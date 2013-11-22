@@ -1,0 +1,6 @@
+[submodule "geomap"]
+	path = geomap
+	url = git@github.com:moma/geomap.git
+[submodule "tinawebJS"]
+	path = tinawebJS
+	url = git@github.com:moma/tinawebJS.git
