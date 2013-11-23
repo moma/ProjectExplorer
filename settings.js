@@ -3,12 +3,14 @@
  */
 
 // ============ < DEVELOPER OPTIONS > ============
-var fa2enabled=false;
-var getAdditionalInfo=true;
-var mainfile="2-Terms-Authors-300nodes.gexf";
+var geomap=true;
 
-ircNick="Ademe";
-ircCHN="#anoe";
+var getAdditionalInfo=false;//for topPapers div
+var sqliteDB="";
+var mainfile="";//"2-Terms-Authors-300nodes.gexf";
+
+ircNick="";//"Ademe";
+ircCHN="";//"#anoe";
 
 var catSoc = "Document";
 var catSem = "NGram";
@@ -25,5 +27,7 @@ var desirableTagCloudFont_MAX=20;
 var desirableNodeSizeMIN=4;
 var desirableNodeSizeMAX=12;
 var desirableScholarSize=6; //Remember that all scholars have the same size!
+
+var fa2enabled=false;
 
 // ============ < / DEVELOPER OPTIONS > ============
