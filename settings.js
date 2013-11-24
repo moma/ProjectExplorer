@@ -5,8 +5,8 @@
 // ============ < DEVELOPER OPTIONS > ============
 var geomap=false;
 
-var getAdditionalInfo=false;//for topPapers div
-var mainfile="";//"2-Terms-Authors-300nodes.gexf";
+var getAdditionalInfo=true;//for topPapers div
+var mainfile="InnovativeAward.gexf";//"2-Terms-Authors-300nodes.gexf";
 
 var dataSource = {};
 dataSource["netw01"] = {
