@@ -6,7 +6,7 @@
 var geomap=true;
 
 var getAdditionalInfo=true;//for topPapers div
-var mainfile="2-Terms-Authors-300nodes.gexf";
+var mainfile=encodeURIComponent("data/2-Terms-Authors-300nodes.gexf");
 
 //var dataSource = {};
 var gexfDict={};
