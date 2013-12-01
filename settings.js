@@ -4,13 +4,16 @@
 
 // ============ < DEVELOPER OPTIONS > ============
 var geomap=false;
-
 var getAdditionalInfo=true;//for topPapers div
-var mainfile=encodeURIComponent("data/InnovativeAward.gexf");//"2-Terms-Authors-300nodes.gexf";
+var mainfile=encodeURIComponent("data/echoing/echoingTop900_2012Spat.gexf");//"2-Terms-Authors-300nodes.gexf";
 
 var dataSource = {};
 var gexfDict={};
 //gexfDict["data/the.gexf"]="The characteristic name";
+var gexfDict={};
+gexfDict["data/echoing/echoingTop900_2012Spat.gexf"]="Echoing 2012 Landscape (detailed)";
+
+
 
 ircNick="";
 ircCHN="";
@@ -27,14 +30,14 @@ var cursor_size= 100;
 
 var desirableTagCloudFont_MIN=12;
 var desirableTagCloudFont_MAX=20;
-var desirableNodeSizeMIN=4;
+var desirableNodeSizeMIN=1;
 var desirableNodeSizeMAX=12;
 var desirableScholarSize=6; //Remember that all scholars have the same size!
 
 var fa2enabled=false;
 
         // ============ < SIGMA.JS PROPERTIES > ============
-        var desirableNodeSizeMIN=4;
+        var desirableNodeSizeMIN=1;
         var desirableNodeSizeMAX=12;
         var desirableScholarSize=6; //Remember that all scholars have the same size!
 
