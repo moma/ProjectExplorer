@@ -9,14 +9,8 @@ var getAdditionalInfo=true;//for topPapers div
 var mainfile=encodeURIComponent("data/InnovativeAward.gexf");//"2-Terms-Authors-300nodes.gexf";
 
 var dataSource = {};
-dataSource["netw01"] = {
-    gexf:"",
-    db:""
-};
-dataSource["netw02"] = {
-    gexf:"",
-    db:""
-};
+var gexfDict={};
+//gexfDict["data/the.gexf"]="The characteristic name";
 
 ircNick="";
 ircCHN="";
