@@ -8,15 +8,15 @@ var geomap=true;
 var getAdditionalInfo=true;//for topPapers div
 var mainfile="2-Terms-Authors-300nodes.gexf";
 
-var dataSource = {};
-dataSource["netw01"] = {
-    gexf:"",
-    db:""
-};
-dataSource["netw02"] = {
-    gexf:"",
-    db:""
-};
+//var dataSource = {};
+var gexfDict={};
+gexfDict["0-terms-terms-MainNodes.gexf"]="Terms monograph: main nodes";
+gexfDict["1-terms-terms-300nodes.gexf"]="Terms monograph: 300 nodes";
+gexfDict["1-terms-terms-500nodes.gexf"]="Terms monograph: 500 nodes";
+gexfDict["2-Terms-Authors-300nodes.gexf"]="Authors and Terms bigraph: 300 nodes";
+gexfDict["3-Terms-Countries-300nodes.gexf"]="Authors and Countries bigraph: 300 nodes";
+gexfDict["3-Terms-Countries-500nodes.gexf"]="Authors and Countries bigraph: 500 nodes";
+gexfDict["4-country-country-300nodes.gexf"]="Countries monograph: 300 nodes";
 
 ircNick="Ademe";
 ircCHN="#anoe";
