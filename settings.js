@@ -6,7 +6,7 @@
 var geomap=false;
 
 var getAdditionalInfo=false;//for topPapers div
-var mainfile="";//"2-Terms-Authors-300nodes.gexf";
+var mainfile=encodeURIComponent("");//" e.g : data/2-Terms-Authors-300nodes.gexf";
 
 var dataSource = {};
 dataSource["netw01"] = {
