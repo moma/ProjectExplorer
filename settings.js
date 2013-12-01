@@ -10,13 +10,13 @@ var mainfile=encodeURIComponent("data/2-Terms-Authors-300nodes.gexf");
 
 //var dataSource = {};
 var gexfDict={};
-gexfDict["0-terms-terms-MainNodes.gexf"]="Terms monograph: main nodes";
-gexfDict["1-terms-terms-300nodes.gexf"]="Terms monograph: 300 nodes";
-gexfDict["1-terms-terms-500nodes.gexf"]="Terms monograph: 500 nodes";
-gexfDict["2-Terms-Authors-300nodes.gexf"]="Authors and Terms bigraph: 300 nodes";
-gexfDict["3-Terms-Countries-300nodes.gexf"]="Authors and Countries bigraph: 300 nodes";
-gexfDict["3-Terms-Countries-500nodes.gexf"]="Authors and Countries bigraph: 500 nodes";
-gexfDict["4-country-country-300nodes.gexf"]="Countries monograph: 300 nodes";
+gexfDict["data/0-terms-terms-MainNodes.gexf"]="Terms monograph: main nodes";
+gexfDict["data/1-terms-terms-300nodes.gexf"]="Terms monograph: 300 nodes";
+gexfDict["data/1-terms-terms-500nodes.gexf"]="Terms monograph: 500 nodes";
+gexfDict["data/2-Terms-Authors-300nodes.gexf"]="Authors and Terms bigraph: 300 nodes";
+gexfDict["data/3-Terms-Countries-300nodes.gexf"]="Authors and Countries bigraph: 300 nodes";
+gexfDict["data/3-Terms-Countries-500nodes.gexf"]="Authors and Countries bigraph: 500 nodes";
+gexfDict["data/4-country-country-300nodes.gexf"]="Countries monograph: 300 nodes";
 
 ircNick="Ademe";
 ircCHN="#anoe";
