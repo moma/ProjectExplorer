@@ -24,10 +24,22 @@ function getTopPapers(type){
             for(var j in dbs){
                 dbsPaths.push(i+"/"+dbs[j]);
             }
-            dbsPaths=JSON.stringify(dbsPaths);
-            //pr(dbsPaths);
             break;
         }
+        graphdb=dataFolderTree["folders"];
+        for(var i in graphdb){
+            for(var j in graphdb[i]){
+                if(j=="data") {
+                    maindbs=graphdb[i][j]["dbs"];
+                    for(var k in maindbs){
+                        dbsPaths.push(j+"/"+maindbs[k]);
+                        break;
+                    }
+                }
+            }
+        }
+        dbsPaths=JSON.stringify(dbsPaths);
+        
         $.ajax({
             type: 'GET',
             url: twjs+'php/info_div.php',
@@ -35,7 +47,7 @@ function getTopPapers(type){
             //contentType: "application/json",
             //dataType: 'json',
             success : function(data){ 
-                //pr(twjs+'php/info_div.php?'+"type="+type+"&query="+jsonparams+"&dbs="+dbsPaths);
+                pr(twjs+'php/info_div.php?'+"type="+type+"&query="+jsonparams+"&dbs="+dbsPaths);
                 $("#topPapers").html(data);
             },
             error: function(){ 
