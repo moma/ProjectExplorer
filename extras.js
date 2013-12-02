@@ -17,20 +17,25 @@ function getTopPapers(type){
         jsonparams = jsonparams.split('&').join('__and__');
         folderID=dataFolderTree["gexf_idfolder"][decodeURIComponent(getUrlParam.file)];
         dbsRaw = dataFolderTree["folders"][folderID];
-        var dbs;
+        var dbsPaths;
         for(var i in dbsRaw){
-            dbs = JSON.stringify(dbsRaw[i]["dbs"]);
-            pr(dbs);
+            dbs = dbsRaw[i]["dbs"];
+            dbsPaths=[]
+            for(var j in dbs){
+                dbsPaths.push(i+"/"+dbs);
+            }
+            dbsPaths=JSON.stringify(dbsPaths);
+            pr(dbsPaths);
             break;
         }
         $.ajax({
             type: 'GET',
             url: twjs+'php/info_div.php',
-            data: "type="+type+"&query="+jsonparams+"&dbs="+dbs,
+            data: "type="+type+"&query="+jsonparams+"&dbs="+dbsPaths,
             //contentType: "application/json",
             //dataType: 'json',
             success : function(data){ 
-                //pr(twjs+'php/info_div.php?'+"type="+type+"&query="+jsonparams+"&dbs="+dbs);
+                pr(twjs+'php/info_div.php?'+"type="+type+"&query="+jsonparams+"&dbs="+dbsPaths);
                 $("#topPapers").html(data);
             },
             error: function(){ 
