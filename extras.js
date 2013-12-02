@@ -49,7 +49,7 @@ function getTopPapers(type){
         //jsonparams = jsonparams.replaceAll("&","__and__");
         jsonparams = jsonparams.split('&').join('__and__');
         dbsPaths=getCurrentDBforCurrentGexf();
-        dbsPaths.push(getGlobalDBs());
+        //dbsPaths.push(getGlobalDBs());
         dbsPaths=JSON.stringify(dbsPaths);
         
         $.ajax({
