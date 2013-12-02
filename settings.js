@@ -12,6 +12,7 @@ var gexfDict={};
 //gexfDict["data/the.gexf"]="The characteristic name";
 var gexfDict={};
 gexfDict["data/echoing/echoingTop900_2012Spat.gexf"]="Echoing 2012 Landscape (detailed)";
+gexfDict["data/echoing/echoingTop900_2013Spat.gexf"]="Echoing 2013 Landscape (detailed)";
 
 
 
