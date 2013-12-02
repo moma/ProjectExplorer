@@ -107,6 +107,7 @@ var semanticConverged=0;
 var socialConverged=0;
 
 var selections = [];
+var deselections={};
 var opossites = {};
 var opos=[];
 var oposMAX;
