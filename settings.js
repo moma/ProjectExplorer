@@ -32,7 +32,7 @@ var desirableNodeSizeMAX=12;
 var desirableScholarSize=6; //Remember that all scholars have the same size!
 
 var fa2enabled=false;
-
+var showLabelsIfZoom=3.0;
         // ============ < SIGMA.JS PROPERTIES > ============
         var desirableNodeSizeMIN=4;
         var desirableNodeSizeMAX=12;
