@@ -6,7 +6,7 @@
 var geomap=false;
 
 var getAdditionalInfo=true;//for topPapers div
-var mainfile=encodeURIComponent("data/InnovativeAward.gexf");//"2-Terms-Authors-300nodes.gexf";
+var mainfile=encodeURIComponent("data/NCI/InnovativeAward.gexf");//"2-Terms-Authors-300nodes.gexf";
 
 var dataFolderTree = {};
 var gexfDict={};
