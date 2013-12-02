@@ -43,7 +43,7 @@ var fa2enabled=false;
             defaultLabelSize: 12,//in fact I'm using it as minLabelSize'
             defaultLabelBGColor: '#fff',
             defaultLabelHoverColor: '#000',
-            labelThreshold: 9,
+            labelThreshold: 20,
             defaultEdgeType: 'curve',
 
             borderSize: 2.5,//Something other than 0
