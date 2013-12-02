@@ -7,7 +7,7 @@ var geomap=false;
 var getAdditionalInfo=true;//for topPapers div
 var mainfile=encodeURIComponent("data/echoing/echoingTop900_2012Spat.gexf");//"2-Terms-Authors-300nodes.gexf";
 
-var dataSource = {};
+var dataFolderTree = {};
 var gexfDict={};
 //gexfDict["data/the.gexf"]="The characteristic name";
 var gexfDict={};
