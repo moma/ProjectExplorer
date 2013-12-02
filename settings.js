@@ -35,7 +35,7 @@ var desirableNodeSizeMAX=12;
 var desirableScholarSize=6; //Remember that all scholars have the same size!
 
 var fa2enabled=false;
-var showLabelsIfZoom=3.0;
+var showLabelsIfZoom=2.0;
         // ============ < SIGMA.JS PROPERTIES > ============
         var desirableNodeSizeMIN=1;
         var desirableNodeSizeMAX=12;
@@ -46,7 +46,7 @@ var showLabelsIfZoom=3.0;
             defaultLabelSize: 12,//in fact I'm using it as minLabelSize'
             defaultLabelBGColor: '#fff',
             defaultLabelHoverColor: '#000',
-            labelThreshold: 20,
+            labelThreshold: 12,
             defaultEdgeType: 'curve',
 
             borderSize: 2.5,//Something other than 0
