@@ -3,7 +3,12 @@
  */
 
 function selectionToMap(){
-    pr("Salut monde!");
+    db=getCurrentDBforCurrentGexf();
+    db=JSON.stringify(db);
+    param='geomap/?db='+db+'';
+    if(is_empty(selections)){
+        newPopup('geomap/?db='+db+'&query=all');
+    } else pr("selection to geomap: be patient");
 }
 
 function getCurrentDBforCurrentGexf(){
@@ -237,11 +242,8 @@ function showhideChat(){
 
 
 function getTips(){
-    //db=getCurrentDBforCurrentGexf();
-    //db=JSON.stringify(db);
-    //param='href="geomap/?db='+db+'"';
-    param='href="geomap/"';
-    text = '<div><h1>Semantic Landscape of the Rockefeller Innovators Awards</h1><div><p>This map displays the different topics addressed in theRockefeller Innovator Awards. Nodes in the graph correspondto relevant terms which have been extracted from the proposalwith text-mining methods. Nodes are linked when some proposals make a strong relation between the corresponding terms.<br/><br/>Terms are clustered into large topics such as <i>kindergarten & education system</i> and terms belonging to the same large topicshave the same color.<br/><br/>When you clic on a node, the main topics it is linked to are displayed as well as a set of more generic and more specitif terms related to this selection.<br/></p><br/><br/><h4>TIPS</h4><p> <b>- You can search for an expression in the search bar.</b><br/><p> <b>- When a node is selected, you can clic in the side bar on its name to launch a google search on that term.</b><br/><p> <b>- Double clic on a node to get more information</b><br/><b>- Double clic an empty area to erase current selection</b></p></div><br/><center><strong><a '+param+' target=blank>See the network world distribution</a></strong></center><br/><div id="footer"><p><i>Credits:</i> <a href="http://chavalarias.com" target="_blank"><img src="rock/user.png" width=15></a> </p></div></div>';
+    param='href="#" onclick="selectionToMap();" ';
+    text = '<div><h1>Semantic Landscape of the Rockefeller Innovators Awards</h1><div><p>This map displays the different topics addressed in theRockefeller Innovator Awards. Nodes in the graph correspondto relevant terms which have been extracted from the proposalwith text-mining methods. Nodes are linked when some proposals make a strong relation between the corresponding terms.<br/><br/>Terms are clustered into large topics such as <i>kindergarten & education system</i> and terms belonging to the same large topicshave the same color.<br/><br/>When you clic on a node, the main topics it is linked to are displayed as well as a set of more generic and more specitif terms related to this selection.<br/></p><br/><br/><h4>TIPS</h4><p> <b>- You can search for an expression in the search bar.</b><br/><p> <b>- When a node is selected, you can clic in the side bar on its name to launch a google search on that term.</b><br/><p> <b>- Double clic on a node to get more information</b><br/><b>- Double clic an empty area to erase current selection</b></p></div><br/><center><strong><a '+param+' >See the network world distribution</a></strong></center><br/><div id="footer"><p><i>Credits:</i> <a href="http://chavalarias.com" target="_blank"><img src="rock/user.png" width=15></a> </p></div></div>';
     return text;
 }
 
