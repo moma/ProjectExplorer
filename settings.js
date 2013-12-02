@@ -6,7 +6,6 @@
 var geomap=false;
 var getAdditionalInfo=true;//for topPapers div
 var mainfile=encodeURIComponent("data/echoing/echoingTop900_2012Spat.gexf");//"2-Terms-Authors-300nodes.gexf";
-
 var dataFolderTree = {};
 var gexfDict={};
 //gexfDict["data/the.gexf"]="The characteristic name";
@@ -36,7 +35,7 @@ var desirableNodeSizeMAX=12;
 var desirableScholarSize=6; //Remember that all scholars have the same size!
 
 var fa2enabled=false;
-
+var showLabelsIfZoom=3.0;
         // ============ < SIGMA.JS PROPERTIES > ============
         var desirableNodeSizeMIN=1;
         var desirableNodeSizeMAX=12;
@@ -47,7 +46,7 @@ var fa2enabled=false;
             defaultLabelSize: 12,//in fact I'm using it as minLabelSize'
             defaultLabelBGColor: '#fff',
             defaultLabelHoverColor: '#000',
-            labelThreshold: 9,
+            labelThreshold: 20,
             defaultEdgeType: 'curve',
 
             borderSize: 2.5,//Something other than 0
@@ -111,6 +110,7 @@ var semanticConverged=0;
 var socialConverged=0;
 
 var selections = [];
+var deselections={};
 var opossites = {};
 var opos=[];
 var oposMAX;
