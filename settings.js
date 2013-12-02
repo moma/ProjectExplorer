@@ -4,13 +4,16 @@
 
 // ============ < DEVELOPER OPTIONS > ============
 var geomap=false;
-
 var getAdditionalInfo=true;//for topPapers div
-var mainfile=encodeURIComponent("data/NCI/InnovativeAward.gexf");//"2-Terms-Authors-300nodes.gexf";
-
+var mainfile=encodeURIComponent("data/echoing/echoingTop900_2012Spat.gexf");//"2-Terms-Authors-300nodes.gexf";
 var dataFolderTree = {};
 var gexfDict={};
 //gexfDict["data/the.gexf"]="The characteristic name";
+var gexfDict={};
+gexfDict["data/echoing/echoingTop900_2012Spat.gexf"]="Echoing 2012 Landscape (detailed)";
+gexfDict["data/echoing/echoingTop900_2013Spat.gexf"]="Echoing 2013 Landscape (detailed)";
+
+
 
 ircNick="";
 ircCHN="";
@@ -27,14 +30,14 @@ var cursor_size= 100;
 
 var desirableTagCloudFont_MIN=12;
 var desirableTagCloudFont_MAX=20;
-var desirableNodeSizeMIN=4;
+var desirableNodeSizeMIN=1;
 var desirableNodeSizeMAX=12;
 var desirableScholarSize=6; //Remember that all scholars have the same size!
 
 var fa2enabled=false;
-var showLabelsIfZoom=3.0;
+var showLabelsIfZoom=2.0;
         // ============ < SIGMA.JS PROPERTIES > ============
-        var desirableNodeSizeMIN=4;
+        var desirableNodeSizeMIN=1;
         var desirableNodeSizeMAX=12;
         var desirableScholarSize=6; //Remember that all scholars have the same size!
 
@@ -43,7 +46,7 @@ var showLabelsIfZoom=3.0;
             defaultLabelSize: 12,//in fact I'm using it as minLabelSize'
             defaultLabelBGColor: '#fff',
             defaultLabelHoverColor: '#000',
-            labelThreshold: 20,
+            labelThreshold: 12,
             defaultEdgeType: 'curve',
 
             borderSize: 2.5,//Something other than 0
