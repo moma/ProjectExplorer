@@ -4,6 +4,7 @@
 
 // ============ < DEVELOPER OPTIONS > ============
 var geomap=false;
+var minimap=false;
 var getAdditionalInfo=true;//for topPapers div
 var mainfile=encodeURIComponent("data/echoing/echoingTop900_2012Spat.gexf");//"2-Terms-Authors-300nodes.gexf";
 var dataFolderTree = {};
