@@ -7,8 +7,22 @@ function selectionToMap(){
     db=JSON.stringify(db);
     param='geomap/?db='+db+'';
     if(is_empty(selections)){
-        newPopup('geomap/?db='+db+'&query=all');
-    } else pr("selection to geomap: be patient");
+        newPopup('geomap/?db='+db+'&query=["all"]');
+    } else {
+        pr("selection to geomap:");
+        jsonparams=JSON.stringify(getSelections());
+        jsonparams = jsonparams.split('&').join('__and__');
+        pr('geomap/?db='+db+'&query='+jsonparams);
+        newPopup('geomap/?db='+db+'&query='+jsonparams);
+    }
+}
+
+function getSelections(){    
+        params=[];
+        for(var i in selections){
+            params.push(Nodes[i].label);
+        }
+        return params;
 }
 
 function getCurrentDBforCurrentGexf(){
@@ -41,15 +55,11 @@ function getGlobalDBs(){
 
 function getTopPapers(type){
     if(getAdditionalInfo){
-        params=[];
-        for(var i in selections){
-            params.push(Nodes[i].label);
-        }
-        jsonparams=JSON.stringify(params);
+        jsonparams=JSON.stringify(getSelections());
         //jsonparams = jsonparams.replaceAll("&","__and__");
         jsonparams = jsonparams.split('&').join('__and__');
         dbsPaths=getCurrentDBforCurrentGexf();
-        dbsPaths.push(getGlobalDBs());
+        //dbsPaths.push(getGlobalDBs());
         dbsPaths=JSON.stringify(dbsPaths);
         
         $.ajax({
@@ -134,6 +144,11 @@ function updateLeftPanel_uni(){//Uni-partite graph
             left: _cG.width() + "px"
         });
     });
+    i=0; for(var s in selections) i++;
+    if(is_empty(selections)==true || i==0){
+        cancelSelection(false);
+        partialGraph.draw();
+    }
 }
 
 //FOR UNI-PARTITE

@@ -4,6 +4,7 @@
 
 // ============ < DEVELOPER OPTIONS > ============
 var geomap=false;
+var minimap=false;
 var getAdditionalInfo=true;//for topPapers div
 var mainfile=encodeURIComponent("data/nci/nciTop500.gexf");//"2-Terms-Authors-300nodes.gexf";
 var dataFolderTree = {};
@@ -27,7 +28,9 @@ var startingNodeId = "1";
 var minLengthAutoComplete = 1;
 var maxSearchResults = 10;
 var strSearchBar = "Search";
+var cursor_size_min= 0;
 var cursor_size= 100;
+var cursor_size_max= 100;
 
 var desirableTagCloudFont_MIN=12;
 var desirableTagCloudFont_MAX=20;
