@@ -134,6 +134,11 @@ function updateLeftPanel_uni(){//Uni-partite graph
             left: _cG.width() + "px"
         });
     });
+    i=0; for(var s in selections) i++;
+    if(is_empty(selections)==true || i==0){
+        cancelSelection(false);
+        partialGraph.draw();
+    }
 }
 
 //FOR UNI-PARTITE
