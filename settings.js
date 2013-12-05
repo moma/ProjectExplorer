@@ -5,13 +5,14 @@
 // ============ < DEVELOPER OPTIONS > ============
 var geomap=false;
 var getAdditionalInfo=true;//for topPapers div
-var mainfile=encodeURIComponent("data/echoing/echoingTop900_2012Spat.gexf");//"2-Terms-Authors-300nodes.gexf";
+var mainfile=encodeURIComponent("data/nci/nciTop500.gexf");//"2-Terms-Authors-300nodes.gexf";
 var dataFolderTree = {};
 var gexfDict={};
 //gexfDict["data/the.gexf"]="The characteristic name";
 var gexfDict={};
-gexfDict["data/echoing/echoingTop900_2012Spat.gexf"]="Echoing 2012 Landscape (detailed)";
-gexfDict["data/echoing/echoingTop900_2013Spat.gexf"]="Echoing 2013 Landscape (detailed)";
+gexfDict["data/echoing/echoingTop900_2012Spat.gexf"]="Echoing 2012 Landscape";
+gexfDict["data/echoing/echoingTop900_2013Spat.gexf"]="Echoing 2013 Landscape";
+gexfDict["data/nci/nciTop500.gexf"]="NCI 2013 Landscape";
 
 
 
@@ -46,7 +47,7 @@ var showLabelsIfZoom=2.0;
             defaultLabelSize: 12,//in fact I'm using it as minLabelSize'
             defaultLabelBGColor: '#fff',
             defaultLabelHoverColor: '#000',
-            labelThreshold: 12,
+            labelThreshold: 6,
             defaultEdgeType: 'curve',
 
             borderSize: 2.5,//Something other than 0
