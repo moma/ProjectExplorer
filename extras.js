@@ -17,14 +17,6 @@ function selectionToMap(){
     }
 }
 
-function getSelections(){    
-        params=[];
-        for(var i in selections){
-            params.push(Nodes[i].label);
-        }
-        return params;
-}
-
 function getCurrentDBforCurrentGexf(){
     folderID=dataFolderTree["gexf_idfolder"][decodeURIComponent(getUrlParam.file)];
     dbsRaw = dataFolderTree["folders"][folderID];
