@@ -4,12 +4,12 @@
 
 // ============ < DEVELOPER OPTIONS > ============
 var geomap=true;
-
+var minimap=false;
 var getAdditionalInfo=true;//for topPapers div
 var mainfile=encodeURIComponent("data/2-Terms-Authors-300nodes.gexf");
-
-//var dataSource = {};
+var dataFolderTree = {};
 var gexfDict={};
+//gexfDict["data/the.gexf"]="The characteristic name";
 gexfDict["data/0-terms-terms-MainNodes.gexf"]="Terms monograph: main nodes";
 gexfDict["data/1-terms-terms-300nodes.gexf"]="Terms monograph: 300 nodes";
 gexfDict["data/1-terms-terms-500nodes.gexf"]="Terms monograph: 500 nodes";
@@ -29,7 +29,9 @@ var startingNodeId = "1";
 var minLengthAutoComplete = 1;
 var maxSearchResults = 10;
 var strSearchBar = "Search";
-var cursor_size= 100;
+var cursor_size_min= 0;
+var cursor_size= 50;
+var cursor_size_max= 100;
 
 var desirableTagCloudFont_MIN=12;
 var desirableTagCloudFont_MAX=20;
@@ -38,7 +40,7 @@ var desirableNodeSizeMAX=12;
 var desirableScholarSize=6; //Remember that all scholars have the same size!
 
 var fa2enabled=false;
-
+var showLabelsIfZoom=2.0;
         // ============ < SIGMA.JS PROPERTIES > ============
         var desirableNodeSizeMIN=4;
         var desirableNodeSizeMAX=12;
@@ -113,6 +115,7 @@ var semanticConverged=0;
 var socialConverged=0;
 
 var selections = [];
+var deselections={};
 var opossites = {};
 var opos=[];
 var oposMAX;
