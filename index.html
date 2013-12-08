@@ -12,6 +12,12 @@
         <script src="libs/jquery/jquery-ui.js" type="text/javascript"></script>
         <script src="libs/jquery/jquery.ba-dotimeout.min.js" type="text/javascript"></script>
         <script src="libs/jquery/jquery.mousewheel.min.js" type="text/javascript"></script>
+                
+	<script src="geomap/js/raphael/raphael-min.js" charset="utf-8" ></script>
+	<script src="geomap/js/jquery.mapael.js" charset="utf-8" ></script>
+	<script src="geomap/js/maps/world_countries.js" charset="utf-8" ></script>
+	<script src="geomap/examples.js" charset="utf-8" ></script>
+        <link rel="stylesheet" type="text/css" href="geomap/css/geo.css" />
 
         <script src="tinawebJS/js/canvas2image/base64.js" type="text/javascript"></script>
         <script src="tinawebJS/js/canvas2image/canvas2image.js" type="text/javascript"></script>
@@ -32,6 +38,12 @@
                 popupWindow = window.open(
                 url,'popUpWindow','height=700,width=800,left=10,top=10,resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,directories=no,status=no')
                 }
+        </script>
+        
+        <script>
+        $(function() {
+          $( "#tabs" ).tabs();
+        });
         </script>
 
     </head>
@@ -153,12 +165,44 @@
 
 
         <div id="zonecentre" class="gradient">
+<div id="tabs">
+  <ul>
+    <li><a href="#tabs-1">TinawebJS</a></li>
+    <li><a href="#tabs-2" onclick="callGeomap();">GeoMap</a></li>
+  </ul>
+  <div id="tabs-1">
 
-            <div onmousemove=
-                'if(typeof(partialGraph)!=="undefined" && cursor_size>0) {
-                    trackMouse();
-                }' oncontextmenu='return false;' 
-                class="sigma-expand" id="sigma-example"></div>
+            <div class="sigma-parent">
+
+                <div onmousemove='if(typeof(partialGraph)!=="undefined" && cursor_size>0){trackMouse();}' oncontextmenu='return false;' 
+                    class="sigma-expand" id="sigma-example">
+                </div>
+            </div>
+  </div>
+  <div id="tabs-2">
+      
+	<div class="geomapCont">
+	
+		<div class="maparea6">
+			<div class="map">
+				<span>Alternative content for the map</span>
+			</div>
+                        
+			<div class="areaLegend">
+			</div>
+                        <!--
+			<div class="plotLegend">
+				<span>Alternative content for the legend</span>
+			</div>
+                        -->
+		</div>
+                <div class="distBar"></div>
+                <div class="min"></div>
+                <div class="mid"></div>
+                <div class="max"></div>
+	</div>
+</div>
+</div>
 
             <ul id="ctlzoom">
                 <li>

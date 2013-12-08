@@ -1,6 +1,18 @@
 /*
  * Customize as you want ;)
  */
+function callGeomap(){
+    db=getCurrentDBforCurrentGexf();
+    db=JSON.stringify(db);
+    if(is_empty(selections)){
+        jsonparams='["all"]';
+    } else {
+        jsonparams=JSON.stringify(getSelections());
+        jsonparams = jsonparams.split('&').join('__and__');
+    }    
+    pr('in callGeomap: db='+db+'&query='+jsonparams);
+    initiateMap(db,jsonparams);
+}
 
 function selectionToMap(){
     db=getCurrentDBforCurrentGexf();
