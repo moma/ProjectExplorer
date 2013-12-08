@@ -165,44 +165,45 @@
 
 
         <div id="zonecentre" class="gradient">
-<div id="tabs">
-  <ul>
-    <li><a href="#tabs-1">TinawebJS</a></li>
-    <li><a href="#tabs-2" onclick="callGeomap();">GeoMap</a></li>
-  </ul>
-  <div id="tabs-1">
+            
+            <div id="tabs">
+              <ul>
+                <li><a href="#tabs-1">TinawebJS</a></li>
+                <li><a href="#tabs-2" onclick="callGeomap();">GeoMap</a></li>
+              </ul>
+                <div id="tabs-1">
 
-            <div class="sigma-parent">
+                          <div class="sigma-parent">
 
-                <div onmousemove='if(typeof(partialGraph)!=="undefined" && cursor_size>0){trackMouse();}' oncontextmenu='return false;' 
-                    class="sigma-expand" id="sigma-example">
+                              <div onmousemove='if(typeof(partialGraph)!=="undefined" && cursor_size>0){trackMouse();}' oncontextmenu='return false;' 
+                                  class="sigma-expand" id="sigma-example">
+                              </div>
+                          </div>
                 </div>
+                <div id="tabs-2">
+
+                      <div class="geomapCont">
+
+                              <div class="maparea6">
+                                      <div class="map">
+                                              <span>Alternative content for the map</span>
+                                      </div>
+
+                                      <div class="areaLegend">
+                                      </div>
+                                      <!--
+                                      <div class="plotLegend">
+                                              <span>Alternative content for the legend</span>
+                                      </div>
+                                      -->
+                              </div>
+                              <div class="distBar"></div>
+                              <div class="min"></div>
+                              <div class="mid"></div>
+                              <div class="max"></div>
+                      </div>
+              </div>
             </div>
-  </div>
-  <div id="tabs-2">
-      
-	<div class="geomapCont">
-	
-		<div class="maparea6">
-			<div class="map">
-				<span>Alternative content for the map</span>
-			</div>
-                        
-			<div class="areaLegend">
-			</div>
-                        <!--
-			<div class="plotLegend">
-				<span>Alternative content for the legend</span>
-			</div>
-                        -->
-		</div>
-                <div class="distBar"></div>
-                <div class="min"></div>
-                <div class="mid"></div>
-                <div class="max"></div>
-	</div>
-</div>
-</div>
 
             <ul id="ctlzoom">
                 <li>
