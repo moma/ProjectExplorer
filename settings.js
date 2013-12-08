@@ -17,6 +17,9 @@ gexfDict["data/2-Terms-Authors-300nodes.gexf"]="Authors and Terms bigraph: 300 n
 gexfDict["data/3-Terms-Countries-300nodes.gexf"]="Authors and Countries bigraph: 300 nodes";
 gexfDict["data/3-Terms-Countries-500nodes.gexf"]="Authors and Countries bigraph: 500 nodes";
 gexfDict["data/4-country-country-300nodes.gexf"]="Countries monograph: 300 nodes";
+gexfDict["data/telework/TeleworkTermsTerms.gexf"]="Semantic Landscape restricted to Telework Corpora";
+
+
 
 ircNick="Ademe";
 ircCHN="#anoe";
