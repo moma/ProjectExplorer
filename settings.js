@@ -6,7 +6,7 @@
 var geomap=true;
 var minimap=false;
 var getAdditionalInfo=true;//for topPapers div
-var mainfile=encodeURIComponent("data/2-Terms-Authors-300nodes.gexf");
+var mainfile=encodeURIComponent("data/ademe/1-terms-terms-300nodes.gexf");
 var dataFolderTree = {};
 var gexfDict={};
 //gexfDict["data/the.gexf"]="The characteristic name";
