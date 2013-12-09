@@ -12,7 +12,7 @@ function callGeomap(){
         jsonparams = jsonparams.split('&').join('__and__');
     }    
     pr('in callGeomap: db='+db+'&query='+jsonparams);
-    initiateMap(db,jsonparams);
+    initiateMap(db,jsonparams,"geomap/");
 }
 
 function getTopPapers(type){
