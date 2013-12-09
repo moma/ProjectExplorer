@@ -168,7 +168,7 @@
             
             <div id="tabs">
               <ul>
-                <li><a href="#tabs-1">Semantic Landscape</a></li>
+                <li><a href="#tabs-1" onclick="callTWJS();">Semantic Landscape</a></li>
                 <li><a href="#tabs-2" onclick="callGeomap();">Worldmap</a></li>
               </ul>
                 <div id="tabs-1">
@@ -249,8 +249,8 @@
         <div id="leftcolumn">
             <div id="unfold">
                 <a href="#" id="aUnfold" class="rightarrow"> </a>
-                <a href="#" title="Status"><img  width="60" src="tinawebJS/img/trans/status_title.png"></img></a>
-                <div align="center" style="left: -250px">
+                <div id="CurrentView" align="center" style="left: -250px">
+                    <a href="#" title="Status"><img  width="60" src="tinawebJS/img/trans/status_title.png"></img></a>
                     <table cellpadding="0" cellspacing="0">
                         <tr>
                             <td>

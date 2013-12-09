@@ -12,6 +12,23 @@ function callGeomap(){
     }    
     pr('in callGeomap: db='+db+'&query='+jsonparams);
     initiateMap(db,jsonparams,"geomap/");
+    $("#ctlzoom").hide();
+    $("#CurrentView").hide();
+}
+
+function callTWJS(){
+//    db=getCurrentDBforCurrentGexf();
+//    db=JSON.stringify(db);
+//    if(is_empty(selections)){
+//        jsonparams='["all"]';
+//    } else {
+//        jsonparams=JSON.stringify(getSelections());
+//        jsonparams = jsonparams.split('&').join('__and__');
+//    }    
+//    pr('in callGeomap: db='+db+'&query='+jsonparams);
+//    initiateMap(db,jsonparams,"geomap/"); //From GEOMAP submod
+    $("#ctlzoom").show();
+    $("#CurrentView").show();
 }
 
 function selectionToMap(){
