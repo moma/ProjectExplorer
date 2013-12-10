@@ -82,16 +82,17 @@ function getTopPapers(type){
         dbsPaths=getCurrentDBforCurrentGexf();
         //dbsPaths.push(getGlobalDBs());
         dbsPaths=JSON.stringify(dbsPaths);
+        thisgexf=JSON.stringify(decodeURIComponent(getUrlParam.file));
         image='<img style="display:block; margin: 0px auto;" src="'+twjs+'img/ajax-loader.gif"></img>';
         $("#topPapers").html(image);
         $.ajax({
             type: 'GET',
             url: twjs+'php/info_div.php',
-            data: "type="+type+"&query="+jsonparams+"&dbs="+dbsPaths,
+            data: "type="+type+"&query="+jsonparams+"&dbs="+dbsPaths+"&gexf="+thisgexf,
             //contentType: "application/json",
             //dataType: 'json',
             success : function(data){ 
-                pr(twjs+'php/info_div.php?'+"type="+type+"&query="+jsonparams+"&dbs="+dbsPaths);
+                pr(twjs+'php/info_div.php?'+"type="+type+"&query="+jsonparams+"&dbs="+dbsPaths+"&gexf="+thisgexf);
                 $("#topPapers").html(data);
             },
             error: function(){ 
