@@ -149,7 +149,10 @@ var maxEdgeWeight=0.0;
 //---------------------------------------------------
 
 var bipartite=false;
-
+var gexfDictReverse={}
+for (var i in gexfDict){
+    gexfDictReverse[gexfDict[i]]=i;
+}
 
 var opts = {
   lines: 13, // The number of lines to draw
