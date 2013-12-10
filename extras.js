@@ -82,7 +82,8 @@ function getTopPapers(type){
         dbsPaths=getCurrentDBforCurrentGexf();
         //dbsPaths.push(getGlobalDBs());
         dbsPaths=JSON.stringify(dbsPaths);
-        
+        image='<img style="display:block; margin: 0px auto;" src="'+twjs+'img/ajax-loader.gif"></img>';
+        $("#topPapers").html(image);
         $.ajax({
             type: 'GET',
             url: twjs+'php/info_div.php',
