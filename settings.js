@@ -6,14 +6,14 @@
 var geomap=false;
 var minimap=false;
 var getAdditionalInfo=true;//for topPapers div
-var mainfile=encodeURIComponent("data/nci/nciTop500.gexf");//"2-Terms-Authors-300nodes.gexf";
+var mainfile=encodeURIComponent("data/nci/NCI.gexf");//"2-Terms-Authors-300nodes.gexf";
 var dataFolderTree = {};
 var gexfDict={};
 //gexfDict["data/the.gexf"]="The characteristic name";
 gexfDict={};
-gexfDict["data/echoing/echoingTop900_2012Spat.gexf"]="Echoing 2012 Landscape";
-gexfDict["data/echoing/echoingTop900_2013Spat.gexf"]="Echoing 2013 Landscape";
-gexfDict["data/nci/nciTop500.gexf"]="NCI 2013 Landscape";
+gexfDict["data/echoing/Echoing_2012.gexf"]="Echoing 2012 Landscape";
+gexfDict["data/echoing/Echoing_2013.gexf"]="Echoing 2013 Landscape";
+gexfDict["data/nci/NCI.gexf"]="NCI 2013 Landscape";
 
 
 
