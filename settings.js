@@ -11,8 +11,9 @@ var dataFolderTree = {};
 var gexfDict={};
 //gexfDict["data/the.gexf"]="The characteristic name";
 gexfDict={};
-gexfDict["data/echoing/Echoing_2012.gexf"]="Echoing 2012 Landscape";
-gexfDict["data/echoing/Echoing_2013.gexf"]="Echoing 2013 Landscape";
+gexfDict["data/echoing/Echoing_Green_2012.gexf"]="Echoing Green 2012 Landscape";
+gexfDict["data/echoing/Echoing_Green_2013.gexf"]="Echoing Green 2013 Landscape";
+gexfDict["data/echoing/EchoingAll.gexf"]="Echoing Green 2012-2013 Landscape";
 gexfDict["data/nci/NCI.gexf"]="NCI 2013 Landscape";
 
 
