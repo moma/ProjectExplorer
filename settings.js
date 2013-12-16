@@ -10,7 +10,7 @@ var mainfile=encodeURIComponent("data/nci/nciTop500.gexf");//"2-Terms-Authors-30
 var dataFolderTree = {};
 var gexfDict={};
 //gexfDict["data/the.gexf"]="The characteristic name";
-var gexfDict={};
+gexfDict={};
 gexfDict["data/echoing/echoingTop900_2012Spat.gexf"]="Echoing 2012 Landscape";
 gexfDict["data/echoing/echoingTop900_2013Spat.gexf"]="Echoing 2013 Landscape";
 gexfDict["data/nci/nciTop500.gexf"]="NCI 2013 Landscape";
@@ -145,7 +145,10 @@ var maxEdgeWeight=0.0;
 //---------------------------------------------------
 
 var bipartite=false;
-
+var gexfDictReverse={}
+for (var i in gexfDict){
+    gexfDictReverse[gexfDict[i]]=i;
+}
 
 var opts = {
   lines: 13, // The number of lines to draw
