@@ -46,32 +46,36 @@ function selectionToMap(){
     }
 }
 
-function getCurrentDBforCurrentGexf(){
-    folderID=dataFolderTree["gexf_idfolder"][decodeURIComponent(getUrlParam.file)];
-    dbsRaw = dataFolderTree["folders"][folderID];
-    dbsPaths=[];
-    for(var i in dbsRaw){
-        dbs = dbsRaw[i]["dbs"];
-        for(var j in dbs){
-            dbsPaths.push(i+"/"+dbs[j]);
-        }
-        break;
-    }
-    return dbsPaths;
+
+function callGeomap(){
+    db=getCurrentDBforCurrentGexf();
+    db=JSON.stringify(db);
+    if(is_empty(selections)){
+        jsonparams='["all"]';
+    } else {
+        jsonparams=JSON.stringify(getSelections());
+        jsonparams = jsonparams.split('&').join('__and__');
+    }    
+    pr('in callGeomap: db='+db+'&query='+jsonparams);
+    initiateMap(db,jsonparams,"geomap/");
+    $("#ctlzoom").hide();
+    $("#CurrentView").hide();
 }
 
-function getGlobalDBs(){
-    graphdb=dataFolderTree["folders"];
-    for(var i in graphdb){
-        for(var j in graphdb[i]){
-            if(j=="data") {
-                maindbs=graphdb[i][j]["dbs"];
-                for(var k in maindbs){
-                    return j+"/"+maindbs[k];
-                }
-            }
-        }
-    }
+function callTWJS(){
+//    db=getCurrentDBforCurrentGexf();
+//    db=JSON.stringify(db);
+//    if(is_empty(selections)){
+//        jsonparams='["all"]';
+//    } else {
+//        jsonparams=JSON.stringify(getSelections());
+//        jsonparams = jsonparams.split('&').join('__and__');
+//    }    
+//    pr('in callGeomap: db='+db+'&query='+jsonparams);
+//    initiateMap(db,jsonparams,"geomap/"); //From GEOMAP submod
+    $("#ctlzoom").show();
+    $("#CurrentView").show();
+
 }
 
 function getTopPapers(type){
@@ -82,7 +86,6 @@ function getTopPapers(type){
         dbsPaths=getCurrentDBforCurrentGexf();
         //dbsPaths.push(getGlobalDBs());
         dbsPaths=JSON.stringify(dbsPaths);
-        thisgexf=JSON.stringify(decodeURIComponent(getUrlParam.file));
         image='<img style="display:block; margin: 0px auto;" src="'+twjs+'img/ajax-loader.gif"></img>';
         $("#topPapers").html(image);
         $.ajax({
