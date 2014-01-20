@@ -1,7 +1,78 @@
 /*
  * Customize as you want ;)
  */
+function callGeomap(){
+    db=getCurrentDBforCurrentGexf();
+    db=JSON.stringify(db);
+    if(is_empty(selections)){
+        jsonparams='["all"]';
+    } else {
+        jsonparams=JSON.stringify(getSelections());
+        jsonparams = jsonparams.split('&').join('__and__');
+    }    
+    pr('in callGeomap: db='+db+'&query='+jsonparams);
+    initiateMap(db,jsonparams,"geomap/");
+    $("#ctlzoom").hide();
+    $("#CurrentView").hide();
+}
 
+function callTWJS(){
+//    db=getCurrentDBforCurrentGexf();
+//    db=JSON.stringify(db);
+//    if(is_empty(selections)){
+//        jsonparams='["all"]';
+//    } else {
+//        jsonparams=JSON.stringify(getSelections());
+//        jsonparams = jsonparams.split('&').join('__and__');
+//    }    
+//    pr('in callGeomap: db='+db+'&query='+jsonparams);
+//    initiateMap(db,jsonparams,"geomap/"); //From GEOMAP submod
+    $("#ctlzoom").show();
+    $("#CurrentView").show();
+}
+
+function selectionToMap(){
+    db=getCurrentDBforCurrentGexf();
+    db=JSON.stringify(db);
+    param='geomap/?db='+db+'';
+    if(is_empty(selections)){
+        newPopup('geomap/?db='+db+'&query=["all"]');
+    } else {
+        pr("selection to geomap:");
+        jsonparams=JSON.stringify(getSelections());
+        jsonparams = jsonparams.split('&').join('__and__');
+        pr('geomap/?db='+db+'&query='+jsonparams);
+        newPopup('geomap/?db='+db+'&query='+jsonparams);
+    }
+}
+
+function getCurrentDBforCurrentGexf(){
+    folderID=dataFolderTree["gexf_idfolder"][decodeURIComponent(getUrlParam.file)];
+    dbsRaw = dataFolderTree["folders"][folderID];
+    dbsPaths=[];
+    for(var i in dbsRaw){
+        dbs = dbsRaw[i]["dbs"];
+        for(var j in dbs){
+            dbsPaths.push(i+"/"+dbs[j]);
+        }
+        break;
+    }
+    return dbsPaths;
+}
+
+function getGlobalDBs(){
+    graphdb=dataFolderTree["folders"];
+    for(var i in graphdb){
+        for(var j in graphdb[i]){
+            if(j=="data") {
+                maindbs=graphdb[i][j]["dbs"];
+                for(var k in maindbs){
+                    return j+"/"+maindbs[k];
+                }
+            }
+        }
+    }
+}
 
 function getTopPapers(type){
     if(getAdditionalInfo){
@@ -11,15 +82,17 @@ function getTopPapers(type){
         dbsPaths=getCurrentDBforCurrentGexf();
         //dbsPaths.push(getGlobalDBs());
         dbsPaths=JSON.stringify(dbsPaths);
-        
+        thisgexf=JSON.stringify(decodeURIComponent(getUrlParam.file));
+        image='<img style="display:block; margin: 0px auto;" src="'+twjs+'img/ajax-loader.gif"></img>';
+        $("#topPapers").html(image);
         $.ajax({
             type: 'GET',
             url: twjs+'php/info_div.php',
-            data: "type="+type+"&query="+jsonparams+"&dbs="+dbsPaths,
+            data: "type="+type+"&query="+jsonparams+"&dbs="+dbsPaths+"&gexf="+thisgexf,
             //contentType: "application/json",
             //dataType: 'json',
             success : function(data){ 
-                pr(twjs+'php/info_div.php?'+"type="+type+"&query="+jsonparams+"&dbs="+dbsPaths);
+                pr(twjs+'php/info_div.php?'+"type="+type+"&query="+jsonparams+"&dbs="+dbsPaths+"&gexf="+thisgexf);
                 $("#topPapers").html(data);
             },
             error: function(){ 
@@ -28,54 +101,6 @@ function getTopPapers(type){
         });
     }
 }
-
-function getTips(){
-    param='<a style="cursor:pointer;" onclick="selectionToMap();"><img width="50px" src="'+
-            twjs+'img/world.png" title="See the network world distribution"></img></a>';
-    text = 
-        "<br>"+
-        "Basic Interactions:"+
-        "<ul>"+
-        "<li>Click on a node to select/unselect and get its information. In case of multiple selection, the button unselect clears all selections.</li>"+
-        "<li>The switch button switch allows to change the view type.</li>"+
-        "</ul>"+
-        "<br>"+
-        "Graph manipulation:"+
-        "<ul>"+
-        "<li>Link and node sizes indicate their strength.</li>"+
-        "<li>To fold/unfold the graph (keep only strong links or weak links), use the 'edges filter' sliders.</li>"+
-        "<li>To select a more of less specific area of the graph, use the 'nodes filter' slider.</li>"+
-        "</ul>"+
-        "<br>"+
-        "Micro/Macro view:"+
-        "<ul>"+
-        "<li>To explore the neighborhood of a selection, either double click on the selected nodes, either click on the macro/meso level button. Zoom out in meso view return to macro view.</li>"+
-        "<li>Click on the 'all nodes' tab below to view the full clickable list of nodes.</li>"+
-        "</ul>"+
-        "<center>"+param+"</center>";
-    return text;
-}
-
-//ADEME examples:
-
-function getChatFrame() {    
-    content = '<div id="showChat" onclick="showhideChat();"><a href="#" id="aShowChat"> </a></div>';
-    content += '<iframe src="'+ircUrl+'"'
-    content += 'width="400" height="300"></iframe>';    
-    $("#rightcolumn").html(content);
-}
-
-function showhideChat(){
-    
-    cg = document.getElementById("rightcolumn");
-    if(cg){
-        if(cg.style.right=="-400px"){
-            cg.style.right="0px";
-        }
-        else cg.style.right="-400px";
-    }
-}
-
 
 //For UNI-PARTITE
 function updateLeftPanel_uni(){//Uni-partite graph
@@ -178,45 +203,96 @@ function selectionUni(currentNode){
     partialGraph.refresh();
 }
 
-function selectionToMap(){
-    db=getCurrentDBforCurrentGexf();
-    db=JSON.stringify(db);
-    param='geomap/?db='+db+'';
-    if(is_empty(selections)){
-        newPopup('geomap/?db='+db+'&query=["all"]');
-    } else {
-        pr("selection to geomap:");
-        jsonparams=JSON.stringify(getSelections());
-        jsonparams = jsonparams.split('&').join('__and__');
-        pr('geomap/?db='+db+'&query='+jsonparams);
-        newPopup('geomap/?db='+db+'&query='+jsonparams);
+//JUST ADEME
+function camaraButton(){
+    $("#PhotoGraph").click(function (){
+        
+        //canvas=partialGraph._core.domElements.nodes;
+        
+        
+        
+        var nodesCtx = partialGraph._core.domElements.nodes;
+        /*
+        var edgesCtx = document.getElementById("sigma_edges_1").getContext('2d');
+        
+        var edgesImg = edgesCtx.getImageData(0, 0, document.getElementById("sigma_edges_1").width, document.getElementById("sigma_edges_1").height)
+        
+        nodesCtx.putImageData(edgesImg,0,0);
+        
+        
+        
+        
+        //ctx.drawImage(partialGraph._core.domElements.edges,0,0)
+        //var oCanvas = ctx;  
+  */
+        //div = document.getElementById("sigma_nodes_1").getContext('2d');
+        //ctx = div.getContext("2d");
+        //oCanvas.drawImage(partialGraph._core.domElements.edges,0,0);
+        Canvas2Image.saveAsPNG(nodesCtx);
+        
+        /*
+        Canvas2Image.saveAsJPEG(oCanvas); // will prompt the user to save the image as JPEG.   
+        // Only supported by Firefox.  
+  
+        Canvas2Image.saveAsBMP(oCanvas);  // will prompt the user to save the image as BMP.  
+  
+  
+        // returns an <img> element containing the converted PNG image  
+        var oImgPNG = Canvas2Image.saveAsPNG(oCanvas, true);     
+  
+        // returns an <img> element containing the converted JPEG image (Only supported by Firefox)  
+        var oImgJPEG = Canvas2Image.saveAsJPEG(oCanvas, true);   
+                                                         
+        // returns an <img> element containing the converted BMP image  
+        var oImgBMP = Canvas2Image.saveAsBMP(oCanvas, true);   
+  
+  
+        // all the functions also takes width and height arguments.   
+        // These can be used to scale the resulting image:  
+  
+        // saves a PNG image scaled to 100x100  
+        Canvas2Image.saveAsPNG(oCanvas, false, 100, 100);  
+        */
+    });
+}
+
+
+//JUST ADEME
+function getChatFrame() {    
+    content = '<div id="showChat" onclick="showhideChat();"><a href="#" id="aShowChat"> </a></div>';
+    content += '<iframe src="'+ircUrl+'"'
+    content += 'width="400" height="300"></iframe>';    
+    $("#rightcolumn").html(content);
+}
+
+
+//JUST ADEME
+function showhideChat(){
+    
+    cg = document.getElementById("rightcolumn");
+    if(cg){
+        if(cg.style.right=="-400px"){
+            cg.style.right="0px";
+        }
+        else cg.style.right="-400px";
     }
 }
 
-function getCurrentDBforCurrentGexf(){
-    folderID=dataFolderTree["gexf_idfolder"][decodeURIComponent(getUrlParam.file)];
-    dbsRaw = dataFolderTree["folders"][folderID];
-    dbsPaths=[];
-    for(var i in dbsRaw){
-        dbs = dbsRaw[i]["dbs"];
-        for(var j in dbs){
-            dbsPaths.push(i+"/"+dbs[j]);
-        }
-        break;
-    }
-    return dbsPaths;
+
+function getTips(){    
+    param='<a style="cursor:pointer;" onclick="selectionToMap();"><img width="50px" src="'+
+            twjs+'img/world.png" title="See the network world distribution"></img></a>';
+    text = '<div><h1>Mapping "Environmnental studies and Virtualisation" </h1><div><p>These maps display the different topics addressed in the academic litterature in the domaine of "Environmnental studies and Virtualisation". Nodes in the graph correspond to relevant terms which have been extracted from the scientific papers with text-mining methods. <br/>Nodes are linked when some papers make a strong relation between the corresponding terms.<br/><br/>Terms are clustered into large topics indicated by colors to help in browsing the graph.<br/><br/>When you click on a set of nodes, additionnal information on your selection is displayed on the left panel like,  for example, the most related documents<br/></p><br/><br/><h4>TIPS</h4><p> <b>- You can search for an expression in the search bar.</b><br/> <b>- When a node is selected, you can click in the side bar on its name to launch a google search on that term.</b><br/><br/><b>- Double click an empty area to erase current selection</b></p></div><br/><center><strong>'+param+'</strong></center><br/><div id="footer"><p><i>Credits:</i> <a href="http://chavalarias.com" target="_blank" title="David Chavalarias"><img src="ademe/user.png" width=15></a> <a href="http://alexandre.delanoe.org" target="_blank" title="Alexandre Delanoë"><img src="ademe/user.png" width=15></a> </p></div></div>';
+    return text;
 }
 
-function getGlobalDBs(){
-    graphdb=dataFolderTree["folders"];
-    for(var i in graphdb){
-        for(var j in graphdb[i]){
-            if(j=="data") {
-                maindbs=graphdb[i][j]["dbs"];
-                for(var k in maindbs){
-                    return j+"/"+maindbs[k];
-                }
-            }
-        }
-    }
+
+
+
+function closeDialog () {
+    $('#windowTitleDialog').modal('hide'); 
+}
+function okClicked () {
+    //document.title = document.getElementById ("xlInput").value;
+    closeDialog ();
 }

@@ -3,26 +3,23 @@
  */
 
 // ============ < DEVELOPER OPTIONS > ============
-var geomap=true;
+var geomap=false;
 var minimap=false;
 var getAdditionalInfo=true;//for topPapers div
-var mainfile=encodeURIComponent("data/ademe/1-terms-terms-300nodes.gexf");
+var mainfile=encodeURIComponent("data/nci/NCI.gexf");//"2-Terms-Authors-300nodes.gexf";
 var dataFolderTree = {};
 var gexfDict={};
 //gexfDict["data/the.gexf"]="The characteristic name";
-gexfDict["data/0-terms-terms-MainNodes.gexf"]="Terms monograph: main nodes";
-gexfDict["data/1-terms-terms-300nodes.gexf"]="Terms monograph: 300 nodes";
-gexfDict["data/1-terms-terms-500nodes.gexf"]="Terms monograph: 500 nodes";
-gexfDict["data/2-Terms-Authors-300nodes.gexf"]="Authors and Terms bigraph: 300 nodes";
-gexfDict["data/3-Terms-Countries-300nodes.gexf"]="Authors and Countries bigraph: 300 nodes";
-gexfDict["data/3-Terms-Countries-500nodes.gexf"]="Authors and Countries bigraph: 500 nodes";
-gexfDict["data/4-country-country-300nodes.gexf"]="Countries monograph: 300 nodes";
-gexfDict["data/telework/TeleworkTermsTerms.gexf"]="Semantic Landscape restricted to Telework Corpora";
+gexfDict={};
+gexfDict["data/echoing/Echoing_Green_2012.gexf"]="Echoing Green 2012 Landscape";
+gexfDict["data/echoing/Echoing_Green_2013.gexf"]="Echoing Green 2013 Landscape";
+gexfDict["data/echoing/EchoingAll.gexf"]="Echoing Green 2012-2013 Landscape";
+gexfDict["data/nci/NCI.gexf"]="NCI 2013 Landscape";
 
 
 
-ircNick="Ademe";
-ircCHN="#anoe";
+ircNick="";
+ircCHN="";
 
 var catSoc = "Document";
 var catSem = "NGram";
@@ -33,28 +30,34 @@ var minLengthAutoComplete = 1;
 var maxSearchResults = 10;
 var strSearchBar = "Search";
 var cursor_size_min= 0;
-var cursor_size= 50;
+var cursor_size= 100;
 var cursor_size_max= 100;
 
 var desirableTagCloudFont_MIN=12;
 var desirableTagCloudFont_MAX=20;
-var desirableNodeSizeMIN=4;
+var desirableNodeSizeMIN=1;
 var desirableNodeSizeMAX=12;
 var desirableScholarSize=6; //Remember that all scholars have the same size!
 
-var fa2enabled=false;
+/*
+ *Three states:
+ *  - true: fa2 running at start
+ *  - false: fa2 stopped at start, button exists
+ *  - "off": button doesn't exist, fa2 stopped forever 
+ **/
+var fa2enabled="off";
 var showLabelsIfZoom=2.0;
         // ============ < SIGMA.JS PROPERTIES > ============
-        var desirableNodeSizeMIN=4;
+        var desirableNodeSizeMIN=1;
         var desirableNodeSizeMAX=12;
         var desirableScholarSize=6; //Remember that all scholars have the same size!
 
         var sigmaJsDrawingProperties = {
             defaultLabelColor: 'black',
-            defaultLabelSize: 12,//in fact I'm using it as minLabelSize'
+            defaultLabelSize: 10,//in fact I'm using it as minLabelSize'
             defaultLabelBGColor: '#fff',
             defaultLabelHoverColor: '#000',
-            labelThreshold: 9,
+            labelThreshold: 6,
             defaultEdgeType: 'curve',
 
             borderSize: 2.5,//Something other than 0
@@ -143,7 +146,10 @@ var maxEdgeWeight=0.0;
 //---------------------------------------------------
 
 var bipartite=false;
-
+var gexfDictReverse={}
+for (var i in gexfDict){
+    gexfDictReverse[gexfDict[i]]=i;
+}
 
 var opts = {
   lines: 13, // The number of lines to draw
