@@ -11,10 +11,18 @@ var dataFolderTree = {};
 var gexfDict={};
 //gexfDict["data/the.gexf"]="The characteristic name";
 gexfDict={};
-gexfDict["data/echoing/Echoing_Green_2012.gexf"]="Echoing Green 2012 Landscape";
-gexfDict["data/echoing/Echoing_Green_2013.gexf"]="Echoing Green 2013 Landscape";
-gexfDict["data/echoing/EchoingAll.gexf"]="Echoing Green 2012-2013 Landscape";
-gexfDict["data/nci/NCI.gexf"]="NCI 2013 Landscape";
+gexfDict["data/ademe/0-terms-terms-MainNodes.gexf"]="[Academic] High Level Map";
+gexfDict["data/ademe/1-terms-terms-300nodes.gexf"]="[Academic] Semantic Landscape (300 nodes)";
+gexfDict["data/ademe/2-Terms-Authors-300nodes.gexf"]="[Academic] Terms - Authors (300 nodes)";
+gexfDict["data/ademe/3-Terms-Countries-300nodes.gexf"]="[Academic] Terms - Countries (300 nodes)";
+gexfDict["data/ademe/3-Terms-Countries-500nodes.gexf"]="[Academic] Terms - Countries (500 nodes)";
+gexfDict["data/europress/[europress]_Semantic_Landscape.gexf"]="[europress] Semantic Landscape";
+gexfDict["data/blogs/[blogs] Semantic landscape.gexf"]="[blogs] Semantic Landscape";
+
+
+
+
+
 
 
 

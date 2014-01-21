@@ -67,7 +67,7 @@ function getGlobalDBs(){
             if(j=="data") {
                 maindbs=graphdb[i][j]["dbs"];
                 for(var k in maindbs){
-                    return j+"/"+maindbs[k];
+                    return jsonparams+"/"+maindbs[k];
                 }
             }
         }
