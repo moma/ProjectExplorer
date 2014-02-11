@@ -14,6 +14,9 @@ function callGeomap(){
     initiateMap(db,jsonparams,"geomap/");
     $("#ctlzoom").hide();
     $("#CurrentView").hide();
+    
+    sigmaheight=$('#leftcolumn').height();
+    $('.geomapCont').height(sigmaheight);
 }
 
 function callTWJS(){
