@@ -30,6 +30,9 @@ function callTWJS(){
 //    }    
 //    pr('in callGeomap: db='+db+'&query='+jsonparams);
 //    initiateMap(db,jsonparams,"geomap/"); //From GEOMAP submod
+    sigmaheight=$('#leftcolumn').height();
+    $('.sigma-parent').height(sigmaheight);
+    
     $("#ctlzoom").show();
     $("#CurrentView").show();
 }
