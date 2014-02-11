@@ -6,15 +6,18 @@
 var geomap=false;
 var minimap=false;
 var getAdditionalInfo=true;//for topPapers div
-var mainfile=encodeURIComponent("data/nci/NCI.gexf");//"2-Terms-Authors-300nodes.gexf";
+var mainfile=encodeURIComponent("data/nci/NCI_All_250.gexf");//"2-Terms-Authors-300nodes.gexf";
 var dataFolderTree = {};
 var gexfDict={};
 //gexfDict["data/the.gexf"]="The characteristic name";
 gexfDict={};
+gexfDict["data/nci/NCI_All_250.gexf"]="NCI 2013 Landscape";
+gexfDict["data/nci/NCI_Impact250.gexf"]="NCI 2013 - Impact Landscape";
+gexfDict["data/nci/NCI_Novelty250.gexf"]="NCI 2013 - Novelty Landscape";
+gexfDict["data/nci/NCI_Novelty350.gexf"]="NCI 2013 - Detailed Landscape";
 gexfDict["data/echoing/Echoing_Green_2012.gexf"]="Echoing Green 2012 Landscape";
 gexfDict["data/echoing/Echoing_Green_2013.gexf"]="Echoing Green 2013 Landscape";
 gexfDict["data/echoing/EchoingAll.gexf"]="Echoing Green 2012-2013 Landscape";
-gexfDict["data/nci/NCI.gexf"]="NCI 2013 Landscape";
 
 
 
@@ -36,7 +39,7 @@ var cursor_size_max= 100;
 var desirableTagCloudFont_MIN=12;
 var desirableTagCloudFont_MAX=20;
 var desirableNodeSizeMIN=1;
-var desirableNodeSizeMAX=12;
+var desirableNodeSizeMAX=9;
 var desirableScholarSize=6; //Remember that all scholars have the same size!
 
 /*
@@ -49,7 +52,7 @@ var fa2enabled="off";
 var showLabelsIfZoom=2.0;
         // ============ < SIGMA.JS PROPERTIES > ============
         var desirableNodeSizeMIN=1;
-        var desirableNodeSizeMAX=12;
+        var desirableNodeSizeMAX=9;
         var desirableScholarSize=6; //Remember that all scholars have the same size!
 
         var sigmaJsDrawingProperties = {
