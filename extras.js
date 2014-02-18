@@ -85,14 +85,15 @@ function getTopPapers(type){
         thisgexf=JSON.stringify(decodeURIComponent(getUrlParam.file));
         image='<img style="display:block; margin: 0px auto;" src="'+twjs+'img/ajax-loader.gif"></img>';
         $("#topPapers").html(image);
+        bi=(Object.keys(categories).length==2)?1:0;
         $.ajax({
             type: 'GET',
             url: twjs+'php/info_div.php',
-            data: "type="+type+"&query="+jsonparams+"&dbs="+dbsPaths+"&gexf="+thisgexf,
+            data: "type="+type+"&bi="+bi+"&query="+jsonparams+"&dbs="+dbsPaths+"&gexf="+thisgexf,
             //contentType: "application/json",
             //dataType: 'json',
             success : function(data){ 
-                pr(twjs+'php/info_div.php?'+"type="+type+"&query="+jsonparams+"&dbs="+dbsPaths+"&gexf="+thisgexf);
+                pr(twjs+'php/info_div.php?'+"type="+type+"&bi="+bi+"&query="+jsonparams+"&dbs="+dbsPaths+"&gexf="+thisgexf);
                 $("#topPapers").html(data);
             },
             error: function(){ 
