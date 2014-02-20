@@ -11,14 +11,14 @@ var dataFolderTree = {};
 var gexfDict={};
 //gexfDict["data/the.gexf"]="The characteristic name";
 gexfDict={};
-gexfDict["data/ademe/0-terms-terms-MainNodes.gexf"]="[Academic] High Level Map";
-gexfDict["data/ademe/1-terms-terms-300nodes.gexf"]="[Academic] Semantic Landscape (300 nodes)";
-gexfDict["data/ademe/2-Terms-Authors-300nodes.gexf"]="[Academic] Terms - Authors (300 nodes)";
-gexfDict["data/ademe/3-Terms-Countries-300nodes.gexf"]="[Academic] Terms - Countries (300 nodes)";
-gexfDict["data/ademe/3-Terms-Countries-500nodes.gexf"]="[Academic] Terms - Countries (500 nodes)";
-gexfDict["data/europress/[europress]_Semantic_Landscape.gexf"]="[europress] Semantic Landscape";
-gexfDict["data/blogs/[blogs] Semantic landscape.gexf"]="[blogs] Semantic Landscape";
+gexfDict["data/academic/TeleworkTermsTerms.gexf"]="[Academic] Semantic Landscape";
+gexfDict["data/academic/TeleworkZourceTerms.gexf"]="[Academic] Sources and Themes";
 
+gexfDict["data/blogs/Semantic_landscape.gexf"]="[Blogs] Semantic Landscape";
+gexfDict["data/blogs/Source_Terms.gexf"]="[Blogs] Sources and Themes";
+
+gexfDict["data/press/Semantic_Landscape2.gexf"]="[Press] Semantic Landscape";
+gexfDict["data/press/Source_Terms.gexf"]="[Press] Sources and Themes";
 
 
 
