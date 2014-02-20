@@ -6,7 +6,7 @@
 var geomap=false;
 var minimap=false;
 var getAdditionalInfo=true;//for topPapers div
-var mainfile=encodeURIComponent("data/nci/NCI_All_250.gexf");//"2-Terms-Authors-300nodes.gexf";
+var mainfile=encodeURIComponent("data/nci/NCI350_all.gexf");//"2-Terms-Authors-300nodes.gexf";
 var dataFolderTree = {};
 var gexfDict={};
 //gexfDict["data/the.gexf"]="The characteristic name";
