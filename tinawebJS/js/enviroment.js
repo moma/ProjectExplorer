@@ -483,67 +483,70 @@ function updateNodeFilter(nodeFilterName) {
     
     nodeType="";
     divName="";
-    if(nodeFilterName=="social"){
-        nodeType=catSoc;
-        divName="#sliderANodeWeight";
-    }
-    else {
-        nodeType=catSem;
-        divName="#sliderBNodeWeight";
-    }
-    nodes=partialGraph._core.graph.nodes.filter(function(n) {
-                    return !n['hidden'];
-          });
-    nodesBySize=[];
-    for(var i in nodes){
-        if(Nodes[nodes[i].id].type==catSoc){
-            if(isUndef(nodesBySize[nodes[i].degree])){
-                nodesBySize[nodes[i].degree]=[];
-            }
-            nodesBySize[nodes[i].degree].push(nodes[i].id);
-        }
-        if(Nodes[nodes[i].id].type==catSem){
-            if(isUndef(nodesBySize[nodes[i].size])){
-                nodesBySize[nodes[i].size]=[];
-            }
-            nodesBySize[nodes[i].size].push(nodes[i].id);
-        }
-    }
-    nodesSortedBySize = ArraySortByKey(nodesBySize, function(a,b){
-        return a-b
-    });
-    if(nodeFilterName=="social"){
-        return null;
-    }
-    $(divName).slider({
-        range: true,
-        min: 0,
-        max: nodesSortedBySize.length-1,
-        values: [0, nodesSortedBySize.length-1],
-        step: 1,
-        animate: true,
-        slide: function(event, ui) {
-            $.doTimeout(300,function (){
-                //console.log("Rango Pesos Arista: "+ui.values[ 0 ]+" , "+ui.values[ 1 ]);
-                nodesTemp = partialGraph._core.graph.nodesIndex;
-                for(i=0;i<nodesSortedBySize.length;i++){
-                    if(i>=ui.values[0] && i<=ui.values[1]){
-                        for (var j in nodesSortedBySize[i].value){
-                            id=nodesSortedBySize[i].value[j];
-                            nodesTemp[id].hidden=false;
-                        }
-                    }
-                    else {
-                        for (var j in nodesSortedBySize[i].value){
-                            id=nodesSortedBySize[i].value[j];
-                            nodesTemp[id].hidden=true;
-                        }
-                    }
-                }
-                partialGraph.draw();
-            });
-        }
-    });
+    pr("something weird is going here dude: enviroment.js|updateNodeFilter(nodeFilterName)")
+    pr(catSoc)
+    pr(catSem)
+//    if(nodeFilterName=="social"){
+//        nodeType=catSoc;
+//        divName="#sliderANodeWeight";
+//    }
+//    else {
+//        nodeType=catSem;
+//        divName="#sliderBNodeWeight";
+//    }
+//    nodes=partialGraph._core.graph.nodes.filter(function(n) {
+//                    return !n['hidden'];
+//          });
+//    nodesBySize=[];
+//    for(var i in nodes){
+//        if(Nodes[nodes[i].id].type==catSoc){
+//            if(isUndef(nodesBySize[nodes[i].degree])){
+//                nodesBySize[nodes[i].degree]=[];
+//            }
+//            nodesBySize[nodes[i].degree].push(nodes[i].id);
+//        }
+//        if(Nodes[nodes[i].id].type==catSem){
+//            if(isUndef(nodesBySize[nodes[i].size])){
+//                nodesBySize[nodes[i].size]=[];
+//            }
+//            nodesBySize[nodes[i].size].push(nodes[i].id);
+//        }
+//    }
+//    nodesSortedBySize = ArraySortByKey(nodesBySize, function(a,b){
+//        return a-b
+//    });
+//    if(nodeFilterName=="social"){
+//        return null;
+//    }
+//    $(divName).slider({
+//        range: true,
+//        min: 0,
+//        max: nodesSortedBySize.length-1,
+//        values: [0, nodesSortedBySize.length-1],
+//        step: 1,
+//        animate: true,
+//        slide: function(event, ui) {
+//            $.doTimeout(300,function (){
+//                //console.log("Rango Pesos Arista: "+ui.values[ 0 ]+" , "+ui.values[ 1 ]);
+//                nodesTemp = partialGraph._core.graph.nodesIndex;
+//                for(i=0;i<nodesSortedBySize.length;i++){
+//                    if(i>=ui.values[0] && i<=ui.values[1]){
+//                        for (var j in nodesSortedBySize[i].value){
+//                            id=nodesSortedBySize[i].value[j];
+//                            nodesTemp[id].hidden=false;
+//                        }
+//                    }
+//                    else {
+//                        for (var j in nodesSortedBySize[i].value){
+//                            id=nodesSortedBySize[i].value[j];
+//                            nodesTemp[id].hidden=true;
+//                        }
+//                    }
+//                }
+//                partialGraph.draw();
+//            });
+//        }
+//    });
 }
 
 function updateBothNodeFilters() {

@@ -1,6 +1,7 @@
-$(window).resize(function(){
-    pr("jjajajaajaj");
-    sigmaLimits();
+var counterrrr=0;
+$( window ).resize(function() {
+  counterrrr++;
+  $("#log").html("redimension nro: "+counterrrr);
 });
 
 if (mainfile) {
@@ -26,15 +27,19 @@ if (mainfile) {
 	    window.location.href=window.location.origin+window.location.pathname+"?file="+mainfile;
 	}
 } else {
-
-    if(getUrlParam.nodeidparam.indexOf("__")===-1){
-        //gexfPath = "php/bridgeClientServer_filter.php?query="+getUrlParam.nodeidparam;
-        pr("not implemented yet");
-    }
-    else {
-	param=getUrlParam.nodeidparam;
-	pr(param)
-	bringTheNoise(param,"unique_id");
+    if(isUndef(getUrlParam.nodeidparam)){
+        pr("doing something 'cause i'm a doer"); mainfile=true;
+	bringTheNoise("data/pkmn_types.gexf","mono");
+    } else {
+	    if(getUrlParam.nodeidparam.indexOf("__")===-1){
+		//gexfPath = "php/bridgeClientServer_filter.php?query="+getUrlParam.nodeidparam;
+		pr("not implemented yet");
+	    }
+	    else {
+		param=getUrlParam.nodeidparam;
+		pr(param)
+		bringTheNoise(param,"unique_id");
+	    }
     }
 }
 

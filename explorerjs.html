@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>TinawebJS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="css/bootstrap.css" media="screen">
+    <link rel="stylesheet" href="css/custom.css" media="screen">
+    <link href="css/sidebar.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Josefin+Sans:300,400,700">
+    <link rel="stylesheet" href="bootswatch/css/bootswatch.css">
+
+</head>
+  <body>
+        <div id="fixedtop" class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+
+        <div class="navbar-header">
+          <a href="#" class="navbar-brand">ComexJS</a>
+          <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+        </div>
+
+        <div class="navbar-collapse collapse" id="navbar-main">
+          <ul class="nav navbar-nav">
+
+            <li class="disabled">
+		<a>SELECT</a>
+            </li>
+            
+
+            <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" id="themes">Keywords <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+		<li><a tabindex="-1">Keywords</a></li>
+              </ul>
+            </li>
+
+            <li class="disabled">
+		<a>AND</a>
+            </li>
+
+            <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" id="themes">Scholars <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+		<li><a tabindex="-1">Scholars</a></li>
+              </ul>
+            </li>
+
+            <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" id="themes">refine <span class="caret"></span></a>
+		<ul class="dropdown-menu">
+                                <li>
+                                    <a id="addfiltercountry" href="#">Filter by country</a>
+                                </li>                               
+                                <!--<li>
+                                                            <a id="addcolor" href="#">Color by</a>
+                                </li>-->
+                                <li>
+                                    <a id="addfilterkeyword" href="#">Filter by keyword</a>
+                                </li>
+                                <li>
+                                    <a id="addfiltertag" href="#">Filter by community tags</a>
+                                </li>
+                                <li>
+                                    <a id="addfilterorganization" href="#">Filter by organization</a>
+                                </li>
+                                <li>
+                                    <a id="addfilterlaboratory" href="#">Filter by laboratory</a>
+                                </li>
+		</ul>
+            </li>
+
+            <li>
+              <a href="#">CREATE DIRECTORY</a>
+            </li>
+
+            <li class="disabled">
+              <a>OR</a>
+            </li>
+
+            <li>
+              <a href="#">MAP</a>
+            </li>
+            
+            <li>
+            asdadasd
+            <div id="log"></div>
+            </li>
+
+          </ul>
+
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="http://www.cnrs.fr" target="_blank">CNRS</a></li>
+            <li><a href="http://iscpif.fr" target="_blank">ISC-PIF</a></li>
+          </ul>
+
+        </div><!--navbar-main-->
+      </div><!--container-->
+    </div><!--navbar-fixed-top-->
+
+
+
+    <div id="defaultop" class="navbar navbar-default">
+
+        <div class="navbar-collapse collapse navbar-responsive-collapse">
+        	<div id="left">
+                  <ul class="nav navbar-nav">
+		        <li>
+		         <div id="bipartiteComponent" class="btn-group" data-toggle="buttons">
+			  <label class="btn btn-primary btn-default active"><input onchange='changeButton(this);' type="radio" name="options" id="social"> Scholars</label>
+			  <label class="btn btn-success btn-default"><input onchange="changeButton(this);" type="radio" name="options" id="sociosemantic"> Mixed</label>
+			  <label class="btn btn-info btn-default"><input onchange="changeButton(this);" type="radio" name="options" id="semantic"> Keywords</label>
+			 </div>
+			</li>
+<!--                    <li><a><button id="socio" type="button" class="btn btn-primary btn-sm :active">Scholars</button></a></li>-->
+<!--                    <li><a><button id="sociosemantic" type="button" class="btn btn-success btn-sm">Mixed</button></a></li>-->
+<!--                    <li><a><button id="semantic" type="button" class="btn btn-info btn-sm">Keywords</button></a></li>-->
+                  </ul>
+                </div>
+		  <ul class="nav navbar-nav navbar-right">
+			<li><a>
+		              <input id="searchinput"  autocomplete="off" class="form-control col-lg-8" placeholder="Search" type="text">
+			</a></li>
+		  </ul>
+                  <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#">Link</a></li>
+                    <li class="dropdown">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+                      <ul class="dropdown-menu">
+                        <li><a href="#">Action</a></li>
+                        <li><a href="#">Another action</a></li>
+                        <li><a href="#">Something else here</a></li>
+                        <li class="divider"></li>
+                        <li><a href="#">Separated link</a></li>
+                      </ul>
+                    </li>
+                  </ul>
+        </div><!-- /.nav-collapse -->
+    </div><!-- /.navbar -->
+
+
+
+
+    <div id="cuerpo">
+
+        <!-- Sidebar -->
+        <div id="leftcolumn">
+            
+            <div id="unfold">
+                <a href="#" id="aUnfold" class="rightarrow"> </a>
+            </div><!--unfold-->
+            
+        </div>
+
+        <!-- Page content -->
+        <div oncontextmenu='return false;' id="sigma-example"></div>
+
+    </div><!--cuerpo-->
+
+
+<div class="modal fade">
+    <div id="loader">
+        <img src="img/loader.gif"></img>
+    </div>
+    <div id="closemodal" data-dismiss="modal"></div>
+</div>
+
+
+
+    <script src="libs/jquery/jquery-1.9.1.js"></script>
+    <script src="libs/jquery/jquery-ui.js" type="text/javascript"></script>
+    <script src="libs/jquery/jquery.ba-dotimeout.min.js" type="text/javascript"></script>
+    <script src="libs/jquery/jquery.mousewheel.min.js" type="text/javascript"></script>
+    
+    <script src="libs/bootstrap/js/bootstrap.min.js"></script>
+    <script src="bootswatch/js/bootswatch.js"></script>
+    <script src="libs/bootstrap/js/bootstrap-modal.js" type="text/javascript"></script>
+    
+<!--    <script src="geomap/js/raphael/raphael-min.js" charset="utf-8" ></script>-->
+<!--    <script src="geomap/js/jquery.mapael.js" charset="utf-8" ></script>-->
+<!--    <script src="geomap/js/maps/world_countries.js" charset="utf-8" ></script>-->
+<!--    <script src="geomap/examples.js" charset="utf-8" ></script>-->
+<!--    <link rel="stylesheet" type="text/css" href="geomap/css/geo.css" />-->
+    
+<!--    <script src="tinawebJS/js/canvas2image/base64.js" type="text/javascript"></script>-->
+<!--    <script src="tinawebJS/js/canvas2image/canvas2image.js" type="text/javascript"></script>-->
+
+    
+    <script src="tinawebJS/js/sigma.min.js" type="text/javascript" language="javascript"></script>
+    <script src="tinawebJS/js/sigma.forceatlas2.js" type="text/javascript" language="javascript"></script>
+    <script src="settings_explorerjs.js" type="text/javascript" language="javascript"></script>
+    <script src="tinawebJS/js/sigma.parseCustom.js" type="text/javascript" language="javascript"></script>
+    <script src="extras_explorerjs.js" type="text/javascript" language="javascript"></script>
+    <script src="tinawebJS/js/sigmaUtils.js" type="text/javascript" language="javascript"></script>
+    <script src="tinawebJS/js/methods.js" type="text/javascript" language="javascript"></script>
+    <script src="tinawebJS/js/minimap.js" type="text/javascript" language="javascript"></script>
+    <script src="tinawebJS/js/enviroment.js" type="text/javascript" language="javascript"></script>
+    <script src="FA2.js" type="text/javascript" language="javascript"></script>
+    <script src="tinawebJS/js/main.js" type="text/javascript" language="javascript"></script>
+    <script type="text/javascript">
+	// Popup window code
+	function newPopup(url) {
+		popupWindow = window.open(
+			url,'popUpWindow','height=700,width=800,left=10,top=10,resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,directories=no,status=no')
+	}
+    </script>
+        
+    <script>
+	$(function() {
+	  $( "#tabs" ).tabs();
+	});
+    </script>
+</body>
+</html>

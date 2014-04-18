@@ -51,7 +51,7 @@ function scanCategories(){
 function onepartiteExtract(){
     
     var i, j, k;
-    partialGraph.emptyGraph();
+//    partialGraph.emptyGraph();
     // Parse Attributes
     // This is confusing, so I'll comment heavily
     var nodesAttributes = [];   // The list of attributes of the nodes of the graph that we build in json
@@ -98,7 +98,7 @@ function onepartiteExtract(){
     }
   
     var nodesNodes = gexf.getElementsByTagName('nodes') // The list of xml nodes 'nodes' (plural)
-  
+
     labels = [];
     minNodeSize=5.00;
     maxNodeSize=5.00;
