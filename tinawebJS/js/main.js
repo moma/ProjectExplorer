@@ -2,6 +2,7 @@ var counterrrr=0;
 $( window ).resize(function() {
   counterrrr++;
   $("#log").html("redimension nro: "+counterrrr);
+  sigmaLimits();
 });
 
 if (mainfile) {
@@ -66,7 +67,7 @@ function sigmaLimits(){
 }
 
 function bringTheNoise(pathfile,type){
-    
+    $('.modal').modal('show');
     sigmaLimits();
     
     partialGraph = sigma.init(document.getElementById('sigma-example'))
