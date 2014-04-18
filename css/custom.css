@@ -1,0 +1,246 @@
+.navbar { 
+	margin-bottom:1px;
+}
+
+#sigma-example {
+    width: 100%;
+    height: 300px;
+    position:relative;
+    float:right;
+}
+
+/*.btn-sm[normal] {*/
+/*  background-image: -webkit-linear-gradient(#5f8ab9, #3e648d 50%, #385a7f);*/
+/*  background-image: linear-gradient(#5f8ab9, #3e648d 50%, #385a7f);*/
+/*  background-repeat: no-repeat;*/
+/*  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff5f8ab9', endColorstr='#ff385a7f', GradientType=0);*/
+/*  filter: none;*/
+/*  border: 1px solid #2e4b69;*/
+/*}*/
+
+#left{
+  display: inline-block;
+}
+
+
+/*.modal-vertical-centered {*/
+#loader{
+    text-align:center;
+    transform: translate(0, 50%) !important;
+    -ms-transform: translate(0, 50%) !important;  /*IE 9*/ 
+    -webkit-transform: translate(0, 50%) !important;  /*Safari and Chrome */
+}
+
+
+#selectionsBox{
+    text-align:center;
+    background-color:white;
+    color:#250587;
+    margin: 7px;
+    border: 1px solid #666;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -border-radius: 3px;
+    -moz-box-shadow: 0px 2px 6px #000;
+    -webkit-box-shadow: 0px 2px 6px #000;
+    box-shadow: 0px 2px 6px #000;
+}
+
+#opossitesBox{
+    margin: 7px;
+    padding: 10px 0px 10px 10px;
+    border-style:solid;
+    background-color:white;
+    color:black;
+    margin: 7px;
+    border: 1px solid #666;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -border-radius: 3px;
+    -moz-box-shadow: 0px 2px 6px #000;
+    -webkit-box-shadow: 0px 2px 6px #000;
+    box-shadow: 0px 2px 6px #000;
+}
+
+#topPapers{
+    margin: 7px;
+    padding: 10px 0px 10px 10px;
+    border-style:solid;
+    background-color:white;
+    color:black;
+    margin: 7px;
+    border: 1px solid #666;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -border-radius: 3px;
+    -moz-box-shadow: 0px 2px 6px #000;
+    -webkit-box-shadow: 0px 2px 6px #000;
+    box-shadow: 0px 2px 6px #000;
+}
+
+
+.grey {
+    color: #cccccc; font-style: italic;
+}
+
+
+/* ZOOM IN OUT */
+
+#ctlzoom {
+    position: absolute; left: 5px; bottom: 5px; list-style: none; padding: 0; margin: 0;
+}
+
+#ctlzoom li {
+    padding: 0; margin: 10px 0; width: 36px; text-align: center;
+}
+
+#zoomSliderzone {
+    height: 120px;
+}
+
+#zoomMinusButton, #zoomPlusButton {
+    display: block; width: 24px; height: 24px; background:url("../tinawebJS/img/plusmoins.png");  margin: 0 auto;
+}
+
+#zoomMinusButton {
+    background-position: 0 -24px;
+}
+
+#zoomMinusButton:hover {
+    background-position: -24px -24px;
+}
+
+#zoomPlusButton {
+    background-position: 0 0;
+}
+
+#zoomPlusButton:hover {
+    background-position: -24px 0;
+}
+
+
+#lensButton {
+    display: block; width: 36px; height: 36px; background:url("../tinawebJS/img/loupe-edges2.png"); margin: 0 auto;
+}
+
+#lensButton {
+    background-position: -72px 0;
+}
+
+#lensButton:hover {
+    background-position: -36px 0;
+}
+
+#lensButton.off {
+    background-position: 0 0;
+}
+
+#lensButton.off:hover {
+    background-position: -108px 0;
+}
+
+#edgesButton {
+    display: block; width: 36px; height: 36px; background:url("../tinawebJS/img/loupe-edges.png"); margin: 0 auto;
+}
+
+#edgesButton {
+    background-position: -72px -36px;
+}
+
+#edgesButton:hover {
+    background-position: -36px -36px;
+}
+
+#edgesButton.off {
+    background-position: 0 -36px;
+}
+
+#edgesButton.off:hover {
+    background-position: -108px -36px;
+}
+
+#saveAs {
+    display: block; width: 30px; height: 30px; background:url("../tinawebJS/img/Save.png"); margin: 0 auto;
+}
+
+#zoomSlider {
+    background:#fff;
+    border:1px solid #aaa;
+    height: 120px; margin: 0 auto;
+}
+
+
+#showChat{
+    position: absolute; top: 16px; left: -14px; width: 20px; height: 100px; background: rgb(250, 250, 252); padding: 2px 2px 2px 0; border-top-right-radius: 5px; border-bottom-right-radius: 5px; box-shadow: 1px 1px 2px #808090;
+}
+
+#aShowChat {
+    float: left; width: 100%; height: 100%; background-image: url("../tinawebJS/img/chat.png");
+}
+
+
+
+/* GESTION DE LA BARRE DE GAUCHE */
+
+#unfold {
+    position: absolute; top: 16px; right: -14px; width: 12px; height: 12px; background: rgb(250, 250, 252); padding: 2px 2px 2px 0; border-top-right-radius: 5px; border-bottom-right-radius: 5px; box-shadow: 1px 1px 2px #808090;
+}
+
+#aUnfold {
+    float: left; width: 12px; height: 12px; background-image: url("../tinawebJS/img/fleches-horiz.png");
+}
+
+.leftarrow {
+    background-position: -12px 0;
+}
+
+.rightarrow {
+    background-position: 0 0;
+}
+
+.leftarrow:hover {
+    background-position: -12px -12px;
+}
+
+.rightarrow:hover {
+    background-position: 0 -12px;
+}
+
+/* AUTOCOMPLETE */
+
+#autocomplete {
+    position: absolute; display: none; padding: 0; margin: 0;
+    border-style: none solid; border-color: #ccc; border-width: 1px;
+}
+
+#autocomplete div {
+    border-bottom: 1px solid #ccc; padding: 0; margin: 0; float: left; clear: both; background: #fff;
+}
+
+#autocomplete h4 {
+    float: left; width: 80px; margin: 5px; font-size: 12px;
+}
+
+#autocomplete ul {
+    float: left; width: 240px; list-style: none; padding: 0; margin: 0;
+}
+
+#autocomplete li {
+    margin: 0; width: 240px; height: 28px; font-size: 12px; clear: both;
+}
+
+#autocomplete li a {
+    display: block; width: 240px; height: 28px; background: #fff; color: #06a8de;
+}
+
+#autocomplete li.hover a {
+    color: #fff; background: #06a8de;
+}
+
+#autocomplete span {
+    float: left; margin: 0; padding: 6px 2px 0;
+}
+
+#autocomplete img {
+    float: left; border: 0; width: 24px; height: 24px; margin: 2px 6px;
+}

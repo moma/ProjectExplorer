@@ -1,0 +1,90 @@
+
+/* Jquery toolbar icons */
+
+.ui-icon-projects { background-position: -192px -144px; }
+.ui-icon-terms { background-position: -208px -144px; }
+.ui-icon-labels { background-position: -208px -80px; }
+.ui-icon-edges { background-position: -144px -176px; }
+.ui-icon-nodes { background-position: -128px -80px; }
+.ui-icon-pin { background-position: -208px -176px; }
+.ui-icon-thunder { background-position: -208px -160px; }
+.ui-icon-arrows { background-position: -96px -80px; }
+
+/* Jquery customization */
+
+.fg-button { margin:0 4px 0 0; text-decoration:none; position: relative; text-align: center; }
+.sliders { margin:0 4px 0 0; text-decoration:none; position: relative; text-align: center; }
+.icon-right { float: right; }
+
+.fg-buttonset-single .fg-button,
+.fg-buttonset-multi .fg-button { margin-right: -1px;}
+
+#htoolbar {
+    opacity: 0.95;
+    box-shadow: 0 0px 10px rgba(0,0,0,.50);
+}
+/*
+.fg-toolbar { padding: .5em; }
+*/
+.fg-toolbar .fg-buttonset { 
+    margin: 1.5em;
+    padding-left: 1px;
+}
+.sliders {
+    margin: 1.5em;
+    padding-left: 2px;
+    border: 1px;
+}
+
+
+body {
+    font-size: .65em;
+}
+
+#title {
+    margin: 3px;
+   /*width: 280px;*/
+}
+
+#toggle-unselect {
+    float:right;
+    margin: 7px;
+    position: absolute;
+    right: 0px;
+    top: 0px;
+}
+
+#appletdiv {
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+	float: left;
+}
+
+#infodiv {
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+
+  position:absolute;
+  top: 85px;
+  right: 2px;
+  opacity: 0.82;
+}
+
+
+#node_label {
+    font-size: 12pt;
+}
+
+#node_table {
+    border: none;
+    width: 100%;
+    text-align: left;
+}
+
+.appletInfo {
+    font-size: 18px;
+}
+
+
