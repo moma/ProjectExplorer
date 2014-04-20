@@ -67,7 +67,7 @@ function sigmaLimits(){
 }
 
 function bringTheNoise(pathfile,type){
-    $('.modal').modal('show');
+//    $('.modal').modal('show');
     sigmaLimits();
     
     partialGraph = sigma.init(document.getElementById('sigma-example'))

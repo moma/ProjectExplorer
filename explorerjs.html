@@ -118,9 +118,6 @@
 			  <label class="btn btn-info btn-default"><input onchange="changeButton(this);" type="radio" name="options" id="semantic"> Keywords</label>
 			 </div>
 			</li>
-<!--                    <li><a><button id="socio" type="button" class="btn btn-primary btn-sm :active">Scholars</button></a></li>-->
-<!--                    <li><a><button id="sociosemantic" type="button" class="btn btn-success btn-sm">Mixed</button></a></li>-->
-<!--                    <li><a><button id="semantic" type="button" class="btn btn-info btn-sm">Keywords</button></a></li>-->
                   </ul>
                 </div>
 		  <ul class="nav navbar-nav navbar-right">
@@ -145,23 +142,54 @@
     </div><!-- /.navbar -->
 
 
-
-
-    <div id="cuerpo">
-
-        <!-- Sidebar -->
-        <div id="leftcolumn">
-            
-            <div id="unfold">
-                <a href="#" id="aUnfold" class="rightarrow"> </a>
-            </div><!--unfold-->
-            
-        </div>
-
+    <div id="zonecentre">
+        
         <!-- Page content -->
-        <div oncontextmenu='return false;' id="sigma-example"></div>
+        <div oncontextmenu='return false;'  class="gradient" id="sigma-example"></div>
+        <ul id="ctlzoom">
+                <li>
+                    <div id="unfold">
+                        <a href="#" id="aUnfold" class="rightarrow"></a>
+                    </div><!--unfold-->                    
+                </li>
+                
+                <li>
+                    <a href="#" id="saveAs" title="export as"> </a>
+                </li>
+                
+                <li>
+                    <a href="#" id="zoomPlusButton" title="S'approcher"> </a>
+                </li>
 
-    </div><!--cuerpo-->
+                <li id="zoomSliderzone">
+                    <div id="zoomSlider"></div>
+                </li>
+
+                <li>
+                    <a href="#" id="zoomMinusButton" title="S'éloigner"> </a>
+                </li>
+
+
+                <li>
+                    <a href="#" id="lensButton"> </a>
+                </li>
+
+                <li>
+                    <a href="#" id="edgesButton"> </a>
+                </li>
+            </ul>
+    </div>
+
+    
+
+    <!-- Sidebar -->
+    <div id="leftcolumn">
+        
+
+    </div>
+
+
+    
 
 
 <div class="modal fade">
