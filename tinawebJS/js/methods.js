@@ -148,6 +148,7 @@ function cancelSelection (fromTagCloud) {
         partialGraph._core.graph.nodesIndex[i].neighbour=false;
     }
     deselections={};
+    leftPanel("close");
     partialGraph.draw();
 }
 
@@ -599,18 +600,8 @@ function updateLeftPanel(){
     $("#opossiteNodes").html(opossitesNodes); //Information extracted, just added
     $("#information").html(information); //Information extracted, just added
     $("#tips").html("");
-     $("#topPapers").show();
-        
-    /***** The animation *****/
-    _cG = $("#leftcolumn");
-    _cG.animate({
-        "left" : "0px"
-    }, function() {
-        $("#aUnfold").attr("class","leftarrow");
-        $("#zonecentre").css({
-            left: _cG.width() + "px"
-        });
-    });
+    $("#topPapers").show();
+    leftPanel("open");
 }
 
 function graphNGrams(node_id){   

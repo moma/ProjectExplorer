@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="utf-8">
     <link rel="stylesheet" href="css/bootstrap.css" media="screen">
+    <link rel="stylesheet" href="css/freshstyle.css" type="text/css">
     <link rel="stylesheet" href="css/custom.css" media="screen">
     <link href="css/sidebar.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Josefin+Sans:300,400,700">
@@ -109,15 +110,18 @@
     <div id="defaultop" class="navbar navbar-default">
 
         <div class="navbar-collapse collapse navbar-responsive-collapse">
-        	<div id="left">
+        	<div id="left" style="margin:0em 2em;">
                   <ul class="nav navbar-nav">
-		        <li>
+                      <li>
+                          <a>
 		         <div id="bipartiteComponent" class="btn-group" data-toggle="buttons">
-			  <label class="btn btn-primary btn-default active"><input onchange='changeButton(this);' type="radio" name="options" id="social"> Scholars</label>
-			  <label class="btn btn-success btn-default"><input onchange="changeButton(this);" type="radio" name="options" id="sociosemantic"> Mixed</label>
-			  <label class="btn btn-info btn-default"><input onchange="changeButton(this);" type="radio" name="options" id="semantic"> Keywords</label>
+			  <label class="btn btn-primary btn-sm active"><input onchange='changeButton(this);' type="radio" name="options" id="social"> Scholars</label>
+			  <label class="btn btn-success btn-sm"><input onchange="changeButton(this);" type="radio" name="options" id="sociosemantic"> Mixed</label>
+			  <label class="btn btn-info btn-sm"><input onchange="changeButton(this);" type="radio" name="options" id="semantic"> Keywords</label>
 			 </div>
+                          </a>
 			</li>
+                        <li><a><div style="margin:0em 2em;" id="unranged-value"></div></a></li>
                   </ul>
                 </div>
 		  <ul class="nav navbar-nav navbar-right">
@@ -138,6 +142,27 @@
                       </ul>
                     </li>
                   </ul>
+            
+                  <ul id="category-A" class="nav navbar-nav navbar-right">
+                      
+                        <li>
+                            <ul style="list-style-type: none; margin:0em 1em;">
+                                <li><div id="sliderANodeWeight"></div></li>
+                                <li><div id="sliderAEdgeWeight"></div></li>
+                                <li><div id="sliderANodeSize"></div></li>
+                            </ul>
+                        </li>
+                  </ul>
+                  <ul id="category-B" class="nav navbar-nav navbar-right">
+                        <li>
+                            <ul style="list-style-type: none; margin:0em 1em;">
+                                <li><div id="sliderBNodeWeight"></div></li>
+                                <li><div id="sliderBEdgeWeight"></div></li>
+                                <li><div id="sliderBNodeSize"></div></li>
+                            </ul>
+                        </li>
+                        
+                  </ul>
         </div><!-- /.nav-collapse -->
     </div><!-- /.navbar -->
 
@@ -150,7 +175,7 @@
         <ul id="ctlzoom">
                 <li>
                     <div id="unfold">
-                        <a href="#" id="aUnfold" class="leftarrow"></a>
+                        <a href="#" id="aUnfold" onclick='leftPanel("fromHtml")' class="leftarrow"></a>
                     </div><!--unfold-->                    
                 </li>
                 
@@ -204,6 +229,7 @@
     <script src="libs/jquery/jquery-ui.js" type="text/javascript"></script>
     <script src="libs/jquery/jquery.ba-dotimeout.min.js" type="text/javascript"></script>
     <script src="libs/jquery/jquery.mousewheel.min.js" type="text/javascript"></script>
+    <script type="text/javascript" src="libs/freshslider.1.0.js"></script>
     
     <script src="libs/bootstrap/js/bootstrap.min.js"></script>
     <script src="bootswatch/js/bootswatch.js"></script>

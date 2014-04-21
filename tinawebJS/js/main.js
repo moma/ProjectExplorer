@@ -137,6 +137,7 @@ function bringTheNoise(pathfile,type){
                             console.log("Parsing and FA2 complete.");
     // < === ASYNCHRONOUS FA2.JS DONE!! === >
 
+                            leftPanel("close");
                             $("#closemodal").click();//modal.hide doesnt work :c
                             //    startForceAtlas2(partialGraph._core.graph);r(
 
@@ -150,7 +151,6 @@ function bringTheNoise(pathfile,type){
                             initializeMap();
                             updateMap();
                             updateDownNodeEvent(false);
-                            $("#aUnfold").click();
                             partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8).draw(2,2,2);
                             theListeners(); 
                         }); 
@@ -222,53 +222,74 @@ function listGexfs(){
     });    
 }
 
+function leftPanel(action) {        
+    sidebar = $("#leftcolumn");
+    fullwidth=$('#fixedtop').width();
+ 
+    if(action=="fromHtml"){
+        if(sidebar.offset().left<0) leftPanel("open");
+        else leftPanel("close");
+    }
+    
+    if (action=="open") {
+        sidebar.animate({
+            "left" : sidebar.width()+"px"
+        }, function() {
+            $("#aUnfold").attr("class","leftarrow");                
+            $('#sigma-example').width(fullwidth-sidebar.width());
+            $("#ctlzoom").css({
+                left: (sidebar.width()+10)+"px"
+            });
+        }); 
+    } 
+    if(action=="close"){
+        sidebar.animate({
+            "left" : "-" + sidebar.width() + "px"
+        }, function() {
+            $("#aUnfold").attr("class","rightarrow");
+            $('#sigma-example').width(fullwidth);
+            $("#ctlzoom").css({
+                left: "0px"
+            });
+        });
+    }   
+}
+
+
 function theListeners(){
     $("#saveAs").click(function() {
         saveGEXF();
     });
-    $("#aUnfold").click(function() {
-        
-        _cG = $("#leftcolumn");
-        anchototal=$('#fixedtop').width();
-        sidebar=_cG.width();
-        
-        pr("\t===== event for aUnfold =====")
-        pr("offset:")
-        pr(_cG.offset())
-        pr("width:")
-        pr(_cG.width())
-        pr("sigma-example")
-        pr($("#sigma-example").offset())
-        pr("-----------------")
-        if (_cG.offset().left < 0) {
-            pr("\t\tinside if")
-            _cG.animate({
-                "left" : sidebar+"px"
-            }, function() {
-                $("#aUnfold").attr("class","leftarrow");                
-                $('#sigma-example').width(anchototal-sidebar);
-                $("#ctlzoom").css({
-                    left: (sidebar+10)+"px"
-                });
-//                $("#sigma-example").css({
-//                    left: _cG.width() + "px"
-//                });
-            }); 
-        } else {
-            pr("\t\tinside else")
-            _cG.animate({
-                "left" : "-" + _cG.width() + "px"
-            }, function() {
-                $("#aUnfold").attr("class","rightarrow");
-                $('#sigma-example').width(anchototal);
-                $("#ctlzoom").css({
-                    left: "0px"
-                });
-            });
-        }
-        return false;
-    });
     
+//    $("#aUnfold").click(function() {        
+//        _cG = $("#leftcolumn");
+//        anchototal=$('#fixedtop').width();
+//        sidebar=_cG.width();
+//
+//        if (_cG.offset().left < 0) {
+//            _cG.animate({
+//                "left" : sidebar+"px"
+//            }, function() {
+//                $("#aUnfold").attr("class","leftarrow");                
+//                $('#sigma-example').width(anchototal-sidebar);
+//                $("#ctlzoom").css({
+//                    left: (sidebar+10)+"px"
+//                });
+//            }); 
+//        } else {
+//            _cG.animate({
+//                "left" : "-" + _cG.width() + "px"
+//            }, function() {
+//                $("#aUnfold").attr("class","rightarrow");
+//                $('#sigma-example').width(anchototal);
+//                $("#ctlzoom").css({
+//                    left: "0px"
+//                });
+//            });
+//        }
+//        return false;
+//    });
+//    
     /******************* /SEARCH ***********************/
     $.ui.autocomplete.prototype._renderItem = function(ul, item) {
         var searchVal = $("#searchinput").val();
@@ -438,52 +459,104 @@ function theListeners(){
             edgesTF=false;
         }
     });
-   
-    $("#sliderANodeSize").slider({
-        value: 1,
-        min: 1,
-        max: 25,
-        animate: true,
-        slide: function(event, ui) {
-            $.doTimeout(100,function (){
-                partialGraph.iterNodes(function (n) {
-                    pr();
-                    if(Nodes[n.id].type==catSoc) {
-                        n.size = parseFloat(Nodes[n.id].size) + parseFloat((ui.value-1))*0.3;
-                    }
-                });
-                partialGraph.draw();
-            });
+    
+    $("#sliderANodeWeight").freshslider({
+        range: true,
+        step:1,
+        value:[10, 60],
+        onchange:function(low, high){
+            console.log(low, high);
         }
     });
-    $("#sliderBNodeSize").slider({
-        value: 1,
-        min: 1,
-        max: 25,
-        animate: true,
-        slide: function(event, ui) {
-            $.doTimeout(100,function (){
-                partialGraph.iterNodes(function (n) {
-                    if(Nodes[n.id].type==catSem) {
-                        n.size = parseFloat(Nodes[n.id].size) + parseFloat((ui.value-1))*0.3;
-                    }
-                });
-                partialGraph.draw();
-            });
+    $("#sliderAEdgeWeight").freshslider({
+        range: true,
+        step:1,
+        value:[10, 100],
+        onchange:function(low, high){
+            console.log(low, high);
         }
     });
-    $("#sliderSelectionZone").slider({
-        value: cursor_size,
-        min: parseFloat(cursor_size_min),
-        max: parseFloat(cursor_size_max),
-        animate: true,
-        change: function(event, ui) {
-            cursor_size= ui.value;
-            //if(cursor_size==0) updateDownNodeEvent(false);
-            //else updateDownNodeEvent(true); 
-        //return callSlider("#sliderSelectionZone", "selectionRadius");
+    $("#sliderANodeSize").freshslider({
+        step:1,
+        value:10,
+        onchange:function(value){
+            console.log(value);
         }
     });
+    
+    $("#sliderBNodeWeight").freshslider({
+        range: true,
+        step:1,
+        value:[20, 60],
+        onchange:function(low, high){
+            console.log(low, high);
+        }
+    });
+    $("#sliderBEdgeWeight").freshslider({
+        range: true,
+        step:1,
+        value:[20, 100],
+        onchange:function(low, high){
+            console.log(low, high);
+        }
+    });
+    $("#sliderBNodeSize").freshslider({
+        step:1,
+        value:20,
+        onchange:function(value){
+            console.log(value);
+        }
+    });
+    $("#unranged-value").freshslider({
+        step: 1,
+        value:10
+    });
+//   
+//    $("#sliderANodeSize").slider({
+//        value: 1,
+//        min: 1,
+//        max: 25,
+//        animate: true,
+//        slide: function(event, ui) {
+//            $.doTimeout(100,function (){
+//                partialGraph.iterNodes(function (n) {
+//                    pr();
+//                    if(Nodes[n.id].type==catSoc) {
+//                        n.size = parseFloat(Nodes[n.id].size) + parseFloat((ui.value-1))*0.3;
+//                    }
+//                });
+//                partialGraph.draw();
+//            });
+//        }
+//    });
+//    $("#sliderBNodeSize").slider({
+//        value: 1,
+//        min: 1,
+//        max: 25,
+//        animate: true,
+//        slide: function(event, ui) {
+//            $.doTimeout(100,function (){
+//                partialGraph.iterNodes(function (n) {
+//                    if(Nodes[n.id].type==catSem) {
+//                        n.size = parseFloat(Nodes[n.id].size) + parseFloat((ui.value-1))*0.3;
+//                    }
+//                });
+//                partialGraph.draw();
+//            });
+//        }
+//    });
+//    $("#sliderSelectionZone").slider({
+//        value: cursor_size,
+//        min: parseFloat(cursor_size_min),
+//        max: parseFloat(cursor_size_max),
+//        animate: true,
+//        change: function(event, ui) {
+//            cursor_size= ui.value;
+//            //if(cursor_size==0) updateDownNodeEvent(false);
+//            //else updateDownNodeEvent(true); 
+//        //return callSlider("#sliderSelectionZone", "selectionRadius");
+//        }
+//    });
 }
 
 function getClientTime(){
