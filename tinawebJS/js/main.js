@@ -59,7 +59,7 @@ function sigmaLimits(){
     altofixtop=$('#fixedtop').height()
     altodeftop=$('#defaultop').height()
     $('#sigma-example').width(anchototal-sidebar);
-    $('#sigma-example').height(altototal-altofixtop-altodeftop-2);
+    $('#sigma-example').height(altototal-altofixtop-altodeftop-4);
     
     pw=$('#sigma-example').width();
     ph=$('#sigma-example').height();
@@ -163,7 +163,6 @@ function bringTheNoise(pathfile,type){
     }  
 }
 
-
 function scanDataFolder(){
         $.ajax({
             type: 'GET',
@@ -228,26 +227,45 @@ function theListeners(){
         saveGEXF();
     });
     $("#aUnfold").click(function() {
-//        _cG = $("#leftcolumn");
-//        if (_cG.offset().left < 0) {
-//            _cG.animate({
-//                "left" : "0px"
-//            }, function() {
-//                $("#aUnfold").attr("class","leftarrow");
-//                $("#zonecentre").css({
+        
+        _cG = $("#leftcolumn");
+        anchototal=$('#fixedtop').width();
+        sidebar=_cG.width();
+        
+        pr("\t===== event for aUnfold =====")
+        pr("offset:")
+        pr(_cG.offset())
+        pr("width:")
+        pr(_cG.width())
+        pr("sigma-example")
+        pr($("#sigma-example").offset())
+        pr("-----------------")
+        if (_cG.offset().left < 0) {
+            pr("\t\tinside if")
+            _cG.animate({
+                "left" : sidebar+"px"
+            }, function() {
+                $("#aUnfold").attr("class","leftarrow");                
+                $('#sigma-example').width(anchototal-sidebar);
+                $("#ctlzoom").css({
+                    left: (sidebar+10)+"px"
+                });
+//                $("#sigma-example").css({
 //                    left: _cG.width() + "px"
 //                });
-//            }); 
-//        } else {
-//            _cG.animate({
-//                "left" : "-" + _cG.width() + "px"
-//            }, function() {
-//                $("#aUnfold").attr("class","rightarrow");
-//                $("#zonecentre").css({
-//                    left: "0"
-//                });
-//            });
-//        }
+            }); 
+        } else {
+            pr("\t\tinside else")
+            _cG.animate({
+                "left" : "-" + _cG.width() + "px"
+            }, function() {
+                $("#aUnfold").attr("class","rightarrow");
+                $('#sigma-example').width(anchototal);
+                $("#ctlzoom").css({
+                    left: "0px"
+                });
+            });
+        }
         return false;
     });
     
