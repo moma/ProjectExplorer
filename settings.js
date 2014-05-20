@@ -4,11 +4,14 @@
 
 // ============ < DEVELOPER OPTIONS > ============
 var geomap=false;
+var minimap=false;
 var getAdditionalInfo=false;//for topPapers div
-var mainfile=encodeURIComponent("data/InnovativeAward.gexf");//"2-Terms-Authors-300nodes.gexf";
+var mainfile=encodeURIComponent("data/CSLbibraph.gexf");//"2-Terms-Authors-300nodes.gexf";
+var dataFolderTree = {};
 var gexfDict={};
 //gexfDict["data/the.gexf"]="The characteristic name";
-
+gexfDict={};
+//gexfDict["data/nci/NCI350_all.gexf"]="NCI 2013 - Landscape";
 
 
 ircNick="";
@@ -22,27 +25,35 @@ var startingNodeId = "1";
 var minLengthAutoComplete = 1;
 var maxSearchResults = 10;
 var strSearchBar = "Search";
-var cursor_size= 100;
+var cursor_size_min= 0;
+var cursor_size= 0;
+var cursor_size_max= 100;
 
 var desirableTagCloudFont_MIN=12;
 var desirableTagCloudFont_MAX=20;
 var desirableNodeSizeMIN=1;
-var desirableNodeSizeMAX=12;
+var desirableNodeSizeMAX=9;
 var desirableScholarSize=6; //Remember that all scholars have the same size!
 
-var fa2enabled=false;
+/*
+ *Three states:
+ *  - true: fa2 running at start
+ *  - false: fa2 stopped at start, button exists
+ *  - "off": button doesn't exist, fa2 stopped forever 
+ **/
+var fa2enabled="off";
 var showLabelsIfZoom=2.0;
         // ============ < SIGMA.JS PROPERTIES > ============
         var desirableNodeSizeMIN=1;
-        var desirableNodeSizeMAX=12;
+        var desirableNodeSizeMAX=9;
         var desirableScholarSize=6; //Remember that all scholars have the same size!
 
         var sigmaJsDrawingProperties = {
             defaultLabelColor: 'black',
-            defaultLabelSize: 12,//in fact I'm using it as minLabelSize'
+            defaultLabelSize: 10,//in fact I'm using it as minLabelSize'
             defaultLabelBGColor: '#fff',
             defaultLabelHoverColor: '#000',
-            labelThreshold: 12,
+            labelThreshold: 6,
             defaultEdgeType: 'curve',
 
             borderSize: 2.5,//Something other than 0
@@ -66,7 +77,6 @@ var showLabelsIfZoom=2.0;
 
 
 // ============ < VARIABLES.JS > ============
-var dataFolderTree = {};
 //"http://webchat.freenode.net/?nick=Ademe&channels=#anoe"
 var ircUrl="http://webchat.freenode.net/?nick="+ircNick+"&channels="+ircCHN;
 var twjs="tinawebJS/";
@@ -132,7 +142,10 @@ var maxEdgeWeight=0.0;
 //---------------------------------------------------
 
 var bipartite=false;
-
+var gexfDictReverse={}
+for (var i in gexfDict){
+    gexfDictReverse[gexfDict[i]]=i;
+}
 
 var opts = {
   lines: 13, // The number of lines to draw

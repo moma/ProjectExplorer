@@ -1,15 +1,54 @@
 /*
  * Customize as you want ;)
  */
+function callGeomap(){
+    db=getCurrentDBforCurrentGexf();
+    db=JSON.stringify(db);
+    if(is_empty(selections)){
+        jsonparams='["all"]';
+    } else {
+        jsonparams=JSON.stringify(getSelections());
+        jsonparams = jsonparams.split('&').join('__and__');
+    }    
+    pr('in callGeomap: db='+db+'&query='+jsonparams);
+    initiateMap(db,jsonparams,"geomap/");
+    $("#ctlzoom").hide();
+    $("#CurrentView").hide();
+    
+    sigmaheight=$('#leftcolumn').height();
+    $('.geomapCont').height(sigmaheight);
+}
+
+function callTWJS(){
+//    db=getCurrentDBforCurrentGexf();
+//    db=JSON.stringify(db);
+//    if(is_empty(selections)){
+//        jsonparams='["all"]';
+//    } else {
+//        jsonparams=JSON.stringify(getSelections());
+//        jsonparams = jsonparams.split('&').join('__and__');
+//    }    
+//    pr('in callGeomap: db='+db+'&query='+jsonparams);
+//    initiateMap(db,jsonparams,"geomap/"); //From GEOMAP submod
+    sigmaheight=$('#leftcolumn').height();
+    $('.sigma-parent').height(sigmaheight);
+    
+    $("#ctlzoom").show();
+    $("#CurrentView").show();
+}
 
 function selectionToMap(){
-    if(geomap) {
-	    db=getCurrentDBforCurrentGexf();
-	    db=JSON.stringify(db);
-	    param='geomap/?db='+db+'';
-	    if(is_empty(selections)){
-		newPopup('geomap/?db='+db+'&query=all');
-	    } else pr("selection to geomap: be patient");
+    db=getCurrentDBforCurrentGexf();
+    db=JSON.stringify(db);
+    param='geomap/?db='+db+'';
+    if(is_empty(selections)){
+        newPopup('geomap/?db='+db+'&query=["all"]');
+    } else {
+        pr("selection to geomap:");
+        jsonparams=JSON.stringify(getSelections());
+        jsonparams = jsonparams.split('&').join('__and__');
+        pr('geomap/?db='+db+'&query='+jsonparams);
+        newPopup('geomap/?db='+db+'&query='+jsonparams);
     }
 }
 
@@ -43,25 +82,23 @@ function getGlobalDBs(){
 
 function getTopPapers(type){
     if(getAdditionalInfo){
-        params=[];
-        for(var i in selections){
-            params.push(Nodes[i].label);
-        }
-        jsonparams=JSON.stringify(params);
+        jsonparams=JSON.stringify(getSelections());
         //jsonparams = jsonparams.replaceAll("&","__and__");
         jsonparams = jsonparams.split('&').join('__and__');
         dbsPaths=getCurrentDBforCurrentGexf();
         //dbsPaths.push(getGlobalDBs());
         dbsPaths=JSON.stringify(dbsPaths);
-        
+        thisgexf=JSON.stringify(decodeURIComponent(getUrlParam.file));
+        image='<img style="display:block; margin: 0px auto;" src="'+twjs+'img/ajax-loader.gif"></img>';
+        $("#topPapers").html(image);
         $.ajax({
             type: 'GET',
             url: twjs+'php/info_div.php',
-            data: "type="+type+"&query="+jsonparams+"&dbs="+dbsPaths,
+            data: "type="+type+"&query="+jsonparams+"&dbs="+dbsPaths+"&gexf="+thisgexf,
             //contentType: "application/json",
             //dataType: 'json',
             success : function(data){ 
-                pr(twjs+'php/info_div.php?'+"type="+type+"&query="+jsonparams+"&dbs="+dbsPaths);
+                pr(twjs+'php/info_div.php?'+"type="+type+"&query="+jsonparams+"&dbs="+dbsPaths+"&gexf="+thisgexf);
                 $("#topPapers").html(data);
             },
             error: function(){ 
@@ -136,6 +173,11 @@ function updateLeftPanel_uni(){//Uni-partite graph
             left: _cG.width() + "px"
         });
     });
+    i=0; for(var s in selections) i++;
+    if(is_empty(selections)==true || i==0){
+        cancelSelection(false);
+        partialGraph.draw();
+    }
 }
 
 //FOR UNI-PARTITE
@@ -244,8 +286,7 @@ function showhideChat(){
 
 
 function getTips(){
-    param='href="#" onclick="selectionToMap();" ';
-    text = '<div><br/><br/><h4>TIPS</h4><p> <b>- You can search for an expression in the search bar.</b><br/><p> <b>- When a node is selected, you can clic in the side bar on its name to launch a google search on that term.</b><br/><p> <b>- Double clic on a node to get more information</b><br/><b>- Double clic an empty area to erase current selection</b></p></div><br/><center><strong><a '+param+' >See the network world distribution</a></strong></center><br/><div id="footer"></div></div>';
+    text = '<div><br/><br/><h4>TIPS</h4><p> <b>- You can search for an expression in the search bar.</b><br/><p> <b>- When a node is selected, you can clic in the side bar on its name to launch a google search on that term.</b><br/><p> <b>- Double clic on a node to get more information</b><br/><b>- Double clic an empty area to erase current selection</b></p></div><br/><div id="footer"></div></div>';
     return text;
 }
 
