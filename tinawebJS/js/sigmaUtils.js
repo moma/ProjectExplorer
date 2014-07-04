@@ -62,13 +62,16 @@ function gete(id){
     return partialGraph._core.graph.edgesIndex[id];
 }
 
+
 function find(label){
-    results=[];
-    nds=getnodesIndex();
+    var results=[];
+    var nds=getnodesIndex();
+    label=label.toLowerCase()
     for(var i in nds){
-        n=nds[i];
+        var n=nds[i];
         if(n.hidden==false){
-            if (n.label.indexOf(label)!==-1) {
+        	var possiblematch=n.label.toLowerCase()
+            if (possiblematch.indexOf(label)!==-1) {
                 results.push(n);
             }  
         }
@@ -108,14 +111,28 @@ function getSelections(){
         return params;
 }
 
+//i added an excpt... why
 function getNeighs(sels,arr){ 
     neighDict={};
     for(var i in sels) {
-        A=arr[i].neighbours;
-        for(var j in A){
-            neighDict[A[j]]=1
+        if(!isUndef(arr[i])) {
+            A=arr[i].neighbours;
+            for(var j in A){
+                neighDict[A[j]]=1
+            }
+            neighDict[i]=1;
         }
-        neighDict[i]=1;
     }    
     return neighDict;
+}
+
+//to general utils
+function getClientTime(){
+    var totalSec = new Date().getTime() / 1000;
+    var d = new Date();
+    var hours = d.getHours();
+    var minutes = parseInt( totalSec / 60 ) % 60;
+    var seconds = (totalSec % 60).toFixed(4);
+    var result = (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds  < 10 ? "0" + seconds : seconds);
+    return result;
 }

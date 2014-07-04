@@ -1,13 +1,16 @@
 
+//to general utils
 function pr(msg) {
     console.log(msg);
 }
 
+//to general utils
 function isUndef(variable){
     if(typeof(variable)==="undefined") return true;
     else return false;
 }
 
+//to general utils
 $.fn.toggleClick = function(){
         methods = arguments, // store the passed arguments for future reference
             count = methods.length; // cache the number of methods 
@@ -23,6 +26,7 @@ $.fn.toggleClick = function(){
         });
 };
 
+//to general utils
 getUrlParam = (function () {
     var get = {
         push:function (key,value){
@@ -51,7 +55,7 @@ getUrlParam = (function () {
     return get;
 })();
 
-
+//to general utils
 function ArraySortByValue(array, sortFunc){
     var tmp = [];
     oposMAX=0;
@@ -71,6 +75,7 @@ function ArraySortByValue(array, sortFunc){
     return tmp;      
 }
 
+//to general utils
 function ArraySortByKey(array, sortFunc){
     var tmp = [];
     for (var k in array) {
@@ -88,6 +93,7 @@ function ArraySortByKey(array, sortFunc){
     return tmp;      
 }
     
+//to general utils
 function is_empty(obj) {
     // Assume if it has a length property with a non-zero value
     // that that property is correct.
@@ -100,6 +106,7 @@ function is_empty(obj) {
     return true;
 }
 
+//obsolete
 function returnBaseUrl(){
     origin = window.location.origin;
     nameOfHtml=window.location.pathname.substring(window.location.pathname.lastIndexOf('/')+1);
@@ -148,7 +155,7 @@ function cancelSelection (fromTagCloud) {
         partialGraph._core.graph.nodesIndex[i].neighbour=false;
     }
     deselections={};
-    leftPanel("close");
+    // leftPanel("close");
     partialGraph.draw();
 }
 
@@ -173,8 +180,56 @@ function highlightSelectedNodes(flag){
         
     }
 }
+
 function alertCheckBox(eventCheck){    
     if(!isUndef(eventCheck.checked)) checkBox=eventCheck.checked;
+}
+
+// States:
+// A : Macro-Social
+// B : Macro-Semantic
+// A*: Macro-Social w/selections
+// B*: Macro-Semantic w/selections
+// a : Meso-Social
+// b : Meso-Semantic
+// AaBb: Socio-Semantic
+function RefreshState(newNOW){
+
+	if (newNOW!="") {
+	    PAST = NOW;
+	    NOW = newNOW;
+		$("#category-A").hide();
+		$("#category-B").hide();  
+		if(NOW=="a" || NOW=="A" || NOW=="AaBb") $("#category-A").show();
+		if(NOW=="b" || NOW=="B" || NOW=="AaBb") $("#category-B").show();
+	}
+
+    i=0; for(var s in selections) { i++; break;}
+    if(is_empty(selections) || i==0) LevelButtonDisable(true);
+    else LevelButtonDisable(false);
+
+    //complete graphs case
+    sels=getNodeIDs(selections).length
+    if(NOW=="A" || NOW=="a") {
+        var N=Object.keys(partialGraph._core.graph.nodes.filter(function(n){return n.type==catSoc && !n.hidden })).length;        
+        var k=Object.keys(getNeighs(selections,nodes1)).length
+        var s=Object.keys(selections).length
+        pr("in social N: "+N+" - k: "+k+" - s: "+s)
+        if(s<N && k>=N && NOW=="A") LevelButtonDisable(true);
+        else LevelButtonDisable(false);
+    }
+    if(NOW=="B" || NOW=="b") {
+        var N=Object.keys(partialGraph._core.graph.nodes.filter(function(n){return n.type==catSem && !n.hidden })).length;
+        var k=Object.keys(getNeighs(selections,nodes2)).length
+        var s=Object.keys(selections).length
+        pr("in semantic N: "+N+" - k: "+k+" - s: "+s)
+        if(s<N && k>=N && NOW=="B") LevelButtonDisable(true);
+        else LevelButtonDisable(false);
+    }
+    if(NOW=="AaBb"){
+        LevelButtonDisable(true);
+    }
+
 }
 
 function pushSWClick(arg){
@@ -182,6 +237,7 @@ function pushSWClick(arg){
     swclickActual = arg;
 }
 
+// it receives entire node
 function selection(currentNode){
     pr("\t***in selection()");
     if(checkBox==false && cursor_size==0) {
@@ -313,7 +369,7 @@ function selection(currentNode){
             currentNode.active=false;
         }
     }
-    partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
+    // partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
     partialGraph.refresh();
 }
 
@@ -337,271 +393,153 @@ function getOpossitesNodes(node_id, entireNode) {
     opos = ArraySortByValue(opossites, function(a,b){
         return b-a
     });
-//        console.log("WOLOLO WOLOLO WOLOLO WOLOLO");
-//        $.ajax({
-//            type: 'GET',
-//            url: 'http://localhost/getJsonFromUrl/tagcloud.php',
-//            data: "url="+JSON.stringify(opos),
-//            //contentType: "application/json",
-//            //dataType: 'json',
-//            success : function(data){ 
-//                console.log(data);
-//            },
-//            error: function(){ 
-//                pr("Page Not found.");
-//            }
-//        });
+    //        console.log("WOLOLO WOLOLO WOLOLO WOLOLO");
+    //        $.ajax({
+    //            type: 'GET',
+    //            url: 'http://localhost/getJsonFromUrl/tagcloud.php',
+    //            data: "url="+JSON.stringify(opos),
+    //            //contentType: "application/json",
+    //            //dataType: 'json',
+    //            success : function(data){ 
+    //                console.log(data);
+    //            },
+    //            error: function(){ 
+    //                pr("Page Not found.");
+    //            }
+    //        });
 }
 
-function updateLeftPanel(){
-    pr("\t ** in updateLeftPanel() ** ");
-    names='';
-    opossitesNodes='';
-    information='';
-    
-    counter=0;
-    names+='<div id="selectionsBox">';
-    names += '<h4>';
-    for(var i in selections){
-        if(counter==4){
-            names += '<h4>[...]</h4>';
-            break;
-        }
-        names += Nodes[i].label+', ';
-        counter++;
+
+//to sigma utils!
+function getNodeLabels(elems){
+    var labelss=[]
+    for(var i in elems){
+        var id=(!isUndef(elems[i].key))?elems[i].key:i
+        labelss.push(Nodes[id].label)
     }
-    names += '</h4>';
-    names=names.replace(", </h4>","</h4>");
-    names=names.replace(", <h4>","<h4>");
-    names+='</div>';
-    
-    
-    js2='\');"';
-    if(swclickActual=="social") {
-        opossitesNodes+= '<br><h4>Keywords: </h4>';
-        opossitesNodes+='<div id="opossitesBox">';/*tochange*/
-        js1='onclick="edgesTF=false;cancelSelection(true);graphNGrams(\'';
-        for(var i in opos){
-            if(i==22){
-                opossitesNodes += '<li>[...]</li>';
-                break;
-            }
-            //fontSize=(opos[i].value/maxFont)*(maxFont-minFont)+minFont;
-            if(oposMAX==1){
-                fontSize=desirableTagCloudFont_MIN;
-            }
-            else {
-                fontSize=desirableTagCloudFont_MIN+(opos[i].value-1)*((desirableTagCloudFont_MAX-desirableTagCloudFont_MIN)/(oposMAX-1));
-            }
-            if(!isUndef(nodes2[opos[i].key])){
-                opossitesNodes += '<span style="display:inline-block;font-size:'+fontSize+'px;cursor: pointer;" '
-                +js1+opos[i].key+js2+'>' + nodes2[opos[i].key].label+ '</span>,&nbsp;&nbsp;';
-            }
+    return labelss
+}
 
+//to sigma utils!
+function getNodeIDs(elems){
+    return Object.keys(elems)
+}
+
+
+//	tag cloud div
+//missing: the graphNGrams javascript
+function htmlfied_alternodes(elems){
+    var oppositesNodes=[]
+    js1=""//'onclick="edgesTF=false;cancelSelection(true);graphNGrams(\'';
+    js2=""//"');"
+    frecMAX=elems[0].value
+    for(var i in elems){
+        id=elems[i].key
+        frec=elems[i].value
+        if(frecMAX==1) fontSize=desirableTagCloudFont_MIN;
+        else {
+            fontSize=
+            desirableTagCloudFont_MIN+
+            (frec-1)*
+            ((desirableTagCloudFont_MAX-desirableTagCloudFont_MIN)/(frecMAX-1));
         }
-        opossitesNodes += '</div>';
-        
-        getTopPapers("social");
+        if(!isUndef(Nodes[id])){
 
-        
-        information += '<br><h4>Information:</h4>';
-        information += '<ul>';
-            
-        for(var i in selections){
-            information += '<li><b>' + Nodes[i].label + '</b></li>';
-            if(Nodes[i].htmlCont==""){
-                information += '<li>' + Nodes[i].attributes["level"] + '</li>';
-            }
-            else {
-                information += '<li>' + $("<div/>").html(Nodes[i].htmlCont).text() + '</li>';
-            }
-            information += '</ul><br>';
+            htmlfied_alternode= '<span class="tagcloud-item" style="font-size:'+fontSize+'px;"'
+
+            +">"//+js1+id+js2+'>' 
+            + Nodes[id].label+ '</span>';
+            oppositesNodes.push(htmlfied_alternode)
         }
     }
-    
-    if(swclickActual=="semantic") {       
-        opossitesNodes+= '<br><h4>Scholars: </h4>';
-        opossitesNodes+='<div id="opossitesBox">';
-        js1='onclick="edgesTF=false;cancelSelection(true);graphDocs(\'';
-        
-        for(var i in opos){
-            if(i==22){
-                opossitesNodes += '<li>[...]</li>';
-                break;
-            }
-            //fontSize=(opos[i].value/maxFont)*(maxFont-minFont)+minFont;
-            if(oposMAX==1){
-                fontSize=desirableTagCloudFont_MIN;
-            }
-            else {
-                fontSize=desirableTagCloudFont_MIN+(opos[i].value-1)*((desirableTagCloudFont_MAX-desirableTagCloudFont_MIN)/(oposMAX-1));
-            }
-            if(!isUndef(nodes1[opos[i].key])){
-                opossitesNodes += '<span style="display:inline-block;font-size:'+fontSize+'px; cursor: pointer;" '
-                +js1+opos[i].key+js2+'>' + nodes1[opos[i].key].label+ '</span>,&nbsp;&nbsp;';
-            }
+    return oppositesNodes
+}
 
+// nodes information div
+function htmlfied_nodesatts(elems){
+
+    var socnodes=[]
+    var semnodes=[]
+    for(var i in elems) {
+
+        information=[]
+
+        var id=elems[i]
+        var node = Nodes[id]
+
+        if(node.type==catSoc){
+            information += '<li><b>' + node.label + '</b></li>';
+            if(node.htmlCont==""){
+                if (!isUndef(node.level)) information += '<li>' + node.level + '</li>';
+            } else {
+                information += '<li>' + $("<div/>").html(node.htmlCont).text() + '</li>';
+            }        
+            socnodes.push(information)
         }
-        opossitesNodes+='</div>';
-        
-        
-        getTopPapers("semantic");
-
-        
-        information += '<br><h4>Information:</h4>';
-        information += '<ul>';
-            
-        for(var i in selections){
-            information += '<li><b>' + Nodes[i].label + '</b></li>';
-            google='<a href=http://www.google.com/#hl=en&source=hp&q=%20'+Nodes[i].label.replace(" ","+")+'%20><img src="'+twjs+'img/google.png"></img></a>';
-            wiki = '<a href=http://en.wikipedia.org/wiki/'+Nodes[i].label.replace(" ","_")+'><img src="'+twjs+'img/wikipedia.png"></img></a>';
-            flickr= '<a href=http://www.flickr.com/search/?w=all&q='+Nodes[i].label.replace(" ","+")+'><img src="'+twjs+'img/flickr.png"></img></a>';
+        if(node.type==catSem){
+            information += '<li><b>' + node.label + '</b></li>';
+            google='<a href=http://www.google.com/#hl=en&source=hp&q=%20'+node.label.replace(" ","+")+'%20><img src="'+twjs+'img/google.png"></img></a>';
+            wiki = '<a href=http://en.wikipedia.org/wiki/'+node.label.replace(" ","_")+'><img src="'+twjs+'img/wikipedia.png"></img></a>';
+            flickr= '<a href=http://www.flickr.com/search/?w=all&q='+node.label.replace(" ","+")+'><img src="'+twjs+'img/flickr.png"></img></a>';
             information += '<li>'+google+"&nbsp;"+wiki+"&nbsp;"+flickr+'</li><br>';
-            
-        }
-        information += '</ul><br>';
-    }
-    
-    
-    if(swclickActual=="sociosemantic") {
-        pr("\t***updLefPan: sociosem case")
-        fullurl = returnBaseUrl()+"img/trans/";
-        if (swclickPrev=="social"){
-            
-            pr("\t\t\tI've to show scholars");    
-            
-            
-            counter=0;
-            names ='<div id="selectionsBox">';
-            names += '<h4>';
-            for(var i in selections){
-                if(Nodes[i].type==catSem){
-                    if(counter==4){
-                        names += '<h4>[...]</h4>';
-                        break;
-                    }
-                    names += Nodes[i].label+', ';
-                    counter++;
-                }
-            }
-            names += '</h4>';
-            names=names.replace(", </h4>","</h4>");
-            names=names.replace(", <h4>","<h4>");
-            names+='</div>';
-            
-            opossitesNodes+= '<br><h4>Scholars: </h4>';
-            opossitesNodes+='<div id="opossitesBox">';
-            js1='onclick="edgesTF=false;cancelSelection(true);graphDocs(\'';
-            opos_aux = opos.filter(function(n) {
-                             return (Nodes[n['key']].type==catSoc) ? n['key'] : null;
-                        });        
-                        
-            for(var i in opos_aux){
-                if(i==22){
-                    opossitesNodes += '<li>[...]</li>';
-                    break;
-                }
-                //fontSize=(opos[i].value/maxFont)*(maxFont-minFont)+minFont;
-                if(oposMAX==1){
-                    fontSize=desirableTagCloudFont_MIN;
-                }
-                else {
-                    fontSize=desirableTagCloudFont_MIN+(opos_aux[i].value-1)*((desirableTagCloudFont_MAX-desirableTagCloudFont_MIN)/(oposMAX-1));
-                }
-                if(!isUndef(nodes1[opos_aux[i].key])){
-                    opossitesNodes += '<span style="display:inline-block;font-size:'+fontSize+'px; cursor: pointer;" '
-                    +js1+opos_aux[i].key+js2+'>' + nodes1[opos_aux[i].key].label+ '</span>,&nbsp;&nbsp;';
-                }
-            }
-            opossitesNodes+='</div>';
-            information += '<br><h4>Information:</h4>';
-            information += '<ul>';
-
-            for(var i in selections){
-                if(Nodes[i].type==catSem){
-                    information += '<li><b>' + Nodes[i].label + '</b></li>';
-                    google='<a href=http://www.google.com/#hl=en&source=hp&q=%20'+Nodes[i].label.replace(" ","+")+'%20><img src="'+twjs+'img/google.png"></img></a>';
-                    wiki = '<a href=http://en.wikipedia.org/wiki/'+Nodes[i].label.replace(" ","_")+'><img src="'+twjs+'img/wikipedia.png"></img></a>';
-                    flickr= '<a href=http://www.flickr.com/search/?w=all&q='+Nodes[i].label.replace(" ","+")+'><img src="'+twjs+'img/flickr.png"></img></a>';
-                    information += '<li>'+google+"&nbsp;"+wiki+"&nbsp;"+flickr+'</li><br>';
-                  }
-           }
-            information += '</ul><br>';
-            
-            
-        } else {
-            pr("\t\t\tI've to show keywords");
-  
-            counter=0;
-            names ='<div id="selectionsBox">';
-            names += '<h4>';
-            for(var i in selections){
-                if(Nodes[i].type==catSoc){
-                    if(counter==4){
-                        names += '<h4>[...]</h4>';
-                        break;
-                    }
-                    names += Nodes[i].label+', ';
-                    counter++;
-                }
-            }
-            names += '</h4>';
-            names=names.replace(", </h4>","</h4>");
-            names=names.replace(", <h4>","<h4>");
-            names+='</div>';           
-            
-            opossitesNodes+= '<br><h4>Keywords: </h4>';
-            opossitesNodes+='<div id="opossitesBox">';/*tochange*/
-            js1='onclick="edgesTF=false;cancelSelection(true);graphNGrams(\'';
-            
-                      
-            opos_aux = opos.filter(function(n) {
-                            return (Nodes[n['key']].type==catSem) ? n['key'] : null;
-                        }); 
-            for(var i in opos_aux){
-                if(i==22){
-                    opossitesNodes += '<li>[...]</li>';
-                    break;
-                }
-                //fontSize=(opos[i].value/maxFont)*(maxFont-minFont)+minFont;
-                if(oposMAX==1){
-                    fontSize=desirableTagCloudFont_MIN;
-                }
-                else {
-                    fontSize=desirableTagCloudFont_MIN+(opos_aux[i].value-1)*((desirableTagCloudFont_MAX-desirableTagCloudFont_MIN)/(oposMAX-1));
-                }
-                if(!isUndef(nodes2[opos_aux[i].key])){
-                    opossitesNodes += '<span style="display:inline-block;font-size:'+fontSize+'px;cursor: pointer;" '
-                    +js1+opos_aux[i].key+js2+'>' + nodes2[opos_aux[i].key].label+ '</span>,&nbsp;&nbsp;';
-                }
-
-            }
-            opossitesNodes += '</div>';
-
-            information += '<br><h4>Information:</h4>';
-            information += '<ul>';
-
-            for(var i in selections){                
-                if(Nodes[i].type==catSoc){
-                    information += '<li><b>' + Nodes[i].label + '</b></li>';
-                    if(Nodes[i].htmlCont==""){
-                        information += '<li>' + Nodes[i].attributes["level"] + '</li>';
-                    }
-                    else {
-                        information += '<li>' + $("<div/>").html(Nodes[i].htmlCont).text() + '</li>';
-                    }
-                    information += '</ul><br>';
-                }
-            }
+            semnodes.push(information)
         }
     }
-    
-    $("#names").html(names); //Information extracted, just added
-    $("#opossiteNodes").html(opossitesNodes); //Information extracted, just added
-    $("#information").html(information); //Information extracted, just added
+    return socnodes.concat(semnodes)
+}
+
+
+//missing: getTopPapers for both node types
+//considering complete graphs case! <= maybe i should mv it
+function updateLeftPanel_fix() {
+    pr("\t ** in updateLeftPanel() corrected version** ")
+    var namesDIV=''
+    var alterNodesDIV=''
+    var informationDIV=''
+
+    // var alternodesname=getNodeLabels(opos)
+
+    namesDIV+='<div id="selectionsBox"><h4>';
+    namesDIV+= getNodeLabels( selections ).join(', ')//aqui limitar
+    namesDIV += '</h4></div>';
+
+    if(opos.length>0) {
+	    alterNodesDIV+='<div id="opossitesBox">';//tagcloud
+	    alterNodesDIV+= htmlfied_alternodes( opos ).join("\n") 
+	    alterNodesDIV+= '</div>';
+	}
+
+        // getTopPapers("semantic");
+
+    informationDIV += '<br><h4>Information:</h4><ul>';
+    informationDIV += htmlfied_nodesatts( getNodeIDs(selections) ).join("<br>\n")
+    informationDIV += '</ul><br>';
+
+    $("#names").html(namesDIV); 
+    $("#opossiteNodes").html(alterNodesDIV); 
+    $("#information").html(informationDIV);
     $("#tips").html("");
-    $("#topPapers").show();
-    leftPanel("open");
+    // $("#topPapers").show();
+
+}
+
+function printStates() {
+	pr("\t\t\t\t---------"+getClientTime()+"---------")
+	pr("\t\t\t\tswMacro: "+swMacro)
+	pr("\t\t\t\tswActual: "+swclickActual+" |  swPrev: "+swclickPrev)
+	pr("\t\t\t\tNOW: "+NOW+" |  PAST: "+PAST)
+	pr("\t\t\t\tselections: ")
+	pr(Object.keys(selections))
+	pr("\t\t\t\topposites: ")
+	pr(Object.keys(opossites))
+	pr("\t\t\t\t------------------------------------")
+}
+
+//	just css
+//true: button disabled
+//false: button enabled
+function LevelButtonDisable( TF ){
+	$('#changelevel').prop('disabled', TF);
 }
 
 function graphNGrams(node_id){   
@@ -727,11 +665,11 @@ function updateDownNodeEvent(selectionRadius){
 }
 
 function greyEverything(){
-//    pr("\t\t\tin grey everything");
-//    for(var i in deselections){
-//        partialGraph._core.graph.nodesIndex[i].forceLabel=false;
-//    }
-//    deselections={};
+    //    pr("\t\t\tin grey everything");
+    //    for(var i in deselections){
+    //        partialGraph._core.graph.nodesIndex[i].forceLabel=false;
+    //    }
+    //    deselections={};
     greyColor = '#9b9e9e';
     
     nds = partialGraph._core.graph.nodes.filter(function(n) {
@@ -769,17 +707,17 @@ function greyEverything(){
     }
 }
 
-function markAsSelected(n_id,sel){
+function markAsSelected(n_id,sel) {
     greyColor = '#9b9e9e';
     if(!isUndef(n_id.id)) nodeSel=n_id;
     else nodeSel = partialGraph._core.graph.nodesIndex[n_id];
     
-    if(sel==true){
+    if(sel==true) {
         
         nodeSel.color = nodeSel.attr['true_color'];
         nodeSel.attr['grey'] = 0;
         
-        if(categoriesIndex.length==1){
+        if(categoriesIndex.length==1) {
             if( !isUndef(nodes1[nodeSel.id]) &&
                     !isUndef(nodes1[nodeSel.id].neighbours)
                   ){
@@ -976,7 +914,7 @@ function markAsSelected(n_id,sel){
                                 an_edge.attr['grey'] = 0;
                             }
                             an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-                            if(!isUndef(an_edge) && an_edge.hidden==false){
+                            if(!isUndef(an_edge) && an_edge.hidden==false) {
                                 an_edge.color = an_edge.attr['true_color'];
                                 an_edge.attr['grey'] = 0;
                             }
@@ -984,204 +922,233 @@ function markAsSelected(n_id,sel){
                     }
                 }
             }
+    	}
     }
-    }
-//    /* Just in case of unselection */
-//    /* Finally I decide not using this unselection. */
-//    /* We just grayEverything and color the selections[] */
-//    else { //   sel=false <-> unselect(nodeSel)
-//                
-//        nodeSel.color = greyColor;
-//        nodeSel.attr['grey'] = 1;
-//        
-//        if(swclickActual=="social") {
-//            if(nodeSel.type==catSoc){
-//                neigh=nodes1[nodeSel.id].neighbours;/**/
-//                for(var i in neigh){
-//                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-//                    vec.color = greyColor;
-//                    vec.attr['grey'] = 1;
-//                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-//                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-//                        an_edge.color = greyColor;
-//                        an_edge.attr['grey'] = 1;
-//                    }
-//                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-//                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-//                        an_edge.color = greyColor;
-//                        an_edge.attr['grey'] = 1;
-//                    }
-//                }
-//            }
-//            else {     
-//                neigh=bipartiteN2D[nodeSel.id].neighbours;/**/
-//                for(var i in neigh){
-//                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-//                    vec.color = greyColor;
-//                    vec.attr['grey'] = 1;
-//                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-//                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-//                        an_edge.color = greyColor;
-//                        an_edge.attr['grey'] = 1;
-//                    }
-//                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-//                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-//                        an_edge.color = greyColor;
-//                        an_edge.attr['grey'] = 1;
-//                    }
-//                }
-//            }
-//        }
-//        if(swclickActual=="semantic") {
-//            if(nodeSel.type==catSoc){   
-//                neigh=bipartiteD2N[nodeSel.id].neighbours;/**/
-//                for(var i in neigh){
-//                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-//                    vec.color = greyColor;
-//                    vec.attr['grey'] = 1;
-//                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-//                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-//                        an_edge.color = greyColor;
-//                        an_edge.attr['grey'] = 1;
-//                    }
-//                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-//                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-//                        an_edge.color = greyColor;
-//                        an_edge.attr['grey'] = 1;
-//                    }
-//                }
-//            }
-//            else {   
-//                neigh=nodes2[nodeSel.id].neighbours;/**/
-//                for(var i in neigh){
-//                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-//                    vec.color = greyColor;
-//                    vec.attr['grey'] = 1;
-//                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-//                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-//                        an_edge.color = greyColor;
-//                        an_edge.attr['grey'] = 1;
-//                    }
-//                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-//                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-//                        an_edge.color = greyColor;
-//                        an_edge.attr['grey'] = 1;
-//                    }
-//                }
-//            }
-//        }
-//        if(swclickActual=="sociosemantic") {
-//            if(nodeSel.type==catSoc){    
-//                neigh=nodes1[nodeSel.id].neighbours;/**/
-//                for(var i in neigh){
-//                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-//                    vec.color = greyColor;
-//                    vec.attr['grey'] = 1;
-//                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-//                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-//                        an_edge.color = greyColor;
-//                        an_edge.attr['grey'] = 1;
-//                    }
-//                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-//                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-//                        an_edge.color = greyColor;
-//                        an_edge.attr['grey'] = 1;
-//                    }
-//                }    
-//                neigh=bipartiteD2N[nodeSel.id].neighbours;/**/
-//                for(var i in neigh){
-//                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-//                    vec.color = greyColor;
-//                    vec.attr['grey'] = 1;
-//                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-//                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-//                        an_edge.color = greyColor;
-//                        an_edge.attr['grey'] = 1;
-//                    }
-//                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-//                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-//                        an_edge.color = greyColor;
-//                        an_edge.attr['grey'] = 1;
-//                    }
-//                }
-//            }
-//            else { 
-//                neigh=nodes2[nodeSel.id].neighbours;/**/
-//                for(var i in neigh){
-//                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-//                    vec.color = greyColor;
-//                    vec.attr['grey'] = 1;
-//                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-//                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-//                        an_edge.color = greyColor;
-//                        an_edge.attr['grey'] = 1;
-//                    }
-//                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-//                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-//                        an_edge.color = greyColor;
-//                        an_edge.attr['grey'] = 1;
-//                    }
-//                }
-//                neigh=bipartiteN2D[nodeSel.id].neighbours;/**/
-//                for(var i in neigh){
-//                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-//                    vec.color = greyColor;
-//                    vec.attr['grey'] = 1;
-//                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-//                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-//                        an_edge.color = greyColor;
-//                        an_edge.attr['grey'] = 1;
-//                    }
-//                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-//                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-//                        an_edge.color = greyColor;
-//                        an_edge.attr['grey'] = 1;
-//                    }
-//                }
-//            }
-//        }
-//    }
+    //    /* Just in case of unselection */
+    //    /* Finally I decide not using this unselection. */
+    //    /* We just grayEverything and color the selections[] */
+    //    else { //   sel=false <-> unselect(nodeSel)
+    //                
+    //        nodeSel.color = greyColor;
+    //        nodeSel.attr['grey'] = 1;
+    //        
+    //        if(swclickActual=="social") {
+    //            if(nodeSel.type==catSoc){
+    //                neigh=nodes1[nodeSel.id].neighbours;/**/
+    //                for(var i in neigh){
+    //                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
+    //                    vec.color = greyColor;
+    //                    vec.attr['grey'] = 1;
+    //                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
+    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
+    //                        an_edge.color = greyColor;
+    //                        an_edge.attr['grey'] = 1;
+    //                    }
+    //                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
+    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
+    //                        an_edge.color = greyColor;
+    //                        an_edge.attr['grey'] = 1;
+    //                    }
+    //                }
+    //            }
+    //            else {     
+    //                neigh=bipartiteN2D[nodeSel.id].neighbours;/**/
+    //                for(var i in neigh){
+    //                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
+    //                    vec.color = greyColor;
+    //                    vec.attr['grey'] = 1;
+    //                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
+    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
+    //                        an_edge.color = greyColor;
+    //                        an_edge.attr['grey'] = 1;
+    //                    }
+    //                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
+    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
+    //                        an_edge.color = greyColor;
+    //                        an_edge.attr['grey'] = 1;
+    //                    }
+    //                }
+    //            }
+    //        }
+    //        if(swclickActual=="semantic") {
+    //            if(nodeSel.type==catSoc){   
+    //                neigh=bipartiteD2N[nodeSel.id].neighbours;/**/
+    //                for(var i in neigh){
+    //                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
+    //                    vec.color = greyColor;
+    //                    vec.attr['grey'] = 1;
+    //                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
+    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
+    //                        an_edge.color = greyColor;
+    //                        an_edge.attr['grey'] = 1;
+    //                    }
+    //                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
+    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
+    //                        an_edge.color = greyColor;
+    //                        an_edge.attr['grey'] = 1;
+    //                    }
+    //                }
+    //            }
+    //            else {   
+    //                neigh=nodes2[nodeSel.id].neighbours;/**/
+    //                for(var i in neigh){
+    //                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
+    //                    vec.color = greyColor;
+    //                    vec.attr['grey'] = 1;
+    //                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
+    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
+    //                        an_edge.color = greyColor;
+    //                        an_edge.attr['grey'] = 1;
+    //                    }
+    //                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
+    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
+    //                        an_edge.color = greyColor;
+    //                        an_edge.attr['grey'] = 1;
+    //                    }
+    //                }
+    //            }
+    //        }
+    //        if(swclickActual=="sociosemantic") {
+    //            if(nodeSel.type==catSoc){    
+    //                neigh=nodes1[nodeSel.id].neighbours;/**/
+    //                for(var i in neigh){
+    //                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
+    //                    vec.color = greyColor;
+    //                    vec.attr['grey'] = 1;
+    //                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
+    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
+    //                        an_edge.color = greyColor;
+    //                        an_edge.attr['grey'] = 1;
+    //                    }
+    //                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
+    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
+    //                        an_edge.color = greyColor;
+    //                        an_edge.attr['grey'] = 1;
+    //                    }
+    //                }    
+    //                neigh=bipartiteD2N[nodeSel.id].neighbours;/**/
+    //                for(var i in neigh){
+    //                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
+    //                    vec.color = greyColor;
+    //                    vec.attr['grey'] = 1;
+    //                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
+    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
+    //                        an_edge.color = greyColor;
+    //                        an_edge.attr['grey'] = 1;
+    //                    }
+    //                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
+    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
+    //                        an_edge.color = greyColor;
+    //                        an_edge.attr['grey'] = 1;
+    //                    }
+    //                }
+    //            }
+    //            else { 
+    //                neigh=nodes2[nodeSel.id].neighbours;/**/
+    //                for(var i in neigh){
+    //                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
+    //                    vec.color = greyColor;
+    //                    vec.attr['grey'] = 1;
+    //                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
+    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
+    //                        an_edge.color = greyColor;
+    //                        an_edge.attr['grey'] = 1;
+    //                    }
+    //                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
+    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
+    //                        an_edge.color = greyColor;
+    //                        an_edge.attr['grey'] = 1;
+    //                    }
+    //                }
+    //                neigh=bipartiteN2D[nodeSel.id].neighbours;/**/
+    //                for(var i in neigh){
+    //                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
+    //                    vec.color = greyColor;
+    //                    vec.attr['grey'] = 1;
+    //                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
+    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
+    //                        an_edge.color = greyColor;
+    //                        an_edge.attr['grey'] = 1;
+    //                    }
+    //                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
+    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
+    //                        an_edge.color = greyColor;
+    //                        an_edge.attr['grey'] = 1;
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    }
+}
+
+function MultipleSelection(nodes){
+
+	pr("IN MULTIPLE SELECTION")
+
+	if(!checkBox) cancelSelection(false);
+
+	greyEverything(); 
+
+	var ndsids=[]
+	if(! $.isArray(nodes)) ndsids.push(nodes);
+	else ndsids=nodes;
+
+	if(!checkBox) {
+		checkBox=true;
+		for(var i in ndsids){
+		 	nodeid = ndsids[i]
+		 	getOpossitesNodes(nodeid,false); //false -> just nodeid
+		 	markAsSelected(nodeid,true); 
+		}
+		checkBox=false;
+	}
+	overNodes=true; 
+
+	partialGraph.draw();
+
+	if(categoriesIndex.length==1) updateLeftPanel_uni();
+	if(categoriesIndex.length==2) updateLeftPanel_fix();
 }
 
 function hoverNodeEffectWhileFA2(selectionRadius) { 
     
     partialGraph.bind('downnodes', function (event) {
         pr("\t\t\t\t"+event.content+" -> "+Nodes[event.content].label);
-        if(cursor_size==0 && checkBox==false){
+        if(cursor_size==0 && !checkBox){
             //Normal click on a node
             getOpossitesNodes(event.content, false);//passing just the node-id
         }
         
-        if(cursor_size==0 && checkBox==true){
+        if(cursor_size==0 && checkBox){
             //Normal click on a node, but we won't clean the previous selections
             getOpossitesNodes(event.content, false);//passing just the node-id
         }
         
-        if(cursor_size>0){
-            //The click WAS in a node and the cursor_size is ON
-            //if(checkBox==false) cancelSelection(false);
-            x1 = partialGraph._core.mousecaptor.mouseX;
-            y1 = partialGraph._core.mousecaptor.mouseY;
-            //dist1(centerClick,selectionRadius)
-            partialGraph.iterNodes(function(n){
-                if(n.hidden==false){
-                    distance = Math.sqrt(
-                        Math.pow((x1-parseInt(n.displayX)),2) +
-                        Math.pow((y1-parseInt(n.displayY)),2)
-                        );
-                    if(parseInt(distance)<=cursor_size) {
-                        getOpossitesNodes(n,true);//passing the entire node
-                    }
-                }
-            });
-        }
+        // if(cursor_size>0 &&){
+        //     //The click WAS in a node and the cursor_size is ON
+        //     //if(checkBox==false) cancelSelection(false);
+        //     x1 = partialGraph._core.mousecaptor.mouseX;
+        //     y1 = partialGraph._core.mousecaptor.mouseY;
+        //     //dist1(centerClick,selectionRadius)
+        //     partialGraph.iterNodes(function(n){
+        //         if(n.hidden==false){
+        //             distance = Math.sqrt(
+        //                 Math.pow((x1-parseInt(n.displayX)),2) +
+        //                 Math.pow((y1-parseInt(n.displayY)),2)
+        //                 );
+        //             if(parseInt(distance)<=cursor_size) {
+        //                 getOpossitesNodes(n,true);//passing the entire node
+        //             }
+        //         }
+        //     });
+        // }
         if(categoriesIndex.length==1) updateLeftPanel_uni();
-        if(categoriesIndex.length==2) updateLeftPanel();
+        if(categoriesIndex.length==2) updateLeftPanel_fix();
         
         //The most brilliant way of knowing if an array is empty in the world of JavaScript
-        i=0; for(var s in selections) i++;
+        i=0; for(var s in selections) {i++;break};
         
-        if(is_empty(selections)==true || i==0){
+        if(is_empty(selections) || i==0){
                 pr("cursor radius ON, downNode -> selecciones vacias");
                 $("#names").html(""); //Information extracted, just added
                 $("#opossiteNodes").html(""); //Information extracted, just added
@@ -1197,7 +1164,7 @@ function hoverNodeEffectWhileFA2(selectionRadius) {
                 for(var i in selections){
                     markAsSelected(i,true);
                 }
-                changeButton("selectNode");
+                RefreshState("")
         }
         overNodes=true;        
         partialGraph.draw();
@@ -1222,12 +1189,15 @@ function graphResetColor(){
         e=eds[x];
         e.attr["grey"] = 0;
         e.color = e.attr["true_color"];
-    }
-    
+    }  
 }
 
 function createEdgesForExistingNodes (typeOfNodes) {
     
+	if(typeOfNodes=="social") typeOfNodes="Scholars"
+	if(typeOfNodes=="semantic") typeOfNodes="Keywords"
+	if(typeOfNodes=="sociosemantic") typeOfNodes="Bipartite"
+
     existingNodes = partialGraph._core.graph.nodes.filter(function(n) {
                             return !n['hidden'];
                         });
@@ -1326,13 +1296,13 @@ function createEdgesForExistingNodes (typeOfNodes) {
 function hideEverything(){
     //visibleNodes=[];
     //visibleEdges=[];
-//    if(swclickActual=="social" && semanticConverged<2){
-//        if(semanticConverged===1) semanticConverged++;
-//    }
-//    if(swclickActual=="semantic" && socialConverged<2){
-//        if(socialConverged===1) socialConverged++;        
-//    }
-//  
+    //    if(swclickActual=="social" && semanticConverged<2){
+    //        if(semanticConverged===1) semanticConverged++;
+    //    }
+    //    if(swclickActual=="semantic" && socialConverged<2){
+    //        if(socialConverged===1) socialConverged++;        
+    //    }
+    //  
     pr("\thiding all");
     nodeslength=0;
     for(var n in partialGraph._core.graph.nodesIndex){
@@ -1386,28 +1356,35 @@ function changeToMeso(iwannagraph) {
     fullurl = returnBaseUrl()+"img/trans/";   
     if(iwannagraph=="social") {
         if(!is_empty(selections)){
-//            hideEverything();
+            //hideEverything();
             if(swclickPrev=="social") {
-                for(var i in partialGraph._core.graph.edgesIndex){
-                    e=partialGraph._core.graph.edgesIndex[i];
-                    if(e.color=="#9b9e9e") {
-                        e.hidden=true;
-                    }
-                }
-                for(var i in partialGraph._core.graph.nodesIndex){
-                    n=partialGraph._core.graph.nodesIndex[i];
-                    if(n.color=="#9b9e9e") {
-                        n.hidden=true;
-                    }
-                }
-//                for(var i in selections) {
-//                    unHide(i);
-//                    for(var j in nodes1[i].neighbours) { 
-//                        id=nodes1[i].neighbours[j];
-//                        unHide(id);
-//                    }
-//                }            
-//                createEdgesForExistingNodes("Scholars");/**/
+
+                // for(var i in partialGraph._core.graph.edgesIndex){
+                //     e=partialGraph._core.graph.edgesIndex[i];
+                //     if(e.color=="#9b9e9e") {
+                //         e.hidden=true;
+                //     }
+                // }
+                // for(var i in partialGraph._core.graph.nodesIndex){
+                //     n=partialGraph._core.graph.nodesIndex[i];
+                //     if(n.color=="#9b9e9e") {
+                //         n.hidden=true;
+                //     }
+                // }
+                hideEverything();
+                for(var i in selections) {
+                   unHide(i);
+                   for(var j in nodes1[i].neighbours) { 
+                       id=nodes1[i].neighbours[j];
+                       unHide(id);
+                   }
+                }            
+                createEdgesForExistingNodes(iwannagraph);/**/
+
+                greyEverything();
+                for(var i in selections) markAsSelected(i,true);
+		        overNodes=true;     
+
             }
             if(swclickPrev=="semantic") {
                 for(var i in selections) {
@@ -1424,9 +1401,12 @@ function changeToMeso(iwannagraph) {
                         }
                     }
                 }
-                createEdgesForExistingNodes("Scholars");
+                createEdgesForExistingNodes(iwannagraph);
             }
             if(swclickPrev=="sociosemantic") { 
+
+            	hideEverything();
+
                 for(var i in selections) {
                     if(Nodes[i].type==catSoc){
                         unHide(i);
@@ -1434,19 +1414,25 @@ function changeToMeso(iwannagraph) {
                             id=nodes1[i].neighbours[j];
                             unHide(id);
                         }
-                        createEdgesForExistingNodes("Scholars");
+                        createEdgesForExistingNodes(iwannagraph);
                     }
                     if(Nodes[i].type==catSem){
                         for(var j in opossites) {
                             unHide(j);
                         }
-                        createEdgesForExistingNodes("Scholars");
+                        createEdgesForExistingNodes(iwannagraph);
                     }
-                }                
+                    
+                }
+                for(var i in selections) {
+                	markAsSelected(i,true); 
+                }
+				overNodes=true; 
             }
             updateEdgeFilter(iwannagraph);
         }
     }
+
     if(iwannagraph=="sociosemantic") {
         if(!is_empty(selections) && !is_empty(opossites)){
             hideEverything();
@@ -1458,7 +1444,7 @@ function changeToMeso(iwannagraph) {
                 unHide(i);
             }
                 
-            createEdgesForExistingNodes("Bipartite");
+            createEdgesForExistingNodes(iwannagraph);
             
             partialGraph.startForceAtlas2();
             socsemFlag=true;
@@ -1479,7 +1465,7 @@ function changeToMeso(iwannagraph) {
                         unHide(neigh[j]);
                     }
                 }
-                createEdgesForExistingNodes("Keywords");
+                createEdgesForExistingNodes(iwannagraph);
             }
             if(swclickPrev=="social") {                
                 for(var i in selections) {
@@ -1496,7 +1482,7 @@ function changeToMeso(iwannagraph) {
                         }
                     }
                 }
-                createEdgesForExistingNodes("Keywords");
+                createEdgesForExistingNodes(iwannagraph);
             }
             if(swclickPrev=="sociosemantic") {                     
                 for(var i in selections) {
@@ -1504,7 +1490,7 @@ function changeToMeso(iwannagraph) {
                         for(var j in opossites) {
                             unHide(j);
                         }
-                        createEdgesForExistingNodes("Keywords");
+                        createEdgesForExistingNodes(iwannagraph);
                         break;
                     }
                     if(Nodes[i].type==catSem){                        
@@ -1513,7 +1499,7 @@ function changeToMeso(iwannagraph) {
                             id=nodes2[i].neighbours[j];
                             unHide(id);
                         }
-                        createEdgesForExistingNodes("Keywords");
+                        createEdgesForExistingNodes(iwannagraph);
                     }
                 }                
             }
@@ -1521,74 +1507,45 @@ function changeToMeso(iwannagraph) {
             updateNodeFilter("semantic");
         }
     }
-    highlightSelectedNodes(true); 
+    // highlightSelectedNodes(true); 
     partialGraph.draw();
-    partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
+    // partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
     partialGraph.refresh();
     partialGraph.startForceAtlas2();
+    $('.gradient').css({"background-size":"90px 90px"});
 }
 
 function changeToMacro(iwannagraph) {
     labels=[]
     pr("CHANGING TO Macro-"+iwannagraph);
-    fullurl = returnBaseUrl()+"img/trans/";
-    if(iwannagraph=="semantic") {
-        hideEverything()
+    
+    hideEverything();
+
+    if(iwannagraph!="sociosemantic") {
+    	socsemFlag=false;
+        category = (iwannagraph=="social")?catSoc:catSem;
+        pr("CHANGING TO Macro-"+iwannagraph+" __ [category: "+category+"] __ [actualsw: "+swclickActual+"] __ [prevsw: "+swclickPrev+"]")
+        //show semantic nodes
         for(var n in Nodes) {                
-            if(Nodes[n].type==catSem){
+            if(Nodes[n].type==category){
                 unHide(n);
             }                
-        }  
-        createEdgesForExistingNodes("Keywords");
-        for(var n in selections){
-            if(Nodes[n].type==catSoc){
-                highlightOpossites(opossites);
-                selectOpossites(opossites);
-            }
-            break;
-        }
+        } // and semantic edges
+        createEdgesForExistingNodes(iwannagraph);
+
+        if (!is_empty(selections))
+        	$.doTimeout(10,function (){
+        		chosenones=(PAST=="a"||PAST=="b")?selections:opossites;
+        		MultipleSelection(Object.keys(chosenones))
+        	});
+
         updateEdgeFilter(iwannagraph);
-        updateNodeFilter("semantic");
-    }
-    if(iwannagraph=="social") {
-        if(swclickPrev=="social") {
-                for(var i in partialGraph._core.graph.edgesIndex){
-                    e=partialGraph._core.graph.edgesIndex[i];
-                    if(e.hidden==true) {
-                        if(e.label=="nodes1") e.hidden=false;
-                    }
-                }
-                for(var i in partialGraph._core.graph.nodesIndex){
-                    n=partialGraph._core.graph.nodesIndex[i];
-                    if(n.hidden==true) {
-                        if(n.type==catSoc) n.hidden=false;
-                    }
-                }
-        } else {            
-            hideEverything()
-            for(var n in Nodes) {                
-                if(Nodes[n].type==catSoc){
-                    unHide(n);
-                }                
-            }
-            createEdgesForExistingNodes("Scholars");
-            for(var n in selections){
-                if(Nodes[n].type==catSem){
-                    highlightOpossites(opossites);
-                    selectOpossites(opossites);
-                }
-                break;
-            }
-        }
-        updateEdgeFilter(iwannagraph);
-    }
-    
-    if(iwannagraph=="sociosemantic") {
-        hideEverything()
-        for(var n in Nodes) {  
-            unHide(n);
-        }
-        //pr(partialGraph._core.graph.edgesIndex);
+        updateNodeFilter(iwannagraph);
+
+    } else {
+        //iwantograph socio-semantic
+        for(var n in Nodes) unHide(n);
+        
         for(var e in Edges) {  
             if(Edges[e].label=="nodes1" || Edges[e].label=="nodes2"){
                 st=e.split(";");
@@ -1617,12 +1574,13 @@ function changeToMacro(iwannagraph) {
         updateBothEdgeFilters();
         updateBothNodeFilters();
     }
-    highlightSelectedNodes(true);
-    //partialGraph.stopForceAtlas2();
+    // highlightSelectedNodes(true);
+    // // partialGraph.stopForceAtlas2();
     partialGraph.draw();
-    partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
+    // partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
     partialGraph.refresh();
     partialGraph.startForceAtlas2();
+    $('.gradient').css({"background-size":"40px 40px"});
 }
 
 function highlightOpossites (list){/*here*/
@@ -1639,7 +1597,7 @@ function selectOpossites (list){//Expanding selection
     for(var n in list){
         getOpossitesNodes(n,false);
     }
-    updateLeftPanel();
+    updateLeftPanel_fix();
     i=0; for(var s in selections) i++;
     if(is_empty(selections)==true || i==0){  
                 $("#names").html(""); //Information extracted, just added
@@ -1753,47 +1711,51 @@ function savePNG(){
     });
 }
 
+//obsolete
 function getSwitchButton(){
     return document.getElementById("switchbutton").src;
 }
 
+//obsolete
 function setComponentButton(comp_name){
 	document.getElementById(comp_name);
 }
 
+//obsolete
 function changeSwitchImage(source, target){
     pr("****    changeSwitchImage() does NOTHING    ****")
-//    if(target=="social") {
-//	setComponentButton("social",true);
-//	setComponentButton("semantic",false);
-//	setComponentButton("sociosemantic",false);
-//    }
-//    if(target=="semantic") {
-//	setComponentButton("social",false);
-//	setComponentButton("semantic",true);
-//	setComponentButton("sociosemantic",false);
-//    }
-//    if(target=="sociosemantic") {
-//	setComponentButton("social",false);
-//	setComponentButton("semantic",false);
-//	setComponentButton("sociosemantic",true);
-//    }
-//    fullurl = returnBaseUrl()+"img/trans/";
-//    if(source=="fromHtml"){
-//        if(document.getElementById("switchbutton").src==fullurl+"showKeywords.png"){
-//            document.getElementById("switchbutton").src=fullurl+"showScholars.png";
-//        }
-//        else {
-//            document.getElementById("switchbutton").src=fullurl+"showKeywords.png";
-//        }
-//    }
-//    else {
-//        if(target=="social") document.getElementById("switchbutton").src=fullurl+"showKeywords.png";
-//        if(target=="semantic") document.getElementById("switchbutton").src=fullurl+"showScholars.png";
-//    }
+    //    if(target=="social") {
+    //	setComponentButton("social",true);
+    //	setComponentButton("semantic",false);
+    //	setComponentButton("sociosemantic",false);
+    //    }
+    //    if(target=="semantic") {
+    //	setComponentButton("social",false);
+    //	setComponentButton("semantic",true);
+    //	setComponentButton("sociosemantic",false);
+    //    }
+    //    if(target=="sociosemantic") {
+    //	setComponentButton("social",false);
+    //	setComponentButton("semantic",false);
+    //	setComponentButton("sociosemantic",true);
+    //    }
+    //    fullurl = returnBaseUrl()+"img/trans/";
+    //    if(source=="fromHtml"){
+    //        if(document.getElementById("switchbutton").src==fullurl+"showKeywords.png"){
+    //            document.getElementById("switchbutton").src=fullurl+"showScholars.png";
+    //        }
+    //        else {
+    //            document.getElementById("switchbutton").src=fullurl+"showKeywords.png";
+    //        }
+    //    }
+    //    else {
+    //        if(target=="social") document.getElementById("switchbutton").src=fullurl+"showKeywords.png";
+    //        if(target=="semantic") document.getElementById("switchbutton").src=fullurl+"showScholars.png";
+    //    }
     //pr($("#names").text());
 }
 
+//obsolete
 function switchSelection(){
     if(swclickActual=="social"){
         //If we are seeing the Social Graph, this implies that the left panel
@@ -1803,5 +1765,4 @@ function switchSelection(){
         //If we are seeing the Semantic Graph, this implies that the left panel
         //is showing Scholars, so we have to invert names and opossites
     }
-    
 }

@@ -96,6 +96,10 @@ var gexf;
 
 var checkBox=false;
 var overNodes=false;
+var shift_key=false;
+
+var NOW="A";
+var PAST="--";
 
 var swclickActual="";
 var swclickPrev="";
@@ -162,16 +166,16 @@ var RVUniformC = function(seed){
     this.u;
     this.seed=seed;
     this.x = this.seed;
-//    this.generar = function(n){
-//        uniforme = [];
-//        x = 0.0;
-//        x = this.seed;
-//        for(i = 1; i < n ; i++){
-//            x = ((x*this.a)+this.b)%this.m;
-//            uniforme[i] = x/this.m;
-//        }
-//        return uniforme;
-//    };
+    //    this.generar = function(n){
+    //        uniforme = [];
+    //        x = 0.0;
+    //        x = this.seed;
+    //        for(i = 1; i < n ; i++){
+    //            x = ((x*this.a)+this.b)%this.m;
+    //            uniforme[i] = x/this.m;
+    //        }
+    //        return uniforme;
+    //    };
     this.getRandom = function(){
         x = ((this.x*this.a)+this.b)%this.m;
         this.x = x;

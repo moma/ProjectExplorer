@@ -38,16 +38,16 @@ function callGeomap(){
 }
 
 function callTWJS(){
-//    db=getCurrentDBforCurrentGexf();
-//    db=JSON.stringify(db);
-//    if(is_empty(selections)){
-//        jsonparams='["all"]';
-//    } else {
-//        jsonparams=JSON.stringify(getSelections());
-//        jsonparams = jsonparams.split('&').join('__and__');
-//    }    
-//    pr('in callGeomap: db='+db+'&query='+jsonparams);
-//    initiateMap(db,jsonparams,"geomap/"); //From GEOMAP submod
+    //    db=getCurrentDBforCurrentGexf();
+    //    db=JSON.stringify(db);
+    //    if(is_empty(selections)){
+    //        jsonparams='["all"]';
+    //    } else {
+    //        jsonparams=JSON.stringify(getSelections());
+    //        jsonparams = jsonparams.split('&').join('__and__');
+    //    }    
+    //    pr('in callGeomap: db='+db+'&query='+jsonparams);
+    //    initiateMap(db,jsonparams,"geomap/"); //From GEOMAP submod
     $("#ctlzoom").show();
     $("#CurrentView").show();
 }
@@ -67,6 +67,7 @@ function selectionToMap(){
     }
 }
 
+//DataFolderMode
 function getCurrentDBforCurrentGexf(){
     folderID=dataFolderTree["gexf_idfolder"][decodeURIComponent(getUrlParam.file)];
     dbsRaw = dataFolderTree["folders"][folderID];
@@ -81,6 +82,7 @@ function getCurrentDBforCurrentGexf(){
     return dbsPaths;
 }
 
+//DataFolderMode
 function getGlobalDBs(){
     graphdb=dataFolderTree["folders"];
     for(var i in graphdb){
@@ -95,6 +97,7 @@ function getGlobalDBs(){
     }
 }
 
+//DataFolderMode
 function getTopPapers(type){
     if(getAdditionalInfo){
         jsonparams=JSON.stringify(getSelections());
@@ -124,6 +127,7 @@ function getTopPapers(type){
     }
 }
 
+//very obsolete: please renew!
 //For UNI-PARTITE
 function updateLeftPanel_uni(){//Uni-partite graph
     pr("\t ** in updateLeftPanel_uni() ** ");
@@ -160,10 +164,10 @@ function updateLeftPanel_uni(){//Uni-partite graph
     for(var i in selections){
         information += '<div id="opossitesBox">';
         information += '<li><b>' + Nodes[i].label.toUpperCase() + '</b></li>';
-        //for(var j in Nodes[i].attributes){
-//            if(Nodes[i].attributes[j].attr=="period"||
-//                Nodes[i].attributes[j].attr=="cluster_label" 
-//                    )
+                //for(var j in Nodes[i].attributes){
+        //            if(Nodes[i].attributes[j].attr=="period"||
+        //                Nodes[i].attributes[j].attr=="cluster_label" 
+        //                    )
                 information += 
                 '<li><b>Topic' + 
                 '</b>:&nbsp;'+Nodes[i].attributes["cluster_label"]+'</li>';
@@ -215,10 +219,10 @@ function selectionUni(currentNode){
         currentNode.active=false;
     }
     //highlightOpossites(nodes1[currentNode.id].neighbours);
-//        currentNode.color = currentNode.attr['true_color'];
-//        currentNode.attr['grey'] = 0;
-//        
-//
+    //        currentNode.color = currentNode.attr['true_color'];
+    //        currentNode.attr['grey'] = 0;
+    //        
+    //
    
 
     partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
@@ -327,7 +331,7 @@ function getTips(){
 
 
 
-
+//da hell is this
 function closeDialog () {
     $('#windowTitleDialog').modal('hide'); 
 }

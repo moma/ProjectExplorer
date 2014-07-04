@@ -2,6 +2,7 @@
 
 //============================ < NEW BUTTONS > =============================//
 
+//obsolete
 function changeButton(bc) { 
     if(!isUndef(bc.id) && bc.id!=swclickActual) {
         
@@ -12,20 +13,20 @@ function changeButton(bc) {
         if(bc.id=="social") {
             if(swMacro) changeToMacro(bc.id);
             else changeToMeso(bc.id);
-//			$("#category-A").show();
-//			$("#category-B").hide();
+            //			$("#category-A").show();
+            //			$("#category-B").hide();
         }
         if(bc.id=="semantic") {
             if(swMacro) changeToMacro(bc.id);
             else changeToMeso(bc.id);
-//			$("#category-A").hide();
-//			$("#category-B").show();
+            //			$("#category-A").hide();
+            //			$("#category-B").show();
         }
         if(bc.id=="sociosemantic") {
             if(swMacro) changeToMacro(bc.id);
             else changeToMeso(bc.id);
-//			$("#category-A").show();
-//			$("#category-B").show();
+            //			$("#category-A").show();
+            //			$("#category-B").show();
         }
         if(bc.id=="switch"){
             if(swMacro) changeToMacro(swclickActual);
@@ -33,130 +34,218 @@ function changeButton(bc) {
         }
     }
 
-//    fullurl = returnBaseUrl()+"img/trans/";
-//    if(img.id=="socio") {
-//        if ( img.src==fullurl+"hover_scholars.png" ) {
-//            changeButton("active_scholars.png");
-//            if(document.getElementById("viewType").src==fullurl+"status_macro_view.png"){
-//                changeToMacro("social");
-//            }
-//            if(document.getElementById("viewType").src==fullurl+"status_meso_view.png"){
-//                changeToMeso("social");
-//            }
-//        }
-//    }
-//    
-//    if(img.id=="semantic") { 
-//        if ( img.src==fullurl+"hover_tags.png" ) { 
-//            changeButton("active_tags.png");
-//            if(document.getElementById("viewType").src==fullurl+"status_macro_view.png"){
-//                changeToMacro("semantic");
-//            }
-//            if(document.getElementById("viewType").src==fullurl+"status_meso_view.png"){
-//                changeToMeso("semantic");
-//            }
-//        }
-//    }
-//    
-//    if(img.id=="sociosemantic") { 
-//        if ( img.src==fullurl+"hover_sociosem.png" ) { 
-//            changeButton("active_sociosem.png");
-//            if(document.getElementById("viewType").src==fullurl+"status_macro_view.png"){
-//                changeToMacro("sociosemantic");
-//            }
-//            if(document.getElementById("viewType").src==fullurl+"status_meso_view.png"){
-//                changeToMeso("sociosemantic");
-//            }
-//        }
-//        
-//    }
-//    if(img.id=="switch") { 
-//        hasbeenclicked=false;
-//        if ( img.src==fullurl+"graph_meso.png"){
-//            changeButton("graph_macro.png");   
-//            pushSWClick(swclickActual);
-//            changeToMeso(swclickActual);
-//            hasbeenclicked=true;       
-//        }
-//        if ( img.src==fullurl+"graph_macro.png" && hasbeenclicked==false){
-//            changeButton("graph_meso.png");    
-//            pushSWClick(swclickActual);
-//            changeToMacro(swclickActual);
-//        }
-//    }
+    //    fullurl = returnBaseUrl()+"img/trans/";
+    //    if(img.id=="socio") {
+    //        if ( img.src==fullurl+"hover_scholars.png" ) {
+    //            changeButton("active_scholars.png");
+    //            if(document.getElementById("viewType").src==fullurl+"status_macro_view.png"){
+    //                changeToMacro("social");
+    //            }
+    //            if(document.getElementById("viewType").src==fullurl+"status_meso_view.png"){
+    //                changeToMeso("social");
+    //            }
+    //        }
+    //    }
+    //    
+    //    if(img.id=="semantic") { 
+    //        if ( img.src==fullurl+"hover_tags.png" ) { 
+    //            changeButton("active_tags.png");
+    //            if(document.getElementById("viewType").src==fullurl+"status_macro_view.png"){
+    //                changeToMacro("semantic");
+    //            }
+    //            if(document.getElementById("viewType").src==fullurl+"status_meso_view.png"){
+    //                changeToMeso("semantic");
+    //            }
+    //        }
+    //    }
+    //    
+    //    if(img.id=="sociosemantic") { 
+    //        if ( img.src==fullurl+"hover_sociosem.png" ) { 
+    //            changeButton("active_sociosem.png");
+    //            if(document.getElementById("viewType").src==fullurl+"status_macro_view.png"){
+    //                changeToMacro("sociosemantic");
+    //            }
+    //            if(document.getElementById("viewType").src==fullurl+"status_meso_view.png"){
+    //                changeToMeso("sociosemantic");
+    //            }
+    //        }
+    //        
+    //    }
+    //    if(img.id=="switch") { 
+    //        hasbeenclicked=false;
+    //        if ( img.src==fullurl+"graph_meso.png"){
+    //            changeButton("graph_macro.png");   
+    //            pushSWClick(swclickActual);
+    //            changeToMeso(swclickActual);
+    //            hasbeenclicked=true;       
+    //        }
+    //        if ( img.src==fullurl+"graph_macro.png" && hasbeenclicked==false){
+    //            changeButton("graph_meso.png");    
+    //            pushSWClick(swclickActual);
+    //            changeToMacro(swclickActual);
+    //        }
+    //    }
 
 
 
 
 
-//    fullurl = returnBaseUrl()+"img/trans/";
-//    hasbeenclicked=false;
-//    if(bc=="graph_meso.png"){
-//        document.getElementById("switch").src=fullurl+"graph_meso.png";
-//        document.getElementById("viewType").src=fullurl+"status_macro_view.png";
-//        hasbeenclicked=true;
-//    }
-//    if(bc=="graph_macro.png" && hasbeenclicked==false){
-//        document.getElementById("switch").src=fullurl+"graph_macro.png";
-//        document.getElementById("viewType").src=fullurl+"status_meso_view.png";
-//    }
-//    
-//    if(bc=="active_scholars.png"){
-//        document.getElementById("socio").src=fullurl+"active_scholars.png";
-//        document.getElementById("semantic").src=fullurl+"inactive_tags.png";
-//        document.getElementById("sociosemantic").src=fullurl+"inactive_sociosem.png";
-//        pushSWClick("social"); 
-//        pr("swclickPrev: "+swclickPrev+" - swclickActual: "+swclickActual);
-//        $("#category-A").show();
-//        $("#category-B").hide();
-//    }  
-//    if(bc=="active_tags.png"){
-//        document.getElementById("socio").src=fullurl+"inactive_scholars.png";
-//        document.getElementById("semantic").src=fullurl+"active_tags.png";
-//        document.getElementById("sociosemantic").src=fullurl+"inactive_sociosem.png";
-//        pushSWClick("semantic"); 
-//        pr("swclickPrev: "+swclickPrev+" - swclickActual: "+swclickActual);     
-//        $("#category-A").hide();
-//        $("#category-B").show();
-//    }
-//    if(bc=="active_sociosem.png"){
-//        document.getElementById("socio").src=fullurl+"inactive_scholars.png";
-//        document.getElementById("semantic").src=fullurl+"inactive_tags.png";
-//        document.getElementById("sociosemantic").src=fullurl+"active_sociosem.png";
-//        pushSWClick("sociosemantic");
-//        pr("swclickPrev: "+swclickPrev+" - swclickActual: "+swclickActual);
-//        $("#category-A").show();
-//        $("#category-B").show();
-//    }
-//    if(bc=="selectNode"){        
-//        if(categories.length==2) $("#switchbutton").show();
-//        if(document.getElementById("switch").src==fullurl+"graph_meso_null.png"){
-//            if(document.getElementById("viewType").src==fullurl+"status_macro_view.png"){
-//                document.getElementById("switch").src=fullurl+"graph_meso.png";
-//            }
-//            if(document.getElementById("viewType").src==fullurl+"status_meso_view.png"){
-//                document.getElementById("switch").src=fullurl+"graph_macro.png";
-//            }
-//        }
-//    }
-//    if(bc=="unselectNodes"){
-//        document.getElementById("switch").src=fullurl+"graph_meso_null.png";
-//    }
-//    /*tofix*/
-////    if(is_empty(selections)){        
-////        /***** The animation *****/
-////        _cG = $("#leftcolumn");    
-////        _cG.animate({
-////            "left" : "-" + _cG.width() + "px"
-////        }, function() {
-////            $("#aUnfold").attr("class","rightarrow");
-////            $("#zonecentre").css({
-////                left: "0"
-////            });
-////        });
-////    }
+    //    fullurl = returnBaseUrl()+"img/trans/";
+    //    hasbeenclicked=false;
+    //    if(bc=="graph_meso.png"){
+    //        document.getElementById("switch").src=fullurl+"graph_meso.png";
+    //        document.getElementById("viewType").src=fullurl+"status_macro_view.png";
+    //        hasbeenclicked=true;
+    //    }
+    //    if(bc=="graph_macro.png" && hasbeenclicked==false){
+    //        document.getElementById("switch").src=fullurl+"graph_macro.png";
+    //        document.getElementById("viewType").src=fullurl+"status_meso_view.png";
+    //    }
+    //    
+    //    if(bc=="active_scholars.png"){
+    //        document.getElementById("socio").src=fullurl+"active_scholars.png";
+    //        document.getElementById("semantic").src=fullurl+"inactive_tags.png";
+    //        document.getElementById("sociosemantic").src=fullurl+"inactive_sociosem.png";
+    //        pushSWClick("social"); 
+    //        pr("swclickPrev: "+swclickPrev+" - swclickActual: "+swclickActual);
+    //        $("#category-A").show();
+    //        $("#category-B").hide();
+    //    }  
+    //    if(bc=="active_tags.png"){
+    //        document.getElementById("socio").src=fullurl+"inactive_scholars.png";
+    //        document.getElementById("semantic").src=fullurl+"active_tags.png";
+    //        document.getElementById("sociosemantic").src=fullurl+"inactive_sociosem.png";
+    //        pushSWClick("semantic"); 
+    //        pr("swclickPrev: "+swclickPrev+" - swclickActual: "+swclickActual);     
+    //        $("#category-A").hide();
+    //        $("#category-B").show();
+    //    }
+    //    if(bc=="active_sociosem.png"){
+    //        document.getElementById("socio").src=fullurl+"inactive_scholars.png";
+    //        document.getElementById("semantic").src=fullurl+"inactive_tags.png";
+    //        document.getElementById("sociosemantic").src=fullurl+"active_sociosem.png";
+    //        pushSWClick("sociosemantic");
+    //        pr("swclickPrev: "+swclickPrev+" - swclickActual: "+swclickActual);
+    //        $("#category-A").show();
+    //        $("#category-B").show();
+    //    }
+    //    if(bc=="selectNode"){        
+    //        if(categories.length==2) $("#switchbutton").show();
+    //        if(document.getElementById("switch").src==fullurl+"graph_meso_null.png"){
+    //            if(document.getElementById("viewType").src==fullurl+"status_macro_view.png"){
+    //                document.getElementById("switch").src=fullurl+"graph_meso.png";
+    //            }
+    //            if(document.getElementById("viewType").src==fullurl+"status_meso_view.png"){
+    //                document.getElementById("switch").src=fullurl+"graph_macro.png";
+    //            }
+    //        }
+    //    }
+    //    if(bc=="unselectNodes"){
+    //        document.getElementById("switch").src=fullurl+"graph_meso_null.png";
+    //    }
+    //    /*tofix*/
+    ////    if(is_empty(selections)){        
+    ////        /***** The animation *****/
+    ////        _cG = $("#leftcolumn");    
+    ////        _cG.animate({
+    ////            "left" : "-" + _cG.width() + "px"
+    ////        }, function() {
+    ////            $("#aUnfold").attr("class","rightarrow");
+    ////            $("#zonecentre").css({
+    ////                left: "0"
+    ////            });
+    ////        });
+    ////    }
 }
 
+function changeType() {
+    pr("***swclickActual:"+swclickActual+" , swMacro:"+swMacro)
+    if(swclickActual=="social") {
+        if(swMacro) {
+        	changeToMacro("semantic");
+	        pushSWClick("semantic");
+	        RefreshState("B")
+        } else {
+        	changeToMeso("sociosemantic");
+	        pushSWClick("sociosemantic");
+        	RefreshState("AaBb")
+        }
+        return;
+    }
+    if(swclickActual=="semantic") {
+        if(swMacro) {
+        	changeToMacro("social");
+	        pushSWClick("social");
+	        RefreshState("A")
+        } else {
+        	changeToMeso("sociosemantic");
+	        pushSWClick("sociosemantic");
+        	RefreshState("AaBb")
+        }
+        return;
+    }
+    if(swclickActual=="sociosemantic") {
+    	
+    	if(swMacro) {
+    		changeToMacro("sociosemantic");
+	        pushSWClick("sociosemantic");
+	        RefreshState("AaBb")
+    	} else {
+	        pushSWClick(swclickPrev);
+        	changeToMeso(swclickActual);
+        	RefreshState(PAST)
+    	}
+        // if(swMacro) {
+        // 	changeToMacro("semantic");
+	       //  pushSWClick("semantic");
+	       //  RefreshState("B")
+	       //  $("#category-A").hide();
+	       //  $("#category-B").show();
+        // } else {
+        // 	changeToMeso("sociosemantic");
+	       //  pushSWClick("sociosemantic");
+        // 	RefreshState("AaBb")
+	       //  $("#category-A").show();
+	       //  $("#category-B").show();
+        // }
+        return;
+    }
+}
+
+function changeLevel() {
+    bf=swclickActual
+    pushSWClick(swclickActual);
+    pr("swMacro: "+swMacro+" - [swclickPrev: "+bf+"] - [swclickActual: "+swclickActual+"]")
+
+    if(swMacro){
+	    if(swclickActual=="social") {
+	    	changeToMeso("social")
+	    	RefreshState("a");
+	    }
+	    if(swclickActual=="semantic") {
+	    	changeToMeso("semantic")
+	    	RefreshState("b");
+	    }
+	    swMacro=false;
+	} else {
+	    if(swclickActual=="social") {
+	    	changeToMacro("social")
+	    	RefreshState("A")
+	    }
+	    if(swclickActual=="semantic") {
+	    	changeToMacro("semantic")
+	    	RefreshState("B")
+	    }
+	    swMacro=true;
+	}
+    // changeToMeso("social")
+    // changeToMeso("semantic")
+
+    // changeToMacro("social")
+    // changeToMacro("semantic")
+}
+
+//obsolete
 function changeHoverActive(img) {
     fullurl = returnBaseUrl()+"img/trans/";
     if(img.id=="socio") {
@@ -211,7 +300,7 @@ function changeHoverActive(img) {
     }
 }
 
-
+//obsolete
 function neweffectshow(){
     if(!is_empty(selections)){    
         $("#labelchange").show();
@@ -219,6 +308,7 @@ function neweffectshow(){
     }
 }
 
+//obsolete
 function neweffecthide(){
     $.doTimeout(300,function (){
         if($("#labelchange")[0].hidden==false){
@@ -231,6 +321,7 @@ function neweffecthide(){
     });
 }
 
+//obsolete
 function justhide(){    
     $("#labelchange").hide();
     $("#availableView").hide();  
@@ -265,10 +356,10 @@ function updateEdgeFilter(edgeFilterName) {
                     return !e['hidden'];
           });
           
-//    pr("\tpartialGraph._core.graph.edges: "+partialGraph._core.graph.edges.length);
-//    pr(partialGraph._core.graph.edges); //#edges=936
-//    pr("\tpartialGraph._core.graph.edges.filter(function(x){return !x['hidden']});: "+edges.length);
-//    pr(edges);                          //#edges=936
+    //    pr("\tpartialGraph._core.graph.edges: "+partialGraph._core.graph.edges.length);
+    //    pr(partialGraph._core.graph.edges); //#edges=936
+    //    pr("\tpartialGraph._core.graph.edges.filter(function(x){return !x['hidden']});: "+edges.length);
+    //    pr(edges);                          //#edges=936
     
     
     
@@ -283,14 +374,14 @@ function updateEdgeFilter(edgeFilterName) {
             }
         }
     }
-//    pr("\tedgesByWeight: ");
-//    pr(edgesByWeight);
+    //    pr("\tedgesByWeight: ");
+    //    pr(edgesByWeight);
     edgesSortedByWeight = ArraySortByKey(edgesByWeight, function(a,b){
         return a-b
     });
     
-//    pr("\tedgesSortedByWeight: ");
-//    pr(edgesSortedByWeight);
+    //    pr("\tedgesSortedByWeight: ");
+    //    pr(edgesSortedByWeight);
     
     normEdges=[];
     cont=0;
@@ -310,8 +401,8 @@ function updateEdgeFilter(edgeFilterName) {
         }
     }
     
-//    pr("\tnormEdges: ");
-//    pr(normEdges);
+    //    pr("\tnormEdges: ");
+    //    pr(normEdges);
     
     $(edgeFilterName).slider({
         range: true,
@@ -332,14 +423,14 @@ function updateEdgeFilter(edgeFilterName) {
                         for (var j in normEdges[i]){
                             id=normEdges[i][j];
                             //pr("unHideElem("+id+");");
-//                            if(isUndef(edgesTemp[id])){
-//                                //source=Edges[id].sourceID;
-//                                //target=Edges[id].targetID;
-//                                //edge=Edges[id];
-//                                pr("unHideElem("+id+");")
+                            //                            if(isUndef(edgesTemp[id])){
+                            //                                //source=Edges[id].sourceID;
+                            //                                //target=Edges[id].targetID;
+                            //                                //edge=Edges[id];
+                            //                                pr("unHideElem("+id+");")
                             unHideElem(id);
-//                                //partialGraph.addEdge(id,source,target,edge);
-//                            }
+                            //partialGraph.addEdge(id,source,target,edge);
+                            //                            }
                         }
                     }
                     else {
@@ -384,24 +475,24 @@ function updateBothEdgeFilters() {
     keywordsEdgesSortedByWeight = ArraySortByKey(keywordsEdgesByWeight, function(a,b){
         return a-b
     });
-//    
-//    normScholarEdges=[];
-//    cont=0;
-//    index=0;
-//    for(var i in scholarsEdgesSortedByWeight){
-//        for(var j in scholarsEdgesSortedByWeight[i].value){
-//            if(isUndef(normScholarEdges[index])){
-//                normScholarEdges[index]=[];
-//            }
-//            normScholarEdges[index].push(scholarsEdgesSortedByWeight[i].value[j])
-//            cont++;
-//            if(cont%20==0) {
-//                index++;
-//                cont=0;
-//            }
-//        }
-//    }
-//    pr(normScholarEdges);
+    //    
+    //    normScholarEdges=[];
+    //    cont=0;
+    //    index=0;
+    //    for(var i in scholarsEdgesSortedByWeight){
+    //        for(var j in scholarsEdgesSortedByWeight[i].value){
+    //            if(isUndef(normScholarEdges[index])){
+    //                normScholarEdges[index]=[];
+    //            }
+    //            normScholarEdges[index].push(scholarsEdgesSortedByWeight[i].value[j])
+    //            cont++;
+    //            if(cont%20==0) {
+    //                index++;
+    //                cont=0;
+    //            }
+    //        }
+    //    }
+    //    pr(normScholarEdges);
     
     $("#sliderAEdgeWeight").slider({
         range: true,
@@ -419,12 +510,12 @@ function updateBothEdgeFilters() {
                         for (var j in scholarsEdgesSortedByWeight[i].value){
                             id=scholarsEdgesSortedByWeight[i].value[j];
                             unHideElem(id);
-//                            if(isUndef(edgesTemp[id])){
-//                                source=Edges[id].sourceID;
-//                                target=Edges[id].targetID;
-//                                edge=Edges[id];
-//                                //partialGraph.addEdge(id,source,target,edge);
-//                            }
+                            //                            if(isUndef(edgesTemp[id])){
+                            //                                source=Edges[id].sourceID;
+                            //                                target=Edges[id].targetID;
+                            //                                edge=Edges[id];
+                            //                                //partialGraph.addEdge(id,source,target,edge);
+                            //                            }
                         }
                     }
                     else {
@@ -454,12 +545,12 @@ function updateBothEdgeFilters() {
                         for (var j in keywordsEdgesSortedByWeight[i].value){
                             id=keywordsEdgesSortedByWeight[i].value[j];
                             unHideElem(id);
-//                            if(isUndef(edgesTemp[id])){
-//                                source=Edges[id].sourceID;
-//                                target=Edges[id].targetID;
-//                                edge=Edges[id];
-//                                //partialGraph.addEdge(id,source,target,edge);
-//                            }
+                            //                            if(isUndef(edgesTemp[id])){
+                            //                                source=Edges[id].sourceID;
+                            //                                target=Edges[id].targetID;
+                            //                                edge=Edges[id];
+                            //                                //partialGraph.addEdge(id,source,target,edge);
+                            //                            }
                         }
                     }
                     else {
@@ -486,67 +577,67 @@ function updateNodeFilter(nodeFilterName) {
     pr("something weird is going here dude: enviroment.js|updateNodeFilter(nodeFilterName)")
     pr(catSoc)
     pr(catSem)
-//    if(nodeFilterName=="social"){
-//        nodeType=catSoc;
-//        divName="#sliderANodeWeight";
-//    }
-//    else {
-//        nodeType=catSem;
-//        divName="#sliderBNodeWeight";
-//    }
-//    nodes=partialGraph._core.graph.nodes.filter(function(n) {
-//                    return !n['hidden'];
-//          });
-//    nodesBySize=[];
-//    for(var i in nodes){
-//        if(Nodes[nodes[i].id].type==catSoc){
-//            if(isUndef(nodesBySize[nodes[i].degree])){
-//                nodesBySize[nodes[i].degree]=[];
-//            }
-//            nodesBySize[nodes[i].degree].push(nodes[i].id);
-//        }
-//        if(Nodes[nodes[i].id].type==catSem){
-//            if(isUndef(nodesBySize[nodes[i].size])){
-//                nodesBySize[nodes[i].size]=[];
-//            }
-//            nodesBySize[nodes[i].size].push(nodes[i].id);
-//        }
-//    }
-//    nodesSortedBySize = ArraySortByKey(nodesBySize, function(a,b){
-//        return a-b
-//    });
-//    if(nodeFilterName=="social"){
-//        return null;
-//    }
-//    $(divName).slider({
-//        range: true,
-//        min: 0,
-//        max: nodesSortedBySize.length-1,
-//        values: [0, nodesSortedBySize.length-1],
-//        step: 1,
-//        animate: true,
-//        slide: function(event, ui) {
-//            $.doTimeout(300,function (){
-//                //console.log("Rango Pesos Arista: "+ui.values[ 0 ]+" , "+ui.values[ 1 ]);
-//                nodesTemp = partialGraph._core.graph.nodesIndex;
-//                for(i=0;i<nodesSortedBySize.length;i++){
-//                    if(i>=ui.values[0] && i<=ui.values[1]){
-//                        for (var j in nodesSortedBySize[i].value){
-//                            id=nodesSortedBySize[i].value[j];
-//                            nodesTemp[id].hidden=false;
-//                        }
-//                    }
-//                    else {
-//                        for (var j in nodesSortedBySize[i].value){
-//                            id=nodesSortedBySize[i].value[j];
-//                            nodesTemp[id].hidden=true;
-//                        }
-//                    }
-//                }
-//                partialGraph.draw();
-//            });
-//        }
-//    });
+    //    if(nodeFilterName=="social"){
+    //        nodeType=catSoc;
+    //        divName="#sliderANodeWeight";
+    //    }
+    //    else {
+    //        nodeType=catSem;
+    //        divName="#sliderBNodeWeight";
+    //    }
+    //    nodes=partialGraph._core.graph.nodes.filter(function(n) {
+    //                    return !n['hidden'];
+    //          });
+    //    nodesBySize=[];
+    //    for(var i in nodes){
+    //        if(Nodes[nodes[i].id].type==catSoc){
+    //            if(isUndef(nodesBySize[nodes[i].degree])){
+    //                nodesBySize[nodes[i].degree]=[];
+    //            }
+    //            nodesBySize[nodes[i].degree].push(nodes[i].id);
+    //        }
+    //        if(Nodes[nodes[i].id].type==catSem){
+    //            if(isUndef(nodesBySize[nodes[i].size])){
+    //                nodesBySize[nodes[i].size]=[];
+    //            }
+    //            nodesBySize[nodes[i].size].push(nodes[i].id);
+    //        }
+    //    }
+    //    nodesSortedBySize = ArraySortByKey(nodesBySize, function(a,b){
+    //        return a-b
+    //    });
+    //    if(nodeFilterName=="social"){
+    //        return null;
+    //    }
+    //    $(divName).slider({
+    //        range: true,
+    //        min: 0,
+    //        max: nodesSortedBySize.length-1,
+    //        values: [0, nodesSortedBySize.length-1],
+    //        step: 1,
+    //        animate: true,
+    //        slide: function(event, ui) {
+    //            $.doTimeout(300,function (){
+    //                //console.log("Rango Pesos Arista: "+ui.values[ 0 ]+" , "+ui.values[ 1 ]);
+    //                nodesTemp = partialGraph._core.graph.nodesIndex;
+    //                for(i=0;i<nodesSortedBySize.length;i++){
+    //                    if(i>=ui.values[0] && i<=ui.values[1]){
+    //                        for (var j in nodesSortedBySize[i].value){
+    //                            id=nodesSortedBySize[i].value[j];
+    //                            nodesTemp[id].hidden=false;
+    //                        }
+    //                    }
+    //                    else {
+    //                        for (var j in nodesSortedBySize[i].value){
+    //                            id=nodesSortedBySize[i].value[j];
+    //                            nodesTemp[id].hidden=true;
+    //                        }
+    //                    }
+    //                }
+    //                partialGraph.draw();
+    //            });
+    //        }
+    //    });
 }
 
 function updateBothNodeFilters() {
@@ -578,35 +669,35 @@ function updateBothNodeFilters() {
         return a-b
     });
     
-//    $("#sliderANodeWeight").slider({
-//        range: true,
-//        min: 0,
-//        max: scholarsSortedBySize.length-1,
-//        values: [0, scholarsSortedBySize.length-1],
-//        step: 1,
-//        animate: true,
-//        slide: function(event, ui) {
-//            $.doTimeout(300,function (){
-//                //console.log("Rango Pesos Arista: "+ui.values[ 0 ]+" , "+ui.values[ 1 ]);
-//                nodesTemp = partialGraph._core.graph.nodesIndex;
-//                for(i=0;i<scholarsSortedBySize.length;i++){
-//                    if(i>=ui.values[0] && i<=ui.values[1]){
-//                        for (var j in scholarsSortedBySize[i].value){
-//                            id=scholarsSortedBySize[i].value[j];
-//                            nodesTemp[id].hidden=false;
-//                        }
-//                    }
-//                    else {
-//                        for (var j in scholarsSortedBySize[i].value){
-//                            id=scholarsSortedBySize[i].value[j];
-//                            nodesTemp[id].hidden=true;
-//                        }
-//                    }
-//                }
-//                partialGraph.draw();
-//            });
-//        }
-//    });
+    //    $("#sliderANodeWeight").slider({
+    //        range: true,
+    //        min: 0,
+    //        max: scholarsSortedBySize.length-1,
+    //        values: [0, scholarsSortedBySize.length-1],
+    //        step: 1,
+    //        animate: true,
+    //        slide: function(event, ui) {
+    //            $.doTimeout(300,function (){
+    //                //console.log("Rango Pesos Arista: "+ui.values[ 0 ]+" , "+ui.values[ 1 ]);
+    //                nodesTemp = partialGraph._core.graph.nodesIndex;
+    //                for(i=0;i<scholarsSortedBySize.length;i++){
+    //                    if(i>=ui.values[0] && i<=ui.values[1]){
+    //                        for (var j in scholarsSortedBySize[i].value){
+    //                            id=scholarsSortedBySize[i].value[j];
+    //                            nodesTemp[id].hidden=false;
+    //                        }
+    //                    }
+    //                    else {
+    //                        for (var j in scholarsSortedBySize[i].value){
+    //                            id=scholarsSortedBySize[i].value[j];
+    //                            nodesTemp[id].hidden=true;
+    //                        }
+    //                    }
+    //                }
+    //                partialGraph.draw();
+    //            });
+    //        }
+    //    });
     $("#sliderBNodeWeight").slider({
         range: true,
         min: 0,
@@ -714,7 +805,7 @@ function search(string) {
     getOpossitesNodes(id_node, false);
     
     if(categoriesIndex.length==1) updateLeftPanel_uni();
-    if(categoriesIndex.length==2) updateLeftPanel(); 
+    if(categoriesIndex.length==2) updateLeftPanel_fix(); 
     
       
                 if(is_empty(selections)==true){  

@@ -16,18 +16,20 @@ function parse(gexfPath) {
     gexf = gexfhttp.responseXML;
 }
 
+
 function scanCategories(){
     nodesNodes = gexf.getElementsByTagName('nodes');
     for(i=0; i<nodesNodes.length; i++){       
         var nodesNode = nodesNodes[i];  // Each xml node 'nodes' (plural)
-        nodeNodes = nodesNode.getElementsByTagName('node');
+        node = nodesNode.getElementsByTagName('node');
         
-        for(j=0; j<nodeNodes.length; j++){
-            attvalueNodes = nodeNodes[j].getElementsByTagName('attvalue');
+        for(j=0; j<node.length; j++){
+            attvalueNodes = node[j].getElementsByTagName('attvalue');
             for(k=0; k<attvalueNodes.length; k++){
                 attvalueNode = attvalueNodes[k];
                 attr = attvalueNode.getAttribute('for');
                 val = attvalueNode.getAttribute('value');
+                pr(val)
                 if (attr=="category") categories[val]=val;
             }
         }
@@ -51,7 +53,7 @@ function scanCategories(){
 function onepartiteExtract(){
     
     var i, j, k;
-//    partialGraph.emptyGraph();
+    //    partialGraph.emptyGraph();
     // Parse Attributes
     // This is confusing, so I'll comment heavily
     var nodesAttributes = [];   // The list of attributes of the nodes of the graph that we build in json
@@ -170,10 +172,10 @@ function onepartiteExtract(){
                 var attvalueNode = attvalueNodes[k];
                 var attr = attvalueNode.getAttribute('for');
                 var val = attvalueNode.getAttribute('value');
-//                node.attributes.push({
-//                    attr:attr, 
-//                    val:val
-//                });
+                   // node.attributes.push({
+                   //     attr:attr, 
+                   //     val:val
+                   // });
                 atts[attr]=val;
                 node.attributes = atts;
             }
@@ -182,9 +184,9 @@ function onepartiteExtract(){
             //if(node.attributes[0].attr=="weight"){
             if(typeof(node.size)==="undefined") node.size=parseInt(node.attributes["weight"]);
             //}
-//            if(node.attributes[1].attr=="weight"){
-//                node.size=node.attributes[1].val;
-//            }
+               // if(node.attributes[1].attr=="weight"){
+               //     node.size=node.attributes[1].val;
+               // }
                 
             partialGraph.addNode(id,node);
             labels.push({
@@ -401,18 +403,18 @@ function fullExtract(){
                 /*      Para asignar tamaño a los NGrams    */
                 if(atts["category"]===categoriesIndex[1]) {
                     if(typeof(node.size)==="undefined") node.size=parseInt(val).toFixed(2);
-//                /* Type of Node*/
-//                //console.log(val);
-//                //if(val<30) val=30;
-//                //Nodes[id].size=(parseInt(val).toFixed(2)*5)/70;
-//                //                    Nodes[id].size=parseInt(val).toFixed(2);
-//                //                    node.size=Nodes[id].size;
-//                //                    if(id.charAt(0)=="D") {
-//                //                        Nodes[id].size = "5";
-//                //                        node.size = "5";
-//                //                    }
+                   /* Type of Node*/
+                   //console.log(val);
+                   //if(val<30) val=30;
+                   //Nodes[id].size=(parseInt(val).toFixed(2)*5)/70;
+                   //                    Nodes[id].size=parseInt(val).toFixed(2);
+                   //                    node.size=Nodes[id].size;
+                   //                    if(id.charAt(0)=="D") {
+                   //                        Nodes[id].size = "5";
+                   //                        node.size = "5";
+                   //                    }
                 }
-            /*      Para asignar tamaño a los NGrams    */
+                /*      Para asignar tamaño a los NGrams    */
             }
             //console.log(node.attributes);
             nodecat=node.attributes["category"];
@@ -519,17 +521,17 @@ function fullExtract(){
                 }
                 else nodes1[source].neighbours.push(target);
                 
-//                if((typeof nodes1[target])=="undefined"){
-//                    nodes1[target] = {
-//                        label: Nodes[target].label,
-//                        neighbours: []
-//                    };
-//                    nodes1[target].neighbours.push(source);
-//                }
-//                else nodes1[target].neighbours.push(source);
+               // if((typeof nodes1[target])=="undefined"){
+               //     nodes1[target] = {
+               //         label: Nodes[target].label,
+               //         neighbours: []
+               //     };
+               //     nodes1[target].neighbours.push(source);
+               // }
+               // else nodes1[target].neighbours.push(source);
             }
-//            
-//            
+           
+           
             if(idS=="N" && idT=="N"){
                 edge.label="nodes2";
                 //pr("nodes2");
@@ -543,8 +545,7 @@ function fullExtract(){
                 }
                 else nodes2[source].neighbours.push(target);
             }
-//            
-//            
+            
             if((idS=="D" && idT=="N")||(idS=="N" && idT=="D")){
                 edge.label="bipartite";
                 //pr("bipartite");
@@ -597,7 +598,7 @@ function extractFromJson(data,seed){
     categoriesIndex[0]=catSoc;
     categoriesIndex[1]=catSem;
 
-    for(var i in nodesNodes){
+    for(var i in nodesNodes) {
             colorRaw = nodesNodes[i].color.split(",");
             color = '#'+sigma.tools.rgbToHex(
                     parseFloat(colorRaw[2]),
@@ -642,8 +643,7 @@ function extractFromJson(data,seed){
             nodeK = Nodes[i];
             nodeK.hidden=true;/**///should be uncommented
             partialGraph.addNode(i,nodeK);   
-        }
-        else {
+        } else {
             partialGraph.addNode(i,Nodes[i]);  
             unHide(i);
         }
@@ -651,11 +651,12 @@ function extractFromJson(data,seed){
     
     var edgeId = 0;
     var edgesNodes = data.edges;
-    for(var i in edgesNodes){
-        //pr(edgesNodes[i]);
-        var indice=edgesNodes[i].s+";"+edgesNodes[i].t;
+    for(var i in edgesNodes) {
+        //pr(edgesNodes[i]);        
         var source = edgesNodes[i].s;
         var target = edgesNodes[i].t;
+        var indice=source+";"+target;
+        if(indice.indexOf("D::593")!==-1) pr(indice)
         var edge = {
                 id:         indice,
                 sourceID:   source,

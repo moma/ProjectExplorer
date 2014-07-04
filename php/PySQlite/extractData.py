@@ -93,7 +93,8 @@ class extract:
 			info['position'] = res3[n-1]['position'];
 			info['job_market'] = res3[n-1]['job_market'];
 			info['login'] = res3[n-1]['login'];
-			self.scholars[ide] = info;
+			if info['nb_keywords']>0:
+				self.scholars[ide] = info;
 
 		except Exception as error:
 			print "sql3:\t"+sql3

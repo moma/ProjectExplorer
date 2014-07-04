@@ -1,48 +1,51 @@
+//  === monitor windows resize === //
 var counterrrr=0;
 $( window ).resize(function() {
   counterrrr++;
   $("#log").html("redimension nro: "+counterrrr);
   sigmaLimits();
-});
+});//  === / monitor windows resize === //
 
+
+//  === [what to do at start] === //
 if (mainfile) {
 	listGexfs();
-	if(typeof(getUrlParam.file)!=="undefined"){
+	if(!isUndef(getUrlParam.file)){
 	    $.doTimeout(30,function (){
-		parse(getUrlParam.file);
-		nb_cats = scanCategories();  
-		pr("nb_cats: "+nb_cats);
-		listGexfs();
-		
-		if(nb_cats==1) bringTheNoise(getUrlParam.file,"mono");
-		else if(nb_cats==2) bringTheNoise(getUrlParam.file,"bi")
-		
-		$.doTimeout(30,function (){
-		    if(typeof(gexfDict[getUrlParam.file])!=="undefined"){
-		        $("#currentGraph").html(gexfDict[getUrlParam.file]);
-		    } else $("#currentGraph").html(getUrlParam.file);
-		    scanDataFolder();
-		});            
+    		parse(getUrlParam.file);
+    		nb_cats = scanCategories();  
+    		pr("nb_cats: "+nb_cats);
+    		listGexfs();    		
+            graphtype=(nb_cats==1)?"mono":"bi";
+    		bringTheNoise(getUrlParam.file,graphtype);
+    		
+    		$.doTimeout(30,function (){
+    		    if(!isUndef(gexfDict[getUrlParam.file])){
+    		        $("#currentGraph").html(gexfDict[getUrlParam.file]);
+    		    } else $("#currentGraph").html(getUrlParam.file);
+    		    scanDataFolder();
+    		});            
 	    });
 	} else {
 	    window.location.href=window.location.origin+window.location.pathname+"?file="+mainfile;
 	}
 } else {
-    if(isUndef(getUrlParam.nodeidparam)){
+
+    if(isUndef(getUrlParam.nodeidparam)) {
         pr("doing something 'cause i'm a doer"); mainfile=true;
-	bringTheNoise("data/pkmn_types.gexf","mono");
+	    bringTheNoise("data/pkmn_types.gexf","mono");
     } else {
+
 	    if(getUrlParam.nodeidparam.indexOf("__")===-1){
-		//gexfPath = "php/bridgeClientServer_filter.php?query="+getUrlParam.nodeidparam;
-		pr("not implemented yet");
-	    }
-	    else {
-		param=getUrlParam.nodeidparam;
-		pr(param)
-		bringTheNoise(param,"unique_id");
+    		//gexfPath = "php/bridgeClientServer_filter.php?query="+getUrlParam.nodeidparam;
+    		pr("not implemented yet");
+	    } else {
+    		param=getUrlParam.nodeidparam;
+            pr(param)
+            bringTheNoise(param,"unique_id");
 	    }
     }
-}
+}//  === [ / what to do at start ] === //
 
 
 //just CSS
@@ -67,230 +70,245 @@ function sigmaLimits(){
 }
 
 function bringTheNoise(pathfile,type){
-//    $('.modal').modal('show');
+    //    $('.modal').modal('show');
+
+    //  === get width and height   === //
     sigmaLimits();
     
+    //  === sigma canvas resize  with previous values === //
     partialGraph = sigma.init(document.getElementById('sigma-example'))
     .drawingProperties(sigmaJsDrawingProperties)
     .graphProperties(sigmaJsGraphProperties)
     .mouseProperties(sigmaJsMouseProperties);
     
+
+    //  ===  resize topbar and tweakbar  === //
     var body=document.getElementsByTagName('body')[0];
     body.style.paddingTop="41px";
-    
+
+
+    $("#changetype").click(function(){
+    	pr("")
+    	pr(" ############  changeTYPE click");
+		printStates()
+
+        changeType();
+
+
+		printStates()
+    	pr(" ############  / changeTYPE click");
+    	pr("")
+    });
+
+
+    $("#changelevel").click(function(){
+    	pr("")
+    	pr(" ############  changeLEVEL click");
+    	printStates()
+
+        changeLevel();
+
+        printStates()
+    	pr(" ############  / changeLEVEL click");
+    	pr("")
+    });
+
+    //  ===  un/hide leftpanel  === //
+    $("#aUnfold").click(function(e) {
+        //SHOW leftcolumn
+        sidebar = $("#leftcolumn");
+        fullwidth=$('#fixedtop').width();
+        e.preventDefault();
+        // $("#wrapper").toggleClass("active");
+        if(parseFloat(sidebar.css("right"))<0){            
+            $("#aUnfold").attr("class","rightarrow"); 
+            sidebar.animate({
+                "right" : sidebar.width()+"px"
+            }, { duration: 400, queue: false }); 
+
+            $("#ctlzoom").animate({
+                    "right": (sidebar.width()+10)+"px"
+            }, { duration: 400, queue: false }); 
+               
+            // $('#sigma-example').width(fullwidth-sidebar.width());
+            $('#sigma-example').animate({
+                    "width": fullwidth-sidebar.width()+"px"
+            }, { duration: 400, queue: false }); 
+            setTimeout(function() {
+                  partialGraph.resize();
+                  partialGraph.refresh();
+            }, 400);
+        } 
+        else {
+            //HIDE leftcolumn
+            $("#aUnfold").attr("class","leftarrow");
+            sidebar.animate({
+                "right" : "-" + sidebar.width() + "px"
+            }, { duration: 400, queue: false });
+
+            $("#ctlzoom").animate({
+                    "right": "0px"
+            }, { duration: 400, queue: false }); 
+
+                // $('#sigma-example').width(fullwidth);
+            $('#sigma-example').animate({
+                    "width": fullwidth+"px"
+            },{ duration: 400, queue: false });
+            setTimeout(function() {
+                  partialGraph.resize();
+                  partialGraph.refresh();
+            }, 400);
+            
+        }   
+    });
+
+    //  === start minimap library... currently off  === //
     startMiniMap();
-    
+
+    var deftoph=$("#defaultop").height();
+    var refh=$("#fixedtop").height();
+    pr("deftoph:"+deftoph+" vs refh: "+refh)
+    if(deftoph>(refh*2)) window.location.reload();
+
     console.log("parsing...");    
     // < === EXTRACTING DATA === >
     if(mainfile) {
+        pr("mainfile: "+mainfile)
 	    parse(decodeURIComponent(pathfile));
 	    if(type=="mono") {
-		onepartiteExtract(); 
-		$("#left").hide();
+    		onepartiteExtract(); 
+    		$("#left").hide();
 	    } else if(type=="bi")  fullExtract(); 
+
+        partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8).draw(2,2,2);
+        theListeners(); 
+
     } else {
 	    if(type=="unique_id") {
-		pr("bring the noise, case: unique_id");
-                pr(getClientTime()+" : DataExt Ini");
-		$.ajax({
-		    type: 'GET',
-		    url: bridge["forNormalQuery"],
-		    data: "unique_id="+pathfile+"&it="+iterationsFA2,
-		    contentType: "application/json",
-		    dataType: 'jsonp',
-		    async: true,
-		    success : function(data){
-                        if(!isUndef(getUrlParam.seed))seed=getUrlParam.seed;
-			extractFromJson(data,seed);
-                        pr(getClientTime()+" : DataExt Fin");
-    // < === DATA EXTRACTED!! === >
+		    pr("bring the noise, case: unique_id");
+            pr(getClientTime()+" : DataExt Ini");
+    		$.ajax({
+    		    type: 'GET',
+    		    url: bridge["forNormalQuery"],
+    		    data: "unique_id="+pathfile+"&it="+iterationsFA2,
+    		    contentType: "application/json",
+    		    dataType: 'jsonp',
+    		    async: true,
+    		    success : function(data){
+                            if(!isUndef(getUrlParam.seed))seed=getUrlParam.seed;
+    			            extractFromJson(data,seed);
+                            pr(getClientTime()+" : DataExt Fin");
+        // < === DATA EXTRACTED!! === >
 
-                        if(fa2enabled==="off") $("#edgesButton").hide();
-                        updateEdgeFilter("social");
-                        updateNodeFilter("social");
-                        pushSWClick("social");
+                            if(fa2enabled==="off") $("#edgesButton").hide();
+                            // updateEdgeFilter("social");
+                            // updateNodeFilter("social");
+                            pushSWClick("social");
 
-    // < === ASYNCHRONOUS FA2.JS === >
-                        pr(getClientTime()+" : Ini FA2");
-                        var ForceAtlas2 = new Worker("FA2.js");
-                        ForceAtlas2.postMessage({ 
-                            "nodes": partialGraph._core.graph.nodes,
-                            "edges": partialGraph._core.graph.edges,
-                            "it":iterationsFA2
-                        });
-                        ForceAtlas2.addEventListener('message', function(e) {
-                            iterations=e.data.it;
-                            nds=e.data.nodes;
-                            for(var n in nds){
-                                id=nds[n].id;
-                                x=nds[n].x
-                                y=nds[n].y
-                                partialGraph._core.graph.nodes[n].x=x;
-                                partialGraph._core.graph.nodes[n].y=y;
-                                partialGraph._core.graph.nodesIndex[id].x=x
-                                partialGraph._core.graph.nodesIndex[id].y=y
-                                Nodes[id].x=x;
-                                Nodes[id].y=y;
-                            }
-                            pr("\ttotalIterations: "+iterations)
-                            pr(getClientTime()+" : Fin FA2");
-                            console.log("Parsing and FA2 complete.");
-    // < === ASYNCHRONOUS FA2.JS DONE!! === >
+        // < === ASYNCHRONOUS FA2.JS === >
+                            pr(getClientTime()+" : Ini FA2");
+                            var ForceAtlas2 = new Worker("FA2.js");
+                            ForceAtlas2.postMessage({ 
+                                "nodes": partialGraph._core.graph.nodes,
+                                "edges": partialGraph._core.graph.edges,
+                                "it":iterationsFA2
+                            });
+                            ForceAtlas2.addEventListener('message', function(e) {
+                                iterations=e.data.it;
+                                nds=e.data.nodes;
+                                for(var n in nds){
+                                    id=nds[n].id;
+                                    x=nds[n].x
+                                    y=nds[n].y
+                                    partialGraph._core.graph.nodes[n].x=x;
+                                    partialGraph._core.graph.nodes[n].y=y;
+                                    partialGraph._core.graph.nodesIndex[id].x=x
+                                    partialGraph._core.graph.nodesIndex[id].y=y
+                                    Nodes[id].x=x;
+                                    Nodes[id].y=y;
+                                }
+                                pr("\ttotalIterations: "+iterations)
+                                pr(getClientTime()+" : Fin FA2");
+                                console.log("Parsing and FA2 complete.");
+        // < === ASYNCHRONOUS FA2.JS DONE!! === >
 
-                            leftPanel("close");
-                            $("#closemodal").click();//modal.hide doesnt work :c
-                            //    startForceAtlas2(partialGraph._core.graph);r(
+                                // // leftPanel("close");
+                                // $("#closemodal").click();//modal.hide doesnt work :c
+                                // //    startForceAtlas2(partialGraph._core.graph);r(
 
-                            cancelSelection(false);        
-                            $("#tips").html(getTips());
-                            //$('#sigma-example').css('background-color','white');
-                            $("#category-B").hide();
-                            $("#labelchange").hide();
-                            $("#availableView").hide(); 
-                            showMeSomeLabels(6);
-                            initializeMap();
-                            updateMap();
-                            updateDownNodeEvent(false);
-                            partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8).draw(2,2,2);
-                            theListeners(); 
-                        }); 
-		    },
-		    error: function(){ 
-		        pr("Page Not found. parseCustom, inside the IF");
-		    }
-		});
+                                // cancelSelection(false);        
+                                // $("#tips").html(getTips());
+                                // //$('#sigma-example').css('background-color','white');
+                                // $("#category-B").hide();
+                                // $("#labelchange").hide();
+                                // $("#availableView").hide(); 
+                                // showMeSomeLabels(6);
+                                // initializeMap();
+                                // updateMap();
+                                // updateDownNodeEvent(false);
+                                // partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8).draw(2,2,2);
+                                theListeners(); 
+                            }); 
+    		    },
+    		    error: function(){ 
+    		        pr("Page Not found. parseCustom, inside the IF");
+    		    }
+    		});
 	    }
     }  
 }
 
-function scanDataFolder(){
-        $.ajax({
-            type: 'GET',
-            url: twjs+'php/DirScan_main.php',
-            //data: "type="+type+"&query="+jsonparams,
-            //contentType: "application/json",
-            //dataType: 'json',
-            success : function(data){ 
-                console.log(data);
-                dataFolderTree=data;
-            },
-            error: function(){ 
-                console.log('Page Not found: updateLeftPanel_uni()');
-            }
-        });
-}
-
-function getGexfPath(v){
-	gexfpath=(gexfDictReverse[v])?gexfDictReverse[v]:v;
-        return gexfpath;
-}
-
-function getGexfLegend(gexfPath){
-    legend=(gexfDict[gexfPath])?gexfDict[gexfPath]:gexfPath;
-    return legend;
-}
-
-function jsActionOnGexfSelector(gexfLegend){
-    window.location=window.location.origin+window.location.pathname+"?file="+encodeURIComponent(getGexfPath(gexfLegend));
-}
-
-function listGexfs(){
-    param = JSON.stringify(gexfDict);
-    $.ajax({
-        type: 'GET',
-        url: twjs+'php/listFiles.php',
-        //contentType: "application/json",
-        //dataType: 'json',
-        success : function(data){ 
-            html="<select style='width:150px;' ";
-            javs='onchange="'+'jsActionOnGexfSelector(this.value);'+'"';
-            html+=javs;
-            html+=">";
-            html+='<option selected>[Select your Graph]</option>';
-            for(var i in data){
-                //pr("path: "+data[i]);
-                //pr("legend: "+getGexfLegend(data[i]));
-                //pr("");
-                html+="<option>"+getGexfLegend(data[i])+"</option>";
-            }
-            html+="</select>";
-            $("#gexfs").html(html);
-        },
-        error: function(){ 
-            console.log("Page Not found.");
-        }
-    });    
-}
-
-function leftPanel(action) {        
-    sidebar = $("#leftcolumn");
-    fullwidth=$('#fixedtop').width();
- 
-    if(action=="fromHtml"){
-        if(sidebar.offset().left<0) leftPanel("open");
-        else leftPanel("close");
-    }
-    
-    if (action=="open") {
-        sidebar.animate({
-            "left" : sidebar.width()+"px"
-        }, function() {
-            $("#aUnfold").attr("class","leftarrow");                
-            $('#sigma-example').width(fullwidth-sidebar.width());
-            $("#ctlzoom").css({
-                left: (sidebar.width()+10)+"px"
-            });
-        }); 
-    } 
-    if(action=="close"){
-        sidebar.animate({
-            "left" : "-" + sidebar.width() + "px"
-        }, function() {
-            $("#aUnfold").attr("class","rightarrow");
-            $('#sigma-example').width(fullwidth);
-            $("#ctlzoom").css({
-                left: "0px"
-            });
-        });
-    }   
-}
-
-
 function theListeners(){
+    pr("in THELISTENERS");
+    // leftPanel("close");
+    $("#closemodal").click();//modal.hide doesnt work :c
+    //    startForceAtlas2(partialGraph._core.graph);r(
+
+    cancelSelection(false);        
+    $("#tips").html(getTips());
+    //$('#sigma-example').css('background-color','white');
+    $("#category-B").hide();
+    $("#labelchange").hide();
+    $("#availableView").hide(); 
+    showMeSomeLabels(6);
+    initializeMap();
+    updateMap();
+    updateDownNodeEvent(false);
+    partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8).draw(2,2,2);
     $("#saveAs").click(function() {
         saveGEXF();
     });
     
-//    $("#aUnfold").click(function() {        
-//        _cG = $("#leftcolumn");
-//        anchototal=$('#fixedtop').width();
-//        sidebar=_cG.width();
-//
-//        if (_cG.offset().left < 0) {
-//            _cG.animate({
-//                "left" : sidebar+"px"
-//            }, function() {
-//                $("#aUnfold").attr("class","leftarrow");                
-//                $('#sigma-example').width(anchototal-sidebar);
-//                $("#ctlzoom").css({
-//                    left: (sidebar+10)+"px"
-//                });
-//            }); 
-//        } else {
-//            _cG.animate({
-//                "left" : "-" + _cG.width() + "px"
-//            }, function() {
-//                $("#aUnfold").attr("class","rightarrow");
-//                $('#sigma-example').width(anchototal);
-//                $("#ctlzoom").css({
-//                    left: "0px"
-//                });
-//            });
-//        }
-//        return false;
-//    });
-//    
-    /******************* /SEARCH ***********************/
+    //    $("#aUnfold").click(function() {        
+    //        _cG = $("#leftcolumn");
+    //        anchototal=$('#fixedtop').width();
+    //        sidebar=_cG.width();
+    //
+    //        if (_cG.offset().left < 0) {
+    //            _cG.animate({
+    //                "left" : sidebar+"px"
+    //            }, function() {
+    //                $("#aUnfold").attr("class","leftarrow");                
+    //                $('#sigma-example').width(anchototal-sidebar);
+    //                $("#ctlzoom").css({
+    //                    left: (sidebar+10)+"px"
+    //                });
+    //            }); 
+    //        } else {
+    //            _cG.animate({
+    //                "left" : "-" + _cG.width() + "px"
+    //            }, function() {
+    //                $("#aUnfold").attr("class","rightarrow");
+    //                $('#sigma-example').width(anchototal);
+    //                $("#ctlzoom").css({
+    //                    left: "0px"
+    //                });
+    //            });
+    //        }
+    //        return false;
+    //    });
+    //    
+        /******************* /SEARCH ***********************/
     $.ui.autocomplete.prototype._renderItem = function(ul, item) {
         var searchVal = $("#searchinput").val();
         var desc = extractContext(item.desc, searchVal);
@@ -337,7 +355,6 @@ function theListeners(){
         }
     });
     
-    
     $("#searchinput").keydown(function (e) {
         if (e.keyCode == 13 && $("input#searchinput").data('is_open') === true) {
             // Search has several results and you pressed ENTER
@@ -371,14 +388,13 @@ function theListeners(){
         }
     });
     
-    
     $("#searchinput").keyup(function (e) {
         if (e.keyCode == 13 && $("input#searchinput").data('is_open') !== true) {
             pr("search KEY UP");
             var s = $("#searchinput").val();
             $("#searchinput").val(strSearchBar);
             if(categoriesIndex.length==1) updateLeftPanel_uni();
-            if(categoriesIndex.length==2) updateLeftPanel();            
+            if(categoriesIndex.length==2) updateLeftPanel_fix();            
         }
     });
     
@@ -406,32 +422,73 @@ function theListeners(){
                 return n.id;
             });
             
-        if(!is_empty(targeted)){
-            swMacro=!swMacro;
-            bc={}; bc.id="switch";
-            changeButton(bc);
-        } else {
+        if(!is_empty(targeted)) changeLevel();
+        else {
             if(!is_empty(selections)){
-                cancelSelection(false);
+                cancelSelection(false);                
+                LevelButtonDisable(true);
             }
         }
     });
     
     
-    $("#overview")
+    // $("#overview")
     //    .mousemove(onOverviewMove)
     //    .mousedown(startMove)
     //    .mouseup(endMove)
     //    .mouseout(endMove)
-    .mousewheel(onGraphScroll);
+    //    .mousewheel(onGraphScroll);
     
-    //$("sigma-example")
+    $("#sigma-example")
+    .mousemove(function(){
+        if(!isUndef(partialGraph)) {
+            if(cursor_size>0) trackMouse();
+        }
+    })
+    .contextmenu(function(){
+        return false;
+    });
     //    .mousemove(onOverviewMove)
     //    .mousedown(startMove)
     //    .mouseup(endMove)
     //    .mouseout(endMove)
     //    .mousewheel(onGraphScroll); -> it doesn't answer!
     
+    $(document).keydown(function(e) {
+        if( e.shiftKey || e.which==16 ) {
+        	shift_key=true;
+        	partialGraph.draw();
+        }
+    });
+
+    $(document).keyup(function(e) {
+        if(e.shiftKey || e.which==16) {
+        	shift_key=false;
+        	partialGraph.draw();
+        	trackMouse();
+        }
+    });
+
+
+    $("#zoomSlider").slider({
+        orientation: "vertical",
+        value: partialGraph.position().ratio,
+        min: sigmaJsMouseProperties.minRatio,
+        max: sigmaJsMouseProperties.maxRatio,
+        range: "min",
+        step: 0.1,
+        slide: function( event, ui ) {
+        	pr("*******lalala***********")
+        	pr(partialGraph.position().ratio)
+        	pr(sigmaJsMouseProperties.minRatio)
+        	pr(sigmaJsMouseProperties.maxRatio)
+            partialGraph.zoomTo(
+                partialGraph._core.width / 2, 
+                partialGraph._core.height / 2, 
+                ui.value);
+        }
+    });
+
     
     $("#zoomPlusButton").click(function () {
         partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, partialGraph._core.mousecaptor.ratio * 1.5);
@@ -509,63 +566,77 @@ function theListeners(){
     });
     $("#unranged-value").freshslider({
         step: 1,
-        value:10
+        min:cursor_size_min,
+        max:cursor_size_max,
+        value:cursor_size,
+        onchange:function(value){
+            // console.log("en cursorsize: "+value);
+            cursor_size=value;
+            if(cursor_size==0) partialGraph.draw();
+        }
     });
-//   
-//    $("#sliderANodeSize").slider({
-//        value: 1,
-//        min: 1,
-//        max: 25,
-//        animate: true,
-//        slide: function(event, ui) {
-//            $.doTimeout(100,function (){
-//                partialGraph.iterNodes(function (n) {
-//                    pr();
-//                    if(Nodes[n.id].type==catSoc) {
-//                        n.size = parseFloat(Nodes[n.id].size) + parseFloat((ui.value-1))*0.3;
-//                    }
-//                });
-//                partialGraph.draw();
-//            });
-//        }
-//    });
-//    $("#sliderBNodeSize").slider({
-//        value: 1,
-//        min: 1,
-//        max: 25,
-//        animate: true,
-//        slide: function(event, ui) {
-//            $.doTimeout(100,function (){
-//                partialGraph.iterNodes(function (n) {
-//                    if(Nodes[n.id].type==catSem) {
-//                        n.size = parseFloat(Nodes[n.id].size) + parseFloat((ui.value-1))*0.3;
-//                    }
-//                });
-//                partialGraph.draw();
-//            });
-//        }
-//    });
-//    $("#sliderSelectionZone").slider({
-//        value: cursor_size,
-//        min: parseFloat(cursor_size_min),
-//        max: parseFloat(cursor_size_max),
-//        animate: true,
-//        change: function(event, ui) {
-//            cursor_size= ui.value;
-//            //if(cursor_size==0) updateDownNodeEvent(false);
-//            //else updateDownNodeEvent(true); 
-//        //return callSlider("#sliderSelectionZone", "selectionRadius");
-//        }
-//    });
-}
 
-function getClientTime(){
-    var totalSec = new Date().getTime() / 1000;
-    var d = new Date();
-    var hours = d.getHours();
-    var minutes = parseInt( totalSec / 60 ) % 60;
-    var seconds = (totalSec % 60).toFixed(4);
-    var result = (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds  < 10 ? "0" + seconds : seconds);
-    return result;
+
+
+    //    $("#sliderSelectionZone").slider({
+    //        value: cursor_size,
+    //        min: parseFloat(cursor_size_min),
+    //        max: parseFloat(cursor_size_max),
+    //        animate: true,
+    //        change: function(event, ui) {
+    //            cursor_size= ui.value;
+    //            //if(cursor_size==0) updateDownNodeEvent(false);
+    //            //else updateDownNodeEvent(true); 
+    //        //return callSlider("#sliderSelectionZone", "selectionRadius");
+    //        }
+    //    });
+
+
+    //   
+    //    $("#sliderANodeSize").slider({
+    //        value: 1,
+    //        min: 1,
+    //        max: 25,
+    //        animate: true,
+    //        slide: function(event, ui) {
+    //            $.doTimeout(100,function (){
+    //                partialGraph.iterNodes(function (n) {
+    //                    pr();
+    //                    if(Nodes[n.id].type==catSoc) {
+    //                        n.size = parseFloat(Nodes[n.id].size) + parseFloat((ui.value-1))*0.3;
+    //                    }
+    //                });
+    //                partialGraph.draw();
+    //            });
+    //        }
+    //    });
+    //    $("#sliderBNodeSize").slider({
+    //        value: 1,
+    //        min: 1,
+    //        max: 25,
+    //        animate: true,
+    //        slide: function(event, ui) {
+    //            $.doTimeout(100,function (){
+    //                partialGraph.iterNodes(function (n) {
+    //                    if(Nodes[n.id].type==catSem) {
+    //                        n.size = parseFloat(Nodes[n.id].size) + parseFloat((ui.value-1))*0.3;
+    //                    }
+    //                });
+    //                partialGraph.draw();
+    //            });
+    //        }
+    //    });
+    //    $("#sliderSelectionZone").slider({
+    //        value: cursor_size,
+    //        min: parseFloat(cursor_size_min),
+    //        max: parseFloat(cursor_size_max),
+    //        animate: true,
+    //        change: function(event, ui) {
+    //            cursor_size= ui.value;
+    //            //if(cursor_size==0) updateDownNodeEvent(false);
+    //            //else updateDownNodeEvent(true); 
+    //        //return callSlider("#sliderSelectionZone", "selectionRadius");
+    //        }
+    //    });
 }
 

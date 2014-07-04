@@ -1,53 +1,58 @@
 
 function trackMouse() {
-    $.doTimeout(200,function (){
-    var ctx = partialGraph._core.domElements.mouse.getContext('2d');
-    ctx.globalCompositeOperation = "source-over";
-    ctx.clearRect(0, 0, partialGraph._core.domElements.nodes.width, partialGraph._core.domElements.nodes.height);
+    if(!shift_key) {
+        // $.doTimeout(300,function (){
+            var ctx = partialGraph._core.domElements.mouse.getContext('2d');
+            ctx.globalCompositeOperation = "source-over";
+            ctx.clearRect(0, 0, partialGraph._core.domElements.nodes.width, partialGraph._core.domElements.nodes.height);
 
-    x = partialGraph._core.mousecaptor.mouseX;
-    y = partialGraph._core.mousecaptor.mouseY;
-    
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    
-    if(partialGraph._core.mousecaptor.ratio>showLabelsIfZoom){
-        for(var i in partialGraph._core.graph.nodesIndex){
-                n=partialGraph._core.graph.nodesIndex[i];
-                if(n.hidden==false){
-                    distance = Math.sqrt(
-                        Math.pow((x-parseInt(n.displayX)),2) +
-                        Math.pow((y-parseInt(n.displayY)),2)
-                        );
-                    if(parseInt(distance)<=cursor_size) {
-                        partialGraph._core.graph.nodesIndex[i].forceLabel=true;
-                    } else {
+            x = partialGraph._core.mousecaptor.mouseX;
+            y = partialGraph._core.mousecaptor.mouseY;
+            
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 1;
+            ctx.fillStyle = "#71C3FF";
+            ctx.globalAlpha = 0.5;  
+            ctx.beginPath();
+            
+            if(partialGraph._core.mousecaptor.ratio>showLabelsIfZoom){
+                for(var i in partialGraph._core.graph.nodesIndex){
+                        n=partialGraph._core.graph.nodesIndex[i];
+                        if(n.hidden==false){
+                            distance = Math.sqrt(
+                                Math.pow((x-parseInt(n.displayX)),2) +
+                                Math.pow((y-parseInt(n.displayY)),2)
+                                );
+                            if(parseInt(distance)<=cursor_size) {
+                                partialGraph._core.graph.nodesIndex[i].forceLabel=true;
+                            } else {
+                                if(typeof(n.neighbour)!=="undefined") {
+                                    if(!n.neighbour) partialGraph._core.graph.nodesIndex[i].forceLabel=false;
+                                } else partialGraph._core.graph.nodesIndex[i].forceLabel=false;
+                            }
+                        }
+                }
+                partialGraph.draw(2,2,2);
+            } else {
+                for(var i in partialGraph._core.graph.nodesIndex){
+                    n=partialGraph._core.graph.nodesIndex[i];
+                    if(!n.hidden){
+                        partialGraph._core.graph.nodesIndex[i].forceLabel=false;
                         if(typeof(n.neighbour)!=="undefined") {
                             if(!n.neighbour) partialGraph._core.graph.nodesIndex[i].forceLabel=false;
+                            else partialGraph._core.graph.nodesIndex[i].forceLabel=true;
                         } else partialGraph._core.graph.nodesIndex[i].forceLabel=false;
                     }
                 }
-        }
-        partialGraph.draw(2,2,2);
-    } else {
-        for(var i in partialGraph._core.graph.nodesIndex){
-            n=partialGraph._core.graph.nodesIndex[i];
-            if(!n.hidden){
-                partialGraph._core.graph.nodesIndex[i].forceLabel=false;
-                if(typeof(n.neighbour)!=="undefined") {
-                    if(!n.neighbour) partialGraph._core.graph.nodesIndex[i].forceLabel=false;
-                    else partialGraph._core.graph.nodesIndex[i].forceLabel=true;
-                } else partialGraph._core.graph.nodesIndex[i].forceLabel=false;
-            }
-        }
-        partialGraph.draw(2,2,2);
+                partialGraph.draw(2,2,2);
+            }          
+            ctx.arc(x, y, cursor_size, 0, Math.PI * 2, true);
+            //ctx.arc(partialGraph._core.width/2, partialGraph._core.height/2, 4, 0, 2 * Math.PI, true);/*todel*/
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        // });
     }
-    ctx.arc(x, y, cursor_size, 0, Math.PI * 2, true);
-    //ctx.arc(partialGraph._core.width/2, partialGraph._core.height/2, 4, 0, 2 * Math.PI, true);/*todel*/
-    ctx.closePath();
-    ctx.stroke();
-    });
 };
 
 function changeGraphPosition(evt, echelle) {
@@ -150,22 +155,9 @@ function onGraphScroll(evt, delta) {
 }
 
 function initializeMap() {
-        clearInterval(partialGraph.timeRefresh);
-        partialGraph.oldParams = {};
-        $("#zoomSlider").slider({
-            orientation: "vertical",
-            value: partialGraph.position().ratio,
-            min: sigmaJsMouseProperties.minRatio,
-            max: sigmaJsMouseProperties.maxRatio,
-            range: "min",
-            step: 0.1,
-            slide: function( event, ui ) {
-                partialGraph.zoomTo(
-                    partialGraph._core.width / 2, 
-                    partialGraph._core.height / 2, 
-                    ui.value);
-            }
-        });
+    clearInterval(partialGraph.timeRefresh);
+    partialGraph.oldParams = {};
+    
     if(minimap){
         $("#overviewzone").css({
             width : overviewWidth + "px",

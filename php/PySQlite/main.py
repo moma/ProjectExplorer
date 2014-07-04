@@ -41,6 +41,17 @@ def main():
 
 
 	tempGraph = db.buildSimpleJSONFinal(db.Graph)
+	
+	# Arnaud Banos network:
+	#   Bruce Edmonds exists twice, but one of them has no keywords
+#	import pprint as p
+#	A=tempGraph["edges"]
+#	for j in A:
+#		s=j["source"]
+#		t=j["target"]
+#		if s=="D::593" or t=="D::593":
+#			print j
+	
 	spatialized = ForceAtlas2(tempGraph)
 	spatialized.init()
 
