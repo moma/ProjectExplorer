@@ -54,6 +54,12 @@ function getedgesIndex(){
     return partialGraph._core.graph.edgesIndex;
 }
 
+function getVisibleEdges() {
+	partialGraph._core.graph.edges.filter(function(e) {
+                return !e['hidden'];
+    });
+}
+
 function getn(id){
     return partialGraph._core.graph.nodesIndex[id];
 }

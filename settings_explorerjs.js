@@ -45,39 +45,38 @@ var desirableScholarSize=6; //Remember that all scholars have the same size!
  *  - true: fa2 running at start
  *  - false: fa2 stopped at start, button exists
  *  - "off": button doesn't exist, fa2 stopped forever 
- **/
-var fa2enabled="off";
+ **/ var fa2enabled=false;//"off";
+var stopcriteria = false;
 var iterationsFA2=1000;
 var seed=999999999;//defaultseed
 
+
 var showLabelsIfZoom=2.0;
-        // ============ < SIGMA.JS PROPERTIES > ============
-        var desirableNodeSizeMIN=1;
-        var desirableNodeSizeMAX=12;
-        var desirableScholarSize=6; //Remember that all scholars have the same size!
 
-        var sigmaJsDrawingProperties = {
-            defaultLabelColor: 'black',
-            defaultLabelSize: 10,//in fact I'm using it as minLabelSize'
-            defaultLabelBGColor: '#fff',
-            defaultLabelHoverColor: '#000',
-            labelThreshold: 6,
-            defaultEdgeType: 'curve',
+// ============ < SIGMA.JS PROPERTIES > ============
 
-            borderSize: 2.5,//Something other than 0
-            nodeBorderColor: "default",//exactly like this
-            defaultNodeBorderColor: "black"//,//Any color of your choice
-            //defaultBorderView: "always"
-        };
-        var sigmaJsGraphProperties = {
-            minEdgeSize: 2,
-            maxEdgeSize: 2
-        };
-        var sigmaJsMouseProperties = {
-            minRatio:0.1,
-            maxRatio: 100
-        };
-        // ============ < / SIGMA.JS PROPERTIES > ============
+var sigmaJsDrawingProperties = {
+    defaultLabelColor: 'black',
+    defaultLabelSize: 10,//in fact I'm using it as minLabelSize'
+    defaultLabelBGColor: '#fff',
+    defaultLabelHoverColor: '#000',
+    labelThreshold: 6,
+    defaultEdgeType: 'curve',
+
+    borderSize: 2.5,//Something other than 0
+    nodeBorderColor: "default",//exactly like this
+    defaultNodeBorderColor: "black"//,//Any color of your choice
+    //defaultBorderView: "always"
+};
+var sigmaJsGraphProperties = {
+    minEdgeSize: 2,
+    maxEdgeSize: 2
+};
+var sigmaJsMouseProperties = {
+    minRatio:0.1,
+    maxRatio: 15
+};
+// ============ < / SIGMA.JS PROPERTIES > ============
          
 
 // ============ < / DEVELOPER OPTIONS > ============
@@ -107,6 +106,18 @@ var swMacro=true;
 
 var socsemFlag=false;
 var constantNGramFilter;
+
+// var nodeFilterA_past = ""
+// var nodeFilterA_now = ""
+
+// var nodeFilterB_past = ""
+// var nodeFilterB_now = ""
+
+var lastEdgeFilterA = "-"
+
+// var edgeFilterB_past = ""
+// var edgeFilterB_now = ""
+
 
 
 var overviewWidth = 200;

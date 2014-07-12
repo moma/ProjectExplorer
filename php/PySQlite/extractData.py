@@ -665,19 +665,20 @@ class extract:
 	return graph
 
 
-    def buildJSON_sansfa2(self,graph,coordsRAW):
+    def buildJSON_sansfa2(self,graph,coordsRAW=None):
 	print "printing in buildJSON_sansfa2()"
 	nodes = {}
 	edges = {}
-	import json
-	xy = coordsRAW #For FA2.java: json.loads(coordsRAW)
-	#print xy
-	coords = {}
-	for i in xy:
-		coords[i['sID']] = {}
-		coords[i['sID']]['x'] = i['x']
-		coords[i['sID']]['y'] = i['y']
-	#print coords
+	if coordsRAW:
+		import json
+		xy = coordsRAW #For FA2.java: json.loads(coordsRAW)
+		#print xy
+		coords = {}
+		for i in xy:
+			coords[i['sID']] = {}
+			coords[i['sID']]['x'] = i['x']
+			coords[i['sID']]['y'] = i['y']
+		#print coords
 
 	for idNode in graph.nodes_iter():
 		if idNode[0]=="N":#If it is NGram
@@ -691,8 +692,8 @@ class extract:
 			node["label"] = nodeLabel
 			node["color"] = "19,"+str(colorg)+",244"
 			node["term_occ"] = term_occ
-			node["x"] = str(coords[idNode]['x'])
-			node["y"] = str(coords[idNode]['y'])
+			if coordsRAW: node["x"] = str(coords[idNode]['x'])
+			if coordsRAW: node["y"] = str(coords[idNode]['y'])
 			
 			nodes[idNode] = node
 
@@ -732,7 +733,7 @@ class extract:
 			if self.scholars[idNode]['homepage'][0:3] == "www":
 				content += '[ <a href=http://' +self.scholars[idNode]['homepage'].replace("&"," and ")+ ' target=blank > View homepage </a ><br/>]'
 			elif self.scholars[idNode]['homepage'][0:4] == "http":
-				content += '[ <a href=' +self.scholars[idNode]['homepage'].replace("&"," and ")+ ' target=blank > View homepage </a ><br/>]'
+				content += '[ <a href=' +self.scholars[idNode]['homepage'].replace("&"," and ")+ ' target=blank > View homepage </a >]<br/>'
 
 		
 			node = {}
@@ -740,19 +741,39 @@ class extract:
 			node["label"] = nodeLabel
 			node["color"] = color
 			node["term_occ"] = "12"
-			node["x"] = str(coords[idNode]['x'])
-			node["y"] = str(coords[idNode]['y'])
+			if coordsRAW: node["x"] = str(coords[idNode]['x'])
+			if coordsRAW: node["y"] = str(coords[idNode]['y'])
 			node["content"] = self.toHTML(content)
 
 			nodes[idNode] = node
+	
+	GG = nx.Graph()
+	for n in self.Graph.edges_iter():
+		s = n[0]
+		t = n[1]
+		w = float(self.Graph[n[0]][n[1]]['weight'])
+		tp = self.Graph[n[0]][n[1]]['type']
+		
+		if GG.has_edge(s,t): 
+			oldw = GG[s][t]['weight']
+			avgw = (oldw+w)/2
+			GG[s][t]['weight'] = avgw
+		else:
+			GG.add_edge( s , t , { "weight":w , "type":tp } )
+	
 	e = 0	
-	for n in self.Graph.edges_iter():#Memory, what's wrong with you?
-		weight = str("%.2f" % self.Graph[n[0]][n[1]]['weight'])
+	for n in GG.edges_iter():#Memory, what's wrong with you?
+		wr = 0.0
+		origw = GG[n[0]][n[1]]['weight']
+		for i in range(2,10):
+			wr = round( origw , i)
+			if wr > 0.0: break
 		edge = {}
 		edge["s"] = n[0] 
 		edge["t"] = n[1]
-		edge["w"] = str(self.Graph[n[0]][n[1]]['weight'])
-		edge["type"] = self.Graph[n[0]][n[1]]['type']
+		edge["w"] = str(wr)
+		edge["type"] = GG[n[0]][n[1]]['type']
+		if edge["type"]=="nodes1": print wr
 		edges[str(e)] = edge
 		e+=1
 		#if e%1000 == 0:
@@ -964,7 +985,7 @@ class extract:
 			nodes2.append(node)
 			nodes[idNode] = countnodes
 		countnodes+=1
-	e = 0	
+	e = 0
 	for n in self.Graph.edges_iter():#Memory, what's wrong with you?
 		weight = str("%.2f" % self.Graph[n[0]][n[1]]['weight'])
 		edge = {}

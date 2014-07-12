@@ -248,7 +248,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph) {
         
         var convg= ((Math.pow(nodes.length,2))/promdxdy);    /**/
         var swingingVSnodes_length = swingingSum/nodes.length;     /**/
-        if(convg > swingingVSnodes_length){ 
+        if(stopcriteria && convg > swingingVSnodes_length){ 
             if(numberOfDocs==nodes.length){
                 socialConverged++;
             }
@@ -963,11 +963,10 @@ sigma.forceatlas2.Region.prototype.applyForce = function(n, Force, theta) {
 
 sigma.publicPrototype.startForceAtlas2 = function() {
   //if(!this.forceatlas2) {
-  if(fa2enabled===true) {
+  if(fa2enabled) {
     this.forceatlas2 = new sigma.forceatlas2.ForceAtlas2(this._core.graph);
     this.forceatlas2.setAutoSettings();
     this.forceatlas2.init();
-  //}
     $("#overviewzone").hide();
     this.addGenerator('forceatlas2', this.forceatlas2.atomicGo, function(){
       return true;
@@ -976,6 +975,7 @@ sigma.publicPrototype.startForceAtlas2 = function() {
 };
 
 sigma.publicPrototype.stopForceAtlas2 = function() {
+  fa2enabled=false;
   this.removeGenerator('forceatlas2');
   updateMap();
   partialGraph.refresh();

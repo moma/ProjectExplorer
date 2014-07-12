@@ -337,8 +337,84 @@ function justhide(){
 
 //=========================== < FILTERS-SLIDERS > ===========================//
 
+
+function OrganizeEdgeWeightsForSlider( edgtype ) {
+	//  ( 1 )
+    // get visible sigma edges
+    visible_edges=partialGraph._core.graph.edges.filter(function(e) {
+                return !e['hidden'] && e["label"]==edgtype;
+    });
+
+
+    //  ( 2 )
+    // extract [ "edgeID" : edgeWEIGHT ] 
+    // and save this into edges_weight
+    var edges_weight=[]
+    for (var i in visible_edges) {
+        e = visible_edges[i]
+        id = e.id
+        edges_weight[id]=e.weight
+        // pr(id+"\t:\t"+e.weight)
+    }
+
+    //  ( 3 )
+    // order dict edges_weight by edge weight
+    var result = ArraySortByValue(edges_weight, function(a,b){
+        return a-b
+        //ASCENDENT
+    });
+
+    // // ( 4 )
+    // printing ordered ASC by weigth
+    // for (var i in result) {
+    //     r = result[i]
+    //     edgeid = r.key
+    //     edgeweight = r.value
+    //     pr(edgeid+"\t:\t"+edgeweight)
+    //     // e = result[i]
+    //     // pr(e.weight)
+    // }
+    var nb_E = result.length
+    var magnitude = (""+nb_E).length //order of magnitude of #visibleedges
+    var exponent = magnitude - 1
+    var steps = Math.pow(10,exponent) //    #(10 ^ magnit-1) steps
+    var stepsize = Math.round(nb_E/steps)// ~~(visibledges / #steps)
+
+    // pr("-----------------------------------")
+    // pr("number of visible edges: "+nb_E); 
+    // pr("result array:")
+    // pr(result)
+    // pr("magnitude : "+magnitude)
+    // pr("number of steps : "+steps)
+    // pr("size of one step : "+stepsize)
+    // pr("-----------------------------------")
+    
+
+    var finalarray = []
+    var counter=0
+    for(var i = 0; i < steps; i++) {
+        // pr(i)
+        var edgIDs = []
+        for(var j = 0; j < stepsize; j++)  {
+            if(!isUndef(result[counter])) {
+                k = result[counter].key
+                // w = result[counter].value
+                // pr("\t["+counter+"] : "+w)
+                edgIDs.push(k)
+            }
+            counter++;
+        }
+        if(edgIDs.length==0) break;
+        finalarray[i] = edgIDs
+    }
+
+    return {"steps":finalarray.length,"finalarray":finalarray}
+}
+
+
 function updateEdgeFilter(edgeFilterName) {
-    pr("Updating filter_ "+edgeFilterName);
+	pr("nothing: Updating edge filter_ "+edgeFilterName);
+	/*    
     thing="";
     if(edgeFilterName=="social") {
         edgeFilterName="#sliderAEdgeWeight";
@@ -445,9 +521,12 @@ function updateEdgeFilter(edgeFilterName) {
             });
         }
     });
+	*/
 }
 
 function updateBothEdgeFilters() {
+	pr("nothing: Updating both edge filters");
+	/*
     edges=partialGraph._core.graph.edges.filter(function(e) {
                     return !e['hidden'];
           });;
@@ -564,10 +643,12 @@ function updateBothEdgeFilters() {
             });
         }
     });
+	*/
 }
 
 function updateNodeFilter(nodeFilterName) {
-        
+    pr("nothing: Updating node filter_ "+nodeFilterName);
+    /*
     scholarsNodesBySize=[];
     keywordsNodesBySize=[];
     nodesSortedBySize=[];
@@ -638,9 +719,12 @@ function updateNodeFilter(nodeFilterName) {
     //            });
     //        }
     //    });
+	*/
 }
 
 function updateBothNodeFilters() {
+	pr("nothing: Updating both node filters");
+	/*
     nodes=partialGraph._core.graph.nodes.filter(function(n) {
                     return !n['hidden'];
           });
@@ -727,6 +811,7 @@ function updateBothNodeFilters() {
             });
         }
     });
+	*/
 }
 
 //=========================== </ FILTERS-SLIDERS > ===========================//

@@ -70,7 +70,7 @@ function sigmaLimits(){
 }
 
 function bringTheNoise(pathfile,type){
-    //    $('.modal').modal('show');
+    // $('.modal').modal('show');
 
     //  === get width and height   === //
     sigmaLimits();
@@ -187,6 +187,7 @@ function bringTheNoise(pathfile,type){
 	    if(type=="unique_id") {
 		    pr("bring the noise, case: unique_id");
             pr(getClientTime()+" : DataExt Ini");
+        // < === DATA EXTRACTION === >
     		$.ajax({
     		    type: 'GET',
     		    url: bridge["forNormalQuery"],
@@ -231,22 +232,6 @@ function bringTheNoise(pathfile,type){
                                 pr(getClientTime()+" : Fin FA2");
                                 console.log("Parsing and FA2 complete.");
         // < === ASYNCHRONOUS FA2.JS DONE!! === >
-
-                                // // leftPanel("close");
-                                // $("#closemodal").click();//modal.hide doesnt work :c
-                                // //    startForceAtlas2(partialGraph._core.graph);r(
-
-                                // cancelSelection(false);        
-                                // $("#tips").html(getTips());
-                                // //$('#sigma-example').css('background-color','white');
-                                // $("#category-B").hide();
-                                // $("#labelchange").hide();
-                                // $("#availableView").hide(); 
-                                // showMeSomeLabels(6);
-                                // initializeMap();
-                                // updateMap();
-                                // updateDownNodeEvent(false);
-                                // partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8).draw(2,2,2);
                                 theListeners(); 
                             }); 
     		    },
@@ -279,35 +264,6 @@ function theListeners(){
         saveGEXF();
     });
     
-    //    $("#aUnfold").click(function() {        
-    //        _cG = $("#leftcolumn");
-    //        anchototal=$('#fixedtop').width();
-    //        sidebar=_cG.width();
-    //
-    //        if (_cG.offset().left < 0) {
-    //            _cG.animate({
-    //                "left" : sidebar+"px"
-    //            }, function() {
-    //                $("#aUnfold").attr("class","leftarrow");                
-    //                $('#sigma-example').width(anchototal-sidebar);
-    //                $("#ctlzoom").css({
-    //                    left: (sidebar+10)+"px"
-    //                });
-    //            }); 
-    //        } else {
-    //            _cG.animate({
-    //                "left" : "-" + _cG.width() + "px"
-    //            }, function() {
-    //                $("#aUnfold").attr("class","rightarrow");
-    //                $('#sigma-example').width(anchototal);
-    //                $("#ctlzoom").css({
-    //                    left: "0px"
-    //                });
-    //            });
-    //        }
-    //        return false;
-    //    });
-    //    
         /******************* /SEARCH ***********************/
     $.ui.autocomplete.prototype._renderItem = function(ul, item) {
         var searchVal = $("#searchinput").val();
@@ -431,7 +387,7 @@ function theListeners(){
         }
     });
     
-    
+    // minimap stuff
     // $("#overview")
     //    .mousemove(onOverviewMove)
     //    .mousedown(startMove)
@@ -447,12 +403,8 @@ function theListeners(){
     })
     .contextmenu(function(){
         return false;
-    });
-    //    .mousemove(onOverviewMove)
-    //    .mousedown(startMove)
-    //    .mouseup(endMove)
-    //    .mouseout(endMove)
-    //    .mousewheel(onGraphScroll); -> it doesn't answer!
+    })
+    .mousewheel(onGraphScroll);
     
     $(document).keydown(function(e) {
         if( e.shiftKey || e.which==16 ) {
@@ -478,23 +430,23 @@ function theListeners(){
         range: "min",
         step: 0.1,
         slide: function( event, ui ) {
-        	pr("*******lalala***********")
-        	pr(partialGraph.position().ratio)
-        	pr(sigmaJsMouseProperties.minRatio)
-        	pr(sigmaJsMouseProperties.maxRatio)
+        	// pr("*******lalala***********")
+        	// pr(partialGraph.position().ratio)
+        	// pr(sigmaJsMouseProperties.minRatio)
+        	// pr(sigmaJsMouseProperties.maxRatio)
             partialGraph.zoomTo(
                 partialGraph._core.width / 2, 
                 partialGraph._core.height / 2, 
                 ui.value);
         }
     });
-
     
     $("#zoomPlusButton").click(function () {
         partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, partialGraph._core.mousecaptor.ratio * 1.5);
         $("#zoomSlider").slider("value",partialGraph.position().ratio);
         return false;
     });
+
     $("#zoomMinusButton").click(function () {
         partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, partialGraph._core.mousecaptor.ratio * 0.5);
         $("#zoomSlider").slider("value",partialGraph.position().ratio);
@@ -502,42 +454,93 @@ function theListeners(){
     });
     
     $("#edgesButton").click(function () {
-        if(fa2enabled===false){
-            edgesTF=true;
+        if(!fa2enabled){
             fa2enabled=true;
-        }
-        if(edgesTF==false){
-            partialGraph.stopForceAtlas2();
-            partialGraph.draw();
-            edgesTF=true;
-        }
-        else {
             partialGraph.startForceAtlas2();
-            edgesTF=false;
+        } else {
+            partialGraph.stopForceAtlas2();
         }
     });
     
+    //finished
     $("#sliderANodeWeight").freshslider({
         range: true,
         step:1,
         value:[10, 60],
+        enabled: false,
         onchange:function(low, high){
             console.log(low, high);
         }
     });
+
+
+
+
+
+
+
+
+    var filterparams = OrganizeEdgeWeightsForSlider ( "nodes1" ) 
+    var steps = filterparams["steps"]
+    var finalarray = filterparams["finalarray"]
+    //finished
     $("#sliderAEdgeWeight").freshslider({
         range: true,
-        step:1,
-        value:[10, 100],
-        onchange:function(low, high){
-            console.log(low, high);
+        step: 1,
+        min:0,
+        max:steps-1,
+        onchange:function(low, high){    
+            var filtervalue = low+"-"+high
+            // pr("filterNOW: "+filtervalue+" | filterPAST: "+lastEdgeFilterA+"  => "+(filtervalue!=lastEdgeFilterA))
+            if(filtervalue!=lastEdgeFilterA) {
+                if(lastEdgeFilterA=="-") {
+                    pushEdgesFilterA(filtervalue)
+                    return false
+                }
+                // $.doTimeout(300,function (){
+
+                for(var i in finalarray) {
+                    ids = finalarray[i]
+                    if(i>=low && i<=high){
+                        for(var id in ids) {
+                            edgeid = ids[id]
+                            add1Edge(edgeid)
+                            // partialGraph.addEdge(edgeid,Edges[edgeid].source,target,edge);
+
+                            // unHideElem(edgeid)
+                        }
+                    } else {
+                        for(var id in ids) {
+                            edgeid = ids[id]
+                            remove1Edge(edgeid)
+                            // hideElem(edgeid)
+                        }
+                    }
+                }
+                pushEdgesFilterA(filtervalue)
+                partialGraph.refresh()
+                partialGraph.draw()
+                // });
+            }
+            // pr("filterNOW: "+filtervalue+" | filterPAST: "+lastEdgeFilterA+"  => "+(filtervalue!=lastEdgeFilterA))
         }
     });
+
+    //finished
     $("#sliderANodeSize").freshslider({
         step:1,
-        value:10,
+        min:1,
+        max:25,
+        value:1,
         onchange:function(value){
-            console.log(value);
+            $.doTimeout(100,function (){2
+                   partialGraph.iterNodes(function (n) {
+                       if(Nodes[n.id].type==catSoc) {
+                           n.size = parseFloat(Nodes[n.id].size) + parseFloat((value-1))*0.3;
+                       }
+                   });
+                   partialGraph.draw();
+            });
         }
     });
     
@@ -549,6 +552,7 @@ function theListeners(){
             console.log(low, high);
         }
     });
+
     $("#sliderBEdgeWeight").freshslider({
         range: true,
         step:1,
@@ -557,13 +561,26 @@ function theListeners(){
             console.log(low, high);
         }
     });
+    
+    //finished
     $("#sliderBNodeSize").freshslider({
         step:1,
-        value:20,
+        min:1,
+        max:25,
+        value:1,
         onchange:function(value){
-            console.log(value);
+            $.doTimeout(100,function (){
+                   partialGraph.iterNodes(function (n) {
+                       if(Nodes[n.id].type==catSem) {
+                           n.size = parseFloat(Nodes[n.id].size) + parseFloat((value-1))*0.3;
+                       }
+                   });
+                   partialGraph.draw();
+            });
         }
     });
+    
+    //finished
     $("#unranged-value").freshslider({
         step: 1,
         min:cursor_size_min,
@@ -624,18 +641,6 @@ function theListeners(){
     //                });
     //                partialGraph.draw();
     //            });
-    //        }
-    //    });
-    //    $("#sliderSelectionZone").slider({
-    //        value: cursor_size,
-    //        min: parseFloat(cursor_size_min),
-    //        max: parseFloat(cursor_size_max),
-    //        animate: true,
-    //        change: function(event, ui) {
-    //            cursor_size= ui.value;
-    //            //if(cursor_size==0) updateDownNodeEvent(false);
-    //            //else updateDownNodeEvent(true); 
-    //        //return callSlider("#sliderSelectionZone", "selectionRadius");
     //        }
     //    });
 }

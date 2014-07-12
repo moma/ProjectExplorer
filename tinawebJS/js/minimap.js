@@ -101,57 +101,58 @@ function endMove(evt){
 }
 
 function onGraphScroll(evt, delta) {
-    partialGraph.totalScroll += delta;
-    if (Math.abs(partialGraph.totalScroll) >= 1) {
-        if (partialGraph.totalScroll < 0) {
-            //ZoomOUT
-            if (partialGraph.position().ratio > sigmaJsMouseProperties.minRatio) {
-                //partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, partialGraph._core.mousecaptor.ratio * 0.5);
-                //var _el = $(this),
-                //_off = $(this).offset(),
-                //_deltaX = evt.pageX - _el.width() / 2 - _off.left,
-                //_deltaY = evt.pageY - _el.height() / 2 - _off.top;
-                var 
-                mx=evt.offsetX,
-                my=evt.offsetY;
-                partialGraph.centreX=mx*((partialGraph._core.width-1)/(overviewWidth)),
-                partialGraph.centreY=my*((partialGraph._core.height-1)/(overviewHeight));               
+    $("#zoomSlider").slider("value",partialGraph.position().ratio);
+    // partialGraph.totalScroll += delta;
+    // if (Math.abs(partialGraph.totalScroll) >= 1) {
+    //     if (partialGraph.totalScroll < 0) {
+    //         //ZoomOUT
+    //         if (partialGraph.position().ratio > sigmaJsMouseProperties.minRatio) {
+    //             //partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, partialGraph._core.mousecaptor.ratio * 0.5);
+    //             //var _el = $(this),
+    //             //_off = $(this).offset(),
+    //             //_deltaX = evt.pageX - _el.width() / 2 - _off.left,
+    //             //_deltaY = evt.pageY - _el.height() / 2 - _off.top;
+    //             var 
+    //             mx=evt.offsetX,
+    //             my=evt.offsetY;
+    //             partialGraph.centreX=mx*((partialGraph._core.width-1)/(overviewWidth)),
+    //             partialGraph.centreY=my*((partialGraph._core.height-1)/(overviewHeight));               
                 
-                //                console.log("mx: "+mx+" - my: "+ my);                
-                //                console.log("cx: "+cx+" - cy: "+ cy);
-                //                partialGraph.centreX =cx;
-                //                partialGraph.centreY =cy;
-                partialGraph.zoomTo(partialGraph.centreX, partialGraph.centreY, partialGraph._core.mousecaptor.ratio * 0.5);
-                //                partialGraph.centreX -= ( Math.SQRT2 - 1 ) * _deltaX / partialGraph.echelleGenerale;
-                //                partialGraph.centreY -= ( Math.SQRT2 - 1 ) * _deltaY / partialGraph.echelleGenerale;
-                //                partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, partialGraph._core.mousecaptor.ratio * 0.5);
-                $("#zoomSlider").slider("value",partialGraph.position().ratio);
-            }
-        } else {
-            //ZoomIN
-            if (partialGraph.position().ratio < sigmaJsMouseProperties.maxRatio) {
-                //                partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, partialGraph._core.mousecaptor.ratio * 1.5);
-                //                partialGraph.echelleGenerale = Math.pow( Math.SQRT2, partialGraph.position().ratio );
-                //var _el = $(this),
-                //_off = $(this).offset(),
-                //_deltaX = evt.pageX - _el.width() / 2 - _off.left,
-                //_deltaY = evt.pageY - _el.height() / 2 - _off.top;
-                var 
-                mx=evt.offsetX,
-                my=evt.offsetY;
-                partialGraph.centreX=mx*((partialGraph._core.width-1)/(overviewWidth)),
-                partialGraph.centreY=my*((partialGraph._core.height-1)/(overviewHeight));               
+    //             //                console.log("mx: "+mx+" - my: "+ my);                
+    //             //                console.log("cx: "+cx+" - cy: "+ cy);
+    //             //                partialGraph.centreX =cx;
+    //             //                partialGraph.centreY =cy;
+    //             partialGraph.zoomTo(partialGraph.centreX, partialGraph.centreY, partialGraph._core.mousecaptor.ratio * 0.5);
+    //             //                partialGraph.centreX -= ( Math.SQRT2 - 1 ) * _deltaX / partialGraph.echelleGenerale;
+    //             //                partialGraph.centreY -= ( Math.SQRT2 - 1 ) * _deltaY / partialGraph.echelleGenerale;
+    //             //                partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, partialGraph._core.mousecaptor.ratio * 0.5);
+    //             $("#zoomSlider").slider("value",partialGraph.position().ratio);
+    //         }
+    //     } else {
+    //         //ZoomIN
+    //         if (partialGraph.position().ratio < sigmaJsMouseProperties.maxRatio) {
+    //             //                partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, partialGraph._core.mousecaptor.ratio * 1.5);
+    //             //                partialGraph.echelleGenerale = Math.pow( Math.SQRT2, partialGraph.position().ratio );
+    //             //var _el = $(this),
+    //             //_off = $(this).offset(),
+    //             //_deltaX = evt.pageX - _el.width() / 2 - _off.left,
+    //             //_deltaY = evt.pageY - _el.height() / 2 - _off.top;
+    //             var 
+    //             mx=evt.offsetX,
+    //             my=evt.offsetY;
+    //             partialGraph.centreX=mx*((partialGraph._core.width-1)/(overviewWidth)),
+    //             partialGraph.centreY=my*((partialGraph._core.height-1)/(overviewHeight));               
                 
-                //                console.log("mx: "+mx+" - my: "+ my);                
-                //                console.log("cx: "+cx+" - cy: "+ cy);
-                //                partialGraph.centreX =cx;
-                //                partialGraph.centreY =cy;
-                partialGraph.zoomTo(partialGraph.centreX, partialGraph.centreY, partialGraph._core.mousecaptor.ratio * 1.5);
-                $("#zoomSlider").slider("value",partialGraph.position().ratio);
-            }
-        }
-        partialGraph.totalScroll = 0;
-    }
+    //             //                console.log("mx: "+mx+" - my: "+ my);                
+    //             //                console.log("cx: "+cx+" - cy: "+ cy);
+    //             //                partialGraph.centreX =cx;
+    //             //                partialGraph.centreY =cy;
+    //             partialGraph.zoomTo(partialGraph.centreX, partialGraph.centreY, partialGraph._core.mousecaptor.ratio * 1.5);
+    //             $("#zoomSlider").slider("value",partialGraph.position().ratio);
+    //         }
+    //     }
+    //     partialGraph.totalScroll = 0;
+    // }
 }
 
 function initializeMap() {

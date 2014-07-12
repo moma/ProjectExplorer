@@ -671,57 +671,88 @@ function extractFromJson(data,seed){
         
         
         
-            if(edge.label=="nodes1"){             
-                if( (typeof partialGraph._core.graph.edgesIndex[target+";"+source])=="undefined" ){
-                    edge.hidden=false;
-                }
-                else edge.hidden=true;
-                
-                if((typeof nodes1[source])=="undefined"){
+            if(edge.label=="nodes1"){   
+                edge.hidden=false;
+
+                if(isUndef(nodes1[source])) {
                     nodes1[source] = {
                         label: Nodes[source].label,
                         neighbours: []
-                    };
-                    nodes1[source].neighbours.push(target);
+                    };                    
                 }
-                else nodes1[source].neighbours.push(target);
+                if(isUndef(nodes1[target])) {
+                    nodes1[target] = {
+                        label: Nodes[target].label,
+                        neighbours: []
+                    };                    
+                }   
+                nodes1[source].neighbours.push(target);
+                nodes1[target].neighbours.push(source);
             }
             
             
             if(edge.label=="nodes2"){ 
                 edge.hidden=true;
-                if((typeof nodes2[source])=="undefined"){
+
+                if(isUndef(nodes2[source])) {
                     nodes2[source] = {
                         label: Nodes[source].label,
                         neighbours: []
-                    };
-                    nodes2[source].neighbours.push(target);
+                    };                    
                 }
-                else nodes2[source].neighbours.push(target);
+                if(isUndef(nodes2[target])) {
+                    nodes2[target] = {
+                        label: Nodes[target].label,
+                        neighbours: []
+                    };                    
+                }
+                nodes2[source].neighbours.push(target);
+                nodes2[target].neighbours.push(source);
             }
             
             
             if(edge.label=="bipartite"){   
                 edge.hidden=true;
-                // Document to NGram 
-                if((typeof bipartiteD2N[source])=="undefined"){
-                    bipartiteD2N[source] = {
-                        label: Nodes[source].label,
-                        neighbours: []
-                    };
+
+                s = edge.sourceID
+
+                // // Source is Document
+                if(Nodes[s].type == catSoc) {
+
+                    if(isUndef(bipartiteD2N[source])) {
+                        bipartiteD2N[source] = {
+                            label: Nodes[source].label,
+                            neighbours: []
+                        };                    
+                    }
+                    if(isUndef(bipartiteN2D[target])) {
+                        bipartiteN2D[target] = {
+                            label: Nodes[target].label,
+                            neighbours: []
+                        };                    
+                    }
+
                     bipartiteD2N[source].neighbours.push(target);
-                }
-                else bipartiteD2N[source].neighbours.push(target);
-                
-                // NGram to Document 
-                if((typeof bipartiteN2D[target])=="undefined"){
-                    bipartiteN2D[target] = {
-                        label: Nodes[target].label,
-                        neighbours: []
-                    };
                     bipartiteN2D[target].neighbours.push(source);
+
+                // // Source is NGram
+                } else {
+
+                    if(isUndef(bipartiteN2D[source])) {
+                        bipartiteN2D[source] = {
+                            label: Nodes[source].label,
+                            neighbours: []
+                        };                    
+                    }
+                    if(isUndef(bipartiteD2N[target])) {
+                        bipartiteD2N[target] = {
+                            label: Nodes[target].label,
+                            neighbours: []
+                        };                    
+                    }
+                    bipartiteN2D[source].neighbours.push(target);
+                    bipartiteD2N[target].neighbours.push(source);
                 }
-                else bipartiteN2D[target].neighbours.push(source);
             }
             
             //edge.hidden=false/**///should be commented
