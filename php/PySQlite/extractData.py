@@ -773,7 +773,7 @@ class extract:
 		edge["t"] = n[1]
 		edge["w"] = str(wr)
 		edge["type"] = GG[n[0]][n[1]]['type']
-		if edge["type"]=="nodes1": print wr
+#		if edge["type"]=="nodes1": print wr
 		edges[str(e)] = edge
 		e+=1
 		#if e%1000 == 0:

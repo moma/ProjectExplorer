@@ -337,53 +337,204 @@ function justhide(){
 
 //=========================== < FILTERS-SLIDERS > ===========================//
 
+//	EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
+//	EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
+function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
-function OrganizeEdgeWeightsForSlider( edgtype ) {
-	//  ( 1 )
-    // get visible sigma edges
-    visible_edges=partialGraph._core.graph.edges.filter(function(e) {
-                return !e['hidden'] && e["label"]==edgtype;
+	if ($(sliderDivID).html()!="") {
+		pr("\t\t\t\t\t\t[[ algorithm not applied "+sliderDivID+" ]]")
+		return;
+	}
+	// sliderDivID = "#sliderAEdgeWeight"
+	// type = "nodes1"
+	// type_attrb = "label"
+	// criteria = "weight"
+
+	// sliderDivID = "#sliderBNodeSize"
+	// type = "NGram"
+	// type_attrb = "type"
+	// criteria = "size"
+
+	// AlgorithmForSliders ( partialGraph._core.graph.edges , "label" , "nodes1" , "weight") 
+	// AlgorithmForSliders ( partialGraph._core.graph.edges , "label" , "nodes2" , "weight") 
+	// AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "Document" ,  "size") 
+	// AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "NGram" ,  "size")
+    var filterparams = AlgorithmForSliders ( partialGraph._core.graph.edges , type_attrb , type , criteria) 
+    var steps = filterparams["steps"]
+    var finalarray = filterparams["finalarray"]
+    
+    //finished
+    $(sliderDivID).freshslider({
+        range: true,
+        step: 1,
+        min:0,
+        max:steps-1,
+        value:[0,steps-1],
+        onchange:function(low, high){    
+            var filtervalue = low+"-"+high
+            
+            if(filtervalue!=lastFilter[sliderDivID]) {
+                if(lastFilter[sliderDivID]=="-") {
+                    pushFilterValue( sliderDivID , filtervalue )
+                    return false
+                }
+                // $.doTimeout(300,function (){
+
+                for(var i in finalarray) {
+                    ids = finalarray[i]
+                    if(i>=low && i<=high){
+                        for(var id in ids) {                            
+                            ID = ids[id]
+                            add1Edge(ID)
+                        }
+                    } else {
+                        for(var id in ids) {
+                            ID = ids[id]
+                            partialGraph.dropEdge(ID)
+                        }
+                    }
+                }
+                pushFilterValue(sliderDivID,filtervalue)
+
+                if (!is_empty(selections))
+                    DrawAsSelectedNodes(selections)
+
+
+
+                partialGraph.refresh()
+                partialGraph.draw()
+                // });
+            }
+            
+        }
+    });
+}
+
+// NodeWeightFilter ( "#sliderANodeWeight" ,  "Document" , "type" , "size") 
+// NodeWeightFilter ( "#sliderBNodeWeight" ,  "NGram" , "type" , "size") 
+function NodeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
+
+	if ($(sliderDivID).html()!="") {
+		pr("\t\t\t\t\t\t[[ algorithm not applied "+sliderDivID+" ]]")
+		return;
+	}
+	// sliderDivID = "#sliderAEdgeWeight"
+	// type = "nodes1"
+	// type_attrb = "label"
+	// criteria = "weight"
+
+	// sliderDivID = "#sliderBNodeSize"
+	// type = "NGram"
+	// type_attrb = "type"
+	// criteria = "size"
+
+	// AlgorithmForSliders ( partialGraph._core.graph.edges , "label" , "nodes1" , "weight") 
+	// AlgorithmForSliders ( partialGraph._core.graph.edges , "label" , "nodes2" , "weight") 
+	// AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "Document" ,  "size") 
+	// AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "NGram" ,  "size")
+    var filterparams = AlgorithmForSliders ( partialGraph._core.graph.nodes , type_attrb , type , criteria) 
+    var steps = filterparams["steps"]
+    var finalarray = filterparams["finalarray"]
+    
+    //finished
+    $(sliderDivID).freshslider({
+        range: true,
+        step: 1,
+        min:0,
+        max:steps-1,
+        value:[0,steps-1],
+        onchange:function(low, high){    
+            var filtervalue = low+"-"+high
+            
+            if(filtervalue!=lastFilter[sliderDivID]) {
+                if(lastFilter[sliderDivID]=="-") {
+                    pushFilterValue( sliderDivID , filtervalue )
+                    return false
+                }
+                // $.doTimeout(300,function (){
+
+                for(var i in finalarray) {
+                    ids = finalarray[i]
+                    if(i>=low && i<=high){
+                        for(var id in ids) {
+                            ID = ids[id]
+                            partialGraph._core.graph.nodesIndex[ID].hidden = false;
+                        }
+                    } else {
+                        for(var id in ids) {
+                            ID = ids[id]
+                            partialGraph._core.graph.nodesIndex[ID].hidden = true;
+                        }                     
+                    }
+                }
+                pushFilterValue(sliderDivID,filtervalue)
+
+                if (!is_empty(selections))
+                    DrawAsSelectedNodes(selections)
+
+                partialGraph.refresh()
+                partialGraph.draw()
+                // });
+            }
+            
+        }
+    });
+}
+
+
+// AlgorithmForSliders ( partialGraph._core.graph.edges , "label" , "nodes1" , "weight") 
+// AlgorithmForSliders ( partialGraph._core.graph.edges , "label" , "nodes2" , "weight") 
+// AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "Document" ,  "size") 
+// AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "NGram" ,  "size") 
+function AlgorithmForSliders( elements , type_attrb , type , criteria) {
+	// //  ( 1 )
+    // // get visible sigma nodes|edges
+    elems=elements.filter(function(e) {
+                return e[type_attrb]==type;
     });
 
-
-    //  ( 2 )
-    // extract [ "edgeID" : edgeWEIGHT ] 
-    // and save this into edges_weight
-    var edges_weight=[]
-    for (var i in visible_edges) {
-        e = visible_edges[i]
+    // pr("nodes|edges length: "+elems.length)
+    // //  ( 2 )
+    // // extract [ "edgeID" : edgeWEIGHT ] | [ "nodeID" : nodeSIZE ] 
+    // // and save this into edges_weight | nodes_size
+    var elem_attrb=[]
+    for (var i in elems) {
+        e = elems[i]
         id = e.id
-        edges_weight[id]=e.weight
-        // pr(id+"\t:\t"+e.weight)
+        elem_attrb[id]=e[criteria]
+        // pr(id+"\t:\t"+e[criteria])
     }
+    // pr("{ id : size|weight } ")
+    // pr(elem_attrb)
 
-    //  ( 3 )
-    // order dict edges_weight by edge weight
-    var result = ArraySortByValue(edges_weight, function(a,b){
+    // //  ( 3 )
+    // // order dict edges_weight by edge weight | nodes_size by node size
+    var result = ArraySortByValue(elem_attrb, function(a,b){
         return a-b
         //ASCENDENT
     });
 
+    // pr("result: ")
+    // pr(result)
+    // pr(result.length)
     // // ( 4 )
-    // printing ordered ASC by weigth
+    // // printing ordered ASC by weigth
     // for (var i in result) {
     //     r = result[i]
-    //     edgeid = r.key
-    //     edgeweight = r.value
-    //     pr(edgeid+"\t:\t"+edgeweight)
+    //     idid = r.key
+    //     elemattrb = r.value
+    //     pr(idid+"\t:\t"+elemattrb)
     //     // e = result[i]
-    //     // pr(e.weight)
+    //     // pr(e[criteria])
     // }
-    var nb_E = result.length
-    var magnitude = (""+nb_E).length //order of magnitude of #visibleedges
+    var N = result.length
+    var magnitude = (""+N).length //order of magnitude of edges|nodes
     var exponent = magnitude - 1
     var steps = Math.pow(10,exponent) //    #(10 ^ magnit-1) steps
-    var stepsize = Math.round(nb_E/steps)// ~~(visibledges / #steps)
+    var stepsize = Math.round(N/steps)// ~~(visibledges / #steps)
 
     // pr("-----------------------------------")
-    // pr("number of visible edges: "+nb_E); 
-    // pr("result array:")
-    // pr(result)
+    // pr("number of visible nodes|edges: "+N); 
     // pr("magnitude : "+magnitude)
     // pr("number of steps : "+steps)
     // pr("size of one step : "+stepsize)
@@ -392,426 +543,23 @@ function OrganizeEdgeWeightsForSlider( edgtype ) {
 
     var finalarray = []
     var counter=0
-    for(var i = 0; i < steps; i++) {
+    for(var i = 0; i < steps*2; i++) {
         // pr(i)
-        var edgIDs = []
+        var IDs = []
         for(var j = 0; j < stepsize; j++)  {
             if(!isUndef(result[counter])) {
                 k = result[counter].key
                 // w = result[counter].value
                 // pr("\t["+counter+"] : "+w)
-                edgIDs.push(k)
+                IDs.push(k)
             }
             counter++;
         }
-        if(edgIDs.length==0) break;
-        finalarray[i] = edgIDs
+        if(IDs.length==0) break;
+        finalarray[i] = IDs
     }
-
+    // pr("finalarray: ")
     return {"steps":finalarray.length,"finalarray":finalarray}
-}
-
-
-function updateEdgeFilter(edgeFilterName) {
-	pr("nothing: Updating edge filter_ "+edgeFilterName);
-	/*    
-    thing="";
-    if(edgeFilterName=="social") {
-        edgeFilterName="#sliderAEdgeWeight";
-        minvalue="#nodeAFilterMinValue";
-        maxvalue="#nodeAFilterMaxValue";
-        thing="nodes1";
-    }
-    if(edgeFilterName=="semantic") {
-        minvalue="#nodeBFilterMinValue";
-        maxvalue="#nodeBFilterMaxValue";
-        edgeFilterName="#sliderBEdgeWeight";
-        thing="nodes2";
-    }
-    edges=partialGraph._core.graph.edges.filter(function(e) {
-                    return !e['hidden'];
-          });
-          
-    //    pr("\tpartialGraph._core.graph.edges: "+partialGraph._core.graph.edges.length);
-    //    pr(partialGraph._core.graph.edges); //#edges=936
-    //    pr("\tpartialGraph._core.graph.edges.filter(function(x){return !x['hidden']});: "+edges.length);
-    //    pr(edges);                          //#edges=936
-    
-    
-    
-    edgesByWeight=[];
-    for(var i in edges){
-        if(edges[i].hidden==false){
-            if(edges[i].label==thing){
-                if(isUndef(edgesByWeight[edges[i].weight])){
-                    edgesByWeight[edges[i].weight]=[];
-                }
-                edgesByWeight[edges[i].weight].push(edges[i].id);
-            }
-        }
-    }
-    //    pr("\tedgesByWeight: ");
-    //    pr(edgesByWeight);
-    edgesSortedByWeight = ArraySortByKey(edgesByWeight, function(a,b){
-        return a-b
-    });
-    
-    //    pr("\tedgesSortedByWeight: ");
-    //    pr(edgesSortedByWeight);
-    
-    normEdges=[];
-    cont=0;
-    index=0;
-    nbCuts=Math.floor(edges.length/10);
-    for(var i in edgesSortedByWeight){
-        for(var j in edgesSortedByWeight[i].value){
-            if(isUndef(normEdges[index])){
-                normEdges[index]=[];
-            }
-            normEdges[index].push(edgesSortedByWeight[i].value[j])
-            cont++;
-            if(cont%nbCuts==0) {
-                index++;
-                cont=0;
-            }
-        }
-    }
-    
-    //    pr("\tnormEdges: ");
-    //    pr(normEdges);
-    
-    $(edgeFilterName).slider({
-        range: true,
-        min: 0,
-        max: normEdges.length-1,
-        values: [0, normEdges.length-1],
-        step: 1,
-        animate: true,
-        slide: function(event, ui) {
-            $.doTimeout(300,function (){
-                //console.log("Rango Pesos Arista: "+ui.values[ 0 ]+" , "+ui.values[ 1 ]);
-                edgesTemp = partialGraph._core.graph.edgesIndex;
-                for(i=0;i<normEdges.length;i++){
-                    if(i>=ui.values[0] && i<=ui.values[1]){
-                        //$(minvalue).text(ui.values[ 0 ]);
-                        //$(maxvalue).text(ui.values[ 1 ]);
-                        //console.log("Rango Pesos Arista: "+ui.values[ 0 ]+" , "+ui.values[ 1 ]);
-                        for (var j in normEdges[i]){
-                            id=normEdges[i][j];
-                            //pr("unHideElem("+id+");");
-                            //                            if(isUndef(edgesTemp[id])){
-                            //                                //source=Edges[id].sourceID;
-                            //                                //target=Edges[id].targetID;
-                            //                                //edge=Edges[id];
-                            //                                pr("unHideElem("+id+");")
-                            unHideElem(id);
-                            //partialGraph.addEdge(id,source,target,edge);
-                            //                            }
-                        }
-                    }
-                    else {
-                        for (var j in normEdges[i]){
-                            hideElem(normEdges[i][j]);
-                        }
-                        //partialGraph.dropEdge(normEdges[i]);
-                    }
-                }
-                pr("==========================================")
-                partialGraph.draw();
-            });
-        }
-    });
-	*/
-}
-
-function updateBothEdgeFilters() {
-	pr("nothing: Updating both edge filters");
-	/*
-    edges=partialGraph._core.graph.edges.filter(function(e) {
-                    return !e['hidden'];
-          });;
-    scholarsEdgesByWeight=[];
-    keywordsEdgesByWeight=[];
-    
-    for(var i in edges){
-        if(edges[i].label=="nodes1"){
-            if(isUndef(scholarsEdgesByWeight[edges[i].weight])){
-                scholarsEdgesByWeight[edges[i].weight]=[];
-            }
-            scholarsEdgesByWeight[edges[i].weight].push(edges[i].id);
-        }
-        if(edges[i].label=="nodes2"){
-            if(isUndef(keywordsEdgesByWeight[edges[i].weight])){
-                keywordsEdgesByWeight[edges[i].weight]=[];
-            }
-            keywordsEdgesByWeight[edges[i].weight].push(edges[i].id);            
-        }
-    }
-    scholarsEdgesSortedByWeight = ArraySortByKey(scholarsEdgesByWeight, function(a,b){
-        return a-b
-    });
-    
-    keywordsEdgesSortedByWeight = ArraySortByKey(keywordsEdgesByWeight, function(a,b){
-        return a-b
-    });
-    //    
-    //    normScholarEdges=[];
-    //    cont=0;
-    //    index=0;
-    //    for(var i in scholarsEdgesSortedByWeight){
-    //        for(var j in scholarsEdgesSortedByWeight[i].value){
-    //            if(isUndef(normScholarEdges[index])){
-    //                normScholarEdges[index]=[];
-    //            }
-    //            normScholarEdges[index].push(scholarsEdgesSortedByWeight[i].value[j])
-    //            cont++;
-    //            if(cont%20==0) {
-    //                index++;
-    //                cont=0;
-    //            }
-    //        }
-    //    }
-    //    pr(normScholarEdges);
-    
-    $("#sliderAEdgeWeight").slider({
-        range: true,
-        min: 0,
-        max: scholarsEdgesSortedByWeight.length-1,
-        values: [0, scholarsEdgesSortedByWeight.length-1],
-        step: 1,
-        animate: true,
-        slide: function(event, ui) {
-            $.doTimeout(300,function (){
-                //console.log("Rango Pesos Arista: "+ui.values[ 0 ]+" , "+ui.values[ 1 ]);
-                edgesTemp = partialGraph._core.graph.edgesIndex;
-                for(i=0;i<scholarsEdgesSortedByWeight.length;i++){
-                    if(i>=ui.values[0] && i<=ui.values[1]){
-                        for (var j in scholarsEdgesSortedByWeight[i].value){
-                            id=scholarsEdgesSortedByWeight[i].value[j];
-                            unHideElem(id);
-                            //                            if(isUndef(edgesTemp[id])){
-                            //                                source=Edges[id].sourceID;
-                            //                                target=Edges[id].targetID;
-                            //                                edge=Edges[id];
-                            //                                //partialGraph.addEdge(id,source,target,edge);
-                            //                            }
-                        }
-                    }
-                    else {
-                        for(var j in scholarsEdgesSortedByWeight[i].value){
-                            hideElem(scholarsEdgesSortedByWeight[i].value[j])
-                        }
-                    }
-                }
-                partialGraph.draw();
-            });
-        }
-    });
-    
-    $("#sliderBEdgeWeight").slider({
-        range: true,
-        min: 0,
-        max: keywordsEdgesSortedByWeight.length-1,
-        values: [0, keywordsEdgesSortedByWeight.length-1],
-        step: 1,
-        animate: true,
-        slide: function(event, ui) {
-            $.doTimeout(300,function (){
-                //console.log("Rango Pesos Arista: "+ui.values[ 0 ]+" , "+ui.values[ 1 ]);
-                edgesTemp = partialGraph._core.graph.edgesIndex;
-                for(i=0;i<keywordsEdgesSortedByWeight.length;i++){
-                    if(i>=ui.values[0] && i<=ui.values[1]){
-                        for (var j in keywordsEdgesSortedByWeight[i].value){
-                            id=keywordsEdgesSortedByWeight[i].value[j];
-                            unHideElem(id);
-                            //                            if(isUndef(edgesTemp[id])){
-                            //                                source=Edges[id].sourceID;
-                            //                                target=Edges[id].targetID;
-                            //                                edge=Edges[id];
-                            //                                //partialGraph.addEdge(id,source,target,edge);
-                            //                            }
-                        }
-                    }
-                    else {
-                        for(var j in keywordsEdgesSortedByWeight[i].value){
-                            hideElem(keywordsEdgesSortedByWeight[i].value[j])
-                        }
-                        //partialGraph.dropEdge(keywordsEdgesSortedByWeight[i].value);
-                    }
-                }
-                partialGraph.draw();
-            });
-        }
-    });
-	*/
-}
-
-function updateNodeFilter(nodeFilterName) {
-    pr("nothing: Updating node filter_ "+nodeFilterName);
-    /*
-    scholarsNodesBySize=[];
-    keywordsNodesBySize=[];
-    nodesSortedBySize=[];
-    
-    nodeType="";
-    divName="";
-    pr("something weird is going here dude: enviroment.js|updateNodeFilter(nodeFilterName)")
-    pr(catSoc)
-    pr(catSem)
-    //    if(nodeFilterName=="social"){
-    //        nodeType=catSoc;
-    //        divName="#sliderANodeWeight";
-    //    }
-    //    else {
-    //        nodeType=catSem;
-    //        divName="#sliderBNodeWeight";
-    //    }
-    //    nodes=partialGraph._core.graph.nodes.filter(function(n) {
-    //                    return !n['hidden'];
-    //          });
-    //    nodesBySize=[];
-    //    for(var i in nodes){
-    //        if(Nodes[nodes[i].id].type==catSoc){
-    //            if(isUndef(nodesBySize[nodes[i].degree])){
-    //                nodesBySize[nodes[i].degree]=[];
-    //            }
-    //            nodesBySize[nodes[i].degree].push(nodes[i].id);
-    //        }
-    //        if(Nodes[nodes[i].id].type==catSem){
-    //            if(isUndef(nodesBySize[nodes[i].size])){
-    //                nodesBySize[nodes[i].size]=[];
-    //            }
-    //            nodesBySize[nodes[i].size].push(nodes[i].id);
-    //        }
-    //    }
-    //    nodesSortedBySize = ArraySortByKey(nodesBySize, function(a,b){
-    //        return a-b
-    //    });
-    //    if(nodeFilterName=="social"){
-    //        return null;
-    //    }
-    //    $(divName).slider({
-    //        range: true,
-    //        min: 0,
-    //        max: nodesSortedBySize.length-1,
-    //        values: [0, nodesSortedBySize.length-1],
-    //        step: 1,
-    //        animate: true,
-    //        slide: function(event, ui) {
-    //            $.doTimeout(300,function (){
-    //                //console.log("Rango Pesos Arista: "+ui.values[ 0 ]+" , "+ui.values[ 1 ]);
-    //                nodesTemp = partialGraph._core.graph.nodesIndex;
-    //                for(i=0;i<nodesSortedBySize.length;i++){
-    //                    if(i>=ui.values[0] && i<=ui.values[1]){
-    //                        for (var j in nodesSortedBySize[i].value){
-    //                            id=nodesSortedBySize[i].value[j];
-    //                            nodesTemp[id].hidden=false;
-    //                        }
-    //                    }
-    //                    else {
-    //                        for (var j in nodesSortedBySize[i].value){
-    //                            id=nodesSortedBySize[i].value[j];
-    //                            nodesTemp[id].hidden=true;
-    //                        }
-    //                    }
-    //                }
-    //                partialGraph.draw();
-    //            });
-    //        }
-    //    });
-	*/
-}
-
-function updateBothNodeFilters() {
-	pr("nothing: Updating both node filters");
-	/*
-    nodes=partialGraph._core.graph.nodes.filter(function(n) {
-                    return !n['hidden'];
-          });
-    scholarsNodesBySize=[];
-    keywordsNodesBySize=[];
-    nodesSortedBySize=[];
-    
-    for(var i in nodes){
-        if(Nodes[nodes[i].id].type==catSoc){
-            if(isUndef(scholarsNodesBySize[nodes[i].degree])){
-                scholarsNodesBySize[nodes[i].degree]=[];
-            }
-            scholarsNodesBySize[nodes[i].degree].push(nodes[i].id);
-        }
-        if(Nodes[nodes[i].id].type==catSem){
-            if(isUndef(keywordsNodesBySize[nodes[i].size])){
-                keywordsNodesBySize[nodes[i].size]=[];
-            }
-            keywordsNodesBySize[nodes[i].size].push(nodes[i].id);
-        }
-    }
-    scholarsSortedBySize = ArraySortByKey(scholarsNodesBySize, function(a,b){
-        return a-b
-    });    
-    keywordsSortedBySize = ArraySortByKey(keywordsNodesBySize, function(a,b){
-        return a-b
-    });
-    
-    //    $("#sliderANodeWeight").slider({
-    //        range: true,
-    //        min: 0,
-    //        max: scholarsSortedBySize.length-1,
-    //        values: [0, scholarsSortedBySize.length-1],
-    //        step: 1,
-    //        animate: true,
-    //        slide: function(event, ui) {
-    //            $.doTimeout(300,function (){
-    //                //console.log("Rango Pesos Arista: "+ui.values[ 0 ]+" , "+ui.values[ 1 ]);
-    //                nodesTemp = partialGraph._core.graph.nodesIndex;
-    //                for(i=0;i<scholarsSortedBySize.length;i++){
-    //                    if(i>=ui.values[0] && i<=ui.values[1]){
-    //                        for (var j in scholarsSortedBySize[i].value){
-    //                            id=scholarsSortedBySize[i].value[j];
-    //                            nodesTemp[id].hidden=false;
-    //                        }
-    //                    }
-    //                    else {
-    //                        for (var j in scholarsSortedBySize[i].value){
-    //                            id=scholarsSortedBySize[i].value[j];
-    //                            nodesTemp[id].hidden=true;
-    //                        }
-    //                    }
-    //                }
-    //                partialGraph.draw();
-    //            });
-    //        }
-    //    });
-    $("#sliderBNodeWeight").slider({
-        range: true,
-        min: 0,
-        max: keywordsSortedBySize.length-1,
-        values: [0, keywordsSortedBySize.length-1],
-        step: 1,
-        animate: true,
-        slide: function(event, ui) {
-            $.doTimeout(300,function (){
-                //console.log("Rango Pesos Arista: "+ui.values[ 0 ]+" , "+ui.values[ 1 ]);
-                nodesTemp = partialGraph._core.graph.nodesIndex;
-                for(i=0;i<keywordsSortedBySize.length;i++){
-                    if(i>=ui.values[0] && i<=ui.values[1]){
-                        for (var j in keywordsSortedBySize[i].value){
-                            id=keywordsSortedBySize[i].value[j];
-                            nodesTemp[id].hidden=false;
-                        }
-                    }
-                    else {
-                        for (var j in keywordsSortedBySize[i].value){
-                            id=keywordsSortedBySize[i].value[j];
-                            nodesTemp[id].hidden=true;
-                        }
-                    }
-                }
-                partialGraph.draw();
-            });
-        }
-    });
-	*/
 }
 
 //=========================== </ FILTERS-SLIDERS > ===========================//

@@ -228,6 +228,7 @@ function RefreshState(newNOW){
         pr("in social N: "+N+" - k: "+k+" - s: "+s)
         if(NOW=="A" && (s==0 || k>=N)) LevelButtonDisable(true);
         else LevelButtonDisable(false);
+		EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
     }
     if(NOW=="B" || NOW=="b") {
         var N=Object.keys(partialGraph._core.graph.nodes.filter(function(n){return n.type==catSem && !n.hidden })).length;
@@ -236,6 +237,8 @@ function RefreshState(newNOW){
         pr("in semantic N: "+N+" - k: "+k+" - s: "+s)
         if( NOW=="B" && (s==0 || k>=N) ) LevelButtonDisable(true);
         else LevelButtonDisable(false);
+        EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
+        NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size") 
     }
     if(NOW=="AaBb"){
         LevelButtonDisable(true);
@@ -249,9 +252,6 @@ function pushSWClick(arg){
 }
 
 
-function pushEdgesFilterA(arg){
-    lastEdgeFilterA = arg;
-}
 
 // it receives entire node
 function selection(currentNode){
@@ -608,9 +608,7 @@ function graphNGrams(node_id){
         } 
         node = partialGraph._core.graph.nodesIndex[node_id];
         selection(node);
-        partialGraph.startForceAtlas2();        
-        updateEdgeFilter("semantic");
-        updateNodeFilter("semantic");
+        partialGraph.startForceAtlas2(); 
         $("#category-A").hide();
         $("#category-B").show();
         changeButton("active_tags.png");
@@ -666,8 +664,7 @@ function graphDocs(node_id){
         selection(node);
         partialGraph.startForceAtlas2();        
         $("#category-A").show();
-        $("#category-B").hide();
-        updateEdgeFilter("social");        
+        $("#category-B").hide();     
         changeButton("active_scholars.png");
     }
 }
@@ -686,7 +683,6 @@ function greyEverything(){
     //        partialGraph._core.graph.nodesIndex[i].forceLabel=false;
     //    }
     //    deselections={};
-    greyColor = '#9b9e9e';
     
     nds = partialGraph._core.graph.nodes.filter(function(n) {
                             return !n['hidden'];
@@ -724,7 +720,6 @@ function greyEverything(){
 }
 
 function markAsSelected(n_id,sel) {
-    greyColor = '#9b9e9e';
     if(!isUndef(n_id.id)) nodeSel=n_id;
     else nodeSel = partialGraph._core.graph.nodesIndex[n_id];
     
@@ -734,11 +729,38 @@ function markAsSelected(n_id,sel) {
         nodeSel.attr['grey'] = 0;
         
         if(categoriesIndex.length==1) {
+        	pr("jeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeere")
             if( !isUndef(nodes1[nodeSel.id]) &&
                     !isUndef(nodes1[nodeSel.id].neighbours)
                   ){
                     neigh=nodes1[nodeSel.id].neighbours;/**/
                     for(var i in neigh){
+
+                            // nodeVec = partialGraph._core.graph.nodesIndex[neigh[i]];
+                            // // vec.color = vec.attr['true_color'];
+                            // // vec.attr['grey'] = 0;
+                            // // pr("nodeselected: "+nodeSel.id+"\t"+nodeSel.label+"\t\t||\t\tvecino: "+vec.id+"\t"+vec.label)
+
+                            // possibledge1 = partialGraph._core.graph.edgesIndex[nodeVec.id+";"+nodeSel.id]
+                            // possibledge2 = partialGraph._core.graph.edgesIndex[nodeSel.id+";"+nodeVec.id]
+
+                            // an_edge = (!isUndef(possibledge1))?possibledge1:possibledge2;
+                            // if(!isUndef(an_edge) && !an_edge.hidden) {
+
+                            // 	//highlight node
+                            // 	nodeVec.hidden = false;
+	                           //  nodeVec.color = nodeVec.attr['true_color'];
+	                           //  nodeVec.attr['grey'] = 0;
+
+                            // 	//highlight edge
+                            //     an_edge.color = an_edge.attr['true_color'];
+                            //     an_edge.attr['grey'] = 0;                         	
+                            // }
+
+                            // if (NOW=="a" || NOW=="b" && nodeVec.color==greyColor)
+                            // 	nodeVec.hidden = true
+
+
                         vec = partialGraph._core.graph.nodesIndex[neigh[i]];
                         vec.color = vec.attr['true_color'];
                         vec.attr['grey'] = 0;
@@ -754,7 +776,7 @@ function markAsSelected(n_id,sel) {
                         }
                     }
                 }
-        }
+        } // two categories network:
         else {
             if(swclickActual=="social") {
                 if(nodeSel.type==catSoc){
@@ -763,23 +785,45 @@ function markAsSelected(n_id,sel) {
                       ){
                         neigh=nodes1[nodeSel.id].neighbours;/**/
                         for(var i in neigh){
-                            vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-                            vec.color = vec.attr['true_color'];
-                            vec.attr['grey'] = 0;
-                            an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-                            if(!isUndef(an_edge) && !an_edge.hidden){
+
+                            nodeVec = partialGraph._core.graph.nodesIndex[neigh[i]];
+                            // vec.color = vec.attr['true_color'];
+                            // vec.attr['grey'] = 0;
+                            // pr("nodeselected: "+nodeSel.id+"\t"+nodeSel.label+"\t\t||\t\tvecino: "+vec.id+"\t"+vec.label)
+
+                            possibledge1 = partialGraph._core.graph.edgesIndex[nodeVec.id+";"+nodeSel.id]
+                            possibledge2 = partialGraph._core.graph.edgesIndex[nodeSel.id+";"+nodeVec.id]
+
+                            an_edge = (!isUndef(possibledge1))?possibledge1:possibledge2;
+                            if(!isUndef(an_edge) && !an_edge.hidden) {
+
+                            	//highlight node
+                            	// nodeVec.hidden = false;
+	                            nodeVec.color = nodeVec.attr['true_color'];
+	                            nodeVec.attr['grey'] = 0;
+
+                            	//highlight edge
                                 an_edge.color = an_edge.attr['true_color'];
-                                an_edge.attr['grey'] = 0;
+                                an_edge.attr['grey'] = 0;                         	
                             }
-                            an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-                            if(!isUndef(an_edge) && !an_edge.hidden){
-                                an_edge.color = an_edge.attr['true_color'];
-                                an_edge.attr['grey'] = 0;
-                            }
+
+                            // if ( (NOW=="a" || NOW=="b") && nodeVec.color==grey)
+                            // 	pr(nodeVec)
+                            	// nodeVec.hidden = true
+
+                            // an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
+                            // if(!isUndef(an_edge) && !an_edge.hidden){
+                            //     an_edge.color = an_edge.attr['true_color'];
+                            //     an_edge.attr['grey'] = 0;
+                            // }
+                            // an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
+                            // if(!isUndef(an_edge) && !an_edge.hidden){
+                            //     an_edge.color = an_edge.attr['true_color'];
+                            //     an_edge.attr['grey'] = 0;
+                            // }
                         }
                     }
-                }
-                else { 
+                } else { 
 
                     if( !isUndef(bipartiteN2D[nodeSel.id]) &&
                         !isUndef(bipartiteN2D[nodeSel.id].neighbours)
@@ -826,25 +870,52 @@ function markAsSelected(n_id,sel) {
                         }
                       }
                 }
-                else {                   
+                else {
                     if( !isUndef(nodes2[nodeSel.id]) &&
                         !isUndef(nodes2[nodeSel.id].neighbours)
                       ){
                         neigh=nodes2[nodeSel.id].neighbours;/**/
                         for(var i in neigh){
-                            vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-                            vec.color = vec.attr['true_color'];
-                            vec.attr['grey'] = 0;
-                            an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-                            if(!isUndef(an_edge) && !an_edge.hidden){
+
+                            nodeVec = partialGraph._core.graph.nodesIndex[neigh[i]];
+                            // vec.color = vec.attr['true_color'];
+                            // vec.attr['grey'] = 0;
+                            // pr("nodeselected: "+nodeSel.id+"\t"+nodeSel.label+"\t\t||\t\tvecino: "+vec.id+"\t"+vec.label)
+
+                            possibledge1 = partialGraph._core.graph.edgesIndex[nodeVec.id+";"+nodeSel.id]
+                            possibledge2 = partialGraph._core.graph.edgesIndex[nodeSel.id+";"+nodeVec.id]
+
+                            an_edge = (!isUndef(possibledge1))?possibledge1:possibledge2;
+                            if(!isUndef(an_edge) && !an_edge.hidden) {
+
+                            	//highlight node
+                            	// nodeVec.hidden = false;
+	                            nodeVec.color = nodeVec.attr['true_color'];
+	                            nodeVec.attr['grey'] = 0;
+
+                            	//highlight edge
                                 an_edge.color = an_edge.attr['true_color'];
-                                an_edge.attr['grey'] = 0;
+                                an_edge.attr['grey'] = 0;                         	
                             }
-                            an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-                            if(!isUndef(an_edge) && !an_edge.hidden){
-                                an_edge.color = an_edge.attr['true_color'];
-                                an_edge.attr['grey'] = 0;
-                            }
+
+                            // if ( (NOW=="a" || NOW=="b") && nodeVec.color==grey)
+                            // 	pr(nodeVec)
+                            	// nodeVec.hidden = true
+
+
+                            // vec = partialGraph._core.graph.nodesIndex[neigh[i]];
+                            // vec.color = vec.attr['true_color'];
+                            // vec.attr['grey'] = 0;
+                            // an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
+                            // if(!isUndef(an_edge) && !an_edge.hidden){
+                            //     an_edge.color = an_edge.attr['true_color'];
+                            //     an_edge.attr['grey'] = 0;
+                            // }
+                            // an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
+                            // if(!isUndef(an_edge) && !an_edge.hidden){
+                            //     an_edge.color = an_edge.attr['true_color'];
+                            //     an_edge.attr['grey'] = 0;
+                            // }
                         }
                       }
                 }
@@ -942,7 +1013,7 @@ function markAsSelected(n_id,sel) {
     }
     //    /* Just in case of unselection */
     //    /* Finally I decide not using this unselection. */
-    //    /* We just grayEverything and color the selections[] */
+    //    /* We just greyEverything and color the selections[] */
     //    else { //   sel=false <-> unselect(nodeSel)
     //                
     //        nodeSel.color = greyColor;
@@ -1095,6 +1166,31 @@ function markAsSelected(n_id,sel) {
     //            }
     //        }
     //    }
+}
+
+
+function DrawAsSelectedNodes( nodeskeys ) {
+    greyEverything(); 
+    
+    var ndsids=[]
+    if( $.isArray(nodeskeys) ) {
+
+    	if(nodeskeys.length==0 && !is_empty(nodeskeys))
+    		ndsids = Object.keys(nodeskeys)
+    	else
+    		ndsids=nodeskeys;
+
+    } else ndsids.push(nodeskeys);
+
+    if(!checkBox) {
+        checkBox=true;
+        for(var i in ndsids){
+            nodeid = ndsids[i]
+            markAsSelected(nodeid,true); 
+        }
+        checkBox=false;
+    }
+    overNodes=true; 
 }
 
 function MultipleSelection(nodes){
@@ -1349,9 +1445,15 @@ function unHide(id){
     }
 }
 
-function add1Edge(ID) {	
 
-	if(gete(edgeid)) return;
+
+
+function pushFilterValue(filtername,arg){
+	lastFilter[filtername] = arg;
+}
+
+function add1Edge(ID) {	
+	if(gete(ID)) return;
 	var s = Edges[ID].sourceID
 	var t = Edges[ID].targetID
     var edge = {
@@ -1365,10 +1467,6 @@ function add1Edge(ID) {
     partialGraph.addEdge(ID,s,t,edge);
 }
 
-
-function remove1Edge(ID) {
-	partialGraph.dropEdge(ID);
-}
 
 function hideElem(id){
     if(id.split(";").length==1){
@@ -1403,13 +1501,13 @@ function changeToMeso(iwannagraph) {
 
                 // for(var i in partialGraph._core.graph.edgesIndex){
                 //     e=partialGraph._core.graph.edgesIndex[i];
-                //     if(e.color=="#9b9e9e") {
+                //     if(e.color==greyColor) {
                 //         e.hidden=true;
                 //     }
                 // }
                 // for(var i in partialGraph._core.graph.nodesIndex){
                 //     n=partialGraph._core.graph.nodesIndex[i];
-                //     if(n.color=="#9b9e9e") {
+                //     if(n.color==greyColor) {
                 //         n.hidden=true;
                 //     }
                 // }
@@ -1471,7 +1569,6 @@ function changeToMeso(iwannagraph) {
                 }
 				overNodes=true; 
             }
-            updateEdgeFilter(iwannagraph);
         }
     }
 
@@ -1490,8 +1587,6 @@ function changeToMeso(iwannagraph) {
             
             partialGraph.startForceAtlas2();
             socsemFlag=true;
-            updateBothEdgeFilters();
-            updateBothNodeFilters();
         }
     }
      
@@ -1545,8 +1640,6 @@ function changeToMeso(iwannagraph) {
                     }
                 }                
             }
-            updateEdgeFilter(iwannagraph);  
-            updateNodeFilter("semantic");
         }
     }
     // highlightSelectedNodes(true); 
@@ -1581,9 +1674,6 @@ function changeToMacro(iwannagraph) {
         		MultipleSelection(Object.keys(chosenones))
         	});
 
-        updateEdgeFilter(iwannagraph);
-        updateNodeFilter(iwannagraph);
-
     } else {
         //iwantograph socio-semantic
         for(var n in Nodes) unHide(n);
@@ -1613,8 +1703,6 @@ function changeToMacro(iwannagraph) {
                 unHide(e);
             }
         }
-        updateBothEdgeFilters();
-        updateBothNodeFilters();
     }
     // highlightSelectedNodes(true);
     // // partialGraph.stopForceAtlas2();

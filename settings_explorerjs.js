@@ -30,6 +30,7 @@ var startingNodeId = "1";
 var minLengthAutoComplete = 1;
 var maxSearchResults = 10;
 var strSearchBar = "Search";
+
 var cursor_size_min= 0;
 var cursor_size= 0;
 var cursor_size_max= 100;
@@ -52,6 +53,7 @@ var seed=999999999;//defaultseed
 
 
 var showLabelsIfZoom=2.0;
+var greyColor = "#9b9e9e";
 
 // ============ < SIGMA.JS PROPERTIES > ============
 
@@ -113,7 +115,10 @@ var constantNGramFilter;
 // var nodeFilterB_past = ""
 // var nodeFilterB_now = ""
 
-var lastEdgeFilterA = "-"
+var lastFilter = []
+    lastFilter["#sliderBNodeWeight"] = "-"
+    lastFilter["#sliderAEdgeWeight"] = "-"
+    lastFilter["#sliderBEdgeWeight"] = "-"
 
 // var edgeFilterB_past = ""
 // var edgeFilterB_now = ""

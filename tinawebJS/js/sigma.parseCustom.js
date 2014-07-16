@@ -647,6 +647,7 @@ function extractFromJson(data,seed){
             partialGraph.addNode(i,Nodes[i]);  
             unHide(i);
         }
+        // pr(Nodes[i])
     }
     
     var edgeId = 0;

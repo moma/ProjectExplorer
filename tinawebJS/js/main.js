@@ -34,6 +34,7 @@ if (mainfile) {
     if(isUndef(getUrlParam.nodeidparam)) {
         pr("doing something 'cause i'm a doer"); mainfile=true;
 	    bringTheNoise("data/pkmn_types.gexf","mono");
+        scanCategories();
     } else {
 
 	    if(getUrlParam.nodeidparam.indexOf("__")===-1){
@@ -202,8 +203,6 @@ function bringTheNoise(pathfile,type){
         // < === DATA EXTRACTED!! === >
 
                             if(fa2enabled==="off") $("#edgesButton").hide();
-                            // updateEdgeFilter("social");
-                            // updateNodeFilter("social");
                             pushSWClick("social");
 
         // < === ASYNCHRONOUS FA2.JS === >
@@ -362,7 +361,7 @@ function theListeners(){
     });
     /******************* /SEARCH ***********************/
 
-    
+    // button CENTER
     $("#lensButton").click(function () {
         partialGraph.position(0,0,1);
         partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
@@ -462,7 +461,10 @@ function theListeners(){
         }
     });
     
-    //finished
+
+
+    //  finished but not used
+    //  NodeWeightFilter ( "#sliderANodeWeight" ,  "Document" , "type" , "size")
     $("#sliderANodeWeight").freshslider({
         range: true,
         step:1,
@@ -473,58 +475,9 @@ function theListeners(){
         }
     });
 
+    //  finished
+    EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
 
-
-
-
-
-
-
-    var filterparams = OrganizeEdgeWeightsForSlider ( "nodes1" ) 
-    var steps = filterparams["steps"]
-    var finalarray = filterparams["finalarray"]
-    //finished
-    $("#sliderAEdgeWeight").freshslider({
-        range: true,
-        step: 1,
-        min:0,
-        max:steps-1,
-        onchange:function(low, high){    
-            var filtervalue = low+"-"+high
-            // pr("filterNOW: "+filtervalue+" | filterPAST: "+lastEdgeFilterA+"  => "+(filtervalue!=lastEdgeFilterA))
-            if(filtervalue!=lastEdgeFilterA) {
-                if(lastEdgeFilterA=="-") {
-                    pushEdgesFilterA(filtervalue)
-                    return false
-                }
-                // $.doTimeout(300,function (){
-
-                for(var i in finalarray) {
-                    ids = finalarray[i]
-                    if(i>=low && i<=high){
-                        for(var id in ids) {
-                            edgeid = ids[id]
-                            add1Edge(edgeid)
-                            // partialGraph.addEdge(edgeid,Edges[edgeid].source,target,edge);
-
-                            // unHideElem(edgeid)
-                        }
-                    } else {
-                        for(var id in ids) {
-                            edgeid = ids[id]
-                            remove1Edge(edgeid)
-                            // hideElem(edgeid)
-                        }
-                    }
-                }
-                pushEdgesFilterA(filtervalue)
-                partialGraph.refresh()
-                partialGraph.draw()
-                // });
-            }
-            // pr("filterNOW: "+filtervalue+" | filterPAST: "+lastEdgeFilterA+"  => "+(filtervalue!=lastEdgeFilterA))
-        }
-    });
 
     //finished
     $("#sliderANodeSize").freshslider({
@@ -542,26 +495,8 @@ function theListeners(){
                    partialGraph.draw();
             });
         }
-    });
-    
-    $("#sliderBNodeWeight").freshslider({
-        range: true,
-        step:1,
-        value:[20, 60],
-        onchange:function(low, high){
-            console.log(low, high);
-        }
-    });
+    }); 
 
-    $("#sliderBEdgeWeight").freshslider({
-        range: true,
-        step:1,
-        value:[20, 100],
-        onchange:function(low, high){
-            console.log(low, high);
-        }
-    });
-    
     //finished
     $("#sliderBNodeSize").freshslider({
         step:1,
@@ -578,7 +513,13 @@ function theListeners(){
                    partialGraph.draw();
             });
         }
-    });
+    }); 
+
+
+    //NodeWeightFilter ( "#sliderBNodeWeight" ,  "NGram" , "type" , "size") 
+
+    // EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
+    
     
     //finished
     $("#unranged-value").freshslider({
@@ -594,54 +535,5 @@ function theListeners(){
     });
 
 
-
-    //    $("#sliderSelectionZone").slider({
-    //        value: cursor_size,
-    //        min: parseFloat(cursor_size_min),
-    //        max: parseFloat(cursor_size_max),
-    //        animate: true,
-    //        change: function(event, ui) {
-    //            cursor_size= ui.value;
-    //            //if(cursor_size==0) updateDownNodeEvent(false);
-    //            //else updateDownNodeEvent(true); 
-    //        //return callSlider("#sliderSelectionZone", "selectionRadius");
-    //        }
-    //    });
-
-
-    //   
-    //    $("#sliderANodeSize").slider({
-    //        value: 1,
-    //        min: 1,
-    //        max: 25,
-    //        animate: true,
-    //        slide: function(event, ui) {
-    //            $.doTimeout(100,function (){
-    //                partialGraph.iterNodes(function (n) {
-    //                    pr();
-    //                    if(Nodes[n.id].type==catSoc) {
-    //                        n.size = parseFloat(Nodes[n.id].size) + parseFloat((ui.value-1))*0.3;
-    //                    }
-    //                });
-    //                partialGraph.draw();
-    //            });
-    //        }
-    //    });
-    //    $("#sliderBNodeSize").slider({
-    //        value: 1,
-    //        min: 1,
-    //        max: 25,
-    //        animate: true,
-    //        slide: function(event, ui) {
-    //            $.doTimeout(100,function (){
-    //                partialGraph.iterNodes(function (n) {
-    //                    if(Nodes[n.id].type==catSem) {
-    //                        n.size = parseFloat(Nodes[n.id].size) + parseFloat((ui.value-1))*0.3;
-    //                    }
-    //                });
-    //                partialGraph.draw();
-    //            });
-    //        }
-    //    });
 }
 
