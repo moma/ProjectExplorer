@@ -33,8 +33,8 @@ function callGeomap(){
     }
     pr('in callGeomap: db='+db+'&query='+jsonparams);
     initiateMap(db,jsonparams,"geomap2/");
-    $("#ctlzoom").hide();
-    $("#CurrentView").hide();
+    // $("#ctlzoom").hide();
+    // $("#CurrentView").hide();
 }
 
 function callTWJS(){

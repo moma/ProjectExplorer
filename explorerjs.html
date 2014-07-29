@@ -14,11 +14,11 @@
     <link rel="stylesheet" href="css/sidebar.css" media="screen">
     <link rel="stylesheet" href="bootswatch/css/bootswatch.css">
     <link rel="stylesheet" href="css/font.css" type="text/css">
+    <link rel="stylesheet" href="css/token-input.css" type="text/css">
 
 
 </head>
   <body class="gradient">
-
   	<!-- this is the topbar -->
     <div id="fixedtop" class="navbar navbar-default navbar-fixed-top">
       <div class="container">
@@ -36,66 +36,20 @@
           <ul class="nav navbar-nav">
 
             <li class="disabled">
-		          <a>SELECT</a>
+		          <a>
+                <span class="label label-default">NETWORK: </span>
+              </a>
+            </li>
+
+            <li>
+              <a>
+                <span id="network" class="label label-success"></span>
+              </a>
             </li>
             
 
-            <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#" id="themes">Keywords <span class="caret"></span></a>
-              <ul class="dropdown-menu">
-		            <li><a tabindex="-1">Keywords</a></li>
-              </ul>
-            </li>
-
-            <li class="disabled">
-		          <a>AND</a>
-            </li>
-
-            <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#" id="themes">Scholars <span class="caret"></span></a>
-              <ul class="dropdown-menu">
-		            <li><a tabindex="-1">Scholars</a></li>
-              </ul>
-            </li>
-
-            <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#" id="themes">refine <span class="caret"></span></a>
-		                    <ul class="dropdown-menu">
-                                <li>
-                                    <a id="addfiltercountry" href="#">Filter by country</a>
-                                </li>                               
-                                <!--<li>
-                                                            <a id="addcolor" href="#">Color by</a>
-                                </li>-->
-                                <li>
-                                    <a id="addfilterkeyword" href="#">Filter by keyword</a>
-                                </li>
-                                <li>
-                                    <a id="addfiltertag" href="#">Filter by community tags</a>
-                                </li>
-                                <li>
-                                    <a id="addfilterorganization" href="#">Filter by organization</a>
-                                </li>
-                                <li>
-                                    <a id="addfilterlaboratory" href="#">Filter by laboratory</a>
-                                </li>
-		                    </ul>
-            </li>
-
             <li>
-              <a href="#">CREATE DIRECTORY</a>
-            </li>
-
-            <li class="disabled">
-              <a>OR</a>
-            </li>
-
-            <li>
-              <a href="#">MAP</a>
-            </li>
-            
-            <li>
-            asdadasd
+            .
             <div id="log"></div>
             </li>
 
@@ -147,12 +101,18 @@
                          </a>
                        </li>
                   </ul>
+                  
+                  <ul class="nav navbar-nav navbar-right">
+                     <li><a>
+                              <input type="checkbox" id="checkboxdiv" onclick="alertCheckBox(this);">Add</input>
+                     </a></li>
+                  </ul>
+                  <ul class="nav navbar-nav navbar-right">
+                     <li><a>
+                              <input id="searchinput"  autocomplete="off" class="form-control input-sm col-lg-8" placeholder="Search" type="text">
+                     </a></li>
+                  </ul>
                 </div>
-            		  <ul class="nav navbar-nav navbar-right">
-            			   <li><a>
-            		              <input id="searchinput"  autocomplete="off" class="form-control input-sm col-lg-8" placeholder="Search" type="text">
-            			   </a></li>
-            		  </ul>
                   <!--
                   <ul class="nav navbar-nav navbar-right">
                     <li><a href="#">Link</a></li>
@@ -212,10 +172,22 @@
 	                        <a href="#" id="aUnfold" class="rightarrow"></a>
 	                    </div>
 	                </li> 
+
+                   <li>
+                      <a href="#" id="geomapicon" onclick="$('#geomapmodal').modal('show'); callGeomap();">
+                        <img width="34px" src="img/world.png"></img>
+                      </a>
+                  </li> 
+<!-- 
+                   <li>
+                      <a href="#" id="statsicon" onclick="$('#statsmodal').modal('show');" >
+                        <img width="34px" src="img/stats.png"></img>
+                      </a>
+                  </li>  -->
 	                
-	                <li>
-	                    <a href="#" id="saveAs" title="export as"> </a>
-	                </li>
+                   <li>
+                      <a href="#" id="saveAs"><img width="30px" src="img/save.png"></img></a>
+                  </li> 
 	                
 	                <li>
 	                    <a href="#" id="zoomPlusButton" title="S'approcher"> </a>
@@ -254,14 +226,63 @@
     
 
 
-<div class="modal fade">
+<div id="modalloader" class="modal fade">
     <div id="loader">
         <img src="img/loader.gif"></img>
     </div>
-    <div id="closemodal" data-dismiss="modal"></div>
+    <div id="closeloader" data-dismiss="modal"></div>
 </div>
 
 
+
+
+
+<div id="statsmodal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title">Modal title</h4>
+      </div>
+      <div class="modal-body">
+        <p>Here goes the stats</p>
+      </div>
+    </div>
+  </div>
+</div> 
+
+<div id="mainmodal" class="modal fade">
+    
+        <div id="my-text-input"></div>
+  <!-- <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title">Come on, change network</h4>
+      </div>
+      <div class="modal-body">    
+      </div>
+    </div>
+  </div> -->
+</div> 
+
+
+
+
+<div id="geomapmodal" class="modal fade">
+
+    <!-- <div class="modal-content"> -->
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title">Geomap</h4>
+      </div>
+      <div class="modal-body">
+        <div class="geomapCont"></div>
+      </div>
+    <!-- </div> -->
+  <!-- <div class="geomapCont"></div> -->
+  <!-- <div id="closemodal2" data-dismiss="modal"></div> -->
+</div>
 
     <!--<script src="libs/jquery/jquery-1.9.1.js"></script>-->
     <!--<script src="libs/jquery/jquery-ui.js" type="text/javascript"></script>-->
@@ -270,6 +291,7 @@
     <script src="jquery/jquery-ui.js" type="text/javascript"></script>
     <script src="libs/jquery/jquery.ba-dotimeout.min.js" type="text/javascript"></script>
     <script src="libs/jquery/jquery.mousewheel.min.js" type="text/javascript"></script>
+    <script src="libs/jquery/jquery.tokeninput.js" type="text/javascript"></script>
 
     <script type="text/javascript" src="libs/freshslider.1.0.js"></script>
     <!--source: http://www.jqueryscript.net/slider/Simple-Nice-jQuery-Value-Range-Slider-Plugin-Fresh-Slider.html-->
@@ -277,12 +299,13 @@
     <script src="libs/bootstrap/js/bootstrap.min.js"></script>
     <script src="bootswatch/js/bootswatch.js"></script>
     <script src="libs/bootstrap/js/bootstrap-modal.js" type="text/javascript"></script>
+
     
-<!--    <script src="geomap/js/raphael/raphael-min.js" charset="utf-8" ></script>-->
-<!--    <script src="geomap/js/jquery.mapael.js" charset="utf-8" ></script>-->
-<!--    <script src="geomap/js/maps/world_countries.js" charset="utf-8" ></script>-->
-<!--    <script src="geomap/examples.js" charset="utf-8" ></script>-->
-<!--    <link rel="stylesheet" type="text/css" href="geomap/css/geo.css" />-->
+    <script src="geomap2/js/raphael/raphael-min.js" charset="utf-8" ></script>
+    <script src="geomap2/js/jquery.mapael.js" charset="utf-8" ></script>
+    <script src="geomap2/js/maps/world_countries.js" charset="utf-8" ></script>
+    <script src="geomap2/examples.js" charset="utf-8" ></script>
+    <link rel="stylesheet" type="text/css" href="geomap2/css/geo.css" />
     
 <!--    <script src="tinawebJS/js/canvas2image/base64.js" type="text/javascript"></script>-->
 <!--    <script src="tinawebJS/js/canvas2image/canvas2image.js" type="text/javascript"></script>-->

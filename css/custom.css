@@ -210,10 +210,11 @@
 #aUnfold {
     display: block; width: 12px; height: 12px; background-image: url("../tinawebJS/img/fleches-horiz.png");  margin: 0 auto;
 }
-
+/*
 #saveAs {
     display: block; width: 30px; height: 30px; background:url("../tinawebJS/img/Save.png"); margin: 0 auto;
 }
+*/
 
 #zoomSlider {
     background:#fff;

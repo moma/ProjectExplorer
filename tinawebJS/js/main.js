@@ -1,6 +1,10 @@
 //  === monitor windows resize === //
 var counterrrr=0;
 $( window ).resize(function() {
+    var deftoph=$("#defaultop").height();
+    var refh=$("#fixedtop").height();
+    pr("deftoph:"+deftoph+" vs refh: "+refh)
+    if(deftoph>(refh*2)) window.location.reload();
   counterrrr++;
   $("#log").html("redimension nro: "+counterrrr);
   sigmaLimits();
@@ -32,9 +36,12 @@ if (mainfile) {
 } else {
 
     if(isUndef(getUrlParam.nodeidparam)) {
-        pr("doing something 'cause i'm a doer"); mainfile=true;
-	    bringTheNoise("data/pkmn_types.gexf","mono");
-        scanCategories();
+        pr("do nothing, 'cause don't wanna");
+        $('#mainmodal').modal('show');
+        $("#my-text-input").tokenInput("try.json");
+     //    pr("doing something 'cause i'm a doer"); mainfile=true;
+	    // bringTheNoise("data/pkmn_types.gexf","mono");
+     //    scanCategories();
     } else {
 
 	    if(getUrlParam.nodeidparam.indexOf("__")===-1){
@@ -71,8 +78,8 @@ function sigmaLimits(){
 }
 
 function bringTheNoise(pathfile,type){
-    // $('.modal').modal('show');
-
+    
+    $('#modalloader').modal('show');
     //  === get width and height   === //
     sigmaLimits();
     
@@ -163,13 +170,15 @@ function bringTheNoise(pathfile,type){
         }   
     });
 
+
+    // $("#statsicon").click(function(){
+    //     $('#statsmodal').modal('show');
+    // });
+    
+
     //  === start minimap library... currently off  === //
     startMiniMap();
 
-    var deftoph=$("#defaultop").height();
-    var refh=$("#fixedtop").height();
-    pr("deftoph:"+deftoph+" vs refh: "+refh)
-    if(deftoph>(refh*2)) window.location.reload();
 
     console.log("parsing...");    
     // < === EXTRACTING DATA === >
@@ -204,7 +213,21 @@ function bringTheNoise(pathfile,type){
 
                             if(fa2enabled==="off") $("#edgesButton").hide();
                             pushSWClick("social");
-
+                            pr(partialGraph._core.graph.nodes.length)
+                            pr(partialGraph._core.graph.edges.length)
+                            nbnodes = partialGraph._core.graph.nodes.length
+                            if(nbnodes>=400 && nbnodes<1000) {
+                                snbnodes = nbnodes+"";
+                                cut1 = snbnodes[0];
+                                cut2 = snbnodes.length;
+                                pr("cut1: "+cut1)
+                                pr("cut2: "+cut2)
+                                iterationsFA2 = Math.round(iterationsFA2/(cut1/cut2))
+                            }
+                            if(nbnodes>=1000) iterationsFA2 = 150;
+                            pr("iterationsFA2: "+iterationsFA2)
+                            var netname = pathfile.replace(/\_/g, ' ').toUpperCase();
+                            $("#network").html(netname);
         // < === ASYNCHRONOUS FA2.JS === >
                             pr(getClientTime()+" : Ini FA2");
                             var ForceAtlas2 = new Worker("FA2.js");
@@ -245,7 +268,7 @@ function bringTheNoise(pathfile,type){
 function theListeners(){
     pr("in THELISTENERS");
     // leftPanel("close");
-    $("#closemodal").click();//modal.hide doesnt work :c
+    $("#closeloader").click();//modal.hide doesnt work :c
     //    startForceAtlas2(partialGraph._core.graph);r(
 
     cancelSelection(false);        
@@ -269,7 +292,7 @@ function theListeners(){
         var desc = extractContext(item.desc, searchVal);
         return $('<li onclick=\'var s = "'+item.label+'"; search(s);$("#searchinput").val(strSearchBar);\'></li>')
         .data('item.autocomplete', item)
-        .append("<a><span class=\"labelresult\">" + item.label + "</span><br ><small>" + desc + "<small></a>" )
+        .append("<a><span class=\"labelresult\">" + item.label + "</span></a>" )
         .appendTo(ul);
     };
 
@@ -277,8 +300,9 @@ function theListeners(){
         source: function(request, response) {
             matches = [];
             var matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i");
+            pr(labels);
             var results = $.grep(labels, function(e) {
-                return matcher.test(e.label) || matcher.test(e.desc);
+                return matcher.test(e.label); //|| matcher.test(e.desc);
             });
             
             if (!results.length) {
@@ -310,32 +334,20 @@ function theListeners(){
         }
     });
     
+    // i've a list of coincidences and i press enter like a boss
     $("#searchinput").keydown(function (e) {
         if (e.keyCode == 13 && $("input#searchinput").data('is_open') === true) {
             // Search has several results and you pressed ENTER
-            if(!is_empty(matches)) {
-                checkBox=true;
+            if(!is_empty(matches)) {                
+                var coincidences = []
                 for(j=0;j<matches.length;j++){
-                    nodeFound=searchLabel(matches[j].label);
-                    getOpossitesNodes(nodeFound,true); 
+                	coincidences.push(matches[j].id)
                 }
-
-                if(is_empty(selections)==true){  
-                    $("#names").html("");
-                    $("#opossiteNodes").html("");
-                    $("#information").html("");
-                    changeButton("unselectNodes");
-                }
-                else {
-                    greyEverything();
-                    overNodes=true;
-                    for(var i in selections){
-                        markAsSelected(i,true);
-                    }
-                    changeButton("selectNode");
-                    partialGraph.draw();
-                }
-                checkBox=false;
+                pr("coincidencees: ");
+                pr(coincidences);
+                $.doTimeout(30,function (){
+                	MultipleSelection(coincidences);
+                });
                 $("input#searchinput").val("");
                 $("input#searchinput").autocomplete( "close" );
                 //$("input#searchinput").trigger('autocompleteclose');
@@ -347,9 +359,17 @@ function theListeners(){
         if (e.keyCode == 13 && $("input#searchinput").data('is_open') !== true) {
             pr("search KEY UP");
             var s = $("#searchinput").val();
+            // pr(s)
+            // pr(exactfind(s))
             $("#searchinput").val(strSearchBar);
-            if(categoriesIndex.length==1) updateLeftPanel_uni();
-            if(categoriesIndex.length==2) updateLeftPanel_fix();            
+            var coincidence = exactfind(s);
+			$.doTimeout(30,function (){
+                	MultipleSelection(coincidence.id);
+            });
+			$("input#searchinput").val("");
+            $("input#searchinput").autocomplete( "close" );
+            // if(categoriesIndex.length==1) updateLeftPanel_uni();
+            // if(categoriesIndex.length==2) updateLeftPanel_fix();            
         }
     });
     

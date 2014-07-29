@@ -628,34 +628,37 @@ function searchLabel(string){
 function search(string) {
     var id_node = '';
     partialGraph.iterNodes(function (n) {
-        if(n.hidden==false){
+        if(!n.hidden){
             if (n.label == string) {
                 id_node = n.id;
                 return n;
             }  
         }
     });
-    getOpossitesNodes(id_node, false);
+    // getOpossitesNodes(id_node, false);
     
-    if(categoriesIndex.length==1) updateLeftPanel_uni();
-    if(categoriesIndex.length==2) updateLeftPanel_fix(); 
+    $.doTimeout(30,function (){
+        MultipleSelection(id_node);
+    });
+    // if(categoriesIndex.length==1) updateLeftPanel_uni();
+    // if(categoriesIndex.length==2) updateLeftPanel_fix(); 
     
       
-                if(is_empty(selections)==true){  
-                    $("#names").html("");
-                    $("#opossiteNodes").html("");
-                    $("#information").html("");
-                    changeButton("unselectNodes");
-                }
-                else {
-                    greyEverything();
-                    overNodes=true;
-                    for(var i in selections){
-                        markAsSelected(i,true);
-                    }
-                    changeButton("selectNode");
-                    partialGraph.draw();
-                }
+                // if(is_empty(selections)==true){  
+                //     $("#names").html("");
+                //     $("#opossiteNodes").html("");
+                //     $("#information").html("");
+                //     changeButton("unselectNodes");
+                // }
+                // else {
+                //     greyEverything();
+                //     overNodes=true;
+                //     for(var i in selections){
+                //         markAsSelected(i,true);
+                //     }
+                //     changeButton("selectNode");
+                //     partialGraph.draw();
+                // }
                 $("input#searchinput").val("");
                 $("input#searchinput").autocomplete( "close" );
 }

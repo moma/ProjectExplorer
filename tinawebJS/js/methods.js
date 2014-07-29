@@ -252,7 +252,6 @@ function pushSWClick(arg){
 }
 
 
-
 // it receives entire node
 function selection(currentNode){
     pr("\t***in selection()");
@@ -424,7 +423,6 @@ function getOpossitesNodes(node_id, entireNode) {
     //            }
     //        });
 }
-
 
 //to sigma utils!
 function getNodeLabels(elems){
@@ -1195,8 +1193,8 @@ function DrawAsSelectedNodes( nodeskeys ) {
 
 function MultipleSelection(nodes){
 
-	pr("IN MULTIPLE SELECTION")
-
+	pr("IN MULTIPLE SELECTION:")
+    
 	if(!checkBox) cancelSelection(false);
 
 	greyEverything(); 
@@ -1213,7 +1211,27 @@ function MultipleSelection(nodes){
 		 	markAsSelected(nodeid,true); 
 		}
 		checkBox=false;
-	}
+	} else { 
+        // pr("=============")
+        // pr("receiving nodes: ")
+        // pr(nodes);       
+        // pr("ndsids content: ")
+        // pr(ndsids)
+        // pr("selections content PREV: ")
+        // pr(selections)
+        
+        for(var i in ndsids){
+            nodeid = ndsids[i]
+            getOpossitesNodes(nodeid,false); //false -> just nodeid
+            // markAsSelected(nodeid,true); 
+        }
+        for( var i in selections){
+            markAsSelected(i,true);             
+        }
+        // pr("selections content AFTER: ")
+        // pr(selections)
+        // pr("=============")
+    }
 	overNodes=true; 
 
 	partialGraph.draw();
@@ -1225,15 +1243,22 @@ function MultipleSelection(nodes){
 function hoverNodeEffectWhileFA2(selectionRadius) { 
     
     partialGraph.bind('downnodes', function (event) {
-        pr("\t\t\t\t"+event.content+" -> "+Nodes[event.content].label);
+        var nodeID = event.content;
+        pr("\t\t\t\t"+nodeID+" -> "+Nodes[nodeID].label);
         if(cursor_size==0 && !checkBox){
             //Normal click on a node
-            getOpossitesNodes(event.content, false);//passing just the node-id
+            $.doTimeout(30,function (){
+                MultipleSelection(nodeID);
+            });
+            // getOpossitesNodes(nodeID, false);//passing just the node-id
         }
         
         if(cursor_size==0 && checkBox){
             //Normal click on a node, but we won't clean the previous selections
-            getOpossitesNodes(event.content, false);//passing just the node-id
+            $.doTimeout(30,function (){
+                MultipleSelection(nodeID);
+            });
+            // getOpossitesNodes(nodeID, false);//passing just the node-id
         }
         
         // if(cursor_size>0 &&){
@@ -1254,32 +1279,32 @@ function hoverNodeEffectWhileFA2(selectionRadius) {
         //         }
         //     });
         // }
-        if(categoriesIndex.length==1) updateLeftPanel_uni();
-        if(categoriesIndex.length==2) updateLeftPanel_fix();
+        // if(categoriesIndex.length==1) updateLeftPanel_uni();
+        // if(categoriesIndex.length==2) updateLeftPanel_fix();
         
-        //The most brilliant way of knowing if an array is empty in the world of JavaScript
-        i=0; for(var s in selections) {i++;break};
+        // //The most brilliant way of knowing if an array is empty in the world of JavaScript
+        // i=0; for(var s in selections) {i++;break};
         
-        if(is_empty(selections) || i==0){
-                pr("cursor radius ON, downNode -> selecciones vacias");
-                $("#names").html(""); //Information extracted, just added
-                $("#opossiteNodes").html(""); //Information extracted, just added
-                $("#information").html("");
-                $("#tips").html(getTips());
-                $("#topPapers").html(""); $("#topPapers").hide();
-                changeButton("unselectNodes");
-                //cancelSelection(false);
-                graphResetColor();
-        }
-        else { 
-                greyEverything();
-                for(var i in selections){
-                    markAsSelected(i,true);
-                }
-                RefreshState("")
-        }
-        overNodes=true;        
-        partialGraph.draw();
+        // if(is_empty(selections) || i==0){
+        //         pr("cursor radius ON, downNode -> selecciones vacias");
+        //         $("#names").html(""); //Information extracted, just added
+        //         $("#opossiteNodes").html(""); //Information extracted, just added
+        //         $("#information").html("");
+        //         $("#tips").html(getTips());
+        //         $("#topPapers").html(""); $("#topPapers").hide();
+        //         changeButton("unselectNodes");
+        //         //cancelSelection(false);
+        //         graphResetColor();
+        // }
+        // else { 
+        //         greyEverything();
+        //         for(var i in selections){
+        //             markAsSelected(i,true);
+        //         }
+        //         RefreshState("")
+        // }
+        // overNodes=true;        
+        // partialGraph.draw();
     });
 }
 

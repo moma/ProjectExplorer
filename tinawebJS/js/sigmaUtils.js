@@ -89,7 +89,7 @@ function exactfind(label) {
     nds=getnodesIndex();
     for(var i in nds){
         n=nds[i];
-        if(n.hidden==false){
+        if(!n.hidden){
             if (n.label==label) {
                 return n;
             }
