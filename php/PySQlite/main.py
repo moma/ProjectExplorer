@@ -29,7 +29,7 @@ def main():
 	# i = int(request.args['it'])
 
 	db=SQLite()
-	print "iciiiii"
+	
 	if request.args.has_key("query"):
 		filteredquery = request.args['query']
 		scholars = db.getScholarsList("filter",filteredquery)

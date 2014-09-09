@@ -379,7 +379,7 @@ var ForceAtlas2 = function(graph) {
       this.p.jitterTolerance = 0.1;
     }
     if (graph.nodes.length >= 1000) {
-      this.p.barnesHutOptimize = true;
+      this.p.barnesHutOptimize = false;
     } else {
       this.p.barnesHutOptimize = false;
     }
@@ -830,22 +830,7 @@ var ForceAtlas2 = function(graph) {
   };
 };
 
-// The Region class, as used by the Barnes Hut optimization
-var Region = function(nodes, depth) {
-  this.depthLimit = 20;
-  this.size = 0;
-  this.nodes = nodes;
-  this.subregions = [];
-  this.depth = depth;
 
-  this.p = {
-    mass: 0,
-    massCenterX: 0,
-    massCenterY: 0
-  };
-  
-  this.updateMassAndGeometry();
-}
 
 var updateMassAndGeometry = function() {
   if (this.nodes.length > 1) {
@@ -879,6 +864,25 @@ var updateMassAndGeometry = function() {
     this.size = size;
   }
 };
+
+// The Region class, as used by the Barnes Hut optimization
+var Region = function(nodes, depth) {
+  this.depthLimit = 20;
+  this.size = 0;
+  this.nodes = nodes;
+  this.subregions = [];
+  this.depth = depth;
+
+  this.p = {
+    mass: 0,
+    massCenterX: 0,
+    massCenterY: 0
+  };
+  
+  console.log("updating mass and geometry");
+  this.updateMassAndGeometry();
+}
+
 
 var buildSubRegions = function() {
   if (this.nodes.length > 1) {

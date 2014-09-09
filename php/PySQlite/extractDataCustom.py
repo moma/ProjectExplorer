@@ -41,22 +41,21 @@ class extract:
 			res1=self.cursor.fetchone()
 			while res1 is not None:
 				keywords_ids = res1['keywords_ids'].split(',')
+				for keywords_id in keywords_ids:
+					if keywords_id != "":
+						sql2 = "SELECT * FROM scholars2terms where term_id="+keywords_id
+						try:
+							self.cursor.execute(sql2)
+							res2=self.cursor.fetchone()
+							while res2 is not None:
+								scholar_array[res2['scholar']]=1
+								res2=self.cursor.fetchone()#res2++
+						except Exception as error:
+							print "sql2:\t"+sql2
+							print error
 
-			for keywords_id in keywords_ids:
-				if keywords_id != "":
-					sql2 = "SELECT * FROM scholars2terms where term_id="+keywords_id
-					try:
-						self.cursor.execute(sql2)
-						res2=self.cursor.fetchone()
-						while res2 is not None:
-							scholar_array[res2['scholar']]=1
-							res2=self.cursor.fetchone()#res2++
-					except Exception as error:
-						print "sql2:\t"+sql2
-						print error
-
-			res1 = self.cursor.fetchone()#res1++
-
+				res1 = self.cursor.fetchone()#res1++
+			return scholar_array
 		except Exception as error:
 			print "sql1:\t"+sql1
 			print error
@@ -68,14 +67,23 @@ class extract:
 #			print res1
 			for unique_id in res1:
 				scholar_array[ unique_id[0] ] = 1
-		
+			return scholar_array
 		except Exception as error:
 			print "qtype filter sql:\t"+sql1
 			print error
 
-	return scholar_array
 
-    def extract(self,scholar_array):
+
+
+
+    def chunks(self,l, n):
+	for i in xrange(0, len(l), n):
+		yield l[i:i+n]
+
+
+
+
+    def testSQLimit(self,scholar_array):
 	for scholar_id in scholar_array:
 		sql3='SELECT * FROM scholars where unique_id="'+scholar_id+'"'
 		try:
@@ -154,139 +162,87 @@ class extract:
 	sql="SELECT term,id,occurrences FROM terms"
 	#self.cursor.execute(sql)
 	cont=0
+	
 	for t in termsMatrix:
 		if cont==0: 
 			sql+=' where id='+t
 			cont+=1
 		else: sql+=' or id='+t
-		
-	for res in self.cursor.execute(sql):
-		idT = res['id'] 	
-		info = {}
-		info['id'] = idT
-		info['occurrences'] = res['occurrences']
-		info['term'] = res['term']
-		self.terms_array[idT] = info
+	print "before crash"
+	print len(termsMatrix)
 	
-	count=1
-	
-	for term in self.terms_array:
-		self.terms_colors[term]=0
-
-	sql='select term_id from jobs2terms'
-	for row in self.cursor.execute(sql):
-		if row['term_id'] in self.terms_colors:
-			self.terms_colors[row['term_id']]+=1
+#	sql="SELECT term,id,occurrences FROM terms where id=123 OR id=343 ... or id=978"
 
 
+	sqlarray = []
+	chunkedTerms = list(self.chunks(termsMatrix.keys(), 500))
+	for chunk_i in chunkedTerms:
+		if len(chunk_i)>0:
+			query = "SELECT term,id,occurrences FROM terms where id="
+			conditions = " or id=".join(chunk_i)
+			sqlarray.append(query+conditions)
 
-	cont=0
-	for term in self.terms_array:
-		#sql="SELECT scholar FROM scholars2terms where term_id='"+str(term)+"'";
-		sql="SELECT scholars.id FROM scholars,scholars2terms where term_id='"+str(term)+"' and scholars.unique_id=scholars2terms.scholar"
-		term_scholars=[]
-		for row in self.cursor.execute(sql):
-			term_scholars.append("D::"+str(row['id']))
+#	import pprint
+#	pprint.pprint(sqlarray)
 
-		for k in range(len(term_scholars)):
-			if scholarsMatrix.has_key(term_scholars[k]):
-				scholarsMatrix[term_scholars[k]]['occ'] = scholarsMatrix[term_scholars[k]]['occ'] + 1
-				for l in range(len(term_scholars)):
-					if self.scholars.has_key(term_scholars[l]):
-						if scholarsMatrix[term_scholars[k]]['cooc'].has_key(term_scholars[l]):
-							scholarsMatrix[term_scholars[k]]['cooc'][term_scholars[l]] += 1
-						else:
-							scholarsMatrix[term_scholars[k]]['cooc'][term_scholars[l]] = 1;
-					
-			else:
-				scholarsMatrix[term_scholars[k]]={}
-				scholarsMatrix[term_scholars[k]]['occ'] = 1;
-				scholarsMatrix[term_scholars[k]]['cooc'] = {};
-
-				for l in range(len(term_scholars)):
-					if self.scholars.has_key(term_scholars[l]):
-						if scholarsMatrix[term_scholars[k]]['cooc'].has_key(term_scholars[l]):
-							scholarsMatrix[term_scholars[k]]['cooc'][term_scholars[l]] += 1
-						else:
-							scholarsMatrix[term_scholars[k]]['cooc'][term_scholars[l]] = 1;
-
-		nodeId = "N::"+str(term)
-		self.Graph.add_node(nodeId)
-
-	for scholar in self.scholars:
-		if scholar in scholarsMatrix:
-			if len(scholarsMatrix[scholar]['cooc']) >= self.min_num_friends:
-				scholarsIncluded += 1;
-				nodeId = str(scholar);
-				self.Graph.add_node(nodeId)
-
-	edgeid = 0
-	for scholar in self.scholars:
-		if scholar in scholarsMatrix:
-			if len(scholarsMatrix[scholar]['cooc']) >= 1:
-				for keyword in self.scholars[scholar]['keywords_ids']:
-					if keyword:
-						source= str(scholar)
-						target="N::"+str(keyword)
-						self.Graph.add_edge( source , target , {'weight':1,'type':"bipartite"})
-						#Some bipartite relations are missing (just the 1%)
-
-	for term in self.terms_array:
-		nodeId1 = self.terms_array[term]['id'];
-		if termsMatrix.has_key(str(nodeId1)):
-			neighbors = termsMatrix[str(nodeId1)]['cooc'];
-			for i, neigh in enumerate(neighbors):
-				if neigh != str(term):					
-					source="N::"+str(term)
-					target="N::"+neigh
-					weight=neighbors[str(neigh)]/float(self.terms_array[term]['occurrences'])
-					self.Graph.add_edge( source , target , {'weight':weight,'type':"nodes2"})
-
-	for scholar in self.scholars:
-		nodeId1 = scholar;
-		if scholarsMatrix.has_key(str(nodeId1)):
-			neighbors=scholarsMatrix[str(nodeId1)]['cooc']; 
-			for i, neigh in enumerate(neighbors):
-				if neigh != str(scholar):				
-					source=str(scholar)
-					target=str(neigh)
-					weight=self.jaccard(scholarsMatrix[nodeId1]['occ'],scholarsMatrix[neigh]['occ'],neighbors[str(neigh)])
-					#print "\t"+source+","+target+" = "+str(weight)
-					self.Graph.add_edge( source , target , {'weight':weight,'type':"nodes1"})
-
-# For filtered query
-    def extract2(self,daquery):
-	try:
-            	for row in self.cursor.execute(daquery):
+	for sql in sqlarray:
+		for res in self.cursor.execute(sql):
+			idT = res['id'] 	
 			info = {}
-			info['id'] = row['id']
-			ide="D::"+str(row['id']);
-			info['unique_id'] = row['unique_id']
-			info['photo_url'] = row['photo_url']
-			info['first_name'] = row['first_name']
-			info['initials'] = row['initials']
-			info['last_name'] = row['last_name']
-			info['nb_keywords'] = row['nb_keywords']
-			info['css_voter'] = row['css_voter']
-			info['css_member'] = row['css_member']
-			info['keywords_ids'] = row['keywords_ids'].split(',');
-			info['keywords'] = row['keywords']
-			info['country'] = row['country']
-			info['homepage'] = row['homepage']
-			info['lab'] = row['lab'];
-			info['affiliation'] = row['affiliation']
-			info['lab2'] = row['lab2']
-			info['affiliation2'] = row['affiliation2']
-			info['homepage'] = row['homepage']
-			info['title'] = row['title']
-			info['position'] = row['position']
-			info['job_market'] = row['job_market']
-			info['login'] = row['login']
-			self.scholars[ide] = info;
+			info['id'] = idT
+			info['occurrences'] = res['occurrences']
+			info['term'] = res['term']
+			self.terms_array[idT] = info
+	count=1
 
-	except Exception as error:
-		print "sql3:\t"+daquery
-		print error
+
+
+
+
+
+
+
+
+
+    def extract(self,scholar_array):
+	for scholar_id in scholar_array:
+		sql3='SELECT * FROM scholars where unique_id="'+scholar_id+'"'
+		try:
+			self.cursor.execute(sql3)
+			res3=self.cursor.fetchall()
+			n=len(res3)#in the DB, there are unique_ids duplicated
+			info = {};
+			#With (n-1) we're fetching only the last result.
+			ide="D::"+str(res3[n-1]['id']);
+			info['id'] = ide;	
+			info['unique_id'] = res3[n-1]['unique_id'];
+			info['photo_url'] = res3[n-1]['photo_url'];
+			info['first_name'] = res3[n-1]['first_name'];
+			info['initials'] = res3[n-1]['initials'];
+			info['last_name'] = res3[n-1]['last_name'];
+			info['nb_keywords'] = res3[n-1]['nb_keywords'];
+			info['css_voter'] = res3[n-1]['css_voter'];
+			info['css_member'] = res3[n-1]['css_member'];
+			info['keywords_ids'] = res3[n-1]['keywords_ids'].split(',');
+			info['keywords'] = res3[n-1]['keywords'];
+			info['country'] = res3[n-1]['country'];
+			info['homepage'] = res3[n-1]['homepage'];
+			info['lab'] = res3[n-1]['lab'];
+			info['affiliation'] = res3[n-1]['affiliation'];
+			info['lab2'] = res3[n-1]['lab2'];
+			info['affiliation2'] = res3[n-1]['affiliation2'];
+			info['homepage'] = res3[n-1]['homepage'];
+			info['title'] = res3[n-1]['title'];
+			info['position'] = res3[n-1]['position'];
+			info['job_market'] = res3[n-1]['job_market'];
+			info['login'] = res3[n-1]['login'];
+			if info['nb_keywords']>0:
+				self.scholars[ide] = info;
+
+		except Exception as error:
+			print "sql3:\t"+sql3
+			print error
+
 
 	# génère le gexf
 	# include('gexf_generator.php');
@@ -324,28 +280,31 @@ class extract:
 		if res['login'].strip() in self.scholars_colors:
 			self.scholars_colors[res['login'].strip()]+=1;
 
-	# With big queries (like France) this won't work
 #	sql="SELECT term,id,occurrences FROM terms"
+#	#self.cursor.execute(sql)
 #	cont=0
-#	for t in termsMatrix:
-#		if cont==0: 
-#			sql+=' where id='+t
-#			cont+=1
-#		else: sql+=' or id='+t
-#	print sql
-#	for res in self.cursor.execute(sql):
-#		idT = res['id'] 	
-#		info = {}
-#		info['id'] = idT
-#		info['occurrences'] = res['occurrences']
-#		info['term'] = res['term']
-#		self.terms_array[idT] = info
+#	
+##	for t in termsMatrix:
+##		if cont==0: 
+##			sql+=' where id='+t
+##			cont+=1
+##		else: sql+=' or id='+t
+##	print "before crash"
+##	print sql
+##	print "nb terms:",len(termsMatrix)
 
+	sqlarray = []
+	chunkedTerms = list(self.chunks(termsMatrix.keys(), 500))
+	for chunk_i in chunkedTerms:
+		if len(chunk_i)>0:
+			query = "SELECT term,id,occurrences FROM terms where id="
+			conditions = " or id=".join(chunk_i)
+			sqlarray.append(query+conditions)
 
-	# Inefficient piece of code!
-	cont=0
-	for t in termsMatrix:
-		sql='SELECT term,id,occurrences FROM terms where id='+t
+#	import pprint
+#	pprint.pprint(sqlarray)
+
+	for sql in sqlarray:
 		for res in self.cursor.execute(sql):
 			idT = res['id'] 	
 			info = {}
@@ -353,9 +312,8 @@ class extract:
 			info['occurrences'] = res['occurrences']
 			info['term'] = res['term']
 			self.terms_array[idT] = info
-	
 	count=1
-	
+
 	for term in self.terms_array:
 		self.terms_colors[term]=0
 
@@ -439,6 +397,7 @@ class extract:
 					weight=self.jaccard(scholarsMatrix[nodeId1]['occ'],scholarsMatrix[neigh]['occ'],neighbors[str(neigh)])
 					#print "\t"+source+","+target+" = "+str(weight)
 					self.Graph.add_edge( source , target , {'weight':weight,'type':"nodes1"})
+
 
     def toHTML(self,string):
 	return cgi.escape(string).encode("ascii", "xmlcharrefreplace")
@@ -594,6 +553,8 @@ class extract:
 	graph["nodes"] = nodes
 	graph["edges"] = edges
 	graph["stats"] = { "sch":nodesA,"kw":nodesB,"n1":edgesA,"n2":edgesB,"nbi":edgesAB }
+	import pprint
+	pprint.pprint(graph["stats"])
 #	print "scholars",nodesA
 #	print "concepts",nodesB
 #	print "nodes1",edgesA

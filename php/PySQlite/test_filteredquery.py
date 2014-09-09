@@ -28,21 +28,23 @@ def main():
 
 #	if request.args.has_key("query"):
 
-	# #testcase 1:
-	# db=SQLite()
-	# scholars = db.getScholarsList("unique_id","Carla__Taramasco")
-	# print scholars
-	# db.extract(scholars)
-	# print len(db.Graph)
-	# # added to production
+	print "testcase 1"
+	 #testcase 1:
+	db=SQLite()
+	scholars = db.getScholarsList("unique_id","Carla__Taramasco")
+	print scholars
+	db.extract(scholars)
+	print len(db.Graph)
+	# added to production
 
-	
+	print "testcase 2"
 	#testcase 2:
 	db=SQLite()
-	query = 'SELECT unique_id FROM scholars where   country = "Chile" OR country="France"'
+	query = 'SELECT unique_id FROM scholars where country="France"'
 	scholars = db.getScholarsList("filter",query)
 	db.extract(scholars)
 	print len(db.Graph)
+	
 
 
 
