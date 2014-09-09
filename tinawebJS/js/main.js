@@ -1,10 +1,6 @@
 //  === monitor windows resize === //
 var counterrrr=0;
 $( window ).resize(function() {
-    var deftoph=$("#defaultop").height();
-    var refh=$("#fixedtop").height();
-    pr("deftoph:"+deftoph+" vs refh: "+refh)
-    if(deftoph>(refh*2)) window.location.reload();
   counterrrr++;
   $("#log").html("redimension nro: "+counterrrr);
   sigmaLimits();
@@ -37,8 +33,8 @@ if (mainfile) {
 
     if(isUndef(getUrlParam.nodeidparam)) {
         pr("do nothing, 'cause don't wanna");
-        $('#mainmodal').modal('show');
-        $("#my-text-input").tokenInput("try.json");
+        // $('#mainmodal').modal('show');
+        // $("#my-text-input").tokenInput("try.json");
      //    pr("doing something 'cause i'm a doer"); mainfile=true;
 	    // bringTheNoise("data/pkmn_types.gexf","mono");
      //    scanCategories();
@@ -46,7 +42,10 @@ if (mainfile) {
 
 	    if(getUrlParam.nodeidparam.indexOf("__")===-1){
     		//gexfPath = "php/bridgeClientServer_filter.php?query="+getUrlParam.nodeidparam;
-    		pr("not implemented yet");
+            param=getUrlParam.nodeidparam;
+            // pr(param)
+            bringTheNoise(param,"filtermode");
+
 	    } else {
     		param=getUrlParam.nodeidparam;
             pr(param)
@@ -178,7 +177,7 @@ function bringTheNoise(pathfile,type){
 
     //  === start minimap library... currently off  === //
     startMiniMap();
-
+    
 
     console.log("parsing...");    
     // < === EXTRACTING DATA === >
@@ -261,7 +260,98 @@ function bringTheNoise(pathfile,type){
     		        pr("Page Not found. parseCustom, inside the IF");
     		    }
     		});
-	    }
+	    } else {
+            if ("filtermode") {
+
+
+                
+
+
+
+
+            // "php/bridgeClientServer_filter.php?query="+getUrlParam.nodeidparam;
+            pr("bring the noise, case: query with multiple filters");
+            pr(getClientTime()+" : DataExt Ini");
+            pr(bridge["forFilteredQuery"]+"?query="+getUrlParam.nodeidparam);
+        // < === DATA EXTRACTION === >
+            $.ajax({
+                type: 'GET',
+                url: bridge["forFilteredQuery"],
+                data: "query="+getUrlParam.nodeidparam,
+                contentType: "application/json",
+                dataType: 'jsonp',
+                async: true,
+                success : function(data){
+                            if(!isUndef(getUrlParam.seed))seed=getUrlParam.seed;
+                            extractFromJson(data,seed);
+                            pr(getClientTime()+" : DataExt Fin");
+        // < === DATA EXTRACTED!! === >
+
+                            if(fa2enabled==="off") $("#edgesButton").hide();
+                            pushSWClick("social");
+                            pr(partialGraph._core.graph.nodes.length)
+                            pr(partialGraph._core.graph.edges.length)
+                            nbnodes = partialGraph._core.graph.nodes.length
+                            if(nbnodes>=400 && nbnodes<1000) {
+                                snbnodes = nbnodes+"";
+                                cut1 = snbnodes[0];
+                                cut2 = snbnodes.length;
+                                pr("cut1: "+cut1)
+                                pr("cut2: "+cut2)
+                                iterationsFA2 = Math.round(iterationsFA2/(cut1/cut2))
+                            }
+                            if(nbnodes>=1000) iterationsFA2 = 150;
+                            pr("iterationsFA2: "+iterationsFA2)
+                            var netname = pathfile.replace(/\_/g, ' ').toUpperCase();
+                            $("#network").html("MultiQuery: lalala");
+        // < === ASYNCHRONOUS FA2.JS === >
+                            pr(getClientTime()+" : Ini FA2");
+                            var ForceAtlas2 = new Worker("FA2.js");
+                            ForceAtlas2.postMessage({ 
+                                "nodes": partialGraph._core.graph.nodes,
+                                "edges": partialGraph._core.graph.edges,
+                                "it":iterationsFA2
+                            });
+                            ForceAtlas2.addEventListener('message', function(e) {
+                                iterations=e.data.it;
+                                nds=e.data.nodes;
+                                for(var n in nds){
+                                    id=nds[n].id;
+                                    x=nds[n].x
+                                    y=nds[n].y
+                                    partialGraph._core.graph.nodes[n].x=x;
+                                    partialGraph._core.graph.nodes[n].y=y;
+                                    partialGraph._core.graph.nodesIndex[id].x=x
+                                    partialGraph._core.graph.nodesIndex[id].y=y
+                                    Nodes[id].x=x;
+                                    Nodes[id].y=y;
+                                }
+                                pr("\ttotalIterations: "+iterations)
+                                pr(getClientTime()+" : Fin FA2");
+                                console.log("Parsing and FA2 complete.");
+        // < === ASYNCHRONOUS FA2.JS DONE!! === >
+                                theListeners(); 
+                            }); 
+                },
+                error: function(){ 
+                    pr("Page Not found. parseCustom, inside the IF");
+                }
+            });
+
+
+
+
+
+
+
+
+
+
+
+
+
+            }
+        }
     }  
 }
 
@@ -505,6 +595,7 @@ function theListeners(){
         min:1,
         max:25,
         value:1,
+        bgcolor:"#27c470",
         onchange:function(value){
             $.doTimeout(100,function (){2
                    partialGraph.iterNodes(function (n) {
@@ -523,6 +614,7 @@ function theListeners(){
         min:1,
         max:25,
         value:1,
+        bgcolor:"#FFA500",
         onchange:function(value){
             $.doTimeout(100,function (){
                    partialGraph.iterNodes(function (n) {
@@ -554,6 +646,17 @@ function theListeners(){
         }
     });
 
+
+    $.doTimeout(10,function (){
+	    var deftoph=$("#defaultop").height();
+	    var refh=$("#fixedtop").height();
+	    pr("deftoph:"+deftoph+" vs refh:"+refh)
+	    pr("deftoph:"+deftoph+" vs refh*2:"+refh*2)
+	    pr("if deftoph > refh*2 ")
+	    pr(deftoph+">"+(refh*2)+" : "+(deftoph>(refh*2))+"     then reload window")
+	    // deftoph.height(64);
+    	// if(deftoph>(refh*2)) window.location.reload();
+    });
 
 }
 

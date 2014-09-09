@@ -53,7 +53,6 @@ function objectToArray($d) {
 $query = str_replace( '_char_', '#', $_GET["query"] );
 $data = json_decode($query);
 $data = objectToArray($data);
-$iterations = $_GET['it'];
 
 //echo json_decode('{ countries: [ "France" ]}');
 //$json = '{"a":1,"b":2,"c":3,"d":4,"e":5}';
@@ -70,7 +69,11 @@ $laboratories = $data["laboratories"];
 $organizations = $data["organizations"];
 $tags = $data["tags"];
 
+
+
 $f = ""; // requête
+
+
 
 if ($keywords) {
     if (sizeof($keywords) > 0) {
@@ -179,15 +182,16 @@ if (substr($f, 0, 3) == 'AND') {
     $f = substr($f, 3, -1);
 }
 
+
 if (strlen($f) > 0) {
-    $sql = "SELECT * FROM scholars where " . " " . $f;
+    $sql = "SELECT unique_id FROM scholars where " . $f;
 } else {
-    $sql = "SELECT * FROM scholars";
+    $sql = "SELECT unique_id FROM scholars";
 }
 
-#echo $sql;
+
 include("curlGET.php");
-$url="http://localhost:8080/getJSON?query=".urlencode($sql)."&it=".$iterations;
+$url="http://localhost:8080/getJSON?query=".urlencode($sql);
 #echo $url;
 
 $res=remote_get_contents($url);

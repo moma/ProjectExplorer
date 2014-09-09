@@ -12,11 +12,10 @@ sys.setdefaultencoding('utf-8')
 
 class extract:
 
-    def __init__(self,q):
-        self.query=q
-        self.connection=sqlite3.connect('../community.db')
+    def __init__(self):
+	self.connection=sqlite3.connect('../community.db')
 	self.connection.row_factory = sqlite3.Row# Magic line!
-        self.cursor=self.connection.cursor()
+	self.cursor=self.connection.cursor()
 	self.scholars = {}
 	self.scholars_colors = {}
 	self.terms_colors = {}
@@ -33,37 +32,52 @@ class extract:
 		return cooc*cooc/float(occ1*occ2)
 
 
-    def extract(self):
-        try:
-	    sql1="SELECT keywords_ids FROM scholars where unique_id='"+self.query+"'"
-            self.cursor.execute(sql1)
-            res1=self.cursor.fetchone()
-            while res1 is not None:
-                keywords_ids = res1['keywords_ids'].split(',')
+    def getScholarsList(self,qtype,query):
+	scholar_array = {}
+	if qtype == "unique_id":
+		try:
+			sql1="SELECT keywords_ids FROM scholars where unique_id='"+query+"'"
+			self.cursor.execute(sql1)
+			res1=self.cursor.fetchone()
+			while res1 is not None:
+				keywords_ids = res1['keywords_ids'].split(',')
 
-		scholar_array = {}
-		for keywords_id in keywords_ids:
-			if keywords_id != "":
-				sql2 = "SELECT * FROM scholars2terms where term_id="+keywords_id
-				try:
-					self.cursor.execute(sql2)
-					res2=self.cursor.fetchone()
-					while res2 is not None:
-						scholar_array[res2['scholar']]=1
-						res2=self.cursor.fetchone()#res2++
-				except Exception as error:
-					print "sql2:\t"+sql2
-					print error
+			for keywords_id in keywords_ids:
+				if keywords_id != "":
+					sql2 = "SELECT * FROM scholars2terms where term_id="+keywords_id
+					try:
+						self.cursor.execute(sql2)
+						res2=self.cursor.fetchone()
+						while res2 is not None:
+							scholar_array[res2['scholar']]=1
+							res2=self.cursor.fetchone()#res2++
+					except Exception as error:
+						print "sql2:\t"+sql2
+						print error
 
-		res1 = self.cursor.fetchone()#res1++
+			res1 = self.cursor.fetchone()#res1++
 
+		except Exception as error:
+			print "sql1:\t"+sql1
+			print error
 
-        except Exception as error:
-		print "sql1:\t"+sql1
-		print error
+	if qtype == "filter":
+		try:
+			self.cursor.execute(query)
+			res1=self.cursor.fetchall()
+#			print res1
+			for unique_id in res1:
+				scholar_array[ unique_id[0] ] = 1
+		
+		except Exception as error:
+			print "qtype filter sql:\t"+sql1
+			print error
 
+	return scholar_array
+
+    def extract(self,scholar_array):
 	for scholar_id in scholar_array:
-		sql3="SELECT * FROM scholars where unique_id='"+scholar_id+"'"
+		sql3='SELECT * FROM scholars where unique_id="'+scholar_id+'"'
 		try:
 			self.cursor.execute(sql3)
 			res3=self.cursor.fetchall()
@@ -470,6 +484,9 @@ class extract:
 			if coordsRAW: node["y"] = str(coords[idNode]['y'])
 			
 			nodes[idNode] = node
+			
+#			print "NGR","\t",idNode,"\t",nodeLabel,"\t",term_occ
+			
 			nodesB+=1
 
 		if idNode[0]=='D':#If it is Document
@@ -521,6 +538,9 @@ class extract:
 			node["content"] = self.toHTML(content)
 
 			nodes[idNode] = node
+			
+#			print "SCH","\t",idNode,"\t",nodeLabel
+			
 			nodesA+=1
 	
 	GG = nx.Graph()
@@ -552,11 +572,24 @@ class extract:
 		if edge["type"]=="nodes1": edgesA+=1
 		if edge["type"]=="nodes2": edgesB+=1
 		if edge["type"]=="bipartite": edgesAB+=1
+		
+#		print edge["type"],"\t",nodes[n[0]]["label"],"\t",nodes[n[1]]["label"],"\t",edge["w"]
+		
 #		if edge["type"]=="nodes1": print wr
 		edges[str(e)] = edge
 		e+=1
 		#if e%1000 == 0:
 		#	print e
+#	for n in GG.nodes_iter():
+#		if nodes[n]["type"]=="NGram":
+#			concepto = nodes[n]["label"]
+#			nodes2 = []
+#			neigh = GG.neighbors(n)
+#			for i in neigh:
+#				if nodes[i]["type"]=="NGram":
+#					nodes2.append(nodes[i]["label"])
+#			print concepto,"\t",", ".join(nodes2)
+			
 	graph = {}
 	graph["nodes"] = nodes
 	graph["edges"] = edges

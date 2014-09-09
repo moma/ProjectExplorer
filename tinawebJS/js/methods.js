@@ -1238,6 +1238,8 @@ function MultipleSelection(nodes){
 
 	if(categoriesIndex.length==1) updateLeftPanel_uni();
 	if(categoriesIndex.length==2) updateLeftPanel_fix();
+
+    RefreshState("")
 }
 
 function hoverNodeEffectWhileFA2(selectionRadius) { 
@@ -1540,8 +1542,29 @@ function changeToMeso(iwannagraph) {
                 for(var i in selections) {
                    unHide(i);
                    for(var j in nodes1[i].neighbours) { 
-                       id=nodes1[i].neighbours[j];
-                       unHide(id);
+                        id=nodes1[i].neighbours[j];
+                        s = i;
+                        t = id;
+                        // if(Edges[s+";"+t])
+                        //     pr(Nodes[s].label+";"+Nodes[t].label+" : lock "+Edges[s+";"+t].lock)
+                        // if(Edges[t+";"+s])
+                        //     pr(Nodes[t].label+";"+Nodes[s].label+" : lock "+Edges[t+";"+s].lock)
+                        edg1 = Edges[s+";"+t];
+                        if(edg1){
+                            pr(edg1.id)
+                            if(!edg1.lock){
+                                unHide(t);
+                            }
+                        }
+                        edg2 = Edges[t+";"+s];
+                        if(edg2){
+                            pr(edg2.id)
+                            if(!edg2.lock){
+                                unHide(t);
+                            }
+                        }
+                        
+                        // unHide(id);
                    }
                 }            
                 createEdgesForExistingNodes(iwannagraph);/**/

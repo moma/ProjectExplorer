@@ -20,6 +20,7 @@
         var me = this;
         var range = typeof options.range == 'undefined'? false : options.range,
             isSingle = !range,
+            bgcolor = options.bgcolor,//"#27c470",
             min = options.min || 0,
             max = options.max || 100,
             gap = max - min,
@@ -107,7 +108,8 @@
 
             selVal.css({
                 left:values[0] * sliderWidth,
-                width:(values[1] - values[0]) * sliderWidth
+                width:(values[1] - values[0]) * sliderWidth,
+                background:bgcolor
             });
 
             caretLeft.css({

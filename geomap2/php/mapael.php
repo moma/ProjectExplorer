@@ -5,16 +5,24 @@ header('Content-Type: application/json');
  geomap/php/mapael.php?db=["data/nci/graph.db"]&query=["biomass","fuel","cooperatives","energy use","energy poverty","wind power","clean energy","social business","remote areas","Solar","battery","kerosene lanterns","retailers","lamps","energy production","distribution","grid electricity"]
  */
 
+/*
+http://localhost/adasd/geomap2/php/mapael.php?db="php/community.db"&query=["all"]
+http://localhost/adasd/geomap2/?db="php/community.db"&query=["all"]
+*/
 include('parameters_details.php');
 include('countries_iso3166.php');
 
 
 $sql="";
 $table="scholars";
-$column="country";
+$column="norm_country";
 $query = str_replace( '__and__', '&', $_GET["query"] );
 $query = str_replace( 'D::', '', $query );
 $elems = json_decode($query);
+
+
+$singularnick= "scholar";
+$pluralnick = "scholars";
 
 $selectiveQuery=true;
 if(count($elems)==1){
@@ -107,7 +115,7 @@ if($selectiveQuery){
             $info["attrs"] = array();
             $info["attrs"]["href"] = "#";
             $info["tooltip"] = array();
-            //$info["tooltip"]["content"] = "<span style='font-weight=bold;'>" . $CC[$key] . "</span><br/>" . $realOCC.'  people ('.$info["percentage"].'%)';
+            //$info["tooltip"]["content"] = "<span style='font-weight=bold;'>" . $CC[$key] . "</span><br/>" . $realOCC.'  '.$pluralnick.' ('.$info["percentage"].'%)';
             $norm_country[$key] = $info;
             
             if($percentage>$maxF) $maxF=$percentage;
@@ -127,13 +135,13 @@ if($selectiveQuery){
         $old=$value["percentage"];
         $new=$old*$constant;# da formula!
         $norm_country[$key]["percentage"]=round($new,2);
-        $norm_country[$key]["tooltip"]["content"]= "<span style='font-weight=bold;'>" . $CC[$key] . "</span><br/>" . $value["realValue"].'  people ('.round($new,2).'%)';
+        $norm_country[$key]["tooltip"]["content"]= "<span style='font-weight=bold;'>" . $CC[$key] . "</span><br/>" . $value["realValue"].'  '.$pluralnick.' ('.round($new,2).'%)';
         //pr($value["code"].": ".$value["realValue"].", ".$value["percentage"].", div:".($country_divisor[$key]+1));
     }
 } else {
     //    $column="data";
-        $sql = "select count(*),data from ISIkeyword GROUP BY data ORDER BY count(*) DESC";
-        $sql = "select count(*),country from scholars GROUP BY country ORDER BY count(*) DESC";
+    $sql = "select count(*),data from ISIkeyword GROUP BY data ORDER BY count(*) DESC";
+    $sql = "select count(*),".$column." from scholars GROUP BY country ORDER BY count(*) DESC";
     ////}
     ////$sql="select count(*),data from ISIC1Country GROUP BY data ORDER BY count(*) DESC";//ademe
     //
@@ -142,7 +150,7 @@ if($selectiveQuery){
         $tempcount = 0;
         if ($norm_country[$code]) {
             $norm_country[$code]["value"]+=$row["count(*)"];
-            $norm_country[$code]["tooltip"]["content"] = "<span style='font-weight=bold;'>" . $CC[$code] . "</span><br/>" . $norm_country[$code]["value"].' people';
+            $norm_country[$code]["tooltip"]["content"] = "<span style='font-weight=bold;'>" . $CC[$code] . "</span><br/>" . $norm_country[$code]["value"].' '.$pluralnick;
         } else {
             $info = array();
             $info["code"] = $code;
@@ -150,14 +158,11 @@ if($selectiveQuery){
             $info["attrs"] = array();
             $info["attrs"]["href"] = "#";
             $info["tooltip"] = array();
-            $info["tooltip"]["content"] = "<span style='font-weight=bold;'>" . $CC[$code] . "</span><br/>" . $row["count(*)"].' people';
+            $info["tooltip"]["content"] = "<span style='font-weight=bold;'>" . $CC[$code] . "</span><br/>" . $row["count(*)"].' '.$pluralnick;
             $norm_country[$code] = $info;
         }
     }
 }
-
-
-
 
 $occToCC = array();
 foreach ($norm_country as $c) {
@@ -218,12 +223,12 @@ foreach ($temp as $key => $value) {
             $moreinfo["tooltip"] = array();
             if($selectiveQuery){
                 if($norm_country[$j]["realValue"]==1){
-                    $moreinfo["tooltip"]["content"] = "<span style='font-weight=bold;'>" . $CC[$j] . "</span><br/>" . $norm_country[$j]["realValue"]. ' person ('.$norm_country[$j]["percentage"].'%)';
+                    $moreinfo["tooltip"]["content"] = "<span style='font-weight=bold;'>" . $CC[$j] . "</span><br/>" . $norm_country[$j]["realValue"]. ' '.$pluralnick.' ('.$norm_country[$j]["percentage"].'%)';
                 } else {
-                    $moreinfo["tooltip"]["content"] = "<span style='font-weight=bold;'>" . $CC[$j] . "</span><br/>" . $norm_country[$j]["realValue"]. ' people ('.$norm_country[$j]["percentage"].'%)';
+                    $moreinfo["tooltip"]["content"] = "<span style='font-weight=bold;'>" . $CC[$j] . "</span><br/>" . $norm_country[$j]["realValue"]. ' '.$pluralnick.' ('.$norm_country[$j]["percentage"].'%)';
                 }                    
             } else {
-                $moreinfo["tooltip"]["content"] = "<span style='font-weight=bold;'>" . $CC[$j] . "</span><br/>" . $value["occ"]. ' people';
+                $moreinfo["tooltip"]["content"] = "<span style='font-weight=bold;'>" . $CC[$j] . "</span><br/>" . $value["occ"]. ' '.$pluralnick;
             }
             $thedata[$j] = $moreinfo;
         }

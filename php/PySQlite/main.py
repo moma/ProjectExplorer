@@ -26,22 +26,20 @@ def main():
 
 
 	# < Data Extraction > #
-	i = int(request.args['it'])
+	# i = int(request.args['it'])
 
+	db=SQLite()
+	print "iciiiii"
 	if request.args.has_key("query"):
-		db=SQLite("")
-		print request.args['query']
-		print i
-		db.extract2(request.args['query'])
+		filteredquery = request.args['query']
+		scholars = db.getScholarsList("filter",filteredquery)
+		db.extract(scholars)
 	else:
 		unique_id = request.args['unique_id']
-		db=SQLite(unique_id)
-		db.extract()
+		scholars = db.getScholarsList("unique_id",unique_id)
+		db.extract(scholars)
 	# < / Data Extraction > #
 
-
-	tempGraph = db.buildSimpleJSONFinal(db.Graph)
-	
 	# Arnaud Banos network:
 	#   Bruce Edmonds exists twice, but one of them has no keywords
 #	import pprint as p

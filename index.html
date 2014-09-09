@@ -1,183 +1,237 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Complex Systems Community Explorer</title>
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+        <!--[if lt IE 9]>
+        <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+        <!-- Le styles -->
+        <link href="index-CSS/bootstrap.css" rel="stylesheet">
+        <link type="text/css" href="index-CSS/brownian-motion/jquery-ui-1.8.16.custom.css">
+        <!--    <link rel="stylesheet/less" type="text/css" href="less/bootstrap.less">
+        <script src="js/less-1.1.5.min.js" type="text/javascript"></script>
+        -->
+        <link href="index-CSS/bootstrap_index.css" rel="stylesheet">
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu' rel='stylesheet' type='text/css'>
+        
+        <script type="text/javascript" src="index-JS/jquery/jquery-1.7.min.js"></script>
+        <script type="text/javascript" src="index-JS/jquery-ui/jquery-ui-1.8.16.custom.min.js"></script>
+        <script type="text/javascript" src="index-JS/bootstrap/bootstrap-dropdown-fade.js"></script>
+        <script type="text/javascript" src="index-JS/misc/underscore.min.js"></script>
+        <script type="text/javascript" src="index-JS/jquery/jquery.highlight-3.js"></script>
+                <script type="text/javascript" src="index-JS/jquery/jquery.vticker-min.js"></script>
+        <script type="text/javascript" src="index-JS/misc/json2.js"></script>
+        <script type="text/javascript" src="index-JS/misc/utils.js"></script>
+        
+        <link href="index-CSS/whoswho.css" rel="stylesheet" type="text/css">
+        
+        <!-- Le fav and touch icons -->
+        <link rel="shortcut icon" href="index-IMG/favicon.ico">
+        <link rel="apple-touch-icon" href="index-IMG/apple-touch-icon.png">
+        <link rel="apple-touch-icon" sizes="72x72" href="index-IMG/apple-touch-icon-72x72.png">
+        <link rel="apple-touch-icon" sizes="114x114" href="index-IMG/apple-touch-icon-114x114.png">
+<script type="text/javascript">
+$(function(){
+    $('#news-container').vTicker({
+        speed: 700,
+        pause: 6000,
+        animation: 'fade',
+        mousePause: false,
+        showItems: 1
+    });
+});
 
-<head>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>TinawebJS</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta charset="utf-8">
-    
-    <link rel="stylesheet" href="jquery/jquery-ui.css" media="screen">
-    <link rel="stylesheet" href="css/bootstrap.css" media="screen">
-    <link rel="stylesheet" href="bootswatch/css/bootswatch.css">
-<style type="text/css">
-  body{background: #eee url(http://subtlepatterns.com/patterns/sativa.png);}
-html,body{
-    position: relative;
-    height: 100%;
-}
 
-.login-container{
-    position: relative;
-    width: 300px;
-    margin: 80px auto;
-    padding: 20px 40px 40px;
-    text-align: center;
-    background: #fff;
-    border: 1px solid #ccc;
-}
+</script>
+    </head>
+    <body>
+        <script>
+            ! function(d, s, id) {
+                var js, fjs = d.getElementsByTagName(s)[0];
+                if(!d.getElementById(id)) {
+                    js = d.createElement(s);
+                    js.id = id;
+                    js.src = "//platform.twitter.com/widgets.js";
+                    fjs.parentNode.insertBefore(js, fjs);
+                }
+            }(document, "script", "twitter-wjs");
 
-#output{
-    position: absolute;
-    width: 300px;
-    top: -75px;
-    left: 0;
-    color: #fff;
-}
+        </script>
+        <div id="fb-root"></div>
+        <script type="text/javascript" src="index-JS/whoswho.js"/></script>
+        <div class="topbar" data-dropdown="dropdown">
+            <div class="topbar-inner">
+                <div class="container-fluid">
+                    <a class="brand" href="index.html">
+                   <i class="icon-home icon-white"></i></a>
+                    <ul class="nav">
+                        <li id="mapping" style="margin-top:5px;">
+                            <span style="color: #fff;"> <strong>SELECT</strong> </span>
+                            <select id="categorya" class="small" style="background: rgb(220,255,220, 0.8);">
+                                <option selected="true">Keywords</option>
+                                <!--<option>Scholars</option>
+                                <option>Labs</option>
+                                <option>Organizations</option>
+                                <option>Countries</option>-->
+                            </select>
+                            <span style="color: #fff;"> <strong>AND</strong> </span>
+                            <select id="categoryb" class="small" style="background: rgb(255,220,220, 0.8);">
+                                <option selected="true">Scholars</option>
+                                <!--<option>Labs</option>
+                                <option>Organizations</option>
+                                <option>Countries</option>-->
+                            </select>
+                        </li>
+                        <!--
+                        <li class="dropdown">
+                        <a class="dropdown-toggle"><strong>working on</strong> Optics, Econometrics</a>
+                        <ul class="dropdown-menu">
+                        <li>
+                        <a href="#">Change filter</a>
+                        </li>
+                        <li>
+                        <a href="#">Delete filter</a>
+                        </li>
+                        </ul>
+                        </li>
+                        -->
+                        <li id="refine" class="dropdown">
+                            <a class="dropdown-toggle">refine</a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                <a id="addfiltercountry" href="#">Filter by country</a>
+                                </li>                               
+                                <li>
+                                                            <a id="addcolor" href="#">Color by</a>
+                                
+                                <li>
+                                    <a id="addfilterkeyword" href="#">Filter by keyword</a>
+                                </li>
+                                                                <li>
+                                <a id="addfiltertag" href="#">Filter by community tags</a>
+                                </li></li>
+                                <li>
+                                
+                                <a id="addfilterorganization" href="#">Filter by organization</a>
+                                </li>
+                                <li>
+                                <a id="addfilterlaboratory" href="#">Filter by laboratory</a>
+                                </li>
+                                
+                            </ul>
+                        </li>
+                                                <li>
+                            <a id="generate" href="#"> <strong>MAP</strong></a>
+                        </li>
+                        
+                    </ul>
+                    <form id="search-form" class="js-search-form pull-right">
+                        <span class="glass js-search-action"><i></i></span>
+                        <input id="search" class="input-small" type="text" name="q" placeholder="Search">
+                        <!--<input type="text" id="search" name="search" placeholder="Scholars">-->
+                        <!--
+                        <li class="ui-state-default ui-corner-all" title=".ui-icon-search"><span class="ui-icon ui-icon-search"></span></li>
 
-#output.alert-success{
-    background: rgb(25, 204, 25);
-}
-
-#output.alert-danger{
-    background: rgb(228, 105, 105);
-}
-
-
-.login-container::before,.login-container::after{
-    content: "";
-    position: absolute;
-    width: 100%;height: 100%;
-    top: 3.5px;left: 0;
-    background: #fff;
-    z-index: -1;
-    -webkit-transform: rotateZ(4deg);
-    -moz-transform: rotateZ(4deg);
-    -ms-transform: rotateZ(4deg);
-    border: 1px solid #ccc;
-
-}
-
-.login-container::after{
-    top: 5px;
-    z-index: -2;
-    -webkit-transform: rotateZ(-2deg);
-     -moz-transform: rotateZ(-2deg);
-      -ms-transform: rotateZ(-2deg);
-
-}
-
-.avatar{
-    width: 100px;height: 100px;
-    margin: 10px auto 30px;
-    border-radius: 100%;
-    border: 2px solid #aaa;
-    background-size: cover;
-}
-
-.form-box input{
-    width: 100%;
-    padding: 10px;
-    text-align: center;
-    height:40px;
-    border: 1px solid #ccc;;
-    background: #fafafa;
-    transition:0.2s ease-in-out;
-
-}
-
-.form-box input:focus{
-    outline: 0;
-    background: #eee;
-}
-
-.form-box input[type="text"]{
-    border-radius: 5px 5px 0 0;
-    text-transform: lowercase;
-}
-
-.form-box input[type="password"]{
-    border-radius: 0 0 5px 5px;
-    border-top: 0;
-}
-
-.form-box button.login{
-    margin-top:15px;
-    padding: 10px 20px;
-}
-
-.animated {
-  -webkit-animation-duration: 1s;
-  animation-duration: 1s;
-  -webkit-animation-fill-mode: both;
-  animation-fill-mode: both;
-}
-
-@-webkit-keyframes fadeInUp {
-  0% {
-    opacity: 0;
-    -webkit-transform: translateY(20px);
-    transform: translateY(20px);
-  }
-
-  100% {
-    opacity: 1;
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeInUp {
-  0% {
-    opacity: 0;
-    -webkit-transform: translateY(20px);
-    -ms-transform: translateY(20px);
-    transform: translateY(20px);
-  }
-
-  100% {
-    opacity: 1;
-    -webkit-transform: translateY(0);
-    -ms-transform: translateY(0);
-    transform: translateY(0);
-  }
-}
-
-.fadeInUp {
-  -webkit-animation-name: fadeInUp;
-  animation-name: fadeInUp;
-}
-
-  
-</style>
-
-</head>
-  <body>
-
-  <div class="container">
-        <div class="login-container">
-            <div id="output"></div>
-            <div class="avatar"></div>
-            <div class="form-box">
-                <form action="" method="">
-                    <input name="user" type="text" placeholder="username">
-                    <input type="password" placeholder="password">
-                    <button class="btn btn-info btn-block login" type="submit">Login</button>
-                </form>
+                        <button class="btn" type="submit"></button>
+                        -->
+                    </form>
+                </div>
             </div>
         </div>
+        <div class="container-fluid">
+            <div id="visualization"></div>
+            <!-- Main hero unit for a primary marketing message or call to action -->
+            <div class="hero-unit">
+                <div id="loading" style="padding-left:-175px; margin-left: 27%;">
+                    <img src="index-CSS/loading.gif" style="border: 0px; opacity: 0.05; " />
+                </div>
+                <div id="welcome">
+                                    <h2>Welcome to the complex systems community explorer</h2>
+                                    <br/>
+                                    <div class="row">
+                                         <div class="span8">                    
+                    <p>
+                        Map your own socio-semantic network or explore sub-communities using the <strong> interactive menu</strong> on the top of the webpage. 
+                                                <br/>The integration of job openings in maps aims at increasing the visibility
+                                                of new positions or new candidates.
+                    </p>
+                                            <br/>
+                    <p>
+                        <!--<form>-->
+                        <input type="text" id="searchname" class="large name" placeholder="Search a name" />
+                        <input type="hidden" id="searchlogin" value=""/>
+                        <img src="index-CSS/branding/big_arrow.png" alt="" style="border: none; margin-bottom : -19px;" title="" />
+                                                <button id="generate2" class="btn btn-small btn-primary">
+                            &nbsp &nbsp MAP &nbsp &nbsp 
+                        </button>
+                        <!--<a id="printname" href="#"> <strong>PRINT</strong></a>-->
+                    </p>
+                    <br/><br/>
+<!--                                              
+                                                 <button id="register" class="btn btn-mini btn-info">
+                            Edit you profile !
+                                                 </button>
+--> 
+                                                 <br/><br/>
+                                             
+                    <br/>
+                    <address>
+                        <i class="icon-info-sign"></i>This directory is <strong>open</strong> to everybody working in the field of Complex Systems science and Complexity science. Map and explore communities or generate a printable version of their directory.
+                         Updated every few minutes.
+                        <br/>
+                        <i class="icon-exclamation-sign"></i> You must have a <strong>recent browser</strong> (e.g. Firefox 10+ or Chrome 17+) to see the maps.
+
+                        
+                                               
+                                                
+                                                
+                                                <!--    <i class="icon-list-alt"></i> Personal data are given on a voluntary basis and people are responsible for the validity and integrity of their data. <br/>
+                                                             
+                        <i class="icon-repeat"></i> Suggestions or comments ? <a href="http://moma.csregistry.org/feedback"  target="BLANK">Please feedback.</a> <br/>
+
+                        <i class="icon-user"></i><a href="http://main.csregistry.org/my+account"  target="_BLANK"> Click here</a> to check your Complex Systems profile.-->
+                    </address>
+                    <br/><br/>
+                                      
+                                         </div>  
+                                         <!-- Second column -->
+                                         <div class="span5">
+                                             
+<center><font color="red">Mapping ECCS'13 participants:</font> ECCS'13 partcipants are invited to add the community tag #eccs13 in their profile to create <a href="http://main.csregistry.org/Whoswhodata">the ECCS'13 directory</a>.</center><br/>
+<p>News</p>       
+                                             <div id="news-container">                                                
+<ul>                                                   
+   <li>Job market integration : announce new jobs and find people looking for a job</li>       
+   <li>Community tags: Map any workgroup or event audience and get the associated directory.</li>
+</ul>
+</div><br/>
+<center>
+
+<br/><br/></div>
+                                    </div>  
+                                    
+                                    <div class="fb-like" data-href="http://communityexplorer.org" data-send="true" data-layout="button_count" data-width="450" data-show-faces="true" data-font="arial"></div>
+                                </div>
+                        </div>
+                        <footer>
+                            <!-- This directory is maintained by the <a href="http://cssociety.org" target="blank">Complex Systems Society</a> and the <a href="http://iscpif.fr" target="blank">Complex Systems Institute of Paris Ile-de-France</a>.<br/>-->
+                            <center>
+                                <div class="span12 sigma-parent" id="sigma-example-parent">
+    <div class="sigma-expand" id="sigma-example"></div>
   </div>
-
-    <!--<script src="libs/jquery/jquery-1.9.1.js"></script>-->
-    <!--<script src="libs/jquery/jquery-ui.js" type="text/javascript"></script>-->
-    
-    <script src="jquery/jquery-1.10.2.js" type="text/javascript"></script>
-    <script src="jquery/jquery-ui.js" type="text/javascript"></script>
-    <script src="querypage.js" type="text/javascript"></script>
-
-    <script src="libs/bootstrap/js/bootstrap.min.js"></script>
-    <script src="bootswatch/js/bootswatch.js"></script>
-    <script src="libs/bootstrap/js/bootstrap-modal.js" type="text/javascript"></script>
-
+                                <a href="about.html"><i class="icon-question-sign"></i> About</a> - <a href="http://moma.csregistry.org/feedback"  target="BLANK"><i class="icon-repeat"></i> Feedback</a> - <a href="privacy.html"> <i class="icon-list-alt"></i> Privacy</a>
+                                <br/>
+                    Directory maintained by the <a href="http://cssociety.org" target="blank">Complex Systems Society</a> and the <a href="http://iscpif.fr" target="blank">Complex Systems Institute of Paris Ile-de-France</a>.
+                                <br/>
+                                <a href="http://cssociety.org" target="_BLANK"><img src="index-IMG/css.png" alt="http://cssociety.org" style="border: none; margin-bottom : -6px;" title="isc-pif" height="25px" /></a><a href="http://iscpif.fr"><img src="index-CSS/branding/iscpif_short.png" alt="iscpif.fr" style="border: none; margin-bottom : -6px;" title="isc-pif" /></a>
+                                <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="blank"><img alt="Creative Commons License" style="border: none; margin-bottom : -6px;" src="img/cc.png" height="20px"/></a> - <a href="http://moma.csregistry.org" target="_BLANK"> MOMA</a> - <a href="http://iscpif.fr" target="_BLANK">ISC-PIF</a> - <a href="http://www.cnrs.fr/fr/recherche/index.htm" target="_BLANK">CNRS</a>.
+                            </center>
+                        </footer>
+                </div>
 </body>
 </html>
+    

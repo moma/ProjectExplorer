@@ -110,4 +110,8 @@ foreach($results as $key => $value) {
 $i = 0;
 
 echo json_encode($completion);
+// $dumpvalue = array();
+// array_push($dumpvalue, "hola");
+// array_push($dumpvalue, "mundo");
+// echo json_encode($dumpvalue);
 ?>

@@ -368,6 +368,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
         range: true,
         step: 1,
         min:0,
+        bgcolor: (type=="nodes1")?"#27c470":"#FFA500" ,
         max:steps-1,
         value:[0,steps-1],
         onchange:function(low, high){    
@@ -385,12 +386,18 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                     if(i>=low && i<=high){
                         for(var id in ids) {                            
                             ID = ids[id]
+                            // partialGraph._core.graph.edgesIndex[ID].lock=false;
+                            // partialGraph._core.graph.edgesIndex[ID].hidden=false;
                             add1Edge(ID)
+                            Edges[ID].lock = false;
                         }
                     } else {
                         for(var id in ids) {
                             ID = ids[id]
+                            // partialGraph._core.graph.edgesIndex[ID].lock=true;
+                            // partialGraph._core.graph.edgesIndex[ID].hidden=true;
                             partialGraph.dropEdge(ID)
+                            Edges[ID].lock = true;
                         }
                     }
                 }
@@ -442,6 +449,7 @@ function NodeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
         step: 1,
         min:0,
         max:steps-1,
+        bgcolor:(type_attrb=="Document")?"#27c470":"#FFA500" ,
         value:[0,steps-1],
         onchange:function(low, high){    
             var filtervalue = low+"-"+high

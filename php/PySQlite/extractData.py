@@ -695,6 +695,8 @@ class extract:
 			if coordsRAW: node["x"] = str(coords[idNode]['x'])
 			if coordsRAW: node["y"] = str(coords[idNode]['y'])
 			
+			print "NGR","\t",idNode,"\t",nodeLabel,"\t",term_occ
+			
 			nodes[idNode] = node
 
 		if idNode[0]=='D':#If it is Document
@@ -744,7 +746,9 @@ class extract:
 			if coordsRAW: node["x"] = str(coords[idNode]['x'])
 			if coordsRAW: node["y"] = str(coords[idNode]['y'])
 			node["content"] = self.toHTML(content)
-
+			
+			print "SCH","\t",idNode,"\t",nodeLabel
+			
 			nodes[idNode] = node
 	
 	GG = nx.Graph()
@@ -773,7 +777,9 @@ class extract:
 		edge["t"] = n[1]
 		edge["w"] = str(wr)
 		edge["type"] = GG[n[0]][n[1]]['type']
-#		if edge["type"]=="nodes1": print wr
+		
+		print edge["type"],"\t",nodes[n[0]]["label"],"\t",nodes[n[1]]["label"],"\t",edge["w"]
+		
 		edges[str(e)] = edge
 		e+=1
 		#if e%1000 == 0:

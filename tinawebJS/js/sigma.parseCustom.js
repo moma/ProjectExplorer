@@ -49,7 +49,6 @@ function scanCategories(){
 }
 
 
-
 function onepartiteExtract(){
     
     var i, j, k;
@@ -232,6 +231,7 @@ function onepartiteExtract(){
                 targetID:   target,
                 label:      "",
                 weight: 1,
+                lock: false,
                 attributes: []
             };
 
@@ -662,6 +662,7 @@ function extractFromJson(data,seed){
                 id:         indice,
                 sourceID:   source,
                 targetID:   target,
+                lock : false,
                 label:      edgesNodes[i].type,
                 weight: edgesNodes[i].w
             };
