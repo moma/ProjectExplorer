@@ -172,6 +172,7 @@ function changeType() {
         }
         return;
     }
+
     if(swclickActual=="semantic") {
         if(swMacro) {
         	changeToMacro("social");
@@ -184,6 +185,7 @@ function changeType() {
         }
         return;
     }
+
     if(swclickActual=="sociosemantic") {
     	
     	if(swMacro) {

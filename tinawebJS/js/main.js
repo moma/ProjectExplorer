@@ -228,6 +228,40 @@ function bringTheNoise(pathfile,type){
                             var netname = pathfile.replace(/\_/g, ' ').toUpperCase();
                             $("#network").html(netname);
         // < === ASYNCHRONOUS FA2.JS === >
+
+
+
+
+                            // var vis_nds = getVisibleNodes();
+                            // pr("before_change... visible nodes:")
+                            // for(var i in vis_nds)
+                            //     pr(vis_nds[i].id+" : "+vis_nds[i].degree)
+
+
+                            // var vis_ndsIndex = {}
+                            // for(var n in vis_nds)  {
+                            //     id = vis_nds[n].id
+                            //     vis_ndsIndex[id] = vis_nds[n]
+                            //     vis_ndsIndex[id].degree = 0;
+                            // }
+
+                            // var vis_edgs = getVisibleEdges();
+                            // for(var e in vis_edgs) {
+                            //     e1 = vis_edgs[e]
+                            //     n1 = e1.source.id
+                            //     n2 = e1.target.id
+                            //     vis_ndsIndex[n1]["degree"]++;
+                            //     vis_ndsIndex[n2]["degree"]++;
+                            // }
+
+                            // pr("after_change... visible nodes:")
+                            // for(var i in vis_ndsIndex)
+                            //     pr(vis_ndsIndex[i].id+" : "+vis_ndsIndex[i].degree)
+
+
+
+
+
                             pr(getClientTime()+" : Ini FA2");
                             var ForceAtlas2 = new Worker("FA2.js");
                             ForceAtlas2.postMessage({ 
@@ -628,7 +662,7 @@ function theListeners(){
     }); 
 
 
-    //NodeWeightFilter ( "#sliderBNodeWeight" ,  "NGram" , "type" , "size") 
+    // NodeWeightFilter ( "#sliderBNodeWeight" ,  "NGram" , "type" , "size") 
 
     // EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
     

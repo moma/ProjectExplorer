@@ -643,7 +643,8 @@ function extractFromJson(data,seed){
             nodeK = Nodes[i];
             nodeK.hidden=true;/**///should be uncommented
             partialGraph.addNode(i,nodeK);   
-        } else {
+        } 
+        else {
             partialGraph.addNode(i,Nodes[i]);  
             unHide(i);
         }

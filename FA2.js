@@ -60,7 +60,7 @@ var ForceAtlas2 = function(graph) {
     switch (self.state.step) {
       case 0: // Pass init
         // Initialise layout data
-//        pr("caso 0")
+        //        pr("caso 0")
         nodes.forEach(function(n) {
           if(n.fa2) {
             n.fa2.mass = 1 + n.degree;
@@ -99,7 +99,7 @@ var ForceAtlas2 = function(graph) {
         break;
 
       case 1: // Repulsion
-//        pr("caso 1")
+        //        pr("caso 1")
         var Repulsion = self.ForceFactory.buildRepulsion(
           self.p.adjustSizes,
           self.p.scalingRatio
@@ -144,7 +144,7 @@ var ForceAtlas2 = function(graph) {
         break;
 
       case 2: // Gravity
-//        pr("caso 2")
+        //        pr("caso 2")
         var Gravity = (self.p.strongGravityMode) ?
                       (self.ForceFactory.getStrongGravity(
                         self.p.scalingRatio
@@ -174,7 +174,7 @@ var ForceAtlas2 = function(graph) {
         break;
 
       case 3: // Attraction
-//        pr("caso 3")
+        //        pr("caso 3")
         var Attraction = self.ForceFactory.buildAttraction(
           self.p.linLogMode,
           self.p.outboundAttractionDistribution,
@@ -216,7 +216,7 @@ var ForceAtlas2 = function(graph) {
         break;
 
       case 4: // Auto adjust speed
-//        pr("caso 4")
+        //        pr("caso 4")
         var totalSwinging = 0;  // How much irregular movement
         var totalEffectiveTraction = 0;  // Hom much useful movement
         var swingingSum=0;
@@ -278,7 +278,7 @@ var ForceAtlas2 = function(graph) {
         break;
 
       case 5: // Apply forces
-//        pr("caso 5")
+        //        pr("caso 5")
         var i = self.state.index;
         if (self.p.adjustSizes) {
           var speed = self.p.speed;
@@ -964,6 +964,20 @@ var startForceAtlas2 = function(graph,limit_it) {
 //    pr(graph.nodes[0].x)
 //    pr(graph.nodes[0].y)
 //    pr("--------")
+
+    // nodes = graph.nodes;
+    // for(var n in nodes) {
+    //   if(!nodes[n].hidden)
+    //     nodes[n].degree = 0;
+    // }
+
+    // edges = graph.edges;
+    // for(var e in edges) {
+    //   if(!edges[e].hidden) {
+
+    //   }
+    // }
+
     forceatlas2 = new ForceAtlas2(graph);
     forceatlas2.setAutoSettings();
     forceatlas2.init();
