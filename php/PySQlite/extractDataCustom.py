@@ -226,6 +226,8 @@ class extract:
 			info['keywords_ids'] = res3[n-1]['keywords_ids'].split(',');
 			info['keywords'] = res3[n-1]['keywords'];
 			info['country'] = res3[n-1]['country'];
+			info['ACR'] = res3[n-1]['affiliation_acronym']
+			info['CC'] = res3[n-1]['norm_country'];
 			info['homepage'] = res3[n-1]['homepage'];
 			info['lab'] = res3[n-1]['lab'];
 			info['affiliation'] = res3[n-1]['affiliation'];
@@ -491,6 +493,10 @@ class extract:
 			node["type"] = "Document"
 			node["label"] = nodeLabel
 			node["color"] = color
+			node["CC"] = self.scholars[idNode]["CC"]
+			node["ACR"] = self.scholars[idNode]["ACR"]
+			if node["ACR"]=="": node["ACR"]="-"
+			if node["CC"]=="": node["CC"]="-"
 			node["term_occ"] = "12"
 			if coordsRAW: node["x"] = str(coords[idNode]['x'])
 			if coordsRAW: node["y"] = str(coords[idNode]['y'])

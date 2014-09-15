@@ -681,6 +681,10 @@ function theListeners(){
     });
 
 
+    $("#clustbyCC").click(function(){
+        clustersBy("country");
+    });
+
     $.doTimeout(10,function (){
 	    var deftoph=$("#defaultop").height();
 	    var refh=$("#fixedtop").height();

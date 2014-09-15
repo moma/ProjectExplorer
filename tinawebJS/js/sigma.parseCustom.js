@@ -624,6 +624,8 @@ function extractFromJson(data,seed){
                 node.shape="square";
                 numberOfDocs++;
                 node.size=desirableScholarSize;
+                node.CC = nodesNodes[i].CC;
+                node.ACR = nodesNodes[i].ACR;
             }
             else {
                 node.type="NGram";

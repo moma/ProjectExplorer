@@ -148,3 +148,44 @@ function getClientTime(){
     var result = (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds  < 10 ? "0" + seconds : seconds);
     return result;
 }
+
+function getCountries(){
+    var nodes = getVisibleNodes();
+    var countries = {}
+    pr("in getCountries")
+    for(var i in nodes) {
+        // pr(i)
+        // pr(nodes[i].id+" : "+nodes[i].attr["CC"]+" , "+nodes[i].attr["ACR"])
+        if (nodes[i].attr["CC"]!="-")
+            countries[nodes[i].attr["CC"]]=1
+        // pr("")
+    }
+    return Object.keys(countries);
+}
+
+function clustersBy(daclass) {
+    if(daclass=="country") {
+
+        CCs = getCountries()
+        CCxID = {}
+        for(var i in CCs) { 
+            code = CCs[i]
+            CCxID[code]=parseInt(i);
+        }
+        pr(CCxID)
+
+
+        var nodes = getVisibleNodes();
+        colorList.sort(function(){ return Math.random()-0.5; }); 
+        pr(colorList);
+        for(var i in nodes) {
+            cc = nodes[i].attr["CC"]
+            if( !isUndef( cc ) && cc!="-" ) {
+                nodes[i].color = colorList[ CCxID[cc] ];
+            }
+        }
+
+        partialGraph.refresh()
+        partialGraph.draw();
+    }
+}
