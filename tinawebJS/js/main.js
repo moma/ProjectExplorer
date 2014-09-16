@@ -681,8 +681,13 @@ function theListeners(){
     });
 
 
-    $("#clustbyCC").click(function(){
+    $("#colorbyCC").click(function(){
         clustersBy("country");
+    });
+
+
+    $("#colorbyDef").click(function(){
+        clustersBy("default");
     });
 
     $.doTimeout(10,function (){

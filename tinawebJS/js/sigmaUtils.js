@@ -164,7 +164,7 @@ function getCountries(){
 }
 
 function clustersBy(daclass) {
-    if(daclass=="country") {
+    if (daclass=="country") {
 
         CCs = getCountries()
         CCxID = {}
@@ -173,19 +173,25 @@ function clustersBy(daclass) {
             CCxID[code]=parseInt(i);
         }
         pr(CCxID)
-
-
+        
         var nodes = getVisibleNodes();
         colorList.sort(function(){ return Math.random()-0.5; }); 
-        pr(colorList);
+        // pr(colorList);
         for(var i in nodes) {
             cc = nodes[i].attr["CC"]
             if( !isUndef( cc ) && cc!="-" ) {
                 nodes[i].color = colorList[ CCxID[cc] ];
             }
         }
-
-        partialGraph.refresh()
-        partialGraph.draw();
     }
+
+    if (daclass=="default") {
+        var nodes = getVisibleNodes();
+        for(var i in nodes) {
+            nodes[i].color = Nodes[ nodes[i].id ].color;            
+        }
+    }
+
+    partialGraph.refresh()
+    partialGraph.draw();
 }
