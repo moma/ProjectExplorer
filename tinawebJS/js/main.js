@@ -539,31 +539,82 @@ function theListeners(){
     //    .mousewheel(onGraphScroll);
     
     $("#sigma-example")
-    .mousemove(function(){
-        if(!isUndef(partialGraph)) {
-            if(cursor_size>0) trackMouse();
-        }
-    })
-    .contextmenu(function(){
-        return false;
-    })
-    .mousewheel(onGraphScroll);
-    
-    $(document).keydown(function(e) {
-        if( e.shiftKey || e.which==16 ) {
-        	shift_key=true;
-        	partialGraph.draw();
-        }
-    });
+        .mousemove(function(){
+            if(!isUndef(partialGraph)) {
+                if(cursor_size>0) trackMouse();
+            }
+        })
+        .contextmenu(function(){
+            return false;
+        })
+        .mousewheel(onGraphScroll)
+        .mousedown(function(e){
 
-    $(document).keyup(function(e) {
-        if(e.shiftKey || e.which==16) {
-        	shift_key=false;
-        	partialGraph.draw();
-        	trackMouse();
-        }
-    });
+            //left click!
+            if(e.which==1){
 
+
+                var targeted = partialGraph._core.graph.nodes.filter(function(n) {
+                    return !!n['hover'];
+                }).map(function(n) {
+                    return n.id;
+                });
+                
+                partialGraph.dispatch(
+                    e['type'] == 'mousedown' ?
+                    'downgraph' :
+                    'upgraph'
+                );
+
+                if(cursor_size>0) {
+                    //Multiple selection
+
+                    x1 = partialGraph._core.mousecaptor.mouseX;
+                    y1 = partialGraph._core.mousecaptor.mouseY;
+                    var counter=0;
+                    var actualSel=[];
+                    partialGraph.iterNodes(function(n){
+                        if(!n.hidden){
+                            distance = Math.sqrt(
+                                Math.pow((x1-parseInt(n.displayX)),2) +
+                                Math.pow((y1-parseInt(n.displayY)),2)
+                                );
+                            if(parseInt(distance)<=cursor_size) {
+                                counter++;
+                                actualSel.push(n.id);                                
+                            }
+                        }
+                    });                    
+                    MultipleSelection(actualSel);
+                    // //The most brilliant way of knowing if an array is empty in the world of JavaScript
+                    i=0; for(var s in actualSel) { i++; break;}
+                    
+                    if(is_empty(actualSel) || i==0){ 
+                        pr("cursor radius ON, mouseDown -> selecciones vacias"); 
+                        cancelSelection(false);                
+                        LevelButtonDisable(true);
+                        //                        $("#names").html("");
+                        //                        $("#opossiteNodes").html("");
+                        //                        $("#information").html("");
+                        //                        $("#topPapers").html("");
+                        //                        $("#tips").html(getTips());
+                        //                        changeButton("unselectNodes");
+                        //                        if(counter>0) graphResetColor();
+                    }      
+
+                } else {
+                    //Unique Selection
+                    partialGraph.dispatch(
+                        e['type'] == 'mousedown' ? 'downnodes' : 'upnodes',
+                        targeted
+                        );
+                }      
+                
+                partialGraph.draw();
+                
+
+            }
+        });
 
     $("#zoomSlider").slider({
         orientation: "vertical",
@@ -690,16 +741,19 @@ function theListeners(){
         clustersBy("default");
     });
 
-    $.doTimeout(10,function (){
-	    var deftoph=$("#defaultop").height();
-	    var refh=$("#fixedtop").height();
-	    pr("deftoph:"+deftoph+" vs refh:"+refh)
-	    pr("deftoph:"+deftoph+" vs refh*2:"+refh*2)
-	    pr("if deftoph > refh*2 ")
-	    pr(deftoph+">"+(refh*2)+" : "+(deftoph>(refh*2))+"     then reload window")
-	    // deftoph.height(64);
-    	// if(deftoph>(refh*2)) window.location.reload();
-    });
+
+
+
+    // $.doTimeout(10,function (){
+	   //  var deftoph=$("#defaultop").height();
+	   //  var refh=$("#fixedtop").height();
+	   //  pr("deftoph:"+deftoph+" vs refh:"+refh)
+	   //  pr("deftoph:"+deftoph+" vs refh*2:"+refh*2)
+	   //  pr("if deftoph > refh*2 ")
+	   //  pr(deftoph+">"+(refh*2)+" : "+(deftoph>(refh*2))+"     then reload window")
+	   //  // deftoph.height(64);
+    // 	// if(deftoph>(refh*2)) window.location.reload();
+    // });
 
 }
 

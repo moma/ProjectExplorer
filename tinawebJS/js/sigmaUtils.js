@@ -214,13 +214,6 @@ function calculateFull(hex) {
     var r = parseInt(hex.substring(0, 2), 16);
     var g = parseInt(hex.substring(2, 4), 16);
     var b = parseInt(hex.substring(4, 6), 16);
-
-    // set results
-    // pr( "r:"+r)
-    // pr( "g:"+g)
-    // pr( "b:"+b)
-    // pr("")
-
     return [r,g,b];
 }
 
@@ -229,12 +222,5 @@ function calculatePartial(hex) {
     var r = parseInt(hex.substring(0, 1) + hex.substring(0, 1), 16);
     var g = parseInt(hex.substring(1, 2) + hex.substring(1, 2), 16);
     var b = parseInt(hex.substring(2, 3) + hex.substring(2, 3), 16);
-
-    // set results
-    // pr( "r:"+r)
-    // pr( "g:"+g)
-    // pr( "b:"+b)
-    // pr("")
-
     return [r,g,b];
 }
