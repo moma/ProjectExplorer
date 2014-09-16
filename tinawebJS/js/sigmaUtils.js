@@ -195,3 +195,46 @@ function clustersBy(daclass) {
     partialGraph.refresh()
     partialGraph.draw();
 }
+
+function hex2rga(sent_hex) {
+    result = []
+    hex = ( sent_hex.charAt(0) === "#" ? sent_hex.substr(1) : sent_hex );
+    // check if 6 letters are provided
+    if (hex.length === 6) {
+        result = calculateFull(hex);
+        return result;
+    }
+    else if (hex.length === 3) {
+        result = calculatePartial(hex);
+        return result;
+    }
+}
+
+function calculateFull(hex) {
+    var r = parseInt(hex.substring(0, 2), 16);
+    var g = parseInt(hex.substring(2, 4), 16);
+    var b = parseInt(hex.substring(4, 6), 16);
+
+    // set results
+    // pr( "r:"+r)
+    // pr( "g:"+g)
+    // pr( "b:"+b)
+    // pr("")
+
+    return [r,g,b];
+}
+
+  // function for calculating 3 letters hex value
+function calculatePartial(hex) {
+    var r = parseInt(hex.substring(0, 1) + hex.substring(0, 1), 16);
+    var g = parseInt(hex.substring(1, 2) + hex.substring(1, 2), 16);
+    var b = parseInt(hex.substring(2, 3) + hex.substring(2, 3), 16);
+
+    // set results
+    // pr( "r:"+r)
+    // pr( "g:"+g)
+    // pr( "b:"+b)
+    // pr("")
+
+    return [r,g,b];
+}

@@ -688,7 +688,10 @@ function greyEverything(){
     for(var i in nds){
             if(!nds[i].attr['grey']){
                 nds[i].attr['true_color'] = nds[i].color;
-                nds[i].color = greyColor;
+                // pr(nds[i].color)
+                alphacol = "rgba("+hex2rga(nds[i].color)+",0.5)";
+                nds[i].color = alphacol;
+                // nds[i].color = "rgba("+hex2rga(nds[i].color)+",0.5)"
             }
             nds[i].attr['grey'] = 1;
     }
@@ -733,31 +736,6 @@ function markAsSelected(n_id,sel) {
                   ){
                     neigh=nodes1[nodeSel.id].neighbours;/**/
                     for(var i in neigh){
-
-                            // nodeVec = partialGraph._core.graph.nodesIndex[neigh[i]];
-                            // // vec.color = vec.attr['true_color'];
-                            // // vec.attr['grey'] = 0;
-                            // // pr("nodeselected: "+nodeSel.id+"\t"+nodeSel.label+"\t\t||\t\tvecino: "+vec.id+"\t"+vec.label)
-
-                            // possibledge1 = partialGraph._core.graph.edgesIndex[nodeVec.id+";"+nodeSel.id]
-                            // possibledge2 = partialGraph._core.graph.edgesIndex[nodeSel.id+";"+nodeVec.id]
-
-                            // an_edge = (!isUndef(possibledge1))?possibledge1:possibledge2;
-                            // if(!isUndef(an_edge) && !an_edge.hidden) {
-
-                            // 	//highlight node
-                            // 	nodeVec.hidden = false;
-	                           //  nodeVec.color = nodeVec.attr['true_color'];
-	                           //  nodeVec.attr['grey'] = 0;
-
-                            // 	//highlight edge
-                            //     an_edge.color = an_edge.attr['true_color'];
-                            //     an_edge.attr['grey'] = 0;                         	
-                            // }
-
-                            // if (NOW=="a" || NOW=="b" && nodeVec.color==greyColor)
-                            // 	nodeVec.hidden = true
-
 
                         vec = partialGraph._core.graph.nodesIndex[neigh[i]];
                         vec.color = vec.attr['true_color'];
