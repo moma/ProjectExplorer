@@ -75,15 +75,6 @@
                          	<button type="button" id="changetype" class="btn btn-primary btn-sm">Change Type</button>
                          </a>
                       </li>
-<!-- 
-                      <li class="dropdown btn-group">  
-                          <button href="#" class="dropdown-toggle btn btn-primary btn-sm" data-toggle="dropdown" data-hover="dropdown" data-delay="1000" data-close-others="true">
-                              Scholars <b class="caret"></b>
-                          </button>
-                          <ul class="dropdown-menu">
-                              <li><a tabindex="-1" href="#">Keywords</a></li>
-                          </ul>
-                      </li>   -->
 
                       <li>
                          <a>
@@ -91,20 +82,6 @@
                          </a>
                       </li>
 
-
-
-                       <!--
-                       <li>
-                          <a>
-                  		        <div id="bipartiteComponent" class="btn-group" data-toggle="buttons">									                         			  
-									<label class="btn btn-primary btn-sm active"><input onchange='changeButton(this);' type="radio" name="options" id="social"> Scholars</label>
-                        			<label class="btn btn-success btn-sm"><input onchange="changeButton(this);" type="radio" name="options" id="sociosemantic"> Mixed</label>
-                        			<label class="btn btn-info btn-sm"><input onchange="changeButton(this);" type="radio" name="options" id="semantic"> Keywords</label>
-                        			
-                        		</div>
-                          </a>
-			           </li>
-			           -->
                        <li>
                          <a>
                           <div style="margin:0em 2em;" id="unranged-value"></div>
@@ -205,7 +182,7 @@
 
 	        <!-- Page content -->
 	        <div id="sigma-example"></div>
-	        
+
 	        <ul id="ctlzoom">
 
 		            <!-- <div class="content-header">
@@ -277,7 +254,7 @@
 
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h4 class="modal-title">Modal title</h4>
+        <h4 class="modal-title">Exporting GEXF file</h4>
       </div>
 
       <div class="modal-body form-horizontal">
@@ -288,13 +265,34 @@
             <div class="radio">
               <label>
                 <input type="radio" name="optionsRadios" id="fullgraph" value="option1" checked="true">
-                Complete Graph
+                Full Graph
               </label>
             </div>
             <div class="radio">
               <label>
                 <input type="radio" name="optionsRadios" id="visgraph" value="option2">
                 Visible Graph
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-body form-horizontal">
+        Which atributes do you want to keep?:
+        <div class="form-group">
+          <label class="col-lg-2 control-label"> </label>
+          <div class="col-lg-10">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" name="optionsRadios" id="check_size" value="option1">
+                Size
+              </label>
+            </div>
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" name="optionsRadios" id="check_color" value="option2">
+                Color
               </label>
             </div>
           </div>
@@ -319,6 +317,22 @@
 </div>
 
 
+
+
+<div id="geomapmodal" class="modal fade">
+
+    <!-- <div class="modal-content"> -->
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title">Geomap</h4>
+      </div>
+      <div class="modal-body">
+        <div class="geomapCont"></div>
+      </div>
+    <!-- </div> -->
+  <!-- <div class="geomapCont"></div> -->
+  <!-- <div id="closemodal2" data-dismiss="modal"></div> -->
+</div>
 
 
 

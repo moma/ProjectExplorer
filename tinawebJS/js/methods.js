@@ -1223,23 +1223,24 @@ function hoverNodeEffectWhileFA2(selectionRadius) {
     
     partialGraph.bind('downnodes', function (event) {
         var nodeID = event.content;
-        pr("\t\t\t\t"+nodeID+" -> "+Nodes[nodeID].label);
-        if(cursor_size==0 && !checkBox){
-            //Normal click on a node
-            $.doTimeout(30,function (){
-                MultipleSelection(nodeID);
-            });
-            // getOpossitesNodes(nodeID, false);//passing just the node-id
+        if(nodeID.length>0) {
+            pr("\t\t\t\t"+nodeID+" -> "+Nodes[nodeID].label);
+            if(cursor_size==0 && !checkBox){
+                //Normal click on a node
+                $.doTimeout(30,function (){
+                    MultipleSelection(nodeID);
+                });
+                // getOpossitesNodes(nodeID, false);//passing just the node-id
+            }
+            
+            if(cursor_size==0 && checkBox){
+                //Normal click on a node, but we won't clean the previous selections
+                $.doTimeout(30,function (){
+                    MultipleSelection(nodeID);
+                });
+                // getOpossitesNodes(nodeID, false);//passing just the node-id
+            }
         }
-        
-        if(cursor_size==0 && checkBox){
-            //Normal click on a node, but we won't clean the previous selections
-            $.doTimeout(30,function (){
-                MultipleSelection(nodeID);
-            });
-            // getOpossitesNodes(nodeID, false);//passing just the node-id
-        }
-        
         // if(cursor_size>0 &&){
         //     //The click WAS in a node and the cursor_size is ON
         //     //if(checkBox==false) cancelSelection(false);
@@ -1778,19 +1779,24 @@ function getByID(elem) {
 
 function saveGraph() {
     
+    size = getByID("check_size").checked
+    color = getByID("check_color").checked
+    atts = {"size":size,"color":color}
+    pr(atts)
+
     if(getByID("fullgraph").checked) {
-        saveGEXF ( getnodes() , getedges() );
+        saveGEXF ( getnodes() , getedges() , atts);
     }
 
     if(getByID("visgraph").checked) {
-        saveGEXF ( getVisibleNodes() , getVisibleEdges() )
+        saveGEXF ( getVisibleNodes() , getVisibleEdges(), atts )
     }
 
     $("#closesavemodal").click();
 
 }
 
-function saveGEXF(nodes,edges){
+function saveGEXF(nodes,edges,atts){
     gexf = '<?xml version="1.0" encoding="UTF-8"?>\n';
     gexf += '<gexf xmlns="http://www.gexf.net/1.1draft" xmlns:viz="http://www.gephi.org/gexf/viz" version="1.1">\n';
     gexf += '<graph defaultedgetype="undirected" type="static">\n';
@@ -1810,8 +1816,11 @@ function saveGEXF(nodes,edges){
         
         gexf += '<node id="'+nodes[n].id+'" label="'+nodes[n].label+'">\n';
         gexf += ' <viz:position x="'+nodes[n].x+'"    y="'+nodes[n].y+'"  z="0" />\n';
-        col = hex2rga(nodes[n].color);
-        gexf += ' <viz:color r="'+col[0]+'" g="'+col[1]+'" b="'+col[2]+'" a="1"/>\n';
+        if(atts["color"]) gexf += ' <viz:size value="'+nodes[n].size+'" />\n';
+        if(atts["color"]) {
+            col = hex2rga(nodes[n].color);
+            gexf += ' <viz:color r="'+col[0]+'" g="'+col[1]+'" b="'+col[2]+'" a="1"/>\n';
+        }    
         gexf += ' <attvalues>\n';
         gexf += ' <attvalue for="0" value="'+nodes[n].type+'"/>\n';
         gexf += ' <attvalue for="1" value="'+Nodes[nodes[n].id].CC+'"/>\n';
