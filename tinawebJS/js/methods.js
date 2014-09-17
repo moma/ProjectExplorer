@@ -534,7 +534,6 @@ function updateLeftPanel_fix() {
     $("#information").html(informationDIV);
     $("#tips").html("");
     // $("#topPapers").show();
-
 }
 
 function printStates() {
@@ -1450,9 +1449,6 @@ function unHide(id){
     }
 }
 
-
-
-
 function pushFilterValue(filtername,arg){
 	lastFilter[filtername] = arg;
 }
@@ -1776,44 +1772,63 @@ function selectOpossites (list){//Expanding selection
     partialGraph.draw();
 }
 
-function saveGEXF(){
-    json = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    json += '<gexf xmlns="http://www.gexf.net/1.1draft" xmlns:viz="http://www.gephi.org/gexf/viz" version="1.1">\n';
-    json += '<graph type="static">';
-    //json += '<attributes class="node" type="static">\n';
-    //json += ' <attribute id="0" title="category" type="string">  </attribute>\n';
-    //json += ' <attribute id="1" title="occurrences" type="float">    </attribute>\n';
-    //json += ' <attribute id="2" title="content" type="string">    </attribute>\n';
-    //json += ' <attribute id="3" title="keywords" type="string">   </attribute>\n';
-    //json += ' <attribute id="4" title="weight" type="float">   </attribute>\n';
-    //json += '</attributes>\n';
-    json += '<attributes class="edge" type="float">\n';
-    json += ' <attribute id="6" title="type" type="string"> </attribute>\n';
-    json += '</attributes>\n';
-    json += "<nodes>\n";
-    nodes = partialGraph._core.graph.nodes.filter(function(n) {
-                    return !n['hidden'];
-            });
-    edges = partialGraph._core.graph.edges.filter(function(e) {
-                    return !e['hidden'];
-            });
+function getByID(elem) {
+    return document.getElementById(elem);
+}
+
+function saveGraph() {
+    
+    if(getByID("fullgraph").checked) {
+        saveGEXF ( getnodes() , getedges() );
+    }
+
+    if(getByID("visgraph").checked) {
+        saveGEXF ( getVisibleNodes() , getVisibleEdges() )
+    }
+
+    $("#closesavemodal").click();
+
+}
+
+function saveGEXF(nodes,edges){
+    gexf = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    gexf += '<gexf xmlns="http://www.gexf.net/1.1draft" xmlns:viz="http://www.gephi.org/gexf/viz" version="1.1">\n';
+    gexf += '<graph defaultedgetype="undirected" type="static">\n';
+    gexf += '<attributes class="node" type="static">\n';
+    gexf += ' <attribute id="0" title="category" type="string">  </attribute>\n';
+    gexf += ' <attribute id="1" title="country" type="float">    </attribute>\n';
+    //gexf += ' <attribute id="2" title="content" type="string">    </attribute>\n';
+    //gexf += ' <attribute id="3" title="keywords" type="string">   </attribute>\n';
+    //gexf += ' <attribute id="4" title="weight" type="float">   </attribute>\n';
+    gexf += '</attributes>\n';
+    gexf += '<attributes class="edge" type="float">\n';
+    gexf += ' <attribute id="6" title="type" type="string"> </attribute>\n';
+    gexf += '</attributes>\n';
+    gexf += "<nodes>\n";
+
     for(var n in nodes){    
         
-        json += '<node id="'+nodes[n].id+'" label="'+nodes[n].label+'">\n';
-        json += '<viz:position x="'+nodes[n].x+'"    y="'+nodes[n].y+'"  z="0" />\n';
-        json += '</node>\n';
+        gexf += '<node id="'+nodes[n].id+'" label="'+nodes[n].label+'">\n';
+        gexf += ' <viz:position x="'+nodes[n].x+'"    y="'+nodes[n].y+'"  z="0" />\n';
+        col = hex2rga(nodes[n].color);
+        gexf += ' <viz:color r="'+col[0]+'" g="'+col[1]+'" b="'+col[2]+'" a="1"/>\n';
+        gexf += ' <attvalues>\n';
+        gexf += ' <attvalue for="0" value="'+nodes[n].type+'"/>\n';
+        gexf += ' <attvalue for="1" value="'+Nodes[nodes[n].id].CC+'"/>\n';
+        gexf += ' </attvalues>\n';
+        gexf += '</node>\n';
     }
-    json += "</nodes\n>";
-    json += "<edges>\n";    
+    gexf += "\n</nodes>\n";
+    gexf += "<edges>\n";    
     cont = 1;
     for(var e in edges){
-        json += '<edge id="'+cont+'" source="'+edges[e].source.id+'"  target="'+edges[e].target.id+'" weight="'+edges[e].weight+'">\n';
-        json += '<attvalues> <attvalue for="6" value="'+edges[e].label+'"/></attvalues>';
-        json += '</edge>\n';
+        gexf += '<edge id="'+cont+'" source="'+edges[e].source.id+'"  target="'+edges[e].target.id+'" weight="'+edges[e].weight+'">\n';
+        gexf += '<attvalues> <attvalue for="6" value="'+edges[e].label+'"/></attvalues>';
+        gexf += '</edge>\n';
         cont++;
     }
-    json += "</edges></graph></gexf>";
-    uriContent = "data:application/octet-stream," + encodeURIComponent(json);
+    gexf += "\n</edges>\n</graph>\n</gexf>";
+    uriContent = "data:application/octet-stream," + encodeURIComponent(gexf);
     newWindow=window.open(uriContent, 'neuesDokument');
 }
 

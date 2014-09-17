@@ -406,8 +406,8 @@ function theListeners(){
     updateMap();
     updateDownNodeEvent(false);
     partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8).draw(2,2,2);
-    $("#saveAs").click(function() {
-        saveGEXF();
+    $("#saveAs").click(function() {        
+        $('#savemodal').modal('show');
     });
     
         /******************* /SEARCH ***********************/
