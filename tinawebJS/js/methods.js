@@ -1793,7 +1793,6 @@ function saveGraph() {
     }
 
     $("#closesavemodal").click();
-
 }
 
 function saveGEXF(nodes,edges,atts){
@@ -1841,55 +1840,52 @@ function saveGEXF(nodes,edges,atts){
     newWindow=window.open(uriContent, 'neuesDokument');
 }
 
-function savePNG(){
-    $("#PhotoGraph").click(function (){
+function saveGraphIMG(){
         
-        //canvas=partialGraph._core.domElements.nodes;
+        var strDownloadMime = "image/octet-stream"
         
-        var nodesCtx = partialGraph._core.domElements.nodes;
-        /*
-        var edgesCtx = document.getElementById("sigma_edges_1").getContext('2d');
-        
-        var edgesImg = edgesCtx.getImageData(0, 0, document.getElementById("sigma_edges_1").width, document.getElementById("sigma_edges_1").height)
-        
-        nodesCtx.putImageData(edgesImg,0,0);
-        
-        
-        
-        
-        //ctx.drawImage(partialGraph._core.domElements.edges,0,0)
-        //var oCanvas = ctx;  
-  */
-        //div = document.getElementById("sigma_nodes_1").getContext('2d');
-        //ctx = div.getContext("2d");
-        //oCanvas.drawImage(partialGraph._core.domElements.edges,0,0);
-        Canvas2Image.saveAsPNG(nodesCtx);
-        
-        /*
-        Canvas2Image.saveAsJPEG(oCanvas); // will prompt the user to save the image as JPEG.   
-        // Only supported by Firefox.  
-  
-        Canvas2Image.saveAsBMP(oCanvas);  // will prompt the user to save the image as BMP.  
-  
-  
-        // returns an <img> element containing the converted PNG image  
-        var oImgPNG = Canvas2Image.saveAsPNG(oCanvas, true);     
-  
-        // returns an <img> element containing the converted JPEG image (Only supported by Firefox)  
-        var oImgJPEG = Canvas2Image.saveAsJPEG(oCanvas, true);   
-                                                         
-        // returns an <img> element containing the converted BMP image  
-        var oImgBMP = Canvas2Image.saveAsBMP(oCanvas, true);   
-  
-  
-        // all the functions also takes width and height arguments.   
-        // These can be used to scale the resulting image:  
-  
-        // saves a PNG image scaled to 100x100  
-        Canvas2Image.saveAsPNG(oCanvas, false, 100, 100);  
-        */
-    });
+        var nodesDiv = partialGraph._core.domElements.nodes;
+        var nodesCtx = nodesDiv.getContext("2d");
+
+        var edgesDiv = partialGraph._core.domElements.edges;
+        var edgesCtx = edgesDiv.getContext("2d");
+
+        var labelsDiv = partialGraph._core.domElements.labels;
+        var labelsCtx = labelsDiv.getContext("2d");
+
+
+        nodesCtx.drawImage(labelsDiv,0,0);
+        edgesCtx.drawImage(nodesDiv,0,0);
+
+        var strData = edgesDiv.toDataURL("image/png");
+        document.location.href = strData.replace("image/png", strDownloadMime)
 }
+
+
+function testSave(){
+        
+        var strDownloadMime = "image/octet-stream"
+        
+        var nodesDiv = partialGraph._core.domElements.nodes;
+        var nodesCtx = nodesDiv.getContext("2d");
+
+        var edgesDiv = partialGraph._core.domElements.edges;
+        var edgesCtx = edgesDiv.getContext("2d");
+
+        var labelsDiv = partialGraph._core.domElements.labels;
+        var labelsCtx = labelsDiv.getContext("2d");
+
+
+        nodesCtx.drawImage(labelsDiv,0,0);
+        edgesCtx.drawImage(nodesDiv,0,0);
+
+        var strData = edgesDiv.toDataURL("image/png");
+        pr(strData)
+        // document.location.href = strData.replace("image/png", strDownloadMime)
+}
+
+
+
 
 //obsolete
 function getSwitchButton(){
