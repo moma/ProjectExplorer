@@ -1,7 +1,7 @@
 	
 		.geomapCont {
 			margin:auto;
-			width:90%;
+			width:80%;
 			text-align:center;
 			white-space: nowrap;
 		}
@@ -9,7 +9,7 @@
 		.distBar {
 			width:200px;
 			height:10px;
-                        border-radius:3px;
+            border-radius:3px;
 			border:1px solid #848484;
 			display: inline-block;
                         -moz-border-radius: 0px 0px 0px 0px;

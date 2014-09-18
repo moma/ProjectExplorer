@@ -115,7 +115,7 @@ if($selectiveQuery){
             $info["attrs"] = array();
             $info["attrs"]["href"] = "#";
             $info["tooltip"] = array();
-            //$info["tooltip"]["content"] = "<span style='font-weight=bold;'>" . $CC[$key] . "</span><br/>" . $realOCC.'  '.$pluralnick.' ('.$info["percentage"].'%)';
+            //$info["tooltip"]["content"] = "<span style='font-weight:bold;'>" . $CC[$key] . "</span><br/>" . $realOCC.'  '.$pluralnick.' ('.$info["percentage"].'%)';
             $norm_country[$key] = $info;
             
             if($percentage>$maxF) $maxF=$percentage;
@@ -135,7 +135,7 @@ if($selectiveQuery){
         $old=$value["percentage"];
         $new=$old*$constant;# da formula!
         $norm_country[$key]["percentage"]=round($new,2);
-        $norm_country[$key]["tooltip"]["content"]= "<span style='font-weight=bold;'>" . $CC[$key] . "</span><br/>" . $value["realValue"].'  '.$pluralnick.' ('.round($new,2).'%)';
+        $norm_country[$key]["tooltip"]["content"]= "<span style='font-weight:bold;'>" . $CC[$key] . "</span><br/>" . $value["realValue"].'  '.$pluralnick.' ('.round($new,2).'%)';
         //pr($value["code"].": ".$value["realValue"].", ".$value["percentage"].", div:".($country_divisor[$key]+1));
     }
 } else {
@@ -150,7 +150,7 @@ if($selectiveQuery){
         $tempcount = 0;
         if ($norm_country[$code]) {
             $norm_country[$code]["value"]+=$row["count(*)"];
-            $norm_country[$code]["tooltip"]["content"] = "<span style='font-weight=bold;'>" . $CC[$code] . "</span><br/>" . $norm_country[$code]["value"].' '.$pluralnick;
+            $norm_country[$code]["tooltip"]["content"] = "<span style='font-weight:bold;'>" . $CC[$code] . "</span><br/>" . $norm_country[$code]["value"].' '.$pluralnick;
         } else {
             $info = array();
             $info["code"] = $code;
@@ -158,7 +158,7 @@ if($selectiveQuery){
             $info["attrs"] = array();
             $info["attrs"]["href"] = "#";
             $info["tooltip"] = array();
-            $info["tooltip"]["content"] = "<span style='font-weight=bold;'>" . $CC[$code] . "</span><br/>" . $row["count(*)"].' '.$pluralnick;
+            $info["tooltip"]["content"] = "<span style='font-weight:bold;'>" . $CC[$code] . "</span><br/>" . $row["count(*)"].' '.$pluralnick;
             $norm_country[$code] = $info;
         }
     }
@@ -223,12 +223,12 @@ foreach ($temp as $key => $value) {
             $moreinfo["tooltip"] = array();
             if($selectiveQuery){
                 if($norm_country[$j]["realValue"]==1){
-                    $moreinfo["tooltip"]["content"] = "<span style='font-weight=bold;'>" . $CC[$j] . "</span><br/>" . $norm_country[$j]["realValue"]. ' '.$pluralnick.' ('.$norm_country[$j]["percentage"].'%)';
+                    $moreinfo["tooltip"]["content"] = "<span style='font-weight:bold;'>" . $CC[$j] . "</span><br/>" . $norm_country[$j]["realValue"]. ' '.$pluralnick.' ('.$norm_country[$j]["percentage"].'%)';
                 } else {
-                    $moreinfo["tooltip"]["content"] = "<span style='font-weight=bold;'>" . $CC[$j] . "</span><br/>" . $norm_country[$j]["realValue"]. ' '.$pluralnick.' ('.$norm_country[$j]["percentage"].'%)';
+                    $moreinfo["tooltip"]["content"] = "<span style='font-weight:bold;'>" . $CC[$j] . "</span><br/>" . $norm_country[$j]["realValue"]. ' '.$pluralnick.' ('.$norm_country[$j]["percentage"].'%)';
                 }                    
             } else {
-                $moreinfo["tooltip"]["content"] = "<span style='font-weight=bold;'>" . $CC[$j] . "</span><br/>" . $value["occ"]. ' '.$pluralnick;
+                $moreinfo["tooltip"]["content"] = "<span style='font-weight:bold;'>" . $CC[$j] . "</span><br/>" . $value["occ"]. ' '.$pluralnick;
             }
             $thedata[$j] = $moreinfo;
         }
