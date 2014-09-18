@@ -20,6 +20,10 @@ $query = str_replace( '__and__', '&', $_GET["query"] );
 $query = str_replace( 'D::', '', $query );
 $elems = json_decode($query);
 
+$unique_id = "";
+$scholar_array = array();
+
+
 
 $singularnick= "scholar";
 $pluralnick = "scholars";
@@ -31,8 +35,38 @@ if(count($elems)==1){
             $selectiveQuery=false;
             break;
         }
+
+        if($e=="unique_id") {
+            $unique_id = $_GET["unique_id"];
+
+            if($unique_id) {
+                $sql = "SELECT keywords_ids FROM scholars where unique_id='" . $unique_id . "'";
+                #pt($sql);
+                foreach ($base->query($sql) as $row) {
+                    $keywords_ids = split(',', $row['keywords_ids']);
+                    $scholar_array = array();
+                    foreach ($keywords_ids as $keywords_id) {
+                        $sql2 = "SELECT * FROM scholars2terms where term_id=" . trim($keywords_id);
+                        
+                        foreach ($base->query($sql2) as $row) {
+                            $sql3 = "SELECT id FROM scholars where term_id=" . trim($keywords_id);
+                            $scholar_array[$row['scholar']] = 1;
+                        }
+                    }
+                }                
+
+                $elems = null;
+                $elems = array();
+                foreach($scholar_array as $key=>$value){
+                    
+                    array_push($elems, utf8_decode($key));
+                }
+            }
+            break;
+        }
     }
 }
+
 
 
 $norm_country = array();
@@ -41,7 +75,12 @@ if($selectiveQuery){
     $countries_temp=array();
     foreach($elems as $e){
         $sql="SELECT ".$column." FROM ".$table." where id=".$e;
+        if($unique_id!="")
+            $sql="SELECT ".$column." FROM ".$table." where unique_id=\"".$e."\"";
+        
+
         foreach ($base->query($sql) as $row) {
+            
             if($countries_temp[$row[$column]]) $countries_temp[$row[$column]]+=1;
             else $countries_temp[$row[$column]]=1;
         }
@@ -139,9 +178,11 @@ if($selectiveQuery){
         //pr($value["code"].": ".$value["realValue"].", ".$value["percentage"].", div:".($country_divisor[$key]+1));
     }
 } else {
+
     //    $column="data";
     $sql = "select count(*),data from ISIkeyword GROUP BY data ORDER BY count(*) DESC";
     $sql = "select count(*),".$column." from scholars GROUP BY country ORDER BY count(*) DESC";
+
     ////}
     ////$sql="select count(*),data from ISIC1Country GROUP BY data ORDER BY count(*) DESC";//ademe
     //

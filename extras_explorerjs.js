@@ -4,8 +4,8 @@
 function callGeomap(){
     db=JSON.stringify('php/community.db');
     if(is_empty(selections)){
-        jsonparams=JSON.stringify(Object.keys(getnodesIndex()));
-        // pr( Object.keys(getnodesIndex()) )
+        // jsonparams='["all"]';
+        jsonparams='["unique_id"]&unique_id='+getUrlParam.nodeidparam;
     } else {
 
         N=0;
@@ -26,7 +26,8 @@ function callGeomap(){
         temp=getNeighs(selections,arr);
         sel_plus_neigh=Object.keys(temp);
         k=sel_plus_neigh.length;
-        if(N==k) jsonparams=JSON.stringify(Object.keys(getnodesIndex()));
+        // if(N==k) jsonparams='["all"]';
+        if(N==k) jsonparams='["unique_id"]&unique_id='+getUrlParam.nodeidparam;
         else jsonparams=JSON.stringify(sel_plus_neigh);
         
         //jsonparams=JSON.stringify(getSelections());
