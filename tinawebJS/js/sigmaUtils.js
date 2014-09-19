@@ -66,6 +66,13 @@ function getVisibleNodes() {
     });
 }
 
+
+function getNodesByAtt(att) {
+    return partialGraph._core.graph.nodes.filter(function(n) {
+                return n['type']==att;
+    });
+}
+
 function getn(id){
     return partialGraph._core.graph.nodesIndex[id];
 }
@@ -123,19 +130,32 @@ function getSelections(){
         return params;
 }
 
-//i added an excpt... why
+
+//This receives an array not a dict!
+//  i added an excpt... why
 function getNeighs(sels,arr){ 
     neighDict={};
     for(var i in sels) {
-        if(!isUndef(arr[i])) {
-            A=arr[i].neighbours;
+        id = sels[i]
+        if(!isUndef(arr[id])) {
+            A=arr[id].neighbours;
             for(var j in A){
                 neighDict[A[j]]=1
             }
-            neighDict[i]=1;
+            neighDict[id]=1;
         }
     }    
-    return neighDict;
+    return Object.keys(neighDict);
+}//It returns an array not a dict!
+
+
+//to general utils
+function getArrSubkeys(arr,id) {
+    var result = []
+    for(var i in arr) {
+        result.push(arr[i][id])
+    }
+    return result;
 }
 
 //to general utils

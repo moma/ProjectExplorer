@@ -8,27 +8,50 @@ function callGeomap(){
         jsonparams='["unique_id"]&unique_id='+getUrlParam.nodeidparam;
     } else {
 
-        N=0;
-        k=0;
-        cats=(categoriesIndex.length);
-        arr={};
-        if(cats==2 && swclickActual=="social") {
-            N=Object.keys(partialGraph._core.graph.nodes.filter(function(n){return n.type==catSoc})).length;
-            arr=nodes1;
+        N=getNodesByAtt(catSoc).length;
+
+        nodesA = []
+        nodesB = []
+        socneigh = []
+        for(var i in selections) {
+            if(Nodes[i].type==catSoc) nodesA.push(i);
+            if(Nodes[i].type==catSem) nodesB.push(i);
         }
-        if(cats==2 && swclickActual=="semantic") {
-            N=Object.keys(partialGraph._core.graph.nodes.filter(function(n){return n.type==catSem})).length;
-            arr=nodes2;
+
+        if(nodesA.length==0 && nodesB.length>0) socneigh = getArrSubkeys(opos,"key");
+        if(nodesA.length>0 && nodesB.length>0) socneigh = getNeighs(nodesB,bipartiteN2D);
+
+        kSels = {}
+
+        for(var i in nodesA) {
+            kSels[nodesA[i]] = 1;
         }
-        if(cats==1)
-            N=Object.keys(Nodes).length;
+        for(var i in socneigh) {
+            kSels[socneigh[i]] = 1;
+        }
+
+        k=Object.keys(kSels).length;
+
+        // cats=(categoriesIndex.length);
+        // arr={};
+        // if(cats==2 && swclickActual=="social") {
+        //     N=Object.keys(partialGraph._core.graph.nodes.filter(function(n){return n.type==catSoc})).length;
+        //     arr=nodes1;
+        // }
+        // if(cats==2 && swclickActual=="semantic") {
+        //     N=Object.keys(partialGraph._core.graph.nodes.filter(function(n){return n.type==catSem})).length;
+        //     arr=nodes2;
+        // }
+        // if(cats==1)
+        //     N=Object.keys(Nodes).length;
     
-        temp=getNeighs(selections,arr);
-        sel_plus_neigh=Object.keys(temp);
-        k=sel_plus_neigh.length;
-        // if(N==k) jsonparams='["all"]';
+        // temp=getNeighs(Object.keys(selections),arr);
+        // sel_plus_neigh=Object.keys(temp);
+        // k=sel_plus_neigh.length;
+        // // if(N==k) jsonparams='["all"]';
+        pr ("N: "+N+" -  k: "+k)
         if(N==k) jsonparams='["unique_id"]&unique_id='+getUrlParam.nodeidparam;
-        else jsonparams=JSON.stringify(sel_plus_neigh);
+        else jsonparams=JSON.stringify(Object.keys(kSels));
         
         //jsonparams=JSON.stringify(getSelections());
         //jsonparams = jsonparams.split('&').join('__and__');

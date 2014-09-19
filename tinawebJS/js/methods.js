@@ -1850,10 +1850,14 @@ function saveGraphIMG(){
         var edgesDiv = partialGraph._core.domElements.edges;
         var edgesCtx = edgesDiv.getContext("2d");
 
+
+        var hoverDiv = partialGraph._core.domElements.hover;
+        var hoverCtx = hoverDiv.getContext("2d");
+
         var labelsDiv = partialGraph._core.domElements.labels;
         var labelsCtx = labelsDiv.getContext("2d");
 
-
+        nodesCtx.drawImage(hoverDiv,0,0);
         nodesCtx.drawImage(labelsDiv,0,0);
         edgesCtx.drawImage(nodesDiv,0,0);
 

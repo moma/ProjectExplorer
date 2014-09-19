@@ -44,7 +44,7 @@ function getGeomapDiv(min,max){
     txt+='	</div>';
     txt+='</div>';
     txt+='<div class="therange">';
-    txt+='  <div>Range of Publications:</div>';
+    txt+='  <div>Range of Scholars:</div>';
     txt+='  <div class="min">'+min+'</div>&nbsp;';
     txt+='  <div class="distBar"></div>&nbsp;';
     txt+='  <div class="max">'+max+'</div>';
