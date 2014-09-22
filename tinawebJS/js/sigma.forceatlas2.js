@@ -42,7 +42,9 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
     self.state = {step: 0, index: 0};
 
     self.graph.nodes.forEach(function(n) {
-     
+
+     if(n.degree>0) {
+
       n.fa2 = {
         mass: 1 + n.degree,
         old_dx: 0,
@@ -50,7 +52,9 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
         dx: 0,
         dy: 0
       };
-     
+
+     }
+
     });
 
     return self;
@@ -73,7 +77,9 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
         // Initialise layout data
         self.count++;
         nodes.forEach(function(n) {
-         
+
+         if(n.degree>0) {
+
           if(n.fa2) {
             n.fa2.mass = 1 + n.degree;
             n.fa2.old_dx = n.fa2.dx;
@@ -89,6 +95,8 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
               dy: 0
             };
           }
+
+         }
          
         });
 
@@ -102,7 +110,9 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
         if (self.p.outboundAttractionDistribution) {
           self.p.outboundAttCompensation = 0;
           nodes.forEach(function(n) {
-            self.p.outboundAttCompensation += n.fa2.mass;
+            if(!n.hidden && n.degree>0) {
+              self.p.outboundAttCompensation += n.fa2.mass;
+            }
           });
           self.p.outboundAttCompensation /= nodes.length;
         }
@@ -125,7 +135,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
           var i = self.state.index;
           while (i < nodes.length && i < self.state.index + cInt) {
             var n = nodes[i++];
-            if(n.fa2)
+            if(!n.hidden && n.degree>0 && n.fa2)
               rootRegion.applyForce(n, Repulsion, barnesHutTheta);
           }
           if (i == nodes.length) {
@@ -138,9 +148,9 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
           var i1 = self.state.index;
           while (i1 < nodes.length && i1 < self.state.index + cInt) {
             var n1 = nodes[i1++];
-            if(n1.fa2)
+            if(!n1.hidden && n1.degree>0 && n1.fa2)
               nodes.forEach(function(n2, i2) {
-                if (i2 < i1 && n2.fa2) {
+                if (i2 < i1 && (!n2.hidden && n2.degree>0 && n2.fa2)) {
                   Repulsion.apply_nn(n1, n2);
                 }
               });
@@ -171,7 +181,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
         var i = self.state.index;
         while (i < nodes.length && i < self.state.index + sInt) {
           var n = nodes[i++];
-          if (n.fa2)
+          if (!n.hidden && n.degree>0 && n.fa2)
             Gravity.apply_g(n, gravity / scalingRatio);
         }
 
@@ -198,20 +208,26 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
         if (self.p.edgeWeightInfluence == 0) {
           while (i < edges.length && i < self.state.index + cInt) {
             var e = edges[i++];
-            Attraction.apply_nn(e.source, e.target, 1);
+            if(!e.hidden) { 
+              Attraction.apply_nn(e.source, e.target, 1);
+            }
           }
         } else if (self.p.edgeWeightInfluence == 1) {
           while (i < edges.length && i < self.state.index + cInt) {
             var e = edges[i++];
-            Attraction.apply_nn(e.source, e.target, e.weight || 1);
+            if(!e.hidden) { 
+              Attraction.apply_nn(e.source, e.target, e.weight || 1);
+            }
           }
         } else {
           while (i < edges.length && i < self.state.index + cInt) {
             var e = edges[i++];
-            Attraction.apply_nn(
-              e.source, e.target,
-              Math.pow(e.weight || 1, self.p.edgeWeightInfluence)
-            );
+            if(!e.hidden) { 
+              Attraction.apply_nn(
+                e.source, e.target,
+                Math.pow(e.weight || 1, self.p.edgeWeightInfluence)
+              );
+            }
           }
         }
 
@@ -233,7 +249,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
 
         nodes.forEach(function(n) {
           var fixed = n.fixed || false;
-          if (!fixed && n.fa2) {
+          if (!fixed && !n.hidden && n.degree>0 && n.fa2) {
             var swinging = Math.sqrt(Math.pow(n.fa2.old_dx - n.fa2.dx, 2) +
                            Math.pow(n.fa2.old_dy - n.fa2.dy, 2));
 
@@ -285,8 +301,10 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
 
         // Save old coordinates
         nodes.forEach(function(n) {
-          n.old_x = +n.x;
-          n.old_y = +n.y;
+          if(!n.hidden && n.degree>0) { 
+            n.old_x = +n.x;
+            n.old_y = +n.y;
+          }
         });
 
         self.state.step = 5;
@@ -302,7 +320,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
           while (i < nodes.length && i < self.state.index + sInt) {
             var n = nodes[i++];
             var fixed = n.fixed || false;
-            if (!fixed && n.fa2) {
+            if (!fixed && !n.hidden && n.degree>0 && n.fa2) {
               // Adaptive auto-speed: the speed of each node is lowered
               // when the node swings.
               var swinging = Math.sqrt(
@@ -327,7 +345,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
           while (i < nodes.length && i < self.state.index + sInt) {
             var n = nodes[i++];
             var fixed = n.fixed || false;
-            if (!fixed && n.fa2) {
+            if (!fixed && !n.hidden && n.degree>0 && n.fa2) {
               // Adaptive auto-speed: the speed of each node is lowered
               // when the node swings.
               var swinging = Math.sqrt(
@@ -364,6 +382,8 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
     this.graph.nodes.forEach(function(n) {
       n.fa2 = null;
     });
+    pr("#nodes: "+V);
+    pr("#edges: "+E);
   }
 
   // Auto Settings
@@ -997,7 +1017,9 @@ sigma.publicPrototype.startForceAtlas2 = function() {
 
 
     for (var i in this._core.graph.nodesIndex) {
-      // if(this._core.graph.nodesIndex[i].degree==0)
+      if(this._core.graph.nodesIndex[i].degree==0) {
+        this._core.graph.nodesIndex[i].color = "#000000"
+      }
       //   this._core.graph.nodesIndex[i].hidden = true;
       pr(i+" -> "+this._core.graph.nodesIndex[i].degree)
     }

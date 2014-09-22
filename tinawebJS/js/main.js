@@ -525,7 +525,7 @@ function theListeners(){
         else {
             if(!is_empty(selections)){
                 cancelSelection(false);                
-                LevelButtonDisable(true);
+                // LevelButtonDisable(true);
             }
         }
     });

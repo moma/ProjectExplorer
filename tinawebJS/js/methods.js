@@ -142,7 +142,7 @@ function cancelSelection (fromTagCloud) {
             n.attr['grey'] = 0;
     }).draw(2,1,2);
     //Nodes colors go back to normal
-    changeButton("unselectNodes");
+    
     
     if(fromTagCloud==false){
         $("#names").html(""); 
@@ -212,12 +212,12 @@ function RefreshState(newNOW){
 		}
 	}
 
-    i=0; for(var s in selections) { i++; break;}
-    if(is_empty(selections) || i==0) LevelButtonDisable(true);
-    else LevelButtonDisable(false);
+    // i=0; for(var s in selections) { i++; break;}
+    // if(is_empty(selections) || i==0) LevelButtonDisable(true);
+    // else LevelButtonDisable(false);
 
     //complete graphs case
-    sels=getNodeIDs(selections).length
+    // sels=getNodeIDs(selections).length
     if(NOW=="A" || NOW=="a") {
     	// N : number of nodes
     	// k : number of ( selected nodes + their neighbors )
@@ -232,6 +232,12 @@ function RefreshState(newNOW){
             } else LevelButtonDisable(false);
             if(s==N) LevelButtonDisable(false);
         }
+
+        if(NOW=="a") {
+            i=0; for(var s in selections) { i++; break;}
+            if(is_empty(selections) || i==0) LevelButtonDisable(false);
+        }
+
         EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
         $("#colorGraph").show();
         
@@ -247,6 +253,13 @@ function RefreshState(newNOW){
             } else LevelButtonDisable(false);
             if(s==N) LevelButtonDisable(false);
         }
+
+        if(NOW=="b") {
+            i=0; for(var s in selections) { i++; break;}
+            if(is_empty(selections) || i==0) LevelButtonDisable(false);
+        }
+
+
         EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
         NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size") 
         $("#colorGraph").hide();
@@ -575,61 +588,7 @@ function graphTagCloudElem(node_id){
     MultipleSelection(node_id);
     changeLevel();
 }
-    
-//obsolete    
-function graphDocs(node_id){
-    pr("\tin graphDocs, node_id: "+node_id);    
-    
-    fullurl = returnBaseUrl()+"img/trans/";
-    document.getElementById("viewType").src=fullurl+"status_meso_view.png";
-    document.getElementById("socio").src=fullurl+"active_scholars.png";
-    document.getElementById("semantic").src=fullurl+"inactive_tags.png";
-    document.getElementById("sociosemantic").src=fullurl+"inactive_sociosem.png";
-    document.getElementById("switch").src=fullurl+"graph_macro.png";
-    
-    hideEverything()
-    //partialGraph.stopForceAtlas2();
-    
-    if(Nodes[node_id].type==catSoc) {
-        labels = [];
-        
-        unHide(node_id);
-        for(i=0;i<nodes1[node_id].neighbours.length;i++) {
-            unHide(nodes1[node_id].neighbours[i]);
-        }
-        
-        existingNodes = partialGraph._core.graph.nodes.filter(function(n) {
-                            return !n['hidden'];
-                        });
-        for(i=0; i < existingNodes.length ; i++){
-            if(existingNodes[i].id==node_id) i++;
-            for(j=0; j < existingNodes.length ; j++){
-                
-                i1=existingNodes[i].id+";"+existingNodes[j].id;                    
-                i2=existingNodes[j].id+";"+existingNodes[i].id;                    
-                      
-                if(!isUndef(Edges[i1]) && !isUndef(Edges[i2])){
-                    
-                    if(Edges[i1].weight > Edges[i2].weight){
-                        unHide(i1);
-                    }
-                    if(Edges[i1].weight < Edges[i2].weight){
-                        unHide(i2);
-                    }
-                    if(Edges[i1].weight == Edges[i2].weight){
-                        unHide(i1);
-                    }
-                }
-            }
-        }
-        node = partialGraph._core.graph.nodesIndex[node_id];
-        selection(node);   
-        $("#category-A").show();
-        $("#category-B").hide();     
-        changeButton("active_scholars.png");
-    }
-}
-       
+      
 function updateDownNodeEvent(selectionRadius){
     pr("actualizando eventos downode");
     partialGraph.unbind("downnodes");
@@ -1205,50 +1164,6 @@ function hoverNodeEffectWhileFA2(selectionRadius) {
                 // getOpossitesNodes(nodeID, false);//passing just the node-id
             }
         }
-        // if(cursor_size>0 &&){
-        //     //The click WAS in a node and the cursor_size is ON
-        //     //if(checkBox==false) cancelSelection(false);
-        //     x1 = partialGraph._core.mousecaptor.mouseX;
-        //     y1 = partialGraph._core.mousecaptor.mouseY;
-        //     //dist1(centerClick,selectionRadius)
-        //     partialGraph.iterNodes(function(n){
-        //         if(n.hidden==false){
-        //             distance = Math.sqrt(
-        //                 Math.pow((x1-parseInt(n.displayX)),2) +
-        //                 Math.pow((y1-parseInt(n.displayY)),2)
-        //                 );
-        //             if(parseInt(distance)<=cursor_size) {
-        //                 getOpossitesNodes(n,true);//passing the entire node
-        //             }
-        //         }
-        //     });
-        // }
-        // if(categoriesIndex.length==1) updateLeftPanel_uni();
-        // if(categoriesIndex.length==2) updateLeftPanel_fix();
-        
-        // //The most brilliant way of knowing if an array is empty in the world of JavaScript
-        // i=0; for(var s in selections) {i++;break};
-        
-        // if(is_empty(selections) || i==0){
-        //         pr("cursor radius ON, downNode -> selecciones vacias");
-        //         $("#names").html(""); //Information extracted, just added
-        //         $("#opossiteNodes").html(""); //Information extracted, just added
-        //         $("#information").html("");
-        //         $("#tips").html(getTips());
-        //         $("#topPapers").html(""); $("#topPapers").hide();
-        //         changeButton("unselectNodes");
-        //         //cancelSelection(false);
-        //         graphResetColor();
-        // }
-        // else { 
-        //         greyEverything();
-        //         for(var i in selections){
-        //             markAsSelected(i,true);
-        //         }
-        //         RefreshState("")
-        // }
-        // overNodes=true;        
-        // partialGraph.draw();
     });
 }
 
@@ -1705,35 +1620,6 @@ function highlightOpossites (list){/*here*/
     }
 }
 
-function selectOpossites (list){//Expanding selection    
-    cancelSelection(false);   
-    checkBox = true;
-    for(var n in list){
-        getOpossitesNodes(n,false);
-    }
-    updateLeftPanel_fix();
-    i=0; for(var s in selections) i++;
-    if(is_empty(selections)==true || i==0){  
-                $("#names").html(""); //Information extracted, just added
-                $("#opossiteNodes").html(""); //Information extracted, just added
-                $("#information").html("");
-                $("#topPapers").html(""); $("#topPapers").hide();
-                $("#tips").html(getTips());
-                changeButton("unselectNodes");
-                cancelSelection(false);
-    }
-    else { 
-                greyEverything();
-                for(var i in list){
-                    markAsSelected(i,true);
-                }
-                changeButton("selectNode");
-    }
-    overNodes=true;    
-    checkBox = false;      
-    partialGraph.draw();
-}
-
 function getByID(elem) {
     return document.getElementById(elem);
 }
@@ -1824,37 +1710,6 @@ function saveGraphIMG(){
 
         var strData = edgesDiv.toDataURL("image/png");
         document.location.href = strData.replace("image/png", strDownloadMime)
-}
-
-//to erase
-function testSave(){
-        
-        var strDownloadMime = "image/octet-stream"
-        
-        var nodesDiv = partialGraph._core.domElements.nodes;
-        var nodesCtx = nodesDiv.getContext("2d");
-
-        var edgesDiv = partialGraph._core.domElements.edges;
-        var edgesCtx = edgesDiv.getContext("2d");
-
-        var labelsDiv = partialGraph._core.domElements.labels;
-        var labelsCtx = labelsDiv.getContext("2d");
-
-
-        nodesCtx.drawImage(labelsDiv,0,0);
-        edgesCtx.drawImage(nodesDiv,0,0);
-
-        var strData = edgesDiv.toDataURL("image/png");
-        pr(strData)
-        // document.location.href = strData.replace("image/png", strDownloadMime)
-}
-
-
-
-
-//obsolete
-function getSwitchButton(){
-    return document.getElementById("switchbutton").src;
 }
 
 //obsolete

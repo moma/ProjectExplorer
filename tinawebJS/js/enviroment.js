@@ -2,162 +2,6 @@
 
 //============================ < NEW BUTTONS > =============================//
 
-//obsolete
-function changeButton(bc) { 
-    if(!isUndef(bc.id) && bc.id!=swclickActual) {
-        
-        if(bc.id!="switch") pushSWClick(bc.id);
-        else pushSWClick(swclickActual)
-        
-        pr("\t***changebutton bc.id:"+bc.id+" , swMacro:"+swMacro)
-        if(bc.id=="social") {
-            if(swMacro) changeToMacro(bc.id);
-            else changeToMeso(bc.id);
-            //			$("#category-A").show();
-            //			$("#category-B").hide();
-        }
-        if(bc.id=="semantic") {
-            if(swMacro) changeToMacro(bc.id);
-            else changeToMeso(bc.id);
-            //			$("#category-A").hide();
-            //			$("#category-B").show();
-        }
-        if(bc.id=="sociosemantic") {
-            if(swMacro) changeToMacro(bc.id);
-            else changeToMeso(bc.id);
-            //			$("#category-A").show();
-            //			$("#category-B").show();
-        }
-        if(bc.id=="switch"){
-            if(swMacro) changeToMacro(swclickActual);
-            else changeToMeso(swclickActual);
-        }
-    }
-
-    //    fullurl = returnBaseUrl()+"img/trans/";
-    //    if(img.id=="socio") {
-    //        if ( img.src==fullurl+"hover_scholars.png" ) {
-    //            changeButton("active_scholars.png");
-    //            if(document.getElementById("viewType").src==fullurl+"status_macro_view.png"){
-    //                changeToMacro("social");
-    //            }
-    //            if(document.getElementById("viewType").src==fullurl+"status_meso_view.png"){
-    //                changeToMeso("social");
-    //            }
-    //        }
-    //    }
-    //    
-    //    if(img.id=="semantic") { 
-    //        if ( img.src==fullurl+"hover_tags.png" ) { 
-    //            changeButton("active_tags.png");
-    //            if(document.getElementById("viewType").src==fullurl+"status_macro_view.png"){
-    //                changeToMacro("semantic");
-    //            }
-    //            if(document.getElementById("viewType").src==fullurl+"status_meso_view.png"){
-    //                changeToMeso("semantic");
-    //            }
-    //        }
-    //    }
-    //    
-    //    if(img.id=="sociosemantic") { 
-    //        if ( img.src==fullurl+"hover_sociosem.png" ) { 
-    //            changeButton("active_sociosem.png");
-    //            if(document.getElementById("viewType").src==fullurl+"status_macro_view.png"){
-    //                changeToMacro("sociosemantic");
-    //            }
-    //            if(document.getElementById("viewType").src==fullurl+"status_meso_view.png"){
-    //                changeToMeso("sociosemantic");
-    //            }
-    //        }
-    //        
-    //    }
-    //    if(img.id=="switch") { 
-    //        hasbeenclicked=false;
-    //        if ( img.src==fullurl+"graph_meso.png"){
-    //            changeButton("graph_macro.png");   
-    //            pushSWClick(swclickActual);
-    //            changeToMeso(swclickActual);
-    //            hasbeenclicked=true;       
-    //        }
-    //        if ( img.src==fullurl+"graph_macro.png" && hasbeenclicked==false){
-    //            changeButton("graph_meso.png");    
-    //            pushSWClick(swclickActual);
-    //            changeToMacro(swclickActual);
-    //        }
-    //    }
-
-
-
-
-
-    //    fullurl = returnBaseUrl()+"img/trans/";
-    //    hasbeenclicked=false;
-    //    if(bc=="graph_meso.png"){
-    //        document.getElementById("switch").src=fullurl+"graph_meso.png";
-    //        document.getElementById("viewType").src=fullurl+"status_macro_view.png";
-    //        hasbeenclicked=true;
-    //    }
-    //    if(bc=="graph_macro.png" && hasbeenclicked==false){
-    //        document.getElementById("switch").src=fullurl+"graph_macro.png";
-    //        document.getElementById("viewType").src=fullurl+"status_meso_view.png";
-    //    }
-    //    
-    //    if(bc=="active_scholars.png"){
-    //        document.getElementById("socio").src=fullurl+"active_scholars.png";
-    //        document.getElementById("semantic").src=fullurl+"inactive_tags.png";
-    //        document.getElementById("sociosemantic").src=fullurl+"inactive_sociosem.png";
-    //        pushSWClick("social"); 
-    //        pr("swclickPrev: "+swclickPrev+" - swclickActual: "+swclickActual);
-    //        $("#category-A").show();
-    //        $("#category-B").hide();
-    //    }  
-    //    if(bc=="active_tags.png"){
-    //        document.getElementById("socio").src=fullurl+"inactive_scholars.png";
-    //        document.getElementById("semantic").src=fullurl+"active_tags.png";
-    //        document.getElementById("sociosemantic").src=fullurl+"inactive_sociosem.png";
-    //        pushSWClick("semantic"); 
-    //        pr("swclickPrev: "+swclickPrev+" - swclickActual: "+swclickActual);     
-    //        $("#category-A").hide();
-    //        $("#category-B").show();
-    //    }
-    //    if(bc=="active_sociosem.png"){
-    //        document.getElementById("socio").src=fullurl+"inactive_scholars.png";
-    //        document.getElementById("semantic").src=fullurl+"inactive_tags.png";
-    //        document.getElementById("sociosemantic").src=fullurl+"active_sociosem.png";
-    //        pushSWClick("sociosemantic");
-    //        pr("swclickPrev: "+swclickPrev+" - swclickActual: "+swclickActual);
-    //        $("#category-A").show();
-    //        $("#category-B").show();
-    //    }
-    //    if(bc=="selectNode"){        
-    //        if(categories.length==2) $("#switchbutton").show();
-    //        if(document.getElementById("switch").src==fullurl+"graph_meso_null.png"){
-    //            if(document.getElementById("viewType").src==fullurl+"status_macro_view.png"){
-    //                document.getElementById("switch").src=fullurl+"graph_meso.png";
-    //            }
-    //            if(document.getElementById("viewType").src==fullurl+"status_meso_view.png"){
-    //                document.getElementById("switch").src=fullurl+"graph_macro.png";
-    //            }
-    //        }
-    //    }
-    //    if(bc=="unselectNodes"){
-    //        document.getElementById("switch").src=fullurl+"graph_meso_null.png";
-    //    }
-    //    /*tofix*/
-    ////    if(is_empty(selections)){        
-    ////        /***** The animation *****/
-    ////        _cG = $("#leftcolumn");    
-    ////        _cG.animate({
-    ////            "left" : "-" + _cG.width() + "px"
-    ////        }, function() {
-    ////            $("#aUnfold").attr("class","rightarrow");
-    ////            $("#zonecentre").css({
-    ////                left: "0"
-    ////            });
-    ////        });
-    ////    }
-}
-
 function changeType() {
     pr("***swclickActual:"+swclickActual+" , swMacro:"+swMacro)
     if(swclickActual=="social") {
@@ -168,7 +12,7 @@ function changeType() {
         } else {
 
             if(is_empty(selections)) {
-                
+
                 changeToMacro("semantic");
                 pushSWClick("semantic");
                 RefreshState("B")
@@ -236,7 +80,9 @@ function changeLevel() {
     pushSWClick(swclickActual);
     pr("swMacro: "+swMacro+" - [swclickPrev: "+bf+"] - [swclickActual: "+swclickActual+"]")
 
+    // ANALIZING CURRENT STATE:
     if(swMacro){
+        // Macro Level  --  swMacro:true
 	    if(swclickActual=="social") {
 	    	changeToMeso("social")
 	    	RefreshState("a");
@@ -246,7 +92,10 @@ function changeLevel() {
 	    	RefreshState("b");
 	    }
 	    swMacro=false;
+        return;
+
 	} else {
+        // Meso Level  --  swMacro:false
 	    if(swclickActual=="social") {
 	    	changeToMacro("social")
 	    	RefreshState("A")
@@ -256,67 +105,14 @@ function changeLevel() {
 	    	RefreshState("B")
 	    }
 	    swMacro=true;
+        return;
 	}
+
     // changeToMeso("social")
     // changeToMeso("semantic")
 
     // changeToMacro("social")
     // changeToMacro("semantic")
-}
-
-//obsolete
-function changeHoverActive(img) {
-    fullurl = returnBaseUrl()+"img/trans/";
-    if(img.id=="socio") {
-        if ( img.src==fullurl+"hover_scholars.png" ) {
-            changeButton("active_scholars.png");
-            if(document.getElementById("viewType").src==fullurl+"status_macro_view.png"){
-                changeToMacro("social");
-            }
-            if(document.getElementById("viewType").src==fullurl+"status_meso_view.png"){
-                changeToMeso("social");
-            }
-        }
-    }
-    
-    if(img.id=="semantic") { 
-        if ( img.src==fullurl+"hover_tags.png" ) { 
-            changeButton("active_tags.png");
-            if(document.getElementById("viewType").src==fullurl+"status_macro_view.png"){
-                changeToMacro("semantic");
-            }
-            if(document.getElementById("viewType").src==fullurl+"status_meso_view.png"){
-                changeToMeso("semantic");
-            }
-        }
-    }
-    
-    if(img.id=="sociosemantic") { 
-        if ( img.src==fullurl+"hover_sociosem.png" ) { 
-            changeButton("active_sociosem.png");
-            if(document.getElementById("viewType").src==fullurl+"status_macro_view.png"){
-                changeToMacro("sociosemantic");
-            }
-            if(document.getElementById("viewType").src==fullurl+"status_meso_view.png"){
-                changeToMeso("sociosemantic");
-            }
-        }
-        
-    }
-    if(img.id=="switch") { 
-        hasbeenclicked=false;
-        if ( img.src==fullurl+"graph_meso.png"){
-            changeButton("graph_macro.png");   
-            pushSWClick(swclickActual);
-            changeToMeso(swclickActual);
-            hasbeenclicked=true;       
-        }
-        if ( img.src==fullurl+"graph_macro.png" && hasbeenclicked==false){
-            changeButton("graph_meso.png");    
-            pushSWClick(swclickActual);
-            changeToMacro(swclickActual);
-        }
-    }
 }
 
 //obsolete
@@ -667,25 +463,6 @@ function search(string) {
     $.doTimeout(30,function (){
         MultipleSelection(id_node);
     });
-    // if(categoriesIndex.length==1) updateLeftPanel_uni();
-    // if(categoriesIndex.length==2) updateLeftPanel_fix(); 
-    
-      
-                // if(is_empty(selections)==true){  
-                //     $("#names").html("");
-                //     $("#opossiteNodes").html("");
-                //     $("#information").html("");
-                //     changeButton("unselectNodes");
-                // }
-                // else {
-                //     greyEverything();
-                //     overNodes=true;
-                //     for(var i in selections){
-                //         markAsSelected(i,true);
-                //     }
-                //     changeButton("selectNode");
-                //     partialGraph.draw();
-                // }
                 $("input#searchinput").val("");
                 $("input#searchinput").autocomplete( "close" );
 }
