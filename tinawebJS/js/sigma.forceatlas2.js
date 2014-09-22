@@ -1,7 +1,7 @@
 // Mathieu Jacomy @ Sciences Po Médialab & WebAtlas
 // (requires sigma.js to be loaded)
 sigma.forceatlas2 = sigma.forceatlas2 || {};
-sigma.forceatlas2.ForceAtlas2 = function(graph) {
+sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
   sigma.classes.Cascade.call(this);
   var self = this;
   this.graph = graph;
@@ -35,9 +35,14 @@ sigma.forceatlas2.ForceAtlas2 = function(graph) {
 
   // Runtime (the ForceAtlas2 itself)
   this.init = function() {
+
+    console.log("#Nodes: "+V)
+    console.log("#Edges: "+E)
+
     self.state = {step: 0, index: 0};
 
     self.graph.nodes.forEach(function(n) {
+     
       n.fa2 = {
         mass: 1 + n.degree,
         old_dx: 0,
@@ -45,6 +50,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph) {
         dx: 0,
         dy: 0
       };
+     
     });
 
     return self;
@@ -67,6 +73,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph) {
         // Initialise layout data
         self.count++;
         nodes.forEach(function(n) {
+         
           if(n.fa2) {
             n.fa2.mass = 1 + n.degree;
             n.fa2.old_dx = n.fa2.dx;
@@ -82,6 +89,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph) {
               dy: 0
             };
           }
+         
         });
 
         // If Barnes Hut active, initialize root region
@@ -964,7 +972,41 @@ sigma.forceatlas2.Region.prototype.applyForce = function(n, Force, theta) {
 sigma.publicPrototype.startForceAtlas2 = function() {
   //if(!this.forceatlas2) {
   if(fa2enabled) {
-    this.forceatlas2 = new sigma.forceatlas2.ForceAtlas2(this._core.graph);
+
+    // -- UPDATING THE DEGREE --
+    for (var i in this._core.graph.nodesIndex) {
+      pr(i+" -> "+this._core.graph.nodesIndex[i].degree)
+    }
+
+    for (var i in this._core.graph.nodes) {
+      if(!this._core.graph.nodes[i].hidden) {
+        this._core.graph.nodes[i].degree = 0;
+        this._core.graph.nodesIndex[this._core.graph.nodes[i].id].degree = 0;
+      }
+    }
+
+    for (var e in this._core.graph.edges) {
+        edge = this._core.graph.edges[e];
+        if(!edge.hidden) {
+            nodeIDS = edge.source.id;
+            nodeIDT = edge.target.id;
+            this._core.graph.nodesIndex[nodeIDS].degree++;
+            this._core.graph.nodesIndex[nodeIDT].degree++;
+        }
+    }
+
+
+    for (var i in this._core.graph.nodesIndex) {
+      // if(this._core.graph.nodesIndex[i].degree==0)
+      //   this._core.graph.nodesIndex[i].hidden = true;
+      pr(i+" -> "+this._core.graph.nodesIndex[i].degree)
+    }
+    // -- / UPDATING THE DEGREE --
+
+    var V = 10;
+    var E = 100;
+
+    this.forceatlas2 = new sigma.forceatlas2.ForceAtlas2(this._core.graph , V, E);
     this.forceatlas2.setAutoSettings();
     this.forceatlas2.init();
     $("#overviewzone").hide();

@@ -166,9 +166,18 @@ function changeType() {
 	        pushSWClick("semantic");
 	        RefreshState("B")
         } else {
-        	changeToMeso("sociosemantic");
-	        pushSWClick("sociosemantic");
-        	RefreshState("AaBb")
+
+            if(is_empty(selections)) {
+                
+                changeToMacro("semantic");
+                pushSWClick("semantic");
+                RefreshState("B")
+
+            } else {
+                changeToMeso("sociosemantic");
+                pushSWClick("sociosemantic");
+                RefreshState("AaBb")
+            }
         }
         return;
     }
@@ -177,11 +186,19 @@ function changeType() {
         if(swMacro) {
         	changeToMacro("social");
 	        pushSWClick("social");
-	        RefreshState("A")
+	        RefreshState("A");
+
         } else {
-        	changeToMeso("sociosemantic");
-	        pushSWClick("sociosemantic");
-        	RefreshState("AaBb")
+
+            if(is_empty(selections)) {
+                changeToMacro("social");
+                pushSWClick("social");
+                RefreshState("A");
+            } else {
+                changeToMeso("sociosemantic");
+                pushSWClick("sociosemantic");
+                RefreshState("AaBb");
+            }
         }
         return;
     }

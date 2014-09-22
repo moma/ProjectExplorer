@@ -13,7 +13,7 @@ function showMeSomeLabels(N){
             }
         });
         counter=0;
-        n = partialGraph._core.graph.nodes;
+        n = getVisibleNodes();
         for(i=0;i<n.length;i++) {
             if(n[i].hidden==false){
                 if(n[i].inDegree==minIn && n[i].forceLabel==false) {
@@ -183,6 +183,21 @@ function getCountries(){
     return Object.keys(countries);
 }
 
+
+function getAcronyms() {
+    var nodes = getVisibleNodes();
+    var acrs = {}
+    pr("in getAcronyms")
+    for(var i in nodes) {
+        // pr(i)
+        // pr(nodes[i].id+" : "+nodes[i].attr["CC"]+" , "+nodes[i].attr["ACR"])
+        if (nodes[i].attr["ACR"]!="-")
+            acrs[nodes[i].attr["ACR"]]=1
+        // pr("")
+    }
+    return ( Object.keys(acrs) );
+}
+
 function clustersBy(daclass) {
     if (daclass=="country") {
 
@@ -195,6 +210,10 @@ function clustersBy(daclass) {
         pr(CCxID)
         
         var nodes = getVisibleNodes();
+        for(var i in nodes) {
+            nodes[i].color = Nodes[ nodes[i].id ].color;            
+        }
+
         colorList.sort(function(){ return Math.random()-0.5; }); 
         // pr(colorList);
         for(var i in nodes) {
@@ -204,6 +223,33 @@ function clustersBy(daclass) {
             }
         }
     }
+
+    if (daclass=="acronym") {
+
+        CCs = getAcronyms()
+        CCxID = {}
+        for(var i in CCs) { 
+            code = CCs[i]
+            CCxID[code]=parseInt(i);
+        }
+        pr(CCxID)
+        
+        var nodes = getVisibleNodes();
+        for(var i in nodes) {
+            nodes[i].color = Nodes[ nodes[i].id ].color;            
+        }
+
+        colorList.sort(function(){ return Math.random()-0.5; }); 
+        // pr(colorList);
+        for(var i in nodes) {
+            cc = nodes[i].attr["ACR"]
+            if( !isUndef( cc ) && cc!="-" ) {
+                nodes[i].color = colorList[ CCxID[cc] ];
+            }
+        }
+
+    }
+
 
     if (daclass=="default") {
         var nodes = getVisibleNodes();

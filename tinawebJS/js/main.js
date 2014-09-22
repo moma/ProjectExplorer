@@ -732,18 +732,6 @@ function theListeners(){
     });
 
 
-    $("#colorbyCC").click(function(){
-        clustersBy("country");
-    });
-
-
-    $("#colorbyDef").click(function(){
-        clustersBy("default");
-    });
-
-
-
-
     // $.doTimeout(10,function (){
 	   //  var deftoph=$("#defaultop").height();
 	   //  var refh=$("#fixedtop").height();
