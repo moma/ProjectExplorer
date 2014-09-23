@@ -56,7 +56,6 @@ getUrlParam = (function () {
 })();
 
 
-
 //to general utils
 function ArraySortByValue(array, sortFunc){
     var tmp = [];
@@ -580,7 +579,6 @@ function LevelButtonDisable( TF ){
 
 function graphTagCloudElem(node_id){
     pr("\tin graphTagCloudElem");/**/
-
     console.log("in graphTagCloudElem, nodae_id: "+node_id);
     cancelSelection();
     swMacro=true;
@@ -1148,6 +1146,7 @@ function hoverNodeEffectWhileFA2(selectionRadius) {
         var nodeID = event.content;
         if(nodeID.length>0) {
             pr("\t\t\t\t"+nodeID+" -> "+Nodes[nodeID].label);
+            pr(getn(nodeID))
             if(cursor_size==0 && !checkBox){
                 //Normal click on a node
                 $.doTimeout(30,function (){

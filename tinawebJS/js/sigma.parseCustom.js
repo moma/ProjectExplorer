@@ -17,7 +17,7 @@ function parse(gexfPath) {
 }
 
 
-function scanCategories(){
+function scanCategories() {
     nodesNodes = gexf.getElementsByTagName('nodes');
     for(i=0; i<nodesNodes.length; i++){       
         var nodesNode = nodesNodes[i];  // Each xml node 'nodes' (plural)

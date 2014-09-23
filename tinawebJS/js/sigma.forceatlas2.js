@@ -1,5 +1,8 @@
 // Mathieu Jacomy @ Sciences Po Médialab & WebAtlas
 // (requires sigma.js to be loaded)
+
+var minx=1000.0, maxx=0.0, miny=1000.0, maxy=0.0;
+
 sigma.forceatlas2 = sigma.forceatlas2 || {};
 sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
   sigma.classes.Cascade.call(this);
@@ -989,6 +992,8 @@ sigma.forceatlas2.Region.prototype.applyForce = function(n, Force, theta) {
   }
 };
 
+
+
 sigma.publicPrototype.startForceAtlas2 = function() {
   //if(!this.forceatlas2) {
   if(fa2enabled) {
@@ -1016,14 +1021,41 @@ sigma.publicPrototype.startForceAtlas2 = function() {
     }
 
 
+    for (var i in this._core.graph.nodes) {
+      if(!this._core.graph.nodes[i].hidden && this._core.graph.nodes[i].degree>0) {
+        if(this._core.graph.nodes[i].x < minx) minx = this._core.graph.nodes[i].x
+        if(this._core.graph.nodes[i].x > maxx) maxx = this._core.graph.nodes[i].x
+        if(this._core.graph.nodes[i].y < miny) miny = this._core.graph.nodes[i].y
+        if(this._core.graph.nodes[i].y > maxy) maxy = this._core.graph.nodes[i].y
+      }
+    }
+
+    var ybuffer = miny;
     for (var i in this._core.graph.nodesIndex) {
       if(this._core.graph.nodesIndex[i].degree==0) {
-        this._core.graph.nodesIndex[i].color = "#000000"
+        // this._core.graph.nodesIndex[i].color = "#000000"
+
+        
+        this._core.graph.nodesIndex[i].x = minx-10
+        this._core.graph.nodesIndex[i].y = ybuffer
+        this._core.graph.nodesIndex[i].displayX = minx-10
+        this._core.graph.nodesIndex[i].displayY = ybuffer
+        // this._core.graph.nodesIndex[i].hidden = true;
+        // this._core.graph.nodesIndex[i].fixed = true;
+
+        ybuffer = ybuffer + Math.pow(this._core.graph.nodesIndex[i].displaySize,2);
+        pr(ybuffer)
       }
       //   this._core.graph.nodesIndex[i].hidden = true;
       pr(i+" -> "+this._core.graph.nodesIndex[i].degree)
     }
     // -- / UPDATING THE DEGREE --
+
+    pr("minx: "+minx)
+    pr("maxx: "+maxx)
+    pr("miny: "+miny)
+    pr("maxy: "+maxy)
+    pr("")
 
     var V = 10;
     var E = 100;
@@ -1044,4 +1076,40 @@ sigma.publicPrototype.stopForceAtlas2 = function() {
   updateMap();
   partialGraph.refresh();
   if(minimap) $("#overviewzone").show();
+
+    for (var i in this._core.graph.nodes) {
+      if(!this._core.graph.nodes[i].hidden && this._core.graph.nodes[i].degree>0) {
+        if(this._core.graph.nodes[i].x < minx) minx = this._core.graph.nodes[i].x
+        if(this._core.graph.nodes[i].x > maxx) maxx = this._core.graph.nodes[i].x
+        if(this._core.graph.nodes[i].y < miny) miny = this._core.graph.nodes[i].y
+        if(this._core.graph.nodes[i].y > maxy) maxy = this._core.graph.nodes[i].y
+      }
+    }
+
+    var ybuffer = miny;
+    for (var i in this._core.graph.nodesIndex) {
+      if(this._core.graph.nodesIndex[i].degree==0) {
+        // this._core.graph.nodesIndex[i].color = "#000000"
+
+        
+        this._core.graph.nodesIndex[i].x = minx-10
+        this._core.graph.nodesIndex[i].y = ybuffer
+        this._core.graph.nodesIndex[i].displayX = minx-10
+        this._core.graph.nodesIndex[i].displayY = ybuffer
+        // this._core.graph.nodesIndex[i].hidden = true;
+        // this._core.graph.nodesIndex[i].fixed = true;
+
+        ybuffer = ybuffer + Math.pow(this._core.graph.nodesIndex[i].displaySize,2);
+        pr(ybuffer)
+      }
+      //   this._core.graph.nodesIndex[i].hidden = true;
+      pr(i+" -> "+this._core.graph.nodesIndex[i].degree)
+    }
+    // -- / UPDATING THE DEGREE --
+
+    pr("minx: "+minx)
+    pr("maxx: "+maxx)
+    pr("miny: "+miny)
+    pr("maxy: "+maxy)
+    pr("")
 };

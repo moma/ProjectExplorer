@@ -4,6 +4,8 @@
 
 function changeType() {
     pr("***swclickActual:"+swclickActual+" , swMacro:"+swMacro)
+    partialGraph.stopForceAtlas2();
+    
     if(swclickActual=="social") {
         if(swMacro) {
         	changeToMacro("semantic");
@@ -79,7 +81,7 @@ function changeLevel() {
     bf=swclickActual
     pushSWClick(swclickActual);
     pr("swMacro: "+swMacro+" - [swclickPrev: "+bf+"] - [swclickActual: "+swclickActual+"]")
-
+    partialGraph.stopForceAtlas2();
     // ANALIZING CURRENT STATE:
     if(swMacro){
         // Macro Level  --  swMacro:true
