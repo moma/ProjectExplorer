@@ -1345,6 +1345,15 @@ function add1Edge(ID) {
         hidden : false
     };
     partialGraph.addEdge(ID,s,t,edge);
+    
+    if(!isUndef(getn(s))) {
+        partialGraph._core.graph.nodesIndex[s].x = Nodes[s].x
+        partialGraph._core.graph.nodesIndex[s].y = Nodes[s].y
+    }
+    if(!isUndef(getn(t))) {
+        partialGraph._core.graph.nodesIndex[t].x = Nodes[t].x
+        partialGraph._core.graph.nodesIndex[t].y = Nodes[t].y
+    }
 }
 
 

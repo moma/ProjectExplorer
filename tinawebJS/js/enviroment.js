@@ -198,6 +198,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                 }
                 // $.doTimeout(300,function (){
 
+                partialGraph.stopForceAtlas2()
                 for(var i in finalarray) {
                     ids = finalarray[i]
                     if(i>=low && i<=high){
@@ -224,9 +225,9 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                     DrawAsSelectedNodes(selections)
 
 
-
                 partialGraph.refresh()
                 partialGraph.draw()
+                fa2enabled=true; partialGraph.startForceAtlas2()
                 // });
             }
             
