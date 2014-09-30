@@ -158,6 +158,7 @@ function cancelSelection (fromTagCloud) {
     }
     deselections={};
     // leftPanel("close");
+    if(swMacro) LevelButtonDisable(true);
     partialGraph.draw();
 }
 
@@ -237,7 +238,10 @@ function RefreshState(newNOW){
             if(is_empty(selections) || i==0) LevelButtonDisable(false);
         }
 
-        EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
+        //this should be available!!
+        // EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
+        $("#semLoader").hide();
+
         $("#colorGraph").show();
         
     }
@@ -257,10 +261,11 @@ function RefreshState(newNOW){
             i=0; for(var s in selections) { i++; break;}
             if(is_empty(selections) || i==0) LevelButtonDisable(false);
         }
-
-
-        EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
-        NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size") 
+        if ( semanticConverged ) $("#semLoader").hide();
+        else $("#semLoader").show();
+        //this should be available!!
+        // EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
+        // NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size") 
         $("#colorGraph").hide();
     }
     if(NOW=="AaBb"){
@@ -1110,14 +1115,7 @@ function MultipleSelection(nodes){
 		}
 		checkBox=false;
 	} else { 
-        // pr("=============")
-        // pr("receiving nodes: ")
-        // pr(nodes);       
-        // pr("ndsids content: ")
-        // pr(ndsids)
-        // pr("selections content PREV: ")
-        // pr(selections)
-        
+
         for(var i in ndsids){
             nodeid = ndsids[i]
             getOpossitesNodes(nodeid,false); //false -> just nodeid
@@ -1314,17 +1312,44 @@ function hideEverything(){
 
 function unHide(id){
 	// i've received a NODE
-    if(id.split(";").length==1){
-        updateSearchLabels(id,Nodes[id].label,Nodes[id].type);
-        nodeslength++;
-        //visibleNodes.push(id);
-        if(getn(id))
-        	partialGraph._core.graph.nodesIndex[id].hidden=false;
+    if(id.split(";").length==1) {
+
+        if(Nodes[id]) {
+            var anode = ({
+                id:id,
+                label: Nodes[id].label, 
+                size: Nodes[id].size, 
+                x: Nodes[id].x, 
+                y: Nodes[id].y,
+                type: Nodes[id].type,
+                color: Nodes[id].color,
+                shape: Nodes[id].shape
+            });  // The graph node
+
+            updateSearchLabels(id,Nodes[id].label,Nodes[id].type);
+            nodeslength++;
+            
+            partialGraph.addNode(id,anode);
+            return;
+        }
     }
     else {// It's an edge!
         //visibleEdges.push(id);
-        if(gete(id))
-        	partialGraph._core.graph.edgesIndex[id].hidden=false;
+        if(Edges[id]){
+
+
+            var anedge = {
+                id:         id,
+                sourceID:   Edges[id].sourceID,
+                targetID:   Edges[id].targetID,
+                lock : false,
+                label:      Edges[id].type,
+                weight: Edges[id].w
+            };
+
+        	partialGraph.addEdge(id , anedge.sourceID , anedge.targetID , anedge);
+            return;
+        }
     }
 }
 
@@ -1355,7 +1380,6 @@ function add1Edge(ID) {
         partialGraph._core.graph.nodesIndex[t].y = Nodes[t].y
     }
 }
-
 
 function hideElem(id){
     if(id.split(";").length==1){
@@ -1561,8 +1585,30 @@ function changeToMacro(iwannagraph) {
     labels=[]
     pr("CHANGING TO Macro-"+iwannagraph);
     
-    hideEverything();
+    // pr("BEFORE cancelSelection()")
+    // for(var i in partialGraph._core.graph.nodesIndex) {
+    //     pr(partialGraph._core.graph.nodesIndex[i].id+" : "+partialGraph._core.graph.nodesIndex[i].color+"  <=>  "+Nodes[i].id+" : "+Nodes[i].color)
+    //     pr(partialGraph._core.graph.nodesIndex[i])
+    //     pr("")
+    // }
+    // pr("--------------------------------------------------------------------------------")
 
+
+    partialGraph.emptyGraph();
+
+    if ( iwannagraph=="semantic" && !semanticConverged ) {
+
+        partialGraph.draw();
+        // partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
+        partialGraph.refresh();
+        // partialGraph.startForceAtlas2();
+        $("#semLoader").show();
+
+        return;
+
+    }
+
+    //iwantograph Social OR Semantic
     if(iwannagraph!="sociosemantic") {
     	socsemFlag=false;
         category = (iwannagraph=="social")?catSoc:catSem;

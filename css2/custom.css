@@ -1,3 +1,14 @@
+
+.loader{
+    text-align:center;
+    transform: translate(0, 50%) !important;
+    -ms-transform: translate(0, 50%) !important;  /*IE 9*/ 
+    -webkit-transform: translate(0, 50%) !important;  /*Safari and Chrome */
+}
+
+
+
+
 .navbar { 
 	margin-bottom:1px;
 }
@@ -15,8 +26,6 @@
 }
 
 
-
-
 /*.btn-sm[normal] {*/
 /*  background-image: -webkit-linear-gradient(#5f8ab9, #3e648d 50%, #385a7f);*/
 /*  background-image: linear-gradient(#5f8ab9, #3e648d 50%, #385a7f);*/
@@ -32,13 +41,6 @@
 
 
 /*.modal-vertical-centered {*/
-#loader{
-    text-align:center;
-    transform: translate(0, 50%) !important;
-    -ms-transform: translate(0, 50%) !important;  /*IE 9*/ 
-    -webkit-transform: translate(0, 50%) !important;  /*Safari and Chrome */
-}
-
 
 #selectionsBox{
     text-align:center;

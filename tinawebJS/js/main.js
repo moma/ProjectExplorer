@@ -78,6 +78,8 @@ function sigmaLimits(){
 
 function bringTheNoise(pathfile,type){
     
+
+    $("#semLoader").hide();
     $('#modalloader').modal('show');
     //  === get width and height   === //
     sigmaLimits();
@@ -87,7 +89,12 @@ function bringTheNoise(pathfile,type){
     .drawingProperties(sigmaJsDrawingProperties)
     .graphProperties(sigmaJsGraphProperties)
     .mouseProperties(sigmaJsMouseProperties);
-    
+
+    otherGraph = sigma.init(document.getElementById('sigma-othergraph'))
+    // .drawingProperties(sigmaJsDrawingProperties)
+    // .graphProperties(sigmaJsGraphProperties)
+    // .mouseProperties(sigmaJsMouseProperties);
+
 
     //  ===  resize topbar and tweakbar  === //
     var body=document.getElementsByTagName('body')[0];
@@ -232,36 +239,6 @@ function bringTheNoise(pathfile,type){
 
 
 
-                            // var vis_nds = getVisibleNodes();
-                            // pr("before_change... visible nodes:")
-                            // for(var i in vis_nds)
-                            //     pr(vis_nds[i].id+" : "+vis_nds[i].degree)
-
-
-                            // var vis_ndsIndex = {}
-                            // for(var n in vis_nds)  {
-                            //     id = vis_nds[n].id
-                            //     vis_ndsIndex[id] = vis_nds[n]
-                            //     vis_ndsIndex[id].degree = 0;
-                            // }
-
-                            // var vis_edgs = getVisibleEdges();
-                            // for(var e in vis_edgs) {
-                            //     e1 = vis_edgs[e]
-                            //     n1 = e1.source.id
-                            //     n2 = e1.target.id
-                            //     vis_ndsIndex[n1]["degree"]++;
-                            //     vis_ndsIndex[n2]["degree"]++;
-                            // }
-
-                            // pr("after_change... visible nodes:")
-                            // for(var i in vis_ndsIndex)
-                            //     pr(vis_ndsIndex[i].id+" : "+vis_ndsIndex[i].degree)
-
-
-
-
-
                             pr(getClientTime()+" : Ini FA2");
                             var ForceAtlas2 = new Worker("FA2.js");
                             ForceAtlas2.postMessage({ 
@@ -286,7 +263,63 @@ function bringTheNoise(pathfile,type){
                                 pr("\ttotalIterations: "+iterations)
                                 pr(getClientTime()+" : Fin FA2");
                                 console.log("Parsing and FA2 complete.");
+                                pr("\n=================\n")
         // < === ASYNCHRONOUS FA2.JS DONE!! === >
+
+
+                                pr(getClientTime()+" : Ini FA2 for SemanticGraph");
+                                var cut1_,cut2_,iterationsFA2_=iterationsFA2;
+                                pr(otherGraph._core.graph.nodes.length)
+                                pr(otherGraph._core.graph.edges.length)
+                                nbnodes = otherGraph._core.graph.nodes.length
+                                if(nbnodes>=400 && nbnodes<1000) {
+                                    snbnodes = nbnodes+"";
+                                    cut1_ = snbnodes[0];
+                                    cut2_ = snbnodes.length;
+                                    pr("cut1 sem: "+cut1_)
+                                    pr("cut2 sem: "+cut2_)
+                                    iterationsFA2_ = Math.round(iterationsFA2/(cut1_/cut2_))
+                                }
+                                if(nbnodes>=1000) iterationsFA2_ = 150;
+                                pr("iterationsFA2 sem: "+iterationsFA2_)
+
+
+                                var ForceAtlas2_ = new Worker("FA2.js");
+                                ForceAtlas2_.postMessage({ 
+                                    "nodes": otherGraph._core.graph.nodes,
+                                    "edges": otherGraph._core.graph.edges,
+                                    "it":iterationsFA2_
+                                });
+                                ForceAtlas2_.addEventListener('message', function(e) {
+                                    iterations=e.data.it;
+                                    nds=e.data.nodes;
+                                    for(var n in nds){
+                                        id=nds[n].id;
+                                        x=nds[n].x
+                                        y=nds[n].y
+                                        Nodes[id].x=x;
+                                        Nodes[id].y=y;
+                                    }
+
+                                    pr("\ttotalIterations: "+iterations)
+                                    pr(getClientTime()+" : Fin FA2 for SemanticGraph");
+
+
+                                    otherGraph.emptyGraph();
+                                    otherGraph = null;
+                                    $("#sigma-othergraph").html("");
+
+
+                                    semanticConverged = true;
+                                    $("#semLoader").hide();
+                                    if( NOW=="B" ) changeToMacro("semantic");
+            
+                                    console.log("Parsing and FA2 complete for SemanticGraph.");
+
+                                });
+
+
+
                                 theListeners(); 
                             }); 
     		    },
@@ -414,6 +447,8 @@ function theListeners(){
     $.ui.autocomplete.prototype._renderItem = function(ul, item) {
         var searchVal = $("#searchinput").val();
         var desc = extractContext(item.desc, searchVal);
+        pr("desc:")
+        pr(desc)
         return $('<li onclick=\'var s = "'+item.label+'"; search(s);$("#searchinput").val(strSearchBar);\'></li>')
         .data('item.autocomplete', item)
         .append("<a><span class=\"labelresult\">" + item.label + "</span></a>" )
@@ -424,7 +459,6 @@ function theListeners(){
         source: function(request, response) {
             matches = [];
             var matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i");
-            pr(labels);
             var results = $.grep(labels, function(e) {
                 return matcher.test(e.label); //|| matcher.test(e.desc);
             });
@@ -467,13 +501,11 @@ function theListeners(){
                 for(j=0;j<matches.length;j++){
                 	coincidences.push(matches[j].id)
                 }
-                pr("coincidencees: ");
-                pr(coincidences);
                 $.doTimeout(30,function (){
                 	MultipleSelection(coincidences);
+                    $("input#searchinput").val("");
+                    $("input#searchinput").autocomplete( "close" );
                 });
-                $("input#searchinput").val("");
-                $("input#searchinput").autocomplete( "close" );
                 //$("input#searchinput").trigger('autocompleteclose');
             }
         }
@@ -482,18 +514,13 @@ function theListeners(){
     $("#searchinput").keyup(function (e) {
         if (e.keyCode == 13 && $("input#searchinput").data('is_open') !== true) {
             pr("search KEY UP");
-            var s = $("#searchinput").val();
-            // pr(s)
-            // pr(exactfind(s))
-            $("#searchinput").val(strSearchBar);
-            var coincidence = exactfind(s);
+            var exfnd = exactfind( $("#searchinput").val() )
+
 			$.doTimeout(30,function (){
-                	MultipleSelection(coincidence.id);
-            });
-			$("input#searchinput").val("");
-            $("input#searchinput").autocomplete( "close" );
-            // if(categoriesIndex.length==1) updateLeftPanel_uni();
-            // if(categoriesIndex.length==2) updateLeftPanel_fix();            
+                	MultipleSelection(exfnd.id);
+                    $("input#searchinput").val("");
+                    $("input#searchinput").autocomplete( "close" );
+            });     
         }
     });
     
@@ -501,7 +528,7 @@ function theListeners(){
         pr("searchsubmit CLICK");
         var s = $("#searchinput").val();
         search(s);
-        $("#searchinput").val(strSearchBar);
+        $("#searchinput").val("");
     });
     /******************* /SEARCH ***********************/
 
@@ -671,7 +698,8 @@ function theListeners(){
     });
 
     //  finished
-    EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
+    //this should be available at start!!
+    // EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
 
 
     //finished
@@ -730,18 +758,6 @@ function theListeners(){
             if(cursor_size==0) partialGraph.draw();
         }
     });
-
-
-    // $.doTimeout(10,function (){
-	   //  var deftoph=$("#defaultop").height();
-	   //  var refh=$("#fixedtop").height();
-	   //  pr("deftoph:"+deftoph+" vs refh:"+refh)
-	   //  pr("deftoph:"+deftoph+" vs refh*2:"+refh*2)
-	   //  pr("if deftoph > refh*2 ")
-	   //  pr(deftoph+">"+(refh*2)+" : "+(deftoph>(refh*2))+"     then reload window")
-	   //  // deftoph.height(64);
-    // 	// if(deftoph>(refh*2)) window.location.reload();
-    // });
 
 }
 

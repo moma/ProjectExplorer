@@ -8,7 +8,7 @@ function changeType() {
     
     if(swclickActual=="social") {
         if(swMacro) {
-        	changeToMacro("semantic");
+            changeToMacro("semantic");
 	        pushSWClick("semantic");
 	        RefreshState("B")
         } else {
@@ -453,21 +453,18 @@ function searchLabel(string){
 
 function search(string) {
     var id_node = '';
-    partialGraph.iterNodes(function (n) {
-        if(!n.hidden){
-            if (n.label == string) {
-                id_node = n.id;
-                return n;
-            }  
-        }
-    });
-    // getOpossitesNodes(id_node, false);
-    
+    var results = find(string)
+
+    var coincd=[]
+    for(var i in results) {
+        coincd.push(results[i].id)
+    }    
     $.doTimeout(30,function (){
-        MultipleSelection(id_node);
+        MultipleSelection(coincd);
+        $("input#searchinput").val("");
+        $("input#searchinput").autocomplete( "close" );
     });
-                $("input#searchinput").val("");
-                $("input#searchinput").autocomplete( "close" );
+    
 }
 
 //============================ < / SEARCH > ============================//

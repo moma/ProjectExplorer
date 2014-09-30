@@ -50,6 +50,7 @@ var desirableScholarSize=6; //Remember that all scholars have the same size!
 var stopcriteria = false;
 var iterationsFA2=1000;
 var seed=999999999;//defaultseed
+var semanticConverged=false;
 
 
 var showLabelsIfZoom=2.0;
@@ -132,6 +133,7 @@ var overviewHover=false;
 var moveDelay = 80, zoomDelay = 2;
 //var Vecindad;
 var partialGraph; 
+var otherGraph;
 var Nodes = []; 
 var Edges = [];
 
@@ -141,8 +143,6 @@ var labels = [];
 
 var numberOfDocs=0;
 var numberOfNGrams=0;
-var semanticConverged=0;
-var socialConverged=0;
 
 var selections = [];
 var deselections={};

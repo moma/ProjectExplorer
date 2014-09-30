@@ -247,9 +247,9 @@ var ForceAtlas2 = function(graph) {
         
         var convg= ((Math.pow(nodes.length,2))/promdxdy);    /**/
         var swingingVSnodes_length = swingingSum/nodes.length;     /**/
-        if(convg > swingingVSnodes_length){ 
-            self.p.banderita=true;
-        }
+        // if(convg > swingingVSnodes_length){ 
+        //     self.p.banderita=true;
+        // }
         
         self.p.totalEffectiveTraction = totalEffectiveTraction;
 

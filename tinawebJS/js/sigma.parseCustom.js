@@ -643,12 +643,14 @@ function extractFromJson(data,seed){
             Nodes[i].size = ""+normalizedSize;
             
             nodeK = Nodes[i];
-            nodeK.hidden=true;/**///should be uncommented
-            partialGraph.addNode(i,nodeK);   
+            otherGraph.addNode(i,nodeK);
+            // nodeK.hidden=true;/**///should be uncommented
+            // partialGraph.addNode(i,nodeK);   
         } 
         else {
             partialGraph.addNode(i,Nodes[i]);  
-            unHide(i);
+            updateSearchLabels(i,Nodes[i].label,Nodes[i].type);
+            // unHide(i);
         }
         // pr(Nodes[i])
     }
@@ -673,11 +675,8 @@ function extractFromJson(data,seed){
         if(edge.weight > maxEdgeWeight) maxEdgeWeight= edge.weight;
         Edges[indice] = edge;
         
-        
-        
-        
             if(edge.label=="nodes1"){   
-                edge.hidden=false;
+                // edge.hidden=false;
 
                 if(isUndef(nodes1[source])) {
                     nodes1[source] = {
@@ -693,11 +692,13 @@ function extractFromJson(data,seed){
                 }   
                 nodes1[source].neighbours.push(target);
                 nodes1[target].neighbours.push(source);
+
+                partialGraph.addEdge(indice,source,target,edge);
             }
             
             
             if(edge.label=="nodes2"){ 
-                edge.hidden=true;
+                // edge.hidden=true;
 
                 if(isUndef(nodes2[source])) {
                     nodes2[source] = {
@@ -713,11 +714,13 @@ function extractFromJson(data,seed){
                 }
                 nodes2[source].neighbours.push(target);
                 nodes2[target].neighbours.push(source);
+                
+                otherGraph.addEdge(indice,source,target,edge);
             }
             
             
             if(edge.label=="bipartite"){   
-                edge.hidden=true;
+                // edge.hidden=true;
 
                 s = edge.sourceID
 
@@ -761,6 +764,5 @@ function extractFromJson(data,seed){
             }
             
             //edge.hidden=false/**///should be commented
-            partialGraph.addEdge(indice,source,target,edge);
     }
 }

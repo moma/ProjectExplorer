@@ -35,6 +35,7 @@ function showMeSomeLabels(N){
                 if(counter==N) break;
             }
         }
+        partialGraph.draw()
         /*======= Show some labels at the beginning =======*/
 }
 
