@@ -211,11 +211,12 @@ function bringTheNoise(pathfile,type){
     		    contentType: "application/json",
     		    dataType: 'jsonp',
     		    async: true,
-    		    success : function(data){
+    		    success : function(data) {
                             if(!isUndef(getUrlParam.seed))seed=getUrlParam.seed;
     			            extractFromJson(data,seed);
+                            changeToMacro("social");
                             pr(getClientTime()+" : DataExt Fin");
-        // < === DATA EXTRACTED!! === >
+                            // < === DATA EXTRACTED!! === >
 
                             if(fa2enabled==="off") $("#edgesButton").hide();
                             pushSWClick("social");
@@ -234,14 +235,14 @@ function bringTheNoise(pathfile,type){
                             pr("iterationsFA2: "+iterationsFA2)
                             var netname = pathfile.replace(/\_/g, ' ').toUpperCase();
                             $("#network").html(netname);
-        // < === ASYNCHRONOUS FA2.JS === >
+                            // < === ASYNCHRONOUS FA2.JS === >
 
-
-
+                            pr("prev first node:")
+                            pr(partialGraph._core.graph.nodes[0])
 
                             pr(getClientTime()+" : Ini FA2");
                             var ForceAtlas2 = new Worker("FA2.js");
-                            ForceAtlas2.postMessage({ 
+                            ForceAtlas2.postMessage({
                                 "nodes": partialGraph._core.graph.nodes,
                                 "edges": partialGraph._core.graph.edges,
                                 "it":iterationsFA2
@@ -264,9 +265,12 @@ function bringTheNoise(pathfile,type){
                                 pr(getClientTime()+" : Fin FA2");
                                 console.log("Parsing and FA2 complete.");
                                 pr("\n=================\n")
-        // < === ASYNCHRONOUS FA2.JS DONE!! === >
+                                // < === ASYNCHRONOUS FA2.JS DONE!! === >
 
+                                pr("aft first node:")
+                                pr(partialGraph._core.graph.nodes[0])
 
+                                // [ calculate iterations for semanticgraph ]
                                 pr(getClientTime()+" : Ini FA2 for SemanticGraph");
                                 var cut1_,cut2_,iterationsFA2_=iterationsFA2;
                                 pr(otherGraph._core.graph.nodes.length)
@@ -282,8 +286,10 @@ function bringTheNoise(pathfile,type){
                                 }
                                 if(nbnodes>=1000) iterationsFA2_ = 150;
                                 pr("iterationsFA2 sem: "+iterationsFA2_)
+                                // [ / calculate iterations for semanticgraph ]
 
 
+                                // [ semantic layouting ]
                                 var ForceAtlas2_ = new Worker("FA2.js");
                                 ForceAtlas2_.postMessage({ 
                                     "nodes": otherGraph._core.graph.nodes,
@@ -312,11 +318,14 @@ function bringTheNoise(pathfile,type){
 
                                     semanticConverged = true;
                                     $("#semLoader").hide();
-                                    if( NOW=="B" ) changeToMacro("semantic");
+                                    if( NOW=="B" ) { 
+                                        changeToMacro("semantic");
+                                        partialGraph.draw();
+                                    }
             
                                     console.log("Parsing and FA2 complete for SemanticGraph.");
-
                                 });
+                                // [ / semantic layouting ]
 
 
 
@@ -404,18 +413,6 @@ function bringTheNoise(pathfile,type){
                     pr("Page Not found. parseCustom, inside the IF");
                 }
             });
-
-
-
-
-
-
-
-
-
-
-
-
 
             }
         }

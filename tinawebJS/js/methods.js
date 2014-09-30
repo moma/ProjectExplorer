@@ -273,6 +273,8 @@ function RefreshState(newNOW){
         $("#colorGraph").hide();
     }
 
+    partialGraph.draw();
+
 }
 
 function pushSWClick(arg){
@@ -1405,6 +1407,7 @@ function unHideElem(id){
 
 function changeToMeso(iwannagraph) { 
     labels=[]
+    partialGraph.emptyGraph();
     pr("changing to Meso-"+iwannagraph);  
     if(iwannagraph=="social") {
         if(!is_empty(selections)){
@@ -1574,10 +1577,10 @@ function changeToMeso(iwannagraph) {
         }
     }
     // highlightSelectedNodes(true); 
-    partialGraph.draw();
-    // partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
-    partialGraph.refresh();
-    partialGraph.startForceAtlas2();
+    // partialGraph.draw();
+    // // partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
+    // partialGraph.refresh();
+    // partialGraph.startForceAtlas2();
     $('.gradient').css({"background-size":"90px 90px"});
 }
 
@@ -1659,10 +1662,10 @@ function changeToMacro(iwannagraph) {
     }
     // highlightSelectedNodes(true);
     // // partialGraph.stopForceAtlas2();
-    partialGraph.draw();
-    // partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
-    partialGraph.refresh();
-    partialGraph.startForceAtlas2();
+    // partialGraph.draw();
+    // // partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
+    // partialGraph.refresh();
+    // partialGraph.startForceAtlas2();
     $('.gradient').css({"background-size":"40px 40px"});
 }
 

@@ -612,8 +612,8 @@ function extractFromJson(data,seed){
                 size:1, 
                 x:rand.getRandom(), 
                 y:rand.getRandom(), 
-                //x:Math.random(),
-                //y:Math.random(),
+                // x:Math.random(),
+                // y:Math.random(),
                 type:"",
                 htmlCont:"",
                 color:color
