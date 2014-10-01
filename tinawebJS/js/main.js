@@ -214,9 +214,16 @@ function bringTheNoise(pathfile,type){
     		    success : function(data) {
                             if(!isUndef(getUrlParam.seed))seed=getUrlParam.seed;
     			            extractFromJson(data,seed);
+
+                            pr("\tLALALALAALALALALALA1")
+                            pr(partialGraph._core.graph.edges)
+
                             changeToMacro("social");
                             pr(getClientTime()+" : DataExt Fin");
                             // < === DATA EXTRACTED!! === >
+
+                            pr("\tLALALALAALALALALALA2")
+                            pr(partialGraph._core.graph.edges)
 
                             if(fa2enabled==="off") $("#edgesButton").hide();
                             pushSWClick("social");
@@ -237,8 +244,6 @@ function bringTheNoise(pathfile,type){
                             $("#network").html(netname);
                             // < === ASYNCHRONOUS FA2.JS === >
 
-                            pr("prev first node:")
-                            pr(partialGraph._core.graph.nodes[0])
 
                             pr(getClientTime()+" : Ini FA2");
                             var ForceAtlas2 = new Worker("FA2.js");
@@ -267,8 +272,6 @@ function bringTheNoise(pathfile,type){
                                 pr("\n=================\n")
                                 // < === ASYNCHRONOUS FA2.JS DONE!! === >
 
-                                pr("aft first node:")
-                                pr(partialGraph._core.graph.nodes[0])
 
                                 // [ calculate iterations for semanticgraph ]
                                 pr(getClientTime()+" : Ini FA2 for SemanticGraph");
@@ -696,6 +699,7 @@ function theListeners(){
 
     //  finished
     //this should be available at start!!
+    // pr("applying edge weith filter")
     // EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
 
 

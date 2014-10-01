@@ -11,7 +11,6 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
   this.count=0;
 
   this.p = {
-    count: 0,
     linLogMode: false,
     outboundAttractionDistribution: false,
     adjustSizes: false,
@@ -1082,6 +1081,12 @@ sigma.publicPrototype.stopForceAtlas2 = function() {
 
     var ybuffer = miny;
     for (var i in this._core.graph.nodesIndex) {
+
+      if (swMacro) {
+        Nodes[i].x = this._core.graph.nodesIndex[i].x;
+        Nodes[i].y = this._core.graph.nodesIndex[i].y; 
+      }
+
       if(this._core.graph.nodesIndex[i].degree==0) {
         // this._core.graph.nodesIndex[i].color = "#000000"
 
@@ -1106,4 +1111,6 @@ sigma.publicPrototype.stopForceAtlas2 = function() {
     pr("miny: "+miny)
     pr("maxy: "+maxy)
     pr("")
+
+
 };

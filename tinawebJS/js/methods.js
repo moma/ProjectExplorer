@@ -1189,13 +1189,15 @@ function graphResetColor(){
 
 function createEdgesForExistingNodes (typeOfNodes) {
     
+
+    pr("create Edges for existing Nodes")
+    pr(partialGraph._core.graph.nodes)
 	if(typeOfNodes=="social") typeOfNodes="Scholars"
 	if(typeOfNodes=="semantic") typeOfNodes="Keywords"
 	if(typeOfNodes=="sociosemantic") typeOfNodes="Bipartite"
 
-    existingNodes = partialGraph._core.graph.nodes.filter(function(n) {
-                            return !n['hidden'];
-                        });
+    existingNodes = partialGraph._core.graph.nodes;
+
     if(typeOfNodes=="Bipartite"){
         for(i=0; i < existingNodes.length ; i++){
             for(j=0; j < existingNodes.length ; j++){
@@ -1247,45 +1249,57 @@ function createEdgesForExistingNodes (typeOfNodes) {
                 i1=existingNodes[i].id+";"+existingNodes[j].id; 
                 i2=existingNodes[j].id+";"+existingNodes[i].id; 
 
-                if(!isUndef(Edges[i1]) && !isUndef(Edges[i2]) && i1!=i2){
+                // pr("Edges[i1]:")
+                // pr(Edges[i1])
+                
+                // pr("Edges[i2]:")
+                // pr(Edges[i2])
+                // pr(".")
+                // pr(".")
+
+                // if(!isUndef(Edges[i1]) && !isUndef(Edges[i2]) && i1!=i2){
                     
-                        if(typeOfNodes=="Scholars") { 
-                            if(Edges[i1].label=="nodes1" && Edges[i2].label=="nodes1"){                              
-                                if(Edges[i1].weight > Edges[i2].weight){
-                                    unHide(i1);
-                                }
-                                if(Edges[i1].weight < Edges[i2].weight){
-                                    unHide(i2);
-                                }
-                                if(Edges[i1].weight == Edges[i2].weight){
-                                    unHide(i1);
-                                }  
-                            }
-                        }
-                        if(typeOfNodes=="Keywords") { 
-                            if(Edges[i1].label=="nodes2" && Edges[i2].label=="nodes2"){ 
-                                if(Edges[i1].weight > Edges[i2].weight){
-                                    unHide(i1);
-                                }
-                                if(Edges[i1].weight < Edges[i2].weight){
-                                    unHide(i2);
-                                }
-                                if(Edges[i1].weight == Edges[i2].weight){
-                                    unHide(i1);
-                                }
-                            }
-                        }
-                }
-                else {
+                //         if(typeOfNodes=="Scholars") { 
+                //             if(Edges[i1].label=="nodes1" && Edges[i2].label=="nodes1"){                              
+                //                 pr(Edges[i1])
+                //                 if(Edges[i1].weight > Edges[i2].weight){
+                //                     unHide(i1);
+                //                 }
+                //                 if(Edges[i1].weight < Edges[i2].weight){
+                //                     unHide(i2);
+                //                 }
+                //                 if(Edges[i1].weight == Edges[i2].weight){
+                //                     unHide(i1);
+                //                 }  
+                //             }
+                //         }
+                //         if(typeOfNodes=="Keywords") { 
+                //             if(Edges[i1].label=="nodes2" && Edges[i2].label=="nodes2"){ 
+                //                 pr(Edges[i1]);
+                //                 if(Edges[i1].weight > Edges[i2].weight){
+                //                     unHide(i1);
+                //                 }
+                //                 if(Edges[i1].weight < Edges[i2].weight){
+                //                     unHide(i2);
+                //                 }
+                //                 if(Edges[i1].weight == Edges[i2].weight){
+                //                     unHide(i1);
+                //                 }
+                //             }
+                //         }
+                // }
+                // else {
                     e=(!isUndef(Edges[i1]))?Edges[i1]:Edges[i2]
                     if(!isUndef(e)){
                         if(typeOfNodes=="Scholars" && e.label=="nodes1") unHide(e.id)
                         if(typeOfNodes=="Keywords" && e.label=="nodes2") unHide(e.id) 
                     }
-                }
+                // }
             }  
         }  
     }
+    pr("AT THE END OF createEdgesForExistingNodes")
+    pr(partialGraph._core.graph.edges)
 }
 
 function hideEverything(){
@@ -1345,8 +1359,8 @@ function unHide(id){
                 sourceID:   Edges[id].sourceID,
                 targetID:   Edges[id].targetID,
                 lock : false,
-                label:      Edges[id].type,
-                weight: Edges[id].w
+                label:      Edges[id].label,
+                weight: Edges[id].weight
             };
 
         	partialGraph.addEdge(id , anedge.sourceID , anedge.targetID , anedge);
@@ -1426,7 +1440,7 @@ function changeToMeso(iwannagraph) {
                 //         n.hidden=true;
                 //     }
                 // }
-                hideEverything();
+                // hideEverything();
                 for(var i in selections) {
                    unHide(i);
                    for(var j in nodes1[i].neighbours) { 
@@ -1622,6 +1636,7 @@ function changeToMacro(iwannagraph) {
                 unHide(n);
             }                
         } // and semantic edges
+
         createEdgesForExistingNodes(iwannagraph);
 
         if (!is_empty(selections))
@@ -1633,14 +1648,13 @@ function changeToMacro(iwannagraph) {
     } else {
         //iwantograph socio-semantic
         for(var n in Nodes) unHide(n);
-        
+
         for(var e in Edges) {  
             if(Edges[e].label=="nodes1" || Edges[e].label=="nodes2"){
                 st=e.split(";");
-                index = partialGraph._core.graph.edgesIndex;
-                if(index[st[0]+";"+st[1]] && index[st[1]+";"+st[0]] &&
-                   index[st[0]+";"+st[1]].hidden==true &&
-                   index[st[1]+";"+st[0]].hidden==true
+                if(Edges[st[0]+";"+st[1]] && Edges[st[1]+";"+st[0]] &&
+                   Edges[st[0]+";"+st[1]].hidden==true &&
+                   Edges[st[1]+";"+st[0]].hidden==true
                     ){
                     if(Edges[st[0]+";"+st[1]].weight == Edges[st[1]+";"+st[0]].weight){
                         unHide(st[0]+";"+st[1]);
