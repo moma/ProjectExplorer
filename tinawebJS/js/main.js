@@ -9,7 +9,8 @@ $( window ).resize(function() {
 
 //  === [what to do at start] === //
 if (mainfile) {
-	listGexfs();
+    // http://localhost/adasd/explorerjs.html?file=data/140907Syneco.gexf
+	// listGexfs(); //should be uncomm
 	if(!isUndef(getUrlParam.file)){
 	    $.doTimeout(30,function (){
     		parse(getUrlParam.file);
@@ -33,11 +34,12 @@ if (mainfile) {
 
     if(isUndef(getUrlParam.nodeidparam)) {
         pr("do nothing, 'cause don't wanna");
+        // pr(getUrlParam.nodeidparam)
         // $('#mainmodal').modal('show');
         // $("#my-text-input").tokenInput("try.json");
-     //    pr("doing something 'cause i'm a doer"); mainfile=true;
-	    // bringTheNoise("data/pkmn_types.gexf","mono");
-     //    scanCategories();
+        //    pr("doing something 'cause i'm a doer"); mainfile=true;
+	    // bringTheNoise("data/140907Syneco.gexf","mono");
+        // scanCategories();
     } else {
 
 	    if(getUrlParam.nodeidparam.indexOf("__")===-1){
@@ -78,6 +80,8 @@ function sigmaLimits(){
 
 function bringTheNoise(pathfile,type){
     
+    pr("printing the pathfile:")
+    pr(pathfile)
 
     $("#semLoader").hide();
     $('#modalloader').modal('show');
@@ -200,227 +204,44 @@ function bringTheNoise(pathfile,type){
         theListeners(); 
 
     } else {
+
+        var theurl,thedata,thename;
+
 	    if(type=="unique_id") {
 		    pr("bring the noise, case: unique_id");
             pr(getClientTime()+" : DataExt Ini");
-        // < === DATA EXTRACTION === >
-    		$.ajax({
-    		    type: 'GET',
-    		    url: bridge["forNormalQuery"],
-    		    data: "unique_id="+pathfile+"&it="+iterationsFA2,
-    		    contentType: "application/json",
-    		    dataType: 'jsonp',
-    		    async: true,
-    		    success : function(data) {
-                            if(!isUndef(getUrlParam.seed))seed=getUrlParam.seed;
-    			            extractFromJson(data,seed);
-
-                            pr("\tLALALALAALALALALALA1")
-                            pr(partialGraph._core.graph.edges)
-
-                            changeToMacro("social");
-                            pr(getClientTime()+" : DataExt Fin");
-                            // < === DATA EXTRACTED!! === >
-
-                            pr("\tLALALALAALALALALALA2")
-                            pr(partialGraph._core.graph.edges)
-
-                            if(fa2enabled==="off") $("#edgesButton").hide();
-                            pushSWClick("social");
-                            pr(partialGraph._core.graph.nodes.length)
-                            pr(partialGraph._core.graph.edges.length)
-                            nbnodes = partialGraph._core.graph.nodes.length
-                            if(nbnodes>=400 && nbnodes<1000) {
-                                snbnodes = nbnodes+"";
-                                cut1 = snbnodes[0];
-                                cut2 = snbnodes.length;
-                                pr("cut1: "+cut1)
-                                pr("cut2: "+cut2)
-                                iterationsFA2 = Math.round(iterationsFA2/(cut1/cut2))
-                            }
-                            if(nbnodes>=1000) iterationsFA2 = 150;
-                            pr("iterationsFA2: "+iterationsFA2)
-                            var netname = pathfile.replace(/\_/g, ' ').toUpperCase();
-                            $("#network").html(netname);
-                            // < === ASYNCHRONOUS FA2.JS === >
+            // < === DATA EXTRACTION === >
+            theurl = bridge["forNormalQuery"]
+            thedata = "unique_id="+getUrlParam.nodeidparam+"&it="+iterationsFA2;
+            thename = true;
+	    } 
 
 
-                            pr(getClientTime()+" : Ini FA2");
-                            var ForceAtlas2 = new Worker("FA2.js");
-                            ForceAtlas2.postMessage({
-                                "nodes": partialGraph._core.graph.nodes,
-                                "edges": partialGraph._core.graph.edges,
-                                "it":iterationsFA2
-                            });
-                            ForceAtlas2.addEventListener('message', function(e) {
-                                iterations=e.data.it;
-                                nds=e.data.nodes;
-                                for(var n in nds){
-                                    id=nds[n].id;
-                                    x=nds[n].x
-                                    y=nds[n].y
-                                    partialGraph._core.graph.nodes[n].x=x;
-                                    partialGraph._core.graph.nodes[n].y=y;
-                                    partialGraph._core.graph.nodesIndex[id].x=x
-                                    partialGraph._core.graph.nodesIndex[id].y=y
-                                    Nodes[id].x=x;
-                                    Nodes[id].y=y;
-                                }
-                                pr("\ttotalIterations: "+iterations)
-                                pr(getClientTime()+" : Fin FA2");
-                                console.log("Parsing and FA2 complete.");
-                                pr("\n=================\n")
-                                // < === ASYNCHRONOUS FA2.JS DONE!! === >
-
-
-                                // [ calculate iterations for semanticgraph ]
-                                pr(getClientTime()+" : Ini FA2 for SemanticGraph");
-                                var cut1_,cut2_,iterationsFA2_=iterationsFA2;
-                                pr(otherGraph._core.graph.nodes.length)
-                                pr(otherGraph._core.graph.edges.length)
-                                nbnodes = otherGraph._core.graph.nodes.length
-                                if(nbnodes>=400 && nbnodes<1000) {
-                                    snbnodes = nbnodes+"";
-                                    cut1_ = snbnodes[0];
-                                    cut2_ = snbnodes.length;
-                                    pr("cut1 sem: "+cut1_)
-                                    pr("cut2 sem: "+cut2_)
-                                    iterationsFA2_ = Math.round(iterationsFA2/(cut1_/cut2_))
-                                }
-                                if(nbnodes>=1000) iterationsFA2_ = 150;
-                                pr("iterationsFA2 sem: "+iterationsFA2_)
-                                // [ / calculate iterations for semanticgraph ]
-
-
-                                // [ semantic layouting ]
-                                var ForceAtlas2_ = new Worker("FA2.js");
-                                ForceAtlas2_.postMessage({ 
-                                    "nodes": otherGraph._core.graph.nodes,
-                                    "edges": otherGraph._core.graph.edges,
-                                    "it":iterationsFA2_
-                                });
-                                ForceAtlas2_.addEventListener('message', function(e) {
-                                    iterations=e.data.it;
-                                    nds=e.data.nodes;
-                                    for(var n in nds){
-                                        id=nds[n].id;
-                                        x=nds[n].x
-                                        y=nds[n].y
-                                        Nodes[id].x=x;
-                                        Nodes[id].y=y;
-                                    }
-
-                                    pr("\ttotalIterations: "+iterations)
-                                    pr(getClientTime()+" : Fin FA2 for SemanticGraph");
-
-
-                                    otherGraph.emptyGraph();
-                                    otherGraph = null;
-                                    $("#sigma-othergraph").html("");
-
-
-                                    semanticConverged = true;
-                                    $("#semLoader").hide();
-                                    if( NOW=="B" ) { 
-                                        changeToMacro("semantic");
-                                        partialGraph.draw();
-                                    }
-            
-                                    console.log("Parsing and FA2 complete for SemanticGraph.");
-                                });
-                                // [ / semantic layouting ]
-
-
-
-                                theListeners(); 
-                            }); 
-    		    },
-    		    error: function(){ 
-    		        pr("Page Not found. parseCustom, inside the IF");
-    		    }
-    		});
-	    } else {
-            if ("filtermode") {
-
-
-                
-
-
-
-
-            // "php/bridgeClientServer_filter.php?query="+getUrlParam.nodeidparam;
-            pr("bring the noise, case: query with multiple filters");
+        if (type=="filtermode") {
+            pr("bring the noise, case: multipleQuery");
             pr(getClientTime()+" : DataExt Ini");
-            pr(bridge["forFilteredQuery"]+"?query="+getUrlParam.nodeidparam);
-        // < === DATA EXTRACTION === >
-            $.ajax({
-                type: 'GET',
-                url: bridge["forFilteredQuery"],
-                data: "query="+getUrlParam.nodeidparam,
-                contentType: "application/json",
-                dataType: 'jsonp',
-                async: true,
-                success : function(data){
-                            if(!isUndef(getUrlParam.seed))seed=getUrlParam.seed;
-                            extractFromJson(data,seed);
-                            pr(getClientTime()+" : DataExt Fin");
-        // < === DATA EXTRACTED!! === >
-
-                            if(fa2enabled==="off") $("#edgesButton").hide();
-                            pushSWClick("social");
-                            pr(partialGraph._core.graph.nodes.length)
-                            pr(partialGraph._core.graph.edges.length)
-                            nbnodes = partialGraph._core.graph.nodes.length
-                            if(nbnodes>=400 && nbnodes<1000) {
-                                snbnodes = nbnodes+"";
-                                cut1 = snbnodes[0];
-                                cut2 = snbnodes.length;
-                                pr("cut1: "+cut1)
-                                pr("cut2: "+cut2)
-                                iterationsFA2 = Math.round(iterationsFA2/(cut1/cut2))
-                            }
-                            if(nbnodes>=1000) iterationsFA2 = 150;
-                            pr("iterationsFA2: "+iterationsFA2)
-                            var netname = pathfile.replace(/\_/g, ' ').toUpperCase();
-                            $("#network").html("MultiQuery: lalala");
-        // < === ASYNCHRONOUS FA2.JS === >
-                            pr(getClientTime()+" : Ini FA2");
-                            var ForceAtlas2 = new Worker("FA2.js");
-                            ForceAtlas2.postMessage({ 
-                                "nodes": partialGraph._core.graph.nodes,
-                                "edges": partialGraph._core.graph.edges,
-                                "it":iterationsFA2
-                            });
-                            ForceAtlas2.addEventListener('message', function(e) {
-                                iterations=e.data.it;
-                                nds=e.data.nodes;
-                                for(var n in nds){
-                                    id=nds[n].id;
-                                    x=nds[n].x
-                                    y=nds[n].y
-                                    partialGraph._core.graph.nodes[n].x=x;
-                                    partialGraph._core.graph.nodes[n].y=y;
-                                    partialGraph._core.graph.nodesIndex[id].x=x
-                                    partialGraph._core.graph.nodesIndex[id].y=y
-                                    Nodes[id].x=x;
-                                    Nodes[id].y=y;
-                                }
-                                pr("\ttotalIterations: "+iterations)
-                                pr(getClientTime()+" : Fin FA2");
-                                console.log("Parsing and FA2 complete.");
-        // < === ASYNCHRONOUS FA2.JS DONE!! === >
-                                theListeners(); 
-                            }); 
-                },
-                error: function(){ 
-                    pr("Page Not found. parseCustom, inside the IF");
-                }
-            });
-
-            }
+            theurl = bridge["forFilteredQuery"];
+            thedata = "query="+getUrlParam.nodeidparam;
+            thename = false;
         }
+
+        if (thename) thename = getUrlParam.nodeidparam.replace(/\_/g, ' ').toUpperCase();
+        else {
+            elements = []
+            queryarray = JSON.parse(getUrlParam.nodeidparam)
+            for(var i in queryarray) {
+                item = queryarray[i]
+                if(Array.isArray(item) && item.length>0) {
+                    for(var j in item) elements.push(item[j])
+                }
+            }
+            thename = '"'+elements.join('" , "')+'"';
+
+        }
+        SigmaLayouting( theurl , thedata , thename );
     }  
 }
+
 
 function theListeners(){
     pr("in THELISTENERS");
@@ -700,7 +521,7 @@ function theListeners(){
     //  finished
     //this should be available at start!!
     // pr("applying edge weith filter")
-    // EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
+    EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
 
 
     //finished
@@ -762,3 +583,137 @@ function theListeners(){
 
 }
 
+function SigmaLayouting( URL, DATA, NAME) {
+
+    return $.ajax({
+        type: 'GET',
+        url: URL,
+        data: DATA,
+        contentType: "application/json",
+        dataType: 'jsonp',
+        async: true,
+        success : function(data) {
+                    if(!isUndef(getUrlParam.seed))seed=getUrlParam.seed;
+                    extractFromJson(data,seed);
+
+                    // changeToMacro("social");
+                    pr(getClientTime()+" : DataExt Fin");
+                    // < === DATA EXTRACTED!! === >
+
+                    if(fa2enabled==="off") $("#edgesButton").hide();
+                    pushSWClick("social");
+                    pr(partialGraph._core.graph.nodes.length)
+                    pr(partialGraph._core.graph.edges.length)
+                    nbnodes = partialGraph._core.graph.nodes.length
+                    if(nbnodes>=400 && nbnodes<1000) {
+                        snbnodes = nbnodes+"";
+                        cut1 = snbnodes[0];
+                        cut2 = snbnodes.length;
+                        pr("cut1: "+cut1)
+                        pr("cut2: "+cut2)
+                        iterationsFA2 = Math.round(iterationsFA2/(cut1/cut2))
+                    }
+                    if(nbnodes>=1000) iterationsFA2 = 150;
+                    pr("iterationsFA2: "+iterationsFA2)
+
+                    $("#network").html(NAME);
+                    // < === ASYNCHRONOUS FA2.JS === >
+
+                    pr(getClientTime()+" : Ini FA2");
+                    var ForceAtlas2 = new Worker("FA2.js");
+                    ForceAtlas2.postMessage({
+                        "nodes": partialGraph._core.graph.nodes,
+                        "edges": partialGraph._core.graph.edges,
+                        "it":iterationsFA2
+                    });
+                    ForceAtlas2.addEventListener('message', function(e) {
+                        iterations=e.data.it;
+                        nds=e.data.nodes;
+                        for(var n in nds){
+                            id=nds[n].id;
+                            x=nds[n].x
+                            y=nds[n].y
+                            partialGraph._core.graph.nodes[n].x=x;
+                            partialGraph._core.graph.nodes[n].y=y;
+                            partialGraph._core.graph.nodesIndex[id].x=x
+                            partialGraph._core.graph.nodesIndex[id].y=y
+                            Nodes[id].x=x;
+                            Nodes[id].y=y;
+                        }
+                        pr("\ttotalIterations: "+iterations)
+                        pr(getClientTime()+" : Fin FA2");
+                        console.log("Parsing and FA2 complete.");
+                        pr("\n=================\n")
+                        // < === ASYNCHRONOUS FA2.JS DONE!! === >
+
+
+                        // [ calculate iterations for semanticgraph ]
+                        pr(getClientTime()+" : Ini FA2 for SemanticGraph");
+                        var cut1_,cut2_,iterationsFA2_=iterationsFA2;
+                        pr(otherGraph._core.graph.nodes.length)
+                        pr(otherGraph._core.graph.edges.length)
+                        nbnodes = otherGraph._core.graph.nodes.length
+                        if(nbnodes>=400 && nbnodes<1000) {
+                            snbnodes = nbnodes+"";
+                            cut1_ = snbnodes[0];
+                            cut2_ = snbnodes.length;
+                            pr("cut1 sem: "+cut1_)
+                            pr("cut2 sem: "+cut2_)
+                            iterationsFA2_ = Math.round(iterationsFA2/(cut1_/cut2_))
+                        }
+                        if(nbnodes>=1000) iterationsFA2_ = 150;
+                        pr("iterationsFA2 sem: "+iterationsFA2_)
+                        // [ / calculate iterations for semanticgraph ]
+
+
+                        // [ semantic layouting ]
+                        var ForceAtlas2_ = new Worker("FA2.js");
+                        ForceAtlas2_.postMessage({ 
+                            "nodes": otherGraph._core.graph.nodes,
+                            "edges": otherGraph._core.graph.edges,
+                            "it":iterationsFA2_
+                        });
+                        ForceAtlas2_.addEventListener('message', function(e) {
+                            iterations=e.data.it;
+                            nds=e.data.nodes;
+                            for(var n in nds){
+                                id=nds[n].id;
+                                x=nds[n].x
+                                y=nds[n].y
+                                Nodes[id].x=x;
+                                Nodes[id].y=y;
+                            }
+
+                            pr("\ttotalIterations: "+iterations)
+                            pr(getClientTime()+" : Fin FA2 for SemanticGraph");
+
+
+                            otherGraph.emptyGraph();
+                            otherGraph = null;
+                            $("#sigma-othergraph").html("");
+
+
+                            semanticConverged = true;
+                            $("#semLoader").hide();
+                            if( NOW=="B" ) { 
+                                changeToMacro("semantic");
+                                partialGraph.draw();                                
+                                EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
+                                NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size") 
+                            }
+    
+                            console.log("Parsing and FA2 complete for SemanticGraph.");
+                        });
+                        // [ / semantic layouting ]
+
+
+
+                        theListeners(); 
+                    }); 
+        },
+        error: function(){ 
+            pr("Page Not found. parseCustom, inside the IF");
+        }
+    });
+
+}

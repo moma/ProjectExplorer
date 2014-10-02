@@ -38,8 +38,8 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
   // Runtime (the ForceAtlas2 itself)
   this.init = function() {
 
-    console.log("#Nodes: "+V)
-    console.log("#Edges: "+E)
+    // console.log("#Nodes: "+V)
+    // console.log("#Edges: "+E)
 
     self.state = {step: 0, index: 0};
 
@@ -886,9 +886,11 @@ sigma.forceatlas2.Region.prototype.updateMassAndGeometry = function() {
     var massSumX = 0;
     var massSumY = 0;
     this.nodes.forEach(function(n) {
-      mass += n.fa2.mass;
-      massSumX += n.x * n.fa2.mass;
-      massSumY += n.y * n.fa2.mass;
+      if(n.fa2) {
+        mass += n.fa2.mass;
+        massSumX += n.x * n.fa2.mass;
+        massSumY += n.y * n.fa2.mass;
+      }
     });
     var massCenterX = massSumX / mass;
     massCenterY = massSumY / mass;
@@ -1082,7 +1084,7 @@ sigma.publicPrototype.stopForceAtlas2 = function() {
     var ybuffer = miny;
     for (var i in this._core.graph.nodesIndex) {
 
-      if (swMacro) {
+      if (swMacro && this._core.graph.nodesIndex[i].degree>0) {
         Nodes[i].x = this._core.graph.nodesIndex[i].x;
         Nodes[i].y = this._core.graph.nodesIndex[i].y; 
       }
@@ -1106,11 +1108,11 @@ sigma.publicPrototype.stopForceAtlas2 = function() {
     }
     // -- / UPDATING THE DEGREE --
 
-    pr("minx: "+minx)
-    pr("maxx: "+maxx)
-    pr("miny: "+miny)
-    pr("maxy: "+maxy)
-    pr("")
+    // pr("minx: "+minx)
+    // pr("maxx: "+maxx)
+    // pr("miny: "+miny)
+    // pr("maxy: "+maxy)
+    // pr("")
 
 
 };

@@ -239,7 +239,7 @@ function RefreshState(newNOW){
         }
 
         //this should be available!!
-        // EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
+        EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
         $("#semLoader").hide();
 
         $("#colorGraph").show();
@@ -264,12 +264,15 @@ function RefreshState(newNOW){
         if ( semanticConverged ) $("#semLoader").hide();
         else $("#semLoader").show();
         //this should be available!!
-        // EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
-        // NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size") 
+        EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
+        NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size") 
         $("#colorGraph").hide();
     }
     if(NOW=="AaBb"){
         LevelButtonDisable(true);
+        EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
+        EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
+        NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size") 
         $("#colorGraph").hide();
     }
 
@@ -1189,9 +1192,6 @@ function graphResetColor(){
 
 function createEdgesForExistingNodes (typeOfNodes) {
     
-
-    pr("create Edges for existing Nodes")
-    pr(partialGraph._core.graph.nodes)
 	if(typeOfNodes=="social") typeOfNodes="Scholars"
 	if(typeOfNodes=="semantic") typeOfNodes="Keywords"
 	if(typeOfNodes=="sociosemantic") typeOfNodes="Bipartite"
@@ -1298,8 +1298,6 @@ function createEdgesForExistingNodes (typeOfNodes) {
             }  
         }  
     }
-    pr("AT THE END OF createEdgesForExistingNodes")
-    pr(partialGraph._core.graph.edges)
 }
 
 function hideEverything(){

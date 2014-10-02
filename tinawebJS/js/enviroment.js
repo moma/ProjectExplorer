@@ -162,8 +162,6 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 		pr("\t\t\t\t\t\t[[ algorithm not applied "+sliderDivID+" ]]")
 		return;
 	}
-
-    pr("heeere in edge weight filter")
 	// sliderDivID = "#sliderAEdgeWeight"
 	// type = "nodes1"
 	// type_attrb = "label"
@@ -178,13 +176,11 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 	// AlgorithmForSliders ( partialGraph._core.graph.edges , "label" , "nodes2" , "weight") 
 	// AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "Document" ,  "size") 
 	// AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "NGram" ,  "size")
-    pr(partialGraph._core.graph.edges)
     var filterparams = AlgorithmForSliders ( partialGraph._core.graph.edges , type_attrb , type , criteria) 
 
-    pr("after algorithm for sliders")
     var steps = filterparams["steps"]
     var finalarray = filterparams["finalarray"]
-    pr(finalarray)
+    
     //finished
     $(sliderDivID).freshslider({
         range: true,
@@ -320,13 +316,10 @@ function NodeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 function AlgorithmForSliders( elements , type_attrb , type , criteria) {
 	// //  ( 1 )
     // // get visible sigma nodes|edges
-    pr(elements)
     elems=elements.filter(function(e) {
                 return e[type_attrb]==type;
     });
 
-    pr("nodes|edges length: "+elems.length)
-    pr(elems)
     // //  ( 2 )
     // // extract [ "edgeID" : edgeWEIGHT ] | [ "nodeID" : nodeSIZE ] 
     // // and save this into edges_weight | nodes_size
