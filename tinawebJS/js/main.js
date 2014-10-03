@@ -7,6 +7,7 @@ $( window ).resize(function() {
 });//  === / monitor windows resize === //
 
 
+mainfile = (isUndef(getUrlParam.file))?false:true;
 //  === [what to do at start] === //
 if (mainfile) {
     // http://localhost/adasd/explorerjs.html?file=data/140907Syneco.gexf
@@ -194,11 +195,26 @@ function bringTheNoise(pathfile,type){
     // < === EXTRACTING DATA === >
     if(mainfile) {
         pr("mainfile: "+mainfile)
+
+
+
 	    parse(decodeURIComponent(pathfile));
 	    if(type=="mono") {
     		onepartiteExtract(); 
     		$("#left").hide();
-	    } else if(type=="bi")  fullExtract(); 
+	    } 
+
+        if(type=="bi")  {
+
+            semanticConverged=true;
+            pr("here in fullextract")
+            fullExtract();
+            $("#closeloader").click(); 
+
+            pushSWClick("social");
+            pr(partialGraph._core.graph.nodes.length)
+            pr(partialGraph._core.graph.edges.length)
+        }
 
         partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8).draw(2,2,2);
         theListeners(); 
@@ -700,6 +716,7 @@ function SigmaLayouting( URL, DATA, NAME) {
                                 partialGraph.draw();                                
                                 EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
                                 NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size") 
+                                $("#colorGraph").hide();
                             }
     
                             console.log("Parsing and FA2 complete for SemanticGraph.");

@@ -198,6 +198,8 @@ function alertCheckBox(eventCheck){
 // AaBb: Socio-Semantic
 function RefreshState(newNOW){
 
+    pr("\t\t\tin RefreshState newNOW:_"+newNOW+"_.")
+
 	if (newNOW!="") {
 	    PAST = NOW;
 	    NOW = newNOW;
@@ -1467,11 +1469,7 @@ function changeToMeso(iwannagraph) {
                         // unHide(id);
                    }
                 }            
-                createEdgesForExistingNodes(iwannagraph);/**/
-
-                greyEverything();
-                for(var i in selections) markAsSelected(i,true);
-		        overNodes=true;     
+                createEdgesForExistingNodes(iwannagraph);/**/   
 
             }
             if(swclickPrev=="semantic") {
@@ -1493,7 +1491,7 @@ function changeToMeso(iwannagraph) {
             }
             if(swclickPrev=="sociosemantic") { 
 
-            	hideEverything();
+            	// hideEverything();
 
                 for(var i in selections) {
                     if(Nodes[i].type==catSoc){
@@ -1512,10 +1510,6 @@ function changeToMeso(iwannagraph) {
                     }
                     
                 }
-                for(var i in selections) {
-                	markAsSelected(i,true); 
-                }
-				overNodes=true; 
             }
         }
     }
@@ -1593,6 +1587,14 @@ function changeToMeso(iwannagraph) {
     // // partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
     // partialGraph.refresh();
     // partialGraph.startForceAtlas2();
+
+
+    MultipleSelection(Object.keys(selections));
+
+    // greyEverything();
+    // for(var i in selections) markAsSelected(i,true);
+    // overNodes=true;  
+
     $('.gradient').css({"background-size":"90px 90px"});
 }
 
@@ -1649,6 +1651,7 @@ function changeToMacro(iwannagraph) {
 
         for(var e in Edges) {  
             if(Edges[e].label=="nodes1" || Edges[e].label=="nodes2"){
+
                 st=e.split(";");
                 if(Edges[st[0]+";"+st[1]] && Edges[st[1]+";"+st[0]] &&
                    Edges[st[0]+";"+st[1]].hidden==true &&

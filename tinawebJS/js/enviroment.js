@@ -176,6 +176,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 	// AlgorithmForSliders ( partialGraph._core.graph.edges , "label" , "nodes2" , "weight") 
 	// AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "Document" ,  "size") 
 	// AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "NGram" ,  "size")
+    if(partialGraph._core.graph.edges.length==0) return;
     var filterparams = AlgorithmForSliders ( partialGraph._core.graph.edges , type_attrb , type , criteria) 
 
     var steps = filterparams["steps"]
@@ -258,6 +259,8 @@ function NodeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 	// AlgorithmForSliders ( partialGraph._core.graph.edges , "label" , "nodes2" , "weight") 
 	// AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "Document" ,  "size") 
 	// AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "NGram" ,  "size")
+    if(partialGraph._core.graph.nodes.length==0) return;
+    
     var filterparams = AlgorithmForSliders ( partialGraph._core.graph.nodes , type_attrb , type , criteria) 
     var steps = filterparams["steps"]
     var finalarray = filterparams["finalarray"]
