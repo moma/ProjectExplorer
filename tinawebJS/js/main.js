@@ -713,7 +713,9 @@ function SigmaLayouting( URL, DATA, NAME) {
                             $("#semLoader").hide();
                             if( NOW=="B" ) { 
                                 changeToMacro("semantic");
-                                partialGraph.draw();                                
+                                partialGraph.draw();            
+                                $("#sliderBEdgeWeight").html("");
+                                $("#sliderBNodeWeight").html("");
                                 EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
                                 NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size") 
                                 $("#colorGraph").hide();

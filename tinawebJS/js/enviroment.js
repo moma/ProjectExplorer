@@ -158,10 +158,12 @@ function justhide(){
 //	EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
 function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
-	if ($(sliderDivID).html()!="") {
-		pr("\t\t\t\t\t\t[[ algorithm not applied "+sliderDivID+" ]]")
-		return;
-	}
+	// if ($(sliderDivID).html()!="") {
+	// 	pr("\t\t\t\t\t\t[[ algorithm not applied "+sliderDivID+" ]]")
+	// 	return;
+	// }
+
+    
 	// sliderDivID = "#sliderAEdgeWeight"
 	// type = "nodes1"
 	// type_attrb = "label"
@@ -176,7 +178,22 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 	// AlgorithmForSliders ( partialGraph._core.graph.edges , "label" , "nodes2" , "weight") 
 	// AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "Document" ,  "size") 
 	// AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "NGram" ,  "size")
-    if(partialGraph._core.graph.edges.length==0) return;
+    if(partialGraph._core.graph.edges.length==0) {
+
+        pr("je suis ici et essai ca")
+        $(sliderDivID).freshslider({
+            range: true,
+            step:1,
+            value:[10, 60],
+            enabled: false,
+            onchange:function(low, high){
+                console.log(low, high);
+            }
+        });
+
+        return;
+    }
+
     var filterparams = AlgorithmForSliders ( partialGraph._core.graph.edges , type_attrb , type , criteria) 
 
     var steps = filterparams["steps"]
@@ -241,10 +258,12 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 // NodeWeightFilter ( "#sliderBNodeWeight" ,  "NGram" , "type" , "size") 
 function NodeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
-	if ($(sliderDivID).html()!="") {
-		pr("\t\t\t\t\t\t[[ algorithm not applied "+sliderDivID+" ]]")
-		return;
-	}
+	// if ($(sliderDivID).html()!="") {
+	// 	pr("\t\t\t\t\t\t[[ algorithm not applied "+sliderDivID+" ]]")
+	// 	return;
+	// }
+
+
 	// sliderDivID = "#sliderAEdgeWeight"
 	// type = "nodes1"
 	// type_attrb = "label"
@@ -259,8 +278,23 @@ function NodeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 	// AlgorithmForSliders ( partialGraph._core.graph.edges , "label" , "nodes2" , "weight") 
 	// AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "Document" ,  "size") 
 	// AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "NGram" ,  "size")
-    if(partialGraph._core.graph.nodes.length==0) return;
-    
+
+    if(partialGraph._core.graph.nodes.length==0) {
+
+        $(sliderDivID).freshslider({
+            range: true,
+            step:1,
+            value:[10, 60],
+            enabled: false,
+            onchange:function(low, high){
+                console.log(low, high);
+            }
+        });
+
+        return;
+    }
+
+
     var filterparams = AlgorithmForSliders ( partialGraph._core.graph.nodes , type_attrb , type , criteria) 
     var steps = filterparams["steps"]
     var finalarray = filterparams["finalarray"]
@@ -357,17 +391,22 @@ function AlgorithmForSliders( elements , type_attrb , type , criteria) {
     //     // pr(e[criteria])
     // }
     var N = result.length
-    var magnitude = (""+N).length //order of magnitude of edges|nodes
-    var exponent = magnitude - 1
-    var steps = Math.pow(10,exponent) //    #(10 ^ magnit-1) steps
-    var stepsize = Math.round(N/steps)// ~~(visibledges / #steps)
+    // var magnitude = (""+N).length //order of magnitude of edges|nodes
+    // var exponent = magnitude - 1
+    // var steps = Math.pow(10,exponent) //    #(10 ^ magnit-1) steps
+    // var stepsize = Math.round(N/steps)// ~~(visibledges / #steps)
 
-    // pr("-----------------------------------")
-    // pr("number of visible nodes|edges: "+N); 
-    // pr("magnitude : "+magnitude)
-    // pr("number of steps : "+steps)
-    // pr("size of one step : "+stepsize)
-    // pr("-----------------------------------")
+
+    //var roundsqrtN = Math.round( Math.sqrt( N ) );
+    var steps =  Math.round( Math.sqrt( N ) );
+    var stepsize = Math.round( N / steps );
+
+    pr("-----------------------------------")
+    pr("number of visible nodes|edges: "+N); 
+    
+    pr("number of steps : "+steps)
+    pr("size of one step : "+stepsize)
+    pr("-----------------------------------")
     
 
     var finalarray = []
