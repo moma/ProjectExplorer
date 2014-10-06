@@ -226,7 +226,7 @@ function RefreshState(newNOW){
     	// N : number of nodes
     	// k : number of ( selected nodes + their neighbors )
     	// s : number of selections
-        var N=Object.keys(partialGraph._core.graph.nodes.filter(function(n){return n.type==catSoc && !n.hidden })).length;        
+        var N=( Object.keys(Nodes).filter(function(n){return Nodes[n].type==catSoc}) ).length
         var k=Object.keys(getNeighs(Object.keys(selections),nodes1)).length
         var s=Object.keys(selections).length
         pr("in social N: "+N+" - k: "+k+" - s: "+s)
@@ -238,8 +238,7 @@ function RefreshState(newNOW){
         }
 
         if(NOW=="a") {
-            i=0; for(var s in selections) { i++; break;}
-            if(is_empty(selections) || i==0) LevelButtonDisable(false);
+            LevelButtonDisable(false);
         }
 
         $("#semLoader").hide();
@@ -248,7 +247,7 @@ function RefreshState(newNOW){
         
     }
     if(NOW=="B" || NOW=="b") {
-        var N=Object.keys(partialGraph._core.graph.nodes.filter(function(n){return n.type==catSem && !n.hidden })).length;
+        var N=( Object.keys(Nodes).filter(function(n){return Nodes[n].type==catSem}) ).length
         var k=Object.keys(getNeighs(Object.keys(selections),nodes2)).length
         var s=Object.keys(selections).length
         pr("in semantic N: "+N+" - k: "+k+" - s: "+s)
@@ -260,8 +259,7 @@ function RefreshState(newNOW){
         }
 
         if(NOW=="b") {
-            i=0; for(var s in selections) { i++; break;}
-            if(is_empty(selections) || i==0) LevelButtonDisable(false);
+            LevelButtonDisable(false);
         }
         if ( semanticConverged ) $("#semLoader").hide();
         else $("#semLoader").show();
@@ -1435,94 +1433,87 @@ function unHideElem(id){
 function changeToMeso(iwannagraph) { 
     labels=[]
     partialGraph.emptyGraph();
-    pr("changing to Meso-"+iwannagraph);  
+    pr("changing to Meso-"+iwannagraph);
     if(iwannagraph=="social") {
         if(!is_empty(selections)){
-            //hideEverything();
+            // hideEverything();
             if(swclickPrev=="social") {
 
-                // for(var i in partialGraph._core.graph.edgesIndex){
-                //     e=partialGraph._core.graph.edgesIndex[i];
-                //     if(e.color==greyColor) {
-                //         e.hidden=true;
-                //     }
-                // }
-                // for(var i in partialGraph._core.graph.nodesIndex){
-                //     n=partialGraph._core.graph.nodesIndex[i];
-                //     if(n.color==greyColor) {
-                //         n.hidden=true;
-                //     }
-                // }
-                // hideEverything();
+                var finalnodes={}
                 for(var i in selections) {
-                   unHide(i);
-                   for(var j in nodes1[i].neighbours) { 
+                   finalnodes[i]=1
+                   for(var j in nodes1[i].neighbours) {
                         id=nodes1[i].neighbours[j];
                         s = i;
                         t = id;
-                        // if(Edges[s+";"+t])
-                        //     pr(Nodes[s].label+";"+Nodes[t].label+" : lock "+Edges[s+";"+t].lock)
-                        // if(Edges[t+";"+s])
-                        //     pr(Nodes[t].label+";"+Nodes[s].label+" : lock "+Edges[t+";"+s].lock)
                         edg1 = Edges[s+";"+t];
                         if(edg1){
-                            pr(edg1.id)
+                            // pr("\tunhide "+edg1.id)
                             if(!edg1.lock){
-                                unHide(t);
+                                finalnodes[t] = 1;
                             }
                         }
                         edg2 = Edges[t+";"+s];
                         if(edg2){
-                            pr(edg2.id)
+                            // pr("\tunhide "+edg2.id)
                             if(!edg2.lock){
-                                unHide(t);
+                                finalnodes[t] = 1;
                             }
                         }
-                        
-                        // unHide(id);
                    }
-                }            
+                }
+
+                for (var Nk in finalnodes) unHide(Nk);
                 createEdgesForExistingNodes(iwannagraph);/**/   
 
             }
             if(swclickPrev=="semantic") {
+
+                var finalnodes={}
                 for(var i in selections) {
                     if(Nodes[i].type==catSem){
                         for(var j in opossites) {
-                            unHide(j);
+                            // unHide(j);
+                            finalnodes[j] = 1;
                         }
                     }
                     else {
-                        unHide(i);
+                        // unHide(i);
+                        finalnodes[i]=1;
                         neigh=nodes1[i].neighbours;
                         for(var j in neigh) {
-                            unHide(neigh[j]);
+                            // unHide(neigh[j]);
+                            finalnodes[neigh[j]] = 1;
                         }
                     }
                 }
-                createEdgesForExistingNodes(iwannagraph);
+                for (var Nk in finalnodes) unHide(Nk);
+                createEdgesForExistingNodes(iwannagraph);/**/   
             }
             if(swclickPrev=="sociosemantic") { 
 
-            	// hideEverything();
+                var finalnodes={}
 
                 for(var i in selections) {
                     if(Nodes[i].type==catSoc){
-                        unHide(i);
+                        // unHide(i);
+                        finalnodes[i] = 1;
                         for(var j in nodes1[i].neighbours) { 
                             id=nodes1[i].neighbours[j];
-                            unHide(id);
+                            // unHide(id);
+                            finalnodes[id] = 1;
                         }
-                        createEdgesForExistingNodes(iwannagraph);
+                        // createEdgesForExistingNodes(iwannagraph);
                     }
                     if(Nodes[i].type==catSem){
                         for(var j in opossites) {
-                            unHide(j);
+                            // unHide(j);
+                            finalnodes[j] = 1;
                         }
-                        createEdgesForExistingNodes(iwannagraph);
                     }
-                    
                 }
+                for (var Nk in finalnodes) unHide(Nk);
+                createEdgesForExistingNodes(iwannagraph);
             }
         }
         
@@ -1532,7 +1523,7 @@ function changeToMeso(iwannagraph) {
 
     if(iwannagraph=="sociosemantic") {
         if(!is_empty(selections) && !is_empty(opossites)){
-            hideEverything();
+            // hideEverything();
             for(var i in selections) {
                 unHide(i);
             }
@@ -1545,61 +1536,73 @@ function changeToMeso(iwannagraph) {
             socsemFlag=true;
         }
         
-        EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
-        NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size") 
-        EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
+        // EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
+        // NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size") 
+        // EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
         $("#colorGraph").hide();
     }
      
     if(iwannagraph=="semantic") {
         if(!is_empty(opossites)){
-            hideEverything()
+            // hideEverything()
             //pr("2. swclickPrev: "+swclickPrev+" - swclickActual: "+swclickActual);
+
+            var finalnodes = {}
             if(swclickPrev=="semantic") {
                 for(var i in selections) {
-                    unHide(i);
+                    // unHide(i);
+                    finalnodes[i] = 1;
                     neigh=nodes2[i].neighbours;
                     for(var j in neigh) {
-                        unHide(neigh[j]);
+                        // unHide(neigh[j]);
+                        finalnodes[neigh[j]] = 1;
                     }
                 }
+                for (var Nk in finalnodes) unHide(Nk);
                 createEdgesForExistingNodes(iwannagraph);
             }
-            if(swclickPrev=="social") {                
+            if(swclickPrev=="social") {  
+                var finalnodes = {}          
                 for(var i in selections) {
                     if(Nodes[i].type==catSoc){
                         for(var j in opossites) {
-                            unHide(j);
+                            // unHide(j);
+                            finalnodes[j] = 1;
                         }
-                    }
-                    else {
-                        unHide(i);
+                    } else {
+                        // unHide(i);
+                        finalnodes[i] = 1;
                         neigh=nodes2[i].neighbours;
                         for(var j in neigh) {
-                            unHide(neigh[j]);
+                            // unHide(neigh[j]);
+                            finalnodes[neigh[j]] = 1;
                         }
                     }
                 }
+                for (var Nk in finalnodes) unHide(Nk);
                 createEdgesForExistingNodes(iwannagraph);
             }
-            if(swclickPrev=="sociosemantic") {                     
+            if(swclickPrev=="sociosemantic") {
+                var finalnodes = {}                     
                 for(var i in selections) {
                     if(Nodes[i].type==catSoc){                        
                         for(var j in opossites) {
-                            unHide(j);
+                            // unHide(j);
+                            finalnodes[i] = 1;
                         }
-                        createEdgesForExistingNodes(iwannagraph);
-                        break;
                     }
                     if(Nodes[i].type==catSem){                        
-                        unHide(i);//sneaky bug!
+                        // unHide(i);//sneaky bug!
+                        finalnodes[i] = 1;
                         for(var j in nodes2[i].neighbours) { 
                             id=nodes2[i].neighbours[j];
-                            unHide(id);
+                            // unHide(id);
+                            finalnodes[id] = 1;
                         }
-                        createEdgesForExistingNodes(iwannagraph);
                     }
-                }                
+                }  
+                for (var Nk in finalnodes) unHide(Nk);
+                createEdgesForExistingNodes(iwannagraph);              
             }
         }
         
@@ -1607,32 +1610,8 @@ function changeToMeso(iwannagraph) {
         NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size") 
         $("#colorGraph").hide();
     }
-    // highlightSelectedNodes(true); 
-    // partialGraph.draw();
-    // // partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
-    // partialGraph.refresh();
-    // partialGraph.startForceAtlas2();
-
-
-
-
 
     MultipleSelection(Object.keys(selections));
-
-
-
-
-
-
-
-
-
-
-
-
-    // greyEverything();
-    // for(var i in selections) markAsSelected(i,true);
-    // overNodes=true;  
 
     $('.gradient').css({"background-size":"90px 90px"});
 }
@@ -1745,7 +1724,6 @@ function changeToMacro(iwannagraph) {
     // partialGraph.draw();
     // // partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
     // partialGraph.refresh();
-    // partialGraph.startForceAtlas2();
     $('.gradient').css({"background-size":"40px 40px"});
 }
 

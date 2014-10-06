@@ -81,9 +81,6 @@ function sigmaLimits(){
 
 function bringTheNoise(pathfile,type){
     
-    pr("printing the pathfile:")
-    pr(pathfile)
-
     $("#semLoader").hide();
     $('#modalloader').modal('show');
     //  === get width and height   === //
@@ -95,11 +92,8 @@ function bringTheNoise(pathfile,type){
     .graphProperties(sigmaJsGraphProperties)
     .mouseProperties(sigmaJsMouseProperties);
 
-    otherGraph = sigma.init(document.getElementById('sigma-othergraph'))
-    // .drawingProperties(sigmaJsDrawingProperties)
-    // .graphProperties(sigmaJsGraphProperties)
-    // .mouseProperties(sigmaJsMouseProperties);
-
+    //dummy graph (semantic layouting in background)
+    otherGraph = sigma.init(document.getElementById('sigma-othergraph'));
 
     //  ===  resize topbar and tweakbar  === //
     var body=document.getElementsByTagName('body')[0];
@@ -284,8 +278,8 @@ function theListeners(){
     $.ui.autocomplete.prototype._renderItem = function(ul, item) {
         var searchVal = $("#searchinput").val();
         var desc = extractContext(item.desc, searchVal);
-        pr("desc:")
-        pr(desc)
+        // pr("desc:")
+        // pr(desc)
         return $('<li onclick=\'var s = "'+item.label+'"; search(s);$("#searchinput").val(strSearchBar);\'></li>')
         .data('item.autocomplete', item)
         .append("<a><span class=\"labelresult\">" + item.label + "</span></a>" )
@@ -456,7 +450,7 @@ function theListeners(){
                     if(is_empty(actualSel) || i==0){ 
                         pr("cursor radius ON, mouseDown -> selecciones vacias"); 
                         cancelSelection(false);                
-                        LevelButtonDisable(true);
+                        
                         //                        $("#names").html("");
                         //                        $("#opossiteNodes").html("");
                         //                        $("#information").html("");

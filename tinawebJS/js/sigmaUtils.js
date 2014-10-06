@@ -1,3 +1,5 @@
+
+//for socialgraph
 function showMeSomeLabels(N){
         /*======= Show some labels at the beginning =======*/
         minIn=50,
@@ -112,6 +114,7 @@ function exactfind(label) {
     return null;
 }
 
+//to general utils (not used btw)
 function cloneObject(source) {
     for (i in source) {
         if (typeof source[i] == 'source') {
@@ -284,7 +287,8 @@ function calculateFull(hex) {
     return [r,g,b];
 }
 
-  // function for calculating 3 letters hex value
+
+// function for calculating 3 letters hex value
 function calculatePartial(hex) {
     var r = parseInt(hex.substring(0, 1) + hex.substring(0, 1), 16);
     var g = parseInt(hex.substring(1, 2) + hex.substring(1, 2), 16);

@@ -12,14 +12,15 @@ function changeType() {
 	        pushSWClick("semantic");
 	        RefreshState("B")
         } else {
-
+            //From soc* to SocSem
             if(is_empty(selections)) {
-
+                //soc to SocSem
                 changeToMacro("semantic");
                 pushSWClick("semantic");
                 RefreshState("B")
 
             } else {
+                //soc* to SocSem
                 changeToMeso("sociosemantic");
                 pushSWClick("sociosemantic");
                 RefreshState("AaBb")
@@ -246,7 +247,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
                 partialGraph.refresh()
                 partialGraph.draw()
-                fa2enabled=true; partialGraph.startForceAtlas2()
+                // fa2enabled=true; partialGraph.startForceAtlas2()
                 // });
             }
             
