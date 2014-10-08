@@ -281,6 +281,7 @@ function onepartiteExtract(){
                             
         }
     }
+    $("#closeloader").click();
 }
 
 function fullExtract(){
@@ -448,6 +449,8 @@ function fullExtract(){
         if(Nodes[i].type==catSoc) partialGraph.addNode(i,nodeK);  
     }
     
+
+    //Edges
     var edgeId = 0;
     var edgesNodes = gexf.getElementsByTagName('edges');
     for(i=0; i<edgesNodes.length; i++){
@@ -462,8 +465,7 @@ function fullExtract(){
             target = (Nodes["D::"+target])? ("D::"+target):("N::"+target)
 
             var indice=source+";"+target;
-
-            // pr(indice)
+            
                 
             var edge = {
                 id:         indice,
@@ -598,6 +600,7 @@ function fullExtract(){
 
         }
     }
+    $("#closeloader").click();
 }
     
 

@@ -280,7 +280,7 @@ function pushSWClick(arg){
 
 // it receives entire node
 function selection(currentNode){
-    pr("\t***in selection()");
+    // pr("\t***in selection()");
     if(checkBox==false && cursor_size==0) {
         highlightSelectedNodes(false);
         opossites = [];
@@ -415,7 +415,7 @@ function selection(currentNode){
 }
 
 function getOpossitesNodes(node_id, entireNode) {
-    pr("\tin getOpossitesNodes");
+    // pr("\tin getOpossitesNodes");
     node="";    
     if(entireNode==true) node=node_id;
     else node = partialGraph._core.graph.nodesIndex[node_id];
@@ -1442,24 +1442,26 @@ function changeToMeso(iwannagraph) {
                 var finalnodes={}
                 for(var i in selections) {
                    finalnodes[i]=1
-                   for(var j in nodes1[i].neighbours) {
-                        id=nodes1[i].neighbours[j];
-                        s = i;
-                        t = id;
-                        edg1 = Edges[s+";"+t];
-                        if(edg1){
-                            // pr("\tunhide "+edg1.id)
-                            if(!edg1.lock){
-                                finalnodes[t] = 1;
+                   if(nodes1[i]) {
+                       for(var j in nodes1[i].neighbours) {
+                            id=nodes1[i].neighbours[j];
+                            s = i;
+                            t = id;
+                            edg1 = Edges[s+";"+t];
+                            if(edg1){
+                                // pr("\tunhide "+edg1.id)
+                                if(!edg1.lock){
+                                    finalnodes[t] = 1;
+                                }
                             }
-                        }
-                        edg2 = Edges[t+";"+s];
-                        if(edg2){
-                            // pr("\tunhide "+edg2.id)
-                            if(!edg2.lock){
-                                finalnodes[t] = 1;
+                            edg2 = Edges[t+";"+s];
+                            if(edg2){
+                                // pr("\tunhide "+edg2.id)
+                                if(!edg2.lock){
+                                    finalnodes[t] = 1;
+                                }
                             }
-                        }
+                       }
                    }
                 }
 
@@ -1480,10 +1482,12 @@ function changeToMeso(iwannagraph) {
                     else {
                         // unHide(i);
                         finalnodes[i]=1;
-                        neigh=nodes1[i].neighbours;
-                        for(var j in neigh) {
-                            // unHide(neigh[j]);
-                            finalnodes[neigh[j]] = 1;
+                        if(nodes1[i]) {
+                            neigh=nodes1[i].neighbours;
+                            for(var j in neigh) {
+                                // unHide(neigh[j]);
+                                finalnodes[neigh[j]] = 1;
+                            }
                         }
                     }
                 }
@@ -1498,10 +1502,12 @@ function changeToMeso(iwannagraph) {
                     if(Nodes[i].type==catSoc){
                         // unHide(i);
                         finalnodes[i] = 1;
-                        for(var j in nodes1[i].neighbours) { 
-                            id=nodes1[i].neighbours[j];
-                            // unHide(id);
-                            finalnodes[id] = 1;
+                        if(nodes1[i]) {
+                            for(var j in nodes1[i].neighbours) { 
+                                id=nodes1[i].neighbours[j];
+                                // unHide(id);
+                                finalnodes[id] = 1;
+                            }
                         }
                         // createEdgesForExistingNodes(iwannagraph);
                     }
@@ -1552,10 +1558,12 @@ function changeToMeso(iwannagraph) {
                 for(var i in selections) {
                     // unHide(i);
                     finalnodes[i] = 1;
-                    neigh=nodes2[i].neighbours;
-                    for(var j in neigh) {
-                        // unHide(neigh[j]);
-                        finalnodes[neigh[j]] = 1;
+                    if(nodes2[i]) {
+                        neigh=nodes2[i].neighbours;
+                        for(var j in neigh) {
+                            // unHide(neigh[j]);
+                            finalnodes[neigh[j]] = 1;
+                        }
                     }
                 }
                 for (var Nk in finalnodes) unHide(Nk);
@@ -1572,10 +1580,12 @@ function changeToMeso(iwannagraph) {
                     } else {
                         // unHide(i);
                         finalnodes[i] = 1;
-                        neigh=nodes2[i].neighbours;
-                        for(var j in neigh) {
-                            // unHide(neigh[j]);
-                            finalnodes[neigh[j]] = 1;
+                        if(nodes2[i]) {
+                            neigh=nodes2[i].neighbours;
+                            for(var j in neigh) {
+                                // unHide(neigh[j]);
+                                finalnodes[neigh[j]] = 1;
+                            }
                         }
                     }
                 }
@@ -1594,10 +1604,12 @@ function changeToMeso(iwannagraph) {
                     if(Nodes[i].type==catSem){                        
                         // unHide(i);//sneaky bug!
                         finalnodes[i] = 1;
-                        for(var j in nodes2[i].neighbours) { 
-                            id=nodes2[i].neighbours[j];
-                            // unHide(id);
-                            finalnodes[id] = 1;
+                        if(nodes2[i]) {
+                            for(var j in nodes2[i].neighbours) { 
+                                id=nodes2[i].neighbours[j];
+                                // unHide(id);
+                                finalnodes[id] = 1;
+                            }
                         }
                     }
                 }  
@@ -1654,8 +1666,10 @@ function changeToMacro(iwannagraph) {
                 unHide(n);
             }                
         } // and semantic edges
-
         createEdgesForExistingNodes(iwannagraph);
+
+        if(iwannagraph=="social") showMeSomeLabels(6);
+        swMacro=true;
 
         if (!is_empty(selections))
         	$.doTimeout(10,function (){

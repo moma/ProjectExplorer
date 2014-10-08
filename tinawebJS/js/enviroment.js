@@ -57,9 +57,16 @@ function changeType() {
 	        pushSWClick("sociosemantic");
 	        RefreshState("AaBb")
     	} else {
-	        pushSWClick(swclickPrev);
-        	changeToMeso(swclickActual);
-        	RefreshState(PAST)
+
+            if(is_empty(selections)) {
+                changeToMacro(swclickPrev);
+                pushSWClick(swclickPrev);
+                RefreshState(PAST.toUpperCase())
+            } else {
+                pushSWClick(swclickPrev);
+                changeToMeso(swclickActual);
+                RefreshState(PAST)
+            }
     	}
         // if(swMacro) {
         // 	changeToMacro("semantic");
@@ -227,7 +234,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                             // partialGraph._core.graph.edgesIndex[ID].lock=false;
                             // partialGraph._core.graph.edgesIndex[ID].hidden=false;
                             add1Edge(ID)
-                            Edges[ID].lock = false;
+                            // Edges[ID].lock = false;
                         }
                     } else {
                         for(var id in ids) {
@@ -235,7 +242,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                             // partialGraph._core.graph.edgesIndex[ID].lock=true;
                             // partialGraph._core.graph.edgesIndex[ID].hidden=true;
                             partialGraph.dropEdge(ID)
-                            Edges[ID].lock = true;
+                            // Edges[ID].lock = true;
                         }
                     }
                 }

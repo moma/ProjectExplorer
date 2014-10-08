@@ -83,6 +83,11 @@ function bringTheNoise(pathfile,type){
     
     $("#semLoader").hide();
     $('#modalloader').modal('show');
+
+
+    // $('.selectpicker').selectpicker();
+
+
     //  === get width and height   === //
     sigmaLimits();
     

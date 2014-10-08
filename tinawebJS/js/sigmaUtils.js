@@ -175,13 +175,16 @@ function getClientTime(){
 
 function getCountries(){
     var nodes = getVisibleNodes();
+    
     var countries = {}
     pr("in getCountries")
     for(var i in nodes) {
+        theid = nodes[i].id;
         // pr(i)
-        // pr(nodes[i].id+" : "+nodes[i].attr["CC"]+" , "+nodes[i].attr["ACR"])
-        if (nodes[i].attr["CC"]!="-")
-            countries[nodes[i].attr["CC"]]=1
+        // pr(Nodes[theid])
+        // pr(theid+" : "+Nodes[theid].attr["CC"]+" , "+nodes[i].attr["ACR"])
+        if (Nodes[theid]["CC"]!="-")
+            countries[Nodes[theid]["CC"]]=1
         // pr("")
     }
     return Object.keys(countries);
@@ -193,10 +196,11 @@ function getAcronyms() {
     var acrs = {}
     pr("in getAcronyms")
     for(var i in nodes) {
+        theid = nodes[i].id;
         // pr(i)
         // pr(nodes[i].id+" : "+nodes[i].attr["CC"]+" , "+nodes[i].attr["ACR"])
-        if (nodes[i].attr["ACR"]!="-")
-            acrs[nodes[i].attr["ACR"]]=1
+        if (Nodes[theid]["ACR"]!="-")
+            acrs[Nodes[theid]["ACR"]]=1
         // pr("")
     }
     return ( Object.keys(acrs) );
@@ -221,7 +225,7 @@ function clustersBy(daclass) {
         colorList.sort(function(){ return Math.random()-0.5; }); 
         // pr(colorList);
         for(var i in nodes) {
-            cc = nodes[i].attr["CC"]
+            cc = Nodes[nodes[i].id]["CC"]
             if( !isUndef( cc ) && cc!="-" ) {
                 nodes[i].color = colorList[ CCxID[cc] ];
             }
@@ -246,7 +250,7 @@ function clustersBy(daclass) {
         colorList.sort(function(){ return Math.random()-0.5; }); 
         // pr(colorList);
         for(var i in nodes) {
-            cc = nodes[i].attr["ACR"]
+            cc = Nodes[nodes[i].id]["ACR"]
             if( !isUndef( cc ) && cc!="-" ) {
                 nodes[i].color = colorList[ CCxID[cc] ];
             }
@@ -294,4 +298,13 @@ function calculatePartial(hex) {
     var g = parseInt(hex.substring(1, 2) + hex.substring(1, 2), 16);
     var b = parseInt(hex.substring(2, 3) + hex.substring(2, 3), 16);
     return [r,g,b];
+}
+
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+
+function rgbToHex(r, g, b) {
+    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
