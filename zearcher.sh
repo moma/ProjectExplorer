@@ -27,11 +27,11 @@ function testing {
 
 #Searching for the word "Magic"
 function test2 {
-	iter=`find . -name '*.js' -print`
+	iter=`find . -name '*.php' -print`
 	for f in $iter
 	do
 		filename=`echo $f | sed s/"\.\/"//g`
-		variable=`cat $filename | grep "semanticConverged"`
+		variable=`cat $filename | grep "community.db"`
 		if [[ "$variable" != "" ]]
 		then
 			echo $filename

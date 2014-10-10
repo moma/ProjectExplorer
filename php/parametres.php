@@ -5,7 +5,7 @@ list de parametres.
  */
 
 //$dbname='/home/jbilcke/databases/scholar_test_data.db';
-$dbname='community.db';
+$dbname='community_fixed.db';
 //$dbname='scholar_test_data.db';
 
 //$scholars_db ="raw_scholars";
