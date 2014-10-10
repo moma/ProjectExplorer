@@ -109,7 +109,7 @@ function is_empty(obj) {
 }
 
 //obsolete
-function returnBaseUrl(){
+function returnBaseUrl() {
     origin = window.location.origin;
     nameOfHtml=window.location.pathname.substring(window.location.pathname.lastIndexOf('/')+1);
     pathname = window.location.pathname.replace(nameOfHtml,"");
@@ -205,17 +205,17 @@ function RefreshState(newNOW){
 	if (newNOW!="") {
 	    PAST = NOW;
 	    NOW = newNOW;
-		$("#category-A").hide();
-		$("#category-B").hide();  
 		
-		if(NOW=="a" || NOW=="A" || NOW=="AaBb") {
-			$("#category-A").show();
-		}
-		if(NOW=="b" || NOW=="B" || NOW=="AaBb") {
-			$("#category-B").show();
-		}
+		// if(NOW=="a" || NOW=="A" || NOW=="AaBb") {
+		// 	$("#category-A").show();
+		// }
+		// if(NOW=="b" || NOW=="B" || NOW=="AaBb") {
+		// 	$("#category-B").show();
+		// }
 	}
 
+    $("#category-A").hide();
+    $("#category-B").hide();  
     // i=0; for(var s in selections) { i++; break;}
     // if(is_empty(selections) || i==0) LevelButtonDisable(true);
     // else LevelButtonDisable(false);
@@ -242,7 +242,7 @@ function RefreshState(newNOW){
         }
 
         $("#semLoader").hide();
-
+        $("#category-A").show();
         $("#colorGraph").show();
         
     }
@@ -261,11 +261,21 @@ function RefreshState(newNOW){
         if(NOW=="b") {
             LevelButtonDisable(false);
         }
-        if ( semanticConverged ) $("#semLoader").hide();
-        else $("#semLoader").show();
+        if ( semanticConverged ) {
+            $("#semLoader").hide();
+            $("#category-B").show();
+            $.doTimeout(30,function (){
+                EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
+                NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size");
+                
+            });
+        } else $("#semLoader").show();
+
     }
     if(NOW=="AaBb"){
         LevelButtonDisable(true);
+        $("#category-A").show();
+        $("#category-B").show();
     }
 
     partialGraph.draw();
@@ -1338,9 +1348,9 @@ function hideEverything(){
 }
 
 function unHide(id){
-	// i've received a NODE
+	
     if(id.split(";").length==1) {
-
+    // i've received a NODE
         if(Nodes[id]) {
             var anode = ({
                 id:id,
@@ -1348,13 +1358,16 @@ function unHide(id){
                 size: Nodes[id].size, 
                 x: Nodes[id].x, 
                 y: Nodes[id].y,
+                hidden:  (Nodes[id].lock)?true:false,
                 type: Nodes[id].type,
                 color: Nodes[id].color,
                 shape: Nodes[id].shape
             });  // The graph node
 
-            updateSearchLabels(id,Nodes[id].label,Nodes[id].type);
-            nodeslength++;
+            if(!Nodes[id].lock) {
+                updateSearchLabels(id,Nodes[id].label,Nodes[id].type);
+                nodeslength++;
+            }
             
             partialGraph.addNode(id,anode);
             return;
@@ -1362,8 +1375,7 @@ function unHide(id){
     }
     else {// It's an edge!
         //visibleEdges.push(id);
-        if(Edges[id]){
-
+        if(Edges[id] && !Edges[id].lock){
 
             var anedge = {
                 id:         id,
@@ -1396,15 +1408,19 @@ function add1Edge(ID) {
         weight: Edges[ID].weight,
         hidden : false
     };
-    partialGraph.addEdge(ID,s,t,edge);
-    
-    if(!isUndef(getn(s))) {
-        partialGraph._core.graph.nodesIndex[s].x = Nodes[s].x
-        partialGraph._core.graph.nodesIndex[s].y = Nodes[s].y
-    }
-    if(!isUndef(getn(t))) {
-        partialGraph._core.graph.nodesIndex[t].x = Nodes[t].x
-        partialGraph._core.graph.nodesIndex[t].y = Nodes[t].y
+
+    if(getn(s) && getn(t)) {
+
+        partialGraph.addEdge(ID,s,t,edge);
+        
+        if(!isUndef(getn(s))) {
+            partialGraph._core.graph.nodesIndex[s].x = Nodes[s].x
+            partialGraph._core.graph.nodesIndex[s].y = Nodes[s].y
+        }
+        if(!isUndef(getn(t))) {
+            partialGraph._core.graph.nodesIndex[t].x = Nodes[t].x
+            partialGraph._core.graph.nodesIndex[t].y = Nodes[t].y
+        }   
     }
 }
 
@@ -1523,7 +1539,7 @@ function changeToMeso(iwannagraph) {
             }
         }
         
-        EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
+        // EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
         $("#colorGraph").show();
     }
 
@@ -1618,12 +1634,14 @@ function changeToMeso(iwannagraph) {
             }
         }
         
-        EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
-        NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size") 
+        // EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
+        // NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size") 
         $("#colorGraph").hide();
     }
 
     MultipleSelection(Object.keys(selections));
+
+    fa2enabled=true; partialGraph.startForceAtlas2();
 
     $('.gradient').css({"background-size":"90px 90px"});
 }
@@ -1646,9 +1664,8 @@ function changeToMacro(iwannagraph) {
     if ( iwannagraph=="semantic" && !semanticConverged ) {
 
         partialGraph.draw();
-        // partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
         partialGraph.refresh();
-        // partialGraph.startForceAtlas2();
+        
         $("#semLoader").show();
 
         return;
@@ -1714,22 +1731,22 @@ function changeToMacro(iwannagraph) {
     $.doTimeout(30,function (){
 
         if(iwannagraph=="social") {
-            EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
+            // EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
             $("#colorGraph").show();      
         }
 
         if(iwannagraph=="semantic") {
-            EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
-            NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size") 
+            // EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
+            // NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size") 
             $("#colorGraph").hide();              
         
             
         }
 
         if(iwannagraph=="sociosemantic") {
-            EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
-            NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size") 
-            EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
+            // EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
+            // NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size") 
+            // EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
             $("#colorGraph").hide();        
         }
     });

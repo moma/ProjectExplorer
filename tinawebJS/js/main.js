@@ -713,10 +713,10 @@ function SigmaLayouting( URL, DATA, NAME) {
                             if( NOW=="B" ) { 
                                 changeToMacro("semantic");
                                 partialGraph.draw();            
-                                $("#sliderBEdgeWeight").html("");
-                                $("#sliderBNodeWeight").html("");
-                                EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
-                                NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size") 
+                                // $("#sliderBEdgeWeight").html("");
+                                // $("#sliderBNodeWeight").html("");
+                                // EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
+                                // NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size");
                                 $("#colorGraph").hide();
                             }
     

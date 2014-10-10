@@ -166,10 +166,10 @@ function justhide(){
 //	EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
 function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
-	// if ($(sliderDivID).html()!="") {
-	// 	pr("\t\t\t\t\t\t[[ algorithm not applied "+sliderDivID+" ]]")
-	// 	return;
-	// }
+	if ($(sliderDivID).html()!="") {
+		pr("\t\t\t\t\t\t[[ algorithm not applied "+sliderDivID+" ]]")
+		return;
+	}
 
     
 	// sliderDivID = "#sliderAEdgeWeight"
@@ -181,6 +181,8 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 	// type = "NGram"
 	// type_attrb = "type"
 	// criteria = "size"
+
+
 
 	// AlgorithmForSliders ( partialGraph._core.graph.edges , "label" , "nodes1" , "weight") 
 	// AlgorithmForSliders ( partialGraph._core.graph.edges , "label" , "nodes2" , "weight") 
@@ -233,8 +235,17 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                             ID = ids[id]
                             // partialGraph._core.graph.edgesIndex[ID].lock=false;
                             // partialGraph._core.graph.edgesIndex[ID].hidden=false;
-                            add1Edge(ID)
-                            // Edges[ID].lock = false;
+                            Edges[ID].lock = false;
+                            for (var n in partialGraph._core.graph.nodesIndex) {
+                                sid = Edges[ID].sourceID
+                                tid = Edges[ID].targetID
+                                if (sid==n || tid==n) {
+                                    if(isUndef(getn(sid))) unHide(sid)
+                                    if(isUndef(getn(tid))) unHide(tid)
+                                    add1Edge(ID)
+                                }
+                            }
+                            
                         }
                     } else {
                         for(var id in ids) {
@@ -242,7 +253,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                             // partialGraph._core.graph.edgesIndex[ID].lock=true;
                             // partialGraph._core.graph.edgesIndex[ID].hidden=true;
                             partialGraph.dropEdge(ID)
-                            // Edges[ID].lock = true;
+                            Edges[ID].lock = true;
                         }
                     }
                 }
@@ -254,7 +265,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
                 partialGraph.refresh()
                 partialGraph.draw()
-                // fa2enabled=true; partialGraph.startForceAtlas2()
+                fa2enabled=true; partialGraph.startForceAtlas2()
                 // });
             }
             
@@ -266,10 +277,10 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 // NodeWeightFilter ( "#sliderBNodeWeight" ,  "NGram" , "type" , "size") 
 function NodeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
-	// if ($(sliderDivID).html()!="") {
-	// 	pr("\t\t\t\t\t\t[[ algorithm not applied "+sliderDivID+" ]]")
-	// 	return;
-	// }
+	if ($(sliderDivID).html()!="") {
+		pr("\t\t\t\t\t\t[[ algorithm not applied "+sliderDivID+" ]]")
+		return;
+	}
 
 
 	// sliderDivID = "#sliderAEdgeWeight"
@@ -324,17 +335,19 @@ function NodeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                     return false
                 }
                 // $.doTimeout(300,function (){
-
+                // pr(finalarray)
                 for(var i in finalarray) {
                     ids = finalarray[i]
                     if(i>=low && i<=high){
                         for(var id in ids) {
                             ID = ids[id]
+                            Nodes[ID].lock = false;
                             partialGraph._core.graph.nodesIndex[ID].hidden = false;
                         }
                     } else {
                         for(var id in ids) {
                             ID = ids[id]
+                            Nodes[ID].lock = true;
                             partialGraph._core.graph.nodesIndex[ID].hidden = true;
                         }                     
                     }
@@ -346,7 +359,7 @@ function NodeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
                 partialGraph.refresh()
                 partialGraph.draw()
-                // });
+                fa2enabled=true; partialGraph.startForceAtlas2()
             }
             
         }
