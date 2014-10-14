@@ -454,7 +454,8 @@ function theListeners(){
                     
                     if(is_empty(actualSel) || i==0){ 
                         pr("cursor radius ON, mouseDown -> selecciones vacias"); 
-                        cancelSelection(false);                
+                        cancelSelection(false);   
+
                         
                         //                        $("#names").html("");
                         //                        $("#opossiteNodes").html("");
@@ -474,6 +475,7 @@ function theListeners(){
                 }      
                 
                 partialGraph.draw();
+                trackMouse();    
                 
 
             }

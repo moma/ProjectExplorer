@@ -15,15 +15,13 @@ include('countries_iso3166.php');
 
 $sql="";
 $table="scholars";
-$column="norm_country";
+$column="country";
 $query = str_replace( '__and__', '&', $_GET["query"] );
 $query = str_replace( 'D::', '', $query );
 $elems = json_decode($query);
 
 $unique_id = "";
 $scholar_array = array();
-
-
 
 $singularnick= "scholar";
 $pluralnick = "scholars";
@@ -59,7 +57,7 @@ if(count($elems)==1){
                 $elems = array();
                 foreach($scholar_array as $key=>$value){
                     
-                    array_push($elems, utf8_decode($key));
+                    array_push($elems, $key);
                 }
             }
             break;
@@ -70,22 +68,40 @@ if(count($elems)==1){
 
 
 $norm_country = array();
+$InvIndCC = array();
+
+$directory = '.';
+
+if (! is_dir($directory)) {
+    exit('Invalid diretory path');
+}
+foreach (scandir($directory) as $file) {
+    if ('.' === $file) continue;
+    if ('..' === $file) continue;
+    if(pathinfo($file, PATHINFO_EXTENSION)=="txt") {
+        extractIndexes( $file );
+    }
+}
 
 if($selectiveQuery){
     $countries_temp=array();
     foreach($elems as $e){
         $sql="SELECT ".$column." FROM ".$table." where id=".$e;
         if($unique_id!="")
-            $sql="SELECT ".$column." FROM ".$table." where unique_id=\"".$e."\"";
-        
+            $sql="SELECT ".$column." FROM ".$table." where unique_id=\"".$e."\"";        
+
+        // echo $sql."\n";
 
         foreach ($base->query($sql) as $row) {
-            
-            if($countries_temp[$row[$column]]) $countries_temp[$row[$column]]+=1;
-            else $countries_temp[$row[$column]]=1;
+            $cc = $InvIndCC [ $row[$column] ];
+            // echo "\t".$row[$column]."\n";
+            if($countries_temp[$cc]) $countries_temp[$cc]+=1;
+            else $countries_temp[$cc]=1;
         }
     }
     arsort($countries_temp);
+
+    // var_dump($countries_temp);
 
     foreach ($countries_temp as $key => $value) {
         $code = strtoupper($key);        
@@ -205,6 +221,7 @@ if($selectiveQuery){
     }
 }
 
+
 $occToCC = array();
 foreach ($norm_country as $c) {
     if (!$occToCC[$c["value"]]) {
@@ -212,9 +229,6 @@ foreach ($norm_country as $c) {
     }
     array_push($occToCC[$c["value"]], $c["code"]);
 }
-
-
-
 
 krsort($occToCC);
 $countries_occ_DESC = array();
@@ -330,6 +344,29 @@ function getDivisors($mainpath,$dbnam,$table,$column){
 
 function pr($msg) {
     echo $msg . "\n";
+}
+
+function extractIndexes( $dictname ) {    
+
+    $myfile = fopen($dictname, "r");
+
+    global $InvIndCC;
+
+    while(!feof($myfile)) {
+
+        $line = fgets($myfile);
+
+        $line = str_replace("\n","",$line);
+
+        $raw = array_filter( explode("\t", $line) , "strlen" );
+      
+        foreach ($raw as $key=>$value) {
+            if($key>0) {
+                $InvIndCC[$value] = $raw[0];
+            }
+        }
+    }
+    fclose($myfile);
 }
 
 ?>

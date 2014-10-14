@@ -2,7 +2,7 @@
  * Customize as you want ;)
  */
 function callGeomap(){
-    db=JSON.stringify('php/community_fixed.db');
+    db=JSON.stringify('php/community.db');
     if(is_empty(selections)){
         // jsonparams='["all"]';
         jsonparams='["unique_id"]&unique_id='+getUrlParam.nodeidparam;
