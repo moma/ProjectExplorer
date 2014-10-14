@@ -88,6 +88,9 @@ function initiateMap(db,query,submodName){
                         attrsHover : {
                             fill: onHover, //Country on Hover
                             animDuration : 300
+                        },
+                        eventHandlers: {
+                            dblclick: function(e, id, mapElem, textElem){console.log(id); console.log(partialGraph)}
                         }
                     },			
                     afterInit : function($self, paper, areas, plots, options) {
@@ -202,6 +205,7 @@ function initiateMap(db,query,submodName){
 			
                 return false;
             });
+
         },
         error: function(){ 
             console.log("Page Not found.");

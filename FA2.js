@@ -15,7 +15,7 @@ var ForceAtlas2 = function(graph) {
     jitterTolerance: 1,
     barnesHutOptimize: false,
     barnesHutTheta: 1.2,
-    speed: 1,
+    speed: 20,
     outboundAttCompensation: 1,
     totalSwinging: 0,
     swingVSnode1: 0,
