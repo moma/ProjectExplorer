@@ -90,7 +90,13 @@ function initiateMap(db,query,submodName){
                             animDuration : 300
                         },
                         eventHandlers: {
-                            dblclick: function(e, id, mapElem, textElem){console.log(id); console.log(partialGraph)}
+                            dblclick: function(e, id, mapElem, textElem) {
+                                        console.log(id); 
+                                        console.log(partialGraph)
+                                        $.doTimeout(30,function (){
+                                            $("#closegeomap").click();
+                                        });
+                                      }
                         }
                     },			
                     afterInit : function($self, paper, areas, plots, options) {
