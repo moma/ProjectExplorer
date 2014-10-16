@@ -10,6 +10,7 @@ foreach($db as $d){
         break;
     } 
 }
+if($mainpath=="//") $mainpath="";
 //$dbname=$db[0];//getDB($mainpath);//'homework-20750-1-homework-db.db';;
 $base = new PDO("sqlite:" .$mainpath.$db);
 $max_item_displayed=6;
