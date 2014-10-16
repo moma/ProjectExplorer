@@ -10,10 +10,12 @@ foreach($db as $d){
         break;
     } 
 }
+
 if($mainpath=="//") $mainpath="";
+if ( is_array($db) ) $db = $db[0];
 
 //$dbname=$db[0];//getDB($mainpath);//'homework-20750-1-homework-db.db';;
-$base = new PDO("sqlite:" .$mainpath.$db)  or die("cannot open the database");
+$base = new PDO("sqlite:" .$mainpath.$db);
 
 $max_item_displayed=6;
 

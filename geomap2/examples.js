@@ -91,11 +91,12 @@ function initiateMap(db,query,submodName){
                         },
                         eventHandlers: {
                             dblclick: function(e, id, mapElem, textElem) {
-                                        console.log(id); 
-                                        console.log(partialGraph)
-                                        $.doTimeout(30,function (){
-                                            $("#closegeomap").click();
-                                        });
+                                        if(mapElem.originalAttrs.fill!="#FFFFFF") {
+                                            $.doTimeout(200,function (){
+                                                $("#closegeomap").click();
+                                                clickInCountry(id);
+                                            });
+                                        }
                                       }
                         }
                     },			

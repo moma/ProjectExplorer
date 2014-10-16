@@ -153,6 +153,23 @@ function getNeighs(sels,arr){
 }//It returns an array not a dict!
 
 
+//Using bipartiteN2D or bipartiteD2N
+//This receives an array not a dict!
+function getNeighs2(sels,arr){ 
+    neighDict={};
+    for(var i in sels) {
+        id = sels[i]
+        if(!isUndef(arr[id])) {
+            A=arr[id].neighbours;
+            for(var j in A){
+                neighDict[A[j]]=1
+            }
+            // neighDict[id]=1;
+        }
+    }    
+    return Object.keys(neighDict);
+}//It returns an array not a dict!
+
 //to general utils
 function getArrSubkeys(arr,id) {
     var result = []

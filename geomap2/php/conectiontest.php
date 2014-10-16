@@ -27,9 +27,9 @@ echo "sqlite:" .$mainpath.$db."\n";
 echo "sqlite:" ."../../community.db";
 
 //$dbname=$db[0];//getDB($mainpath);//'homework-20750-1-homework-db.db';;
-$base = new PDO("sqlite:" ."/var/www/adasd/community.db");
+$base = new PDO("sqlite:" .$db);
 
-echo "succeed?\n";
+echo "succeed\n";
 
 $max_item_displayed=6;
 

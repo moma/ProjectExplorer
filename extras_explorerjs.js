@@ -62,6 +62,35 @@ function callGeomap(){
     // $("#CurrentView").hide();
 }
 
+
+function clickInCountry( CC ) {
+    pr("in extras.js: you've clicked "+CC)
+    var results = []
+    
+    for(var i in Nodes) {
+        if( !isUndef(Nodes[i].CC) && Nodes[i].CC==CC) results.push(i)
+    }
+
+    
+    $.doTimeout(20,function (){
+
+        if(swclickActual=="social") {
+            MultipleSelection(results);
+            return;
+        }
+
+        if(swclickActual=="semantic") {
+            var oposresults = getNeighs2( results , bipartiteD2N );
+            MultipleSelection(oposresults);
+            return;
+        }
+        
+    });
+    
+
+
+}
+
 function callTWJS(){
     //    db=getCurrentDBforCurrentGexf();
     //    db=JSON.stringify(db);
