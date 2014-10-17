@@ -721,6 +721,10 @@ function extractFromJson(data,seed){
                 nodes1[source].neighbours.push(target);
                 nodes1[target].neighbours.push(source);
 
+                // social edges = 1
+                Edges[indice].weight = 1;
+                edge.weight = 1;
+
                 partialGraph.addEdge(indice,source,target,edge);
             }
             
