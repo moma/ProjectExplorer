@@ -600,6 +600,10 @@ function theListeners(){
 
 }
 
+
+// extractFromJson()
+//      Social Spatialization
+//          Semantic Spatialization
 function SigmaLayouting( URL, DATA, NAME) {
 
     return $.ajax({
@@ -713,13 +717,17 @@ function SigmaLayouting( URL, DATA, NAME) {
                             semanticConverged = true;
                             $("#semLoader").hide();
                             if( NOW=="B" ) { 
+
+                                pr("i made a modification")
                                 changeToMacro("semantic");
                                 partialGraph.draw();            
                                 // $("#sliderBEdgeWeight").html("");
                                 // $("#sliderBNodeWeight").html("");
-                                // EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
-                                // NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size");
+                                $("#category-B").show();
                                 $("#colorGraph").hide();
+                                EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
+                                NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size");
+                                
                             }
     
                             console.log("Parsing and FA2 complete for SemanticGraph.");

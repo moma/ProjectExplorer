@@ -190,7 +190,6 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 	// AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "NGram" ,  "size")
     if(partialGraph._core.graph.edges.length==0) {
 
-        pr("je suis ici et essai ca")
         $(sliderDivID).freshslider({
             range: true,
             step:1,
@@ -217,57 +216,61 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
         bgcolor: (type=="nodes1")?"#27c470":"#FFA500" ,
         max:steps-1,
         value:[0,steps-1],
-        onchange:function(low, high){    
-            var filtervalue = low+"-"+high
-            
-            if(filtervalue!=lastFilter[sliderDivID]) {
-                if(lastFilter[sliderDivID]=="-") {
-                    pushFilterValue( sliderDivID , filtervalue )
-                    return false
-                }
-                // $.doTimeout(300,function (){
+        onchange:function(low, high) {
 
-                partialGraph.stopForceAtlas2()
-                for(var i in finalarray) {
-                    ids = finalarray[i]
-                    if(i>=low && i<=high){
-                        for(var id in ids) {                            
-                            ID = ids[id]
-                            // partialGraph._core.graph.edgesIndex[ID].lock=false;
-                            // partialGraph._core.graph.edgesIndex[ID].hidden=false;
-                            Edges[ID].lock = false;
-                            for (var n in partialGraph._core.graph.nodesIndex) {
-                                sid = Edges[ID].sourceID
-                                tid = Edges[ID].targetID
-                                if (sid==n || tid==n) {
-                                    if(isUndef(getn(sid))) unHide(sid)
-                                    if(isUndef(getn(tid))) unHide(tid)
-                                    add1Edge(ID)
+            $.doTimeout(300,function () {
+
+                var filtervalue = low+"-"+high
+                
+                if(filtervalue!=lastFilter[sliderDivID]) {
+                    if(lastFilter[sliderDivID]=="-") {
+                        pushFilterValue( sliderDivID , filtervalue )
+                        return false
+                    }
+                    
+
+                    partialGraph.stopForceAtlas2()
+                    for(var i in finalarray) {
+                        ids = finalarray[i]
+                        if(i>=low && i<=high){
+                            for(var id in ids) {                            
+                                ID = ids[id]
+                                // partialGraph._core.graph.edgesIndex[ID].lock=false;
+                                // partialGraph._core.graph.edgesIndex[ID].hidden=false;
+                                Edges[ID].lock = false;
+                                for (var n in partialGraph._core.graph.nodesIndex) {
+                                    sid = Edges[ID].sourceID
+                                    tid = Edges[ID].targetID
+                                    if (sid==n || tid==n) {
+                                        if(isUndef(getn(sid))) unHide(sid)
+                                        if(isUndef(getn(tid))) unHide(tid)
+                                        add1Edge(ID)
+                                    }
                                 }
+                                
                             }
-                            
-                        }
-                    } else {
-                        for(var id in ids) {
-                            ID = ids[id]
-                            // partialGraph._core.graph.edgesIndex[ID].lock=true;
-                            // partialGraph._core.graph.edgesIndex[ID].hidden=true;
-                            partialGraph.dropEdge(ID)
-                            Edges[ID].lock = true;
+                        } else {
+                            for(var id in ids) {
+                                ID = ids[id]
+                                // partialGraph._core.graph.edgesIndex[ID].lock=true;
+                                // partialGraph._core.graph.edgesIndex[ID].hidden=true;
+                                partialGraph.dropEdge(ID)
+                                Edges[ID].lock = true;
+                            }
                         }
                     }
+                    pushFilterValue(sliderDivID,filtervalue)
+
+                    if (!is_empty(selections))
+                        DrawAsSelectedNodes(selections)
+
+
+                    partialGraph.refresh()
+                    partialGraph.draw()
+                    fa2enabled=true; partialGraph.startForceAtlas2()
+                    // });
                 }
-                pushFilterValue(sliderDivID,filtervalue)
-
-                if (!is_empty(selections))
-                    DrawAsSelectedNodes(selections)
-
-
-                partialGraph.refresh()
-                partialGraph.draw()
-                fa2enabled=true; partialGraph.startForceAtlas2()
-                // });
-            }
+            });//doTimeout
             
         }
     });

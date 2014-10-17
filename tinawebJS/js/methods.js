@@ -1393,7 +1393,12 @@ function unHide(id){
 }
 
 function pushFilterValue(filtername,arg){
+    pr("%%%%%%%%%%%%%%%%%%%%%%%%%%")
+    pr(lastFilter)
+    pr("pushFilterValue ( "+filtername+" , "+arg+" )")
 	lastFilter[filtername] = arg;
+    pr(lastFilter)
+    pr("%%%%%%%%%%%%%%%%%%%%%%%%%%")
 }
 
 function add1Edge(ID) {	
