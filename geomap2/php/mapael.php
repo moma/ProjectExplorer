@@ -38,7 +38,8 @@ if(count($elems)==1){
             $unique_id = $_GET["unique_id"];
 
             if($unique_id) {
-                $sql = "SELECT keywords_ids FROM scholars where unique_id='" . $unique_id . "'";
+                $unique_id = str_replace( 'D::', '', $unique_id );
+                $sql = "SELECT keywords_ids FROM scholars where id='" . $unique_id . "'";
                 #pt($sql);
                 foreach ($base->query($sql) as $row) {
                     $keywords_ids = split(',', $row['keywords_ids']);
@@ -64,8 +65,6 @@ if(count($elems)==1){
         }
     }
 }
-
-
 
 $norm_country = array();
 $InvIndCC = array();

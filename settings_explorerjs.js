@@ -9,6 +9,7 @@ var getAdditionalInfo=false;//for topPapers div
 var mainfile=false;
 var dataFolderTree = {};
 var gexfDict={};
+var egonode = {}
 
 var bridge={};
 external="";

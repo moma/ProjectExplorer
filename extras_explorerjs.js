@@ -5,7 +5,7 @@ function callGeomap(){
     db=JSON.stringify('community.db');
     if(is_empty(selections)){
         // jsonparams='["all"]';
-        jsonparams='["unique_id"]&unique_id='+getUrlParam.nodeidparam;
+        jsonparams='["unique_id"]&unique_id='+egonode[getUrlParam.nodeidparam];
     } else {
 
         N=getNodesByAtt(catSoc).length;
@@ -64,14 +64,13 @@ function callGeomap(){
 
 
 function clickInCountry( CC ) {
-    pr("in extras.js: you've clicked "+CC)
+    // pr("in extras.js: you've clicked "+CC)
     var results = []
     
     for(var i in Nodes) {
         if( !isUndef(Nodes[i].CC) && Nodes[i].CC==CC) results.push(i)
     }
 
-    
     $.doTimeout(20,function (){
 
         if(swclickActual=="social") {
@@ -84,11 +83,8 @@ function clickInCountry( CC ) {
             MultipleSelection(oposresults);
             return;
         }
-        
+
     });
-    
-
-
 }
 
 function callTWJS(){

@@ -618,6 +618,8 @@ function extractFromJson(data,seed){
     labels = [];
     numberOfDocs=0;
     numberOfNGrams=0;
+
+    for (var uid in data.ID) egonode[uid] = data.ID[uid]
     
     categories[catSoc]=catSoc;
     categories[catSem]=catSem;

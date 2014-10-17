@@ -325,3 +325,10 @@ function componentToHex(c) {
 function rgbToHex(r, g, b) {
     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
+
+//just for fun
+function makeEdgeWeightUndef() {
+    for(var e in partialGraph._core.graph.edges) {
+        partialGraph._core.graph.edges[e].weight=1;
+    }
+}
