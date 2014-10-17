@@ -52,6 +52,7 @@ var stopcriteria = false;
 var iterationsFA2=1000;
 var seed=999999999;//defaultseed
 var semanticConverged=false;
+var isolatedBCauseFilter = 0;
 
 
 var showLabelsIfZoom=2.0;

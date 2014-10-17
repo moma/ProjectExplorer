@@ -1,4 +1,18 @@
 
+function draw1Circle(ctx , x , y , color) {    
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 1;
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.5;
+
+    ctx.beginPath();
+    ctx.arc(x, y, 10, 0, Math.PI * 2, true);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+}
+
+
 function trackMouse() {
     if(!shift_key) {
         // $.doTimeout(300,function (){
