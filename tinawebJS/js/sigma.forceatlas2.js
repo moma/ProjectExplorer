@@ -9,6 +9,22 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
   var self = this;
   this.graph = graph;
   this.count=0;
+  this.isolated=0;
+  this.stepDeg = 0;
+
+  this.minx=1000.0;
+  this.maxx=0.0;
+  this.miny=1000.0;
+  this.maxy=0.0;
+
+  this.Ox = 0.0;//(this.minx+self.maxx)/2;
+  this.Oy = 0.0;//(self.miny+self.maxy)/2;
+  this.Px = 0.0;
+  this.Py = 0.0;
+
+  this.firstit = true;
+
+  this.R = 100;
 
   this.p = {
     linLogMode: false,
@@ -38,14 +54,28 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
   // Runtime (the ForceAtlas2 itself)
   this.init = function() {
 
+    self.firstit = true;
+    self.isolated=0;
     // console.log("#Nodes: "+V)
     // console.log("#Edges: "+E)
 
     self.state = {step: 0, index: 0};
 
+    // calc dimensions of connected subgraphs
+    self.minx=1000.0;
+    self.maxx=0.0;
+    self.miny=1000.0;
+    self.maxy=0.0;
+
+
     self.graph.nodes.forEach(function(n) {
 
      if(n.degree>0) {
+
+      if(n.x < self.minx) self.minx = n.x
+      if(n.x > self.maxx) self.maxx = n.x
+      if(n.y < self.miny) self.miny = n.y
+      if(n.y > self.maxy) self.maxy = n.y
 
       n.fa2 = {
         mass: 1 + n.degree,
@@ -55,9 +85,11 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
         dy: 0
       };
 
-     }
+     } else self.isolated++;
 
     });
+
+    self.stepDeg = 2/parseFloat(self.isolated);
 
     return self;
   }
@@ -78,6 +110,21 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
       case 0: // Pass init
         // Initialise layout data
         self.count++;
+
+
+        if( self.firstit ) {
+          self.Ox = (self.minx+self.maxx)/2;
+          self.Oy = (self.miny+self.maxy)/2;
+
+          self.Px = self.minx;
+          self.Py = self.miny;
+
+
+          self.R = Math.sqrt( Math.pow((self.Ox-self.Px), 2) + Math.pow((self.Oy-self.Py), 2) );
+          self.R = self.R * 1.2;
+        }
+
+        var mult = 1;
         nodes.forEach(function(n) {
 
          if(n.degree>0) {
@@ -98,9 +145,20 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
             };
           }
 
+         } else {
+          
+          if( self.firstit ) {
+            n.x = self.Ox + self.R*Math.cos(Math.PI*self.stepDeg*mult);
+            n.y = self.Oy + self.R*Math.sin(Math.PI*self.stepDeg*mult);
+
+            mult++;
+          }
+
          }
          
         });
+
+        self.firstit = false ;
 
         // If Barnes Hut active, initialize root region
         if (self.p.barnesHutOptimize) {
@@ -310,6 +368,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
       case 5: // Apply forces
         var i = self.state.index;
         if (self.p.adjustSizes) {
+          pr("en este caso");
           var speed = self.p.speed;
           // If nodes overlap prevention is active,
           // it's not possible to trust the swinging mesure.
@@ -336,26 +395,84 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
               n.y += n.fa2.dy * factor;
             }
           }
-        } else {
-          var speed = self.p.speed;
-          while (i < nodes.length && i < self.state.index + sInt) {
-            var n = nodes[i++];
-            var fixed = n.fixed || false;
-            if (!fixed && !n.hidden && n.degree>0 && n.fa2) {
-              // Adaptive auto-speed: the speed of each node is lowered
-              // when the node swings.
-              var swinging = Math.sqrt(
-                (n.fa2.old_dx - n.fa2.dx) *
-                (n.fa2.old_dx - n.fa2.dx) +
-                (n.fa2.old_dy - n.fa2.dy) *
-                (n.fa2.old_dy - n.fa2.dy)
-              );
-              var factor = speed / (1 + speed * Math.sqrt(swinging));
 
-              n.x += n.fa2.dx * factor;
-              n.y += n.fa2.dy * factor;
+          
+            if(self.count%50 == 0) {
+              nodes.forEach(function(n) {
+                if(n.degree>0) {
+                  if(n.x < self.minx) self.minx = n.x
+                  if(n.x > self.maxx) self.maxx = n.x
+                  if(n.y < self.miny) self.miny = n.y
+                  if(n.y > self.maxy) self.maxy = n.y
+                }
+              });
+              self.Ox = (self.minx+self.maxx)/2;
+              self.Oy = (self.miny+self.maxy)/2;
+              self.Px = self.minx;
+              self.Py = self.miny;
+              self.R = Math.sqrt( Math.pow((self.Ox-self.Px), 2) + Math.pow((self.Oy-self.Py), 2) );
+              self.R = self.R * 1.2;
+              var mult = 1;
+              nodes.forEach(function(n) {
+                if(n.degree==0) {
+                  n.x = self.Ox + self.R*Math.cos(Math.PI*self.stepDeg*mult);
+                  n.y = self.Oy + self.R*Math.sin(Math.PI*self.stepDeg*mult);
+                  mult++;
+                }
+              });
             }
-          }
+
+
+
+
+
+        } else {
+            var speed = self.p.speed;
+            while (i < nodes.length && i < self.state.index + sInt) {
+              var n = nodes[i++];
+              var fixed = n.fixed || false;
+              if (!fixed && !n.hidden && n.degree>0 && n.fa2) {
+                // Adaptive auto-speed: the speed of each node is lowered
+                // when the node swings.
+                var swinging = Math.sqrt(
+                  (n.fa2.old_dx - n.fa2.dx) *
+                  (n.fa2.old_dx - n.fa2.dx) +
+                  (n.fa2.old_dy - n.fa2.dy) *
+                  (n.fa2.old_dy - n.fa2.dy)
+                );
+                var factor = speed / (1 + speed * Math.sqrt(swinging));
+
+                n.x += n.fa2.dx * factor;
+                n.y += n.fa2.dy * factor;
+              }
+            }
+
+
+            if(self.count%50 == 0) {
+              nodes.forEach(function(n) {
+                if(n.degree>0) {
+                  if(n.x < self.minx) self.minx = n.x
+                  if(n.x > self.maxx) self.maxx = n.x
+                  if(n.y < self.miny) self.miny = n.y
+                  if(n.y > self.maxy) self.maxy = n.y
+                }
+              });
+              self.Ox = (self.minx+self.maxx)/2;
+              self.Oy = (self.miny+self.maxy)/2;
+              self.Px = self.minx;
+              self.Py = self.miny;
+              self.R = Math.sqrt( Math.pow((self.Ox-self.Px), 2) + Math.pow((self.Oy-self.Py), 2) );
+              self.R = self.R * 1.2;
+              var mult = 1;
+              nodes.forEach(function(n) {
+                if(n.degree==0) {
+                  n.x = self.Ox + self.R*Math.cos(Math.PI*self.stepDeg*mult);
+                  n.y = self.Oy + self.R*Math.sin(Math.PI*self.stepDeg*mult);
+                  mult++;
+                }
+              });
+            }
+
         }
 
         if (i == nodes.length) {
@@ -993,6 +1110,7 @@ sigma.publicPrototype.startForceAtlas2 = function() {
   //if(!this.forceatlas2) {
   if(fa2enabled) {
 
+  /*
   isolatedBCauseFilter = 0;
 
   for (var i in this._core.graph.nodesIndex) {
@@ -1001,6 +1119,13 @@ sigma.publicPrototype.startForceAtlas2 = function() {
       isolatedBCauseFilter++;
     }
   }
+  */
+
+
+
+
+
+
 
     // // -- UPDATING THE DEGREE --
     // for (var i in this._core.graph.nodesIndex) {
@@ -1081,6 +1206,7 @@ sigma.publicPrototype.stopForceAtlas2 = function() {
   partialGraph.refresh();
   if(minimap) $("#overviewzone").show();
 
+  /*
 
   // calc dimensions of connected subgraphs
   minx=1000.0;
@@ -1153,6 +1279,8 @@ sigma.publicPrototype.stopForceAtlas2 = function() {
       mult++;
     }
   }
+
+  */
 
 
 };

@@ -228,8 +228,8 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                         return false
                     }
                     
+                    // partialGraph.stopForceAtlas2();
 
-                    // partialGraph.stopForceAtlas2()
                     for(var i in finalarray) {
                         ids = finalarray[i]
                         if(i>=low && i<=high){
@@ -267,9 +267,13 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
                     partialGraph.refresh()
                     partialGraph.draw()
-                    // fa2enabled=true; partialGraph.startForceAtlas2()
+
+                    // $.doTimeout(300,function(){
+                    //     fa2enabled=true; partialGraph.startForceAtlas2();
                     // });
+
                 }
+
             });//doTimeout
             
         }
@@ -339,6 +343,9 @@ function NodeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                 }
                 // $.doTimeout(300,function (){
                 // pr(finalarray)
+
+                partialGraph.stopForceAtlas2();
+
                 for(var i in finalarray) {
                     ids = finalarray[i]
                     if(i>=low && i<=high){
@@ -362,6 +369,11 @@ function NodeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
                 partialGraph.refresh()
                 partialGraph.draw()
+
+                $.doTimeout(300,function(){
+                    fa2enabled=true; partialGraph.startForceAtlas2();
+                });
+
                 // fa2enabled=true; partialGraph.startForceAtlas2()
             }
             
