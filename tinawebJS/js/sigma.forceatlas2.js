@@ -1110,16 +1110,26 @@ sigma.publicPrototype.startForceAtlas2 = function() {
   //if(!this.forceatlas2) {
   if(fa2enabled) {
 
-  /*
-  isolatedBCauseFilter = 0;
 
-  for (var i in this._core.graph.nodesIndex) {
-    if(this._core.graph.nodesIndex[i].degree==0) {
-      this._core.graph.nodesIndex[i].hidden=true;
-      isolatedBCauseFilter++;
+    pr("\t\t\t\t\tFA2 Started")
+  
+
+    var ene = this._core.graph.nodes.length;
+    var isolatedBCauseFilter = 0;
+
+    for (var i in this._core.graph.nodesIndex) {
+      if(this._core.graph.nodesIndex[i].degree==0) isolatedBCauseFilter++;
     }
-  }
-  */
+  
+
+    pr("|||||||||| probando una cosa super loca")
+    pr("|||||||||| isolatedBCauseFilter "+isolatedBCauseFilter)
+    pr("|||||||||| ene "+ene)
+    pr("isolatedBCauseFilter==ene   = "+(isolatedBCauseFilter==ene))
+    if(isolatedBCauseFilter==ene) {
+      partialGraph.stopForceAtlas2();
+      return;
+    }
 
 
 
@@ -1200,11 +1210,16 @@ sigma.publicPrototype.startForceAtlas2 = function() {
 };
 
 sigma.publicPrototype.stopForceAtlas2 = function() {
+
+  pr("\t\t\t\t\tFA2 Stopped")
   fa2enabled=false;
   this.removeGenerator('forceatlas2');
   updateMap();
   partialGraph.refresh();
   if(minimap) $("#overviewzone").show();
+
+
+
 
   /*
 
