@@ -31,7 +31,7 @@ function test2 {
 	for f in $iter
 	do
 		filename=`echo $f | sed s/"\.\/"//g`
-		variable=`cat $filename | grep "pushFilterValue"`
+		variable=`cat $filename | grep "fa2enabled"`
 		if [[ "$variable" != "" ]]
 		then
 			echo $filename

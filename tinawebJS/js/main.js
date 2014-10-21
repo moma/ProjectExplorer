@@ -262,7 +262,6 @@ function theListeners(){
     pr("in THELISTENERS");
     // leftPanel("close");
     $("#closeloader").click();//modal.hide doesnt work :c
-    //    startForceAtlas2(partialGraph._core.graph);r(
 
     cancelSelection(false);        
     $("#tips").html(getTips());
@@ -373,7 +372,7 @@ function theListeners(){
         partialGraph.position(0,0,1);
         partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
         partialGraph.refresh();
-        partialGraph.startForceAtlas2();
+        // partialGraph.startForceAtlas2();
     });
     
     $('#sigma-example').dblclick(function(event) {
@@ -513,12 +512,26 @@ function theListeners(){
     });
     
     $("#edgesButton").click(function () {
-        if(!fa2enabled){
-            fa2enabled=true;
-            partialGraph.startForceAtlas2();
+
+        pr("click en #edgesButton")
+        pr(partialGraph.forceatlas2)
+        fa2enabled=true;
+        if(!isUndef(partialGraph.forceatlas2)) {
+
+            if(partialGraph.forceatlas2.active) {
+                partialGraph.stopForceAtlas2();
+                partialGraph.draw();
+                return;
+            } else {
+                partialGraph.startForceAtlas2();
+                return;
+            }
+
         } else {
-            partialGraph.stopForceAtlas2();
+            partialGraph.startForceAtlas2();
+            return;
         }
+        
     });
     
 

@@ -9,6 +9,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
   var self = this;
   this.graph = graph;
   this.count=0;
+  this.active = false;
   this.isolated=0;
   this.stepDeg = 0;
 
@@ -108,6 +109,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
 
     switch (self.state.step) {
       case 0: // Pass init
+        // pr("case0 - "+"the self.count: "+self.count)
         // Initialise layout data
         self.count++;
 
@@ -182,6 +184,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
         break;
 
       case 1: // Repulsion
+        // pr("case1 - "+"the self.count: "+self.count)
         var Repulsion = self.ForceFactory.buildRepulsion(
           self.p.adjustSizes,
           self.p.scalingRatio
@@ -226,6 +229,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
         break;
 
       case 2: // Gravity
+        // pr("case2 - "+"the self.count: "+self.count)
         var Gravity = (self.p.strongGravityMode) ?
                       (self.ForceFactory.getStrongGravity(
                         self.p.scalingRatio
@@ -255,6 +259,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
         break;
 
       case 3: // Attraction
+        // pr("case3 - "+"the self.count: "+self.count)
         var Attraction = self.ForceFactory.buildAttraction(
           self.p.linLogMode,
           self.p.outboundAttractionDistribution,
@@ -302,6 +307,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
         break;
 
       case 4: // Auto adjust speed
+        // pr("case4 - "+"the self.count: "+self.count)
         var totalSwinging = 0;  // How much irregular movement
         var totalEffectiveTraction = 0;  // Hom much useful movement
         var swingingSum=0;
@@ -366,9 +372,9 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
         break;
 
       case 5: // Apply forces
+        // pr("case5 - "+"the self.count: "+self.count)
         var i = self.state.index;
         if (self.p.adjustSizes) {
-          pr("en este caso");
           var speed = self.p.speed;
           // If nodes overlap prevention is active,
           // it's not possible to trust the swinging mesure.
@@ -397,7 +403,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
           }
 
           
-            if(self.count%50 == 0) {
+            if(self.isolated>0 && self.count%50 == 0) {
               nodes.forEach(function(n) {
                 if(n.degree>0) {
                   if(n.x < self.minx) self.minx = n.x
@@ -421,10 +427,6 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
                 }
               });
             }
-
-
-
-
 
         } else {
             var speed = self.p.speed;
@@ -448,7 +450,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
             }
 
 
-            if(self.count%50 == 0) {
+            if(self.isolated>0 && self.count%50 == 0) {
               nodes.forEach(function(n) {
                 if(n.degree>0) {
                   if(n.x < self.minx) self.minx = n.x
@@ -475,14 +477,21 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
 
         }
 
+        // pr("\t in case 5, i="+i+" | nbnodes="+nodes.length)
+        // pr("\tstate index: "+self.state.index)
+        // pr("\tthe self.count: "+self.count)
+
         if (i == nodes.length) {
           self.state.step = 0;
           self.state.index = 0;
+          // pr("\t\tafter the thing")
           return false;
         } else {
           self.state.index = i;
+          // pr("else state index: "+self.state.index)
           return true;
         }
+
         break;
 
       default:
@@ -495,8 +504,6 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
     this.graph.nodes.forEach(function(n) {
       n.fa2 = null;
     });
-    pr("#nodes: "+V);
-    pr("#edges: "+E);
   }
 
   // Auto Settings
@@ -1111,30 +1118,6 @@ sigma.publicPrototype.startForceAtlas2 = function() {
   if(fa2enabled) {
 
 
-    pr("\t\t\t\t\tFA2 Started")
-  
-
-    var ene = this._core.graph.nodes.length;
-    var isolatedBCauseFilter = 0;
-
-    for (var i in this._core.graph.nodesIndex) {
-      if(this._core.graph.nodesIndex[i].degree==0) isolatedBCauseFilter++;
-    }
-  
-
-    pr("|||||||||| probando una cosa super loca")
-    pr("|||||||||| isolatedBCauseFilter "+isolatedBCauseFilter)
-    pr("|||||||||| ene "+ene)
-    pr("isolatedBCauseFilter==ene   = "+(isolatedBCauseFilter==ene))
-    if(isolatedBCauseFilter==ene) {
-      partialGraph.stopForceAtlas2();
-      return;
-    }
-
-
-
-
-
 
 
     // // -- UPDATING THE DEGREE --
@@ -1199,21 +1182,67 @@ sigma.publicPrototype.startForceAtlas2 = function() {
     var V = 10;
     var E = 100;
 
+    if(partialGraph.forceatlas2)
+        pr("t=8: in startfa2 : forceatlas2.active = "+partialGraph.forceatlas2.active)
+
     this.forceatlas2 = new sigma.forceatlas2.ForceAtlas2(this._core.graph , V, E);
     this.forceatlas2.setAutoSettings();
+
+
     this.forceatlas2.init();
+
+    if(partialGraph.forceatlas2)
+        pr("t=9: in startfa2 : forceatlas2.active = "+partialGraph.forceatlas2.active)
+
+    this.forceatlas2.active=true;
+    pr("\t\t\t\t\tFA2 Started")
+    var ene = this._core.graph.nodes.length;
+    var isolatedBCauseFilter = 0;
+    for (var i in this._core.graph.nodesIndex) {
+      if(this._core.graph.nodesIndex[i].degree==0) isolatedBCauseFilter++;
+    }
+
+    if(partialGraph.forceatlas2)
+        pr("t=10: in startfa2 : forceatlas2.active = "+partialGraph.forceatlas2.active)
+
+    pr("|||||||||| isolatedBCauseFilter "+isolatedBCauseFilter)
+    pr("|||||||||| ene "+ene)
+    pr("isolatedBCauseFilter==ene   = "+(isolatedBCauseFilter==ene))
+    if(isolatedBCauseFilter==ene) {
+      partialGraph.stopForceAtlas2();
+      return;
+    } 
+
+
     $("#overviewzone").hide();
+
     this.addGenerator('forceatlas2', this.forceatlas2.atomicGo, function(){
       return true;
     });
+
+    pr(getClientTime()+"\tjust before addGenerator | fa2.active:"+partialGraph.forceatlas2.active+" | fa2.count: "+partialGraph.forceatlas2.count);
+
+
+    $.doTimeout(250,function (){
+      pr(getClientTime()+"\tjust after addGenerator | fa2.active:"+partialGraph.forceatlas2.active+" | fa2.count: "+partialGraph.forceatlas2.count);
+
+      if( partialGraph.forceatlas2.active && partialGraph.forceatlas2.count==0 ) {
+        pr("SUPER TECHNIQUE")
+        partialGraph.startForceAtlas2();
+        return;
+      }
+
+    });
+    
   }
 };
 
 sigma.publicPrototype.stopForceAtlas2 = function() {
 
   pr("\t\t\t\t\tFA2 Stopped")
-  fa2enabled=false;
   this.removeGenerator('forceatlas2');
+  this.forceatlas2.active=false;
+  this.forceatlas2.count=0;
   updateMap();
   partialGraph.refresh();
   if(minimap) $("#overviewzone").show();

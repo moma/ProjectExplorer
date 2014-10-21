@@ -4,7 +4,7 @@
 
 function changeType() {
     pr("***swclickActual:"+swclickActual+" , swMacro:"+swMacro)
-    partialGraph.stopForceAtlas2();
+    // partialGraph.stopForceAtlas2();
     
     if(swclickActual=="social") {
         if(swMacro) {
@@ -89,7 +89,7 @@ function changeLevel() {
     bf=swclickActual
     pushSWClick(swclickActual);
     pr("swMacro: "+swMacro+" - [swclickPrev: "+bf+"] - [swclickActual: "+swclickActual+"]")
-    partialGraph.stopForceAtlas2();
+    // partialGraph.stopForceAtlas2();
     // ANALIZING CURRENT STATE:
     if(swMacro){
         // Macro Level  --  swMacro:true
@@ -341,10 +341,8 @@ function NodeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                     pushFilterValue( sliderDivID , filtervalue )
                     return false
                 }
-                // $.doTimeout(300,function (){
-                // pr(finalarray)
 
-                partialGraph.stopForceAtlas2();
+                // partialGraph.stopForceAtlas2();
 
                 for(var i in finalarray) {
                     ids = finalarray[i]
@@ -370,9 +368,9 @@ function NodeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                 partialGraph.refresh()
                 partialGraph.draw()
 
-                $.doTimeout(300,function(){
-                    fa2enabled=true; partialGraph.startForceAtlas2();
-                });
+                // $.doTimeout(300,function(){
+                //     fa2enabled=true; partialGraph.startForceAtlas2();
+                // });
 
                 // fa2enabled=true; partialGraph.startForceAtlas2()
             }

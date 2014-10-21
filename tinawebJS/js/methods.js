@@ -1370,7 +1370,6 @@ function unHide(id){
             }
             
             partialGraph.addNode(id,anode);
-            pr(partialGraph._core.graph.nodesIndex[id].displayX)
             return;
         }
     }
@@ -1449,8 +1448,12 @@ function unHideElem(id){
 
 function changeToMeso(iwannagraph) { 
     labels=[]
-    partialGraph.stopForceAtlas2();
+
+    // partialGraph.stopForceAtlas2();
     partialGraph.emptyGraph();
+
+    if(partialGraph.forceatlas2)
+        pr("t=2: in empty graph : forceatlas2.active = "+partialGraph.forceatlas2.active)
     pr("changing to Meso-"+iwannagraph);
     if(iwannagraph=="social") {
         if(!is_empty(selections)){
@@ -1546,7 +1549,12 @@ function changeToMeso(iwannagraph) {
     }
 
     if(iwannagraph=="sociosemantic") {
+
+        if(partialGraph.forceatlas2)
+            pr("t=3: in empty graph : forceatlas2.active = "+partialGraph.forceatlas2.active)
         if(!is_empty(selections) && !is_empty(opossites)){
+
+            pr("ESTOY DENTRO DE SOCIOSEMANTIC!!!")
             // hideEverything();
             for(var i in selections) {
                 unHide(i);
@@ -1556,7 +1564,13 @@ function changeToMeso(iwannagraph) {
                 unHide(i);
             }
                 
+            if(partialGraph.forceatlas2)
+                pr("t=4: in empty graph : forceatlas2.active = "+partialGraph.forceatlas2.active)
             createEdgesForExistingNodes(iwannagraph);
+
+
+            if(partialGraph.forceatlas2)
+                pr("t=5: in empty graph : forceatlas2.active = "+partialGraph.forceatlas2.active)
             socsemFlag=true;
         }
         
@@ -1564,6 +1578,10 @@ function changeToMeso(iwannagraph) {
         // NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size") 
         // EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
         $("#colorGraph").hide();
+
+        if(partialGraph.forceatlas2)
+            pr("t=6: in empty graph : forceatlas2.active = "+partialGraph.forceatlas2.active)
+
     }
      
     if(iwannagraph=="semantic") {
@@ -1641,9 +1659,13 @@ function changeToMeso(iwannagraph) {
         $("#colorGraph").hide();
     }
 
-    MultipleSelection(Object.keys(selections));
+    if(partialGraph.forceatlas2)
+        pr("t=7: in empty graph : forceatlas2.active = "+partialGraph.forceatlas2.active)
 
     fa2enabled=true; partialGraph.startForceAtlas2();
+    
+    MultipleSelection(Object.keys(selections));
+
 
     $('.gradient').css({"background-size":"90px 90px"});
 }
@@ -1651,17 +1673,8 @@ function changeToMeso(iwannagraph) {
 function changeToMacro(iwannagraph) {
     labels=[]
     pr("CHANGING TO Macro-"+iwannagraph);
-    
-    // pr("BEFORE cancelSelection()")
-    // for(var i in partialGraph._core.graph.nodesIndex) {
-    //     pr(partialGraph._core.graph.nodesIndex[i].id+" : "+partialGraph._core.graph.nodesIndex[i].color+"  <=>  "+Nodes[i].id+" : "+Nodes[i].color)
-    //     pr(partialGraph._core.graph.nodesIndex[i])
-    //     pr("")
-    // }
-    // pr("--------------------------------------------------------------------------------")
 
-
-    partialGraph.stopForceAtlas2();
+    // partialGraph.stopForceAtlas2();
     partialGraph.emptyGraph();
 
     if ( iwannagraph=="semantic" && !semanticConverged ) {
@@ -1686,29 +1699,16 @@ function changeToMacro(iwannagraph) {
                 unHide(n);
             }                
         } // and semantic edges
-        pr("im here")
-        createEdgesForExistingNodes(iwannagraph);
-        pr("im also here")
 
-        pr("nodes:")
-        pr(partialGraph._core.graph.nodesIndex)
-        pr("edges:")
-        pr(partialGraph._core.graph.edgesIndex)
+        createEdgesForExistingNodes(iwannagraph);
 
         if(iwannagraph=="social") showMeSomeLabels(6);
         swMacro=true;
 
-        pr("im now here")
-
         if (!is_empty(selections))
         	$.doTimeout(10,function (){
         		chosenones=(PAST=="a"||PAST=="b")?selections:opossites;
-                pr("the chosen ones")
-                pr(chosenones)
         		MultipleSelection(Object.keys(chosenones))
-                
-                pr("im now right here")
-
         	});
 
     } else {
@@ -1767,13 +1767,9 @@ function changeToMacro(iwannagraph) {
             $("#colorGraph").hide();        
         }
     });
-    // highlightSelectedNodes(true);
-    // // partialGraph.stopForceAtlas2();
-    // partialGraph.draw();
-    // // partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
-    // partialGraph.refresh();
-    fa2enabled=true; partialGraph.startForceAtlas2();
-    
+
+    // fa2enabled=true; partialGraph.startForceAtlas2();
+
     $('.gradient').css({"background-size":"40px 40px"});
 }
 
