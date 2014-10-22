@@ -377,17 +377,43 @@ function theListeners(){
     
     $('#sigma-example').dblclick(function(event) {
         pr("in the double click event");
-        targeted = partialGraph._core.graph.nodes.filter(function(n) {
-                return !!n['hover'];
-            }).map(function(n) {
-                return n.id;
+
+        var targeted = [];
+        
+        if(cursor_size>0) {
+                    //Multiple selection
+            x1 = partialGraph._core.mousecaptor.mouseX;
+            y1 = partialGraph._core.mousecaptor.mouseY;
+            var counter=0;
+            var actualSel=[];
+            partialGraph.iterNodes(function(n){
+                if(!n.hidden){
+                    distance = Math.sqrt(
+                        Math.pow((x1-parseInt(n.displayX)),2) +
+                        Math.pow((y1-parseInt(n.displayY)),2)
+                        );
+                    if(parseInt(distance)<=cursor_size) {
+                        counter++;
+                        actualSel.push(n.id);                                
+                    }
+                }
             });
-            
+
+            targeted = actualSel;
+
+        } else {
+
+            targeted = partialGraph._core.graph.nodes.filter(function(n) {
+                    return !!n['hover'];
+                }).map(function(n) {
+                    return n.id;
+            });
+        }
+
         if(!is_empty(targeted)) changeLevel();
         else {
             if(!is_empty(selections)){
                 cancelSelection(false);                
-                // LevelButtonDisable(true);
             }
         }
     });
@@ -430,7 +456,6 @@ function theListeners(){
 
                 if(cursor_size>0) {
                     //Multiple selection
-
                     x1 = partialGraph._core.mousecaptor.mouseX;
                     y1 = partialGraph._core.mousecaptor.mouseY;
                     var counter=0;
