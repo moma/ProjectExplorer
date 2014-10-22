@@ -1,120 +1,4 @@
 
-//to general utils
-function pr(msg) {
-    console.log(msg);
-}
-
-//to general utils
-function isUndef(variable){
-    if(typeof(variable)==="undefined") return true;
-    else return false;
-}
-
-//to general utils
-$.fn.toggleClick = function(){
-        methods = arguments, // store the passed arguments for future reference
-            count = methods.length; // cache the number of methods 
-
-        //use return this to maintain jQuery chainability
-        return this.each(function(i, item){
-            // for each element you bind to
-            index = 0; // create a local counter for that element
-            $(item).click(function(){ // bind a click handler to that element
-                return methods[index++ % count].apply(this,arguments); // that when called will apply the 'index'th method to that element
-                // the index % count means that we constrain our iterator between 0 and (count-1)
-            });
-        });
-};
-
-//to general utils
-getUrlParam = (function () {
-    var get = {
-        push:function (key,value){
-            var cur = this[key];
-            if (cur.isArray){
-                this[key].push(value);
-            }else {
-                this[key] = [];
-                this[key].push(cur);
-                this[key].push(value);
-            }
-        }
-    },
-    search = document.location.search,
-    decode = function (s,boo) {
-        var a = decodeURIComponent(s.split("+").join(" "));
-        return boo? a.replace(/\s+/g,''):a;
-    };
-    search.replace(/\??(?:([^=]+)=([^&]*)&?)/g, function (a,b,c) {
-        if (get[decode(b,true)]){
-            get.push(decode(b,true),decode(c));
-        }else {
-            get[decode(b,true)] = decode(c);
-        }
-    });
-    return get;
-})();
-
-
-//to general utils
-function ArraySortByValue(array, sortFunc){
-    var tmp = [];
-    oposMAX=0;
-    for (var k in array) {
-        if (array.hasOwnProperty(k)) {
-            tmp.push({
-                key: k, 
-                value:  array[k]
-            });
-            if((array[k]) > oposMAX) oposMAX= array[k];
-        }
-    }
-
-    tmp.sort(function(o1, o2) {
-        return sortFunc(o1.value, o2.value);
-    });   
-    return tmp;      
-}
-
-
-//to general utils
-function ArraySortByKey(array, sortFunc){
-    var tmp = [];
-    for (var k in array) {
-        if (array.hasOwnProperty(k)) {
-            tmp.push({
-                key: k, 
-                value:  array[k]
-            });
-        }
-    }
-
-    tmp.sort(function(o1, o2) {
-        return sortFunc(o1.key, o2.key);
-    });   
-    return tmp;      
-}
-    
-//to general utils
-function is_empty(obj) {
-    // Assume if it has a length property with a non-zero value
-    // that that property is correct.
-    if (obj.length && obj.length > 0)    return false;
-    if (obj.length && obj.length === 0)  return true;
-
-    for (var key in obj) {
-        if (hasOwnProperty.call(obj, key))    return false;
-    }
-    return true;
-}
-
-//obsolete
-function returnBaseUrl() {
-    origin = window.location.origin;
-    nameOfHtml=window.location.pathname.substring(window.location.pathname.lastIndexOf('/')+1);
-    pathname = window.location.pathname.replace(nameOfHtml,"");
-    return origin+pathname+twjs;
-}
 
 function cancelSelection (fromTagCloud) {
     pr("\t***in cancelSelection");
@@ -287,10 +171,8 @@ function pushSWClick(arg){
     swclickActual = arg;
 }
 
-
 // it receives entire node
 function selection(currentNode){
-    // pr("\t***in selection()");
     if(checkBox==false && cursor_size==0) {
         highlightSelectedNodes(false);
         opossites = [];
@@ -425,7 +307,6 @@ function selection(currentNode){
 }
 
 function getOpossitesNodes(node_id, entireNode) {
-    // pr("\tin getOpossitesNodes");
     node="";    
     if(entireNode==true) node=node_id;
     else node = partialGraph._core.graph.nodesIndex[node_id];
@@ -436,8 +317,7 @@ function getOpossitesNodes(node_id, entireNode) {
     }
     
     if (!node) return null;
-    //selection(node);
-    
+    //selection(node);    
     if(categoriesIndex.length==1) selectionUni(node);
     if(categoriesIndex.length==2) selection(node);
     
@@ -445,22 +325,6 @@ function getOpossitesNodes(node_id, entireNode) {
         return b-a
     });
 }
-
-//to sigma utils!
-function getNodeLabels(elems){
-    var labelss=[]
-    for(var i in elems){
-        var id=(!isUndef(elems[i].key))?elems[i].key:i
-        labelss.push(Nodes[id].label)
-    }
-    return labelss
-}
-
-//to sigma utils!
-function getNodeIDs(elems){
-    return Object.keys(elems)
-}
-
 
 //	tag cloud div
 //missing: the graphNGrams javascript
@@ -575,6 +439,7 @@ function LevelButtonDisable( TF ){
 	$('#changelevel').prop('disabled', TF);
 }
 
+//tofix!
 function graphTagCloudElem(node_id){
     pr("\tin graphTagCloudElem");/**/
     console.log("in graphTagCloudElem, nodae_id: "+node_id);
@@ -593,12 +458,8 @@ function updateDownNodeEvent(selectionRadius){
     hoverNodeEffectWhileFA2(selectionRadius);
 }
 
+
 function greyEverything(){
-    //    pr("\t\t\tin grey everything");
-    //    for(var i in deselections){
-    //        partialGraph._core.graph.nodesIndex[i].forceLabel=false;
-    //    }
-    //    deselections={};
     
     nds = partialGraph._core.graph.nodes.filter(function(n) {
                             return !n['hidden'];
@@ -606,10 +467,8 @@ function greyEverything(){
     for(var i in nds){
             if(!nds[i].attr['grey']){
                 nds[i].attr['true_color'] = nds[i].color;
-                // pr(nds[i].color)
                 alphacol = "rgba("+hex2rga(nds[i].color)+",0.5)";
                 nds[i].color = alphacol;
-                // nds[i].color = "rgba("+hex2rga(nds[i].color)+",0.5)"
             }
             nds[i].attr['grey'] = 1;
     }
@@ -638,6 +497,9 @@ function greyEverything(){
     }
 }
 
+
+//it is a mess but it works. 
+// TODO: refactor this
 function markAsSelected(n_id,sel) {
     if(!isUndef(n_id.id)) nodeSel=n_id;
     else nodeSel = partialGraph._core.graph.nodesIndex[n_id];
@@ -1133,14 +995,10 @@ function MultipleSelection(nodes){
         for(var i in ndsids){
             nodeid = ndsids[i]
             getOpossitesNodes(nodeid,false); //false -> just nodeid
-            // markAsSelected(nodeid,true); 
         }
         for( var i in selections){
             markAsSelected(i,true);             
         }
-        // pr("selections content AFTER: ")
-        // pr(selections)
-        // pr("=============")
     }
 	overNodes=true; 
 
@@ -1411,6 +1269,8 @@ function add1Edge(ID) {
     }
 }
 
+
+//obsolete au non
 function hideElem(id){
     if(id.split(";").length==1){
         //updateSearchLabels(id,Nodes[id].label,Nodes[id].type);
@@ -1422,6 +1282,7 @@ function hideElem(id){
     }
 }
 
+//obsolete au non
 function unHideElem(id){
     if(id.split(";").length==1){
         //updateSearchLabels(id,Nodes[id].label,Nodes[id].type);
@@ -1751,16 +1612,11 @@ function highlightOpossites (list){/*here*/
     }
 }
 
-function getByID(elem) {
-    return document.getElementById(elem);
-}
-
 function saveGraph() {
     
     size = getByID("check_size").checked
     color = getByID("check_color").checked
     atts = {"size":size,"color":color}
-    pr(atts)
 
     if(getByID("fullgraph").checked) {
         saveGEXF ( getnodes() , getedges() , atts);
@@ -1841,55 +1697,4 @@ function saveGraphIMG(){
 
         var strData = edgesDiv.toDataURL("image/png");
         document.location.href = strData.replace("image/png", strDownloadMime)
-}
-
-//obsolete
-function setComponentButton(comp_name){
-	document.getElementById(comp_name);
-}
-
-//obsolete
-function changeSwitchImage(source, target){
-    pr("****    changeSwitchImage() does NOTHING    ****")
-    //    if(target=="social") {
-    //	setComponentButton("social",true);
-    //	setComponentButton("semantic",false);
-    //	setComponentButton("sociosemantic",false);
-    //    }
-    //    if(target=="semantic") {
-    //	setComponentButton("social",false);
-    //	setComponentButton("semantic",true);
-    //	setComponentButton("sociosemantic",false);
-    //    }
-    //    if(target=="sociosemantic") {
-    //	setComponentButton("social",false);
-    //	setComponentButton("semantic",false);
-    //	setComponentButton("sociosemantic",true);
-    //    }
-    //    fullurl = returnBaseUrl()+"img/trans/";
-    //    if(source=="fromHtml"){
-    //        if(document.getElementById("switchbutton").src==fullurl+"showKeywords.png"){
-    //            document.getElementById("switchbutton").src=fullurl+"showScholars.png";
-    //        }
-    //        else {
-    //            document.getElementById("switchbutton").src=fullurl+"showKeywords.png";
-    //        }
-    //    }
-    //    else {
-    //        if(target=="social") document.getElementById("switchbutton").src=fullurl+"showKeywords.png";
-    //        if(target=="semantic") document.getElementById("switchbutton").src=fullurl+"showScholars.png";
-    //    }
-    //pr($("#names").text());
-}
-
-//obsolete
-function switchSelection(){
-    if(swclickActual=="social"){
-        //If we are seeing the Social Graph, this implies that the left panel
-        //is showing Keywords, so we have to invert names and opossites
-    }
-    if(swclickActual=="semantic"){
-        //If we are seeing the Semantic Graph, this implies that the left panel
-        //is showing Scholars, so we have to invert names and opossites
-    }
 }

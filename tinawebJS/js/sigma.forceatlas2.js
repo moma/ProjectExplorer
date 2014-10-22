@@ -1111,68 +1111,6 @@ sigma.publicPrototype.startForceAtlas2 = function() {
   //if(!this.forceatlas2) {
   if(fa2enabled) {
 
-
-
-
-    // // -- UPDATING THE DEGREE --
-    // for (var i in this._core.graph.nodesIndex) {
-    //   pr(i+" -> "+this._core.graph.nodesIndex[i].degree)
-    // }
-
-    // for (var i in this._core.graph.nodes) {
-    //   if(!this._core.graph.nodes[i].hidden) {
-    //     this._core.graph.nodes[i].degree = 0;
-    //     this._core.graph.nodesIndex[this._core.graph.nodes[i].id].degree = 0;
-    //   }
-    // }
-
-    // for (var e in this._core.graph.edges) {
-    //     edge = this._core.graph.edges[e];
-    //     if(!edge.hidden) {
-    //         nodeIDS = edge.source.id;
-    //         nodeIDT = edge.target.id;
-    //         this._core.graph.nodesIndex[nodeIDS].degree++;
-    //         this._core.graph.nodesIndex[nodeIDT].degree++;
-    //     }
-    // }
-
-
-    // for (var i in this._core.graph.nodes) {
-    //   if(!this._core.graph.nodes[i].hidden && this._core.graph.nodes[i].degree>0) {
-    //     if(this._core.graph.nodes[i].x < minx) minx = this._core.graph.nodes[i].x
-    //     if(this._core.graph.nodes[i].x > maxx) maxx = this._core.graph.nodes[i].x
-    //     if(this._core.graph.nodes[i].y < miny) miny = this._core.graph.nodes[i].y
-    //     if(this._core.graph.nodes[i].y > maxy) maxy = this._core.graph.nodes[i].y
-    //   }
-    // }
-
-    // var ybuffer = miny;
-    // for (var i in this._core.graph.nodesIndex) {
-    //   if(this._core.graph.nodesIndex[i].degree==0) {
-    //     // this._core.graph.nodesIndex[i].color = "#000000"
-
-        
-    //     this._core.graph.nodesIndex[i].x = minx-10
-    //     this._core.graph.nodesIndex[i].y = ybuffer
-    //     this._core.graph.nodesIndex[i].displayX = minx-10
-    //     this._core.graph.nodesIndex[i].displayY = ybuffer
-    //     // this._core.graph.nodesIndex[i].hidden = true;
-    //     // this._core.graph.nodesIndex[i].fixed = true;
-
-    //     ybuffer = ybuffer + Math.pow(this._core.graph.nodesIndex[i].displaySize,2);
-    //     pr(ybuffer)
-    //   }
-    //   //   this._core.graph.nodesIndex[i].hidden = true;
-    //   pr(i+" -> "+this._core.graph.nodesIndex[i].degree)
-    // }
-    // // -- / UPDATING THE DEGREE --
-
-    // pr("minx: "+minx)
-    // pr("maxx: "+maxx)
-    // pr("miny: "+miny)
-    // pr("maxy: "+maxy)
-    // pr("")
-
     var V = 10;
     var E = 100;
 
@@ -1203,7 +1141,7 @@ sigma.publicPrototype.startForceAtlas2 = function() {
     // fixing anomaly in forceatlas2
     $.doTimeout(250,function (){
       if( partialGraph.forceatlas2.active && partialGraph.forceatlas2.count==0 ) {
-        pr("SUPER TECHNIQUE!!")
+        pr("SUPER JUTSU!!")
         partialGraph.startForceAtlas2();
         return;
       }
@@ -1221,85 +1159,5 @@ sigma.publicPrototype.stopForceAtlas2 = function() {
   updateMap();
   partialGraph.refresh();
   if(minimap) $("#overviewzone").show();
-
-
-
-
-  /*
-
-  // calc dimensions of connected subgraphs
-  minx=1000.0;
-  maxx=0.0;
-  miny=1000.0;
-  maxy=0.0;
-  for (var i in this._core.graph.nodes) {
-    if(!this._core.graph.nodes[i].hidden && this._core.graph.nodes[i].degree>0) {
-      if(this._core.graph.nodes[i].x < minx) minx = this._core.graph.nodes[i].x
-      if(this._core.graph.nodes[i].x > maxx) maxx = this._core.graph.nodes[i].x
-      if(this._core.graph.nodes[i].y < miny) miny = this._core.graph.nodes[i].y
-      if(this._core.graph.nodes[i].y > maxy) maxy = this._core.graph.nodes[i].y
-    }
-  }
-
-
-  // var ybuffer = miny;
-  // for (var i in this._core.graph.nodesIndex) {
-
-  //   // if (swMacro && this._core.graph.nodesIndex[i].degree>0) {
-  //   //   Nodes[i].x = this._core.graph.nodesIndex[i].x;
-  //   //   Nodes[i].y = this._core.graph.nodesIndex[i].y; 
-  //   // }
-
-  //   if(this._core.graph.nodesIndex[i].degree==0) {
-  //     pr(this._core.graph.nodesIndex[i].label);
-  //     this._core.graph.nodesIndex[i].x = minx-10
-  //     this._core.graph.nodesIndex[i].y = ybuffer
-      
-  //     ybuffer = ybuffer + Math.pow(this._core.graph.nodesIndex[i].displaySize,2);
-  //   }
-  // }
-  
-  // pr("minx: "+minx)
-  // pr("maxx: "+maxx)
-  // pr("miny: "+miny)
-  // pr("maxy: "+maxy)
-  // pr("")
-
-  Ox = (minx+maxx)/2;
-  Oy = (miny+maxy)/2;
-
-  Ax = minx;
-  Ay = miny;
-
-  // var ctx = partialGraph._core.domElements.mouse.getContext('2d');
-  // ctx.globalCompositeOperation = "source-over";
-  // ctx.clearRect(0, 0, partialGraph._core.domElements.nodes.width, partialGraph._core.domElements.nodes.height);
-  // draw1Circle(ctx,minx,miny,"aqua") // point A
-  // draw1Circle(ctx,maxx,miny,"blue") // point B
-  // draw1Circle(ctx,minx,maxy,"coral")  //point C 
-  // draw1Circle(ctx,maxx,maxy,"darkorange") // point D
-  // draw1Circle(ctx, Ox , Oy ,"red") // Center
-
-
-  var R = Math.sqrt( Math.pow((Ox-Ax), 2) + Math.pow((Oy-Ay), 2) );
-  R = R * 1.2;
-
-  stepDeg = 2/parseFloat(isolatedBCauseFilter);
-
-  var mult = 1;
-  for (var i in this._core.graph.nodes) {
-    if(this._core.graph.nodes[i].degree==0) {
-
-      this._core.graph.nodes[i].hidden=false;
-
-      this._core.graph.nodes[i].x = Ox + R*Math.cos(Math.PI*stepDeg*mult);
-      this._core.graph.nodes[i].y = Oy + R*Math.sin(Math.PI*stepDeg*mult);
-
-      mult++;
-    }
-  }
-
-  */
-
 
 };

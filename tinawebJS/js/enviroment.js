@@ -51,9 +51,6 @@ function changeType() {
 
     if(swclickActual=="sociosemantic") {
 
-    	pr("click en changeType y estoy en SocioSemantic, swMacro:"+swMacro+"|selections:");
-        pr(selections)
-
     	if(swMacro) {
     		changeToMacro("sociosemantic");
 	        pushSWClick("sociosemantic");
@@ -66,18 +63,15 @@ function changeType() {
                 RefreshState(PAST.toUpperCase())
             } else {
               //there is an active selection
-
                 //identify type of the current-selection
                 var countTypes = {};
-                pr("identify type of the current-selection")
                 for(var i in selections) {
                     if( isUndef(countTypes[Nodes[i].type]) )
                         countTypes[Nodes[i].type]=1;
                     else
                         countTypes[Nodes[i].type]++;
                 }
-
-                pr("#selectionsTypes: ")
+                pr("bigraph #selectionsTypes: ")
                 pr(countTypes)
 
 
@@ -85,7 +79,6 @@ function changeType() {
                 if(cpCountTypes.length==1) {
 
                     if(cpCountTypes[0]==catSoc) {
-                        pr("FROM MESO-SOCIOSEMANTIC TO MESO-SOCIAL")
                         pushSWClick("social");
                         changeToMeso("social");
                         RefreshState("a");
@@ -97,9 +90,8 @@ function changeType() {
                     }
 
                 } else {
-                  //there is a selection of both kind of nodes
-                    //
-
+                  //there is a selection with both kind of nodes
+                    //Manually changing the selection, not using MultipleSelection
                     var ndsids = [];
                     for(var i in selections) {
                         if( Nodes[i].type == catSoc )
@@ -109,34 +101,16 @@ function changeType() {
                     for(var i in ndsids){
                         nodeid = ndsids[i]
                         getOpossitesNodes(nodeid,false); //false -> just nodeid
-                        // markAsSelected(nodeid,true); 
                     }
-
                     pushSWClick("social");
                     changeToMeso("social");
                     RefreshState("a");
 
                 }
 
-
-                // pushSWClick(swclickPrev);
-                // changeToMeso(swclickActual);
-                // RefreshState(PAST)
             }
     	}
-        // if(swMacro) {
-        // 	changeToMacro("semantic");
-	       //  pushSWClick("semantic");
-	       //  RefreshState("B")
-	       //  $("#category-A").hide();
-	       //  $("#category-B").show();
-        // } else {
-        // 	changeToMeso("sociosemantic");
-	       //  pushSWClick("sociosemantic");
-        // 	RefreshState("AaBb")
-	       //  $("#category-A").show();
-	       //  $("#category-B").show();
-        // }
+
         return;
     }
 }
@@ -145,8 +119,7 @@ function changeLevel() {
     bf=swclickActual
     pushSWClick(swclickActual);
     pr("swMacro: "+swMacro+" - [swclickPrev: "+bf+"] - [swclickActual: "+swclickActual+"]")
-    // partialGraph.stopForceAtlas2();
-    // ANALIZING CURRENT STATE:
+
     if(swMacro){
         // Macro Level  --  swMacro:true
 	    if(swclickActual=="social") {
@@ -174,39 +147,8 @@ function changeLevel() {
         return;
 	}
 
-    // changeToMeso("social")
-    // changeToMeso("semantic")
-
-    // changeToMacro("social")
-    // changeToMacro("semantic")
 }
 
-//obsolete
-function neweffectshow(){
-    if(!is_empty(selections)){    
-        $("#labelchange").show();
-        $("#availableView").show();  
-    }
-}
-
-//obsolete
-function neweffecthide(){
-    $.doTimeout(300,function (){
-        if($("#labelchange")[0].hidden==false){
-            
-        }
-        else {
-            $("#labelchange").hide();
-            $("#availableView").hide(); 
-        }
-    });
-}
-
-//obsolete
-function justhide(){    
-    $("#labelchange").hide();
-    $("#availableView").hide();  
-}
 
 //============================= </ NEW BUTTONS > =============================//
 
@@ -218,6 +160,8 @@ function justhide(){
 
 //=========================== < FILTERS-SLIDERS > ===========================//
 
+
+//    Execution modes:
 //	EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
 //	EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
 function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
@@ -238,12 +182,6 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 	// type_attrb = "type"
 	// criteria = "size"
 
-
-
-	// AlgorithmForSliders ( partialGraph._core.graph.edges , "label" , "nodes1" , "weight") 
-	// AlgorithmForSliders ( partialGraph._core.graph.edges , "label" , "nodes2" , "weight") 
-	// AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "Document" ,  "size") 
-	// AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "NGram" ,  "size")
     if(partialGraph._core.graph.edges.length==0) {
 
         $(sliderDivID).freshslider({
@@ -291,8 +229,6 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                         if(i>=low && i<=high){
                             for(var id in ids) {                            
                                 ID = ids[id]
-                                // partialGraph._core.graph.edgesIndex[ID].lock=false;
-                                // partialGraph._core.graph.edgesIndex[ID].hidden=false;
                                 Edges[ID].lock = false;
                                 for (var n in partialGraph._core.graph.nodesIndex) {
                                     sid = Edges[ID].sourceID
@@ -308,8 +244,6 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                         } else {
                             for(var id in ids) {
                                 ID = ids[id]
-                                // partialGraph._core.graph.edgesIndex[ID].lock=true;
-                                // partialGraph._core.graph.edgesIndex[ID].hidden=true;
                                 partialGraph.dropEdge(ID)
                                 Edges[ID].lock = true;
                             }
@@ -330,12 +264,15 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
                 }
 
-            });//doTimeout
+            });// [/doTimeout]
             
         }
     });
 }
 
+
+
+//   Execution modes:
 // NodeWeightFilter ( "#sliderANodeWeight" ,  "Document" , "type" , "size") 
 // NodeWeightFilter ( "#sliderBNodeWeight" ,  "NGram" , "type" , "size") 
 function NodeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
@@ -344,7 +281,6 @@ function NodeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 		pr("\t\t\t\t\t\t[[ algorithm not applied "+sliderDivID+" ]]")
 		return;
 	}
-
 
 	// sliderDivID = "#sliderAEdgeWeight"
 	// type = "nodes1"
@@ -355,11 +291,6 @@ function NodeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 	// type = "NGram"
 	// type_attrb = "type"
 	// criteria = "size"
-
-	// AlgorithmForSliders ( partialGraph._core.graph.edges , "label" , "nodes1" , "weight") 
-	// AlgorithmForSliders ( partialGraph._core.graph.edges , "label" , "nodes2" , "weight") 
-	// AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "Document" ,  "size") 
-	// AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "NGram" ,  "size")
 
     if(partialGraph._core.graph.nodes.length==0) {
 
@@ -435,7 +366,7 @@ function NodeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
     });
 }
 
-
+//   Execution modes:
 // AlgorithmForSliders ( partialGraph._core.graph.edges , "label" , "nodes1" , "weight") 
 // AlgorithmForSliders ( partialGraph._core.graph.edges , "label" , "nodes2" , "weight") 
 // AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "Document" ,  "size") 
@@ -521,12 +452,6 @@ function AlgorithmForSliders( elements , type_attrb , type , criteria) {
 }
 
 //=========================== </ FILTERS-SLIDERS > ===========================//
-
-
-
-
-
-
 
 
 

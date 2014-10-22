@@ -114,17 +114,21 @@ function exactfind(label) {
     return null;
 }
 
-//to general utils (not used btw)
-function cloneObject(source) {
-    for (i in source) {
-        if (typeof source[i] == 'source') {
-            this[i] = new cloneObject(source[i]);
-        }
-        else{
-            this[i] = source[i];
-	}
+
+function getNodeLabels(elems){
+    var labelss=[]
+    for(var i in elems){
+        var id=(!isUndef(elems[i].key))?elems[i].key:i
+        labelss.push(Nodes[id].label)
     }
+    return labelss
 }
+
+function getNodeIDs(elems){
+    return Object.keys(elems)
+}
+
+
 
 function getSelections(){    
         params=[];
@@ -287,44 +291,6 @@ function clustersBy(daclass) {
     partialGraph.draw();
 }
 
-function hex2rga(sent_hex) {
-    result = []
-    hex = ( sent_hex.charAt(0) === "#" ? sent_hex.substr(1) : sent_hex );
-    // check if 6 letters are provided
-    if (hex.length === 6) {
-        result = calculateFull(hex);
-        return result;
-    }
-    else if (hex.length === 3) {
-        result = calculatePartial(hex);
-        return result;
-    }
-}
-
-function calculateFull(hex) {
-    var r = parseInt(hex.substring(0, 2), 16);
-    var g = parseInt(hex.substring(2, 4), 16);
-    var b = parseInt(hex.substring(4, 6), 16);
-    return [r,g,b];
-}
-
-
-// function for calculating 3 letters hex value
-function calculatePartial(hex) {
-    var r = parseInt(hex.substring(0, 1) + hex.substring(0, 1), 16);
-    var g = parseInt(hex.substring(1, 2) + hex.substring(1, 2), 16);
-    var b = parseInt(hex.substring(2, 3) + hex.substring(2, 3), 16);
-    return [r,g,b];
-}
-
-function componentToHex(c) {
-    var hex = c.toString(16);
-    return hex.length == 1 ? "0" + hex : hex;
-}
-
-function rgbToHex(r, g, b) {
-    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
-}
 
 //just for fun
 function makeEdgeWeightUndef() {

@@ -703,7 +703,6 @@ function extractFromJson(data,seed){
         Edges[indice] = edge;
     
         if(edge.label=="nodes1"){   
-            // edge.hidden=false;
 
             if(isUndef(nodes1[source])) {
                 nodes1[source] = {
@@ -721,7 +720,7 @@ function extractFromJson(data,seed){
             nodes1[target].neighbours.push(source);
 
             // social edges = 1
-            Edges[indice].bweight = edgesNodes[i].w;//realweight as in bigraph-weight
+            Edges[indice].bweight = edgesNodes[i].w;//realweight just in bigraph-weight
             edge.weight = 1; 
 
             partialGraph.addEdge(indice,source,target,edge);
@@ -729,7 +728,6 @@ function extractFromJson(data,seed){
         
         
         if(edge.label=="nodes2"){ 
-            // edge.hidden=true;
 
             if(isUndef(nodes2[source])) {
                 nodes2[source] = {
@@ -751,10 +749,8 @@ function extractFromJson(data,seed){
         
         
         if(edge.label=="bipartite"){   
-            // edge.hidden=true;
 
             s = edge.sourceID
-
             // // Source is Document
             if(Nodes[s].type == catSoc) {
 
@@ -794,6 +790,5 @@ function extractFromJson(data,seed){
             }
         }
             
-            //edge.hidden=false/**///should be commented
     }
 }
