@@ -412,7 +412,7 @@ function theListeners(){
         .mousewheel(onGraphScroll)
         .mousedown(function(e){
 
-            //left click!
+            //left click!<- normal click
             if(e.which==1){
 
 
@@ -446,23 +446,41 @@ function theListeners(){
                                 actualSel.push(n.id);                                
                             }
                         }
-                    });                    
-                    MultipleSelection(actualSel);
+                    });
+
+                    if(checkBox) {
+
+                        var dummyarray = {};
+                        for(var i in actualSel) dummyarray[ actualSel[i] ]=1;
+                        for(var i in selections) dummyarray[ i ]=1;
+
+                        var countTypes = {};
+                        for(var i in dummyarray) {
+                            if( isUndef(countTypes[Nodes[i].type]) )
+                                countTypes[Nodes[i].type]=1;
+                            else
+                                countTypes[Nodes[i].type]++;
+                        }
+                        cancelSelection(false);
+                        cpCountTypes = Object.keys(countTypes);
+                        if(cpCountTypes.length==1)  MultipleSelection(Object.keys(dummyarray));
+                        else MultipleSelection(actualSel);
+
+                    } else MultipleSelection(actualSel);
+
                     // //The most brilliant way of knowing if an array is empty in the world of JavaScript
                     i=0; for(var s in actualSel) { i++; break;}
-                    
+
                     if(is_empty(actualSel) || i==0){ 
                         pr("cursor radius ON, mouseDown -> selecciones vacias"); 
                         cancelSelection(false);   
-
-                        
-                        //                        $("#names").html("");
-                        //                        $("#opossiteNodes").html("");
-                        //                        $("#information").html("");
-                        //                        $("#topPapers").html("");
-                        //                        $("#tips").html(getTips());
-                        //                        changeButton("unselectNodes");
-                        //                        if(counter>0) graphResetColor();
+                        //$("#names").html("");
+                        //$("#opossiteNodes").html("");
+                        //$("#information").html("");
+                        //$("#topPapers").html("");
+                        //$("#tips").html(getTips());
+                        //changeButton("unselectNodes");
+                        //if(counter>0) graphResetColor();
                     }      
 
                 } else {
@@ -609,7 +627,6 @@ function theListeners(){
     });
 
 }
-
 
 // extractFromJson()
 //      Social Spatialization

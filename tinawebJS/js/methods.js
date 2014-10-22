@@ -483,18 +483,20 @@ function greyEverything(){
             }
             eds[i].attr['grey'] = 1;
     }
-    for(var i in selections){
-        if(!isUndef(nodes1[i])){
-            if(!isUndef(nodes1[i]["neighbours"])){
-                nb=nodes1[i]["neighbours"];
-                for(var j in nb){
-                    deselections[nb[j]]=1;
-                    partialGraph._core.graph.nodesIndex[nb[j]].forceLabel=true;
-                    partialGraph._core.graph.nodesIndex[nb[j]].neighbour=true;
-                }
-            }
-        }
-    }
+
+    //		deselect neighbours of previous selection i think
+    // for(var i in selections){
+    //     if(!isUndef(nodes1[i])){
+    //         if(!isUndef(nodes1[i]["neighbours"])){
+    //             nb=nodes1[i]["neighbours"];
+    //             for(var j in nb){
+    //                 deselections[nb[j]]=1;
+    //                 partialGraph._core.graph.nodesIndex[nb[j]].forceLabel=true;
+    //                 partialGraph._core.graph.nodesIndex[nb[j]].neighbour=true;
+    //             }
+    //         }
+    //     }
+    // }
 }
 
 
@@ -504,8 +506,7 @@ function markAsSelected(n_id,sel) {
     if(!isUndef(n_id.id)) nodeSel=n_id;
     else nodeSel = partialGraph._core.graph.nodesIndex[n_id];
     
-    if(sel==true) {
-        
+    if(sel) {
         nodeSel.color = nodeSel.attr['true_color'];
         nodeSel.attr['grey'] = 0;
         
@@ -972,8 +973,8 @@ function DrawAsSelectedNodes( nodeskeys ) {
 
 function MultipleSelection(nodes){
 
-	pr("IN MULTIPLE SELECTION:")
-    
+	pr("IN MULTIPLE SELECTION: checkbox="+checkBox)
+
 	if(!checkBox) cancelSelection(false);
 
 	greyEverything(); 
@@ -991,15 +992,20 @@ function MultipleSelection(nodes){
 		}
 		checkBox=false;
 	} else { 
+	  //checkbox = true
+		//incrementing the selections[]
 
-        for(var i in ndsids){
-            nodeid = ndsids[i]
-            getOpossitesNodes(nodeid,false); //false -> just nodeid
-        }
-        for( var i in selections){
-            markAsSelected(i,true);             
-        }
+		cancelSelection(false);
+		greyEverything(); 
+
+		for(var i in ndsids){
+		 	nodeid = ndsids[i]
+		 	getOpossitesNodes(nodeid,false); //false -> just nodeid
+		 	markAsSelected(nodeid,true); 
+		}
+
     }
+
 	overNodes=true; 
 
 	partialGraph.draw();
@@ -1008,6 +1014,37 @@ function MultipleSelection(nodes){
 	if(categoriesIndex.length==2) updateLeftPanel_fix();
 
     RefreshState("")
+}
+
+//test-function
+function genericHighlightSelection( nodes ) {
+
+	for( var n in nodes ) {
+		pr(n)
+	}
+
+        // nodeSel.color = nodeSel.attr['true_color'];
+        // nodeSel.attr['grey'] = 0;
+        
+        //     if(swclickActual=="social") {
+        //         if(nodeSel.type==catSoc){
+        //             if( !isUndef(nodes1[nodeSel.id]) &&
+        //                 !isUndef(nodes1[nodeSel.id].neighbours)
+        //               ) {
+        //                 neigh=nodes1[nodeSel.id].neighbours;/**/
+        //                 for(var i in neigh) {
+
+
+        //                     if( !isUndef(partialGraph._core.graph.nodesIndex[neigh[i]]) ) {
+
+        //                         nodeVec = partialGraph._core.graph.nodesIndex[neigh[i]];
+        //                         possibledge1 = partialGraph._core.graph.edgesIndex[nodeVec.id+";"+nodeSel.id]
+        //                         possibledge2 = partialGraph._core.graph.edgesIndex[nodeSel.id+";"+nodeVec.id]
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
 }
 
 function hoverNodeEffectWhileFA2(selectionRadius) { 
@@ -1027,8 +1064,9 @@ function hoverNodeEffectWhileFA2(selectionRadius) {
             
             if(cursor_size==0 && checkBox){
                 //Normal click on a node, but we won't clean the previous selections
+			    selections[nodeID] = 1;
                 $.doTimeout(30,function (){
-                    MultipleSelection(nodeID);
+                    MultipleSelection( Object.keys(selections) );
                 });
                 // getOpossitesNodes(nodeID, false);//passing just the node-id
             }

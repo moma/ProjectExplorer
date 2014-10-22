@@ -307,7 +307,6 @@ function NodeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
         return;
     }
 
-
     var filterparams = AlgorithmForSliders ( partialGraph._core.graph.nodes , type_attrb , type , criteria) 
     var steps = filterparams["steps"]
     var finalarray = filterparams["finalarray"]
@@ -422,12 +421,12 @@ function AlgorithmForSliders( elements , type_attrb , type , criteria) {
     var steps =  Math.round( Math.sqrt( N ) );
     var stepsize = Math.round( N / steps );
 
-    pr("-----------------------------------")
-    pr("number of visible nodes|edges: "+N); 
+    // pr("-----------------------------------")
+    // pr("number of visible nodes|edges: "+N); 
     
-    pr("number of steps : "+steps)
-    pr("size of one step : "+stepsize)
-    pr("-----------------------------------")
+    // pr("number of steps : "+steps)
+    // pr("size of one step : "+stepsize)
+    // pr("-----------------------------------")
     
 
     var finalarray = []
