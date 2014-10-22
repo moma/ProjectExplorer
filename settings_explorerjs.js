@@ -10,6 +10,7 @@ var mainfile=false;
 var dataFolderTree = {};
 var gexfDict={};
 var egonode = {}
+var iwantograph = "";
 
 var bridge={};
 external="";

@@ -512,9 +512,6 @@ function theListeners(){
     });
     
     $("#edgesButton").click(function () {
-
-        pr("click en #edgesButton")
-        pr(partialGraph.forceatlas2)
         fa2enabled=true;
         if(!isUndef(partialGraph.forceatlas2)) {
 

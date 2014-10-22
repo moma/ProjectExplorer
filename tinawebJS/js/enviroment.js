@@ -3,8 +3,7 @@
 //============================ < NEW BUTTONS > =============================//
 
 function changeType() {
-    pr("***swclickActual:"+swclickActual+" , swMacro:"+swMacro)
-    // partialGraph.stopForceAtlas2();
+    pr("***swclickActual:"+swclickActual+" , swMacro:"+swMacro);
     
     if(swclickActual=="social") {
         if(swMacro) {
@@ -51,7 +50,10 @@ function changeType() {
     }
 
     if(swclickActual=="sociosemantic") {
-    	
+
+    	pr("click en changeType y estoy en SocioSemantic, swMacro:"+swMacro+"|selections:");
+        pr(selections)
+
     	if(swMacro) {
     		changeToMacro("sociosemantic");
 	        pushSWClick("sociosemantic");
@@ -63,9 +65,63 @@ function changeType() {
                 pushSWClick(swclickPrev);
                 RefreshState(PAST.toUpperCase())
             } else {
-                pushSWClick(swclickPrev);
-                changeToMeso(swclickActual);
-                RefreshState(PAST)
+              //there is an active selection
+
+                //identify type of the current-selection
+                var countTypes = {};
+                pr("identify type of the current-selection")
+                for(var i in selections) {
+                    if( isUndef(countTypes[Nodes[i].type]) )
+                        countTypes[Nodes[i].type]=1;
+                    else
+                        countTypes[Nodes[i].type]++;
+                }
+
+                pr("#selectionsTypes: ")
+                pr(countTypes)
+
+
+                cpCountTypes = Object.keys(countTypes);
+                if(cpCountTypes.length==1) {
+
+                    if(cpCountTypes[0]==catSoc) {
+                        pr("FROM MESO-SOCIOSEMANTIC TO MESO-SOCIAL")
+                        pushSWClick("social");
+                        changeToMeso("social");
+                        RefreshState("a");
+
+                    } else {
+                        pushSWClick("semantic");
+                        changeToMeso("semantic");
+                        RefreshState("b");
+                    }
+
+                } else {
+                  //there is a selection of both kind of nodes
+                    //
+
+                    var ndsids = [];
+                    for(var i in selections) {
+                        if( Nodes[i].type == catSoc )
+                            ndsids.push(i);
+                    }
+                    cancelSelection(false);
+                    for(var i in ndsids){
+                        nodeid = ndsids[i]
+                        getOpossitesNodes(nodeid,false); //false -> just nodeid
+                        // markAsSelected(nodeid,true); 
+                    }
+
+                    pushSWClick("social");
+                    changeToMeso("social");
+                    RefreshState("a");
+
+                }
+
+
+                // pushSWClick(swclickPrev);
+                // changeToMeso(swclickActual);
+                // RefreshState(PAST)
             }
     	}
         // if(swMacro) {

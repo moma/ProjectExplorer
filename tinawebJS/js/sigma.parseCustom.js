@@ -686,11 +686,10 @@ function extractFromJson(data,seed){
     var edgeId = 0;
     var edgesNodes = data.edges;
     for(var i in edgesNodes) {
-        //pr(edgesNodes[i]);        
         var source = edgesNodes[i].s;
         var target = edgesNodes[i].t;
         var indice=source+";"+target;
-        // if(indice.indexOf("D::593")!==-1) pr(indice)
+        
         var edge = {
                 id:         indice,
                 sourceID:   source,
@@ -702,98 +701,98 @@ function extractFromJson(data,seed){
         if(edge.weight < minEdgeWeight) minEdgeWeight= edge.weight;
         if(edge.weight > maxEdgeWeight) maxEdgeWeight= edge.weight;
         Edges[indice] = edge;
+    
+        if(edge.label=="nodes1"){   
+            // edge.hidden=false;
+
+            if(isUndef(nodes1[source])) {
+                nodes1[source] = {
+                    label: Nodes[source].label,
+                    neighbours: []
+                };                    
+            }
+            if(isUndef(nodes1[target])) {
+                nodes1[target] = {
+                    label: Nodes[target].label,
+                    neighbours: []
+                };                    
+            }   
+            nodes1[source].neighbours.push(target);
+            nodes1[target].neighbours.push(source);
+
+            // social edges = 1
+            Edges[indice].bweight = edgesNodes[i].w;//realweight as in bigraph-weight
+            edge.weight = 1; 
+
+            partialGraph.addEdge(indice,source,target,edge);
+        }
         
-            if(edge.label=="nodes1"){   
-                // edge.hidden=false;
+        
+        if(edge.label=="nodes2"){ 
+            // edge.hidden=true;
 
-                if(isUndef(nodes1[source])) {
-                    nodes1[source] = {
+            if(isUndef(nodes2[source])) {
+                nodes2[source] = {
+                    label: Nodes[source].label,
+                    neighbours: []
+                };                    
+            }
+            if(isUndef(nodes2[target])) {
+                nodes2[target] = {
+                    label: Nodes[target].label,
+                    neighbours: []
+                };                    
+            }
+            nodes2[source].neighbours.push(target);
+            nodes2[target].neighbours.push(source);
+            
+            otherGraph.addEdge(indice,source,target,edge);
+        }
+        
+        
+        if(edge.label=="bipartite"){   
+            // edge.hidden=true;
+
+            s = edge.sourceID
+
+            // // Source is Document
+            if(Nodes[s].type == catSoc) {
+
+                if(isUndef(bipartiteD2N[source])) {
+                    bipartiteD2N[source] = {
                         label: Nodes[source].label,
                         neighbours: []
                     };                    
                 }
-                if(isUndef(nodes1[target])) {
-                    nodes1[target] = {
+                if(isUndef(bipartiteN2D[target])) {
+                    bipartiteN2D[target] = {
                         label: Nodes[target].label,
                         neighbours: []
                     };                    
-                }   
-                nodes1[source].neighbours.push(target);
-                nodes1[target].neighbours.push(source);
+                }
 
-                // social edges = 1
-                Edges[indice].weight = 1;
-                edge.weight = 1;
+                bipartiteD2N[source].neighbours.push(target);
+                bipartiteN2D[target].neighbours.push(source);
 
-                partialGraph.addEdge(indice,source,target,edge);
-            }
-            
-            
-            if(edge.label=="nodes2"){ 
-                // edge.hidden=true;
+            // // Source is NGram
+            } else {
 
-                if(isUndef(nodes2[source])) {
-                    nodes2[source] = {
+                if(isUndef(bipartiteN2D[source])) {
+                    bipartiteN2D[source] = {
                         label: Nodes[source].label,
                         neighbours: []
                     };                    
                 }
-                if(isUndef(nodes2[target])) {
-                    nodes2[target] = {
+                if(isUndef(bipartiteD2N[target])) {
+                    bipartiteD2N[target] = {
                         label: Nodes[target].label,
                         neighbours: []
                     };                    
                 }
-                nodes2[source].neighbours.push(target);
-                nodes2[target].neighbours.push(source);
-                
-                otherGraph.addEdge(indice,source,target,edge);
+                bipartiteN2D[source].neighbours.push(target);
+                bipartiteD2N[target].neighbours.push(source);
             }
-            
-            
-            if(edge.label=="bipartite"){   
-                // edge.hidden=true;
-
-                s = edge.sourceID
-
-                // // Source is Document
-                if(Nodes[s].type == catSoc) {
-
-                    if(isUndef(bipartiteD2N[source])) {
-                        bipartiteD2N[source] = {
-                            label: Nodes[source].label,
-                            neighbours: []
-                        };                    
-                    }
-                    if(isUndef(bipartiteN2D[target])) {
-                        bipartiteN2D[target] = {
-                            label: Nodes[target].label,
-                            neighbours: []
-                        };                    
-                    }
-
-                    bipartiteD2N[source].neighbours.push(target);
-                    bipartiteN2D[target].neighbours.push(source);
-
-                // // Source is NGram
-                } else {
-
-                    if(isUndef(bipartiteN2D[source])) {
-                        bipartiteN2D[source] = {
-                            label: Nodes[source].label,
-                            neighbours: []
-                        };                    
-                    }
-                    if(isUndef(bipartiteD2N[target])) {
-                        bipartiteD2N[target] = {
-                            label: Nodes[target].label,
-                            neighbours: []
-                        };                    
-                    }
-                    bipartiteN2D[source].neighbours.push(target);
-                    bipartiteD2N[target].neighbours.push(source);
-                }
-            }
+        }
             
             //edge.hidden=false/**///should be commented
     }

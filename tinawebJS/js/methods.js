@@ -444,20 +444,6 @@ function getOpossitesNodes(node_id, entireNode) {
     opos = ArraySortByValue(opossites, function(a,b){
         return b-a
     });
-    //        console.log("WOLOLO WOLOLO WOLOLO WOLOLO");
-    //        $.ajax({
-    //            type: 'GET',
-    //            url: 'http://localhost/getJsonFromUrl/tagcloud.php',
-    //            data: "url="+JSON.stringify(opos),
-    //            //contentType: "application/json",
-    //            //dataType: 'json',
-    //            success : function(data){ 
-    //                console.log(data);
-    //            },
-    //            error: function(){ 
-    //                pr("Page Not found.");
-    //            }
-    //        });
 }
 
 //to sigma utils!
@@ -1349,6 +1335,7 @@ function hideEverything(){
 
 function unHide(id){
 	
+    // pr("in unhide "+iwantograph+" | swMacro: "+swMacro)
     if(id.split(";").length==1) {
     // i've received a NODE
         if(Nodes[id]) {
@@ -1383,7 +1370,7 @@ function unHide(id){
                 targetID:   Edges[id].targetID,
                 lock : false,
                 label:      Edges[id].label,
-                weight: Edges[id].weight
+                weight: (swMacro && (iwantograph=="sociosemantic"))?Edges[id].bweight:Edges[id].weight
             };
 
         	partialGraph.addEdge(id , anedge.sourceID , anedge.targetID , anedge);
@@ -1449,11 +1436,10 @@ function unHideElem(id){
 function changeToMeso(iwannagraph) { 
     labels=[]
 
-    // partialGraph.stopForceAtlas2();
+    iwantograph=iwannagraph;//just a mess
+
     partialGraph.emptyGraph();
 
-    if(partialGraph.forceatlas2)
-        pr("t=2: in empty graph : forceatlas2.active = "+partialGraph.forceatlas2.active)
     pr("changing to Meso-"+iwannagraph);
     if(iwannagraph=="social") {
         if(!is_empty(selections)){
@@ -1550,12 +1536,8 @@ function changeToMeso(iwannagraph) {
 
     if(iwannagraph=="sociosemantic") {
 
-        if(partialGraph.forceatlas2)
-            pr("t=3: in empty graph : forceatlas2.active = "+partialGraph.forceatlas2.active)
         if(!is_empty(selections) && !is_empty(opossites)){
 
-            pr("ESTOY DENTRO DE SOCIOSEMANTIC!!!")
-            // hideEverything();
             for(var i in selections) {
                 unHide(i);
             }
@@ -1564,13 +1546,8 @@ function changeToMeso(iwannagraph) {
                 unHide(i);
             }
                 
-            if(partialGraph.forceatlas2)
-                pr("t=4: in empty graph : forceatlas2.active = "+partialGraph.forceatlas2.active)
             createEdgesForExistingNodes(iwannagraph);
 
-
-            if(partialGraph.forceatlas2)
-                pr("t=5: in empty graph : forceatlas2.active = "+partialGraph.forceatlas2.active)
             socsemFlag=true;
         }
         
@@ -1578,10 +1555,6 @@ function changeToMeso(iwannagraph) {
         // NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size") 
         // EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
         $("#colorGraph").hide();
-
-        if(partialGraph.forceatlas2)
-            pr("t=6: in empty graph : forceatlas2.active = "+partialGraph.forceatlas2.active)
-
     }
      
     if(iwannagraph=="semantic") {
@@ -1659,13 +1632,9 @@ function changeToMeso(iwannagraph) {
         $("#colorGraph").hide();
     }
 
-    if(partialGraph.forceatlas2)
-        pr("t=7: in empty graph : forceatlas2.active = "+partialGraph.forceatlas2.active)
-
     fa2enabled=true; partialGraph.startForceAtlas2();
-    
-    MultipleSelection(Object.keys(selections));
 
+    MultipleSelection(Object.keys(selections));
 
     $('.gradient').css({"background-size":"90px 90px"});
 }
@@ -1674,7 +1643,8 @@ function changeToMacro(iwannagraph) {
     labels=[]
     pr("CHANGING TO Macro-"+iwannagraph);
 
-    // partialGraph.stopForceAtlas2();
+    iwantograph=iwannagraph;//just a mess
+
     partialGraph.emptyGraph();
 
     if ( iwannagraph=="semantic" && !semanticConverged ) {

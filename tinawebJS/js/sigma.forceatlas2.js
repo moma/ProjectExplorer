@@ -338,8 +338,8 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
         
         var convg= ((Math.pow(nodes.length,2))/promdxdy);    /**/
         var swingingVSnodes_length = swingingSum/nodes.length;     /**/
-        if(stopcriteria && convg > swingingVSnodes_length){ 
-            pr("iteraciones: "+self.count)
+        if(stopcriteria && (convg > swingingVSnodes_length)){ 
+            pr("i've applied the stopcriteria: "+self.count)
             partialGraph.stopForceAtlas2(); 
         }
         
@@ -477,18 +477,12 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
 
         }
 
-        // pr("\t in case 5, i="+i+" | nbnodes="+nodes.length)
-        // pr("\tstate index: "+self.state.index)
-        // pr("\tthe self.count: "+self.count)
-
         if (i == nodes.length) {
           self.state.step = 0;
           self.state.index = 0;
-          // pr("\t\tafter the thing")
           return false;
         } else {
           self.state.index = i;
-          // pr("else state index: "+self.state.index)
           return true;
         }
 
@@ -1182,17 +1176,9 @@ sigma.publicPrototype.startForceAtlas2 = function() {
     var V = 10;
     var E = 100;
 
-    if(partialGraph.forceatlas2)
-        pr("t=8: in startfa2 : forceatlas2.active = "+partialGraph.forceatlas2.active)
-
     this.forceatlas2 = new sigma.forceatlas2.ForceAtlas2(this._core.graph , V, E);
     this.forceatlas2.setAutoSettings();
-
-
     this.forceatlas2.init();
-
-    if(partialGraph.forceatlas2)
-        pr("t=9: in startfa2 : forceatlas2.active = "+partialGraph.forceatlas2.active)
 
     this.forceatlas2.active=true;
     pr("\t\t\t\t\tFA2 Started")
@@ -1202,12 +1188,6 @@ sigma.publicPrototype.startForceAtlas2 = function() {
       if(this._core.graph.nodesIndex[i].degree==0) isolatedBCauseFilter++;
     }
 
-    if(partialGraph.forceatlas2)
-        pr("t=10: in startfa2 : forceatlas2.active = "+partialGraph.forceatlas2.active)
-
-    pr("|||||||||| isolatedBCauseFilter "+isolatedBCauseFilter)
-    pr("|||||||||| ene "+ene)
-    pr("isolatedBCauseFilter==ene   = "+(isolatedBCauseFilter==ene))
     if(isolatedBCauseFilter==ene) {
       partialGraph.stopForceAtlas2();
       return;
@@ -1220,18 +1200,13 @@ sigma.publicPrototype.startForceAtlas2 = function() {
       return true;
     });
 
-    pr(getClientTime()+"\tjust before addGenerator | fa2.active:"+partialGraph.forceatlas2.active+" | fa2.count: "+partialGraph.forceatlas2.count);
-
-
+    // fixing anomaly in forceatlas2
     $.doTimeout(250,function (){
-      pr(getClientTime()+"\tjust after addGenerator | fa2.active:"+partialGraph.forceatlas2.active+" | fa2.count: "+partialGraph.forceatlas2.count);
-
       if( partialGraph.forceatlas2.active && partialGraph.forceatlas2.count==0 ) {
-        pr("SUPER TECHNIQUE")
+        pr("SUPER TECHNIQUE!!")
         partialGraph.startForceAtlas2();
         return;
       }
-
     });
     
   }
