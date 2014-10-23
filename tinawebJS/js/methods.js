@@ -486,6 +486,8 @@ function graphTagCloudElem(node_id) {
 		fa2enabled=true; partialGraph.startForceAtlas2();
 	});
 
+	$('.gradient').css({"background-size":"90px 90px"});
+
 }
       
 function updateDownNodeEvent(selectionRadius){
@@ -1708,6 +1710,30 @@ function changeToMacro(iwannagraph) {
     // fa2enabled=true; partialGraph.startForceAtlas2();
 
     $('.gradient').css({"background-size":"40px 40px"});
+
+    var activefilterscount=0;
+    for(var i in lastFilter) { 
+
+    	if(iwannagraph=="social" && i.indexOf("sliderA")!=-1 )
+    		if(lastFilter[i].charAt(0)!="0")
+    			activefilterscount++;
+
+    	if(iwannagraph=="semantic" && i.indexOf("sliderb")!=-1) 
+    		if(lastFilter[i].charAt(0)!="0")
+    			activefilterscount++;
+
+    	if(iwannagraph=="sociosemantic")
+    		if(lastFilter[i].charAt(0)!="0")
+    			activefilterscount++;
+    }
+
+    // for 1 second, activate FA2 if there is any filter applied
+    if(activefilterscount>0) {
+    	partialGraph.startForceAtlas2();
+    	$.doTimeout(2000,function (){
+    		partialGraph.stopForceAtlas2()
+    	});
+    }
 }
 
 function highlightOpossites (list){/*here*/

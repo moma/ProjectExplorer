@@ -222,7 +222,9 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                         return false
                     }
                     
-                    // partialGraph.stopForceAtlas2();
+                    // [ Stopping FA2 ]
+                    partialGraph.stopForceAtlas2();
+                    // [ / Stopping FA2 ]
 
                     for(var i in finalarray) {
                         ids = finalarray[i]
@@ -258,9 +260,12 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                     partialGraph.refresh()
                     partialGraph.draw()
 
-                    // $.doTimeout(300,function(){
-                    //     fa2enabled=true; partialGraph.startForceAtlas2();
-                    // });
+                    // [ Starting FA2 ]
+                    $.doTimeout(30,function(){
+                        fa2enabled=true; partialGraph.startForceAtlas2();
+                        if(filtervalue.charAt(0)=="0") partialGraph.stopForceAtlas2();
+                    });
+                    // [ / Starting FA2 ]
 
                 }
 
@@ -328,7 +333,9 @@ function NodeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                     return false
                 }
 
-                // partialGraph.stopForceAtlas2();
+                // [ Stopping FA2 ]
+                partialGraph.stopForceAtlas2();
+                // [ / Stopping FA2 ]
 
                 for(var i in finalarray) {
                     ids = finalarray[i]
@@ -336,13 +343,15 @@ function NodeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                         for(var id in ids) {
                             ID = ids[id]
                             Nodes[ID].lock = false;
-                            partialGraph._core.graph.nodesIndex[ID].hidden = false;
+                            if(partialGraph._core.graph.nodesIndex[ID])
+                                partialGraph._core.graph.nodesIndex[ID].hidden = false;
                         }
                     } else {
                         for(var id in ids) {
                             ID = ids[id]
                             Nodes[ID].lock = true;
-                            partialGraph._core.graph.nodesIndex[ID].hidden = true;
+                            if(partialGraph._core.graph.nodesIndex[ID])
+                                partialGraph._core.graph.nodesIndex[ID].hidden = true;
                         }                     
                     }
                 }
@@ -354,11 +363,12 @@ function NodeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                 partialGraph.refresh()
                 partialGraph.draw()
 
-                // $.doTimeout(300,function(){
-                //     fa2enabled=true; partialGraph.startForceAtlas2();
-                // });
-
-                // fa2enabled=true; partialGraph.startForceAtlas2()
+                // [ Starting FA2 ]
+                $.doTimeout(30,function(){
+                    fa2enabled=true; partialGraph.startForceAtlas2()
+                    if(filtervalue.charAt(0)=="0") partialGraph.stopForceAtlas2();
+                });
+                // [ / Starting FA2 ]
             }
             
         }

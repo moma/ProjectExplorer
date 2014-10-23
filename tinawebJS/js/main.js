@@ -651,6 +651,14 @@ function theListeners(){
         }
     });
 
+
+    $.doTimeout(5,function (){
+        fa2enabled=true; partialGraph.startForceAtlas2();
+        $.doTimeout(5,function (){
+            partialGraph.stopForceAtlas2();
+        });
+    });
+
 }
 
 // extractFromJson()
