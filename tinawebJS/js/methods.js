@@ -440,14 +440,52 @@ function LevelButtonDisable( TF ){
 }
 
 //tofix!
-function graphTagCloudElem(node_id){
+function graphTagCloudElem(node_id) {
     pr("\tin graphTagCloudElem");/**/
     console.log("in graphTagCloudElem, nodae_id: "+node_id);
     cancelSelection();
-    swMacro=true;
-    changeType();
-    MultipleSelection(node_id);
-    changeLevel();
+    partialGraph.emptyGraph();
+
+    var voisinage = []
+    var vars = []
+    if(Nodes[node_id].type==catSoc) {
+    	voisinage = nodes1;
+    	vars = ["social","a"]
+    } else {
+    	voisinage = nodes2;
+    	vars = ["semantic","b"]
+    }
+ 	
+    var finalnodes={}
+	finalnodes[node_id]=1
+	if(voisinage[node_id]) {
+		for(var j in voisinage[node_id].neighbours) {
+		    id=voisinage[node_id].neighbours[j];
+		    s = node_id;
+		    t = id;
+		    edg1 = Edges[s+";"+t];
+		    if(edg1){
+		        if(!edg1.lock) finalnodes[t] = 1;
+		    }
+		    edg2 = Edges[t+";"+s];
+		    if(edg2){
+		        if(!edg2.lock) finalnodes[t] = 1;
+		    }
+		}
+	}
+    for (var Nk in finalnodes) unHide(Nk);
+    createEdgesForExistingNodes(vars[0]);
+
+	pushSWClick(vars[0]);
+	RefreshState(vars[1]);
+	swMacro=false;
+
+	MultipleSelection(node_id);
+
+	$.doTimeout(10,function (){
+		fa2enabled=true; partialGraph.startForceAtlas2();
+	});
+
 }
       
 function updateDownNodeEvent(selectionRadius){
@@ -993,8 +1031,6 @@ function MultipleSelection(nodes){
 		checkBox=false;
 	} else { 
 	  //checkbox = true
-		//incrementing the selections[]
-
 		cancelSelection(false);
 		greyEverything(); 
 
@@ -1463,19 +1499,51 @@ function changeToMeso(iwannagraph) {
 
             var finalnodes = {}
             if(swclickPrev=="semantic") {
+
+
+
+                var finalnodes={}
                 for(var i in selections) {
-                    // unHide(i);
-                    finalnodes[i] = 1;
-                    if(nodes2[i]) {
-                        neigh=nodes2[i].neighbours;
-                        for(var j in neigh) {
-                            // unHide(neigh[j]);
-                            finalnodes[neigh[j]] = 1;
-                        }
-                    }
+                   finalnodes[i]=1
+                   if(nodes2[i]) {
+                       for(var j in nodes2[i].neighbours) {
+                            id=nodes2[i].neighbours[j];
+                            s = i;
+                            t = id;
+                            edg1 = Edges[s+";"+t];
+                            if(edg1){
+                                // pr("\tunhide "+edg1.id)
+                                if(!edg1.lock){
+                                    finalnodes[t] = 1;
+                                }
+                            }
+                            edg2 = Edges[t+";"+s];
+                            if(edg2){
+                                // pr("\tunhide "+edg2.id)
+                                if(!edg2.lock){
+                                    finalnodes[t] = 1;
+                                }
+                            }
+                       }
+                   }
                 }
+
                 for (var Nk in finalnodes) unHide(Nk);
-                createEdgesForExistingNodes(iwannagraph);
+                createEdgesForExistingNodes(iwannagraph);/**/   
+
+                // for(var i in selections) {
+                //     // unHide(i);
+                //     finalnodes[i] = 1;
+                //     if(nodes2[i]) {
+                //         neigh=nodes2[i].neighbours;
+                //         for(var j in neigh) {
+                //             // unHide(neigh[j]);
+                //             finalnodes[neigh[j]] = 1;
+                //         }
+                //     }
+                // }
+                // for (var Nk in finalnodes) unHide(Nk);
+                // createEdgesForExistingNodes(iwannagraph);
             }
             if(swclickPrev=="social") {  
                 var finalnodes = {}          
