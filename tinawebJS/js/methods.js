@@ -451,9 +451,11 @@ function graphTagCloudElem(node_id) {
     if(Nodes[node_id].type==catSoc) {
     	voisinage = nodes1;
     	vars = ["social","a"]
+    	$("#colorGraph").show();
     } else {
     	voisinage = nodes2;
     	vars = ["semantic","b"]
+    	$("#colorGraph").hide();
     }
  	
     var finalnodes={}
@@ -487,6 +489,7 @@ function graphTagCloudElem(node_id) {
 	});
 
 	$('.gradient').css({"background-size":"90px 90px"});
+
 
 }
       
@@ -1244,15 +1247,6 @@ function createEdgesForExistingNodes (typeOfNodes) {
 }
 
 function hideEverything(){
-    //visibleNodes=[];
-    //visibleEdges=[];
-    //    if(swclickActual=="social" && semanticConverged<2){
-    //        if(semanticConverged===1) semanticConverged++;
-    //    }
-    //    if(swclickActual=="semantic" && socialConverged<2){
-    //        if(socialConverged===1) socialConverged++;        
-    //    }
-    //  
     pr("\thiding all");
     nodeslength=0;
     for(var n in partialGraph._core.graph.nodesIndex){
@@ -1272,6 +1266,7 @@ function unHide(id){
     // pr("in unhide "+iwantograph+" | swMacro: "+swMacro)
     if(id.split(";").length==1) {
     // i've received a NODE
+        if(!isUndef(getn(id))) return;
         if(Nodes[id]) {
             var anode = ({
                 id:id,
@@ -1296,6 +1291,7 @@ function unHide(id){
     }
     else {// It's an edge!
         //visibleEdges.push(id);
+        if(!isUndef(gete(id))) return;
         if(Edges[id] && !Edges[id].lock){
 
             var anedge = {

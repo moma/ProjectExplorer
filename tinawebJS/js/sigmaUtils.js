@@ -129,7 +129,6 @@ function getNodeIDs(elems){
 }
 
 
-
 function getSelections(){    
         params=[];
         for(var i in selections){
@@ -180,17 +179,6 @@ function getArrSubkeys(arr,id) {
     for(var i in arr) {
         result.push(arr[i][id])
     }
-    return result;
-}
-
-//to general utils
-function getClientTime(){
-    var totalSec = new Date().getTime() / 1000;
-    var d = new Date();
-    var hours = d.getHours();
-    var minutes = parseInt( totalSec / 60 ) % 60;
-    var seconds = (totalSec % 60).toFixed(4);
-    var result = (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds  < 10 ? "0" + seconds : seconds);
     return result;
 }
 

@@ -171,7 +171,6 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 		return;
 	}
 
-    
 	// sliderDivID = "#sliderAEdgeWeight"
 	// type = "nodes1"
 	// type_attrb = "label"
@@ -201,7 +200,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
     var steps = filterparams["steps"]
     var finalarray = filterparams["finalarray"]
-    
+    pr(finalarray)
     //finished
     $(sliderDivID).freshslider({
         range: true,
@@ -239,6 +238,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                                         if(isUndef(getn(sid))) unHide(sid)
                                         if(isUndef(getn(tid))) unHide(tid)
                                         add1Edge(ID)
+                                        // pr("addedge")
                                     }
                                 }
                                 
@@ -248,6 +248,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                                 ID = ids[id]
                                 partialGraph.dropEdge(ID)
                                 Edges[ID].lock = true;
+                                // pr("removeedge")
                             }
                         }
                     }
