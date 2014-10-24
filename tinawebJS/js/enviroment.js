@@ -197,10 +197,14 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
     }
 
     var filterparams = AlgorithmForSliders ( partialGraph._core.graph.edges , type_attrb , type , criteria) 
-
     var steps = filterparams["steps"]
     var finalarray = filterparams["finalarray"]
     
+
+    var lastvalue=("0-"+(steps-1));
+
+    pushFilterValue( sliderDivID , lastvalue )
+
     //finished
     $(sliderDivID).freshslider({
         range: true,
@@ -211,48 +215,97 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
         value:[0,steps-1],
         onchange:function(low, high) {
 
-            $.doTimeout(300,function () {
+            var filtervalue = low+"-"+high
 
-                var filtervalue = low+"-"+high
-                
-                if(filtervalue!=lastFilter[sliderDivID]) {
-                    if(lastFilter[sliderDivID]=="-") {
-                        pushFilterValue( sliderDivID , filtervalue )
-                        return false
-                    }
-                    
+            if(filtervalue!=lastFilter[sliderDivID]) {
+
+                $.doTimeout(sliderDivID+"_"+lastFilter[sliderDivID]);
+
+                $.doTimeout( sliderDivID+"_"+filtervalue,300,function () {
+
+                    pr("\nprevious value "+lastvalue+" | current value "+filtervalue)
+
                     // [ Stopping FA2 ]
                     partialGraph.stopForceAtlas2();
                     // [ / Stopping FA2 ]
 
-                    for(var i in finalarray) {
+                    var t0 = lastvalue.split("-")
+                    var mint0=parseInt(t0[0]), maxt0=parseInt(t0[1]), mint1=parseInt(low), maxt1=parseInt(high);
+                    var addflag = false;
+                    var delflag = false;
+
+                    var iterarr = []
+
+
+                    if(mint0!=mint1) {
+                        if(mint0<mint1) {
+                            delflag = true;
+                            pr("cotainferior   --||>--------||   a la derecha")
+                        }
+                        if(mint0>mint1) {
+                            addflag = true;
+                            pr("cotainferior   --<||--------||   a la izquierda")
+                        }
+                        iterarr = calc_range(mint0,mint1).sort(compareNumbers);
+                    }
+
+                    if(maxt0!=maxt1) {
+                        if(maxt0<maxt1) {
+                            addflag = true;
+                            pr("cotasuperior   ||--------||>--   a la derecha")
+                        }
+                        if(maxt0>maxt1) {
+                            delflag = true;
+                            pr("cotasuperior   ||--------<||--   a la izquierda")
+                        }
+                        iterarr = calc_range(maxt0,maxt1).sort(compareNumbers);
+                    }
+
+                    // do the important stuff
+                    for( var c in iterarr ) {
+                        
+                        var i = iterarr[c];
                         ids = finalarray[i]
-                        if(i>=low && i<=high){
-                            for(var id in ids) {                            
-                                ID = ids[id]
-                                Edges[ID].lock = false;
-                                for (var n in partialGraph._core.graph.nodesIndex) {
-                                    sid = Edges[ID].sourceID
-                                    tid = Edges[ID].targetID
-                                    if (sid==n || tid==n) {
-                                        if(isUndef(getn(sid))) unHide(sid)
-                                        if(isUndef(getn(tid))) unHide(tid)
+
+                        if(i>=low && i<=high) {
+                            if(addflag) {
+                                // pr("adding "+ids.join())
+                                for(var id in ids) {                            
+                                    ID = ids[id]
+                                    Edges[ID].lock = false;
+
+                                    if(swMacro) {
                                         add1Edge(ID)
-                                        // pr("addedge")
+                                    } else {
+                                        for (var n in partialGraph._core.graph.nodesIndex) {
+                                            sid = Edges[ID].sourceID
+                                            tid = Edges[ID].targetID
+                                            if (sid==n || tid==n) {
+                                                if(isUndef(getn(sid))) unHide(sid)
+                                                if(isUndef(getn(tid))) unHide(tid)
+                                                add1Edge(ID)
+                                                // pr("\tADD "+ID)
+                                            }
+                                        }
                                     }
+                                    
                                 }
-                                
                             }
+
                         } else {
-                            for(var id in ids) {
-                                ID = ids[id]
-                                partialGraph.dropEdge(ID)
-                                Edges[ID].lock = true;
-                                // pr("removeedge")
+                            if(delflag) {
+                                // pr("deleting "+ids.join())
+                                for(var id in ids) {
+                                    ID = ids[id]
+                                    if(!isUndef(gete(ID)))
+                                        partialGraph.dropEdge(ID)
+                                    Edges[ID].lock = true;
+                                    // pr("\tDEL "+ID)
+                                    // pr("removeedge")
+                                }
                             }
                         }
                     }
-                    pushFilterValue(sliderDivID,filtervalue)
 
                     if (!is_empty(selections))
                         DrawAsSelectedNodes(selections)
@@ -268,9 +321,11 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                     });
                     // [ / Starting FA2 ]
 
-                }
 
-            });// [/doTimeout]
+                    lastvalue = filtervalue;
+                });
+                pushFilterValue( sliderDivID , filtervalue )
+            }
             
         }
     });

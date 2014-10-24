@@ -1119,7 +1119,7 @@ sigma.publicPrototype.startForceAtlas2 = function() {
     this.forceatlas2.init();
 
     this.forceatlas2.active=true;
-    pr("\t\t\t\t\tFA2 Started")
+    // pr("\t\t\t\t\tFA2 Started")
     var ene = this._core.graph.nodes.length;
     var isolatedBCauseFilter = 0;
     for (var i in this._core.graph.nodesIndex) {
@@ -1140,7 +1140,7 @@ sigma.publicPrototype.startForceAtlas2 = function() {
 
     // fixing anomaly in forceatlas2
     $.doTimeout(250,function (){
-      if( partialGraph.forceatlas2.active && partialGraph.forceatlas2.count==0 ) {
+      if( !swMacro && partialGraph.forceatlas2.active && partialGraph.forceatlas2.count==0) {
         pr("SUPER JUTSU!!")
         partialGraph.startForceAtlas2();
         return;
@@ -1152,7 +1152,7 @@ sigma.publicPrototype.startForceAtlas2 = function() {
 
 sigma.publicPrototype.stopForceAtlas2 = function() {
 
-  pr("\t\t\t\t\tFA2 Stopped")
+  // pr("\t\t\t\t\tFA2 Stopped")
   this.removeGenerator('forceatlas2');
   this.forceatlas2.active=false;
   this.forceatlas2.count=0;

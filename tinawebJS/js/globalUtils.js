@@ -15,6 +15,22 @@ function getClientTime(){
     return result;
 }
 
+function compareNumbers(a, b) {
+    return a - b;
+}
+
+//python range(a,b) | range(a)
+function calc_range(begin, end) {
+  if (typeof end === "undefined") {
+    end = begin; begin = 0;
+  }
+  var result = [], modifier = end > begin ? 1 : -1;
+  for ( var i = 0; i <= Math.abs(end - begin); i++ ) {
+    result.push(begin + i * modifier);
+  }
+  return result;
+}
+
 
 //to general utils (not used btw)
 function cloneObject(source) {
