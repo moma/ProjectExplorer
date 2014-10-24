@@ -27,6 +27,10 @@ ircCHN="";
 var catSoc = "Document";
 var catSem = "NGram";
 
+var sizeMult = [];
+    sizeMult[catSoc] = 0.0;
+    sizeMult[catSem] = 0.0;
+
 var inactiveColor = '#666';
 var startingNodeId = "1";
 var minLengthAutoComplete = 1;

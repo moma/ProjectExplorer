@@ -1279,10 +1279,11 @@ function unHide(id){
     // i've received a NODE
         if(!isUndef(getn(id))) return;
         if(Nodes[id]) {
+            var tt = Nodes[id].type
             var anode = ({
                 id:id,
                 label: Nodes[id].label, 
-                size: Nodes[id].size, 
+                size: (parseFloat(Nodes[id].size)+sizeMult[tt])+"", 
                 x: Nodes[id].x, 
                 y: Nodes[id].y,
                 hidden:  (Nodes[id].lock)?true:false,

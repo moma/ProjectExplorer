@@ -321,6 +321,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                     });
                     // [ / Starting FA2 ]
 
+                    pr("\t\t\tfilter applied!")
 
                     lastvalue = filtervalue;
                 });

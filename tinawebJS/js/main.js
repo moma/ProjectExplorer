@@ -603,10 +603,11 @@ function theListeners(){
         value:1,
         bgcolor:"#27c470",
         onchange:function(value){
-            $.doTimeout(100,function (){2
+            $.doTimeout(100,function (){
                    partialGraph.iterNodes(function (n) {
                        if(Nodes[n.id].type==catSoc) {
                            n.size = parseFloat(Nodes[n.id].size) + parseFloat((value-1))*0.3;
+                           sizeMult[catSoc] = parseFloat(value-1)*0.3;
                        }
                    });
                    partialGraph.draw();
@@ -626,6 +627,7 @@ function theListeners(){
                    partialGraph.iterNodes(function (n) {
                        if(Nodes[n.id].type==catSem) {
                            n.size = parseFloat(Nodes[n.id].size) + parseFloat((value-1))*0.3;
+                           sizeMult[catSem] = parseFloat(value-1)*0.3;
                        }
                    });
                    partialGraph.draw();
