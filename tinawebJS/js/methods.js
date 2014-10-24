@@ -453,7 +453,8 @@ function graphTagCloudElem(nodes) {
     var voisinage = []
     var vars = []
 
-    node_id = nodes[0]
+    node_id = ndsids[0]
+    
     if(Nodes[node_id].type==catSoc) {
     	voisinage = nodes1;
     	vars = ["social","a"]
