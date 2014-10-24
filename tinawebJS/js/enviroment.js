@@ -200,7 +200,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
     var steps = filterparams["steps"]
     var finalarray = filterparams["finalarray"]
-    pr(finalarray)
+    
     //finished
     $(sliderDivID).freshslider({
         range: true,

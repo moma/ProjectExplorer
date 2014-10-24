@@ -410,8 +410,9 @@ function theListeners(){
             });
         }
 
-        if(!is_empty(targeted)) changeLevel();
-        else {
+        if(!is_empty(targeted)) {
+            graphTagCloudElem(targeted); 
+        } else {
             if(!is_empty(selections)){
                 cancelSelection(false);                
             }

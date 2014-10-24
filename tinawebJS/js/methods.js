@@ -440,14 +440,20 @@ function LevelButtonDisable( TF ){
 }
 
 //tofix!
-function graphTagCloudElem(node_id) {
-    pr("\tin graphTagCloudElem");/**/
-    console.log("in graphTagCloudElem, nodae_id: "+node_id);
+function graphTagCloudElem(nodes) {
+    pr("in graphTagCloudElem, nodae_id: "+nodes);
     cancelSelection();
     partialGraph.emptyGraph();
 
+
+    var ndsids=[]
+    if(! $.isArray(nodes)) ndsids.push(nodes);
+    else ndsids=nodes;
+
     var voisinage = []
     var vars = []
+
+    node_id = nodes[0]
     if(Nodes[node_id].type==catSoc) {
     	voisinage = nodes1;
     	vars = ["social","a"]
@@ -459,22 +465,26 @@ function graphTagCloudElem(node_id) {
     }
  	
     var finalnodes={}
-	finalnodes[node_id]=1
-	if(voisinage[node_id]) {
-		for(var j in voisinage[node_id].neighbours) {
-		    id=voisinage[node_id].neighbours[j];
-		    s = node_id;
-		    t = id;
-		    edg1 = Edges[s+";"+t];
-		    if(edg1){
-		        if(!edg1.lock) finalnodes[t] = 1;
-		    }
-		    edg2 = Edges[t+";"+s];
-		    if(edg2){
-		        if(!edg2.lock) finalnodes[t] = 1;
-		    }
-		}
-	}
+
+    for (var i in ndsids) {
+        node_id = ndsids[i]
+    	finalnodes[node_id]=1
+    	if(voisinage[node_id]) {
+    		for(var j in voisinage[node_id].neighbours) {
+    		    id=voisinage[node_id].neighbours[j];
+    		    s = node_id;
+    		    t = id;
+    		    edg1 = Edges[s+";"+t];
+    		    if(edg1){
+    		        if(!edg1.lock) finalnodes[t] = 1;
+    		    }
+    		    edg2 = Edges[t+";"+s];
+    		    if(edg2){
+    		        if(!edg2.lock) finalnodes[t] = 1;
+    		    }
+    		}
+    	}
+    }
     for (var Nk in finalnodes) unHide(Nk);
     createEdgesForExistingNodes(vars[0]);
 
