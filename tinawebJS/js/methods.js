@@ -493,7 +493,7 @@ function graphTagCloudElem(nodes) {
 	RefreshState(vars[1]);
 	swMacro=false;
 
-	MultipleSelection(node_id);
+	MultipleSelection(ndsids);
 
 	$.doTimeout(10,function (){
 		fa2enabled=true; partialGraph.startForceAtlas2();
