@@ -500,8 +500,6 @@ function graphTagCloudElem(nodes) {
 	});
 
 	$('.gradient').css({"background-size":"90px 90px"});
-
-
 }
       
 function updateDownNodeEvent(selectionRadius){
@@ -1029,6 +1027,8 @@ function MultipleSelection(nodes){
 
 	pr("IN MULTIPLE SELECTION: checkbox="+checkBox)
 
+    var prevsels = selections;
+
 	if(!checkBox) cancelSelection(false);
 
 	greyEverything(); 
@@ -1038,12 +1038,43 @@ function MultipleSelection(nodes){
 	else ndsids=nodes;
 
 	if(!checkBox) {
-		checkBox=true;
-		for(var i in ndsids){
-		 	nodeid = ndsids[i]
-		 	getOpossitesNodes(nodeid,false); //false -> just nodeid
-		 	markAsSelected(nodeid,true); 
-		}
+		checkBox=true;      
+        
+        if(!is_empty(prevsels) && (PAST==NOW || PAST=="--")) {
+            var blacklist = {};
+            for(var i in ndsids) {
+                ID = ndsids[i];
+                if ( prevsels[ID] ) {
+                    delete prevsels[ID];
+                    blacklist[ID] = true;
+                }
+            }
+
+            if(Object.keys(blacklist).length>0) {
+                tmparr = Object.keys(prevsels);
+                for (var i in ndsids) {
+                    ID = ndsids[i];
+                    if(isUndef(blacklist[ID])) {
+                        tmparr.push(ID)
+                    }
+                }
+                ndsids = tmparr;
+            }
+        }
+
+        if (ndsids.length>0) {
+    		for(var i in ndsids) {
+    		 	nodeid = ndsids[i]
+    		 	getOpossitesNodes(nodeid,false); //false -> just nodeid
+    		 	markAsSelected(nodeid,true);
+    		}
+        } else {
+            cancelSelection(false);
+            partialGraph.draw();
+            RefreshState("")
+            checkBox=false;
+            return;
+        }
 		checkBox=false;
 	} else { 
 	  //checkbox = true
@@ -1055,7 +1086,6 @@ function MultipleSelection(nodes){
 		 	getOpossitesNodes(nodeid,false); //false -> just nodeid
 		 	markAsSelected(nodeid,true); 
 		}
-
     }
 
 	overNodes=true; 
@@ -1104,14 +1134,15 @@ function hoverNodeEffectWhileFA2(selectionRadius) {
     partialGraph.bind('downnodes', function (event) {
         var nodeID = event.content;
         if(nodeID.length>0) {
+
             pr("\t\t\t\t"+nodeID+" -> "+Nodes[nodeID].label);
             pr(getn(nodeID))
+
             if(cursor_size==0 && !checkBox){
                 //Normal click on a node
                 $.doTimeout(30,function (){
                     MultipleSelection(nodeID);
                 });
-                // getOpossitesNodes(nodeID, false);//passing just the node-id
             }
             
             if(cursor_size==0 && checkBox){
@@ -1120,7 +1151,6 @@ function hoverNodeEffectWhileFA2(selectionRadius) {
                 $.doTimeout(30,function (){
                     MultipleSelection( Object.keys(selections) );
                 });
-                // getOpossitesNodes(nodeID, false);//passing just the node-id
             }
         }
     });
