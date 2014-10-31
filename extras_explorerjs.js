@@ -62,7 +62,6 @@ function callGeomap(){
     // $("#CurrentView").hide();
 }
 
-
 function clickInCountry( CC ) {
     // pr("in extras.js: you've clicked "+CC)
     var results = []
@@ -177,78 +176,6 @@ function getTopPapers(type){
     }
 }
 
-//very obsolete: please renew!
-//For UNI-PARTITE
-function updateLeftPanel_uni(){//Uni-partite graph
-    pr("\t ** in updateLeftPanel_uni() ** ");
-    var names='';
-    var information='';
-    
-    counter=0;
-    names+='<div id="selectionsBox">';
-    names += '<h4>';
-    for(var i in selections){
-        if(counter==4){
-            names += '<h4>[...]</h4>';
-            break;
-        }
-        names += Nodes[i].label+', ';
-        counter++;
-    }
-    names += '</h4>';
-    names=names.replace(", </h4>","</h4>");
-    names=names.replace(", <h4>","<h4>");
-    names+='</div>';
-    
-    
-    minFont=12;
-    //maxFont=(minFont+oposMAX)-1;  
-    maxFont=20;
-    
-    getTopPapers("semantic");
-    
-    js2='\');"';
-    information += '<br><h4>Information:</h4>';
-    information += '<ul>';
-            
-    for(var i in selections){
-        information += '<div id="opossitesBox">';
-        information += '<li><b>' + Nodes[i].label.toUpperCase() + '</b></li>';
-                //for(var j in Nodes[i].attributes){
-        //            if(Nodes[i].attributes[j].attr=="period"||
-        //                Nodes[i].attributes[j].attr=="cluster_label" 
-        //                    )
-                information += 
-                '<li><b>Topic' + 
-                '</b>:&nbsp;'+Nodes[i].attributes["cluster_label"]+'</li>';
-
-                information += '<a href="https://www.google.com/#q='+Nodes[i].label+'"  target=blank>'+'www</a>';
-        //}
-        information += '</div>';            
-        information += '</ul><br>';
-    }
-    
-    
-    $("#names").html(names); //Information extracted, just added
-    $("#information").html(information); //Information extracted, just added
-    $("#tips").html("");
-    $("#topPapers").show();
-    /***** The animation *****/
-    _cG = $("#leftcolumn");
-    _cG.animate({
-        "left" : "0px"
-    }, function() {
-        $("#aUnfold").attr("class","leftarrow");
-        $("#zonecentre").css({
-            left: _cG.width() + "px"
-        });
-    });
-    i=0; for(var s in selections) i++;
-    if(is_empty(selections)==true || i==0){
-        cancelSelection(false);
-        partialGraph.draw();
-    }
-}
 
 //FOR UNI-PARTITE
 function selectionUni(currentNode){
@@ -381,7 +308,7 @@ function getTips(){
 
 
 
-//da hell is this
+//both obsolete
 function closeDialog () {
     $('#windowTitleDialog').modal('hide'); 
 }

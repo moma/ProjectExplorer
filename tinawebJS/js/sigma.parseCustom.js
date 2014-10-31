@@ -115,9 +115,9 @@ function onepartiteExtract(){
       
             window.NODE = nodeNode;
 
-            var id = nodeNode.getAttribute('id');
+            var id = ""+nodeNode.getAttribute('id');
             var label = nodeNode.getAttribute('label') || id;
-                 
+            
             //viz
             var size=1;
             sizeNodes = nodeNode.getElementsByTagName('size');
@@ -281,7 +281,6 @@ function onepartiteExtract(){
                             
         }
     }
-    $("#closeloader").click();
 }
 
 function fullExtract(){
@@ -348,7 +347,6 @@ function fullExtract(){
 
             var id = nodeNode.getAttribute('id');
             var label = nodeNode.getAttribute('label') || id;
-            //viz
             
             var size=1;
             sizeNodes = nodeNode.getElementsByTagName('size');
@@ -422,8 +420,7 @@ function fullExtract(){
                 numberOfDocs++;
                 //node.size=desirableScholarSize;
                 if(typeof(node.size)==="undefined") node.size=nodew;
-            }
-            else {
+            } else {
                 node.type=catSem;
                 node.id = "N::"+node.id;
                 numberOfNGrams++;
@@ -439,14 +436,16 @@ function fullExtract(){
             
         }
     }  
-
-    
     //New scale for node size: now, between 2 and 5 instead [1,70]
     for(var i in Nodes){
         normalizedSize=desirableNodeSizeMIN+(Nodes[i].size-1)*((desirableNodeSizeMAX-desirableNodeSizeMIN)/(parseInt(maxNodeSize)-parseInt(minNodeSize)));
         Nodes[i].size = ""+normalizedSize;
         nodeK = Nodes[i];
-        if(Nodes[i].type==catSoc) partialGraph.addNode(i,nodeK);  
+        if(Nodes[i].type==catSoc) {
+			nodeK.shape="square";
+        	partialGraph.addNode(i,nodeK); 
+        }
+        // pr(nodeK)
     }
     
 
@@ -465,7 +464,6 @@ function fullExtract(){
             target = (Nodes["D::"+target])? ("D::"+target):("N::"+target)
 
             var indice=source+";"+target;
-            
                 
             var edge = {
                 id:         indice,
@@ -507,6 +505,9 @@ function fullExtract(){
             idT=Nodes[edge.targetID].type;
 
             Edges[indice] = edge;
+            
+            if(idS==idT)
+           		pr(edge.sourceID+"|"+idS+" <-> "+idT+"|"+edge.targetID)
 
             if(idS==catSoc && idT==catSoc){  
                 // pr("anything here?")
@@ -600,7 +601,6 @@ function fullExtract(){
 
         }
     }
-    $("#closeloader").click();
 }
     
 

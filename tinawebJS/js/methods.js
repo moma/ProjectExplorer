@@ -365,22 +365,33 @@ function htmlfied_nodesatts(elems){
         var id=elems[i]
         var node = Nodes[id]
 
-        if(node.type==catSoc){
+        if (mainfile) {
             information += '<li><b>' + node.label + '</b></li>';
-            if(node.htmlCont==""){
-                if (!isUndef(node.level)) information += '<li>' + node.level + '</li>';
-            } else {
-                information += '<li>' + $("<div/>").html(node.htmlCont).text() + '</li>';
-            }        
-            socnodes.push(information)
-        }
-        if(node.type==catSem){
-            information += '<li><b>' + node.label + '</b></li>';
-            google='<a href=http://www.google.com/#hl=en&source=hp&q=%20'+node.label.replace(" ","+")+'%20><img src="'+twjs+'img/google.png"></img></a>';
-            wiki = '<a href=http://en.wikipedia.org/wiki/'+node.label.replace(" ","_")+'><img src="'+twjs+'img/wikipedia.png"></img></a>';
-            flickr= '<a href=http://www.flickr.com/search/?w=all&q='+node.label.replace(" ","+")+'><img src="'+twjs+'img/flickr.png"></img></a>';
-            information += '<li>'+google+"&nbsp;"+wiki+"&nbsp;"+flickr+'</li><br>';
-            semnodes.push(information)
+            for (var i in node.attributes) {
+                information += '<li>&nbsp;&nbsp;'+i +" : " + node.attributes[i] + '</li>';
+            }
+            socnodes.push(information);
+        } else {
+            if(node.type==catSoc){
+                information += '<li><b>' + node.label + '</b></li>';
+                if(node.htmlCont==""){
+                    if (!isUndef(node.level)) {
+                        information += '<li>' + node.level + '</li>';
+                    }
+                } else {
+                    information += '<li>' + $("<div/>").html(node.htmlCont).text() + '</li>';
+                }        
+                socnodes.push(information)
+            }
+
+            if(node.type==catSem){
+                information += '<li><b>' + node.label + '</b></li>';
+                google='<a href=http://www.google.com/#hl=en&source=hp&q=%20'+node.label.replace(" ","+")+'%20><img src="'+twjs+'img/google.png"></img></a>';
+                wiki = '<a href=http://en.wikipedia.org/wiki/'+node.label.replace(" ","_")+'><img src="'+twjs+'img/wikipedia.png"></img></a>';
+                flickr= '<a href=http://www.flickr.com/search/?w=all&q='+node.label.replace(" ","+")+'><img src="'+twjs+'img/flickr.png"></img></a>';
+                information += '<li>'+google+"&nbsp;"+wiki+"&nbsp;"+flickr+'</li><br>';
+                semnodes.push(information)
+            }
         }
     }
     return socnodes.concat(semnodes)
@@ -1039,8 +1050,10 @@ function MultipleSelection(nodes){
 
 	if(!checkBox) {
 		checkBox=true;      
-        
-        if(!is_empty(prevsels) && (PAST==NOW || PAST=="--")) {
+        pr("IN MULTIPLE SELECTION: past="+PAST)
+        pr("IN MULTIPLE SELECTION: now="+NOW)
+
+        if(!is_empty(prevsels) && (PAST=="--" || PAST==NOW )) {
             var blacklist = {};
             for(var i in ndsids) {
                 ID = ndsids[i];
@@ -1061,6 +1074,10 @@ function MultipleSelection(nodes){
                 ndsids = tmparr;
             }
         }
+        // bug in first A* to a*
+        pr("IN MULTIPLE SELECTION: ndsids=")
+        pr(ndsids)
+        pr("")
 
         if (ndsids.length>0) {
     		for(var i in ndsids) {
@@ -1092,8 +1109,9 @@ function MultipleSelection(nodes){
 
 	partialGraph.draw();
 
-	if(categoriesIndex.length==1) updateLeftPanel_uni();
-	if(categoriesIndex.length==2) updateLeftPanel_fix();
+    updateLeftPanel_fix();
+	// if(categoriesIndex.length==1) updateLeftPanel_uni();
+	// if(categoriesIndex.length==2) updateLeftPanel_fix();
 
     RefreshState("")
 }
@@ -1303,8 +1321,8 @@ function hideEverything(){
 }
 
 function unHide(id){
-	
-    // pr("in unhide "+iwantograph+" | swMacro: "+swMacro)
+	pr("unhide "+id)
+    id = ""+id;
     if(id.split(";").length==1) {
     // i've received a NODE
         if(!isUndef(getn(id))) return;

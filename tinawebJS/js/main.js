@@ -17,7 +17,7 @@ if (mainfile) {
     		parse(getUrlParam.file);
     		nb_cats = scanCategories();  
     		pr("nb_cats: "+nb_cats);
-    		listGexfs();    		
+    		// listGexfs();    		
             graphtype=(nb_cats==1)?"mono":"bi";
     		bringTheNoise(getUrlParam.file,graphtype);
     		
@@ -194,13 +194,14 @@ function bringTheNoise(pathfile,type){
     // < === EXTRACTING DATA === >
     if(mainfile) {
         pr("mainfile: "+mainfile)
-
-
-
 	    parse(decodeURIComponent(pathfile));
+
 	    if(type=="mono") {
+	    	$("#changetype").hide();
     		onepartiteExtract(); 
-    		$("#left").hide();
+            pushSWClick("social");
+            pr(partialGraph._core.graph.nodes.length)
+            pr(partialGraph._core.graph.edges.length)
 	    } 
 
         if(type=="bi")  {
@@ -208,8 +209,6 @@ function bringTheNoise(pathfile,type){
             semanticConverged=true;
             pr("here in fullextract")
             fullExtract();
-            $("#closeloader").click(); 
-
             pushSWClick("social");
             pr(partialGraph._core.graph.nodes.length)
             pr(partialGraph._core.graph.edges.length)
@@ -217,9 +216,10 @@ function bringTheNoise(pathfile,type){
 
         partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8).draw(2,2,2);
         theListeners(); 
+        $("#closeloader").click(); 
 
     } else {
-
+      // 
         var theurl,thedata,thename;
 
 	    if(type=="unique_id") {
@@ -240,6 +240,7 @@ function bringTheNoise(pathfile,type){
             thename = false;
         }
 
+        // Assigning name for the network
         if (thename) thename = getUrlParam.nodeidparam.replace(/\_/g, ' ').toUpperCase();
         else {
             elements = []
@@ -251,8 +252,8 @@ function bringTheNoise(pathfile,type){
                 }
             }
             thename = '"'+elements.join('" , "')+'"';
-
         }
+
         SigmaLayouting( theurl , thedata , thename );
     }  
 }
