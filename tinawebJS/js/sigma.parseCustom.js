@@ -517,8 +517,8 @@ function fullExtract(){
 
             Edges[indice] = edge;
             
-            if(idS==idT)
-           		pr(edge.sourceID+"|"+idS+" <-> "+idT+"|"+edge.targetID)
+            // if(idS==idT)
+           	// 	pr(edge.sourceID+"|"+idS+" <-> "+idT+"|"+edge.targetID)
 
             if(idS==catSoc && idT==catSoc){  
                 // pr("anything here?")
@@ -682,16 +682,12 @@ function extractFromJson(data,seed){
             Nodes[i].size = ""+normalizedSize;
             
             nodeK = Nodes[i];
-            otherGraph.addNode(i,nodeK);
-            // nodeK.hidden=true;/**///should be uncommented
-            // partialGraph.addNode(i,nodeK);   
+            otherGraph.addNode(i,nodeK);  
         } 
         else {
             partialGraph.addNode(i,Nodes[i]);  
             updateSearchLabels(i,Nodes[i].label,Nodes[i].type);
-            // unHide(i);
         }
-        // pr(Nodes[i])
     }
     
     var edgeId = 0;
@@ -706,14 +702,21 @@ function extractFromJson(data,seed){
                 sourceID:   source,
                 targetID:   target,
                 lock : false,
-                label:      edgesNodes[i].type,
+                label:      "",
                 weight: edgesNodes[i].w
             };
         if(edge.weight < minEdgeWeight) minEdgeWeight= edge.weight;
         if(edge.weight > maxEdgeWeight) maxEdgeWeight= edge.weight;
         Edges[indice] = edge;
-    
-        if(edge.label=="nodes1"){   
+
+
+        idS=Nodes[edge.sourceID].type;
+        idT=Nodes[edge.targetID].type;
+
+
+        if(idS==catSoc && idT==catSoc){  
+
+            edge.label = "nodes1";
 
             if(isUndef(nodes1[source])) {
                 nodes1[source] = {
@@ -738,7 +741,8 @@ function extractFromJson(data,seed){
         }
         
         
-        if(edge.label=="nodes2"){ 
+        if(idS==catSem && idT==catSem){ 
+            edge.label = "nodes2";
 
             if(isUndef(nodes2[source])) {
                 nodes2[source] = {
@@ -754,14 +758,16 @@ function extractFromJson(data,seed){
             }
             nodes2[source].neighbours.push(target);
             nodes2[target].neighbours.push(source);
-            
-            otherGraph.addEdge(indice,source,target,edge);
+        
+        	otherGraph.addEdge(indice,source,target,edge);
         }
         
         
-        if(edge.label=="bipartite"){   
+        if((idS==catSoc && idT==catSem)||(idS==catSem && idT==catSoc)) {
+            edge.label = "bipartite";
 
             s = edge.sourceID
+
             // // Source is Document
             if(Nodes[s].type == catSoc) {
 
