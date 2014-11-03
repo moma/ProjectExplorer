@@ -1049,16 +1049,10 @@ function MultipleSelection(nodes){
 	else ndsids=nodes;
 
 	if(!checkBox) {
-		checkBox=true;      
-        pr("IN MULTIPLE SELECTION: past="+PAST)
-        pr("IN MULTIPLE SELECTION: now="+NOW)
-        pr("previous selections:")
-        pr(prevsels)
+		checkBox=true;
 
         if(PAST=="--") {
             pr("faire rien")
-            // ndsids = Object.keys(prevsels);
-
         } else {
             if(!is_empty(prevsels) && PAST==NOW ) {
                 var blacklist = {};
@@ -1082,10 +1076,6 @@ function MultipleSelection(nodes){
                 }
             }
         }
-        // bug in first A* to a*
-        pr("IN MULTIPLE SELECTION: ndsids=")
-        pr(ndsids)
-        pr("")
 
         if (ndsids.length>0) {
     		for(var i in ndsids) {
@@ -1101,6 +1091,7 @@ function MultipleSelection(nodes){
             return;
         }
 		checkBox=false;
+        
 	} else { 
 	  //checkbox = true
 		cancelSelection(false);
@@ -1118,8 +1109,6 @@ function MultipleSelection(nodes){
 	partialGraph.draw();
 
     updateLeftPanel_fix();
-	// if(categoriesIndex.length==1) updateLeftPanel_uni();
-	// if(categoriesIndex.length==2) updateLeftPanel_fix();
 
     RefreshState("")
 }

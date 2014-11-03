@@ -230,7 +230,7 @@ function bringTheNoise(pathfile,type){
             theurl = bridge["forNormalQuery"]
             thedata = "unique_id="+getUrlParam.nodeidparam+"&it="+iterationsFA2;
             thename = true;
-	    } 
+	    }
 
 
         if (type=="filtermode") {
@@ -239,6 +239,7 @@ function bringTheNoise(pathfile,type){
             theurl = bridge["forFilteredQuery"];
             thedata = "query="+getUrlParam.nodeidparam;
             thename = false;
+            thedata = thedata.replace("#","_char_");//possible bugfix
         }
 
         // Assigning name for the network
@@ -258,6 +259,8 @@ function bringTheNoise(pathfile,type){
         SigmaLayouting( theurl , thedata , thename );
     }  
 }
+
+//http://communityexplorer.org/explorerjs.html?nodeidparam={%22categorya%22%3A%22Keywords%22%2C%22categoryb%22%3A%22Scholars%22%2C%22tags%22%3A[%22%23resident%22]}
 
 
 function theListeners(){
@@ -670,7 +673,7 @@ function theListeners(){
 //      Social Spatialization
 //          Semantic Spatialization
 function SigmaLayouting( URL, DATA, NAME) {
-
+	pr(URL+"?"+DATA)
     return $.ajax({
         type: 'GET',
         url: URL,
@@ -679,6 +682,7 @@ function SigmaLayouting( URL, DATA, NAME) {
         dataType: 'jsonp',
         async: true,
         success : function(data) {
+        	pr(data)
                     if(!isUndef(getUrlParam.seed))seed=getUrlParam.seed;
                     extractFromJson(data,seed);
 
@@ -783,7 +787,6 @@ function SigmaLayouting( URL, DATA, NAME) {
                             $("#semLoader").hide();
                             if( NOW=="B" ) { 
 
-                                pr("i made a modification")
                                 changeToMacro("semantic");
                                 partialGraph.draw();            
                                 // $("#sliderBEdgeWeight").html("");
