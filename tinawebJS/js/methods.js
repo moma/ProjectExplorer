@@ -1052,26 +1052,34 @@ function MultipleSelection(nodes){
 		checkBox=true;      
         pr("IN MULTIPLE SELECTION: past="+PAST)
         pr("IN MULTIPLE SELECTION: now="+NOW)
+        pr("previous selections:")
+        pr(prevsels)
 
-        if(!is_empty(prevsels) && (PAST=="--" || PAST==NOW )) {
-            var blacklist = {};
-            for(var i in ndsids) {
-                ID = ndsids[i];
-                if ( prevsels[ID] ) {
-                    delete prevsels[ID];
-                    blacklist[ID] = true;
-                }
-            }
+        if(PAST=="--") {
+            pr("faire rien")
+            // ndsids = Object.keys(prevsels);
 
-            if(Object.keys(blacklist).length>0) {
-                tmparr = Object.keys(prevsels);
-                for (var i in ndsids) {
+        } else {
+            if(!is_empty(prevsels) && PAST==NOW ) {
+                var blacklist = {};
+                for(var i in ndsids) {
                     ID = ndsids[i];
-                    if(isUndef(blacklist[ID])) {
-                        tmparr.push(ID)
+                    if ( prevsels[ID] ) {
+                        delete prevsels[ID];
+                        blacklist[ID] = true;
                     }
                 }
-                ndsids = tmparr;
+
+                if(Object.keys(blacklist).length>0) {
+                    tmparr = Object.keys(prevsels);
+                    for (var i in ndsids) {
+                        ID = ndsids[i];
+                        if(isUndef(blacklist[ID])) {
+                            tmparr.push(ID)
+                        }
+                    }
+                    ndsids = tmparr;
+                }
             }
         }
         // bug in first A* to a*
@@ -1358,7 +1366,7 @@ function hideEverything(){
 }
 
 function unHide(id){
-	pr("unhide "+id)
+	// pr("unhide "+id)
     id = ""+id;
     if(id.split(";").length==1) {
     // i've received a NODE
@@ -1474,8 +1482,8 @@ function changeToMeso(iwannagraph) {
     pr("changing to Meso-"+iwannagraph);
 
     if(iwannagraph=="social") {
-        if(!is_empty(selections)){
-            // hideEverything();
+        if(!is_empty(selections)) {
+            
             if(swclickPrev=="social") {
 
                 var finalnodes={}
@@ -1698,6 +1706,8 @@ function changeToMeso(iwannagraph) {
 
     fa2enabled=true; partialGraph.startForceAtlas2();
 
+    pr("inside multipleselection:")
+    printStates();
     MultipleSelection(Object.keys(selections));
 
     $('.gradient').css({"background-size":"90px 90px"});
