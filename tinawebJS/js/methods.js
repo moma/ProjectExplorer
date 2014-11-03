@@ -1203,6 +1203,43 @@ function createEdgesForExistingNodes (typeOfNodes) {
 
     existingNodes = partialGraph._core.graph.nodes;
 
+
+
+    if( categoriesIndex.length==1 ) {
+
+        var pairdict = {}
+        for(var n in existingNodes) {
+            ID = existingNodes[n].id;
+            vois = nodes1[ID].neighbours;
+
+            for(var v in vois) {
+                pair = [ parseInt(ID) , parseInt(vois[v]) ].sort(compareNumbers)
+                pairdict [ pair[0]+";"+pair[1] ] = 1
+            }
+        }
+
+        for (var e in pairdict) {
+
+            edge = "";
+            if(isUndef(Edges[e])) {
+                E = e.split(";")
+                edge = E[1]+";"+E[0];
+            } else edge=e;
+
+            E = edge.split(";")
+            if( getn(E[0]) && getn(E[1]) )
+                unHide(edge)
+
+            // pr("antes:"+e+"\t|\tdespues:"+edge)
+            // pr("\t\t\t\t\t----- decision final "+edge)
+            // unHide(edge)
+        }
+
+        return;
+    }
+
+
+
     if(typeOfNodes=="Bipartite"){
         for(i=0; i < existingNodes.length ; i++){
             for(j=0; j < existingNodes.length ; j++){
@@ -1427,6 +1464,7 @@ function unHideElem(id){
 }
 
 function changeToMeso(iwannagraph) { 
+
     labels=[]
 
     iwantograph=iwannagraph;//just a mess
@@ -1434,6 +1472,7 @@ function changeToMeso(iwannagraph) {
     partialGraph.emptyGraph();
 
     pr("changing to Meso-"+iwannagraph);
+
     if(iwannagraph=="social") {
         if(!is_empty(selections)){
             // hideEverything();
@@ -1464,11 +1503,10 @@ function changeToMeso(iwannagraph) {
                        }
                    }
                 }
-
                 for (var Nk in finalnodes) unHide(Nk);
                 createEdgesForExistingNodes(iwannagraph);/**/   
-
             }
+
             if(swclickPrev=="semantic") {
 
                 var finalnodes={}
@@ -1494,6 +1532,7 @@ function changeToMeso(iwannagraph) {
                 for (var Nk in finalnodes) unHide(Nk);
                 createEdgesForExistingNodes(iwannagraph);/**/   
             }
+
             if(swclickPrev=="sociosemantic") { 
 
                 var finalnodes={}

@@ -31,7 +31,8 @@ if (mainfile) {
 	} else {
 	    window.location.href=window.location.origin+window.location.pathname+"?file="+mainfile;
 	}
-} else {
+} //url-mode 
+else {
 
     if(isUndef(getUrlParam.nodeidparam)) {
         pr("do nothing, 'cause don't wanna");

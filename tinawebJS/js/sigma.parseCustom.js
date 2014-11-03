@@ -259,29 +259,40 @@ function onepartiteExtract(){
                     val:val
                 });
             }
+
             edge.label="nodes1";            
-            if((typeof nodes1[source])=="undefined"){
+            if(isUndef(nodes1[source])){
                 nodes1[source] = {
                     label: Nodes[source].label,
-                    neighbours: []
+                    neighbours: [],
+                    neighboursIndex: {}
                 };
-                nodes1[source].neighbours.push(target);
-            } else nodes1[source].neighbours.push(target);        
-            if((typeof nodes1[target])=="undefined"){
+                nodes1[source].neighboursIndex[target] = 1;
+            } else nodes1[source].neighboursIndex[target] = 1;  
+
+            if( isUndef(nodes1[target]) ){
                 nodes1[target] = {
                     label: Nodes[target].label,
-                    neighbours: []
+                    neighbours: [],
+                    neighboursIndex: {}
                 };
-                nodes1[target].neighbours.push(source);
-            } else nodes1[target].neighbours.push(source);
+                nodes1[target].neighboursIndex[source] = 1;
+            } else nodes1[target].neighboursIndex[source] = 1;
+
             Edges[indice] = edge;
-            if( (typeof partialGraph._core.graph.edgesIndex[target+";"+source])=="undefined" ){
-                partialGraph.addEdge(indice,source,target,edge);
-            }
-                            
+            if( isUndef(gete([target+";"+source])) ) partialGraph.addEdge(indice,source,target,edge);
+            
         }
     }
+    
+    for(var n in nodes1) {
+    	nodes1[n].neighbours = Object.keys(nodes1[n].neighboursIndex)
+    	nodes1[n].neighboursIndex = null;
+    	delete nodes1[n].neighboursIndex
+    }
+
 }
+
 
 function fullExtract(){
     var i, j, k;
