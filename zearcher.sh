@@ -25,18 +25,30 @@ function testing {
 	done
 }
 
-#Searching for the word "Magic"
+# Usage:
+# ./zearcher.sh "extension" "the query"
 function test2 {
-	iter=`find . -name '*.js' -print`
+	extension=$1
+	query=$2
+	# echo "lala $extension , $query"
+	iter=`find . -name "*.$extension" -print`
+	
+	counter=0
 	for f in $iter
 	do
 		filename=`echo $f | sed s/"\.\/"//g`
-		variable=`cat $filename | grep "MultipleSelection"`
+		variable=`cat $filename | grep "$query"`
 		if [[ "$variable" != "" ]]
 		then
 			echo $filename
+			counter=$((counter + 1));
 		fi
 	done
+
+	if [ $counter -eq 0 ]
+	then
+		echo "Nothing found. Die."
+	fi		
 }
 
-test2
+test2 $1 $2
