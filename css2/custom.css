@@ -144,7 +144,7 @@
 }
 
 #zoomMinusButton, #zoomPlusButton {
-    display: block; width: 24px; height: 24px; background:url("../tinawebJS/img/plusmoins.png");  margin: 0 auto;
+    display: block; width: 24px; height: 24px; background:url("../img2/plusmoins.png");  margin: 0 auto;
 }
 
 #zoomMinusButton {
@@ -165,7 +165,7 @@
 
 
 #lensButton {
-    display: block; width: 36px; height: 36px; background:url("../tinawebJS/img/loupe-edges2.png"); margin: 0 auto;
+    display: block; width: 36px; height: 36px; background:url("../img2/loupe-edges2.png"); margin: 0 auto;
 }
 
 #lensButton {
@@ -185,7 +185,7 @@
 }
 
 #edgesButton {
-    display: block; width: 36px; height: 36px; background:url("../tinawebJS/img/loupe-edges.png"); margin: 0 auto;
+    display: block; width: 36px; height: 36px; background:url("../img2/loupe-edges.png"); margin: 0 auto;
 }
 
 #edgesButton {
@@ -209,11 +209,11 @@
 }
 
 #aUnfold {
-    display: block; width: 12px; height: 12px; background-image: url("../tinawebJS/img/fleches-horiz.png");  margin: 0 auto;
+    display: block; width: 12px; height: 12px; background-image: url("../img2/fleches-horiz.png");  margin: 0 auto;
 }
 /*
 #saveAs {
-    display: block; width: 30px; height: 30px; background:url("../tinawebJS/img/Save.png"); margin: 0 auto;
+    display: block; width: 30px; height: 30px; background:url("../img2/Save.png"); margin: 0 auto;
 }
 */
 
@@ -229,7 +229,7 @@
 }
 
 #aShowChat {
-    float: right; width: 100%; height: 100%; background-image: url("../tinawebJS/img/chat.png");
+    float: right; width: 100%; height: 100%; background-image: url("../img2/chat.png");
 }
 
 
