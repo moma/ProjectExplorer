@@ -583,11 +583,10 @@ function search(string) {
         coincd.push(results[i].id)
     }    
     $.doTimeout(30,function (){
-        MultipleSelection(coincd);
+        MultipleSelection(coincd , true);
         $("input#searchinput").val("");
         $("input#searchinput").autocomplete( "close" );
     });
-    
 }
 
 //============================ < / SEARCH > ============================//

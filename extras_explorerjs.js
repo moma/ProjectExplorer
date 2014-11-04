@@ -73,13 +73,13 @@ function clickInCountry( CC ) {
     $.doTimeout(20,function (){
 
         if(swclickActual=="social") {
-            MultipleSelection(results);
+            MultipleSelection(results , false); //false-> dont apply deselection algorithm
             return;
         }
 
         if(swclickActual=="semantic") {
             var oposresults = getNeighs2( results , bipartiteD2N );
-            MultipleSelection(oposresults);
+            MultipleSelection(oposresults , false);
             return;
         }
 

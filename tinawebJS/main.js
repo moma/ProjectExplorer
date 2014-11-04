@@ -342,7 +342,7 @@ function theListeners(){
                 	coincidences.push(matches[j].id)
                 }
                 $.doTimeout(30,function (){
-                	MultipleSelection(coincidences);
+                	MultipleSelection(coincidences , true);//true-> apply deselection algorithm
                     $("input#searchinput").val("");
                     $("input#searchinput").autocomplete( "close" );
                 });
@@ -357,7 +357,7 @@ function theListeners(){
             var exfnd = exactfind( $("#searchinput").val() )
 
 			$.doTimeout(30,function (){
-                	MultipleSelection(exfnd.id);
+                	MultipleSelection(exfnd.id , true);//true-> apply deselection algorithm
                     $("input#searchinput").val("");
                     $("input#searchinput").autocomplete( "close" );
             });     
@@ -494,10 +494,12 @@ function theListeners(){
                         }
                         cancelSelection(false);
                         cpCountTypes = Object.keys(countTypes);
-                        if(cpCountTypes.length==1)  MultipleSelection(Object.keys(dummyarray));
-                        else MultipleSelection(actualSel);
+                        if(cpCountTypes.length==1)
+                            MultipleSelection(Object.keys(dummyarray) , true);//true-> apply deselection algorithm
+                        else
+                            MultipleSelection(actualSel , true);//true-> apply deselection algorithm
 
-                    } else MultipleSelection(actualSel);
+                    } else MultipleSelection(actualSel , true);//true-> apply deselection algorithm
 
                     // //The most brilliant way of knowing if an array is empty in the world of JavaScript
                     i=0; for(var s in actualSel) { i++; break;}

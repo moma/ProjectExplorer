@@ -504,7 +504,7 @@ function graphTagCloudElem(nodes) {
 	RefreshState(vars[1]);
 	swMacro=false;
 
-	MultipleSelection(ndsids);
+	MultipleSelection(ndsids , false);//false-> dont apply deselection algorithm
 
 	$.doTimeout(10,function (){
 		fa2enabled=true; partialGraph.startForceAtlas2();
@@ -1034,7 +1034,7 @@ function DrawAsSelectedNodes( nodeskeys ) {
     overNodes=true; 
 }
 
-function MultipleSelection(nodes){
+function MultipleSelection(nodes , desalg){
 
 	pr("IN MULTIPLE SELECTION: checkbox="+checkBox)
 
@@ -1050,32 +1050,35 @@ function MultipleSelection(nodes){
 
 	if(!checkBox) {
 		checkBox=true;
+        printStates();
+        pr("prevsels:")
+        pr(Object.keys(prevsels))
+        pr("ndsids:")
+        pr(ndsids)
 
-        if(PAST=="--") {
-            pr("faire rien")
-        } else {
-            if(!is_empty(prevsels) && PAST==NOW ) {
-                var blacklist = {};
-                for(var i in ndsids) {
-                    ID = ndsids[i];
-                    if ( prevsels[ID] ) {
-                        delete prevsels[ID];
-                        blacklist[ID] = true;
-                    }
-                }
-
-                if(Object.keys(blacklist).length>0) {
-                    tmparr = Object.keys(prevsels);
-                    for (var i in ndsids) {
-                        ID = ndsids[i];
-                        if(isUndef(blacklist[ID])) {
-                            tmparr.push(ID)
-                        }
-                    }
-                    ndsids = tmparr;
+        if (desalg && !is_empty(prevsels) ) {
+            pr("DOING THE WEIRD ALGORITHM")
+            var blacklist = {};
+            for(var i in ndsids) {
+                ID = ndsids[i];
+                if ( prevsels[ID] ) {
+                    delete prevsels[ID];
+                    blacklist[ID] = true;
                 }
             }
-        }
+
+            if(Object.keys(blacklist).length>0) {
+                tmparr = Object.keys(prevsels);
+                for (var i in ndsids) {
+                    ID = ndsids[i];
+                    if(isUndef(blacklist[ID])) {
+                        tmparr.push(ID)
+                    }
+                }
+                ndsids = tmparr;
+            }
+        } else pr("CASE NOT COVERED")
+        
 
         if (ndsids.length>0) {
     		for(var i in ndsids) {
@@ -1156,7 +1159,7 @@ function hoverNodeEffectWhileFA2(selectionRadius) {
             if(cursor_size==0 && !checkBox){
                 //Normal click on a node
                 $.doTimeout(30,function (){
-                    MultipleSelection(nodeID);
+                    MultipleSelection(nodeID , true);//true-> apply deselection algorithm
                 });
             }
             
@@ -1164,7 +1167,7 @@ function hoverNodeEffectWhileFA2(selectionRadius) {
                 //Normal click on a node, but we won't clean the previous selections
 			    selections[nodeID] = 1;
                 $.doTimeout(30,function (){
-                    MultipleSelection( Object.keys(selections) );
+                    MultipleSelection( Object.keys(selections) , true );//true-> apply deselection algorithm
                 });
             }
         }
@@ -1695,9 +1698,7 @@ function changeToMeso(iwannagraph) {
 
     fa2enabled=true; partialGraph.startForceAtlas2();
 
-    pr("inside multipleselection:")
-    printStates();
-    MultipleSelection(Object.keys(selections));
+    MultipleSelection(Object.keys(selections) , false);//false-> dont apply deselection algorithm
 
     $('.gradient').css({"background-size":"90px 90px"});
 }
@@ -1741,7 +1742,7 @@ function changeToMacro(iwannagraph) {
         if (!is_empty(selections))
         	$.doTimeout(10,function (){
         		chosenones=(PAST=="a"||PAST=="b")?selections:opossites;
-        		MultipleSelection(Object.keys(chosenones))
+        		MultipleSelection(Object.keys(chosenones) , false)//false-> dont apply deselection algorithm
         	});
 
     } else {
@@ -1775,7 +1776,7 @@ function changeToMacro(iwannagraph) {
         }
 
         if (!is_empty(selections))
-            MultipleSelection(Object.keys(selections));
+            MultipleSelection(Object.keys(selections) , false);//false-> dont apply deselection algorithm
     }
 
     $.doTimeout(30,function (){
