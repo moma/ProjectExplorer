@@ -30,7 +30,7 @@ REQUIREMENTS
 
 HOW TO USE:
 
-	- Put a bipartite gexf, e.g.: Somemap.gexf, inside "data/" folder.
+	- Put a mono or bipartite gexf, e.g.: Somemap.gexf, inside "data/" folder.
 
 	- And then see it in your 	http://localhost/../../explorerjs.html?file=data/Somemap.gexf
 
