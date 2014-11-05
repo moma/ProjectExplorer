@@ -2,37 +2,101 @@
  * Customize as you want ;)
  */
 function callGeomap(){
-    db=getCurrentDBforCurrentGexf();
-    db=JSON.stringify(db);
+    db=JSON.stringify('community.db');
     if(is_empty(selections)){
-        jsonparams='["all"]';
+        // jsonparams='["all"]';
+        jsonparams='["unique_id"]&unique_id='+egonode[getUrlParam.nodeidparam];
     } else {
-        jsonparams=JSON.stringify(getSelections());
-        jsonparams = jsonparams.split('&').join('__and__');
-    }    
-    pr('in callGeomap: db='+db+'&query='+jsonparams);
-    initiateMap(db,jsonparams,"geomap/");
-    $("#ctlzoom").hide();
-    $("#CurrentView").hide();
+
+        N=getNodesByAtt(catSoc).length;
+
+        nodesA = []
+        nodesB = []
+        socneigh = []
+        for(var i in selections) {
+            if(Nodes[i].type==catSoc) nodesA.push(i);
+            if(Nodes[i].type==catSem) nodesB.push(i);
+        }
+
+        if(nodesA.length==0 && nodesB.length>0) socneigh = getArrSubkeys(opos,"key");
+        if(nodesA.length>0 && nodesB.length>0) socneigh = getNeighs(nodesB,bipartiteN2D);
+
+        kSels = {}
+
+        for(var i in nodesA) {
+            kSels[nodesA[i]] = 1;
+        }
+        for(var i in socneigh) {
+            kSels[socneigh[i]] = 1;
+        }
+
+        k=Object.keys(kSels).length;
+
+        // cats=(categoriesIndex.length);
+        // arr={};
+        // if(cats==2 && swclickActual=="social") {
+        //     N=Object.keys(partialGraph._core.graph.nodes.filter(function(n){return n.type==catSoc})).length;
+        //     arr=nodes1;
+        // }
+        // if(cats==2 && swclickActual=="semantic") {
+        //     N=Object.keys(partialGraph._core.graph.nodes.filter(function(n){return n.type==catSem})).length;
+        //     arr=nodes2;
+        // }
+        // if(cats==1)
+        //     N=Object.keys(Nodes).length;
     
-    sigmaheight=$('#leftcolumn').height();
-    $('.geomapCont').height(sigmaheight);
+        // temp=getNeighs(Object.keys(selections),arr);
+        // sel_plus_neigh=Object.keys(temp);
+        // k=sel_plus_neigh.length;
+        // // if(N==k) jsonparams='["all"]';
+        pr ("N: "+N+" -  k: "+k)
+        if(N==k) jsonparams='["unique_id"]&unique_id='+getUrlParam.nodeidparam;
+        else jsonparams=JSON.stringify(Object.keys(kSels));
+        
+        //jsonparams=JSON.stringify(getSelections());
+        //jsonparams = jsonparams.split('&').join('__and__');
+    }
+    pr('in callGeomap: db='+db+'&query='+jsonparams);
+    initiateMap(db,jsonparams,"geomap2/");
+    // $("#ctlzoom").hide();
+    // $("#CurrentView").hide();
+}
+
+function clickInCountry( CC ) {
+    // pr("in extras.js: you've clicked "+CC)
+    var results = []
+    
+    for(var i in Nodes) {
+        if( !isUndef(Nodes[i].CC) && Nodes[i].CC==CC) results.push(i)
+    }
+
+    $.doTimeout(20,function (){
+
+        if(swclickActual=="social") {
+            MultipleSelection(results , false); //false-> dont apply deselection algorithm
+            return;
+        }
+
+        if(swclickActual=="semantic") {
+            var oposresults = getNeighs2( results , bipartiteD2N );
+            MultipleSelection(oposresults , false);
+            return;
+        }
+
+    });
 }
 
 function callTWJS(){
-//    db=getCurrentDBforCurrentGexf();
-//    db=JSON.stringify(db);
-//    if(is_empty(selections)){
-//        jsonparams='["all"]';
-//    } else {
-//        jsonparams=JSON.stringify(getSelections());
-//        jsonparams = jsonparams.split('&').join('__and__');
-//    }    
-//    pr('in callGeomap: db='+db+'&query='+jsonparams);
-//    initiateMap(db,jsonparams,"geomap/"); //From GEOMAP submod
-    sigmaheight=$('#leftcolumn').height();
-    $('.sigma-parent').height(sigmaheight);
-    
+    //    db=getCurrentDBforCurrentGexf();
+    //    db=JSON.stringify(db);
+    //    if(is_empty(selections)){
+    //        jsonparams='["all"]';
+    //    } else {
+    //        jsonparams=JSON.stringify(getSelections());
+    //        jsonparams = jsonparams.split('&').join('__and__');
+    //    }    
+    //    pr('in callGeomap: db='+db+'&query='+jsonparams);
+    //    initiateMap(db,jsonparams,"geomap/"); //From GEOMAP submod
     $("#ctlzoom").show();
     $("#CurrentView").show();
 }
@@ -52,6 +116,7 @@ function selectionToMap(){
     }
 }
 
+//DataFolderMode
 function getCurrentDBforCurrentGexf(){
     folderID=dataFolderTree["gexf_idfolder"][decodeURIComponent(getUrlParam.file)];
     dbsRaw = dataFolderTree["folders"][folderID];
@@ -66,6 +131,7 @@ function getCurrentDBforCurrentGexf(){
     return dbsPaths;
 }
 
+//DataFolderMode
 function getGlobalDBs(){
     graphdb=dataFolderTree["folders"];
     for(var i in graphdb){
@@ -73,13 +139,14 @@ function getGlobalDBs(){
             if(j=="data") {
                 maindbs=graphdb[i][j]["dbs"];
                 for(var k in maindbs){
-                    return j+"/"+maindbs[k];
+                    return jsonparams+"/"+maindbs[k];
                 }
             }
         }
     }
 }
 
+//DataFolderMode
 function getTopPapers(type){
     if(getAdditionalInfo){
         jsonparams=JSON.stringify(getSelections());
@@ -91,14 +158,15 @@ function getTopPapers(type){
         thisgexf=JSON.stringify(decodeURIComponent(getUrlParam.file));
         image='<img style="display:block; margin: 0px auto;" src="'+twjs+'img/ajax-loader.gif"></img>';
         $("#topPapers").html(image);
+        bi=(Object.keys(categories).length==2)?1:0;
         $.ajax({
             type: 'GET',
             url: twjs+'php/info_div.php',
-            data: "type="+type+"&query="+jsonparams+"&dbs="+dbsPaths+"&gexf="+thisgexf,
+            data: "type="+type+"&bi="+bi+"&query="+jsonparams+"&dbs="+dbsPaths+"&gexf="+thisgexf,
             //contentType: "application/json",
             //dataType: 'json',
             success : function(data){ 
-                pr(twjs+'php/info_div.php?'+"type="+type+"&query="+jsonparams+"&dbs="+dbsPaths+"&gexf="+thisgexf);
+                pr(twjs+'php/info_div.php?'+"type="+type+"&bi="+bi+"&query="+jsonparams+"&dbs="+dbsPaths+"&gexf="+thisgexf);
                 $("#topPapers").html(data);
             },
             error: function(){ 
@@ -108,77 +176,6 @@ function getTopPapers(type){
     }
 }
 
-//For UNI-PARTITE
-function updateLeftPanel_uni(){//Uni-partite graph
-    pr("\t ** in updateLeftPanel_uni() ** ");
-    var names='';
-    var information='';
-    
-    counter=0;
-    names+='<div id="selectionsBox">';
-    names += '<h4>';
-    for(var i in selections){
-        if(counter==4){
-            names += '<h4>[...]</h4>';
-            break;
-        }
-        names += Nodes[i].label+', ';
-        counter++;
-    }
-    names += '</h4>';
-    names=names.replace(", </h4>","</h4>");
-    names=names.replace(", <h4>","<h4>");
-    names+='</div>';
-    
-    
-    minFont=12;
-    //maxFont=(minFont+oposMAX)-1;  
-    maxFont=20;
-    
-    getTopPapers("semantic");
-    
-    js2='\');"';
-    information += '<br><h4>Information:</h4>';
-    information += '<ul>';
-            
-    for(var i in selections){
-        information += '<div id="opossitesBox">';
-        information += '<li><b>' + Nodes[i].label.toUpperCase() + '</b></li>';
-        //for(var j in Nodes[i].attributes){
-//            if(Nodes[i].attributes[j].attr=="period"||
-//                Nodes[i].attributes[j].attr=="cluster_label" 
-//                    )
-                information += 
-                '<li><b>Topic' + 
-                '</b>:&nbsp;'+Nodes[i].attributes["cluster_label"]+'</li>';
-
-                information += '<a href="https://www.google.com/#q='+Nodes[i].label+'"  target=blank>'+'www</a>';
-        //}
-        information += '</div>';            
-        information += '</ul><br>';
-    }
-    
-    
-    $("#names").html(names); //Information extracted, just added
-    $("#information").html(information); //Information extracted, just added
-    $("#tips").html("");
-    $("#topPapers").show();
-    /***** The animation *****/
-    _cG = $("#leftcolumn");
-    _cG.animate({
-        "left" : "0px"
-    }, function() {
-        $("#aUnfold").attr("class","leftarrow");
-        $("#zonecentre").css({
-            left: _cG.width() + "px"
-        });
-    });
-    i=0; for(var s in selections) i++;
-    if(is_empty(selections)==true || i==0){
-        cancelSelection(false);
-        partialGraph.draw();
-    }
-}
 
 //FOR UNI-PARTITE
 function selectionUni(currentNode){
@@ -199,10 +196,10 @@ function selectionUni(currentNode){
         currentNode.active=false;
     }
     //highlightOpossites(nodes1[currentNode.id].neighbours);
-//        currentNode.color = currentNode.attr['true_color'];
-//        currentNode.attr['grey'] = 0;
-//        
-//
+    //        currentNode.color = currentNode.attr['true_color'];
+    //        currentNode.attr['grey'] = 0;
+    //        
+    //
    
 
     partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
@@ -285,14 +282,33 @@ function showhideChat(){
 }
 
 
-function getTips(){
-    text = '<div><br/><br/><h4>TIPS</h4><p> <b>- You can search for an expression in the search bar.</b><br/><p> <b>- When a node is selected, you can clic in the side bar on its name to launch a google search on that term.</b><br/><p> <b>- Double clic on a node to get more information</b><br/><b>- Double clic an empty area to erase current selection</b></p></div><br/><div id="footer"></div></div>';
+function getTips(){    
+    text = 
+        "<br>"+
+        "Basic Interactions:"+
+        "<ul>"+
+        "<li>Click on a node to select/unselect and get its information. In case of multiple selection, the button unselect clears all selections.</li>"+
+        "<li>The switch button switch allows to change the view type.</li>"+
+        "</ul>"+
+        "<br>"+
+        "Graph manipulation:"+
+        "<ul>"+
+        "<li>Link and node sizes indicate their strength.</li>"+
+        "<li>To fold/unfold the graph (keep only strong links or weak links), use the 'edges filter' sliders.</li>"+
+        "<li>To select a more of less specific area of the graph, use the 'nodes filter' slider.</li>"+
+        "</ul>"+
+        "<br>"+
+        "Micro/Macro view:"+
+        "<ul>"+
+        "<li>To explore the neighborhood of a selection, either double click on the selected nodes, either click on the macro/meso level button. Zoom out in meso view return to macro view.</li>"+
+        "<li>Click on the 'all nodes' tab below to view the full clickable list of nodes.</li>"+
+        "</ul>";
     return text;
 }
 
 
 
-
+//both obsolete
 function closeDialog () {
     $('#windowTitleDialog').modal('hide'); 
 }
