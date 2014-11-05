@@ -7,26 +7,34 @@ $( window ).resize(function() {
 });//  === / monitor windows resize === //
 
 
+
+
 mainfile = (isUndef(getUrlParam.file))?false:true;
 //  === [what to do at start] === //
 if (mainfile) {
-    // http://localhost/adasd/explorerjs.html?file=data/140907Syneco.gexf
-	// listGexfs(); //should be uncomm
+
 	if(!isUndef(getUrlParam.file)){
 	    $.doTimeout(30,function (){
-    		parse(getUrlParam.file);
-    		nb_cats = scanCategories();  
-    		pr("nb_cats: "+nb_cats);
-    		// listGexfs();    		
-            graphtype=(nb_cats==1)?"mono":"bi";
-    		bringTheNoise(getUrlParam.file,graphtype);
-    		
-    		$.doTimeout(30,function (){
-    		    if(!isUndef(gexfDict[getUrlParam.file])){
-    		        $("#currentGraph").html(gexfDict[getUrlParam.file]);
-    		    } else $("#currentGraph").html(getUrlParam.file);
-    		    scanDataFolder();
-    		});            
+
+            var filename = getUrlParam.file;
+            if( filename.indexOf(".json") > -1 ) {
+                bringTheNoise( filename , "mono");
+                
+            } else {
+        		parse(getUrlParam.file);
+        		nb_cats = scanCategories();  
+        		pr("nb_cats: "+nb_cats);
+        		
+                graphtype=(nb_cats==1)?"mono":"bi";
+        		bringTheNoise(getUrlParam.file,graphtype);
+        		
+        		$.doTimeout(30,function (){
+        		    if(!isUndef(gexfDict[getUrlParam.file])){
+        		        $("#currentGraph").html(gexfDict[getUrlParam.file]);
+        		    } else $("#currentGraph").html(getUrlParam.file);
+        		    // scanDataFolder();
+        		});            
+            }
 	    });
 	} else {
 	    window.location.href=window.location.origin+window.location.pathname+"?file="+mainfile;
@@ -199,7 +207,14 @@ function bringTheNoise(pathfile,type){
 
 	    if(type=="mono") {
 	    	$("#changetype").hide();
-    		onepartiteExtract(); 
+
+
+            if( pathfile.indexOf(".json") > -1 ) {
+                JSONFile( pathfile )
+            } else {
+                onepartiteExtract(); 
+            }
+
             pushSWClick("social");
             pr(partialGraph._core.graph.nodes.length)
             pr(partialGraph._core.graph.edges.length)

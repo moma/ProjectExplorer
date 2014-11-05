@@ -6,7 +6,11 @@
 var geomap=false;
 var minimap=false;
 var getAdditionalInfo=false;//for topPapers div
+
+
 var mainfile=false;
+// getUrlParam.file = "data/testgraph.json";
+
 var dataFolderTree = {};
 var gexfDict={};
 var egonode = {}

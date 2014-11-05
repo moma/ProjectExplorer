@@ -613,7 +613,132 @@ function fullExtract(){
         }
     }
 }
+
+
+
+
+function JSONFile( URL ) {
+
+
     
+    return $.ajax({
+        type: 'GET',
+        url: URL,
+        contentType: "application/json",
+        async: true,
+        success : function(data) {
+            pr("nodes:")
+            pr(data.nodes)
+            pr("---------")
+            pr("links: ")
+            pr(data.links)
+            if(!isUndef(getUrlParam.seed))seed=getUrlParam.seed;
+
+            parseSimpleJSON(data,seed)
+        },
+        error: function(){ 
+            pr("Page Not found. parseCustom, inside the IF");
+        }
+    });
+
+}
+
+
+function parseSimpleJSON( data , seed ) {
+
+    var i, j, k;
+    rand=new RVUniformC(seed);                     
+    //partialGraph.emptyGraph();
+    // Parse Attributes
+    // This is confusing, so I'll comment heavily
+    var nodesAttributes = [];   // The list of attributes of the nodes of the graph that we build in json
+    var edgesAttributes = [];   // The list of attributes of the edges of the graph that we build in json
+    //var attributesNodes = gexf.getElementsByTagName('attributes');  // In the gexf (that is an xml), the list of xml nodes 'attributes' (note the plural 's')
+    
+    var nodesNodes = data.nodes // The list of xml nodes 'nodes' (plural)
+
+    labels = [];
+    numberOfDocs=0;
+    numberOfNGrams=0;
+    
+    //Manually assigning ONE category
+    categories[catSoc]=catSoc;
+    categoriesIndex[0]=catSoc;
+
+
+    for(var i in nodesNodes) {
+
+        var color, label;
+        if(isUndef(nodesNodes[i].color)) color = "#800000";
+        if(isUndef(nodesNodes[i].label)) label = "node_"+i;
+        
+        var node = ({
+            id: i ,
+            label:label, 
+            size:1, 
+            x:rand.getRandom(), 
+            y:rand.getRandom(), 
+            type:catSoc,
+            htmlCont:"",
+            color:color
+        });  // The graph node
+        pr(node)
+        Nodes[i] = node;
+        partialGraph.addNode( i , node );  
+    }
+
+    var edgeId = 0;
+    var edgesNodes = data.links;
+    for(var i in edgesNodes) {
+        var source = edgesNodes[i].source;
+        var target = edgesNodes[i].target;
+        var indice=source+";"+target;
+
+        var edge = {
+                id:         indice,
+                sourceID:   source,
+                targetID:   target,
+                lock : false,
+                label:      "",
+                weight: (edgesNodes[i].w)?edgesNodes[i].w:1
+        };
+
+        if(edge.weight < minEdgeWeight) minEdgeWeight= edge.weight;
+        if(edge.weight > maxEdgeWeight) maxEdgeWeight= edge.weight;
+
+
+        idS=Nodes[edge.sourceID].type;
+        idT=Nodes[edge.targetID].type;
+
+
+        if(idS==catSoc && idT==catSoc) {
+
+            edge.label = "nodes1";
+
+            if(isUndef(nodes1[source])) {
+                nodes1[source] = {
+                    label: Nodes[source].label,
+                    neighbours: []
+                };                    
+            }
+            if(isUndef(nodes1[target])) {
+                nodes1[target] = {
+                    label: Nodes[target].label,
+                    neighbours: []
+                };                    
+            }   
+            nodes1[source].neighbours.push(target);
+            nodes1[target].neighbours.push(source);
+
+
+            Edges[indice] = edge;
+            partialGraph.addEdge(indice,source,target,edge);
+        }
+    }
+
+
+}
+
 
 function extractFromJson(data,seed){
     var i, j, k;
@@ -632,48 +757,51 @@ function extractFromJson(data,seed){
 
     for (var uid in data.ID) egonode[uid] = data.ID[uid]
     
+    //Manually assigning categories
     categories[catSoc]=catSoc;
     categories[catSem]=catSem;
     categoriesIndex[0]=catSoc;
     categoriesIndex[1]=catSem;
 
     for(var i in nodesNodes) {
+        if(nodesNodes[i].color) {
             colorRaw = nodesNodes[i].color.split(",");
             color = '#'+sigma.tools.rgbToHex(
                     parseFloat(colorRaw[2]),
                     parseFloat(colorRaw[1]),
                     parseFloat(colorRaw[0]));
                     //Colors inverted... Srsly??
-            
-            var node = ({
-                id:i,
-                label:nodesNodes[i].label, 
-                size:1, 
-                x:rand.getRandom(), 
-                y:rand.getRandom(), 
-                // x:Math.random(),
-                // y:Math.random(),
-                type:"",
-                htmlCont:"",
-                color:color
-            });  // The graph node
-            if(nodesNodes[i].type=="Document"){
-                node.htmlCont = nodesNodes[i].content;
-                node.type="Document";
-                node.shape="square";
-                numberOfDocs++;
-                node.size=desirableScholarSize;
-                node.CC = nodesNodes[i].CC;
-                node.ACR = nodesNodes[i].ACR;
-            }
-            else {
-                node.type="NGram";
-                numberOfNGrams++;
-                node.size=parseInt(nodesNodes[i].term_occ).toFixed(2);
-                if(parseInt(node.size) < parseInt(minNodeSize)) minNodeSize= node.size;
-                if(parseInt(node.size) > parseInt(maxNodeSize)) maxNodeSize= node.size;
-            }
-            Nodes[i] = node;
+        } else color = "#800000";
+        
+        var node = ({
+            id:i,
+            label:nodesNodes[i].label, 
+            size:1, 
+            x:rand.getRandom(), 
+            y:rand.getRandom(), 
+            // x:Math.random(),
+            // y:Math.random(),
+            type:"",
+            htmlCont:"",
+            color:color
+        });  // The graph node
+        if(nodesNodes[i].type=="Document"){
+            node.htmlCont = nodesNodes[i].content;
+            node.type="Document";
+            node.shape="square";
+            numberOfDocs++;
+            node.size=desirableScholarSize;
+            node.CC = nodesNodes[i].CC;
+            node.ACR = nodesNodes[i].ACR;
+        }
+        else {
+            node.type="NGram";
+            numberOfNGrams++;
+            node.size=parseInt(nodesNodes[i].term_occ).toFixed(2);
+            if(parseInt(node.size) < parseInt(minNodeSize)) minNodeSize= node.size;
+            if(parseInt(node.size) > parseInt(maxNodeSize)) maxNodeSize= node.size;
+        }
+        Nodes[i] = node;
     }
 
     for(var i in Nodes){
@@ -691,7 +819,7 @@ function extractFromJson(data,seed){
     }
     
     var edgeId = 0;
-    var edgesNodes = data.edges;
+    var edgesNodes = data.links;
     for(var i in edgesNodes) {
         var source = edgesNodes[i].s;
         var target = edgesNodes[i].t;
