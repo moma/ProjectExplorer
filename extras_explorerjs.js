@@ -303,6 +303,7 @@ function getTips(){
         "<li>To explore the neighborhood of a selection, either double click on the selected nodes, either click on the macro/meso level button. Zoom out in meso view return to macro view.</li>"+
         "<li>Click on the 'all nodes' tab below to view the full clickable list of nodes.</li>"+
         "</ul>";
+    $("#tab-container").hide();
     return text;
 }
 

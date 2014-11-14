@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="libs/css2/sidebar.css" media="screen">
     <link rel="stylesheet" href="libs/bootswatch/css/bootswatch.css">
     <link rel="stylesheet" href="libs/css2/font.css" type="text/css">
+
+
 </head>
 
   <body class="gradient">
@@ -129,7 +131,6 @@
                                 <li>Size</li>
                             </ul>
                         </li>
-                        
                   </ul>
 
                   <ul id="category-B" class="nav navbar-nav navbar-right">
@@ -140,7 +141,6 @@
                                 <li><div id="sliderBNodeSize"></div></li>
                             </ul>
                         </li>
-                        
                   </ul>
 
                   <ul class="nav navbar-nav navbar-right">
@@ -259,11 +259,34 @@
 	        </ul>
 	    </div>
 
+
 	    <!-- Sidebar -->
 	    <div id="leftcolumn">      
         <div id="tips"></div>
         <div id="names"></div>
-        <div id="opossiteNodes"></div>
+
+        <br>
+        <div id="tab-container" class='tab-container' style="display: none;">
+
+           <ul class='etabs'>
+             <li id="taboppos" class='tab'><a href="#tabs1">Opposite-Neighbors</a></li>
+             <li id="tabneigh" class='tab'><a href="#tabs2">Neighbors</a></li>
+           </ul>
+
+           <div class='panel-container'>
+              <div id="tabs1">
+                <div id="opossiteNodes"></div>
+              </div>
+              <div id="tabs2">
+                <div id="sameNodes"></div>
+              </div>
+           </div>
+
+        </div>
+
+
+
+        <!-- <div id="opossiteNodes"></div> -->
         <!-- <div id="topPapers"></div> -->
         <div id="information"></div>
 	    </div>
@@ -364,6 +387,7 @@
 
     <script type="text/javascript" src="libs/freshslider.1.0.js"></script>
     <script src="libs/readmore.js" type="text/javascript"></script>
+    <script src="libs/jquery/jquery.easytabs.min.js" type="text/javascript"></script>
     
     <script src="libs/bootstrap/js/bootstrap.min.js"></script>
     <script src="libs/bootswatch/js/bootswatch.js"></script>
@@ -381,7 +405,6 @@
     <script src="geomap2/js/countries_iso3166.js" charset="utf-8" ></script>
     <link rel="stylesheet" type="text/css" href="geomap2/css/geo.css" />
     
-
     
     <script src="tinawebJS/sigma.min.js" type="text/javascript" language="javascript"></script>
     <script src="tinawebJS/sigma.forceatlas2.js" type="text/javascript" language="javascript"></script>
@@ -395,18 +418,9 @@
     <script src="tinawebJS/asyncFA2.js" type="text/javascript" language="javascript"></script>
     <script src="tinawebJS/DataScanner.js" type="text/javascript" language="javascript"></script>
     <script src="tinawebJS/main.js" type="text/javascript" language="javascript"></script>
-    <script type="text/javascript">
-      	// Popup window code
-      	function newPopup(url) {
-      		popupWindow = window.open(
-      			url,'popUpWindow','height=700,width=800,left=10,top=10,resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,directories=no,status=no')
-      	}
-    </script>
         
-    <script>
-      	$(function() {
-      	  $( "#tabs" ).tabs();
-      	});
-    </script>
+  <script type="text/javascript">
+      $('#tab-container').easytabs({updateHash:false});
+  </script>
 </body>
 </html>
