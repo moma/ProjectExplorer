@@ -1,5 +1,5 @@
-// Mathieu Jacomy @ Sciences Po Médialab & WebAtlas
-
+// Original version made by: Mathieu Jacomy @ http://github.com/jacomyal/sigma.js/blob/deprecated-v0.1/plugins/sigma.forceatlas2.js
+// This is a Modified version made by Samuel Castillo.
 var ForceAtlas2 = function(graph) {
   var self = this;
   this.graph = graph;
@@ -830,8 +830,6 @@ var ForceAtlas2 = function(graph) {
   };
 };
 
-
-
 var updateMassAndGeometry = function() {
   if (this.nodes.length > 1) {
     // Compute Mass
@@ -882,7 +880,6 @@ var Region = function(nodes, depth) {
   console.log("updating mass and geometry");
   this.updateMassAndGeometry();
 }
-
 
 var buildSubRegions = function() {
   if (this.nodes.length > 1) {
@@ -957,64 +954,74 @@ var applyForce = function(n, Force, theta) {
   }
 };
 
-var startForceAtlas2 = function(graph,limit_it) {
-//    pr("inside FA2")
-////  if(!this.forceatlas2) {
-//    pr(graph);
-//    pr(graph.nodes[0].x)
-//    pr(graph.nodes[0].y)
-//    pr("--------")
 
-    // nodes = graph.nodes;
-    // for(var n in nodes) {
-    //   if(!nodes[n].hidden)
-    //     nodes[n].degree = 0;
-    // }
 
-    // edges = graph.edges;
-    // for(var e in edges) {
-    //   if(!edges[e].hidden) {
+//   [ NEW STUFF FOR WORKERS ] 
 
-    //   }
-    // }
+  // 01. Return the values to MainContext when spatialization is finished
+  var startForceAtlas2 = function(graph,limit_it) {
+      //    pr("inside FA2")
+      ////  if(!this.forceatlas2) {
+      //    pr(graph);
+      //    pr(graph.nodes[0].x)
+      //    pr(graph.nodes[0].y)
+      //    pr("--------")
 
-    forceatlas2 = new ForceAtlas2(graph);
-    forceatlas2.setAutoSettings();
-    forceatlas2.init();
-    
-    count=0;
-    flag=false;
-    while(true){
-        for(var jt=0;jt<=5;jt++){
-            ret=forceatlas2.onebucle();
-            if(ret=="fini") {
-                flag=true;
-                break;
-            }
-        }
-        count++;
-        if(flag||count>limit_it) break;
-    }    
-//    pr(forceatlas2.graph.nodes[0].x)
-//    pr(forceatlas2.graph.nodes[0].y)
-//    console.log("\titerations: "+count)
-    result={
-        "nodes":forceatlas2.graph.nodes,
-        "it":count        
-    }
-    return result;
-};
+      // nodes = graph.nodes;
+      // for(var n in nodes) {
+      //   if(!nodes[n].hidden)
+      //     nodes[n].degree = 0;
+      // }
 
-self.addEventListener("message", function(e) {
-    var graph = {
-        "nodes":e.data.nodes,
-        "edges":e.data.edges
-    }
-    var limit_it=e.data.it;
-    result=startForceAtlas2(graph,limit_it)
-    postMessage({
-        "nodes":result.nodes,
-        "it":result.it
-    });
-    
-}, false);
+      // edges = graph.edges;
+      // for(var e in edges) {
+      //   if(!edges[e].hidden) {
+
+      //   }
+      // }
+
+      forceatlas2 = new ForceAtlas2(graph);
+      forceatlas2.setAutoSettings();
+      forceatlas2.init();
+      
+      count=0;
+      flag=false;
+      while(true){
+          for(var jt=0;jt<=5;jt++){
+              ret=forceatlas2.onebucle();
+              if(ret=="fini") {
+                  flag=true;
+                  break;
+              }
+          }
+          count++;
+          if(flag||count>limit_it) break;
+      }    
+      //    pr(forceatlas2.graph.nodes[0].x)
+      //    pr(forceatlas2.graph.nodes[0].y)
+      //    console.log("\titerations: "+count)
+      result={
+          "nodes":forceatlas2.graph.nodes,
+          "it":count        
+      }
+      return result;
+  };
+
+
+  // 02. This receives the Input from MainContext. This will execute startForceAtlas2() and will "post" the returned values in MainContext.
+  self.addEventListener("message", function(e) {
+      var graph = {  // Input: nodes and edges.
+          "nodes":e.data.nodes,
+          "edges":e.data.edges
+      }
+      var limit_it=e.data.it; // Input: nb of iterations max.
+      result=startForceAtlas2(graph,limit_it) // executing Jacomy's Algo.
+      postMessage({ // "posting" the results in MainContext.
+          "nodes":result.nodes,
+          "it":result.it
+      });
+      
+  }, false);
+
+
+//   [ / NEW STUFF FOR WORKERS ] 
