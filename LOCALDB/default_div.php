@@ -14,7 +14,7 @@ $elems = json_decode($query);
 $table = "";
 $column = "";
 $id="";
-$twjs="API_CNRS/"; // submod path of TinaWebJS
+$twjs="LOCALDB/"; // submod path of TinaWebJS
 
 if($type=="social"){
   $table = "ISIAUTHOR";

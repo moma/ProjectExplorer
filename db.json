@@ -1,17 +1,13 @@
 {
 	"data/ClimateChange": {
-		"dbname":"wosclimatechange-61490-1-wosclimatechange-db.db",
+		"dbname":"wos_climate-change_title_2014-2015.db",
 		"title":"ISITITLE",
 		"date":"ISIpubdate",
 		"abstract":"ISIABSTRACT",
 		"gexfs": {
-			"hnetwork-2014_2015hn-wosclimatechange2014_2015top509-ISItermsListV3bis-ISItermsListV3bis-distributionalcooc-99999-oT0.36-20-louTrue.gexf": {
+			"Maps_S_800.gexf": {
 				"social": { "table":"ISIAUTHOR" , "textCol":"data","forkeyCol":"id"},
-				"semantic": { "table":"ISItermsListV3bis" , "textCol":"data","forkeyCol":"id"}
-			},
-			"ClimateChangeV1.gexf": {
-				"social": { "table":"ISIAUTHOR" , "textCol":"data","forkeyCol":"id"},
-				"semantic": { "table":"ISItermsListV3bis" , "textCol":"data","forkeyCol":"id"}
+				"semantic": { "table":"ISItermsWhitelistV2Oct_5" , "textCol":"data","forkeyCol":"id"}
 			}
 		}
 	},"data/terrorism": {

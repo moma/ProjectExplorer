@@ -193,6 +193,8 @@ function dictfyGexf( gexf , categories ){
     
     var nodesNodes = gexf.getElementsByTagName('nodes') // The list of xml nodes 'nodes' (plural)
     labels = [];
+    minNodeSize=999.00;
+    maxNodeSize=0.001;
     numberOfDocs=0;
     numberOfNGrams=0;
     for(i=0; i<nodesNodes.length; i++) {
@@ -279,9 +281,41 @@ function dictfyGexf( gexf , categories ){
 
                 // console.log(node)
             }
+            
+            if(parseInt(node.size) < parseInt(minNodeSize)) 
+                minNodeSize= node.size;
+            
+            if(parseInt(node.size) > parseInt(maxNodeSize))
+                maxNodeSize= node.size;
         
         }
     }  
+
+    var attention = false
+    if( Clusters.length == 0 ) {
+        if( nodes[1].attributes["cluster_index"] ) {
+            attention = true;
+        }
+    }
+
+    Clusters = {}
+    //New scale for node size: now, between 2 and 5 instead [1,70]
+    for(var it in nodes){
+        nodes[it].size =  desirableNodeSizeMIN+ (parseInt(nodes[it].size)-1)*((desirableNodeSizeMAX-desirableNodeSizeMIN) / (maxNodeSize-minNodeSize));
+        if(attention) {
+            var t_type = nodes[it].type
+            var t_cnumber = nodes[it].attributes["cluster_index"]
+            nodes[it].attributes["clust_default"] = t_cnumber;
+            var t_label = (nodes[it].attributes["cluster_label"])?nodes[it].attributes["cluster_label"]:"cluster_"+nodes[it].attributes["cluster_index"]
+            if(!Clusters[t_type]) {
+                Clusters[t_type] = {}
+                Clusters[t_type]["clust_default"] = {}
+            }
+            Clusters[t_type]["clust_default"][t_cnumber] = t_label
+        }
+        // partialGraph._core.graph.nodesIndex[it].size=Nodes[it].size;
+    }
+    
 
     var edgeId = 0;
     var edgesNodes = gexf.getElementsByTagName('edges');
