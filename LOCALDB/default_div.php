@@ -45,7 +45,7 @@ if (count($elems)==1){// un seul mot est sélectionné, on compte les mots multi
 	#$querynotparsed=$sql;#####
     $sql = substr($sql, 0, -3);
     $sql = str_replace( ' & ', '" OR '.$column.'="', $sql );
-    $sql.=')'.$restriction.'
+    $sql.=' COLLATE NOCASE ) '.$restriction.' 
 	GROUP BY '.$id.'
 	ORDER BY count('.$id.') DESC
 	LIMIT 1000';
@@ -57,7 +57,7 @@ if (count($elems)==1){// un seul mot est sélectionné, on compte les mots multi
         }
     $sql=substr($sql, 0, -3);
     $sql='SELECT count(*),id,data FROM (SELECT *
-	FROM '.$table.' where ('.$sql.')'.$restriction.'
+	FROM '.$table.' where ('.$sql.' COLLATE NOCASE )'.$restriction.'
 	 group by id,data) GROUP BY '.$id.'
 	ORDER BY count('.$id.') DESC
 	LIMIT 1000';
