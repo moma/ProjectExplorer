@@ -1,5 +1,9 @@
 // Original version made by: Mathieu Jacomy @ http://github.com/jacomyal/sigma.js/blob/deprecated-v0.1/plugins/sigma.forceatlas2.js
-// This is a Modified version made by Samuel Castillo.
+// This is a Modified version because:
+//   - It's the Asynchronous version of the original FA2.js from sigmaJS v0.1 (now deprecated). This is useful when you have a bigraph and you want to spatialize the component-B in background.
+//   - If there're isolated nodes, those will be "layouted" as an external circunference surrounding the connected components.
+//   - There's an stop-criteria declarated in the step-04("Auto adjust speed") of the FA2 algo.
+
 var ForceAtlas2 = function(graph) {
   var self = this;
   this.graph = graph;
