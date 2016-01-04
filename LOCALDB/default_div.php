@@ -14,7 +14,8 @@ $elems = json_decode($query);
 $table = "";
 $column = "";
 $id="";
-$twjs="LOCALDB/"; // submod path of TinaWebJS
+
+$twjs=end( explode("/",getcwd()) )."/"; // LOCALDB folder.
 
 if($type=="social"){
   $table = "ISIAUTHOR";
