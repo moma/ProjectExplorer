@@ -9,4 +9,4 @@ TinawebJS
 
 
 - "JS+PHP Mode": Quand il y a des GEXF|JSON et en plus une BD en sqlite en format CorText (manager.cortext.net). En ce mode on dois declarer une db.json avec l'info necessaire.
-	- Graph bi-partite.   http://localhost/TinawebJS_2015/explorerjs.html?file=data/cnrsfolder/2015-11-06T15:15:02.121958_graph.json
+	- Graph bi-partite.   http://localhost/TinawebJS_2015/explorerjs.html
