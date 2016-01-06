@@ -13,8 +13,8 @@ function newPopup(url) {
 //  then, add the button in the html with the sigmaUtils.clustersBy(x) listener.
 function ChangeGraphAppearanceByAtt( manualflag ) {
 
-    if ( !isUndef(manualflag) && !colorByAtt ) colorByAtt = manualflag;
-    if(!colorByAtt) return;
+    if ( !isUndef(manualflag) && !TW.colorByAtt ) TW.colorByAtt = manualflag;
+    if(!TW.colorByAtt) return;
 
     // Seeing all the possible attributes!
     var AttsDict = {}    
@@ -25,8 +25,8 @@ function ChangeGraphAppearanceByAtt( manualflag ) {
 
             var id = v_nodes[i].id;
 
-            for(var a in Nodes[id].attributes) {
-                var someatt = Nodes[id].attributes[a]
+            for(var a in TW.Nodes[id].attributes) {
+                var someatt = TW.Nodes[id].attributes[a]
 
                 // Identifying the attribute datatype: exclude strings and objects
                 if ( ( typeof(someatt)=="string" && isNaN(Number(someatt)) ) || typeof(someatt)=="object" ) {
@@ -36,8 +36,8 @@ function ChangeGraphAppearanceByAtt( manualflag ) {
             }
 
             var possible_atts = [];
-            if (!isUndef(Nodes[id].attributes)) 
-                possible_atts = Object.keys(Nodes[id].attributes)
+            if (!isUndef(TW.Nodes[id].attributes)) 
+                possible_atts = Object.keys(TW.Nodes[id].attributes)
 
             if(!isUndef(v_nodes[i].degree))
                 possible_atts.push("degree")
@@ -118,7 +118,7 @@ function RunLouvain() {
     var community = jLouvain().nodes(node_realdata).edges(edge_realdata);  
     var results = community();
     for(var i in results)
-        Nodes[i].attributes["clust_louvain"]=results[i]
+        TW.Nodes[i].attributes["clust_louvain"]=results[i]
 }
 
 
@@ -128,7 +128,7 @@ function SomeEffect( ClusterCode ) {
     var raw = ClusterCode.split("||")
     var Type=raw[0], Cluster=raw[1], clstID=Number(raw[2]);
 
-    var present = partialGraph.states.slice(-1)[0]; // Last
+    var present = TW.partialGraph.states.slice(-1)[0]; // Last
     var type_t0 = present.type;    
     var str_type_t0 = type_t0.map(Number).join("|")
     console.log( "\t"+str_type_t0)
@@ -143,7 +143,7 @@ function SomeEffect( ClusterCode ) {
     for(var i in nodesV) {
         var n = nodesV[i]
         n.forceLabel = false;
-        var node = Nodes[n.id]
+        var node = TW.Nodes[n.id]
         if ( node.type==Type && !isUndef(node.attributes[Cluster]) && node.attributes[Cluster]==clstID ) {
             // pr( n.id + " | " + Cluster + " : " + node.attributes[Cluster] )
             nodes_2_colour[n.id] = n.degree;
@@ -152,8 +152,8 @@ function SomeEffect( ClusterCode ) {
 
 
     for(var s in nodes_2_colour) {
-        if(Relations[str_type_t0] && Relations[str_type_t0][s] ) {
-            neigh = Relations[str_type_t0][s]
+        if(TW.Relations[str_type_t0] && TW.Relations[str_type_t0][s] ) {
+            neigh = TW.Relations[str_type_t0][s]
             if(neigh) {
                 for(var j in neigh) {
                     t = neigh[j]
@@ -168,7 +168,7 @@ function SomeEffect( ClusterCode ) {
 
 
     for(var i in nodes_2_colour) {
-        n = partialGraph._core.graph.nodesIndex[i]
+        n = TW.partialGraph._core.graph.nodesIndex[i]
         if(n) {
             n.color = n.attr['true_color'];
             n.attr['grey'] = 0;
@@ -177,7 +177,7 @@ function SomeEffect( ClusterCode ) {
 
 
     for(var i in edges_2_colour) {
-        an_edge = partialGraph._core.graph.edgesIndex[i]
+        an_edge = TW.partialGraph._core.graph.edgesIndex[i]
         if(!isUndef(an_edge) && !an_edge.hidden){
             // pr(an_edge)
             an_edge.color = an_edge.attr['true_color'];
@@ -197,29 +197,30 @@ function SomeEffect( ClusterCode ) {
         if(n==4) 
             break
         var ID = nodes_2_label[n].key
-        partialGraph._core.graph.nodesIndex[ID].forceLabel = true;
+        TW.partialGraph._core.graph.nodesIndex[ID].forceLabel = true;
     }
 
 
 
     overNodes=true;
-    partialGraph.draw()
+    TW.partialGraph.draw()
 }
 
 
 function set_ClustersLegend ( daclass ) {
-    //partialGraph.states.slice(-1)[0].LouvainFait = true
+    //TW.partialGraph.states.slice(-1)[0].LouvainFait = true
 
     $("#legend_for_clusters").removeClass( "my-legend" )
     $("#legend_for_clusters").html("")
+    if(daclass==null) return;
 
     var ClustNB_CurrentColor = {}
     var nodesV = getVisibleNodes()
     for(var i in nodesV) {
         n = nodesV[i]
         color = n.color
-        type = Nodes[n.id].type
-        clstNB = Nodes[n.id].attributes[daclass]
+        type = TW.Nodes[n.id].type
+        clstNB = TW.Nodes[n.id].attributes[daclass]
         ClustNB_CurrentColor[type+"||"+daclass+"||"+clstNB] = color
     }
 
@@ -239,15 +240,15 @@ function set_ClustersLegend ( daclass ) {
             var ClustType = raw[1]
             var ClustID = raw[2]
             var Color = ClustNB_CurrentColor[IDx]
-            pr ( Color+" : "+ Clusters[Type][ClustType][ClustID] )
+            pr ( Color+" : "+ TW.Clusters[Type][ClustType][ClustID] )
             var ColorDiv = '<span style="background:'+Color+';"></span>'
-            LegendDiv += '<li onclick=\'SomeEffect("'+IDx+'")\'>'+ColorDiv+ Clusters[Type][ClustType][ClustID]+"</li>"+"\n"
+            LegendDiv += '<li onclick=\'SomeEffect("'+IDx+'")\'>'+ColorDiv+ TW.Clusters[Type][ClustType][ClustID]+"</li>"+"\n"
         }
     } else {
         for(var i in OrderedClustDicts) {
             var IDx = OrderedClustDicts[i]
             var Color = ClustNB_CurrentColor[IDx]
-            // pr ( Color+" : "+ Clusters[Type][ClustType][ClustID] )
+            // pr ( Color+" : "+ TW.Clusters[Type][ClustType][ClustID] )
             var ColorDiv = '<span style="background:'+Color+';"></span>'
             LegendDiv += '<li onclick=\'SomeEffect("'+IDx+'")\'>'+ColorDiv+ IDx+"</li>"+"\n"
         }
@@ -264,25 +265,25 @@ function set_ClustersLegend ( daclass ) {
 
 //For CNRS
 function getTopPapers(type){
-    if(getAdditionalInfo){
+    if(TW.getAdditionalInfo){
         jsonparams=JSON.stringify(getSelections());
         bi=(Object.keys(categories).length==2)?1:0;
         //jsonparams = jsonparams.replaceAll("&","__and__");
         jsonparams = jsonparams.split('&').join('__and__');
         //dbsPaths.push(getGlobalDBs());
         thisgexf=JSON.stringify(decodeURIComponent(getUrlParam.file));
-        image='<img style="display:block; margin: 0px auto;" src="'+APINAME+'img/ajax-loader.gif"></img>';
+        image='<img style="display:block; margin: 0px auto;" src="'+TW.APINAME+'img/ajax-loader.gif"></img>';
         $("#tab-container-top").show();
         $("#topPapers").show();
         $("#topPapers").html(image);
         $.ajax({
             type: 'GET',
-            url: APINAME+'info_div.php',
-            data: "type="+type+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+field[getUrlParam.file],
+            url: TW.APINAME+'info_div.php',
+            data: "type="+type+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+TW.field[getUrlParam.file],
             //contentType: "application/json",
             //dataType: 'json',
             success : function(data){ 
-                pr(APINAME+'info_div.php?'+"type="+type+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+field[getUrlParam.file]);
+                pr(TW.APINAME+'info_div.php?'+"type="+type+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+TW.field[getUrlParam.file]);
                 $("#topPapers").html(data);
             },
             error: function(){ 
@@ -300,7 +301,7 @@ function selectionUni(currentNode){
         highlightSelectedNodes(false);
         opossites = [];
         selections = [];
-        partialGraph.refresh();
+        TW.partialGraph.refresh();
     }   
     
     if((typeof selections[currentNode.id])=="undefined"){
@@ -318,19 +319,19 @@ function selectionUni(currentNode){
     //
    
 
-    partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
-    partialGraph.refresh();
+    TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8);
+    TW.partialGraph.refresh();
 }
 
 //JUST ADEME
 function camaraButton(){
     $("#PhotoGraph").click(function (){
         
-        //canvas=partialGraph._core.domElements.nodes;
+        //canvas=TW.partialGraph._core.domElements.nodes;
         
         
         
-        var nodesCtx = partialGraph._core.domElements.nodes;
+        var nodesCtx = TW.partialGraph._core.domElements.nodes;
         /*
         var edgesCtx = document.getElementById("sigma_edges_1").getContext('2d');
         
@@ -341,12 +342,12 @@ function camaraButton(){
         
         
         
-        //ctx.drawImage(partialGraph._core.domElements.edges,0,0)
+        //ctx.drawImage(TW.partialGraph._core.domElements.edges,0,0)
         //var oCanvas = ctx;  
   */
         //div = document.getElementById("sigma_nodes_1").getContext('2d');
         //ctx = div.getContext("2d");
-        //oCanvas.drawImage(partialGraph._core.domElements.edges,0,0);
+        //oCanvas.drawImage(TW.partialGraph._core.domElements.edges,0,0);
         Canvas2Image.saveAsPNG(nodesCtx);
         
         /*
@@ -423,12 +424,12 @@ function draw1Circle(ctx , x , y , color) {
 function trackMouse() {
     if(!shift_key) {
         // $.doTimeout(300,function (){
-            var ctx = partialGraph._core.domElements.mouse.getContext('2d');
+            var ctx = TW.partialGraph._core.domElements.mouse.getContext('2d');
             ctx.globalCompositeOperation = "source-over";
-            ctx.clearRect(0, 0, partialGraph._core.domElements.nodes.width, partialGraph._core.domElements.nodes.height);
+            ctx.clearRect(0, 0, TW.partialGraph._core.domElements.nodes.width, TW.partialGraph._core.domElements.nodes.height);
 
-            x = partialGraph._core.mousecaptor.mouseX;
-            y = partialGraph._core.mousecaptor.mouseY;
+            x = TW.partialGraph._core.mousecaptor.mouseX;
+            y = TW.partialGraph._core.mousecaptor.mouseY;
             
             ctx.strokeStyle = '#000';
             ctx.lineWidth = 1;
@@ -436,43 +437,43 @@ function trackMouse() {
             ctx.globalAlpha = 0.5;  
             ctx.beginPath();
             
-            if(partialGraph._core.mousecaptor.ratio>showLabelsIfZoom){
-                for(var i in partialGraph._core.graph.nodesIndex){
-                        n=partialGraph._core.graph.nodesIndex[i];
+            if(TW.partialGraph._core.mousecaptor.ratio>showLabelsIfZoom){
+                for(var i in TW.partialGraph._core.graph.nodesIndex){
+                        n=TW.partialGraph._core.graph.nodesIndex[i];
                         if(n.hidden==false){
                             distance = Math.sqrt(
                                 Math.pow((x-parseInt(n.displayX)),2) +
                                 Math.pow((y-parseInt(n.displayY)),2)
                                 );
                             if(parseInt(distance)<=cursor_size) {
-                                partialGraph._core.graph.nodesIndex[i].forceLabel=true;
+                                TW.partialGraph._core.graph.nodesIndex[i].forceLabel=true;
                             } else {
                                 if(typeof(n.neighbour)!=="undefined") {
-                                    if(!n.neighbour) partialGraph._core.graph.nodesIndex[i].forceLabel=false;
-                                } else partialGraph._core.graph.nodesIndex[i].forceLabel=false;
+                                    if(!n.neighbour) TW.partialGraph._core.graph.nodesIndex[i].forceLabel=false;
+                                } else TW.partialGraph._core.graph.nodesIndex[i].forceLabel=false;
                             }
                         }
                 }
-                if(partialGraph.forceatlas2 && partialGraph.forceatlas2.count<=1) {
-                    partialGraph.draw(2,2,2);
+                if(TW.partialGraph.forceatlas2 && TW.partialGraph.forceatlas2.count<=1) {
+                    TW.partialGraph.draw(2,2,2);
                 }
             } else {
-                for(var i in partialGraph._core.graph.nodesIndex){
-                    n=partialGraph._core.graph.nodesIndex[i];
+                for(var i in TW.partialGraph._core.graph.nodesIndex){
+                    n=TW.partialGraph._core.graph.nodesIndex[i];
                     if(!n.hidden){
-                        partialGraph._core.graph.nodesIndex[i].forceLabel=false;
+                        TW.partialGraph._core.graph.nodesIndex[i].forceLabel=false;
                         if(typeof(n.neighbour)!=="undefined") {
-                            if(!n.neighbour) partialGraph._core.graph.nodesIndex[i].forceLabel=false;
-                            else partialGraph._core.graph.nodesIndex[i].forceLabel=true;
-                        } else partialGraph._core.graph.nodesIndex[i].forceLabel=false;
+                            if(!n.neighbour) TW.partialGraph._core.graph.nodesIndex[i].forceLabel=false;
+                            else TW.partialGraph._core.graph.nodesIndex[i].forceLabel=true;
+                        } else TW.partialGraph._core.graph.nodesIndex[i].forceLabel=false;
                     }
                 }
-                if(partialGraph.forceatlas2 && partialGraph.forceatlas2.count<=1) {
-                    partialGraph.draw(2,2,2);
+                if(TW.partialGraph.forceatlas2 && TW.partialGraph.forceatlas2.count<=1) {
+                    TW.partialGraph.draw(2,2,2);
                 }
             }          
             ctx.arc(x, y, cursor_size, 0, Math.PI * 2, true);
-            //ctx.arc(partialGraph._core.width/2, partialGraph._core.height/2, 4, 0, 2 * Math.PI, true);/*todel*/
+            //ctx.arc(TW.partialGraph._core.width/2, TW.partialGraph._core.height/2, 4, 0, 2 * Math.PI, true);/*todel*/
             ctx.closePath();
             ctx.fill();
             ctx.stroke();

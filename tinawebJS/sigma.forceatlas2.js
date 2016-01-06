@@ -341,7 +341,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
         var swingingVSnodes_length = swingingSum/nodes.length;     /**/
         if(stopcriteria && (convg > swingingVSnodes_length)){ 
             pr("i've applied the stopcriteria: "+self.count)
-            partialGraph.stopForceAtlas2(); 
+            TW.partialGraph.stopForceAtlas2(); 
         }
         
         self.p.totalEffectiveTraction = totalEffectiveTraction;
@@ -1128,7 +1128,7 @@ sigma.publicPrototype.startForceAtlas2 = function() {
     }
 
     if(isolatedBCauseFilter==ene) {
-      partialGraph.stopForceAtlas2();
+      TW.partialGraph.stopForceAtlas2();
       return;
     } 
 
@@ -1139,12 +1139,12 @@ sigma.publicPrototype.startForceAtlas2 = function() {
       return true;
     });
 
-    var present = partialGraph.states.slice(-1)[0]
+    var present = TW.partialGraph.states.slice(-1)[0]
     // fixing anomaly in forceatlas2
     $.doTimeout(250,function (){
-      if( !present.level && partialGraph.forceatlas2.active && partialGraph.forceatlas2.count==0) {
+      if( !present.level && TW.partialGraph.forceatlas2.active && TW.partialGraph.forceatlas2.count==0) {
         pr("SUPER JUTSU!!")
-        partialGraph.startForceAtlas2();
+        TW.partialGraph.startForceAtlas2();
         return;
       }
     });
@@ -1153,7 +1153,7 @@ sigma.publicPrototype.startForceAtlas2 = function() {
 };
 
 sigma.publicPrototype.stopForceAtlas2 = function() {
-  var present = partialGraph.states.slice(-1)[0]
+  var present = TW.partialGraph.states.slice(-1)[0]
   if(this.forceatlas2) {
     if(this.forceatlas2.count) {
       pr("\t\t\t\t\tFA2 Stopped: "+this.forceatlas2.count)
@@ -1162,14 +1162,14 @@ sigma.publicPrototype.stopForceAtlas2 = function() {
         first_state = present.type;
         for(var i in first_state) {
           if(first_state[i]) {
-            for(var j in Filters[i]) {
+            for(var j in TW.Filters[i]) {
               original = lastFilter[j]["orig"]
               thelast = lastFilter[j]["last"]
               if(thelast!="-") {
                 if(original==thelast) {
-                  for(var i in partialGraph._core.graph.nodesIndex){
-                    Nodes[i].x = partialGraph._core.graph.nodesIndex[i].x;
-                    Nodes[i].y = partialGraph._core.graph.nodesIndex[i].y;
+                  for(var i in TW.partialGraph._core.graph.nodesIndex){
+                    TW.Nodes[i].x = TW.partialGraph._core.graph.nodesIndex[i].x;
+                    TW.Nodes[i].y = TW.partialGraph._core.graph.nodesIndex[i].y;
                   }
                 }
               }
@@ -1182,15 +1182,14 @@ sigma.publicPrototype.stopForceAtlas2 = function() {
     this.forceatlas2.count=0;
   }
   this.removeGenerator('forceatlas2');
-  partialGraph.refresh();
-  if(minimap) $("#overviewzone").show();
+  TW.partialGraph.refresh();
 
   if(first_time) {
     $.doTimeout(100,function (){
       pr("\t\t\t\t\tFirst time FA2 Stopped")
-      for(var i in partialGraph._core.graph.nodesIndex){
-        Nodes[i].x = partialGraph._core.graph.nodesIndex[i].x;
-        Nodes[i].y = partialGraph._core.graph.nodesIndex[i].y;
+      for(var i in TW.partialGraph._core.graph.nodesIndex){
+        TW.Nodes[i].x = TW.partialGraph._core.graph.nodesIndex[i].x;
+        TW.Nodes[i].y = TW.partialGraph._core.graph.nodesIndex[i].y;
       }
     });
     first_time=false;

@@ -292,13 +292,13 @@ function dictfyGexf( gexf , categories ){
     }  
 
     var attention = false
-    if( Clusters.length == 0 ) {
+    if( TW.Clusters.length == 0 ) {
         if( nodes[1].attributes["cluster_index"] ) {
             attention = true;
         }
     }
 
-    Clusters = {}
+    TW.Clusters = {}
     //New scale for node size: now, between 2 and 5 instead [1,70]
     for(var it in nodes){
         nodes[it].size =  desirableNodeSizeMIN+ (parseInt(nodes[it].size)-1)*((desirableNodeSizeMAX-desirableNodeSizeMIN) / (maxNodeSize-minNodeSize));
@@ -307,13 +307,13 @@ function dictfyGexf( gexf , categories ){
             var t_cnumber = nodes[it].attributes["cluster_index"]
             nodes[it].attributes["clust_default"] = t_cnumber;
             var t_label = (nodes[it].attributes["cluster_label"])?nodes[it].attributes["cluster_label"]:"cluster_"+nodes[it].attributes["cluster_index"]
-            if(!Clusters[t_type]) {
-                Clusters[t_type] = {}
-                Clusters[t_type]["clust_default"] = {}
+            if(!TW.Clusters[t_type]) {
+                TW.Clusters[t_type] = {}
+                TW.Clusters[t_type]["clust_default"] = {}
             }
-            Clusters[t_type]["clust_default"][t_cnumber] = t_label
+            TW.Clusters[t_type]["clust_default"][t_cnumber] = t_label
         }
-        // partialGraph._core.graph.nodesIndex[it].size=Nodes[it].size;
+        // TW.partialGraph._core.graph.nodesIndex[it].size=Nodes[it].size;
     }
     
 
@@ -373,12 +373,12 @@ function dictfyGexf( gexf , categories ){
                 }
                 idArray = idInRelations.map(Number).join("|")
                 edge.categ = idArray;
-                if(!Relations[idArray]) Relations[idArray] = {}
+                if(!TW.Relations[idArray]) TW.Relations[idArray] = {}
 
-                if(isUndef(Relations[idArray][source])) Relations[idArray][source] = {};
-                if(isUndef(Relations[idArray][target]))  Relations[idArray][target] = {};
-                Relations[idArray][source][target]=true;
-                Relations[idArray][target][source]=true;
+                if(isUndef(TW.Relations[idArray][source])) TW.Relations[idArray][source] = {};
+                if(isUndef(TW.Relations[idArray][target]))  TW.Relations[idArray][target] = {};
+                TW.Relations[idArray][source][target]=true;
+                TW.Relations[idArray][target][source]=true;
                 // [ / New Code! ]
 
 
@@ -400,7 +400,7 @@ function dictfyGexf( gexf , categories ){
                     }   
                     nodes1[source].neighbours.push(target);
                     nodes1[target].neighbours.push(source);
-                    // partialGraph.addEdge(indice,source,target,edge);
+                    // TW.partialGraph.addEdge(indice,source,target,edge);
                 }
                 
                 if(categories.length>1) {
@@ -482,9 +482,9 @@ function dictfyGexf( gexf , categories ){
         }
     }
 
-    for(var i in Relations) {
-        for(var j in Relations[i]) {
-            Relations[i][j] = Object.keys(Relations[i][j]).map(Number)
+    for(var i in TW.Relations) {
+        for(var j in TW.Relations[i]) {
+            TW.Relations[i][j] = Object.keys(TW.Relations[i][j]).map(Number)
         }
     }
 
@@ -617,12 +617,12 @@ function dictfyJSON( data , categories ) {
             }
             idArray = idInRelations.map(Number).join("|")
             edge.categ = idArray;
-            if(!Relations[idArray]) Relations[idArray] = {}
+            if(!TW.Relations[idArray]) TW.Relations[idArray] = {}
 
-            if(isUndef(Relations[idArray][source])) Relations[idArray][source] = {};
-            if(isUndef(Relations[idArray][target]))  Relations[idArray][target] = {};
-            Relations[idArray][source][target]=true;
-            Relations[idArray][target][source]=true;
+            if(isUndef(TW.Relations[idArray][source])) TW.Relations[idArray][source] = {};
+            if(isUndef(TW.Relations[idArray][target]))  TW.Relations[idArray][target] = {};
+            TW.Relations[idArray][source][target]=true;
+            TW.Relations[idArray][target][source]=true;
             // [ / New Code! ]
 
 
@@ -720,9 +720,9 @@ function dictfyJSON( data , categories ) {
         }
     }
 
-    for(var i in Relations) {
-        for(var j in Relations[i]) {
-            Relations[i][j] = Object.keys(Relations[i][j]).map(Number)
+    for(var i in TW.Relations) {
+        for(var j in TW.Relations[i]) {
+            TW.Relations[i][j] = Object.keys(TW.Relations[i][j]).map(Number)
         }
     }
 

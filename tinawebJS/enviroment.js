@@ -1,10 +1,12 @@
 
 
 //============================ < NEW BUTTONS > =============================//
+
+// Documentation Level: *****
 function changeType() {
-    var present = partialGraph.states.slice(-1)[0]; // Last
-    var past = partialGraph.states.slice(-2)[0] // avant Last
-    var lastpos = partialGraph.states.length-1;
+    var present = TW.partialGraph.states.slice(-1)[0]; // Last
+    var past = TW.partialGraph.states.slice(-2)[0] // avant Last
+    var lastpos = TW.partialGraph.states.length-1;
     var avantlastpos = lastpos-1;
 
 
@@ -44,16 +46,16 @@ function changeType() {
 
     var prevnodes = {}
     var prevedges = {}
-    for(var i in partialGraph._core.graph.nodesIndex) {
-        anode = partialGraph._core.graph.nodesIndex[i];
+    for(var i in TW.partialGraph._core.graph.nodesIndex) {
+        anode = TW.partialGraph._core.graph.nodesIndex[i];
         if(anode) {
             prevnodes[i] = true
         }
     }
 
     var links_sels = {}
-    for(var i in partialGraph._core.graph.edgesIndex) {
-        anedge = partialGraph._core.graph.edgesIndex[i];
+    for(var i in TW.partialGraph._core.graph.edgesIndex) {
+        anedge = TW.partialGraph._core.graph.edgesIndex[i];
         if(anedge) {
             prevedges[i] = true;
             if(anedge.attr) {
@@ -64,7 +66,7 @@ function changeType() {
         }
     }
 
-    partialGraph.emptyGraph();
+    TW.partialGraph.emptyGraph();
 
     var nodes_2_colour = {}
     var edges_2_colour = {}
@@ -73,12 +75,12 @@ function changeType() {
 
     if(present.level) { //If level=Global, fill all {X}-component 
 
-        for(var n in Nodes) {
-            if(type_t1[catDict[Nodes[n].type]]) 
+        for(var n in TW.Nodes) {
+            if(type_t1[catDict[TW.Nodes[n].type]]) 
                 add1Elem(n)
         }
-        for(var e in Edges) {
-            if(Edges[e].categ==str_type_t1) 
+        for(var e in TW.Edges) {
+            if(TW.Edges[e].categ==str_type_t1) 
                 add1Elem(e)
         }
     } else /* Local level, change to previous or alter component*/ {
@@ -101,7 +103,7 @@ function changeType() {
             if(sumpastcat==1) /* change to alter comp*/ {
                 for(var i in prevnodes) {
                     s = i;
-                    neigh = Relations[str_nextState][s]
+                    neigh = TW.Relations[str_nextState][s]
                     if(neigh) {
                         for(var j in neigh) {
                             t = neigh[j]
@@ -112,7 +114,7 @@ function changeType() {
 
                 for(var i in nodes_2_colour) {
                     s = i;
-                    neigh = Relations[str_type_t1][s]
+                    neigh = TW.Relations[str_type_t1][s]
                     if(neigh) {
                         for(var j in neigh) {
                             t = neigh[j]
@@ -164,7 +166,7 @@ function changeType() {
             var newsels = {}
             for(var i in sels) {
                 s = sels[i];
-                neigh = Relations[indexCat][s]
+                neigh = TW.Relations[indexCat][s]
                 if(neigh) {
                     for(var j in neigh) {
                         t = neigh[j]
@@ -192,7 +194,7 @@ function changeType() {
             // Saving all the nodes&edges to be highlighted.
             for(var i in sels) {
                 s = sels[i];
-                neigh = Relations[str_nextState][s]
+                neigh = TW.Relations[str_nextState][s]
                 if(neigh) {
                     for(var j in neigh) {
                         t = neigh[j]
@@ -208,7 +210,7 @@ function changeType() {
         } 
 
         if(sumNextState==2) { // we're moving to bipartite subgraph
-            for(var i in Edges) {
+            for(var i in TW.Edges) {
                 n = i.split(";").map(Number)
                 if( selDict[ n[0] ] || selDict[ n[1] ]  ) {
                     nodes_2_colour[n[0]]=false;
@@ -236,36 +238,37 @@ function changeType() {
         overNodes=true;
     }
 
-    partialGraph.states[avantlastpos] = {};
-    partialGraph.states[avantlastpos].LouvainFait = false;
-    partialGraph.states[avantlastpos].level = present.level;
-    partialGraph.states[avantlastpos].selections = selsbackup;
-    partialGraph.states[avantlastpos].type = present.type; 
-    partialGraph.states[avantlastpos].opposites = present.opposites;
-    partialGraph.states[avantlastpos].categories = present.categories;//to_del
-    partialGraph.states[avantlastpos].categoriesDict = present.categoriesDict;//to_del
+    TW.partialGraph.states[avantlastpos] = {};
+    TW.partialGraph.states[avantlastpos].LouvainFait = false;
+    TW.partialGraph.states[avantlastpos].level = present.level;
+    TW.partialGraph.states[avantlastpos].selections = selsbackup;
+    TW.partialGraph.states[avantlastpos].type = present.type; 
+    TW.partialGraph.states[avantlastpos].opposites = present.opposites;
+    TW.partialGraph.states[avantlastpos].categories = present.categories;//to_del
+    TW.partialGraph.states[avantlastpos].categoriesDict = present.categoriesDict;//to_del
 
-    partialGraph.states[lastpos].setState({
+    TW.partialGraph.states[lastpos].setState({
         type: nextState,
         level: level,
         sels: Object.keys(selections).map(Number),
         oppos: []
     })
-    partialGraph.states[lastpos].categories = present.categories;//to_del
-    partialGraph.states[lastpos].categoriesDict = catDict;//to_del
+    TW.partialGraph.states[lastpos].categories = present.categories;//to_del
+    TW.partialGraph.states[lastpos].categoriesDict = catDict;//to_del
 
     
-    fa2enabled=true; partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8).draw();//.startForceAtlas2();
+    fa2enabled=true; TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8).draw();//.startForceAtlas2();
 }
 
+// Documentation Level: *****
 function changeLevel() {
-    var present = partialGraph.states.slice(-1)[0]; // Last
-    var past = partialGraph.states.slice(-2)[0] // avant Last
-    var lastpos = partialGraph.states.length-1;
+    var present = TW.partialGraph.states.slice(-1)[0]; // Last
+    var past = TW.partialGraph.states.slice(-2)[0] // avant Last
+    var lastpos = TW.partialGraph.states.length-1;
     var avantlastpos = lastpos-1;
 
     var level = present.level;
-    var sels = present.selections;//[144, 384, 543]//partialGraph.states.selections;
+    var sels = present.selections;//[144, 384, 543]//TW.partialGraph.states.selections;
     var catDict = present.categoriesDict;
 
     var type_t0 = present.type;    
@@ -293,7 +296,7 @@ function changeLevel() {
     }
     var str_nextState = nextState.map(Number).join("|")
 
-    partialGraph.emptyGraph();
+    TW.partialGraph.emptyGraph();
 
     var voisinage = {}
     // Dictionaries of: selection+neighbors
@@ -301,7 +304,7 @@ function changeLevel() {
     var edges_2_colour = {}
     for(var i in sels) {
         s = sels[i];
-        neigh = Relations[str_type_t0][s]
+        neigh = TW.Relations[str_type_t0][s]
         if(neigh) {
             for(var j in neigh) {
                 t = neigh[j]
@@ -340,12 +343,12 @@ function changeLevel() {
         
         futurelevel = false;
     } else { // [Change to Global] when level=Local(0)
-        for(var n in Nodes) {
-            if(type_t0[catDict[Nodes[n].type]]) 
+        for(var n in TW.Nodes) {
+            if(type_t0[catDict[TW.Nodes[n].type]]) 
                 add1Elem(n)
         }
-        for(var e in Edges) {
-            if(Edges[e].categ==str_type_t0) 
+        for(var e in TW.Edges) {
+            if(TW.Edges[e].categ==str_type_t0) 
                 add1Elem(e)
         }
         futurelevel = true;
@@ -364,24 +367,24 @@ function changeLevel() {
         overNodes=true;
     }
 
-    partialGraph.states[avantlastpos] = {};
-    partialGraph.states[avantlastpos].level = present.level;
-    partialGraph.states[avantlastpos].selections = present.selections;
-    partialGraph.states[avantlastpos].type = present.type; 
-    partialGraph.states[avantlastpos].opposites = present.opposites;
-    partialGraph.states[avantlastpos].categories = present.categories;//to_del
-    partialGraph.states[avantlastpos].categoriesDict = present.categoriesDict;//to_del
+    TW.partialGraph.states[avantlastpos] = {};
+    TW.partialGraph.states[avantlastpos].level = present.level;
+    TW.partialGraph.states[avantlastpos].selections = present.selections;
+    TW.partialGraph.states[avantlastpos].type = present.type; 
+    TW.partialGraph.states[avantlastpos].opposites = present.opposites;
+    TW.partialGraph.states[avantlastpos].categories = present.categories;//to_del
+    TW.partialGraph.states[avantlastpos].categoriesDict = present.categoriesDict;//to_del
 
-    partialGraph.states[lastpos].setState({
+    TW.partialGraph.states[lastpos].setState({
         type: present.type,
         level: futurelevel,
         sels: Object.keys(selections).map(Number),
         oppos: []
     })
-    partialGraph.states[lastpos].categories = present.categories;//to_del
-    partialGraph.states[lastpos].categoriesDict = catDict;//to_del
+    TW.partialGraph.states[lastpos].categories = present.categories;//to_del
+    TW.partialGraph.states[lastpos].categoriesDict = catDict;//to_del
 
-    fa2enabled=true; partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8).draw().startForceAtlas2();
+    fa2enabled=true; TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8).draw().startForceAtlas2();
 }
 //============================= </ NEW BUTTONS > =============================//
 
@@ -407,7 +410,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 	// type_attrb = "type"
 	// criteria = "size"
 
-    if(partialGraph._core.graph.edges.length<3) {
+    if(TW.partialGraph._core.graph.edges.length<3) {
         $(sliderDivID).freshslider({
             range: true,
             step:1,
@@ -420,7 +423,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
         return;
     }
 
-    var filterparams = AlgorithmForSliders ( Edges , type_attrb , type , criteria) //OK
+    var filterparams = AlgorithmForSliders ( TW.Edges , type_attrb , type , criteria) //OK
     pr("EdgeWeightFilter: "+type)
     pr(filterparams)
     var steps = filterparams["steps"]
@@ -443,7 +446,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
     pushFilterValue( sliderDivID , lastvalue )
     
-    var present = partialGraph.states.slice(-1)[0];
+    var present = TW.partialGraph.states.slice(-1)[0];
 
     //finished
     $(sliderDivID).freshslider({
@@ -466,7 +469,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                     pr("\nprevious value "+lastvalue+" | current value "+filtervalue)
 
                     // [ Stopping FA2 ]
-                    partialGraph.stopForceAtlas2();
+                    TW.partialGraph.stopForceAtlas2();
                     // [ / Stopping FA2 ]
 
                     var t0 = lastvalue.split("-")
@@ -512,18 +515,18 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                                 // pr("adding "+ids.join())
                                 for(var id in ids) {                            
                                     ID = ids[id]
-                                    Edges[ID].lock = false;
+                                    TW.Edges[ID].lock = false;
 
                                     if(present.level) {
                                         // pr("\tADD "+ID)
                                         // n = ID.split(";")
                                         // if(n.length>1)
-                                        //     pr("\t\tsource:("+Nodes[n[0]].x+","+Nodes[n[0]].y+") ||| target:("+Nodes[n[1]].x+","+Nodes[n[1]].y+")")
+                                        //     pr("\t\tsource:("+TW.Nodes[n[0]].x+","+TW.Nodes[n[0]].y+") ||| target:("+TW.Nodes[n[1]].x+","+TW.Nodes[n[1]].y+")")
                                         add1Elem(ID)
                                     } else {
-                                        for (var n in partialGraph._core.graph.nodesIndex) {
-                                            sid = Edges[ID].sourceID
-                                            tid = Edges[ID].targetID
+                                        for (var n in TW.partialGraph._core.graph.nodesIndex) {
+                                            sid = TW.Edges[ID].sourceID
+                                            tid = TW.Edges[ID].targetID
                                             if (sid==n || tid==n) {
                                                 if(isUndef(getn(sid))) unHide(sid)
                                                 if(isUndef(getn(tid))) unHide(tid)
@@ -542,28 +545,28 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                                 for(var id in ids) {
                                     ID = ids[id]
                                     if(!isUndef(gete(ID))) {
-                                        partialGraph.dropEdge(ID)
-                                        Edges[ID].lock = true;
+                                        TW.partialGraph.dropEdge(ID)
+                                        TW.Edges[ID].lock = true;
                                         // pr("\tDEL "+ID)
                                         // n = ID.split(";")
                                         // if(n.length>1)
-                                        //     pr("\t\tsource:("+Nodes[n[0]].x+","+Nodes[n[0]].y+") ||| target:("+Nodes[n[1]].x+","+Nodes[n[1]].y+")")
+                                        //     pr("\t\tsource:("+TW.Nodes[n[0]].x+","+TW.Nodes[n[0]].y+") ||| target:("+TW.Nodes[n[1]].x+","+TW.Nodes[n[1]].y+")")
                                     }                                    
                                 }
                             }
                         }
                     }
 
-                    partialGraph.refresh()
-                    partialGraph.draw()
+                    TW.partialGraph.refresh()
+                    TW.partialGraph.draw()
 
                     // console.log("\t\tedgesfilter:")
                     // console.log("\t\t[ Starting FA2 ]")
                     // [ Starting FA2 ]
                     $.doTimeout(10,function(){
-                        fa2enabled=true; partialGraph.startForceAtlas2();
+                        fa2enabled=true; TW.partialGraph.startForceAtlas2();
                         // $.doTimeout(10,function(){
-                        //     partialGraph.stopForceAtlas2();
+                        //     TW.partialGraph.stopForceAtlas2();
                         // });
                     });
                     // [ / Starting FA2 ]
@@ -597,7 +600,7 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
 	// type_attrb = "type"
 	// criteria = "size"
 
-    if(partialGraph._core.graph.nodes.length<3) {
+    if(TW.partialGraph._core.graph.nodes.length<3) {
 
         $(sliderDivID).freshslider({
             range: true,
@@ -612,7 +615,7 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
         return;
     }
 
-    var filterparams = AlgorithmForSliders ( Nodes , type , type_attrb , criteria)
+    var filterparams = AlgorithmForSliders ( TW.Nodes , type , type_attrb , criteria)
     pr("NodeWeightFilter: "+type)
     pr(filterparams)
     
@@ -649,7 +652,7 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
                 }
 
                 // [ Stopping FA2 ]
-                partialGraph.stopForceAtlas2();
+                TW.partialGraph.stopForceAtlas2();
                 // [ / Stopping FA2 ]
 
                 for(var i in finalarray) {
@@ -657,29 +660,29 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
                     if(i>=low && i<=high){
                         for(var id in ids) {
                             ID = ids[id]
-                            Nodes[ID].lock = false;
-                            if(partialGraph._core.graph.nodesIndex[ID])
-                                partialGraph._core.graph.nodesIndex[ID].hidden = false;
+                            TW.Nodes[ID].lock = false;
+                            if(TW.partialGraph._core.graph.nodesIndex[ID])
+                                TW.partialGraph._core.graph.nodesIndex[ID].hidden = false;
                         }
                     } else {
                         for(var id in ids) {
                             ID = ids[id]
-                            Nodes[ID].lock = true;
-                            if(partialGraph._core.graph.nodesIndex[ID])
-                                partialGraph._core.graph.nodesIndex[ID].hidden = true;
+                            TW.Nodes[ID].lock = true;
+                            if(TW.partialGraph._core.graph.nodesIndex[ID])
+                                TW.partialGraph._core.graph.nodesIndex[ID].hidden = true;
                         }                     
                     }
                 }
                 pushFilterValue(sliderDivID,filtervalue)
 
-                partialGraph.refresh()
-                partialGraph.draw()
+                TW.partialGraph.refresh()
+                TW.partialGraph.draw()
 
                 // [ Starting FA2 ]
                 $.doTimeout(10,function(){
-                    fa2enabled=true; partialGraph.startForceAtlas2();
+                    fa2enabled=true; TW.partialGraph.startForceAtlas2();
                     // $.doTimeout(10,function(){
-                    //     partialGraph.stopForceAtlas2();
+                    //     TW.partialGraph.stopForceAtlas2();
                     // });
                 });
                 // [ / Starting FA2 ]
@@ -690,23 +693,20 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
 }
 
 function getGraphElement(elem) {
-    if(elem.split(";").length==1) return partialGraph._core.graph.nodesIndex[elem];
-    else return partialGraph._core.graph.edgesIndex[elem]
+    if(elem.split(";").length==1) return TW.partialGraph._core.graph.nodesIndex[elem];
+    else return TW.partialGraph._core.graph.edgesIndex[elem]
 }
 //   Execution modes:
-// AlgorithmForSliders ( partialGraph._core.graph.edges , "label" , "nodes1" , "weight") 
-// AlgorithmForSliders ( partialGraph._core.graph.edges , "label" , "nodes2" , "weight") 
-// AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "Document" ,  "size") 
-// AlgorithmForSliders ( partialGraph._core.graph.nodes , "type" ,  "NGram" ,  "size") 
+// AlgorithmForSliders ( TW.partialGraph._core.graph.edges , "label" , "nodes1" , "weight") 
+// AlgorithmForSliders ( TW.partialGraph._core.graph.edges , "label" , "nodes2" , "weight") 
+// AlgorithmForSliders ( TW.partialGraph._core.graph.nodes , "type" ,  "Document" ,  "size") 
+// AlgorithmForSliders ( TW.partialGraph._core.graph.nodes , "type" ,  "NGram" ,  "size") 
 function AlgorithmForSliders( elements , type_attrb , type , criteria) {
 	// //  ( 1 )
     // // get visible sigma nodes|edges
     if(isUndef(elements)) return {"steps":0 , "finalarray":[]};
     
-    var elems = [];/*=elements.filter(function(e) {
-                return e[type_attrb]==type;
-    });*/
-
+    var elems = [];
     for(var e in elements) {
         if( elements[e][type_attrb]==type ) {
             if(getGraphElement(e)) {
@@ -714,7 +714,8 @@ function AlgorithmForSliders( elements , type_attrb , type , criteria) {
             } 
         }
     }
-    if(elems.length==0)  return {"steps":0 , "finalarray":[]};
+    if(elems.length==0)  
+        return { "steps":0 , "finalarray":[] };
 
     // identifying if you received nodes or edges
     var edgeflag = ( !isNaN(elems.slice(-1)[0].id) || elems.slice(-1)[0].id.split(";").length>1)? true : false;
@@ -836,7 +837,7 @@ function searchLabel(string){
     var id_node = '';
     var n;
     
-    nds = partialGraph._core.graph.nodes.filter(function(x){return !x["hidden"]});
+    nds = TW.partialGraph._core.graph.nodes.filter(function(x){return !x["hidden"]});
     for(var i in nds){
         n = nds[i]
             if (n.label == string) {

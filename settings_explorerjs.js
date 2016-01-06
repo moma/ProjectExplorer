@@ -1,96 +1,59 @@
-/*
- * Customize as you want ;)
- */
 
-// ============ < DEVELOPER OPTIONS > ============
-var geomap=false;
-var colorByAtt = false;
-var twittertimeline = false;
-var minimap=false;
-var getAdditionalInfo=false;//for topPapers div
+var TW = {}
+    TW.geomap = false;
+    TW.colorByAtt = false;
+    TW.twittertimeline = false;
+    TW.minimap=false;
+    TW.getAdditionalInfo=false;// True: Activate TopPapers feature.
+    TW.mainfile = ["db.json"];
+    // // TW.mainfile = "api.json";
+    // TW.mainfile = [
+    //     "data/2-Terms-Authors-300nodes.gexf",
+    //     "data/0-terms-terms-MainNodes.gexf",
+    //     "data/maziyar2.json",
+    //     "data/3-Terms-Countries-300nodes.gexf",
+    // //     "data/noclimatechange_mnodes.gexf",
+    //     "data/20150518t1052_phylograph.json",
+    // //     "data/phylograph_6.json",
+    // //     "data/maziyar.json",
+    // //     "data/20141128_GPs_03_bi.gexf",
+    // //     "data/example.json",
+    // //     "data/Elisa__Omodei.gexf",
+    //     ];
+    TW.APINAME = "LOCALDB/";
 
+    TW.bridge={};
+    TW.bridge["forFilteredQuery"] = "php/bridgeClientServer_filter.php";
+    TW.bridge["forNormalQuery"] = "php/bridgeClientServer.php";
 
-var mainfile = ["db.json"];
-// // var mainfile = "api.json";
-// var mainfile = [
-//     "data/2-Terms-Authors-300nodes.gexf",
-//     "data/0-terms-terms-MainNodes.gexf",
-//     "data/maziyar2.json",
-//     "data/3-Terms-Countries-300nodes.gexf",
-// //     "data/noclimatechange_mnodes.gexf",
-//     "data/20150518t1052_phylograph.json",
-// //     "data/phylograph_6.json",
-// //     "data/maziyar.json",
-// //     "data/20141128_GPs_03_bi.gexf",
-// //     "data/example.json",
-// //     "data/Elisa__Omodei.gexf",
-//     ];
-var APINAME = "LOCALDB/"
+    TW.gexfDict={};
+    TW.gexfDictReverse={}
+    for (var i in TW.gexfDict){
+        TW.gexfDictReverse[TW.gexfDict[i]]=i;
+    }
+    TW.field = {}
+    // field["data/20141128_GPs_03_bi.gexf"] = "ISItermsfirstindexing";
+    // field["data/20141215_GPs_04.gexf"] = "ISItermsfirstindexing";
+    TW.Relations = {}
 
-
-// getUrlParam.file = "data/testgraph.json";
-
-var dataFolderTree = {};
-var egonode = {}
-var iwantograph = "";
-
-var bridge={};
-external="";
-//external="http://tina.iscpif.fr/explorerjs/";//Just if you want to use the server-apps from tina.server
-bridge["forFilteredQuery"] = external+"php/bridgeClientServer_filter.php";
-bridge["forNormalQuery"] = external+"php/bridgeClientServer.php";
-
-
-var gexfDict={};
-// gexfDict["data/terrorism/terrorism_mono.gexf"] = "[2001-2014] TERRORISM (1-partite graph)";
-// gexfDict["data/terrorism/terrorism_bi.gexf"] = "[2001-2014] TERRORISM (2-partite graph)";
-
-var field = {}
-// field["data/20141128_GPs_03_bi.gexf"] = "ISItermsfirstindexing";
-// field["data/20141215_GPs_04.gexf"] = "ISItermsfirstindexing";
-// field["data/medq2/20141128_MED_02_bi.gexf"] = "ISItermsBigWL";
-// field["data/medq2/20141128_MED_03_bi.gexf"] = "ISItermsBigWL";
-// field["data/medq2/20141208_MED_Author_name-ISItermsjulien_index.gexf"] = "ISItermsjulien_index";
-// field["data/medq1/20141208_MED_01_bi.gexf"] = "ISItermsfirstindex";
-
-// field["data/terrorism/terrorism_mono.gexf"] = "ISItermsListV1";
-// field["data/terrorism/terrorism_bi.gexf"] = "ISItermsListV1";
+    TW.SystemStates = {}
+    TW.SystemStates.level = true;
+    TW.SystemStates.type = [ true ] //[ true , false ]; //social activated!
+    TW.SystemStates.selections = [];
+    TW.SystemStates.opposites = [];
+    TW.catSoc = "Document";
+    TW.catSem = "NGram";
 
 var ParseCustom = function () {};
 var SigmaUtils = function () {};
 var TinaWebJS = function () {};
 
-var Relations = {}
-    
-
-var SystemStates = {}
-    SystemStates.level = true;
-    SystemStates.type = [ true ] //[ true , false ]; //social activated!
-    SystemStates.selections = [];
-    SystemStates.opposites = [];
-
-ircNick="";
-ircCHN="";
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-var catSoc = "Document";
-var catSem = "NGram";
 
 var sizeMult = [];
-    sizeMult[catSoc] = 0.0;
-    sizeMult[catSem] = 0.0;
+    sizeMult[TW.catSoc] = 0.0;
+    sizeMult[TW.catSem] = 0.0;
 
 var inactiveColor = '#666';
 var startingNodeId = "1";
@@ -155,10 +118,9 @@ var sigmaJsMouseProperties = {
 
 // ============ < VARIABLES.JS > ============
 //"http://webchat.freenode.net/?nick=Ademe&channels=#anoe"
-var ircUrl="http://webchat.freenode.net/?nick="+ircNick+"&channels="+ircCHN;
 var twjs="tinawebJS/";
-var categories = {};
-var categoriesIndex = [];
+TW.categories = {};
+TW.categoriesIndex = [];
 
 var gexf;
 //var zoom=0;
@@ -183,7 +145,7 @@ var lastFilter = []
     lastFilter["#slidercat0edgesweight"] =  {"orig":"-" , "last":"-"}
     lastFilter["#slidercat1edgesweight"] =  {"orig":"-" , "last":"-"}
 
-var Filters = {}
+TW.Filters = {}
 
 
 
@@ -193,11 +155,11 @@ var overviewScale = 0.25;
 var overviewHover=false;
 var moveDelay = 80, zoomDelay = 2;
 //var Vecindad;
-var partialGraph; 
+TW.partialGraph; 
 var otherGraph;
-var Nodes = []; 
-var Edges = [];
-var Clusters = [];
+TW.Nodes = []; 
+TW.Edges = [];
+TW.Clusters = [];
 
 var nodeslength=0;
 
@@ -232,10 +194,6 @@ var maxEdgeWeight=0.0;
 //---------------------------------------------------
 
 var bipartite=false;
-var gexfDictReverse={}
-for (var i in gexfDict){
-    gexfDictReverse[gexfDict[i]]=i;
-}
 
 var colorList = ["#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941", "#006FA6", "#A30059", "#FFDBE5", "#7A4900", "#0000A6", "#63FFAC", "#B79762", "#004D43", "#8FB0FF", "#997D87", "#5A0007", "#809693", "#FEFFE6", "#1B4400", "#4FC601", "#3B5DFF", "#4A3B53", "#FF2F80", "#61615A", "#BA0900", "#6B7900", "#00C2A0", "#FFAA92", "#FF90C9", "#B903AA", "#D16100", "#DDEFFF", "#000035", "#7B4F4B", "#A1C299", "#300018", "#0AA6D8", "#013349", "#00846F", "#372101", "#FFB500", "#C2FFED", "#A079BF", "#CC0744", "#C0B9B2", "#C2FF99", "#001E09", "#00489C", "#6F0062", "#0CBD66", "#EEC3FF", "#456D75", "#B77B68", "#7A87A1", "#788D66", "#885578", "#FAD09F", "#FF8A9A", "#D157A0", "#BEC459", "#456648", "#0086ED", "#886F4C","#34362D", "#B4A8BD", "#00A6AA", "#452C2C", "#636375", "#A3C8C9", "#FF913F", "#938A81", "#575329", "#00FECF", "#B05B6F", "#8CD0FF", "#3B9700", "#04F757", "#C8A1A1", "#1E6E00", "#7900D7", "#A77500", "#6367A9", "#A05837", "#6B002C", "#772600", "#D790FF", "#9B9700", "#549E79", "#FFF69F", "#201625", "#72418F", "#BC23FF", "#99ADC0", "#3A2465", "#922329", "#5B4534", "#FDE8DC", "#404E55", "#0089A3", "#CB7E98", "#A4E804", "#324E72", "#6A3A4C", "#83AB58", "#001C1E", "#D1F7CE", "#004B28", "#C8D0F6", "#A3A489", "#806C66", "#222800", "#BF5650", "#E83000", "#66796D", "#DA007C", "#FF1A59", "#8ADBB4", "#1E0200", "#5B4E51", "#C895C5", "#320033", "#FF6832", "#66E1D3", "#CFCDAC", "#D0AC94", "#7ED379", "#012C58"];
 

@@ -7,21 +7,21 @@ function cancelSelection (fromTagCloud) {
     selections = [];
     //selections.length = 0;
     selections.splice(0, selections.length);
-    partialGraph.refresh();
+    TW.partialGraph.refresh();
 
-    partialGraph.states.slice(-1)[0].selections=[]
+    TW.partialGraph.states.slice(-1)[0].selections=[]
     
     
     //Nodes colors go back to normal
     overNodes=false;
-    e = partialGraph._core.graph.edges;
+    e = TW.partialGraph._core.graph.edges;
     for(i=0;i<e.length;i++){
             e[i].color = e[i].attr['grey'] ? e[i].attr['true_color'] : e[i].color;
             e[i].attr['grey'] = 0;
     }
-    partialGraph.draw(2,1,2);
+    TW.partialGraph.draw(2,1,2);
                 
-    partialGraph.iterNodes(function(n){
+    TW.partialGraph.iterNodes(function(n){
             n.active=false;
             n.color = n.attr['grey'] ? n.attr['true_color'] : n.color;
             n.attr['grey'] = 0;
@@ -39,33 +39,33 @@ function cancelSelection (fromTagCloud) {
         $("#tips").html(getTips());
     }   
     for(var i in deselections){
-        if( !isUndef(partialGraph._core.graph.nodesIndex[i]) ) {
-            partialGraph._core.graph.nodesIndex[i].forceLabel=false;
-            partialGraph._core.graph.nodesIndex[i].neighbour=false;
+        if( !isUndef(TW.partialGraph._core.graph.nodesIndex[i]) ) {
+            TW.partialGraph._core.graph.nodesIndex[i].forceLabel=false;
+            TW.partialGraph._core.graph.nodesIndex[i].neighbour=false;
         }
     }
     deselections={};
     // leftPanel("close");
-    if(partialGraph.states.slice(-1)[0].level)
+    if(TW.partialGraph.states.slice(-1)[0].level)
         LevelButtonDisable(true);
 
-    partialGraph.draw();
+    TW.partialGraph.draw();
 }
 
 function highlightSelectedNodes(flag){ 
     pr("\t***methods.js:highlightSelectedNodes(flag)"+flag+" selEmpty:"+is_empty(selections))
     if(!is_empty(selections)){          
         for(var i in selections) {
-            if(Nodes[i].type==catSoc && swclickActual=="social"){
-                node = partialGraph._core.graph.nodesIndex[i];
+            if(TW.Nodes[i].type==TW.catSoc && swclickActual=="social"){
+                node = TW.partialGraph._core.graph.nodesIndex[i];
                 node.active = flag;
             }
-            else if(Nodes[i].type==catSem && swclickActual=="semantic") {
-                node = partialGraph._core.graph.nodesIndex[i];
+            else if(TW.Nodes[i].type==TW.catSem && swclickActual=="semantic") {
+                node = TW.partialGraph._core.graph.nodesIndex[i];
                 node.active = flag;
             }
             else if(swclickActual=="sociosemantic") {
-                node = partialGraph._core.graph.nodesIndex[i];
+                node = TW.partialGraph._core.graph.nodesIndex[i];
                 node.active = flag;
             }
             else break;        
@@ -114,7 +114,7 @@ function RefreshState(newNOW){
     	// N : number of nodes
     	// k : number of ( selected nodes + their neighbors )
     	// s : number of selections
-        var N=( Object.keys(Nodes).filter(function(n){return Nodes[n].type==catSoc}) ).length
+        var N=( Object.keys(TW.Nodes).filter(function(n){return TW.Nodes[n].type==TW.catSoc}) ).length
         var k=Object.keys(getNeighs(Object.keys(selections),nodes1)).length
         var s=Object.keys(selections).length
         pr("in social N: "+N+" - k: "+k+" - s: "+s)
@@ -135,7 +135,7 @@ function RefreshState(newNOW){
         
     }
     if(NOW=="B" || NOW=="b") {
-        var N=( Object.keys(Nodes).filter(function(n){return Nodes[n].type==catSem}) ).length
+        var N=( Object.keys(TW.Nodes).filter(function(n){return TW.Nodes[n].type==TW.catSem}) ).length
         var k=Object.keys(getNeighs(Object.keys(selections),nodes2)).length
         var s=Object.keys(selections).length
         pr("in semantic N: "+N+" - k: "+k+" - s: "+s)
@@ -169,7 +169,7 @@ function RefreshState(newNOW){
         $("#category-B").show();
     }
 
-    partialGraph.draw();
+    TW.partialGraph.draw();
 
 }
 
@@ -194,10 +194,10 @@ function htmlfied_alternodes(elems) {
             (frec-1)*
             ((desirableTagCloudFont_MAX-desirableTagCloudFont_MIN)/(frecMAX-1));
         }
-        if(!isUndef(Nodes[id])){
+        if(!isUndef(TW.Nodes[id])){
             //          js1            js2
             // onclick="graphTagCloudElem('  ');
-            htmlfied_alternode = '<span class="tagcloud-item" style="font-size:'+fontSize+'px;" '+js1+id+js2+'>'+ Nodes[id].label+ '</span>';
+            htmlfied_alternode = '<span class="tagcloud-item" style="font-size:'+fontSize+'px;" '+js1+id+js2+'>'+ TW.Nodes[id].label+ '</span>';
             oppositesNodes.push(htmlfied_alternode)
         }
     }
@@ -206,8 +206,8 @@ function htmlfied_alternodes(elems) {
 
 function manualForceLabel(nodeid,active) {
 	// pr("manual|"+nodeid+"|"+active)
-	partialGraph._core.graph.nodesIndex[nodeid].active=active;
-	partialGraph.draw();
+	TW.partialGraph._core.graph.nodesIndex[nodeid].active=active;
+	TW.partialGraph.draw();
 }
 
 function htmlfied_samenodes(elems) {
@@ -236,9 +236,9 @@ function htmlfied_nodesatts(elems){
         information=[]
 
         var id=elems[i]
-        var node = Nodes[id]
+        var node = TW.Nodes[id]
 
-        if (mainfile) {
+        if (TW.mainfile) {
             var addname = (node.attributes["name"])?node.attributes["name"]:"";
             google='<a target="_blank" href="http://www.google.com/search?q='+addname+"+"+node.label.replace(" ","+")+'">';
             information += '<li><b>'+ google + node.label + '</a></b></li>';
@@ -248,7 +248,7 @@ function htmlfied_nodesatts(elems){
             }
             socnodes.push(information);
         } else {
-            if(node.type==catSoc){
+            if(node.type==TW.catSoc){
                 information += '<li><b>' + node.label + '</b></li>';
                 if(node.htmlCont==""){
                     if (!isUndef(node.level)) {
@@ -260,7 +260,7 @@ function htmlfied_nodesatts(elems){
                 socnodes.push(information)
             }
 
-            if(node.type==catSem){
+            if(node.type==TW.catSem){
                 information += '<li><b>' + node.label + '</b></li>';
                 google='<a href=http://www.google.com/#hl=en&source=hp&q=%20'+node.label.replace(" ","+")+'%20><img src="'+'img/google.png"></img></a>';
                 wiki = '<a href=http://en.wikipedia.org/wiki/'+node.label.replace(" ","_")+'><img src="'+'img/wikipedia.png"></img></a>';
@@ -318,7 +318,7 @@ function updateLeftPanel_fix( sels , oppos ) {
     $("#information").html(informationDIV);
     $("#tips").html("");
 
-    if(categoriesIndex.length==1) getTopPapers("semantic");
+    if(TW.categoriesIndex.length==1) getTopPapers("semantic");
     else getTopPapers(swclickActual); 
 }
 
@@ -345,7 +345,7 @@ function LevelButtonDisable( TF ){
 function graphTagCloudElem(nodes) {
     pr("in graphTagCloudElem, nodae_id: "+nodes);
     cancelSelection();
-    partialGraph.emptyGraph();
+    TW.partialGraph.emptyGraph();
 
 
     var ndsids=[]
@@ -356,18 +356,18 @@ function graphTagCloudElem(nodes) {
 
     node_id = ndsids[0]
 
-    var catDict = partialGraph.states.slice(-1)[0].categoriesDict;
-    var type = Nodes[node_id].type;
+    var catDict = TW.partialGraph.states.slice(-1)[0].categoriesDict;
+    var type = TW.Nodes[node_id].type;
     var next_state = [];
     for(var c in catDict)
         next_state.push( c==type )
     var str_nextstate = next_state.map(Number).join("|")
 
 
-    var present = partialGraph.states.slice(-1)[0]; // Last
+    var present = TW.partialGraph.states.slice(-1)[0]; // Last
     var level = present.level;
-    var sels = [node_id];//[144, 384, 543]//partialGraph.states.selections;Last
-    var lastpos = partialGraph.states.length-1;
+    var sels = [node_id];//[144, 384, 543]//TW.partialGraph.states.selections;Last
+    var lastpos = TW.partialGraph.states.length-1;
     var avantlastpos = lastpos-1;
 
     // Dictionaries of: selection+neighbors
@@ -376,7 +376,7 @@ function graphTagCloudElem(nodes) {
     var voisinage = {}
     for(var i in sels) {
         s = sels[i];
-        neigh = Relations[str_nextstate][s]
+        neigh = TW.Relations[str_nextstate][s]
         if(neigh) {
             for(var j in neigh) {
                 t = neigh[j]
@@ -424,33 +424,33 @@ function graphTagCloudElem(nodes) {
         overNodes=true;
     }
 
-    partialGraph.states[avantlastpos] = {};
-    partialGraph.states[avantlastpos].level = present.level;
-    partialGraph.states[avantlastpos].selections = present.selections;
-    partialGraph.states[avantlastpos].type = present.type; 
-    partialGraph.states[avantlastpos].opposites = present.opposites;
-    partialGraph.states[avantlastpos].categories = present.categories;//to_del
-    partialGraph.states[avantlastpos].categoriesDict = present.categoriesDict;//to_del
+    TW.partialGraph.states[avantlastpos] = {};
+    TW.partialGraph.states[avantlastpos].level = present.level;
+    TW.partialGraph.states[avantlastpos].selections = present.selections;
+    TW.partialGraph.states[avantlastpos].type = present.type; 
+    TW.partialGraph.states[avantlastpos].opposites = present.opposites;
+    TW.partialGraph.states[avantlastpos].categories = present.categories;//to_del
+    TW.partialGraph.states[avantlastpos].categoriesDict = present.categoriesDict;//to_del
 
 
-    partialGraph.states[lastpos].setState({
+    TW.partialGraph.states[lastpos].setState({
         type: next_state,
         level: futurelevel,
         sels: Object.keys(selections).map(Number),
         oppos: []
     })
 
-    partialGraph.states[lastpos].categories = present.categories;//to_del
-    partialGraph.states[lastpos].categoriesDict = catDict;//to_del
+    TW.partialGraph.states[lastpos].categories = present.categories;//to_del
+    TW.partialGraph.states[lastpos].categoriesDict = catDict;//to_del
 
-    fa2enabled=true; partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8).draw().startForceAtlas2();
+    fa2enabled=true; TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8).draw().startForceAtlas2();
 
     ChangeGraphAppearanceByAtt(true)
 }
 
 function greyEverything(){
     
-    nds = partialGraph._core.graph.nodes.filter(function(n) {
+    nds = TW.partialGraph._core.graph.nodes.filter(function(n) {
                             return !n['hidden'];
                         });
     for(var i in nds){
@@ -462,7 +462,7 @@ function greyEverything(){
             nds[i].attr['grey'] = 1;
     }
     
-    eds = partialGraph._core.graph.edges.filter(function(e) {
+    eds = TW.partialGraph._core.graph.edges.filter(function(e) {
                             return !e['hidden'];
                         });
     for(var i in eds){
@@ -475,10 +475,10 @@ function greyEverything(){
 }
 
 function graphResetColor(){
-    nds = partialGraph._core.graph.nodes.filter(function(x) {
+    nds = TW.partialGraph._core.graph.nodes.filter(function(x) {
                             return !x['hidden'];
           });
-    eds = partialGraph._core.graph.edges.filter(function(x) {
+    eds = TW.partialGraph._core.graph.edges.filter(function(x) {
                             return !x['hidden'];
           });
           
@@ -498,11 +498,11 @@ function graphResetColor(){
 function hideEverything(){
     pr("\thiding all");
     nodeslength=0;
-    for(var n in partialGraph._core.graph.nodesIndex){
-        partialGraph._core.graph.nodesIndex[n].hidden=true;
+    for(var n in TW.partialGraph._core.graph.nodesIndex){
+        TW.partialGraph._core.graph.nodesIndex[n].hidden=true;
     }
-    for(var e in partialGraph._core.graph.edgesIndex){
-        partialGraph._core.graph.edgesIndex[e].hidden=true;
+    for(var e in TW.partialGraph._core.graph.edgesIndex){
+        TW.partialGraph._core.graph.edgesIndex[e].hidden=true;
     }
     overNodes=false;//magic line!
     pr("\tall hidded");
@@ -517,43 +517,43 @@ function add1Elem(id) {
         id = parseInt(id)
         if(!isUndef(getn(id))) return;
 
-        if(Nodes[id]) {
+        if(TW.Nodes[id]) {
             var anode = {}
             anode.id=id;
-            anode.label=Nodes[id].label;
-            anode.size=Nodes[id].size;
-            anode.x=Nodes[id].x;
-            anode.y=Nodes[id].y;
-            anode.hidden=(Nodes[id].lock)?true:false;
-            anode.type=Nodes[id].type;
-            anode.color=Nodes[id].color;
-            if( Nodes[id].shape ) anode.shape = Nodes[id].shape;
+            anode.label=TW.Nodes[id].label;
+            anode.size=TW.Nodes[id].size;
+            anode.x=TW.Nodes[id].x;
+            anode.y=TW.Nodes[id].y;
+            anode.hidden=(TW.Nodes[id].lock)?true:false;
+            anode.type=TW.Nodes[id].type;
+            anode.color=TW.Nodes[id].color;
+            if( TW.Nodes[id].shape ) anode.shape = TW.Nodes[id].shape;
 
             if(Number(anode.id)==287) console.log("coordinates of node 287: ( "+anode.x+" , "+anode.y+" ) ")
 
-            if(!Nodes[id].lock) {
-                updateSearchLabels(id,Nodes[id].label,Nodes[id].type);
+            if(!TW.Nodes[id].lock) {
+                updateSearchLabels(id,TW.Nodes[id].label,TW.Nodes[id].type);
                 nodeslength++;
             }
-            partialGraph.addNode(id,anode);
+            TW.partialGraph.addNode(id,anode);
             return;
         }
     } else { // It's an edge!
         if(!isUndef(gete(id))) return;
-        if(Edges[id] && !Edges[id].lock){
-            // var present = partialGraph.states.slice(-1)[0];            
+        if(TW.Edges[id] && !TW.Edges[id].lock){
+            // var present = TW.partialGraph.states.slice(-1)[0];            
             var anedge = {
                 id:         id,
-                sourceID:   Edges[id].source,
-                targetID:   Edges[id].target,
+                sourceID:   TW.Edges[id].source,
+                targetID:   TW.Edges[id].target,
                 lock : false,
-                label:      Edges[id].label,
-                type:      Edges[id].type,
-                categ:      Edges[id].categ,
-                weight: Edges[id].weight
+                label:      TW.Edges[id].label,
+                type:      TW.Edges[id].type,
+                categ:      TW.Edges[id].categ,
+                weight: TW.Edges[id].weight
             };
 
-            partialGraph.addEdge(id , anedge.sourceID , anedge.targetID , anedge);
+            TW.partialGraph.addEdge(id , anedge.sourceID , anedge.targetID , anedge);
             return;
         }
     }
@@ -614,7 +614,7 @@ function saveGEXF(nodes,edges,atts){
         }    
         gexf += ' <attvalues>\n';
         gexf += ' <attvalue for="0" value="'+nodes[n].type+'"/>\n';
-        gexf += ' <attvalue for="1" value="'+Nodes[nodes[n].id].CC+'"/>\n';
+        gexf += ' <attvalue for="1" value="'+TW.Nodes[nodes[n].id].CC+'"/>\n';
         gexf += ' </attvalues>\n';
         gexf += '</node>\n';
     }
@@ -636,17 +636,17 @@ function saveGraphIMG(){
         
         var strDownloadMime = "image/octet-stream"
         
-        var nodesDiv = partialGraph._core.domElements.nodes;
+        var nodesDiv = TW.partialGraph._core.domElements.nodes;
         var nodesCtx = nodesDiv.getContext("2d");
 
-        var edgesDiv = partialGraph._core.domElements.edges;
+        var edgesDiv = TW.partialGraph._core.domElements.edges;
         var edgesCtx = edgesDiv.getContext("2d");
 
 
-        var hoverDiv = partialGraph._core.domElements.hover;
+        var hoverDiv = TW.partialGraph._core.domElements.hover;
         var hoverCtx = hoverDiv.getContext("2d");
 
-        var labelsDiv = partialGraph._core.domElements.labels;
+        var labelsDiv = TW.partialGraph._core.domElements.labels;
         var labelsCtx = labelsDiv.getContext("2d");
 
         nodesCtx.drawImage(hoverDiv,0,0);

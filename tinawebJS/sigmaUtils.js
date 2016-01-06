@@ -33,11 +33,11 @@ SigmaUtils = function () {
 
         var typeNow = initialState.map(Number).join("|")
 
-        for(var i in Relations[typeNow]) {
+        for(var i in TW.Relations[typeNow]) {
             s = i;
-            for(var j in Relations[typeNow][i]) {
-                t = Relations[typeNow][i][j]
-                e = Edges[s+";"+t]
+            for(var j in TW.Relations[typeNow][i]) {
+                t = TW.Relations[typeNow][i][j]
+                e = TW.Edges[s+";"+t]
                 if(e) {
                     if(e.source != e.target) {
                         var edge = ({
@@ -69,7 +69,7 @@ function showMeSomeLabels(N){
         maxIn=0,
         minOut=50,
         maxOut=0;        
-        partialGraph.iterNodes(function(n){
+        TW.partialGraph.iterNodes(function(n){
             if(n.hidden==false){
                 if(parseInt(n.inDegree) < minIn) minIn= n.inDegree;
                 if(parseInt(n.inDegree) > maxIn) maxIn= n.inDegree;
@@ -100,51 +100,51 @@ function showMeSomeLabels(N){
                 if(counter==N) break;
             }
         }
-        partialGraph.draw()
+        TW.partialGraph.draw()
         /*======= Show some labels at the beginning =======*/
 }
 
 function getnodes(){
-    return partialGraph._core.graph.nodes;
+    return TW.partialGraph._core.graph.nodes;
 }
 
 function getnodesIndex(){
-    return partialGraph._core.graph.nodesIndex;
+    return TW.partialGraph._core.graph.nodesIndex;
 }
 
 function getedges(){
-    return partialGraph._core.graph.edges;
+    return TW.partialGraph._core.graph.edges;
 }
 
 function getedgesIndex(){
-    return partialGraph._core.graph.edgesIndex;
+    return TW.partialGraph._core.graph.edgesIndex;
 }
 
 function getVisibleEdges() {
-	return partialGraph._core.graph.edges.filter(function(e) {
+	return TW.partialGraph._core.graph.edges.filter(function(e) {
                 return !e['hidden'];
     });
 }
 
 function getVisibleNodes() {
-    return partialGraph._core.graph.nodes.filter(function(n) {
+    return TW.partialGraph._core.graph.nodes.filter(function(n) {
                 return !n['hidden'];
     });
 }
 
 
 function getNodesByAtt(att) {
-    return partialGraph._core.graph.nodes.filter(function(n) {
+    return TW.partialGraph._core.graph.nodes.filter(function(n) {
                 return n['type']==att;
     });
 }
 
 function getn(id){
-    return partialGraph._core.graph.nodesIndex[id];
+    return TW.partialGraph._core.graph.nodesIndex[id];
 }
 
 function gete(id){
-    return partialGraph._core.graph.edgesIndex[id];
+    return TW.partialGraph._core.graph.edgesIndex[id];
 }
 
 
@@ -182,7 +182,7 @@ function getNodeLabels(elems){
     var labelss=[]
     for(var i in elems){
         var id=(!isUndef(elems[i].key))?elems[i].key:i
-        labelss.push(Nodes[id].label)
+        labelss.push(TW.Nodes[id].label)
     }
     return labelss
 }
@@ -195,7 +195,7 @@ function getNodeIDs(elems){
 function getSelections(){    
         params=[];
         for(var i in selections){
-            params.push(Nodes[i].label);
+            params.push(TW.Nodes[i].label);
         }
         return params;
 }
@@ -250,7 +250,7 @@ function clustersBy(daclass) {
     var v_nodes = getVisibleNodes();
     var min_pow = 0;
     for(var i in v_nodes) {
-        var the_node = Nodes[ v_nodes[i].id ]
+        var the_node = TW.Nodes[ v_nodes[i].id ]
         var attval = ( isUndef(the_node.attributes) || isUndef(the_node.attributes[daclass]) )? v_nodes[i][daclass]: the_node.attributes[daclass];
         if( !isNaN(parseFloat(attval)) ) { //is float
             while(true) {
@@ -268,7 +268,7 @@ function clustersBy(daclass) {
     var real_max = -1;
     var themult = Math.pow(10,min_pow);
     for(var i in v_nodes) {
-        var the_node = Nodes[ v_nodes[i].id ]
+        var the_node = TW.Nodes[ v_nodes[i].id ]
         var attval = ( isUndef(the_node.attributes) || isUndef(the_node.attributes[daclass]) )? v_nodes[i][daclass]: the_node.attributes[daclass];
         var attnumber = Number(attval);
         var round_number = Math.round(  attnumber*themult ) ;
@@ -298,19 +298,19 @@ function clustersBy(daclass) {
 
         var newval_color = Math.round( ( Min_color+(NodeID_Val[i]["round"]-real_min)*((Max_color-Min_color)/(real_max-real_min)) ) );
         var hex_color = rgbToHex(255, (255-newval_color) , 0)
-        partialGraph._core.graph.nodesIndex[i].color = hex_color
+        TW.partialGraph._core.graph.nodesIndex[i].color = hex_color
 
         var newval_size = Math.round( ( Min_size+(NodeID_Val[i]["round"]-real_min)*((Max_size-Min_size)/(real_max-real_min)) ) );
-        partialGraph._core.graph.nodesIndex[i].size = newval_size;
+        TW.partialGraph._core.graph.nodesIndex[i].size = newval_size;
         // pr("real:"+ NodeID_Val[i]["real"] + " | newvalue: "+newval_size)
 
-        partialGraph._core.graph.nodesIndex[i].label = "("+NodeID_Val[i]["real"].toFixed(min_pow)+") "+Nodes[i].label
+        TW.partialGraph._core.graph.nodesIndex[i].label = "("+NodeID_Val[i]["real"].toFixed(min_pow)+") "+TW.Nodes[i].label
     }
     //    [ / Scaling node colours(0-255) and sizes(3-5) ]
 
 
-    partialGraph.refresh();
-    partialGraph.draw();
+    TW.partialGraph.refresh();
+    TW.partialGraph.draw();
 
 
     //    [ Edge-colour by source-target nodes-colours combination ]
@@ -324,15 +324,14 @@ function clustersBy(daclass) {
         var r = (a[0] + b[0]) >> 1;
         var g = (a[1] + b[1]) >> 1;
         var b = (a[2] + b[2]) >> 1;
-        partialGraph._core.graph.edgesIndex[e_id].color = "rgba("+[r,g,b].join(",")+",0.5)";
+        TW.partialGraph._core.graph.edgesIndex[e_id].color = "rgba("+[r,g,b].join(",")+",0.5)";
     }
     //    [ / Edge-colour by source-target nodes-colours combination ]
 
-    if(daclass!="degree")
-        set_ClustersLegend ( daclass )
+    set_ClustersLegend ( null )
 
-    partialGraph.refresh();
-    partialGraph.draw();
+    TW.partialGraph.refresh();
+    TW.partialGraph.draw();
 }
 
 function colorsBy(daclass) {
@@ -346,9 +345,9 @@ function colorsBy(daclass) {
     pr("")
 
     if(daclass=="clust_louvain") {
-        if(!partialGraph.states.slice(-1)[0].LouvainFait) {
+        if(!TW.partialGraph.states.slice(-1)[0].LouvainFait) {
             RunLouvain()
-            partialGraph.states.slice(-1)[0].LouvainFait = true
+            TW.partialGraph.states.slice(-1)[0].LouvainFait = true
         }
     }
 
@@ -356,11 +355,11 @@ function colorsBy(daclass) {
     colorList.sort(function(){ return Math.random()-0.5; });
 
     for(var i in v_nodes) {
-        var the_node = Nodes[ v_nodes[i].id ]
+        var the_node = TW.Nodes[ v_nodes[i].id ]
         var attval = ( isUndef(the_node.attributes) || isUndef(the_node.attributes[daclass]) )? v_nodes[i][daclass]: the_node.attributes[daclass];
-        partialGraph._core.graph.nodesIndex[v_nodes[i].id].color = colorList[ attval ]
+        TW.partialGraph._core.graph.nodesIndex[v_nodes[i].id].color = colorList[ attval ]
     }
-    partialGraph.draw();
+    TW.partialGraph.draw();
 
     //    [ Edge-colour by source-target nodes-colours combination ]
     var v_edges = getVisibleEdges();
@@ -374,18 +373,18 @@ function colorsBy(daclass) {
             var r = (a[0] + b[0]) >> 1;
             var g = (a[1] + b[1]) >> 1;
             var b = (a[2] + b[2]) >> 1;
-            partialGraph._core.graph.edgesIndex[e_id].color = "rgba("+[r,g,b].join(",")+",0.5)";
+            TW.partialGraph._core.graph.edgesIndex[e_id].color = "rgba("+[r,g,b].join(",")+",0.5)";
         }
     }
     //    [ / Edge-colour by source-target nodes-colours combination ]
     set_ClustersLegend ( daclass )
-    partialGraph.refresh();
-    partialGraph.draw();
+    TW.partialGraph.refresh();
+    TW.partialGraph.draw();
 }
 
 //just for fun
 function makeEdgeWeightUndef() {
-    for(var e in partialGraph._core.graph.edges) {
-        partialGraph._core.graph.edges[e].weight=1;
+    for(var e in TW.partialGraph._core.graph.edges) {
+        TW.partialGraph._core.graph.edges[e].weight=1;
     }
 }

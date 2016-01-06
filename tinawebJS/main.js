@@ -21,6 +21,7 @@
   /\(([\s\S]*?)\)/,
   /[$\w]+/g
 );
+
 var AjaxSync = (function(TYPE, URL, DATA, CT , DT) {
     var Result = []
     TYPE = (!TYPE)?"GET":"POST"
@@ -46,7 +47,7 @@ var AjaxSync = (function(TYPE, URL, DATA, CT , DT) {
 }).index();
  
 function getGexfPath(v){
-    gexfpath=(gexfDictReverse[v])?gexfDictReverse[v]:v;
+    var gexfpath=(TW.gexfDictReverse[v])?TW.gexfDictReverse[v]:v;
     return gexfpath;
 }
 
@@ -57,30 +58,27 @@ function jsActionOnGexfSelector(gexfLegend){
         window.location=window.location.origin+window.location.pathname+"?file="+encodeURIComponent( gexfLegend );
 }
 
-
-var urlfile_override = (isUndef(getUrlParam.file))?false:true;
-
 var files_selector = ""
-if(urlfile_override) 
-    mainfile.unshift( getUrlParam.file );
+if( !isUndef(getUrlParam.file) ) 
+    TW.mainfile.unshift( getUrlParam.file );
 
-unique_mainfile = mainfile.filter(function(item, pos) {
-    return mainfile.indexOf(item) == pos;
+var unique_mainfile = TW.mainfile.filter(function(item, pos) {
+    return TW.mainfile.indexOf(item) == pos;
 });
-mainfile = unique_mainfile;
+TW.mainfile = unique_mainfile;
 
 console.log("THE URL.FILE PARAM:")
-console.log(mainfile)
+console.log(TW.mainfile)
 
 files_selector += '<select onchange="jsActionOnGexfSelector(this.value);">'
-for(var i in mainfile) {
-    var gotoURL = window.location.origin+window.location.pathname+"?file="+mainfile[i];
-    files_selector += '<option>'+mainfile[i]+'</option>'
+for(var i in TW.mainfile) {
+    var gotoURL = window.location.origin+window.location.pathname+"?file="+TW.mainfile[i];
+    files_selector += '<option>'+TW.mainfile[i]+'</option>'
 }
 files_selector += "</select>"
 $("#network").html(files_selector)
 
-var file = (Array.isArray(mainfile))?mainfile[0]:mainfile;
+var file = (Array.isArray(TW.mainfile))?TW.mainfile[0]:TW.mainfile;
 
 var RES = AjaxSync({ URL: file });
 
@@ -91,7 +89,7 @@ if(RES["OK"]) {
     
     if(file=="db.json") {
 
-        getAdditionalInfo = true;
+        TW.getAdditionalInfo = true;
 
         fileparam = file;
 
@@ -103,8 +101,8 @@ if(RES["OK"]) {
             for(var gexf in the_gexfs) {
                 pr("\t\t\t"+gexf)
                 pr("\t\t\t\t"+ the_gexfs[gexf]["semantic"]["table"] )
-                field[path+"/"+gexf] = the_gexfs[gexf]["semantic"]["table"]
-                gexfDict[path+"/"+gexf] = "A "+gexf
+                TW.field[path+"/"+gexf] = the_gexfs[gexf]["semantic"]["table"]
+                TW.gexfDict[path+"/"+gexf] = "A "+gexf
                 getUrlParam.file = path+"/"+gexf
                 break
             }
@@ -112,8 +110,8 @@ if(RES["OK"]) {
         }
 
         pr("\n============================\n")
-        pr(field)
-        pr(gexfDict)
+        pr(TW.field)
+        pr(TW.gexfDict)
         var sub_RES = AjaxSync({ URL: getUrlParam.file });
         the_data = sub_RES["data"]
         fileparam = sub_RES["format"]
@@ -139,23 +137,23 @@ if(RES["OK"]) {
     var possibleStates = makeSystemStates( categories )
     var initialState = buildInitialState( categories ) //[true,false]//
 
-    dicts = start.makeDicts(categories);
-    Nodes = dicts.nodes;
-    Edges = dicts.edges;
-    if (the_data.clusters) Clusters = the_data.clusters
+    var dicts = start.makeDicts(categories);
+    TW.Nodes = dicts.nodes;
+    TW.Edges = dicts.edges;
+    if (the_data.clusters) TW.Clusters = the_data.clusters
 
-    nodes1 = dicts.n1;//not used
+    TW.nodes1 = dicts.n1;//not used
     var catDict = dicts.catDict
     pr("CategoriesDict: ")
     pr(catDict)
 
-    categoriesIndex = categories;//to_remove
-    catSoc = categories[0];//to_remove
-    catSem = (categories[1])?categories[1]:false;//to_remove
+    TW.categoriesIndex = categories;//to_remove
+    TW.catSoc = categories[0];//to_remove
+    TW.catSem = (categories[1])?categories[1]:false;//to_remove
 
     for(var i in categories) {
-        Filters[i] = {}
-        Filters[i]["#slidercat"+i+"edgesweight"] = true;        
+        TW.Filters[i] = {}
+        TW.Filters[i]["#slidercat"+i+"edgesweight"] = true;        
     } 
     
     // [ Initiating Sigma-Canvas ]
@@ -169,21 +167,21 @@ if(RES["OK"]) {
 
     // [ Poblating the Sigma-Graph ]
     var sigma_utils = new SigmaUtils();
-    partialGraph = sigma.init(document.getElementById('sigma-example'))
+    TW.partialGraph = sigma.init(document.getElementById('sigma-example'))
         .drawingProperties(sigmaJsDrawingProperties)
         .graphProperties(sigmaJsGraphProperties)
         .mouseProperties(sigmaJsMouseProperties);
-    partialGraph = sigma_utils.FillGraph(  initialState , catDict  , dicts.nodes , dicts.edges , partialGraph );
-    partialGraph.states = []
-    partialGraph.states[0] = false;
-    partialGraph.states[1] = SystemStates;
-    partialGraph.states[1].categories = categories
-    partialGraph.states[1].categoriesDict = catDict;
-    partialGraph.states[1].type = initialState;
-    partialGraph.states[1].LouvainFait = false;
+    TW.partialGraph = sigma_utils.FillGraph(  initialState , catDict  , dicts.nodes , dicts.edges , TW.partialGraph );
+    TW.partialGraph.states = []
+    TW.partialGraph.states[0] = false;
+    TW.partialGraph.states[1] = TW.SystemStates;
+    TW.partialGraph.states[1].categories = categories
+    TW.partialGraph.states[1].categoriesDict = catDict;
+    TW.partialGraph.states[1].type = initialState;
+    TW.partialGraph.states[1].LouvainFait = false;
     // [ / Poblating the Sigma-Graph ]
 
-    partialGraph.states[1].setState = (function( type , level , sels , oppos ) {
+    TW.partialGraph.states[1].setState = (function( type , level , sels , oppos ) {
         var bistate=false, typestring=false;
         console.log("IN THE SET STATE METHOD:")
         if(!isUndef(type)) {
@@ -207,8 +205,8 @@ if(RES["OK"]) {
         console.log("opposites: ");
         console.log(oppos)
 
-        var present = partialGraph.states.slice(-1)[0]; // Last
-        var past = partialGraph.states.slice(-2)[0] // avant Last
+        var present = TW.partialGraph.states.slice(-1)[0]; // Last
+        var past = TW.partialGraph.states.slice(-2)[0] // avant Last
         console.log("previous level: "+past.level)
         console.log("new level: "+present.level)
         
@@ -224,7 +222,7 @@ if(RES["OK"]) {
             LevelButtonDisable(true)
 
         // console.log("printing the first state:")
-        // first_state = partialGraph.states.slice(-1)[0].type;
+        // first_state = TW.partialGraph.states.slice(-1)[0].type;
         // for(var i in first_state) {
         //     if(first_state[i]) {
         //         for(var j in Filters[i])
@@ -279,14 +277,14 @@ if(RES["OK"]) {
             bgcolor:"#FFA500",
             onchange:function(value){
                 $.doTimeout(100,function (){
-                       partialGraph.iterNodes(function (n) {
-                           if(Nodes[n.id].type==catSem) {
-                               var newval = parseFloat(Nodes[n.id].size) + parseFloat((value-1))*0.3
+                       TW.partialGraph.iterNodes(function (n) {
+                           if(TW.Nodes[n.id].type==TW.catSem) {
+                               var newval = parseFloat(TW.Nodes[n.id].size) + parseFloat((value-1))*0.3
                                n.size = (newval<1.0)?1:newval;
-                               sizeMult[catSem] = parseFloat(value-1)*0.3;
+                               sizeMult[TW.catSem] = parseFloat(value-1)*0.3;
                            }
                        });
-                       partialGraph.draw();
+                       TW.partialGraph.draw();
                 });
             }
         }); 
@@ -305,17 +303,17 @@ if(RES["OK"]) {
         }
     }).index();
 
-    partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8).draw();
+    TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8).draw();
 
-    // fa2enabled=true; partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8).draw();
+    // fa2enabled=true; TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8).draw();
     // $.doTimeout(1,function(){
-    //     fa2enabled=true; partialGraph.startForceAtlas2();
+    //     fa2enabled=true; TW.partialGraph.startForceAtlas2();
     //     $.doTimeout(10,function(){
-    //         partialGraph.stopForceAtlas2();
+    //         TW.partialGraph.stopForceAtlas2();
     //     });
     // });
 
-    twjs_.initListeners( categories , partialGraph);
+    twjs_.initListeners( categories , TW.partialGraph);
 
     if( categories.length==1 ) {
         $("#changetype").hide();

@@ -48,7 +48,7 @@ SelectionEngine = function() {
         if(cursorsize>0) {
             clickedNodes = this.SelectThis2( area )
         } else {
-            clickedNodes = partialGraph._core.graph.nodes.filter(function(n) {
+            clickedNodes = TW.partialGraph._core.graph.nodes.filter(function(n) {
                             return !!n['hover'];
                         }).map(function(n) {
                             return n.id;
@@ -122,7 +122,7 @@ SelectionEngine = function() {
             if(cursorsize>0) {
                 targeted = this.SelectThis2( area )
             } else {
-                targeted = partialGraph._core.graph.nodes.filter(function(n) {
+                targeted = TW.partialGraph._core.graph.nodes.filter(function(n) {
                                 return !!n['hover'];
                             }).map(function(n) {
                                 return n.id;
@@ -203,7 +203,7 @@ SelectionEngine = function() {
             cancelSelection(false);
             MultipleSelection2(targeted);
         }
-        partialGraph.draw();
+        TW.partialGraph.draw();
 
         $("input#searchinput").val("");
         $("input#searchinput").autocomplete( "close" );
@@ -240,7 +240,7 @@ SelectionEngine = function() {
         //Multiple selection
         var counter=0;
         var actualSel=[];
-        partialGraph.iterNodes(function(n){
+        TW.partialGraph.iterNodes(function(n){
             if(!n.hidden){
                 distance = Math.sqrt(
                     Math.pow((x1-parseInt(n.displayX)),2) +
@@ -263,7 +263,7 @@ SelectionEngine = function() {
         greyEverything(); 
 
 
-        var typeNow = partialGraph.states.slice(-1)[0].type.map(Number).join("|")
+        var typeNow = TW.partialGraph.states.slice(-1)[0].type.map(Number).join("|")
         console.log ("console.loging the Type:")
         console.log (typeNow)
         console.log (" - - - - - - ")
@@ -280,8 +280,8 @@ SelectionEngine = function() {
             else ndsids=nodes;
             for(var i in ndsids) {
                 s = ndsids[i];
-                if(Relations[typeNow] && Relations[typeNow][s] ) {
-                    neigh = Relations[typeNow][s]
+                if(TW.Relations[typeNow] && TW.Relations[typeNow][s] ) {
+                    neigh = TW.Relations[typeNow][s]
                     if(neigh) {
                         for(var j in neigh) {
                             t = neigh[j]
@@ -300,7 +300,7 @@ SelectionEngine = function() {
 
         for(var i in nodes_2_colour) {
             if(i) {
-                n = partialGraph._core.graph.nodesIndex[i]
+                n = TW.partialGraph._core.graph.nodesIndex[i]
                 if(n) {
                     n.color = n.attr['true_color'];
                     n.attr['grey'] = 0;
@@ -312,7 +312,7 @@ SelectionEngine = function() {
             }
         }
         for(var i in edges_2_colour) {
-            an_edge = partialGraph._core.graph.edgesIndex[i]
+            an_edge = TW.partialGraph._core.graph.edgesIndex[i]
             if(!isUndef(an_edge) && !an_edge.hidden){
                 an_edge.color = an_edge.attr['true_color'];
                 an_edge.attr['grey'] = 0;
@@ -321,13 +321,13 @@ SelectionEngine = function() {
 
 
         var the_new_sels = Object.keys(selections).map(Number)
-        partialGraph.states.slice(-1)[0].selections = the_new_sels;
-        partialGraph.states.slice(-1)[0].setState( { sels: the_new_sels} )
+        TW.partialGraph.states.slice(-1)[0].selections = the_new_sels;
+        TW.partialGraph.states.slice(-1)[0].setState( { sels: the_new_sels} )
 
         var neighsDict = {}
-        if(Relations["1|1"]) {
+        if(TW.Relations["1|1"]) {
             for(var s in the_new_sels) {
-                var neighs = Relations["1|1"][the_new_sels[s]];
+                var neighs = TW.Relations["1|1"][the_new_sels[s]];
                 for(var n in neighs) {
                     if (!neighsDict[neighs[n]])
                         neighsDict[neighs[n]] = 0;
@@ -343,7 +343,7 @@ SelectionEngine = function() {
 
         overNodes=true; 
 
-        partialGraph.draw();
+        TW.partialGraph.draw();
 
         updateLeftPanel_fix( selections , oppos );
 
@@ -452,7 +452,7 @@ TinaWebJS = function ( sigmacanvas ) {
                             SelInst.MultipleSelection2({nodes:targeted});
                             cursor_size = prev_cursor_size;
                         }
-                        partialGraph.draw();
+                        TW.partialGraph.draw();
 
                         $("input#searchinput").val("");
                         $("input#searchinput").autocomplete( "close" );
@@ -481,7 +481,7 @@ TinaWebJS = function ( sigmacanvas ) {
                                 cancelSelection(false);
                                 SelInst.MultipleSelection2({nodes:targeted});
                             }
-                            partialGraph.draw();
+                            TW.partialGraph.draw();
                             
                             $("input#searchinput").val("");
                             $("input#searchinput").autocomplete( "close" );
@@ -743,10 +743,10 @@ TinaWebJS = function ( sigmacanvas ) {
             onchange:function(value){
                 $.doTimeout(100,function (){
                        partialGraph.iterNodes(function (n) {
-                           if(Nodes[n.id].type==catSoc) {
-                               var newval = parseFloat(Nodes[n.id].size) + parseFloat((value-1))*0.3
+                           if(TW.Nodes[n.id].type==TW.catSoc) {
+                               var newval = parseFloat(TW.Nodes[n.id].size) + parseFloat((value-1))*0.3
                                n.size = (newval<1.0)?1:newval;
-                               sizeMult[catSoc] = parseFloat(value-1)*0.3;
+                               sizeMult[TW.catSoc] = parseFloat(value-1)*0.3;
                            }
                        });
                        partialGraph.draw();
@@ -764,10 +764,10 @@ TinaWebJS = function ( sigmacanvas ) {
             onchange:function(value){
                 $.doTimeout(100,function (){
                        partialGraph.iterNodes(function (n) {
-                           if(Nodes[n.id].type==catSem) {
-                               var newval = parseFloat(Nodes[n.id].size) + parseFloat((value-1))*0.3
+                           if(TW.Nodes[n.id].type==TW.catSem) {
+                               var newval = parseFloat(TW.Nodes[n.id].size) + parseFloat((value-1))*0.3
                                n.size = (newval<1.0)?1:newval;
-                               sizeMult[catSem] = parseFloat(value-1)*0.3;
+                               sizeMult[TW.catSem] = parseFloat(value-1)*0.3;
                            }
                        });
                        partialGraph.draw();
