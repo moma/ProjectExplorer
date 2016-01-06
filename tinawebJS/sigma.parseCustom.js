@@ -231,6 +231,8 @@ function dictfyGexf( gexf , categories ){
                 x = parseFloat(positionNode.getAttribute('x'));
                 y = parseFloat(positionNode.getAttribute('y'));
             }// [ / get Coordinates ]
+            x = x*-1
+            y = y*-1
 
             // [ get Colour ]
             var colorNodes = nodeNode.getElementsByTagName('color');
