@@ -5,9 +5,9 @@
 		"date":"ISIpubdate",
 		"abstract":"ISIABSTRACT",
 		"gexfs": {
-			"EditedJan20151980 nodes V2 PageRank.gexf": {
+			"RiskV2PageRank.gexf": {
 				"social": { "table":"ISIAUTHOR" , "textCol":"data","forkeyCol":"id"},
-				"semantic": { "table":"ISItermsAsbestos" , "textCol":"data","forkeyCol":"id"}
+				"semantic": { "table":"ISItermsAxa_2015" , "textCol":"data","forkeyCol":"id"}
 			},
 			"asbestos.gexf": {
 				"social": { "table":"ISIAUTHOR" , "textCol":"data","forkeyCol":"id"},
@@ -24,20 +24,6 @@
 			"Maps_S_800.gexf": {
 				"social": { "table":"ISIAUTHOR" , "textCol":"data","forkeyCol":"id"},
 				"semantic": { "table":"ISItermsWhitelistV2Oct_5" , "textCol":"data","forkeyCol":"id"}
-			}
-		}
-	},"data/terrorism": {
-		"dbname":"data.db",
-		"title":"ISITITLE",
-		"date":"ISIpubdate",
-		"abstract":"ISIABSTRACT",
-		"gexfs": {
-			"terrorism_bi.gexf": {
-				"social": { "table":"ISIAUTHOR" , "textCol":"data","forkeyCol":"id"},
-				"semantic": { "table":"ISItermsListV1" , "textCol":"data","forkeyCol":"id"}
-			},
-			"terrorism_mono.gexf":{
-				"semantic": { "table":"ISItermsListV1" , "textCol":"data","forkeyCol":"id"}
 			}
 		}
 	},

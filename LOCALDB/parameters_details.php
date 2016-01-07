@@ -9,6 +9,7 @@ $gexf_db = array();
 $gexf_db["data/ClimateChange/Maps_S_800.gexf"] = "data/ClimateChange/wos_climate-change_title_2014-2015.db";
 
 $gexf_db["data/AXA/EditedJan20151980 nodes V2 PageRank.gexf"] = "data/AXA/data.db";
+$gexf_db["data/AXA/RiskV2PageRank.gexf"] = "data/AXA/data.db";
 
 $gexf= str_replace('"','',$_GET["gexf"]);
 
