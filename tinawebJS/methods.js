@@ -274,6 +274,34 @@ function htmlfied_nodesatts(elems){
 }
 
 
+function htmlfied_tagcloud(elems , limit) {
+    var oppositesNodes=[]
+    js1="" //'onclick="graphTagCloudElem(\'';
+    js2="" //"');\""
+    frecMAX=elems[0].value
+    for(var i in elems){
+        if(i==limit)
+            break
+        id=elems[i].key
+        frec=elems[i].value
+        if(frecMAX==1) fontSize=desirableTagCloudFont_MIN;
+        else {
+            fontSize=
+            desirableTagCloudFont_MIN+
+            (frec-1)*
+            ((desirableTagCloudFont_MAX-desirableTagCloudFont_MIN)/(frecMAX-1));
+        }
+        if(!isUndef(TW.Nodes[id])){
+            //          js1            js2
+            // onclick="graphTagCloudElem('  ');
+            var jspart = 'onmouseover="manualForceLabel(\''+id+'\',true)"  onmouseout="manualForceLabel(\''+id+'\',false)"'
+            htmlfied_alternode = '<span class="tagcloud-item" style="font-size:'+fontSize+'px;" '+jspart+'>'+ TW.Nodes[id].label+ '</span>';
+            oppositesNodes.push(htmlfied_alternode)
+        }
+    }
+    return oppositesNodes
+}
+
 //missing: getTopPapers for both node types
 //considering complete graphs case! <= maybe i should mv it
 function updateLeftPanel_fix( sels , oppos ) {
@@ -295,9 +323,22 @@ function updateLeftPanel_fix( sels , oppos ) {
 	}
 
     sameNodesDIV = "";
-    sameNodesDIV+='<div id="sameNodes"><ul style="list-style: none;">';//tagcloud
-    sameNodesDIV += htmlfied_samenodes( getNodeIDs(sels) ).join("\n") ;
-    sameNodesDIV+= '</ul></div>';
+    if(getNodeIDs(sels).length>0) {
+        var temp_voisinage = {}
+        var A = getVisibleNodes()
+        for (var a in A){
+            var n = A[a]
+            if(!n.active && n.color.charAt(0)=="#" ) {
+                temp_voisinage[n.id] = Math.round(TW.Nodes[n.id].size)
+            }
+        }
+        var voisinage = ArraySortByValue(temp_voisinage, function(a,b){
+            return b-a
+        });
+        sameNodesDIV+='<div id="sameNodes">';//tagcloud
+        sameNodesDIV+= htmlfied_tagcloud( voisinage , TW.tagcloud_limit).join("\n") 
+        sameNodesDIV+= '</div>';
+    }
 
         // getTopPapers("semantic");
 
