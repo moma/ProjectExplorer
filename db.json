@@ -17,11 +17,7 @@
             "RiskV2PageRank5000.gexf": {
                     "social": { "table":"ISIAUTHOR" , "textCol":"data","forkeyCol":"id"},
                     "semantic": { "table":"ISItermsAxa_2015" , "textCol":"data","forkeyCol":"id"}
-            },
-			"asbestos.gexf": {
-				"social": { "table":"ISIAUTHOR" , "textCol":"data","forkeyCol":"id"},
-				"semantic": { "table":"ISItermsAsbestos" , "textCol":"data","forkeyCol":"id"}
-			}
+            }
 		}
 
 	},
