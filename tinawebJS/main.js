@@ -110,7 +110,7 @@ if(RES["OK"]) {
             for(var gexf in the_gexfs) {
                 pr("\t\t\t"+gexf+ "   -> table:" +the_gexfs[gexf]["semantic"]["table"] )
                 TW.field[path+"/"+gexf] = the_gexfs[gexf]["semantic"]["table"]
-                TW.gexfDict[path+"/"+gexf] = "A "+gexf
+                TW.gexfDict[path+"/"+gexf] = gexf
 
                 var selected = (the_file==(path+"/"+gexf))?"selected":""
                 files_selector += '<option '+selected+'>'+gexf+'</option>'
@@ -131,6 +131,10 @@ if(RES["OK"]) {
         fileparam = sub_RES["format"]
         pr(the_data.length)
         pr(fileparam)
+        
+        getUrlParam.file=the_file;
+        console.log(" .  .. . -. - .- . - -.")
+        console.log(getUrlParam.file)
         pr("\n============================\n")
 
 
