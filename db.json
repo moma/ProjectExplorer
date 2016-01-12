@@ -4,7 +4,7 @@
 		"title":"ISITITLE",
 		"date":"ISIpubdate",
 		"abstract":"ISIABSTRACT",
-		"first" : "RiskV2PageRank.gexf",		
+		"first" : "RiskV2PageRank5000.gexf",		
 		"gexfs": {
 			"RiskV2PageRank5000.gexf": {
                 "social": { "table":"ISIAUTHOR" , "textCol":"data","forkeyCol":"id"},
