@@ -5,11 +5,11 @@ var TW = {}
     TW.twittertimeline = false;
     TW.minimap=false;
     TW.getAdditionalInfo=false;// True: Activate TopPapers feature.
-    TW.mainfile = ["db.json"];
+    //TW.mainfile = ["db.json"];
     // // TW.mainfile = "api.json";
-    // TW.mainfile = [
+     TW.mainfile = [
     //     "data/2-Terms-Authors-300nodes.gexf",
-    //     "data/0-terms-terms-MainNodes.gexf",
+         "data/0-terms-terms-MainNodes.gexf",
     //     "data/maziyar2.json",
     //     "data/3-Terms-Countries-300nodes.gexf",
     // //     "data/noclimatechange_mnodes.gexf",
@@ -19,7 +19,7 @@ var TW = {}
     // //     "data/20141128_GPs_03_bi.gexf",
     // //     "data/example.json",
     // //     "data/Elisa__Omodei.gexf",
-    //     ];
+         ];
     TW.APINAME = "LOCALDB/";
     TW.tagcloud_limit = 6;
     TW.bridge={};

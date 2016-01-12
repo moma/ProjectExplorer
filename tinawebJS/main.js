@@ -51,35 +51,27 @@ function getGexfPath(v){
     return gexfpath;
 }
 
-function jsActionOnGexfSelector(gexfLegend){
+function jsActionOnGexfSelector(gexfLegend , db_json){
+    db_json = (db_json)?"&mode=db.json":""
     if(getGexfPath[gexfLegend])
-        window.location=window.location.origin+window.location.pathname+"?file="+encodeURIComponent(getGexfPath(gexfLegend));
+        window.location=window.location.origin+window.location.pathname+"?file="+encodeURIComponent(getGexfPath(gexfLegend))+db_json;
     else
-        window.location=window.location.origin+window.location.pathname+"?file="+encodeURIComponent( gexfLegend );
+        window.location=window.location.origin+window.location.pathname+"?file="+encodeURIComponent( gexfLegend )+db_json;
 }
 
-var files_selector = ""
-if( !isUndef(getUrlParam.file) ) 
-    TW.mainfile.unshift( getUrlParam.file );
 
-var unique_mainfile = TW.mainfile.filter(function(item, pos) {
-    return TW.mainfile.indexOf(item) == pos;
-});
-TW.mainfile = unique_mainfile;
+var file =""
+if(!isUndef(getUrlParam.mode)) { // if {db|api}.json
+    file = getUrlParam.mode
+} else {
+    if( !isUndef(getUrlParam.file) ) 
+        TW.mainfile.unshift( getUrlParam.file );
 
-console.log("THE URL.FILE PARAM:")
-console.log(TW.mainfile)
-
-files_selector += '<select onchange="jsActionOnGexfSelector(this.value);">'
-for(var i in TW.mainfile) {
-    var gotoURL = window.location.origin+window.location.pathname+"?file="+TW.mainfile[i];
-    files_selector += '<option>'+TW.mainfile[i]+'</option>'
+    var unique_mainfile = TW.mainfile.filter(function(item, pos) {
+        return TW.mainfile.indexOf(item) == pos;
+    });
+    file = (Array.isArray(TW.mainfile))?TW.mainfile[0]:TW.mainfile;
 }
-files_selector += "</select>"
-$("#network").html(files_selector)
-
-var file = (Array.isArray(TW.mainfile))?TW.mainfile[0]:TW.mainfile;
-
 var RES = AjaxSync({ URL: file });
 
 if(RES["OK"]) {
@@ -87,11 +79,28 @@ if(RES["OK"]) {
     var fileparam;// = { db|api.json , somefile.json|gexf }
     var the_data = RES["data"];
     
-    if(file=="db.json") {
+
+    var the_file = "";
+    if ( !isUndef(getUrlParam.mode) && getUrlParam.mode=="db.json") {
+
+        var first_file = "" , first_path = ""
+        for( var path in the_data ) {
+            first_file = the_data[path]["first"]
+            first_path = path
+            break;
+        }
+
+        if( isUndef(getUrlParam.file) ) {
+            the_file = first_path+"/"+first_file
+        } else {
+            the_file = first_path+"/"+getUrlParam.file
+        }
 
         TW.getAdditionalInfo = true;
 
-        fileparam = file;
+        fileparam = the_file;
+
+        var files_selector = '<select onchange="jsActionOnGexfSelector(this.value , true);">'
 
         for( var path in the_data ) {
             pr("\t"+path+" has:")
@@ -99,26 +108,36 @@ if(RES["OK"]) {
             var the_gexfs = the_data[path]["gexfs"]
             pr("\t\tThese are the available  Gexfs:")
             for(var gexf in the_gexfs) {
-                pr("\t\t\t"+gexf)
-                pr("\t\t\t\t"+ the_gexfs[gexf]["semantic"]["table"] )
+                pr("\t\t\t"+gexf+ "   -> table:" +the_gexfs[gexf]["semantic"]["table"] )
                 TW.field[path+"/"+gexf] = the_gexfs[gexf]["semantic"]["table"]
                 TW.gexfDict[path+"/"+gexf] = "A "+gexf
-                getUrlParam.file = path+"/"+gexf
-                break
+
+                var selected = (the_file==(path+"/"+gexf))?"selected":""
+                files_selector += '<option '+selected+'>'+gexf+'</option>'
             }
+            console.log( files_selector )
             break;
         }
+        files_selector += "</select>"
+        $("#network").html(files_selector)
+
+
 
         pr("\n============================\n")
         pr(TW.field)
         pr(TW.gexfDict)
-        var sub_RES = AjaxSync({ URL: getUrlParam.file });
+        var sub_RES = AjaxSync({ URL: fileparam });
         the_data = sub_RES["data"]
         fileparam = sub_RES["format"]
         pr(the_data.length)
         pr(fileparam)
         pr("\n============================\n")
-    } 
+
+
+
+
+
+    }
 
     if (file=="api.json") {
         fileparam = file;
