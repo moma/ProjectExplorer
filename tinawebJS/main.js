@@ -36,8 +36,17 @@ var AjaxSync = (function(TYPE, URL, DATA, CT , DT) {
             async: false,
             success : function(data, textStatus, jqXHR) {
                 header = jqXHR.getResponseHeader("Content-Type")
+                // console.log("AjaxSync("+URL+"):header="+header);
+                var format ;
+                if (!header || header == "application/octet-stream") {
+                  // default choice if undetailed header
+                  format = "gexf" ;
+                }
+                else {
+                  format = "json" ;
+                }
                 header = (header)?"json":"gexf";
-                Result = { "OK":true , "format":header , "data":data };
+                Result = { "OK":true , "format":format , "data":data };
             },
             error: function(exception) { 
                 Result = { "OK":false , "format":false , "data":exception.status };
