@@ -281,6 +281,7 @@ function manualSelectNode ( nodeid ) {
 }
 
 function htmlfied_tagcloud(elems , limit) {
+    if(elems.length==0) return false;
     var oppositesNodes=[]
     js1="" //'onclick="graphTagCloudElem(\'';
     js2="" //"');\""
@@ -342,7 +343,8 @@ function updateLeftPanel_fix( sels , oppos ) {
             return b-a
         });
         sameNodesDIV+='<div id="sameNodes">';//tagcloud
-        sameNodesDIV+= htmlfied_tagcloud( voisinage , TW.tagcloud_limit).join("\n") 
+        var tagcloud_opposite_neigh = htmlfied_tagcloud( voisinage , TW.tagcloud_limit)
+        sameNodesDIV+= (tagcloud_opposite_neigh!=false) ? tagcloud_opposite_neigh.join("\n")  : "No related terms.";
         sameNodesDIV+= '</div>';
     }
 
