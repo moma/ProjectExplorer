@@ -45,7 +45,6 @@ var AjaxSync = (function(TYPE, URL, DATA, CT , DT) {
                 else {
                   format = "json" ;
                 }
-                header = (header)?"json":"gexf";
                 Result = { "OK":true , "format":format , "data":data };
             },
             error: function(exception) { 
