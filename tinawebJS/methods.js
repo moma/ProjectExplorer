@@ -274,6 +274,12 @@ function htmlfied_nodesatts(elems){
 }
 
 
+function manualSelectNode ( nodeid ) {
+    cancelSelection(false);
+    var SelInst = new SelectionEngine();
+    SelInst.MultipleSelection2({nodes:[nodeid]});
+}
+
 function htmlfied_tagcloud(elems , limit) {
     var oppositesNodes=[]
     js1="" //'onclick="graphTagCloudElem(\'';
@@ -294,7 +300,7 @@ function htmlfied_tagcloud(elems , limit) {
         if(!isUndef(TW.Nodes[id])){
             //          js1            js2
             // onclick="graphTagCloudElem('  ');
-            var jspart = 'onmouseover="manualForceLabel(\''+id+'\',true)"  onmouseout="manualForceLabel(\''+id+'\',false)"'
+            var jspart = ' onclick="manualSelectNode(\''+id+'\')" onmouseover="manualForceLabel(\''+id+'\',true)"  onmouseout="manualForceLabel(\''+id+'\',false)"'
             htmlfied_alternode = '<span class="tagcloud-item" style="font-size:'+fontSize+'px;" '+jspart+'>'+ TW.Nodes[id].label+ '</span>';
             oppositesNodes.push(htmlfied_alternode)
         }
