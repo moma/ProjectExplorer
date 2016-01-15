@@ -36,6 +36,14 @@ var TW = {}
     // field["data/20141215_GPs_04.gexf"] = "ISItermsfirstindexing";
     TW.Relations = {}
 
+    //  module_names to load
+    // ----------------------
+    TW.DivsFlags = {} ;
+    // flag name is div class to be removed if false
+    //        *and* subdirectory to import if true
+    // see also ProcessDivsFlags()
+    //ex: TW.DivsFlags["crowdsourcingTerms"] = true ;
+
     TW.SystemStates = {}
     TW.SystemStates.level = true;
     TW.SystemStates.type = [ true ] //[ true , false ]; //social activated!

@@ -361,6 +361,9 @@ if(RES["OK"]) {
 } else alert("error: "+RES["data"])
 
 
+// load optional modules
+ProcessDivsFlags() ;
+
 console.log("finish")
 
 
