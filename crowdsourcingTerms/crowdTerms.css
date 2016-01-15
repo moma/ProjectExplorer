@@ -1,0 +1,17 @@
+#crowdsource_legend{
+  display: block;
+  position:absolute;
+  left: 5px ;
+  top: 200px;
+}
+
+.ui-autocomplete-input, .ui-menu, .ui-menu-item {
+  /* bad hack for autocomplete menu to end up *over* modal:z1000 */
+  z-index: 1100;
+}
+
+.ui-menu-item a{
+    color: #96f226;
+    border-radius: 0px;
+    border: 1px solid #454545;
+}

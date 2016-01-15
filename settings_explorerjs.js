@@ -42,7 +42,7 @@ var TW = {}
     // flag name is div class to be removed if false
     //        *and* subdirectory to import if true
     // see also ProcessDivsFlags()
-    //ex: TW.DivsFlags["crowdsourcingTerms"] = true ;
+    TW.DivsFlags["crowdsourcingTerms"] = false ;
 
     TW.SystemStates = {}
     TW.SystemStates.level = true;

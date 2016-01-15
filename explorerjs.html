@@ -185,7 +185,6 @@
 
     <div id="wrapper">
 
-
 	    <div id="zonecentre">
 	        
 
@@ -286,11 +285,22 @@
 	        <div id="information"></div>
 	        <br><br><br><br><br><br>
 	    </div>
+      
 
+      
     </div>
 
-    <div id="legend_for_clusters"></div>
+    <div id="crowdsource_legend" style="text-align:center; margin:10px;" class="crowdsourcingTerms">
+        <br><h2>Contribute</h2>Add topics here
+      <center>
+        <button style="position: relative; bottom: 0;" id="openthemodal" class="btn btn-xl btn-danger ">Suggest new terms !</button>
+      </center>
+    </div>
 
+
+    <div id="legend_for_clusters"></div>
+    
+    
     <div id="savemodal" class="modal fade">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -361,6 +371,39 @@
     </div>
 
 
+    <div id="crowdsourcing_modal" class="modal fade crowdsourcingTerms" style="color:black;">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 class="modal-title">Contribuez à l'analyse en suggérant des termes !</h3>
+          </div>
+
+          <div class="modal-body form-horizontal">
+            <div class="row">
+              
+              <div id="custom-search-input">
+                <div class="input-group col-md-12">
+                  
+                  <!-- ideally should be appended by jquery for autocomplete -->
+                  <input id="proposed_terms" type="text" class="form-control input-lg" placeholder="Recherche" />
+                  
+                  <span class="input-group-btn">
+                    <button id="search_proposed_terms" class="btn btn-info btn-lg" type="button"><i class="glyphicon glyphicon-search"></i></button>
+                  </span>
+                </div>
+              </div>
+              
+              <br>
+              <center><div id="wos_chart"></div></center>
+
+            </div>
+          </div>
+
+        </div><!-- /modal-content -->
+      </div><!-- /modal-dialog -->
+    </div><!-- /#crowdsourcing_modal -->
+
     <div id="geomapmodal" class="modal fade">
 
         <!-- <div class="modal-content"> -->
@@ -405,7 +448,7 @@
     -->
     <!--<script src="geomap/js/countries_iso3166.js" charset="utf-8" ></script>-->
     
-    <script type="text/javascript" type="text/javascript" src="tinawebJS/jLouvain.js"></script>
+    <script type="text/javascript" src="tinawebJS/jLouvain.js"></script>
     <script src="tinawebJS/sigma.min.js" type="text/javascript" language="javascript"></script>
     <script src="tinawebJS/sigma.forceatlas2.js" type="text/javascript" language="javascript"></script>
     <script src="settings_explorerjs.js" type="text/javascript" language="javascript"></script>
