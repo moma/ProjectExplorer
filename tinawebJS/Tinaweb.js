@@ -376,14 +376,14 @@ TinaWebJS = function ( sigmacanvas ) {
 
         var SelInst = new SelectionEngine();
 
-        $.ui.autocomplete.prototype._renderItem = function(ul, item) {
-            var searchVal = $("#searchinput").val();
-            var desc = extractContext(item.desc, searchVal);
-            return $('<li onclick=\'var s = "'+item.label+'"; search(s);$("#searchinput").val(strSearchBar);\'></li>')
-            .data('item.autocomplete', item)
-            .append("<a><span class=\"labelresult\">" + item.label + "</span></a>" )
-            .appendTo(ul);
-        };
+        //~ $.ui.autocomplete.prototype._renderItem = function(ul, item) {
+            //~ var searchVal = $("#searchinput").val();
+            //~ var desc = extractContext(item.desc, searchVal);
+            //~ return $('<li onclick=\'var s = "'+item.label+'"; search(s);$("#searchinput").val(strSearchBar);\'></li>')
+            //~ .data('item.autocomplete', item)
+            //~ .append("<a><span class=\"labelresult\">" + item.label + "</span></a>" )
+            //~ .appendTo(ul);
+        //~ };
 
         $('input#searchinput').autocomplete({
             source: function(request, response) {
