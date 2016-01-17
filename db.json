@@ -13,6 +13,10 @@
 			"RiskV2PageRank.gexf": {
 				"social": { "table":"ISIAUTHOR" , "textCol":"data","forkeyCol":"id"},
 				"semantic": { "table":"ISItermsAxa_2015" , "textCol":"data","forkeyCol":"id"}
+			},
+			"RiskV2PageRank1000.gexf": {
+				"social": { "table":"ISIAUTHOR" , "textCol":"data","forkeyCol":"id"},
+				"semantic": { "table":"ISItermsAxa_2015" , "textCol":"data","forkeyCol":"id"}
 			}
 		}
 	},
