@@ -21,7 +21,7 @@ var TW = {}
     // //     "data/Elisa__Omodei.gexf",
          ];
     TW.APINAME = "LOCALDB/";
-    TW.tagcloud_limit = 20;
+    TW.tagcloud_limit = 50;
     TW.bridge={};
     TW.bridge["forFilteredQuery"] = "php/bridgeClientServer_filter.php";
     TW.bridge["forNormalQuery"] = "php/bridgeClientServer.php";
