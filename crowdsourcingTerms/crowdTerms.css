@@ -5,8 +5,8 @@
   top: 200px;
 }
 
-.ui-autocomplete-input, .ui-menu, .ui-menu-item {
-  /* bad hack for autocomplete menu to end up *over* modal:z1000 */
+.ui-menu, .ui-menu-item {
+  /* hack for autocomplete menu to end up *over* modal:z1000 */
   z-index: 1100;
 }
 
