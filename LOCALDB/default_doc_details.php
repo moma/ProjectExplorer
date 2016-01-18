@@ -32,7 +32,7 @@ echo '
     <div id="tabs">
   <ul>
     <li><a href="#tabs-1">Selected Document</a></li>
-    <li><a href="full_doc_list.php?'.'gexf='.urlencode($gexf).'&query='.urlencode($_GET["query"]).'&type='.urlencode($_GET["type"]).'">Full list</a></li>';    
+    <li><a href="full_doc_list.php?'.'gexf='.urlencode($gexf).'&query='.urlencode($_GET["query"]).'&index='.$_GET["index"].'&type='.urlencode($_GET["type"]).'">Full list</a></li>';    
   echo '</ul>';
 
 echo '<div id="tabs-1">';

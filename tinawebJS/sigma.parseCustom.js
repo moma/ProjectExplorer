@@ -295,8 +295,11 @@ function dictfyGexf( gexf , categories ){
 
     var attention = false
     if( TW.Clusters.length == 0 ) {
-        if( nodes[1].attributes["cluster_index"] ) {
-            attention = true;
+        for( var i in nodes ) {
+            if( nodes[i].attributes["cluster_index"] ) {
+                attention = true;
+            }
+            break
         }
     }
 

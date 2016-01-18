@@ -23,7 +23,7 @@ foreach ($base->query($sql) as $row) {
 $table = "";
 $column = "";
 $id="";
-$twjs="API_CNRS/"; // submod path of TinaWebJS
+$twjs=end( explode("/",getcwd()) )."/"; // LOCALDB folder.
 
 if($type=="social"){
   $table = "ISIAUTHOR";
@@ -34,7 +34,7 @@ if($type=="social"){
 }
 
 if($type=="semantic"){
-  $table = "ISItermsListV1";
+  $table = $_GET["index"];
   $column = "data";
   $id = "id";
   $restriction='';
@@ -55,7 +55,6 @@ FROM '.$table.' where (';
 GROUP BY '.$id.'
 ORDER BY count('.$id.') DESC
 LIMIT 1000';
-
 #$queryparsed=$sql;#####
 
 $wos_ids = array();
