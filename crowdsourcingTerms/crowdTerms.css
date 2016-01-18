@@ -1,9 +1,24 @@
-#crowdsource_legend{
-  display: block;
-  position:absolute;
-  left: 5px ;
-  top: 200px;
+
+
+/* left bar contains modules */
+.newleftbar {
+    /* TODO choix fond noir ou fond clair via variables less*/
+    background-color: inherit;
+    position:fixed;
+    left:0 ;
+    width:20% ;
+    height: 100%;
+    overflow: auto;
 }
+
+
+#crowdsource_legend{
+  position:relative;
+  text-align:center;
+  margin: 30 10 10 10;
+}
+
+
 
 .ui-menu, .ui-menu-item {
   /* hack for autocomplete menu to end up *over* modal:z1000 */

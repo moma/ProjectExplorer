@@ -8,6 +8,14 @@
 module_name="crowdsourcingTerms"
 
 // ---- INIT main part -------- (listing all things to load)
-loadJS(module_name+"/modal.js") ;
+
+// basic modal
 loadCSS(module_name+"/crowdTerms.css")
+loadJS(module_name+"/modal.js") ;
+
+// histogram
+loadJS(module_name+"/dygraph/dygraph.combined.js") ;
+loadCSS(module_name+"/dygraph/gallery.css") ;
+loadCSS(module_name+"/dygraph/textarea.css") ;
+
 console.log("OK LOADED " + module_name) ;

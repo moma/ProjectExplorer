@@ -184,7 +184,7 @@
 
 
     <div id="wrapper">
-
+      
 	    <div id="zonecentre">
 	        
 
@@ -249,8 +249,21 @@
 	        </ul>
 	    </div>
 
-	    <!-- Sidebar -->
-	    <div id="leftcolumn">      
+      <!-- Sidebar left, new css -->
+      <div id="leftcolumn" class="newleftbar">
+          <div id="crowdsource_legend" style="text-align:center; margin:10px;" class="crowdsourcingTerms">
+            <br><h2>Contribute</h2>Add topics here
+            <center>
+              <button style="position: relative; bottom: 0;" id="openthemodal" class="btn btn-xl btn-danger ">Suggest new terms !</button>
+            </center>
+          </div>
+          
+          
+          <div id="legend_for_clusters"></div>
+      </div>
+
+	    <!-- Sidebar right, old css -->
+	    <div id="rightcolumn">      
           <div style="text-align: center;">
               <a href="http://www.cnrs.fr" target="_blank"><img width="40%"  src="https://www.ipmc.cnrs.fr/~duprat/comm/images/logo_cnrs_transparent.gif"></a>
           </div>
@@ -286,20 +299,9 @@
 	        <br><br><br><br><br><br>
 	    </div>
       
-
       
     </div>
 
-    <div id="crowdsource_legend" style="text-align:center; margin:10px;" class="crowdsourcingTerms">
-        <br><h2>Contribute</h2>Add topics here
-      <center>
-        <button style="position: relative; bottom: 0;" id="openthemodal" class="btn btn-xl btn-danger ">Suggest new terms !</button>
-      </center>
-    </div>
-
-
-    <div id="legend_for_clusters"></div>
-    
     
     <div id="savemodal" class="modal fade">
       <div class="modal-dialog">
@@ -376,7 +378,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h3 class="modal-title">Contribuez à l'analyse en suggérant des termes !</h3>
+            <h3 class="modal-title">Contribute to the map by suggesting new topics!</h3>
           </div>
 
           <div class="modal-body form-horizontal">
@@ -395,7 +397,10 @@
               </div>
               
               <br>
-              <center><div id="wos_chart"></div></center>
+              <center>
+                <div id="crowdsourcing_answer"></div>
+                <div id="crowdsourcing_histogram"></div>
+              </center>
 
             </div>
           </div>

@@ -26,13 +26,20 @@ function sigmaLimits( sigmacanvas ) {
     pw=$( sigmacanvas ).width();
     ph=$( sigmacanvas ).height();
     
-    sidebar=$('#leftcolumn').width();
+    sidebar=$('#rightcolumn').width();
     anchototal=$('#fixedtop').width();
-    altototal=$('#leftcolumn').height();
+    altototal=$('#rightcolumn').height();
     altofixtop=$('#fixedtop').height()
     altodeftop=$('#defaultop').height()
     $( sigmacanvas ).width(anchototal-sidebar);
     $( sigmacanvas ).height(altototal-altofixtop-altodeftop-4);
+    
+    
+    // todo take into account leftcolumn
+        //sidebar_left=$('#leftcolumn').width();
+        //sidebar_right=$('#rightcolumn').width();
+        //$( sigmacanvas ).width(anchototal-sidebar_right-sidebar_left);
+    
     
     pw=$( sigmacanvas ).width();
     ph=$( sigmacanvas ).height();
@@ -538,8 +545,8 @@ TinaWebJS = function ( sigmacanvas ) {
 
         //  ===  un/hide leftpanel  === //
         $("#aUnfold").click(function(e) {
-            //SHOW leftcolumn
-            sidebar = $("#leftcolumn");
+            //SHOW rightcolumn
+            sidebar = $("#rightcolumn");
             fullwidth=$('#fixedtop').width();
             e.preventDefault();
             // $("#wrapper").toggleClass("active");
@@ -563,7 +570,7 @@ TinaWebJS = function ( sigmacanvas ) {
                 }, 400);
             } 
             else {
-                //HIDE leftcolumn
+                //HIDE rightcolumn
                 $("#aUnfold").attr("class","leftarrow");
                 sidebar.animate({
                     "right" : "-" + sidebar.width() + "px"
