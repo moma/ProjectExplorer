@@ -59,6 +59,11 @@
   padding: 0;
 }
 
+/* selection box aka 'div#names' */
+div#names{
+  height: 20em;
+}
+
 /* ------------- crowdsourcing proprement dit ----------------------- */
 
 

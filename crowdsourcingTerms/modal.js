@@ -205,7 +205,7 @@ function save_suggestions(term) {
             console.log( "SUCCESS" )
             console.log( data )
             //$("#sendcrowds").html(D["#sendcrowds"]["thanks"][LA]) //showing message
-            $("#crowdsourcing_answer").html("<p><b>Thank you !</b><br/>(<i>\"" + term + "\"</i> was saved in database)</p>") ;
+            $("#crowdsourcing_answer").html("<p><b>Thank you !</b><br/>(<i>\"" + term + "\"</i> was saved as a suggestion)</p>") ;
             
             // show "saved" icon
             $("#saveicon").removeClass("glyphicon-save");

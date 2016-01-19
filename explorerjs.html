@@ -63,8 +63,8 @@
           </ul>
 
           <ul class="nav navbar-nav navbar-right">
-            <li><a href="http://www.cnrs.fr" target="_blank">CNRS</a></li>
-            <li><a href="http://iscpif.fr" target="_blank">ISC-PIF</a></li>
+            <li><a href="http://www.cnrs.fr" target="_blank" title="CNRS"><img src="libs/img2/logo_cnrs_transparent.gif" height="45"></a></li>
+            <li><a href="http://iscpif.fr" target="_blank" title="ISC-PIF" height="22"><img src="libs/img2/logo_ISCPIF_small.svg"></a></li>
           </ul>
 
         </div><!--navbar-main-->
@@ -221,7 +221,7 @@
 
                 <!-- ideally should be appended by jquery for autocomplete -->
                 <input id="proposed_terms" type="text" class="form-control" placeholder="Recherche" />
-
+                
               </div><!-- /search_input_group -->
 
             </div><!-- /form -->
@@ -230,6 +230,10 @@
           <div class="row" class="crowdsourcingTerms">
             <!-- say thanks for the suggestion -->
             <div id="crowdsourcing_answer" class="col-md-12"></div>
+          </div><!-- /row -->
+          
+          <div class="row" class="TODOselectionbox">
+            <div id="names"></div>
           </div><!-- /row -->
 
           <div class="row" class="TODOhistogramModule">
@@ -312,17 +316,13 @@
 	    </div>
 
 	    <!-- Sidebar right, old css -->
-	    <div id="rightcolumn">      
-          <div style="text-align: center;">
-              <a href="http://www.cnrs.fr" target="_blank"><img width="40%"  src="https://www.ipmc.cnrs.fr/~duprat/comm/images/logo_cnrs_transparent.gif"></a>
-          </div>
+	    <div id="rightcolumn">
           <button 
               style="color: #900;font-weight: bold;font-size: 70%;text-transform: uppercase;float:right;" 
               onClick='cancelSelection(false);'
           >X</button>
 
 	        <div id="tips"></div>
-	        <div id="names"></div>
 
 	        <br>
 	        <div id="tab-container" class='tab-container' style="display: none;">
