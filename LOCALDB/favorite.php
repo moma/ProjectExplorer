@@ -114,10 +114,10 @@ function imagestar($score,$factor,$twjs) {
   if ($score > .5) {
     $star_image = '';
     for ($s = 0; $s < min(5,$score/$factor); $s++) {
-      $star_image.='<img src="img/star.gif" border="0" >';
+      $star_image.='<img src="libs/img2/star.gif" border="0" >';
     }
   } else {
-    $star_image.='<img src="img/stargrey.gif" border="0">';
+    $star_image.='<img src="libs/img2/stargrey.gif" border="0">';
   }
   return $star_image;
 }
