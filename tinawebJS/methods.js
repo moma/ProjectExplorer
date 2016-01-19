@@ -360,7 +360,7 @@ function updateLeftPanel_fix( sels , oppos ) {
     // and im commenting now because github is not 
     // pushing my commit
     // because i need more lines, idk
-    $("#names").html(namesDIV).readmore({maxHeight:150}); 
+    $("#names").html(namesDIV).readmore({maxHeight:100}); 
     $("#tab-container").show();
     $("#opossiteNodes").html(alterNodesDIV).readmore({maxHeight:200}); 
     $("#sameNodes").html(sameNodesDIV).readmore({maxHeight:200}); 
