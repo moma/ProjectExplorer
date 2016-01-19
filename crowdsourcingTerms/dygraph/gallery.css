@@ -1,7 +1,9 @@
+/*
 body {
   font-family: Helvetica Neue, Arial, Helvetica, sans-serif;
   font-size: 90%;
 }
+*/
 
 aside {
   font-size: 90%;
@@ -68,9 +70,11 @@ aside {
   color: blue;
 }
 
+/*
 a {
   text-decoration: none;
 }
+*/
 
 /* CSS for drawing tool */
 #workarea #drawing #tool_zoom {
@@ -134,23 +138,24 @@ a {
 #workarea #styled-chart-labels #div_g .dygraph-label {
   /* This applies to the title, x-axis label and y-axis label */
   font-family: Georgia, Verdana, serif;
+  /* can't set font-size because of inline values?? */
 }
 
 #workarea #styled-chart-labels #div_g .dygraph-title {
   /* This rule only applies to the chart title */
-  font-size: 36px;
-  text-shadow: gray 2px 2px 2px;  /* color, delta-x, delta-y, blur radius */
+  font-size: 12px;
+  text-shadow: gray 1px 1px 1px;  /* color, delta-x, delta-y, blur radius */
 }
 
 #workarea #styled-chart-labels #div_g .dygraph-ylabel {
   /* This rule only applies to the y-axis label */
-  font-size: 18px;
-  text-shadow: gray -2px 2px 2px;  /* (offsets are in a rotated frame) */
+  font-size: 6px;
+  text-shadow: gray -1px 1px 1px;  /* (offsets are in a rotated frame) */
 }
 
 #workarea #styled-chart-labels .chart {
   border: 1px dashed black;
-  margin: 5px  5px 5px 50px;
+  margin: 2px  2px 2px 2px;
   padding: 2px;
 }
 

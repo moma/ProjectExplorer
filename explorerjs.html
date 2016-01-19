@@ -184,7 +184,69 @@
 
 
     <div id="wrapper">
-      
+
+      <!-- Sidebar left, new css -->
+      <div id="leftcolumn" class="newleftbar">
+        
+          <div class="row">
+
+            <div id="crowdsourcing_intro" class="col-md-12 crowdsourcingTerms">
+              <!-- <button type="button" class="close">×</button> -->
+              <h5>Search or suggest topics</h5>
+              
+            </div>
+
+          </div><!-- /row -->
+
+          <div class="row">
+            <div id="mainform" class="form-horizontal col-md-12">
+
+              <div id="search_input_group" class="input-group input-group-sm">
+                
+                <span class="input-group-btn crowdsourcingTerms">
+                  <button id="savesuggestion"
+                          disabled
+                          title="Save this topic as a new suggestion"
+                          class="btn btn-default" 
+                          type="button"><i id="saveicon" class="glyphicon glyphicon-save"></i></button>
+                </span>
+                
+                
+                <span class="input-group-btn">
+                  <button id="search_proposed_terms" 
+                          title="Search the topic in the map"
+                          class="btn btn-info" 
+                          type="button"><i class="glyphicon glyphicon-search"></i></button>
+                </span>
+
+                <!-- ideally should be appended by jquery for autocomplete -->
+                <input id="proposed_terms" type="text" class="form-control" placeholder="Recherche" />
+
+              </div><!-- /search_input_group -->
+
+            </div><!-- /form -->
+          </div><!-- /row -->
+
+          <div class="row" class="crowdsourcingTerms">
+            <!-- say thanks for the suggestion -->
+            <div id="crowdsourcing_answer" class="col-md-12"></div>
+          </div><!-- /row -->
+
+          <div class="row" class="TODOhistogramModule">
+            <!-- filled by query (user search value) to wos api -->
+            <div id="search_histogram_wrapper" class="col-md-12">
+              <div id="search_histogram"></div>
+            </div>
+          </div><!-- /row -->
+
+
+            <!-- class="my-legend" (absolute position bottom) -->
+            <div id="legend_for_clusters"></div>
+
+      </div>
+
+
+
 	    <div id="zonecentre">
 	        
 
@@ -248,19 +310,6 @@
 	                </li>
 	        </ul>
 	    </div>
-
-      <!-- Sidebar left, new css -->
-      <div id="leftcolumn" class="newleftbar">
-          <div id="crowdsource_legend" style="text-align:center; margin:10px;" class="crowdsourcingTerms">
-            <br><h2>Contribute</h2>Add topics here
-            <center>
-              <button style="position: relative; bottom: 0;" id="openthemodal" class="btn btn-xl btn-danger ">Suggest new terms !</button>
-            </center>
-          </div>
-          
-          
-          <div id="legend_for_clusters"></div>
-      </div>
 
 	    <!-- Sidebar right, old css -->
 	    <div id="rightcolumn">      
@@ -372,42 +421,6 @@
         <div id="closeloader" data-dismiss="modal"></div>
     </div>
 
-
-    <div id="crowdsourcing_modal" class="modal fade crowdsourcingTerms" style="color:black;">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h3 class="modal-title">Contribute to the map by suggesting new topics!</h3>
-          </div>
-
-          <div class="modal-body form-horizontal">
-            <div class="row">
-              
-              <div id="custom-search-input">
-                <div class="input-group col-md-12">
-                  
-                  <!-- ideally should be appended by jquery for autocomplete -->
-                  <input id="proposed_terms" type="text" class="form-control input-lg" placeholder="Recherche" />
-                  
-                  <span class="input-group-btn">
-                    <button id="search_proposed_terms" class="btn btn-info btn-lg" type="button"><i class="glyphicon glyphicon-search"></i></button>
-                  </span>
-                </div>
-              </div>
-              
-              <br>
-              <center>
-                <div id="crowdsourcing_answer"></div>
-                <div id="crowdsourcing_histogram"></div>
-              </center>
-
-            </div>
-          </div>
-
-        </div><!-- /modal-content -->
-      </div><!-- /modal-dialog -->
-    </div><!-- /#crowdsourcing_modal -->
 
     <div id="geomapmodal" class="modal fade">
 

@@ -1,4 +1,9 @@
 
+/* ---------------------------------------------------------------- */
+/* -----------  search histogram (à mettre dans main) ------------- */
+/* ---------------------------------------------------------------- */
+
+
 // labels of map terms... 
 var Label2ID = {} ;
 
@@ -16,36 +21,56 @@ for (id in TW.Nodes) {
 
 
 
-// Crowdsourcing terms open
-//      When click in "Proposez nouveaux mots" 
-//      and then building the autocomplete data
+// Crowdsourcing terms load
+// => building the autocomplete data
 // Input: Label2ID
 // Output: ExtraWords
-$("#openthemodal").click(function(){
-    $("#crowdsourcing_modal").modal("show")
+$( "#proposed_terms" ).autocomplete({
+    source: Object.keys(Label2ID),
     
-    // this gives data to jquery autocomplete
-    $( "#proposed_terms" ).autocomplete({
-        source: Object.keys(Label2ID)
-    });
-})
+    // on response callback
+    // (only if crowdsourcingTerms module)
+    response: function (event, ui_response_array) {
+        
+        // console.log(JSON.stringify(ui_response_array)) ;
+        // exemple in ui_response_array
+        // {"content":
+        //  [{"label":"warning system","value":"warning system"},
+        //   {"label":"training programme","value":"training programme"}
+        //  ]
+        // }
+        
+        if (ui_response_array.content.length == 0) {
+            
+            // when there is no corresponding term
+            // the user gains the right to suggest it
+            $('#savesuggestion').prop('disabled', false) ;
+        }
+        else {
+            $('#savesuggestion').prop('disabled', true) ;
+        }
+    },
+});
 
 
 // autocomplete the user input
 $("#proposed_terms").keypress(function(e) {
+    
+    clean_histogram() ;
+    
     if(e.keyCode == 13) { //if press enter then:
         e.preventDefault();
         $("#search_proposed_terms").click();
         $(this).autocomplete('close');
     }
+    
+    // (only if crowdsourcingTerms module)
+    clean_crowdsourcingform();
 })
-
 
 //method for calling the ISC-API and get pubs-distribution of the suggested term
 function search_proposed_terms_and_draw( the_query ) {
     // alert("i'm searching:\n"+JSON.stringify(the_query)) ;
-    
-    
     
     var args = {
         // query is an array of str
@@ -54,6 +79,9 @@ function search_proposed_terms_and_draw( the_query ) {
         "until": 2013
     }
     var docs_years = [] ;
+
+
+
     $.ajax({
         type: "GET",
         url: 'https://api.iscpif.fr/1/wos/search/histogram.json',
@@ -73,13 +101,13 @@ function search_proposed_terms_and_draw( the_query ) {
                 }
                 
                 // counts_by_year_array
-                draw_histogram(docs_years, "crowdsourcing_histogram") ;
+                draw_histogram(docs_years, "search_histogram") ;
             }
         },
 
         error: function(exception) { 
             console.log("exception!:"+exception.status)
-            $("#wos_chart").prepend(msg)
+            $("#search_histogram").prepend(msg)
         }
     })
 }
@@ -87,39 +115,75 @@ function search_proposed_terms_and_draw( the_query ) {
 // input value retrieval/handling
 $("#search_proposed_terms").click(function() {
     
-    clean_crowdsourcingform()
+    clean_crowdsourcingform() ;
     
     if($("#proposed_terms").val()=="")
         return false;
     
-    var msg = "" ;
+    // var msg = "" ;
     var query = $("#proposed_terms").val()
     query = $.trim( query.toLowerCase() )
     console.log('===\nyour query was: "'+query+'"');
     if( Label2ID[query] ) {
         // query : IF in the Map !!!
-        //    -> GO to ISC-API
-        // 
-        $("#crowdsourcing_answer").prepend("<h3 class='modal-title'>The term <i>" + query + "</i> already exists in the map</h3>") ;
-        $("#crowdsourcing_histogram").width(500) ;
-        $("#crowdsourcing_histogram").height(300) ;
-        // search it and draw it
+        //    -> GO to ISC-API (search it and draw it)
         search_proposed_terms_and_draw ( [query] ) ;
     }
     else {
-        // send ajax DB post
+        // activate save suggestion button
+        // (if subchain was in no autocomplete term, it's already on)
+        $('#savesuggestion').prop('disabled', false) ;
         
-        $("#crowdsourcing_answer").html(
-            "<h3 class='modal-title'>The term <i>" + query + "</i> is not in the map yet.</h3>"
-            + '<center><button style="position: relative; bottom: 0;" id="savesuggestion" class="btn btn-xl btn-info ">Save the suggestion !</button></center>'
-        ) ;
+        // save_suggestions
+        $("#crowdsourcing_answer").html("<p>This topic (<i>\"" + query + "\"</i> isn't in the maps. You can click the grey button to propose it as a suggestion.</p>") ;
     }
+    
+    $("#proposed_terms").autocomplete('close');
 });
 
 
+// use dygraph lib to draw below the crowdsourcing div
+function draw_histogram(counts_by_year_array, div_id) {
+    
+    // 1) layout for the div#search_histogram
+    //    /!\ this div *needs* padding:0 /!\;
+    $("#"+div_id).height("15em") ;
+    
+    // 2) data preparation
+    //~ var years = [] ;
+    //~ for (i in counts_by_year_array) {
+        //~ couple = counts_by_year_array[i] ;
+        //~ 
+        //~ // x values (year as int) => Date objects
+        //~ counts_by_year_array[i][0] = new Date(couple[0]) ;
+    //~ }
+    console.log('=== GRAPH PREPARATION ===') ;
+    
+    // 3) call histogram lib
+    new Dygraph(document.getElementById(div_id),
+                  counts_by_year_array,
+                  {
+                    labels: ['year', 'n'],
+                    drawPoints: true,
+                    fillGraph: true
+                  });
+}
+
+
+function clean_histogram() {
+    $("#search_histogram").html("") ;
+}
+
+
+/* ---------------------------------------------------------------- */
+/* -----------  crowdsourcing proprement dit ---------------------- */
+/* ---------------------------------------------------------------- */
+
+
 $("#savesuggestion").click(function(){
+    var query = $("#proposed_terms").val()
+    query = $.trim( query.toLowerCase() ) ;
     save_suggestions(query) ;
-    $("#crowdsourcing_answer").prepend("<h3 class='modal-title'>Saved suggested term: <i>" + query + "</i></h3>") ;
 })
 
 function save_suggestions(term) {
@@ -129,8 +193,7 @@ function save_suggestions(term) {
         "date" : (new Date()).toISOString(),
         "geo" : "ip and geoloc"
     }
-    console.log( "SAVE INFO:" + info )
-    console.log(" - - -  - -")
+    // console.log( "SAVE INFO:" + info )
     $.ajax({
         type: "POST",
         url: "crowdsourcingTerms/db/s.php",
@@ -141,12 +204,20 @@ function save_suggestions(term) {
         success : function(data, textStatus, jqXHR) {
             console.log( "SUCCESS" )
             console.log( data )
-            setTimeout(function(){
-                //$("#sendcrowds").html(D["#sendcrowds"]["thanks"][LA]) //showing message
-                setTimeout(function(){
-                    clean_crowdsourcingform()
-                }, 3000);
-            }, 1000);
+            //$("#sendcrowds").html(D["#sendcrowds"]["thanks"][LA]) //showing message
+            $("#crowdsourcing_answer").html("<p><b>Thank you !</b><br/>(<i>\"" + term + "\"</i> was saved in database)</p>") ;
+            
+            // show "saved" icon
+            $("#saveicon").removeClass("glyphicon-save");
+            $("#saveicon").addClass("glyphicon-saved");
+            
+            // reset state after 3 secs
+            setTimeout(function() {
+                clean_crowdsourcingform() ;
+                
+                // if we want to reset the input value too
+                // $("#proposed_terms").val('') ;
+            }, 3000);
         },
 
         error: function(exception) { 
@@ -159,39 +230,41 @@ function save_suggestions(term) {
 
 
 function clean_crowdsourcingform() {
-    $("#crowdsourcing_answer").html("") ;
-    $("#crowdsourcing_histogram").html("") ;
-    $("#crowdsourcing_histogram").width(0) ;
-    $("#crowdsourcing_histogram").height(0) ;
+    $("#crowdsourcing_answer").html('') ;
+    $("#saveicon").removeClass("glyphicon-saved");
+    $("#saveicon").addClass("glyphicon-save");
+    $('#savesuggestion').prop('disabled', true) ;
 }
 
-function get_already_suggested_terms() {
-$("#sendcrowds").html("...")
-    $.ajax({
-        type: "POST",
-        url: "crowdsourcingTerms/db/s.php",
-        // cache:false,
-        // contentType: "application/json",
-        data: info,
-        dataType: "json",
-        success : function(data, textStatus, jqXHR) {
-            console.log( "SUCCESS" )
-            console.log( data )
-            setTimeout(function(){
-                //$("#sendcrowds").html(D["#sendcrowds"]["thanks"][LA]) //showing message
-                setTimeout(function(){
-                    clean_crowdsourcingform()
-                }, 3000);
-            }, 1000);
-        },
 
-        error: function(exception) { 
-            console.log(exception)
-            console.log("exception!:"+exception.status)
-        }
-
-    })
-}
+// non utilisé si termes depuis map
+//~ function get_already_suggested_terms() {
+//~ $("#sendcrowds").html("...")
+    //~ $.ajax({
+        //~ type: "POST",
+        //~ url: "crowdsourcingTerms/db/s.php",
+        //~ // cache:false,
+        //~ // contentType: "application/json",
+        //~ data: info,
+        //~ dataType: "json",
+        //~ success : function(data, textStatus, jqXHR) {
+            //~ console.log( "SUCCESS" )
+            //~ console.log( data )
+            //~ setTimeout(function(){
+                //~ //$("#sendcrowds").html(D["#sendcrowds"]["thanks"][LA]) //showing message
+                //~ setTimeout(function(){
+                    //~ clean_crowdsourcingform()
+                //~ }, 3000);
+            //~ }, 1000);
+        //~ },
+//~ 
+        //~ error: function(exception) { 
+            //~ console.log(exception)
+            //~ console.log("exception!:"+exception.status)
+        //~ }
+//~ 
+    //~ })
+//~ }
 
 // sqlite columns in table 'terms'
 // 0|source|CHAR(250)|0||0
@@ -199,21 +272,3 @@ $("#sendcrowds").html("...")
 // 2|time|CHAR(30)|0||0
 // 3|space|CHAR(100)|0||0
 // 4|new|INTEGER|0||0
-
-
-// use dygraph lib to draw in the modal
-function draw_histogram(counts_by_year_array, div_id) {
-    var years = [] ;
-    for (i in counts_by_year_array) {
-        couple = counts_by_year_array[i] ;
-        
-        // x values (year as int) => Date objects
-        counts_by_year_array[i][0] = new Date(couple[0]) ;
-    }
-    console.log('=== GRAPH PREPARATION ===') ;
-    new Dygraph(document.getElementById(div_id),
-                  counts_by_year_array,
-                  {
-                    labels: ['x', 'occurrences']
-                  });
-}
