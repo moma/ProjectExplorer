@@ -47,8 +47,9 @@ function sigmaLimits( sigmacanvas ) {
 }
 
 
-
+// will be instanciated as SelInst
 SelectionEngine = function() {
+    
     // Selection Engine!! finally...
     this.SelectorEngine_part01 = (function(cursorsize, area ) {
         var clickedNodes = []
@@ -61,6 +62,7 @@ SelectionEngine = function() {
                             return n.id;
                         });
         }
+        
         return clickedNodes.map(Number);
     }).index();
 
@@ -261,14 +263,17 @@ SelectionEngine = function() {
         });
         return actualSel;
     }
-
+    
+    
+    /**
+     * Main function for any selecting action
+     */
     //  external usage : partialGraph , updateLeftPanel_fix();
     this.MultipleSelection2 = (function(nodes,nodesDict,edgesDict) {
 
         console.log("IN SelectionEngine.MultipleSelection2:")
         console.log(nodes)
-        greyEverything(); 
-
+        greyEverything();
 
         var typeNow = TW.partialGraph.states.slice(-1)[0].type.map(Number).join("|")
         console.log ("console.loging the Type:")
@@ -326,6 +331,8 @@ SelectionEngine = function() {
             }
         }
 
+        // show the button to remove selection
+        $("#unselectbutton").show() ;
 
         var the_new_sels = Object.keys(selections).map(Number)
         TW.partialGraph.states.slice(-1)[0].selections = the_new_sels;
@@ -380,7 +387,7 @@ TinaWebJS = function ( sigmacanvas ) {
     }
 
     this.SearchListeners = function () {
-
+        
         var SelInst = new SelectionEngine();
 
         //~ $.ui.autocomplete.prototype._renderItem = function(ul, item) {

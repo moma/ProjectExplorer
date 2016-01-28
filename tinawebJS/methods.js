@@ -11,7 +11,6 @@ function cancelSelection (fromTagCloud) {
 
     TW.partialGraph.states.slice(-1)[0].selections=[]
     
-    
     //Nodes colors go back to normal
     overNodes=false;
     e = TW.partialGraph._core.graph.edges;
@@ -29,13 +28,14 @@ function cancelSelection (fromTagCloud) {
     //Nodes colors go back to normal
     
     
+    
     if(fromTagCloud==false){
         $("#names").html(""); 
         $("#topPapers").html(""); $("#topPapers").hide();
         $("#opossiteNodes").html(""); $("#tab-container").hide();
         $("#information").html("");
         $("#searchinput").val("");
-        $("#switchbutton").hide();
+        $("#unselectbutton").hide();
         $("#tips").html(getTips());
     }   
     for(var i in deselections){

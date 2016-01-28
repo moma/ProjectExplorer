@@ -312,15 +312,15 @@
 
 	    <!-- Sidebar right, old css -->
 	    <div id="rightcolumn">
-          <button 
-              style="color: #900;font-weight: bold;font-size: 70%;text-transform: uppercase;float:right;" 
-              onClick='cancelSelection(false);'
-          >X</button>
-          
           <!-- TODO: put the video on cloud for better streaming & player -->
           <video width="100%" 
             id="video_explanation" 
             src="video/AXA2015.mp4" controls=""  frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></video>
+          
+          <button id="unselectbutton"
+              style="color: #900;font-weight: bold;font-size: 70%;text-transform: uppercase;float:right;" 
+              onClick='cancelSelection(false);'
+          >X</button>
           
           <div id="tips"></div>
           
