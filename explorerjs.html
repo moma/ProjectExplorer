@@ -70,91 +70,81 @@
       </div><!--container-->
     </div><!--navbar-fixed-top-->
 
+
     <!-- this is the tweakbar -->
-    <div id="defaultop" class="navbar navbar-default">
-        <div class="navbar-collapse collapse navbar-responsive-collapse">
-        	<div id="left" style="margin:0em 2em;">
-                  <ul class="nav navbar-nav">
-                      <!-- 
+    <div class="container-fluid navbar-default">
+      <div id="defaultop" class="row">
+            <div id="left" class="col-sm-8 col-md-8 col-lg-6" >
 
-                      <li>
-                         <a>                            
-                          <select id="aselector" onchange="console.log('salut monde')" class="selectpicker"  data-style="btn btn-success btn-sm"  data-width="auto">
-                            <option value="Document" selected>Scholars</option>
-                            <option value="NGram">Keywords</option>
-                          </select>
-                         </a>
-                      </li> -->
+                <ul class="nav navbar-nav navbar-right">
+                
+                <!--
+                <li>
+                   <a>
+                    <select id="aselector" onchange="console.log('salut monde')" class="selectpicker"  data-style="btn btn-success btn-sm"  data-width="auto">
+                      <option value="Document" selected>Scholars</option>
+                      <option value="NGram">Keywords</option>
+                    </select>
+                   </a>
+                </li>
+                -->
 
-                      <li>
-                         <a>
-                         	<button type="button" id="changetype" class="btn btn-success btn-sm">Change Type</button>
-                         </a>
-                      </li>
+                <li>
+                   <a>
+                    <button type="button" id="changetype" class="btn btn-success btn-sm">Change Type</button>
+                   </a>
+                </li>
+                
+                <li>
+                   <a>
+                    <button type="button" id="changelevel" class="btn btn-info btn-sm" disabled>Change Level</button>
+                   </a>
+                </li>
 
+                <li><a>
+                  Selector size<br>
+                  <div id="unranged-value" class="settingslider"></div>
+                </a></li>
+                
+                <li><a>
+                  <!-- TODO fix: category0 -> category1 switching -->
+                  Label size<br>
+                  <div id="slidercat0nodessize" class="settingslider"></div>
+                </a></li>
 
-                      <li>
-                         <a>
-                         	<button type="button" id="changelevel" class="btn btn-info btn-sm" disabled>Change Level</button>
-                         </a>
-                      </li>
+                 <li><a>
+                   Colors<div class="colorgraph_div"></div>
+                 </a></li>
 
+                <!--
+                <li>
+                   <a>
+                    <button type="button" onclick="partialGraph.stopForceAtlas2();" class="btn btn-sm">wu</button>
+                   </a>
+                </li>
+                -->
 
-                       <li>
-                         <a>
-                          <div style="margin:0em 2em;" id="unranged-value"></div>
-                          <label style="margin:0em 2em;" for="unranged-value">selector size</label>
-                         </a>
-                       </li>
-
-                      <!--
-                      <li>
-                         <a>
-                          <button type="button" onclick="partialGraph.stopForceAtlas2();" class="btn btn-sm">wu</button>
-                         </a>
-                      </li>
-                      -->
-                      
-
+                <!-- TODO fix: category0 -> category1 switching -->
+                <li><a>
+                  Create a subgraph
+                  <ul id="category0" class="nav">
+                        <li><small>Nodes</small> <div id="slidercat0nodesweight" class="settingslider"></div></li>
+                        <li><small>Edges</small> <div id="slidercat0edgesweight" class="settingslider"></div></li>
                   </ul>
-
-                  <ul id="category0" class="nav navbar-nav navbar-right">
-                    <li>
-                      <ul style="list-style-type: none; margin:0em 1em;">
-                        <li><div id="slidercat0nodesweight"></div></li>
-                        <li><div id="slidercat0edgesweight"></div></li>
-                        <li><div id="slidercat0nodessize"></div></li>
-                      </ul>
-                    </li>
+                  <ul id="category1" class="nav">
+                        <li><small>Nodes</small> <div id="slidercat1nodesweight" class="settingslider"></div></li>
+                        <li><small>Edges</small> <div id="slidercat1edgesweight" class="settingslider"></div></li>
                   </ul>
-                  <ul id="filterslegend" class="nav navbar-nav navbar-right">
-                        <li>
-                            <ul style="list-style-type: none;">
-                                <li>Nodes</li>
-                                <li>Edges</li>
-                                <li>Size</li>
-                            </ul>
-                        </li>
-                  </ul>
-                  <ul id="category1" class="nav navbar-nav navbar-right">
-                    <li>
-                      <ul style="list-style-type: none; margin:0em 1em;">
-                        <li><div id="slidercat1nodesweight"></div></li>
-                        <li><div id="slidercat1edgesweight"></div></li>
-                        <li><div id="slidercat1nodessize"></div></li>
-                      </ul>
-                    </li>
-                  </ul>
+                </a></li>
+              </ul>
+              
+            </div><!-- /div#left -->
 
-
-
-                  <div class="colorgraph_div"></div>
-
-            <div class="container" >
+            <div id="right" class="col-sm-3 col-md-4 col-lg-6" >
 
                    <div class='row' id="searchnav">
                        <!-- the smaller the viewport, the larger the relative search box size -->
-                     <div class="col-sm-3 col-md-4 col-lg-6" >
+                     <div class="col-sm-9 col-md-9 col-lg-6" >
                        <div id="search_input_group" class="input-group input-group-sm">
                           <span class="input-group-btn crowdsourcingModule">
                             <button id="savesuggestion"
@@ -223,9 +213,9 @@
             -->
             </div>
               
-        </div><!-- /.nav-collapse -->
-        </div><!-- /.navbar -->
-    </div>
+      </div><!-- /.row#defaultop -->
+    </div><!-- /.container.fluid -->
+<!-- £TODO wtf    </div> -->
     <div id="wrapper">
 
       <!-- Sidebar left, new css -->
@@ -310,47 +300,111 @@
           </ul>
       </div>
 
-	    <!-- Sidebar right, old css -->
-	    <div id="rightcolumn">
-          <!-- TODO: put the video on cloud for better streaming & player -->
-          <video width="100%" 
-            id="video_explanation" 
-            src="video/AXA2015.mp4" controls=""  frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></video>
-          
-          <button id="unselectbutton"
-              style="color: #900;font-weight: bold;font-size: 70%;text-transform: uppercase;float:right;" 
-              onClick='cancelSelection(false);'
-          >X</button>
-          
-          <div id="tips"></div>
-          
-          <div id="names"></div>
-	        <br>
-	        <div id="tab-container" class='tab-container' style="display: none;">
+      <!-- Sidebar right, old css -->
+      <div id="rightcolumn">
 
-	           <ul class='etabs'>
-	             <li id="taboppos" class='tab'><a href="#tabs1">Opposite-Neighbors</a></li>
-	             <li id="tabneigh" class='tab'><a href="#tabs2">Neighbors</a></li>
-	           </ul>
+        <button id="unselectbutton"
+            style="color: #900;font-weight: bold;font-size: 70%;text-transform: uppercase;float:right;" 
+            onClick='cancelSelection(false);'>
+              <span class="glyphicon glyphicon-remove" alt="X"></span>
+        </button>
+        
+        <div id="names"></div>
+        
+        
+        <br>
+        <div id="tab-container" class='tab-container' style="display: none;">
 
-	           <div class='panel-container'>
-	              <div id="tabs1">
-	                <div id="opossiteNodes"></div>
-	              </div>
-	              <div id="tabs2">
-	                <div id="sameNodes"></div>
-	              </div>
-	           </div>
-	        </div>
+           <ul class='etabs'>
+             <li id="taboppos" class='tab'><a href="#tabs1">Opposite-Neighbors</a></li>
+             <li id="tabneigh" class='tab'><a href="#tabs2">Neighbors</a></li>
+           </ul>
 
-          <div id="topPapers" style="display: none;"></div>
+           <div class='panel-container'>
+              <div id="tabs1">
+                <div id="opossiteNodes"></div>
+              </div>
+              <div id="tabs2">
+                <div id="sameNodes"></div>
+              </div>
+           </div>
+        </div>
+
+        <div id="topPapers" style="display: none;"></div>
+        
+        <div id="information"></div>
+
+        <!--
+          bottom right column as panels
           
-	        <div id="information"></div>
-	        <br><br><br><br><br><br>
-	    </div>
+          open/close panel from: jsfiddle.net/KyleMit/kcpma 
+        -->
+        <div class="panel-group" id="accordion">
+          
+          
+          <div class="panel panel-default" id="video_explanation">
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                <a data-toggle="collapse" data-target="#le_tutorial" 
+                                                 href="#">
+                  <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+                  &nbsp;Tutorial video
+                </a>
+              </h4>
+            </div>
+
+            <div class="panel-collapse collapse" id="le_tutorial">
+              <!-- TODO: outcloud the video for better stream+player -->
+              <video width="100%" 
+                src="video/AXA2015.mp4" controls=""  frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></video>
+            </div>
+          </div>
+
+          <div class="panel panel-default" id="tips_panel">
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                <a data-toggle="collapse" data-target="#tips" 
+                                                 href="#">
+                  <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                  &nbsp;Tips
+                </a>
+              </h4>
+            </div>
+
+            <div class="panel-collapse collapse in" id="tips"></div>
+          </div>
+
+          <div class="panel panel-default" id="credits_panel">
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                <a data-toggle="collapse" data-target="#credits" 
+                                                 href="#">
+                  <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+                  &nbsp;Credits
+                </a>
+              </h4>
+            </div>
+
+            <div class="panel-collapse collapse" id="credits">
+              <a href="https://bigdata.iscpif.fr/" target="_blank">
+                  <img src="https://bigdata.iscpif.fr/images/logos/BIGDATA-Logo-PoweredBy-light.jpg"
+                  alt="Powered by Big Data at ISCPIF"
+                  style="width:85%; ">
+              </a>
+              <a href="https://github.com/moma" target="_blank">
+                  <img src="libs/img2/moma.png"
+                  alt="Sciencemapping"
+                  style="width:85%; ">
+              </a>
+            </div>
+            
+          </div>
+        </div>
+
+        <br><br><br><br><br><br>
+      </div>
     
 
-    <!-- £TODO check </div> -->
 
     <div id="savemodal" class="modal fade">
       <div class="modal-dialog">
