@@ -333,9 +333,22 @@
     float: right; width: 100%; height: 100%; background-image: url("../img2/chat.png");
 }
 
-
-
 /* GESTION DE LA BARRE DE GAUCHE */
+.newleftbar {
+    /* TODO choix fond noir ou fond clair via variables less*/
+    background-color: inherit;
+    position:fixed;
+    left:0 ;
+    width:18% ;
+    height: 100%;
+    overflow: auto;
+    text-align:center;
+    z-index: 100 ;   /* over the graph ? */
+    padding-top: .3em;
+    padding-bottom: 0;
+    padding-right: 1em;
+    padding-left: 1em;
+}
 
 
 .leftarrow {
@@ -375,6 +388,12 @@
     list-style:none;
     padding-left:5%;
 }​
+
+/* small messages */
+p.micromessage{
+  font-size: 85%;
+  color: #707070 ;
+}
 
 .btn-sm:hover {
 	font-weight: bold;

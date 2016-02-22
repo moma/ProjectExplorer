@@ -482,26 +482,28 @@ function trackMouse() {
     }
 }
 
-
-// This is for adding/removing features from TinawebJS
-// each key is simultaneously 3 things:
+// BASIC MODULARITY
+// =================
+// ProcessDivsFlags is for adding/removing features from TinawebJS
+// each flag is simultaneously 3 things:
 //   - the key of a bool config value in DivsFlags (settings_explorerjs)
-//   - the dir of the submodule's files (and its init.js)
+//   - the dirname of the submodule's files (with a mandatory init.js)
 //   - the css class of all html elements added by the submodule
 function ProcessDivsFlags() {
     for(var key in TW.DivsFlags) {
         if(TW.DivsFlags[key]===false) {
-            // $("#"+key).remove() ; // previous logic by id
-            $("."+key).remove() ; // new logic by class
+            $("."+key).remove() ; // hide elements of module's class
         }
         else {
-            console.log("extras:ProcessDivsFlags: key is true: "+key)
+            // console.log("extras:ProcessDivsFlags: key is true: "+key)
             // load JS+CSS items corresponding to the flagname
-            // ex: flag = crowdsourcingTerms
-            //  ==>  JS = crowdsourcingTerms/init.js
-            //  ==> CSS = crowdsourcingTerms/submodule.css
             my_src_dir = key
             loadJS(my_src_dir+"/init.js") ;
+            // ex: for the flag = crowdsourcingTerms
+            //     will load ==> JS    crowdsourcingTerms/init.js
+            //               ==> other elements listed in init.js
+            //                ├── "crowdsourcingTerms"+"/crowdTerms.css"
+            //                └── "crowdsourcingTerms"+"/suggest.js"
         }
     }
 }
