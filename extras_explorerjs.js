@@ -11,6 +11,7 @@ function newPopup(url) {
 // Execution:    ChangeGraphAppearanceByAtt( true )
 // It scans the existing node-attributes and t keeps only those which are Numeric.
 //  then, add the button in the html with the sigmaUtils.clustersBy(x) listener.
+// [TODO: fonction un peu lourde dans le profilage]
 function ChangeGraphAppearanceByAtt( manualflag ) {
 
     if ( !isUndef(manualflag) && !TW.colorByAtt ) TW.colorByAtt = manualflag;

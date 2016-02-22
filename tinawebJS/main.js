@@ -265,7 +265,7 @@ if(RES["OK"]) {
         console.log(typestring)
 
         if(typestring=="0|1") {
-            $("#category0").hide();set_ClustersLegend
+            $("#category0").hide();
             $("#category1").show();
 
             if($("#slidercat1nodesweight").html()=="") 
@@ -363,6 +363,9 @@ if(RES["OK"]) {
 
 // load optional modules
 ProcessDivsFlags() ;
+
+// grey message in the search bar from settings
+$("#searchinput").attr('placeholder', TW.strSearchBar) ;
 
 console.log("finish")
 

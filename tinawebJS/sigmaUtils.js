@@ -27,6 +27,8 @@ SigmaUtils = function () {
                 
                 if(Number(n.id)==287) console.log("coordinates of node 287: ( "+n.x+" , "+n.y+" ) ")
                 graph.addNode( n.id , node);
+                
+                // fill the "labels" global variable
                 updateSearchLabels( n.id , n.label , n.type);
             }
         }
@@ -148,17 +150,20 @@ function gete(id){
 }
 
 
-function find(label){
+function find(lquery){
     var results=[];
-    var nds=getnodesIndex();
-    label=label.toLowerCase()
-    for(var i in nds){
-        var n=nds[i];
-        if(n.hidden==false){
-        	var possiblematch=n.label.toLowerCase()
-            if (possiblematch.indexOf(label)!==-1) {
-                results.push(n);
-            }  
+    if (typeof lquery == 'string' && lquery.length > 0) {
+        lquery=lquery.toLowerCase() ;
+        var nds=getnodesIndex();
+        for(var i in nds){
+            var n=nds[i];
+            if(n.hidden==false){
+                var possiblematch=n.label.toLowerCase()
+                // string.indexOf(substring) faster than search/match
+                if (possiblematch.indexOf(lquery)!==-1) {
+                    results.push(n);
+                }  
+            }
         }
     }
     return results;
@@ -166,11 +171,13 @@ function find(label){
 
 function exactfind(label) {
     nds=getnodesIndex();
-    for(var i in nds){
-        n=nds[i];
-        if(!n.hidden){
-            if (n.label==label) {
-                return n;
+    if (typeof lquery == 'string' && lquery.length > 0) {
+        for(var i in nds){
+            n=nds[i];
+            if(!n.hidden){
+                if (n.label==label) {
+                    return n;
+                }
             }
         }
     }

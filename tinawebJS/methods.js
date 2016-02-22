@@ -37,7 +37,12 @@ function cancelSelection (fromTagCloud) {
         $("#searchinput").val("");
         $("#unselectbutton").hide();
         $("#tips").html(getTips());
-    }   
+    }
+    
+    // we send our "eraseNodeSet" event
+    // (signal for plugins that any selection behavior is finished)
+    $('#searchinput').trigger("tw:eraseNodeSet");
+    
     for(var i in deselections){
         if( !isUndef(TW.partialGraph._core.graph.nodesIndex[i]) ) {
             TW.partialGraph._core.graph.nodesIndex[i].forceLabel=false;

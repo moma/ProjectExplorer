@@ -18,7 +18,7 @@
 </head>
 
   <body class="gradient">
-  	<!-- this is the topbar -->
+    <!-- this is the topbar -->
     <div id="fixedtop" class="navbar navbar-default navbar-fixed-top">
       <div class="container">
 
@@ -35,7 +35,7 @@
           <ul class="nav navbar-nav">
 
             <li class="disabled">
-		          <a>
+              <a>
                 <span class="label label-default label-lg">NETWORK: </span>
               </a>
             </li>
@@ -147,91 +147,91 @@
                   </ul>
 
 
-                  <ul class="nav navbar-nav navbar-right">
-                     <li><a>
-                              <input type="checkbox" id="checkboxdiv" onclick="alertCheckBox(this);">Add</input>
-                     </a></li>
-                  </ul>
-                  <ul class="nav navbar-nav navbar-right">
-                     <li><a>
-                              <input id="searchinput"  autocomplete="off" class="form-control input-sm col-lg-8" placeholder="Search" type="text">
-                     </a></li>
-                  </ul>
 
                   <div class="colorgraph_div"></div>
 
-                </div>
+            <div class="container" >
 
-                  <!--
-                  <ul class="nav navbar-nav navbar-right">
-                    <li><a href="#">Link</a></li>
-                    <li class="dropdown">
-                      <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
-                      <ul class="dropdown-menu">
-                        <li><a href="#">Action</a></li>
-                        <li><a href="#">Another action</a></li>
-                        <li><a href="#">Something else here</a></li>
-                        <li class="divider"></li>
-                        <li><a href="#">Separated link</a></li>
-                      </ul>
-                    </li>
-                  </ul>
-                  -->
-            
+                   <div class='row' id="searchnav">
+                       <!-- the smaller the viewport, the larger the relative search box size -->
+                     <div class="col-sm-3 col-md-4 col-lg-6" >
+                       <div id="search_input_group" class="input-group input-group-sm">
+                          <span class="input-group-btn crowdsourcingTerms">
+                            <button id="savesuggestion"
+                                    disabled
+                                    title="Save this topic as a new suggestion"
+                                    class="btn btn-default" 
+                                    type="button">
+                              <span class="glyphicon glyphicon-save"
+                                     id="saveicon">
+                              </span>
+                            </button>
+                          </span>
+                          
+                          <span class="input-group-btn">
+                            <button id="searchbutton" 
+                                    title="Search the topic in the map"
+                                    class="btn btn-info" 
+                                    type="button">
+                              <span class="glyphicon glyphicon-search">
+                              </span>
+                            </button>
+                          </span>
+                          
+                          <!-- ########## THE SEARCH BAR ########## -->
+                          
+                          <input id="searchinput" 
+                                  type="text"
+                                  class="form-control" 
+                                  placeholder="Select node(s)" />
+                          
+                          <!-- strSearchBar will replace placeholder value -->
+                       
+                          <!-- #################################### -->
+
+                       </div>
+                       
+                       <!-- messages below the search bar -->
+                       <!-- say thanks for the suggestion, etc. -->
+                       <div id="crowdsourcing_answer" class="crowdsourcingTerms"></div>
+                    </div>
+
+                    <div class="col-sm-3 col-md-3 col-lg-5">
+                            <input id="checkboxdiv"  onclick="alertCheckBox(this);"
+                                    title="Add next search results to current selection"
+                                    class="btn btn-info" 
+                                    type="checkbox"></input>
+                            <p style="font-size:75%; line-height:90%">Add to selection</p>
+                    </div>
+                    
+                  </div>
+
+            <!--
+            <ul class="nav navbar-nav navbar-right">
+              <li><a href="#">Link</a></li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li><a href="#">Action</a></li>
+                  <li><a href="#">Another action</a></li>
+                  <li><a href="#">Something else here</a></li>
+                  <li class="divider"></li>
+                  <li><a href="#">Separated link</a></li>
+                </ul>
+              </li>
+            </ul>
+            -->
+            </div>
+              
         </div><!-- /.nav-collapse -->
-    </div><!-- /.navbar -->
-
-
+        </div><!-- /.navbar -->
+    </div>
     <div id="wrapper">
 
       <!-- Sidebar left, new css -->
       <div id="leftcolumn" class="newleftbar">
         
-          <div class="row">
-
-            <div id="crowdsourcing_intro" class="col-md-12 crowdsourcingTerms">
-              <!-- <button type="button" class="close">×</button> -->
-              <h5>Search or suggest topics</h5>
-              
-            </div>
-
-          </div><!-- /row -->
-
-          <div class="row">
-            <div id="mainform" class="form-horizontal col-md-12">
-
-              <div id="search_input_group" class="input-group input-group-sm">
-                
-                <span class="input-group-btn crowdsourcingTerms">
-                  <button id="savesuggestion"
-                          disabled
-                          title="Save this topic as a new suggestion"
-                          class="btn btn-default" 
-                          type="button"><i id="saveicon" class="glyphicon glyphicon-save"></i></button>
-                </span>
-                
-                
-                <span class="input-group-btn">
-                  <button id="search_proposed_terms" 
-                          title="Search the topic in the map"
-                          class="btn btn-info" 
-                          type="button"><i class="glyphicon glyphicon-search"></i></button>
-                </span>
-
-                <!-- ideally should be appended by jquery for autocomplete -->
-                <input id="proposed_terms" type="text" class="form-control" placeholder="Recherche" />
-                
-              </div><!-- /search_input_group -->
-
-            </div><!-- /form -->
-          </div><!-- /row -->
-
-          <div class="row" class="crowdsourcingTerms">
-            <!-- say thanks for the suggestion -->
-            <div id="crowdsourcing_answer" class="col-md-12"></div>
-          </div><!-- /row -->
-          
-          <div class="row" class="TODOhistogramModule">
+          <div class="row" class="£TODOhistogramModule">
             <!-- filled by query (user search value) to wos api -->
             <div id="search_histogram_wrapper" class="col-md-12">
               <div id="search_histogram"></div>
@@ -246,26 +246,26 @@
 
 
 
-	    <div id="zonecentre">
-	        
+      <div id="zonecentre">
+          
 
-	        <!-- Page content -->
-	        <div id="sigma-example"></div>
+          <!-- Page content -->
+          <div id="sigma-example"></div>
 
           <div style="visibility: hidden;" id="sigma-othergraph"></div>
 
           <img id="semLoader" style="position:absolute; top:50%; left:40%; width:80px;" src="libs/img2/loading-bar.gif"></img>
 
-	        <ul id="ctlzoom">
+          <ul id="ctlzoom">
 
-		            <!-- <div class="content-header">
-		                    <button id="menu-toggle">X</button>
-		            </div> -->
-					         <li>
-	                    <div id="unfold">
-	                        <a href="#" id="aUnfold" class="rightarrow"></a>
-	                    </div>
-	                </li> 
+                <!-- <div class="content-header">
+                        <button id="menu-toggle">X</button>
+                </div> -->
+                   <li>
+                      <div id="unfold">
+                          <a href="#" id="aUnfold" class="rightarrow"></a>
+                      </div>
+                  </li> 
                   <!--
                    <li>
                       <a href="#" id="geomapicon" onclick="$('#geomapmodal').modal('show'); callGeomapADEME();">
@@ -280,35 +280,35 @@
                         <img title="Take a photo!" width="34px" src="libs/img2/camera.png"></img>
                       </a>
                   </li>
-	                
+                  
                    <li>
                       <a href="#" id="saveAs">
                         <img width="30px" title="Save As..." src="libs/img2/save.png"></img>
                       </a>
                   </li> 
-	                
-	                <li>
-	                    <a href="#" id="zoomPlusButton" title="S'approcher"> </a>
-	                </li>
+                  
+                  <li>
+                      <a href="#" id="zoomPlusButton" title="S'approcher"> </a>
+                  </li>
 
-	                <li id="zoomSliderzone">
-	                    <div id="zoomSlider"></div>
-	                </li>
+                  <li id="zoomSliderzone">
+                      <div id="zoomSlider"></div>
+                  </li>
 
-	                <li>
-	                    <a href="#" id="zoomMinusButton" title="S'éloigner"> </a>
-	                </li>
+                  <li>
+                      <a href="#" id="zoomMinusButton" title="S'éloigner"> </a>
+                  </li>
 
 
-	                <li>
-	                    <a href="#" id="lensButton"> </a>
-	                </li>
+                  <li>
+                      <a href="#" id="lensButton"> </a>
+                  </li>
 
-	                <li>
-	                    <a href="#" id="edgesButton"> </a>
-	                </li>
-	        </ul>
-	    </div>
+                  <li>
+                      <a href="#" id="edgesButton"> </a>
+                  </li>
+          </ul>
+      </div>
 
 	    <!-- Sidebar right, old css -->
 	    <div id="rightcolumn">
@@ -348,11 +348,10 @@
 	        <div id="information"></div>
 	        <br><br><br><br><br><br>
 	    </div>
-      
-      
-    </div>
-
     
+
+    <!-- £TODO check </div> -->
+
     <div id="savemodal" class="modal fade">
       <div class="modal-dialog">
         <div class="modal-content">

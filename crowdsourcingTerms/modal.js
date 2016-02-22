@@ -7,8 +7,7 @@
 // labels of map terms... 
 var Label2ID = {} ;
 
-// ...initialized from TW.Nodes
-
+// ...initialized from TW.Nodes (nodes' info sorted by id)
 for (id in TW.Nodes) {
     // console.log("label: " + TW.Nodes[id].label) ;
     // console.log("id: " + id) ;
@@ -16,71 +15,24 @@ for (id in TW.Nodes) {
 }
 
 
-// TODO: use ExtraWords to know already suggested terms  
-// var ExtraWords = {'a miam term': true} ;
-
-
-
-// Crowdsourcing terms load
-// => building the autocomplete data
-// Input: Label2ID
-// Output: ExtraWords
-$( "#proposed_terms" ).autocomplete({
-    source: Object.keys(Label2ID),
-    
-    // on response callback
-    // (only if crowdsourcingTerms module)
-    response: function (event, ui_response_array) {
-        
-        // console.log(JSON.stringify(ui_response_array)) ;
-        // exemple in ui_response_array
-        // {"content":
-        //  [{"label":"warning system","value":"warning system"},
-        //   {"label":"training programme","value":"training programme"}
-        //  ]
-        // }
-        
-        if (ui_response_array.content.length == 0) {
-            
-            // when there is no corresponding term
-            // the user gains the right to suggest it
-            $('#savesuggestion').prop('disabled', false) ;
-        }
-        else {
-            $('#savesuggestion').prop('disabled', true) ;
-        }
-    },
-});
-
-
-// autocomplete the user input
-$("#proposed_terms").keypress(function(e) {
-    
-    clean_histogram() ;
-    
-    if(e.keyCode == 13) { //if press enter then:
-        e.preventDefault();
-        $("#search_proposed_terms").click();
-        $(this).autocomplete('close');
-    }
-    
-    // (only if crowdsourcingTerms module)
-    clean_crowdsourcingform();
-})
-
 //method for calling the ISC-API and get pubs-distribution of the suggested term
-function search_proposed_terms_and_draw( the_query ) {
-    // alert("i'm searching:\n"+JSON.stringify(the_query)) ;
+function search_proposed_terms_and_draw( the_queries ) {
+    // console.log("search_proposed_terms_and_draw:\n"
+    //            +"i'm searching:\n"
+    //            +JSON.stringify(the_queries)) ;
+    
+    $("#search_histogram").html("Searching for matching twitter data...")
     
     var args = {
-        // query is an array of str
-        "q": the_query,
+        // the_queries is an array of str
+        "q": the_queries,
         "since": 1989,
         "until": 2013
     }
     var docs_years = [] ;
-
-
+    
+    $("#search_histogram")
+        .html('<p class="micromessage">Waiting for histogram data</p>')
 
     $.ajax({
         type: "GET",
@@ -90,6 +42,9 @@ function search_proposed_terms_and_draw( the_query ) {
         success : function(data, textStatus, jqXHR) {
             // ES aggs response, for example 
             // data = {"took":91,"total":121673,"aggs":{"publicationCount":{"buckets":[{"key":1989,"doc_count":880},{"key":1990,"doc_count":1088},...,{"key":2012,"doc_count":9543},{"key":2013,"doc_count":8832}]}},"hits":{"total":121673,"max_score":0,"hits":[]}}
+            
+            // console.log(">> incoming api data <<")
+            // console.log(data)
             
             if(data.total==0) {
                 return false;
@@ -102,44 +57,65 @@ function search_proposed_terms_and_draw( the_query ) {
                 
                 // counts_by_year_array
                 draw_histogram(docs_years, "search_histogram") ;
+                return true ;
             }
         },
 
-        error: function(exception) { 
-            console.log("exception!:"+exception.status)
-            $("#search_histogram").prepend(msg)
+        error: function(exception) {
+            console.log("search_proposed_terms_and_draw:exception" 
+                        + JSON.stringify(exception))
+            $("#search_histogram")
+                .html('<p class="micromessage">'
+                     +'<b>No histogram</b>: too many nodes selected</b>'
+                     +'</p>')
         }
     })
 }
 
-// input value retrieval/handling
-$("#search_proposed_terms").click(function() {
+// gotNodeSet event when Tinawab did main search behavior (select nodes)
+$("#searchinput").on("tw:gotNodeSet", function(e) {
+    // console.log("event 'nodes' --> the event's nodes: " + JSON.stringify(e.nodeIds)) ;
+    clean_histogram() ;
     
-    clean_crowdsourcingform() ;
-    
-    if($("#proposed_terms").val()=="")
-        return false;
-    
-    // var msg = "" ;
-    var query = $("#proposed_terms").val()
-    query = $.trim( query.toLowerCase() )
-    console.log('===\nyour query was: "'+query+'"');
-    if( Label2ID[query] ) {
-        // query : IF in the Map !!!
-        //    -> GO to ISC-API (search it and draw it)
-        search_proposed_terms_and_draw ( [query] ) ;
-    }
-    else {
-        // activate save suggestion button
-        // (if subchain was in no autocomplete term, it's already on)
-        $('#savesuggestion').prop('disabled', false) ;
-        
-        // save_suggestions
-        $("#crowdsourcing_answer").html("<p>This topic (<i>\"" + query + "\"</i> isn't in the maps. You can click the grey button to propose it as a suggestion.</p>") ;
-    }
-    
-    $("#proposed_terms").autocomplete('close');
+    // now we may want to do other things (draw histogram, suggest term)
+    newnodesHistogramBehavior(e.nodeIds, e.q) ;
 });
+
+
+// eraseNodeSet event when Tinawab canceled the previous selections
+$("#searchinput").on("tw:eraseNodeSet", function(e) {
+    // console.log("event 'erase'") ;
+    clean_histogram() ;
+});
+
+// emptyNodeSet event when Tinaweb search found nothing
+$("#searchinput").on("tw:emptyNodeSet", function(e) {
+    clean_histogram() ;
+});
+
+
+function newnodesHistogramBehavior(selectedNodeIds, unusedQuery) {
+    
+    console.log('/////////\nFUN additionalSearchBehavior' + '\nselectedNodeIds:' +JSON.stringify(selectedNodeIds) ) ;
+    
+    if( selectedNodeIds != null && selectedNodeIds.length > 0 ) {
+        // query : IF in the Map -> GO to ISC-API (search and draw it)
+        
+        var selectedLabels = [] ;
+        for (i in selectedNodeIds) {
+            var thisId = selectedNodeIds[i]
+            if (TW.Nodes[thisId] != null) {
+                selectedLabels.push(TW.Nodes[thisId].label)
+            }
+            else {
+                console.log('ID error on TW.Nodes['+thisId+']')
+            }
+        }
+        console.log('\n\n\n<---!--->\nselectedLabels' + JSON.stringify(selectedLabels))
+        
+        search_proposed_terms_and_draw ( selectedLabels ) ;
+    }
+}
 
 
 // use dygraph lib to draw below the crowdsourcing div
@@ -164,6 +140,7 @@ function draw_histogram(counts_by_year_array, div_id) {
                   counts_by_year_array,
                   {
                     labels: ['year', 'n'],
+                    pixelsPerLabel: 25 ,
                     drawPoints: true,
                     fillGraph: true
                   });
@@ -180,8 +157,48 @@ function clean_histogram() {
 /* ---------------------------------------------------------------- */
 
 
+/* 3 possible events affect crowdsourcing */
+
+// catch noAutocomplete event when Tinaweb ui.autocomplete becomes empty
+$("#searchinput").on("tw:noAutocomplete", function(e) {
+    // when there is no corresponding term
+    // the user gains the right to suggest it
+    $('#savesuggestion').prop('disabled', false) ;
+});
+
+// catch gotAutocomplete event when Tinaweb ui.autocomplete is full
+$("#searchinput").on("tw:gotAutocomplete", function(e) {
+    $('#savesuggestion').prop('disabled', true) ;
+});
+
+
+// eraseNodeSet event when Tinawab had an empty search or unclick
+$("#searchinput").on("tw:eraseNodeSet", function(e) {
+    clean_crowdsourcingzone() ;
+});
+
+// emptyNodeSet event when Tinawab had a search but with no matches
+$("#searchinput").on("tw:emptyNodeSet", function(e) {
+    
+    $('#savesuggestion').prop('disabled', false) ;
+    // when query has no match
+    if (e.nodeIds == null || e.nodeIds.length == 0) {
+        // activate save suggestion button
+        // (if subchain was in no autocomplete term, it's already on)
+        $('#savesuggestion').prop('disabled', false) ;
+
+        // save_suggestions
+        $("#crowdsourcing_answer").html("<p>The topic <i>\"" + e.q + "\"</i> is not in the map.</p> <p>(You can click the grey <span class=\"glyphicon glyphicon-save\"></span> button to propose it as a suggestion.)</p>") ;
+        
+        // $("#searchinput").val() = query ;
+    }
+});
+
 $("#savesuggestion").click(function(){
-    var query = $("#proposed_terms").val()
+    var query = $("#searchinput").val()
+    if (typeof query != "string" || !query.length) {
+        query = TW.lastQuery ;
+    }
     query = $.trim( query.toLowerCase() ) ;
     save_suggestions(query) ;
 })
@@ -193,6 +210,14 @@ function save_suggestions(term) {
         "date" : (new Date()).toISOString(),
         "geo" : "ip and geoloc"
     }
+    
+    // sqlite columns in table 'terms'
+    // 0|source|CHAR(250)|0||0
+    // 1|suggestion|CHAR(250)|0||0
+    // 2|time|CHAR(30)|0||0
+    // 3|space|CHAR(100)|0||0
+    // 4|new|INTEGER|0||0
+    
     // console.log( "SAVE INFO:" + info )
     $.ajax({
         type: "POST",
@@ -213,7 +238,7 @@ function save_suggestions(term) {
             
             // reset state after 3 secs
             setTimeout(function() {
-                clean_crowdsourcingform() ;
+                clean_crowdsourcingzone() ;
                 
                 // if we want to reset the input value too
                 // $("#proposed_terms").val('') ;
@@ -229,7 +254,7 @@ function save_suggestions(term) {
 }
 
 
-function clean_crowdsourcingform() {
+function clean_crowdsourcingzone() {
     $("#crowdsourcing_answer").html('') ;
     $("#saveicon").removeClass("glyphicon-saved");
     $("#saveicon").addClass("glyphicon-save");
@@ -237,7 +262,6 @@ function clean_crowdsourcingform() {
 }
 
 
-// non utilisé si termes depuis map
 //~ function get_already_suggested_terms() {
 //~ $("#sendcrowds").html("...")
     //~ $.ajax({
@@ -253,7 +277,7 @@ function clean_crowdsourcingform() {
             //~ setTimeout(function(){
                 //~ //$("#sendcrowds").html(D["#sendcrowds"]["thanks"][LA]) //showing message
                 //~ setTimeout(function(){
-                    //~ clean_crowdsourcingform()
+                    //~ clean_crowdsourcingzone()
                 //~ }, 3000);
             //~ }, 1000);
         //~ },
@@ -265,10 +289,3 @@ function clean_crowdsourcingform() {
 //~ 
     //~ })
 //~ }
-
-// sqlite columns in table 'terms'
-// 0|source|CHAR(250)|0||0
-// 1|suggestion|CHAR(250)|0||0
-// 2|time|CHAR(30)|0||0
-// 3|space|CHAR(100)|0||0
-// 4|new|INTEGER|0||0

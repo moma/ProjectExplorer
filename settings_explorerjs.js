@@ -51,6 +51,8 @@ var TW = {}
     TW.SystemStates.opposites = [];
     TW.catSoc = "Document";
     TW.catSem = "NGram";
+    
+    TW.strSearchBar = "Select or suggest topics";
 
 var ParseCustom = function () {};
 var SigmaUtils = function () {};
@@ -67,7 +69,6 @@ var inactiveColor = '#666';
 var startingNodeId = "1";
 var minLengthAutoComplete = 1;
 var maxSearchResults = 10;
-var strSearchBar = "Search";
 
 var cursor_size_min= 0;
 var cursor_size= 0;

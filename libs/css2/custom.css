@@ -23,11 +23,16 @@
 	margin-bottom:1px;
 }
 
-#defaultop{	
+#defaultop{
     min-height: 5%;
     max-height: 10%;
 }
 
+/* searchnav gets same padding as bootstrap's .navbar-nav > li > a */
+#defaultop div#searchnav {
+    padding-top: 13px; 
+    padding-bottom: 9px;
+}
 #sigma-example {
     width: 100%;
     height: 300px;
@@ -45,6 +50,10 @@
 
 .my-legend {
     position:fixed;
+    /* width: we set it smaller than #leftcolumn container's width */
+    width:16%;
+    max-height: 40%;
+    overflow-y:scroll;
     bottom:5px;
     left:5px;
 

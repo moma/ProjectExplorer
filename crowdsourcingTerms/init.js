@@ -14,8 +14,9 @@ loadCSS(module_name+"/crowdTerms.css")
 loadJS(module_name+"/modal.js") ;
 
 // histogram
-loadJS(module_name+"/dygraph/dygraph.combined.js") ;
 loadCSS(module_name+"/dygraph/gallery.css") ;
 loadCSS(module_name+"/dygraph/textarea.css") ;
+loadJS(module_name+"/dygraph/dygraph.combined.js") ;
+
 
 console.log("OK LOADED " + module_name) ;

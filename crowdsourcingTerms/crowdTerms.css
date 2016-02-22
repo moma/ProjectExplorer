@@ -58,15 +58,28 @@
   margin: 0 ;
   padding: 0;
 }
+
+/* small messages */
+p.micromessage{
+  font-size: 85%;
+  color: #707070 ;
+}
 /* ------------- crowdsourcing proprement dit ----------------------- */
 
 
-#crowdsourcing_intro{
+#crowdsourcing_answer{
+  font-size: 85%;
+  color: #707070 ;
+  padding:0 1em ;
+  text-align:center ;
+}
+
+#crowdsourcing_answer p {
+  margin: 2px 0;
 }
 
 #savesuggestion.btn {
 }
-
 
 #savesuggestion.btn[disabled], #savesuggestion.btn.disabled {
   background-color: #B0B0B0 ;

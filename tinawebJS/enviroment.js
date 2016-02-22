@@ -833,6 +833,8 @@ function extractContext(string, context) {
     return begin_pts + str + end_pts;
 }
 
+
+// TODO check duplicate function with sigmaUtils exactfind()
 function searchLabel(string){    
     var id_node = '';
     var n;

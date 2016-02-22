@@ -193,6 +193,46 @@ function rgbToHex(r, g, b) {
 }
 
 
+// lowercase etc query strings
+normalizeString = function(string) {
+    if (! typeof string == "string") {
+        return "" ;
+    }
+    else {
+        return $.trim( string.toLowerCase() )
+    }
+}
+
+// html-escape user input strings
+// /!\ TODO check if safe enough?
+saferString = function(string) {
+    // TODO table in an outer scope
+    conversions = { 
+        '&' : '&amp;'   ,
+        '<' : '&lt;'    ,
+        '>' : '&gt;'    ,
+        '"' : '&quot;'  ,
+        "'" : '&apos;'  ,
+        '%' : '&percnt;' 
+    } ;
+    
+    matchables = /[&<>"'%]/ ;
+    
+    if (! typeof string == "string") {
+        return "" ;
+    }
+    else {
+        return string.replace(
+            matchables, 
+            function(char) {
+                return conversions[char]
+            }
+        )
+    }
+}
+
+
+
  /**
   * function to load a given css file 
   */ 
