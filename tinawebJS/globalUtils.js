@@ -194,17 +194,24 @@ function rgbToHex(r, g, b) {
 
 
 // lowercase etc query strings
-normalizeString = function(string) {
+normalizeString = function(string, escapeHtml) {
+    if (typeof escapeHtml == "undefined") {
+        escapeHtml = true ;
+    }
     if (! typeof string == "string") {
         return "" ;
     }
     else {
-        return $.trim( string.toLowerCase() )
+        string = $.trim( string.toLowerCase() )
+        if (escapeHtml == true) {
+            string = saferString(string) ;
+        }
+        return string ;
     }
 }
 
-// html-escape user input strings
-// /!\ TODO check if safe enough?
+// html-escape user-input strings (before printing them out)
+// (or use jquery .text())
 saferString = function(string) {
     // TODO table in an outer scope
     conversions = { 
@@ -213,10 +220,12 @@ saferString = function(string) {
         '>' : '&gt;'    ,
         '"' : '&quot;'  ,
         "'" : '&apos;'  ,
+        "{" : '&lcub;'  ,
+        "}" : '&rcub;'  ,
         '%' : '&percnt;' 
     } ;
     
-    matchables = /[&<>"'%]/ ;
+    matchables = /[&<>"'{}%]/g ;
     
     if (! typeof string == "string") {
         return "" ;
