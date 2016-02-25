@@ -59,8 +59,9 @@ function getGexfPath(v){
     return gexfpath;
 }
 
-function jsActionOnGexfSelector(gexfLegend , db_json){
+function jsActionOnGexfSelector(gexfBasename , db_json){
     db_json = (db_json)?"&mode=db.json":""
+    gexfLegend = gexfBasename+".gexf"
     if(getGexfPath[gexfLegend])
         window.location=window.location.origin+window.location.pathname+"?file="+encodeURIComponent(getGexfPath(gexfLegend))+db_json;
     else
@@ -116,12 +117,13 @@ if(RES["OK"]) {
             var the_gexfs = the_data[path]["gexfs"]
             pr("\t\tThese are the available  Gexfs:")
             for(var gexf in the_gexfs) {
+                var gexfBasename = gexf.replace(/\.gexf$/, "") // more human-readable in the menu
                 pr("\t\t\t"+gexf+ "   -> table:" +the_gexfs[gexf]["semantic"]["table"] )
                 TW.field[path+"/"+gexf] = the_gexfs[gexf]["semantic"]["table"]
                 TW.gexfDict[path+"/"+gexf] = gexf
 
                 var selected = (the_file==(path+"/"+gexf))?"selected":""
-                files_selector += '<option '+selected+'>'+gexf+'</option>'
+                files_selector += '<option '+selected+'>'+gexfBasename+'</option>'
             }
             console.log( files_selector )
             break;

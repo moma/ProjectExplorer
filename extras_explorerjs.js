@@ -384,21 +384,22 @@ function getTips(){
         "<br>"+
         "Basic Interactions:"+
         "<ul>"+
-        "<li>Click on a node to select/unselect and get its information. In case of multiple selection, the button unselect clears all selections.</li>"+
-        "<li>The switch button switch allows to change the view type.</li>"+
+        "<li>Click on a node to select/unselect and get its information. In case of multiple selection, the button unselect clears all selections,</li>"+
+        "<li> Use your mouse scroll to zoom in and out in the graph.</li>"+
         "</ul>"+
         "<br>"+
         "Graph manipulation:"+
         "<ul>"+
-        "<li>Link and node sizes indicate their strength.</li>"+
-        "<li>To fold/unfold the graph (keep only strong links or weak links), use the 'edges filter' sliders.</li>"+
-        "<li>To select a more of less specific area of the graph, use the 'nodes filter' slider.</li>"+
+        "<li>Node size is proportional to the number of documents with the associated term,</li>"+
+        "<li>Use the node filter to create a subgraph with nodes of a given size range (e.g. display only generic terms),</li>"+
+        "<li>Link strength is proportional to the strenght of terms association,</li>"+
+        "<li>Use the edge filter so create a subgraph with links in a given range (e.g. keep the strongest association).</li>"+
         "</ul>"+
         "<br>"+
-        "Micro/Macro view:"+
+        "Global/local view:"+
         "<ul>"+
-        "<li>To explore the neighborhood of a selection, either double click on the selected nodes, either click on the macro/meso level button. Zoom out in meso view return to macro view.</li>"+
-        "<li>Click on the 'all nodes' tab below to view the full clickable list of nodes.</li>"+
+        "<li>The 'change level' button allows to change between global view and node centered view,</li>"+
+        "<li>To explore the neighborhood of a selection click on the 'change level' button.</li>"+
         "</ul>";
         
     $("#tab-container").hide();

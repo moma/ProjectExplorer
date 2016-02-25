@@ -36,7 +36,7 @@
 
             <li class="disabled">
               <a>
-                <span class="label label-default label-lg">NETWORK: </span>
+                <span class="label label-default label-lg">MAP: </span>
               </a>
             </li>
 
@@ -220,18 +220,29 @@
 
       <!-- Sidebar left, new css -->
       <div id="leftcolumn" class="newleftbar">
+
+        <!-- selected nodes -->
+        <div class="row">
+            <button id="unselectbutton"
+                style="color: #900;font-weight: bold;font-size: 70%;text-transform: uppercase;float:right;margin-right:.5em" 
+                onClick='cancelSelection(false);'
+                title="Unselect these terms">
+              <span class="glyphicon glyphicon-remove" alt="X"></span>
+            </button>
+            <div id="names"></div>
+        </div>
         
-          <div class="row" class="histogramModule">
-            <!-- filled by query (user search value) to wos api -->
-            <div id="search_histogram_wrapper" class="col-md-12">
-              <div id="search_histogram"></div>
-            </div>
-          </div><!-- /row -->
+        <!-- histogram of selected nodes -->
+        <div class="row histogramModule">
+          <!-- filled by query (user search value) to wos api -->
+          <div id="search_histogram_wrapper" class="col-md-12">
+            <div id="search_histogram"></div>
+          </div>
+        </div><!-- /row -->
 
 
-            <!-- class="my-legend" (absolute position bottom) -->
-            <div id="legend_for_clusters"></div>
-
+        <!-- class="my-legend" (absolute position bottom) -->
+        <div id="legend_for_clusters"></div>
       </div>
 
 
@@ -303,21 +314,13 @@
       <!-- Sidebar right, old css -->
       <div id="rightcolumn">
 
-        <button id="unselectbutton"
-            style="color: #900;font-weight: bold;font-size: 70%;text-transform: uppercase;float:right;" 
-            onClick='cancelSelection(false);'>
-              <span class="glyphicon glyphicon-remove" alt="X"></span>
-        </button>
-        
-        <div id="names"></div>
-        
-        
-        <br>
         <div id="tab-container" class='tab-container' style="display: none;">
 
            <ul class='etabs'>
+             <!-- for related elements from the combined graph (eg soc => sem) -->
              <li id="taboppos" class='tab'><a href="#tabs1">Opposite-Neighbors</a></li>
-             <li id="tabneigh" class='tab'><a href="#tabs2">Neighbors</a></li>
+             <!-- for neighbors within this graph -->
+             <li id="tabneigh" class='tab'><a href="#tabs2">Related</a></li>
            </ul>
 
            <div class='panel-container'>

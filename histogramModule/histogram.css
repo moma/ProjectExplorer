@@ -24,8 +24,8 @@
   margin: 0 ;
   /* overwrite bootstrap's 
    * grid element padding*/
-  padding-right: 1em;
-  padding-left: 0;
+  padding-right: 2em ;
+  margin-left: -.5em ;
 }
 /* graph div */
 #search_histogram{

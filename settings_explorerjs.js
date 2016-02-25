@@ -113,7 +113,7 @@ var sigmaJsDrawingProperties = {
 };
 var sigmaJsGraphProperties = {
     minEdgeSize: 2,
-    maxEdgeSize: 2
+    maxEdgeSize: 3
 };
 var sigmaJsMouseProperties = {
     minRatio:0.1,

@@ -9,6 +9,9 @@
 module_name="histogramModule"
 // ---- INIT main part -------- (listing all things to load)
 
+// our histogram wrapper styles
+loadCSS(module_name+"/histogram.css") ;
+
 // our histogram controller
 loadJS(module_name+"/wosHistogram.js") ;
 
