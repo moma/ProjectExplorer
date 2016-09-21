@@ -3,26 +3,30 @@ This code base serves as a great starting point to write your next Flask applica
 
 
 Official repo:
-    git clone https://github.com/lingthio/Flask-User-starter-app   regcomex
-
-export LC_ALL=C
-sudo apt-get install postgresql-server-dev-9.4
-
-export ENV_SETTINGS_FILE=.../regcomex/env_settings.py
-
-virtualenv -p /usr/bin/python3 env
-source env/bin/activate
+git clone https://github.com/lingthio/Flask-User-starter-app   regcomex
 
 
-pip install -r requirements.txt
-pip list --outdated | sed 's/(.*//g' | xargs -n1 pip install -U
+        export LC_ALL=C
 
-app/templates/layout.html           :29: change to    {% if current_user.is_authenticated %}
-app/templates/core/home_page.html   : 8: change to    {% if not current_user.is_authenticated %}
+        sudo apt-get install postgresql-server-dev-9.4
 
-python manage.py init_db
+        export ENV_SETTINGS_FILE=.../regcomex/env_settings.py
 
-./runserver.sh
+        virtualenv -p /usr/bin/python3 env
+
+        source env/bin/activate
+
+        pip install -r requirements.txt
+
+        pip list --outdated | sed 's/(.*//g' | xargs -n1 pip install -U
+
+        app/templates/layout.html           :29: change to    {% if current_user.is_authenticated %}
+
+        app/templates/core/home_page.html   : 8: change to    {% if not current_user.is_authenticated %}
+
+        python manage.py init_db
+
+        ./runserver.sh
 
 
 
