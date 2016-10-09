@@ -11,7 +11,7 @@ SigmaUtils = function () {
         console.log(catDict)
         for(var i in nodes) {
             var n = nodes[i];
-            
+
             if(initialState[catDict[n.type]]) {
                 var node = ({
                     id : n.id,
@@ -24,10 +24,10 @@ SigmaUtils = function () {
                 })
                 if(n.shape) node.shape = n.shape;
                 // console.log(node)
-                
+
                 if(Number(n.id)==287) console.log("coordinates of node 287: ( "+n.x+" , "+n.y+" ) ")
                 graph.addNode( n.id , node);
-                
+
                 // fill the "labels" global variable
                 updateSearchLabels( n.id , n.label , n.type);
             }
@@ -70,7 +70,7 @@ function showMeSomeLabels(N){
         minIn=50,
         maxIn=0,
         minOut=50,
-        maxOut=0;        
+        maxOut=0;
         TW.partialGraph.iterNodes(function(n){
             if(n.hidden==false){
                 if(parseInt(n.inDegree) < minIn) minIn= n.inDegree;
@@ -162,7 +162,7 @@ function find(lquery){
                 // string.indexOf(substring) faster than search/match
                 if (possiblematch.indexOf(lquery)!==-1) {
                     results.push(n);
-                }  
+                }
             }
         }
     }
@@ -199,7 +199,7 @@ function getNodeIDs(elems){
 }
 
 
-function getSelections(){    
+function getSelections(){
         params=[];
         for(var i in selections){
             params.push(TW.Nodes[i].label);
@@ -210,7 +210,7 @@ function getSelections(){
 
 //This receives an array not a dict!
 //  i added an excpt... why
-function getNeighs(sels,arr) { 
+function getNeighs(sels,arr) {
     neighDict={};
     for(var i in sels) {
         id = sels[i]
@@ -221,13 +221,13 @@ function getNeighs(sels,arr) {
             }
             neighDict[id]=1;
         }
-    }    
+    }
     return Object.keys(neighDict);
 }//It returns an array not a dict!
 
 //Using bipartiteN2D or bipartiteD2N
 //This receives an array not a dict!
-function getNeighs2(sels,arr){ 
+function getNeighs2(sels,arr){
     neighDict={};
     for(var i in sels) {
         id = sels[i]
@@ -238,7 +238,7 @@ function getNeighs2(sels,arr){
             }
             // neighDict[id]=1;
         }
-    }    
+    }
     return Object.keys(neighDict);
 }//It returns an array not a dict!
 
@@ -342,7 +342,7 @@ function clustersBy(daclass) {
 }
 
 function colorsBy(daclass) {
-    
+
     pr("")
     pr(" = = = = = = = = = = = = = = = = = ")
     pr(" = = = = = = = = = = = = = = = = = ")
@@ -359,12 +359,13 @@ function colorsBy(daclass) {
     }
 
     var v_nodes = getVisibleNodes();
-    colorList.sort(function(){ return Math.random()-0.5; });
+    // shuffle on entire array is better than random sorting function on each element
+    var randomColorList = shuffle(colorList)
 
     for(var i in v_nodes) {
         var the_node = TW.Nodes[ v_nodes[i].id ]
         var attval = ( isUndef(the_node.attributes) || isUndef(the_node.attributes[daclass]) )? v_nodes[i][daclass]: the_node.attributes[daclass];
-        TW.partialGraph._core.graph.nodesIndex[v_nodes[i].id].color = colorList[ attval ]
+        TW.partialGraph._core.graph.nodesIndex[v_nodes[i].id].color = randomColorList[ attval ]
     }
     TW.partialGraph.draw();
 
@@ -394,4 +395,26 @@ function makeEdgeWeightUndef() {
     for(var e in TW.partialGraph._core.graph.edges) {
         TW.partialGraph._core.graph.edges[e].weight=1;
     }
+}
+
+
+// shuffle algo from stackoverflow.com/a/6274398/2489184
+function shuffle(array) {
+    var counter = array.length;
+
+    // While there are elements in the array
+    while (counter > 0) {
+        // Pick a random index
+        let index = Math.floor(Math.random() * counter);
+
+        // Decrease counter by 1
+        counter--;
+
+        // And swap the last element with it
+        let temp = array[counter];
+        array[counter] = array[index];
+        array[index] = temp;
+    }
+
+    return array;
 }
