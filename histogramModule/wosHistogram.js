@@ -15,7 +15,7 @@ function search_proposed_terms_and_draw( the_queries ) {
         // the_queries is an array of str
         "q": the_queries,
         "since": 1989,
-        "until": 2013
+        "until": 2015
     }
     var docs_years = [] ;
 
