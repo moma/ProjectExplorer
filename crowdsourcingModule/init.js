@@ -2,7 +2,7 @@
 // ====================
 // Allows suggestions from search box
 
-// Our module_name is simultaneously 3 things: 
+// Our module_name is simultaneously 3 things:
 //   - a DivsFlag for settings_explorerjs
 //   - our current dir for this module's files (and this init.js)
 //   - the class of module's html elements

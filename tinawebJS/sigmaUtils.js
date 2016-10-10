@@ -251,6 +251,8 @@ function getArrSubkeys(arr,id) {
     return result;
 }
 
+
+// color & size scale using an attribute in the nodes' data
 function clustersBy(daclass) {
 
     cancelSelection(false);
@@ -259,6 +261,7 @@ function clustersBy(daclass) {
     for(var i in v_nodes) {
         var the_node = TW.Nodes[ v_nodes[i].id ]
         var attval = ( isUndef(the_node.attributes) || isUndef(the_node.attributes[daclass]) )? v_nodes[i][daclass]: the_node.attributes[daclass];
+        console.log("clustersBy begin trace",v_nodes[i].id, attval)
         if( !isNaN(parseFloat(attval)) ) { //is float
             while(true) {
                 var themult = Math.pow(10,min_pow);
@@ -276,14 +279,24 @@ function clustersBy(daclass) {
     var themult = Math.pow(10,min_pow);
     for(var i in v_nodes) {
         var the_node = TW.Nodes[ v_nodes[i].id ]
+
+        // debug
+        // console.log(the_node.label)
+
+
         var attval = ( isUndef(the_node.attributes) || isUndef(the_node.attributes[daclass]) )? v_nodes[i][daclass]: the_node.attributes[daclass];
         var attnumber = Number(attval);
         var round_number = Math.round(  attnumber*themult ) ;
 
+        console.log({ the_node, "round":round_number , "real":attnumber })
+
+        // order per ascii val of label's first letter
+        // round_number = Math.round(the_node.label.charAt(0).charCodeAt())
+        // console.log({ "round":round_number , "real":attnumber })
         NodeID_Val[v_nodes[i].id] = { "round":round_number , "real":attnumber };
 
-        if (round_number<real_min) real_min = round_number;
-        if (round_number>real_max) real_max = round_number;
+        // if (round_number<real_min) real_min = round_number;
+        // if (round_number>real_max) real_max = round_number;
     }
 
 
@@ -300,14 +313,22 @@ function clustersBy(daclass) {
     var Min_color = 0;
     var Max_color = 255;
     var Min_size = 2;
-    var Max_size= 6;
+    var Max_size= 5;
     for(var i in NodeID_Val) {
 
         var newval_color = Math.round( ( Min_color+(NodeID_Val[i]["round"]-real_min)*((Max_color-Min_color)/(real_max-real_min)) ) );
         var hex_color = rgbToHex(255, (255-newval_color) , 0)
+        console.log({'round in': NodeID_Val[i]["round"],
+                     'label':TW.partialGraph._core.graph.nodesIndex[i]["label"],
+                     'newval col':newval_color,
+                     'hex_color':hex_color
+                    })
+
+        // paint the sigma node
         TW.partialGraph._core.graph.nodesIndex[i].color = hex_color
 
         var newval_size = Math.round( ( Min_size+(NodeID_Val[i]["round"]-real_min)*((Max_size-Min_size)/(real_max-real_min)) ) );
+        // size it too
         TW.partialGraph._core.graph.nodesIndex[i].size = newval_size;
         // pr("real:"+ NodeID_Val[i]["real"] + " | newvalue: "+newval_size)
 
@@ -324,10 +345,13 @@ function clustersBy(daclass) {
     var v_edges = getVisibleEdges();
     for(var e in v_edges) {
         var e_id = v_edges[e].id;
+        // from a
         var a = v_edges[e].source.color;
+        // to b
         var b = v_edges[e].target.color;
         a = hex2rga(a);
         b = hex2rga(b);
+        // 3x bitwise right shifts
         var r = (a[0] + b[0]) >> 1;
         var g = (a[1] + b[1]) >> 1;
         var b = (a[2] + b[2]) >> 1;

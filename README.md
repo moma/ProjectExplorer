@@ -11,7 +11,7 @@ SOURCE CODE REPOSITORY
 
 AUTHORS
 
-- Researchers and engineers of the ISC-PIF 
+- Researchers and engineers of the ISC-PIF
     David Chavalarias <david dot chavalarias at iscpif ... fr>
     Samuel Castillo
 
@@ -25,7 +25,7 @@ TinawebJS is build on Alexis Jacomy's sigmaJS (http://sigmajs.org)
 This work is the continuation of the TINA project, an European Union FP7 project - FP7-ICT-2009-C
 
 REQUIREMENTS
-   
+
     WEB BROWSER compatible with javascript : we recommend Chrome/Chromium or Firefox
 
 HOW TO USE:

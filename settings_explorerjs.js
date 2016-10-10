@@ -52,7 +52,7 @@ var TW = {}
     TW.SystemStates.opposites = [];
     TW.catSoc = "Document";
     TW.catSem = "NGram";
-    
+
     TW.strSearchBar = "Select or suggest topics";
 
 var ParseCustom = function () {};
@@ -85,7 +85,7 @@ var desirableScholarSize=6; //Remember that all scholars have the same size!
  *Three states:
  *  - true: fa2 running at start
  *  - false: fa2 stopped at start, button exists
- *  - "off": button doesn't exist, fa2 stopped forever 
+ *  - "off": button doesn't exist, fa2 stopped forever
  **/ var fa2enabled=false;//"off";
 var stopcriteria = false;
 var iterationsFA2=1000;
@@ -120,7 +120,7 @@ var sigmaJsMouseProperties = {
     maxRatio: 50
 };
 // ============ < / SIGMA.JS PROPERTIES > ============
-         
+
 
 // ============ < / DEVELOPER OPTIONS > ============
 
@@ -165,15 +165,15 @@ var overviewScale = 0.25;
 var overviewHover=false;
 var moveDelay = 80, zoomDelay = 2;
 //var Vecindad;
-TW.partialGraph; 
+TW.partialGraph;
 var otherGraph;
-TW.Nodes = []; 
+TW.Nodes = [];
 TW.Edges = [];
 TW.Clusters = [];
 
 var nodeslength=0;
 
-var labels = [];   
+var labels = [];
 
 var numberOfDocs=0;
 var numberOfNGrams=0;
@@ -232,4 +232,3 @@ var RVUniformC = function(seed){
     };
 }
 //unifCont = new RVUniformC(100000000)
-

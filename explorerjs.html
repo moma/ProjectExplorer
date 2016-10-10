@@ -6,7 +6,7 @@
     <title>Mapping risk research</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="utf-8">
-    
+
     <link rel="stylesheet" href="libs/jquery/jquery-ui.css" media="screen">
     <link rel="stylesheet" href="libs/bootstrap/css/bootstrap.css" media="screen">
     <link rel="stylesheet" href="libs/css2/freshslider.css" media="screen">
@@ -45,7 +45,7 @@
                 <span id="network" ></span>
               </a>
             </li>
-            
+
 
             <li>
               <div id="log"></div>
@@ -77,7 +77,7 @@
             <div id="left" class="col-sm-8 col-md-8 col-lg-6" >
 
                 <ul class="nav navbar-nav navbar-right">
-                
+
                 <!--
                 <li>
                    <a>
@@ -94,7 +94,7 @@
                     <button type="button" id="changetype" class="btn btn-success btn-sm">Change Type</button>
                    </a>
                 </li>
-                
+
                 <li>
                    <a>
                     <button type="button" id="changelevel" class="btn btn-info btn-sm" disabled>Change Level</button>
@@ -105,7 +105,7 @@
                   Selector size<br>
                   <div id="unranged-value" class="settingslider"></div>
                 </a></li>
-                
+
                 <li><a>
                   <!-- TODO fix: category0 -> category1 switching -->
                   Label size<br>
@@ -137,7 +137,7 @@
                   </ul>
                 </a></li>
               </ul>
-              
+
             </div><!-- /div#left -->
 
             <div id="right" class="col-sm-3 col-md-4 col-lg-6" >
@@ -150,37 +150,37 @@
                             <button id="savesuggestion"
                                     disabled
                                     title="Save this topic as a new suggestion"
-                                    class="btn btn-default" 
+                                    class="btn btn-default"
                                     type="button">
                               <span class="glyphicon glyphicon-save"
                                      id="saveicon">
                               </span>
                             </button>
                           </span>
-                          
+
                           <span class="input-group-btn">
-                            <button id="searchbutton" 
+                            <button id="searchbutton"
                                     title="Search the topic in the map"
-                                    class="btn btn-info" 
+                                    class="btn btn-info"
                                     type="button">
                               <span class="glyphicon glyphicon-search">
                               </span>
                             </button>
                           </span>
-                          
+
                           <!-- ########## THE SEARCH BAR ########## -->
-                          
-                          <input id="searchinput" 
+
+                          <input id="searchinput"
                                   type="text"
-                                  class="form-control" 
+                                  class="form-control"
                                   placeholder="Select node(s)" />
-                          
+
                           <!-- strSearchBar will replace placeholder value -->
-                       
+
                           <!-- #################################### -->
 
                        </div>
-                       
+
                        <!-- messages below the search bar -->
                        <!-- say thanks for the suggestion, etc. -->
                        <div id="crowdsourcing_answer" class="crowdsourcingModule"></div>
@@ -189,11 +189,11 @@
                     <div class="col-sm-3 col-md-3 col-lg-5">
                             <input id="checkboxdiv"  onclick="alertCheckBox(this);"
                                     title="Add next search results to current selection"
-                                    class="btn btn-info" 
+                                    class="btn btn-info"
                                     type="checkbox"></input>
                             <p style="font-size:75%; line-height:90%">Add to selection</p>
                     </div>
-                    
+
                   </div>
 
             <!--
@@ -212,7 +212,7 @@
             </ul>
             -->
             </div>
-              
+
       </div><!-- /.row#defaultop -->
     </div><!-- /.container.fluid -->
 <!-- £TODO wtf    </div> -->
@@ -224,14 +224,14 @@
         <!-- selected nodes -->
         <div class="row">
             <button id="unselectbutton"
-                style="color: #900;font-weight: bold;font-size: 70%;text-transform: uppercase;float:right;margin-right:.5em" 
+                style="color: #900;font-weight: bold;font-size: 70%;text-transform: uppercase;float:right;margin-right:.5em"
                 onClick='cancelSelection(false);'
                 title="Unselect these terms">
               <span class="glyphicon glyphicon-remove" alt="X"></span>
             </button>
             <div id="names"></div>
         </div>
-        
+
         <!-- histogram of selected nodes -->
         <div class="row histogramModule">
           <!-- filled by query (user search value) to wos api -->
@@ -248,7 +248,7 @@
 
 
       <div id="zonecentre">
-          
+
 
           <!-- Page content -->
           <div id="sigma-example"></div>
@@ -266,14 +266,14 @@
                       <div id="unfold">
                           <a href="#" id="aUnfold" class="rightarrow"></a>
                       </div>
-                  </li> 
+                  </li>
                   <!--
                    <li>
                       <a href="#" id="geomapicon" onclick="$('#geomapmodal').modal('show'); callGeomapADEME();">
                         <img title="World Map Distribution" width="34px" src="libs/img2/world.png"></img>
                       </a>
                   </li>
-                  --> 
+                  -->
 
 
                    <li>
@@ -281,13 +281,13 @@
                         <img title="Take a photo!" width="34px" src="libs/img2/camera.png"></img>
                       </a>
                   </li>
-                  
+
                    <li>
                       <a href="#" id="saveAs">
                         <img width="30px" title="Save As..." src="libs/img2/save.png"></img>
                       </a>
-                  </li> 
-                  
+                  </li>
+
                   <li>
                       <a href="#" id="zoomPlusButton" title="S'approcher"> </a>
                   </li>
@@ -334,21 +334,21 @@
         </div>
 
         <div id="topPapers" style="display: none;"></div>
-        
+
         <div id="information"></div>
 
         <!--
           bottom right column as panels
-          
-          open/close panel from: jsfiddle.net/KyleMit/kcpma 
+
+          open/close panel from: jsfiddle.net/KyleMit/kcpma
         -->
         <div class="panel-group" id="accordion">
-          
-          
+
+
           <div class="panel panel-default" id="video_explanation">
             <div class="panel-heading">
               <h4 class="panel-title">
-                <a data-toggle="collapse" data-target="#le_tutorial" 
+                <a data-toggle="collapse" data-target="#le_tutorial"
                                                  href="#">
                   <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
                   &nbsp;Tutorial video
@@ -358,7 +358,7 @@
 
             <div class="panel-collapse collapse" id="le_tutorial">
               <!-- TODO: outcloud the video for better stream+player -->
-              <video width="100%" 
+              <video width="100%"
                 src="video/AXA2015.mp4" controls=""  frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></video>
             </div>
           </div>
@@ -366,7 +366,7 @@
           <div class="panel panel-default" id="tips_panel">
             <div class="panel-heading">
               <h4 class="panel-title">
-                <a data-toggle="collapse" data-target="#tips" 
+                <a data-toggle="collapse" data-target="#tips"
                                                  href="#">
                   <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
                   &nbsp;Tips
@@ -380,7 +380,7 @@
           <div class="panel panel-default" id="credits_panel">
             <div class="panel-heading">
               <h4 class="panel-title">
-                <a data-toggle="collapse" data-target="#credits" 
+                <a data-toggle="collapse" data-target="#credits"
                                                  href="#">
                   <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
                   &nbsp;Credits
@@ -400,13 +400,13 @@
                   style="width:85%; ">
               </a>
             </div>
-            
+
           </div>
         </div>
 
         <br><br><br><br><br><br>
       </div>
-    
+
 
 
     <div id="savemodal" class="modal fade">
@@ -468,7 +468,7 @@
 
         </div>
       </div>
-    </div> 
+    </div>
 
 
     <div id="modalloader" class="modal fade">
@@ -491,12 +491,12 @@
           </div>
         <!-- </div> -->
           <!-- <div class="geomapCont"></div> -->
-          <div id="closegeomap" data-dismiss="modal"></div> 
+          <div id="closegeomap" data-dismiss="modal"></div>
     </div>
 
     <div id="heatgraph"></div>
     <!-- <div id="twittertimeline_div"></div> -->
-    
+
     <script src="libs/jquery/jquery-1.10.2.js" type="text/javascript"></script>
     <script src="libs/jquery/jquery-ui.js" type="text/javascript"></script>
     <script src="libs/jquery/jquery.ba-dotimeout.min.js" type="text/javascript"></script>
@@ -505,12 +505,12 @@
     <script type="text/javascript" src="libs/freshslider.1.0.js"></script>
     <script src="libs/readmore.js" type="text/javascript"></script>
     <script src="libs/jquery/jquery.easytabs.min.js" type="text/javascript"></script>
-    
+
     <script src="libs/bootstrap/js/bootstrap.min.js"></script>
     <script src="libs/bootswatch/js/bootswatch.js"></script>
     <script src="libs/bootstrap/js/bootstrap-modal.js" type="text/javascript"></script>
     <script src="libs/bootstrap/js/bootstrap-hover-dropdown.min.js" type="text/javascript"></script>
-    
+
 
     <script src="tinawebJS/globalUtils.js" type="text/javascript"></script>
 
@@ -522,7 +522,7 @@
         <link rel="stylesheet" type="text/css" href="geomap/css/geo.css" />
     -->
     <!--<script src="geomap/js/countries_iso3166.js" charset="utf-8" ></script>-->
-    
+
     <script type="text/javascript" src="tinawebJS/jLouvain.js"></script>
     <script src="tinawebJS/sigma.min.js" type="text/javascript" language="javascript"></script>
     <script src="tinawebJS/sigma.forceatlas2.js" type="text/javascript" language="javascript"></script>
@@ -535,7 +535,7 @@
     <script src="tinawebJS/asyncFA2.js" type="text/javascript" language="javascript"></script>
     <script src="tinawebJS/Tinaweb.js" type="text/javascript" language="javascript"></script>
     <script src="tinawebJS/main.js" type="text/javascript" language="javascript"></script>
-        
+
   <script type="text/javascript">
       $('#tab-container').easytabs({updateHash:false});
       $('#tab-container-top').easytabs({updateHash:false});

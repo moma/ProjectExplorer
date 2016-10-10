@@ -237,7 +237,7 @@ var ForceAtlas2 = function(graph) {
             totalSwinging += n.fa2.mass * swinging;
             swingingSum += swinging;
             promdxdy += (Math.abs(n.fa2.dx)+Math.abs(n.fa2.dy))/2; /**/
-            
+
             totalEffectiveTraction += n.fa2.mass *
                                       0.5 *
                                       Math.sqrt(
@@ -246,15 +246,15 @@ var ForceAtlas2 = function(graph) {
                                       );
           }
         });
-        
+
         self.p.totalSwinging = totalSwinging;
-        
+
         var convg= ((Math.pow(nodes.length,2))/promdxdy);    /**/
         var swingingVSnodes_length = swingingSum/nodes.length;     /**/
-        // if(convg > swingingVSnodes_length){ 
+        // if(convg > swingingVSnodes_length){
         //     self.p.banderita=true;
         // }
-        
+
         self.p.totalEffectiveTraction = totalEffectiveTraction;
 
         // We want that swingingMovement < tolerance * convergenceMovement
@@ -880,7 +880,7 @@ var Region = function(nodes, depth) {
     massCenterX: 0,
     massCenterY: 0
   };
-  
+
   console.log("updating mass and geometry");
   this.updateMassAndGeometry();
 }
@@ -960,7 +960,7 @@ var applyForce = function(n, Force, theta) {
 
 
 
-//   [ NEW STUFF FOR WORKERS ] 
+//   [ NEW STUFF FOR WORKERS ]
 
   // 01. Return the values to MainContext when spatialization is finished
   var startForceAtlas2 = function(graph,limit_it) {
@@ -987,7 +987,7 @@ var applyForce = function(n, Force, theta) {
       forceatlas2 = new ForceAtlas2(graph);
       forceatlas2.setAutoSettings();
       forceatlas2.init();
-      
+
       count=0;
       flag=false;
       while(true){
@@ -1000,13 +1000,13 @@ var applyForce = function(n, Force, theta) {
           }
           count++;
           if(flag||count>limit_it) break;
-      }    
+      }
       //    pr(forceatlas2.graph.nodes[0].x)
       //    pr(forceatlas2.graph.nodes[0].y)
       //    console.log("\titerations: "+count)
       result={
           "nodes":forceatlas2.graph.nodes,
-          "it":count        
+          "it":count
       }
       return result;
   };
@@ -1024,8 +1024,8 @@ var applyForce = function(n, Force, theta) {
           "nodes":result.nodes,
           "it":result.it
       });
-      
+
   }, false);
 
 
-//   [ / NEW STUFF FOR WORKERS ] 
+//   [ / NEW STUFF FOR WORKERS ]

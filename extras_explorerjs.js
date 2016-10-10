@@ -18,7 +18,7 @@ function ChangeGraphAppearanceByAtt( manualflag ) {
     if(!TW.colorByAtt) return;
 
     // Seeing all the possible attributes!
-    var AttsDict = {}    
+    var AttsDict = {}
     var Atts_2_Exclude = {}
     var v_nodes = getVisibleNodes();
     for (var i in v_nodes) {
@@ -33,11 +33,11 @@ function ChangeGraphAppearanceByAtt( manualflag ) {
                 if ( ( typeof(someatt)=="string" && isNaN(Number(someatt)) ) || typeof(someatt)=="object" ) {
                     if (!Atts_2_Exclude[a]) Atts_2_Exclude[a]=0;
                     Atts_2_Exclude[a]++;
-                } 
+                }
             }
 
             var possible_atts = [];
-            if (!isUndef(TW.Nodes[id].attributes)) 
+            if (!isUndef(TW.Nodes[id].attributes))
                 possible_atts = Object.keys(TW.Nodes[id].attributes)
 
             if(!isUndef(v_nodes[i].degree))
@@ -45,15 +45,15 @@ function ChangeGraphAppearanceByAtt( manualflag ) {
             possible_atts.push("clust_louvain")
 
             for(var a in possible_atts){
-                if ( !AttsDict[ possible_atts[a] ] ) 
+                if ( !AttsDict[ possible_atts[a] ] )
                     AttsDict[ possible_atts[a] ] = 0
                 AttsDict[ possible_atts[a] ] ++;
-            } 
-            
+            }
+
         }
     }
 
-    for(var i in Atts_2_Exclude) 
+    for(var i in Atts_2_Exclude)
         delete AttsDict[i];
 
     var AttsDict_sorted = ArraySortByValue(AttsDict, function(a,b){
@@ -64,9 +64,9 @@ function ChangeGraphAppearanceByAtt( manualflag ) {
     // console.log( AttsDict_sorted )
 
 
-    var div_info = "";            
+    var div_info = "";
 
-    if( $( ".colorgraph_div" ).length>0 )          
+    if( $( ".colorgraph_div" ).length>0 )
         div_info += '<ul id="colorGraph" class="nav navbar-nav navbar-right">'
 
     div_info += ' <li class="dropdown">'
@@ -116,7 +116,7 @@ function RunLouvain() {
     }
     edge_realdata.push(info)
   }
-    var community = jLouvain().nodes(node_realdata).edges(edge_realdata);  
+    var community = jLouvain().nodes(node_realdata).edges(edge_realdata);
     var results = community();
     for(var i in results)
         TW.Nodes[i].attributes["clust_louvain"]=results[i]
@@ -130,7 +130,7 @@ function SomeEffect( ClusterCode ) {
     var Type=raw[0], Cluster=raw[1], clstID=Number(raw[2]);
 
     var present = TW.partialGraph.states.slice(-1)[0]; // Last
-    var type_t0 = present.type;    
+    var type_t0 = present.type;
     var str_type_t0 = type_t0.map(Number).join("|")
     console.log( "\t"+str_type_t0)
 
@@ -195,7 +195,7 @@ function SomeEffect( ClusterCode ) {
     });
 
     for(var n in nodes_2_label) {
-        if(n==4) 
+        if(n==4)
             break
         var ID = nodes_2_label[n].key
         TW.partialGraph._core.graph.nodesIndex[ID].forceLabel = true;
@@ -257,7 +257,7 @@ function set_ClustersLegend ( daclass ) {
     }
     LegendDiv += '      </ul>'
     LegendDiv += '    </div>'
-    
+
 
     $("#legend_for_clusters").addClass( "my-legend" );
     $("#legend_for_clusters").html( LegendDiv )
@@ -283,11 +283,11 @@ function getTopPapers(type){
             data: "type="+type+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+TW.field[getUrlParam.file],
             //contentType: "application/json",
             //dataType: 'json',
-            success : function(data){ 
+            success : function(data){
                 pr(TW.APINAME+'info_div.php?'+"type="+type+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+TW.field[getUrlParam.file]);
                 $("#topPapers").html(data);
             },
-            error: function(){ 
+            error: function(){
                 pr('Page Not found: getTopPapers');
             }
         });
@@ -303,22 +303,22 @@ function selectionUni(currentNode){
         opossites = [];
         selections = [];
         TW.partialGraph.refresh();
-    }   
-    
+    }
+
     if((typeof selections[currentNode.id])=="undefined"){
         selections[currentNode.id] = 1;
         currentNode.active=true;
     }
     else {
-        delete selections[currentNode.id];               
+        delete selections[currentNode.id];
         currentNode.active=false;
     }
     //highlightOpossites(nodes1[currentNode.id].neighbours);
     //        currentNode.color = currentNode.attr['true_color'];
     //        currentNode.attr['grey'] = 0;
-    //        
     //
-   
+    //
+
 
     TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8);
     TW.partialGraph.refresh();
@@ -327,60 +327,60 @@ function selectionUni(currentNode){
 //JUST ADEME
 function camaraButton(){
     $("#PhotoGraph").click(function (){
-        
+
         //canvas=TW.partialGraph._core.domElements.nodes;
-        
-        
-        
+
+
+
         var nodesCtx = TW.partialGraph._core.domElements.nodes;
         /*
         var edgesCtx = document.getElementById("sigma_edges_1").getContext('2d');
-        
+
         var edgesImg = edgesCtx.getImageData(0, 0, document.getElementById("sigma_edges_1").width, document.getElementById("sigma_edges_1").height)
-        
+
         nodesCtx.putImageData(edgesImg,0,0);
-        
-        
-        
-        
+
+
+
+
         //ctx.drawImage(TW.partialGraph._core.domElements.edges,0,0)
-        //var oCanvas = ctx;  
+        //var oCanvas = ctx;
   */
         //div = document.getElementById("sigma_nodes_1").getContext('2d');
         //ctx = div.getContext("2d");
         //oCanvas.drawImage(TW.partialGraph._core.domElements.edges,0,0);
         Canvas2Image.saveAsPNG(nodesCtx);
-        
+
         /*
-        Canvas2Image.saveAsJPEG(oCanvas); // will prompt the user to save the image as JPEG.   
-        // Only supported by Firefox.  
-  
-        Canvas2Image.saveAsBMP(oCanvas);  // will prompt the user to save the image as BMP.  
-  
-  
-        // returns an <img> element containing the converted PNG image  
-        var oImgPNG = Canvas2Image.saveAsPNG(oCanvas, true);     
-  
-        // returns an <img> element containing the converted JPEG image (Only supported by Firefox)  
-        var oImgJPEG = Canvas2Image.saveAsJPEG(oCanvas, true);   
-                                                         
-        // returns an <img> element containing the converted BMP image  
-        var oImgBMP = Canvas2Image.saveAsBMP(oCanvas, true);   
-  
-  
-        // all the functions also takes width and height arguments.   
-        // These can be used to scale the resulting image:  
-  
-        // saves a PNG image scaled to 100x100  
-        Canvas2Image.saveAsPNG(oCanvas, false, 100, 100);  
+        Canvas2Image.saveAsJPEG(oCanvas); // will prompt the user to save the image as JPEG.
+        // Only supported by Firefox.
+
+        Canvas2Image.saveAsBMP(oCanvas);  // will prompt the user to save the image as BMP.
+
+
+        // returns an <img> element containing the converted PNG image
+        var oImgPNG = Canvas2Image.saveAsPNG(oCanvas, true);
+
+        // returns an <img> element containing the converted JPEG image (Only supported by Firefox)
+        var oImgJPEG = Canvas2Image.saveAsJPEG(oCanvas, true);
+
+        // returns an <img> element containing the converted BMP image
+        var oImgBMP = Canvas2Image.saveAsBMP(oCanvas, true);
+
+
+        // all the functions also takes width and height arguments.
+        // These can be used to scale the resulting image:
+
+        // saves a PNG image scaled to 100x100
+        Canvas2Image.saveAsPNG(oCanvas, false, 100, 100);
         */
     });
 }
 
-function getTips(){   
+function getTips(){
     param='';
 
-    text = 
+    text =
         "<br>"+
         "Basic Interactions:"+
         "<ul>"+
@@ -401,7 +401,7 @@ function getTips(){
         "<li>The 'change level' button allows to change between global view and node centered view,</li>"+
         "<li>To explore the neighborhood of a selection click on the 'change level' button.</li>"+
         "</ul>";
-        
+
     $("#tab-container").hide();
     $("#tab-container-top").hide();
     return text;
@@ -409,7 +409,7 @@ function getTips(){
 
 
 
-function draw1Circle(ctx , x , y , color) {    
+function draw1Circle(ctx , x , y , color) {
     ctx.strokeStyle = '#000';
     ctx.lineWidth = 1;
     ctx.fillStyle = color;
@@ -432,13 +432,13 @@ function trackMouse() {
 
             x = TW.partialGraph._core.mousecaptor.mouseX;
             y = TW.partialGraph._core.mousecaptor.mouseY;
-            
+
             ctx.strokeStyle = '#000';
             ctx.lineWidth = 1;
             ctx.fillStyle = "#71C3FF";
-            ctx.globalAlpha = 0.5;  
+            ctx.globalAlpha = 0.5;
             ctx.beginPath();
-            
+
             if(TW.partialGraph._core.mousecaptor.ratio>showLabelsIfZoom){
                 for(var i in TW.partialGraph._core.graph.nodesIndex){
                         n=TW.partialGraph._core.graph.nodesIndex[i];
@@ -473,7 +473,7 @@ function trackMouse() {
                 if(TW.partialGraph.forceatlas2 && TW.partialGraph.forceatlas2.count<=1) {
                     TW.partialGraph.draw(2,2,2);
                 }
-            }          
+            }
             ctx.arc(x, y, cursor_size, 0, Math.PI * 2, true);
             //ctx.arc(TW.partialGraph._core.width/2, TW.partialGraph._core.height/2, 4, 0, 2 * Math.PI, true);/*todel*/
             ctx.closePath();
@@ -512,7 +512,7 @@ function ProcessDivsFlags() {
 
 //both obsolete
 function closeDialog () {
-    $('#windowTitleDialog').modal('hide'); 
+    $('#windowTitleDialog').modal('hide');
 }
 function okClicked () {
     //document.title = document.getElementById ("xlInput").value;

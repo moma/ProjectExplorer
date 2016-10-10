@@ -22,7 +22,7 @@
 
 #search_histogram_wrapper{
   margin: 0 ;
-  /* overwrite bootstrap's 
+  /* overwrite bootstrap's
    * grid element padding*/
   padding-right: 2em ;
   margin-left: -.5em ;

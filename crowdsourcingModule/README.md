@@ -9,4 +9,3 @@ sqlite> CREATE TABLE terms (source CHAR(250),suggestion CHAR(250),time CHAR(30))
 sqlite> .exit
 > chmod -v 775 crowdsourcing.db
 ```
-
