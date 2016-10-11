@@ -341,6 +341,80 @@ function clustersBy(daclass) {
     TW.partialGraph.draw();
 }
 
+
+// rewrite of clustersBy with binning and for attributes that can have negative float values
+function colorsRelByBins(daclass) {
+
+    cancelSelection(false);
+    // 13 colors
+    var binColors = [
+        "#005197",  //blue
+        // "#3c76fb",
+        "#5c8af2",
+        "#64c5f2",
+        "#64e0f2",
+        "#bae64f",//epsilon
+        "#f9f008",
+        "#f9da08",
+        "#fab207",
+        "#fa9607",
+        "#fa6e07",
+        "#fa4607", // red
+        "#991B1E"
+    ];
+
+
+    // £TODO calculate thresholds like eg d3.histogram
+    // var thresholdsMin = [-100,-75,-50,-25,-10,10,25,50,75,100,125,150, 1000000]
+    var thresholdsMin = [-75,-50,-25,-10,10,25,50,75,100,125,150, 1000000]
+
+    // get the nodes
+    var v_nodes = getVisibleNodes();
+    for(var i in v_nodes) {
+        var theId = v_nodes[i].id
+        var theNode = TW.Nodes[ theId ]
+        var attval = ( isUndef(theNode.attributes) || isUndef(theNode.attributes[daclass]) )? v_nodes[i][daclass]: theNode.attributes[daclass];
+        var theVal = parseFloat(attval)
+        if( !isNaN(theVal) ) { //is float
+            // iterate over bins
+            for(var j=0 ; j < thresholdsMin.length-1; j++) {
+                var binMin = thresholdsMin[j]
+                var binMax = thresholdsMin[(j+1)]
+                if((theVal >= binMin) && (theVal < binMax)) {
+                    TW.partialGraph._core.graph.nodesIndex[theId].color = binColors[j]
+                    break
+                }
+            }
+        }
+    }
+
+    TW.partialGraph.refresh();
+    TW.partialGraph.draw();
+
+
+    //    [ Edge-colour by source-target nodes-colours combination ]
+    var v_edges = getVisibleEdges();
+    for(var e in v_edges) {
+        var e_id = v_edges[e].id;
+        var a = v_edges[e].source.color;
+        var b = v_edges[e].target.color;
+        a = hex2rga(a);
+        b = hex2rga(b);
+        var r = (a[0] + b[0]) >> 1;
+        var g = (a[1] + b[1]) >> 1;
+        var b = (a[2] + b[2]) >> 1;
+        TW.partialGraph._core.graph.edgesIndex[e_id].color = "rgba("+[r,g,b].join(",")+",0.5)";
+    }
+    //    [ / Edge-colour by source-target nodes-colours combination ]
+
+    set_ClustersLegend ( null )
+
+    TW.partialGraph.refresh();
+    TW.partialGraph.draw();
+}
+
+
+
 function colorsBy(daclass) {
 
     pr("")
