@@ -51,7 +51,7 @@ function isUndef(variable){
 
 $.fn.toggleClick = function(){
         methods = arguments, // store the passed arguments for future reference
-            count = methods.length; // cache the number of methods
+            count = methods.length; // cache the number of methods 
 
         //use return this to maintain jQuery chainability
         return this.each(function(i, item){
@@ -101,7 +101,7 @@ function ArraySortByValue(array, sortFunc){
     for (var k in array) {
         if (array.hasOwnProperty(k)) {
             tmp.push({
-                key: k,
+                key: k, 
                 value:  array[k]
             });
             if((array[k]) > oposMAX) oposMAX= array[k];
@@ -110,8 +110,8 @@ function ArraySortByValue(array, sortFunc){
 
     tmp.sort(function(o1, o2) {
         return sortFunc(o1.value, o2.value);
-    });
-    return tmp;
+    });   
+    return tmp;      
 }
 
 
@@ -121,7 +121,7 @@ function ArraySortByKey(array, sortFunc){
     for (var k in array) {
         if (array.hasOwnProperty(k)) {
             tmp.push({
-                key: k,
+                key: k, 
                 value:  array[k]
             });
         }
@@ -129,10 +129,10 @@ function ArraySortByKey(array, sortFunc){
 
     tmp.sort(function(o1, o2) {
         return sortFunc(o1.key, o2.key);
-    });
-    return tmp;
+    });   
+    return tmp;      
 }
-
+    
 
 function is_empty(obj) {
     // Assume if it has a length property with a non-zero value
@@ -214,7 +214,7 @@ normalizeString = function(string, escapeHtml) {
 // (or use jquery .text())
 saferString = function(string) {
     // TODO table in an outer scope
-    conversions = {
+    conversions = { 
         '&' : '&amp;'   ,
         '<' : '&lt;'    ,
         '>' : '&gt;'    ,
@@ -222,17 +222,17 @@ saferString = function(string) {
         "'" : '&apos;'  ,
         "{" : '&lcub;'  ,
         "}" : '&rcub;'  ,
-        '%' : '&percnt;'
+        '%' : '&percnt;' 
     } ;
-
+    
     matchables = /[&<>"'{}%]/g ;
-
+    
     if (! typeof string == "string") {
         return "" ;
     }
     else {
         return string.replace(
-            matchables,
+            matchables, 
             function(char) {
                 return conversions[char]
             }
@@ -243,17 +243,17 @@ saferString = function(string) {
 
 
  /**
-  * function to load a given css file
-  */
+  * function to load a given css file 
+  */ 
  loadCSS = function(href) {
      var cssLink = $("<link rel='stylesheet' type='text/css' href='"+href+"'>");
-     $("head").append(cssLink);
+     $("head").append(cssLink); 
  };
 
 /**
- * function to load a given js file
- */
+ * function to load a given js file 
+ */ 
  loadJS = function(src) {
      var jsLink = $("<script type='text/javascript' src='"+src+"'>");
-     $("head").append(jsLink);
- };
+     $("head").append(jsLink); 
+ }; 

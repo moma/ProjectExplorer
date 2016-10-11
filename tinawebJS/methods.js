@@ -10,7 +10,7 @@ function cancelSelection (fromTagCloud) {
     TW.partialGraph.refresh();
 
     TW.partialGraph.states.slice(-1)[0].selections=[]
-
+    
     //Nodes colors go back to normal
     overNodes=false;
     e = TW.partialGraph._core.graph.edges;
@@ -19,18 +19,18 @@ function cancelSelection (fromTagCloud) {
             e[i].attr['grey'] = 0;
     }
     TW.partialGraph.draw(2,1,2);
-
+                
     TW.partialGraph.iterNodes(function(n){
             n.active=false;
             n.color = n.attr['grey'] ? n.attr['true_color'] : n.color;
             n.attr['grey'] = 0;
     }).draw(2,1,2);
     //Nodes colors go back to normal
-
-
-
+    
+    
+    
     if(fromTagCloud==false){
-        $("#names").html("");
+        $("#names").html(""); 
         $("#topPapers").html(""); $("#topPapers").hide();
         $("#opossiteNodes").html(""); $("#tab-container").hide();
         $("#information").html("");
@@ -38,11 +38,11 @@ function cancelSelection (fromTagCloud) {
         $("#unselectbutton").hide();
         $("#tips").html(getTips());
     }
-
+    
     // we send our "eraseNodeSet" event
     // (signal for plugins that any selection behavior is finished)
     $('#searchinput').trigger("tw:eraseNodeSet");
-
+    
     for(var i in deselections){
         if( !isUndef(TW.partialGraph._core.graph.nodesIndex[i]) ) {
             TW.partialGraph._core.graph.nodesIndex[i].forceLabel=false;
@@ -57,9 +57,9 @@ function cancelSelection (fromTagCloud) {
     TW.partialGraph.draw();
 }
 
-function highlightSelectedNodes(flag){
+function highlightSelectedNodes(flag){ 
     pr("\t***methods.js:highlightSelectedNodes(flag)"+flag+" selEmpty:"+is_empty(selections))
-    if(!is_empty(selections)){
+    if(!is_empty(selections)){          
         for(var i in selections) {
             if(TW.Nodes[i].type==TW.catSoc && swclickActual=="social"){
                 node = TW.partialGraph._core.graph.nodesIndex[i];
@@ -73,13 +73,13 @@ function highlightSelectedNodes(flag){
                 node = TW.partialGraph._core.graph.nodesIndex[i];
                 node.active = flag;
             }
-            else break;
+            else break;        
         }
-
+        
     }
 }
 
-function alertCheckBox(eventCheck){
+function alertCheckBox(eventCheck){    
     if(!isUndef(eventCheck.checked)) checkBox=eventCheck.checked;
 }
 
@@ -98,7 +98,7 @@ function RefreshState(newNOW){
 	if (newNOW!="") {
 	    PAST = NOW;
 	    NOW = newNOW;
-
+		
 		// if(NOW=="a" || NOW=="A" || NOW=="AaBb") {
 		// 	$("#category-A").show();
 		// }
@@ -108,7 +108,7 @@ function RefreshState(newNOW){
 	}
 
     $("#category-A").hide();
-    $("#category-B").hide();
+    $("#category-B").hide();  
     // i=0; for(var s in selections) { i++; break;}
     // if(is_empty(selections) || i==0) LevelButtonDisable(true);
     // else LevelButtonDisable(false);
@@ -137,7 +137,7 @@ function RefreshState(newNOW){
         $("#semLoader").hide();
         $("#category-A").show();
         $("#colorGraph").show();
-
+        
     }
     if(NOW=="B" || NOW=="b") {
         var N=( Object.keys(TW.Nodes).filter(function(n){return TW.Nodes[n].type==TW.catSem}) ).length
@@ -160,7 +160,7 @@ function RefreshState(newNOW){
             $.doTimeout(30,function (){
                 EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
                 NodeWeightFilter ( "#sliderBNodeWeight"  , "NGram", "type" , "size");
-
+                
             });
         } else {
             $("#semLoader").css('visibility', 'visible');
@@ -261,7 +261,7 @@ function htmlfied_nodesatts(elems){
                     }
                 } else {
                     information += '<li>' + $("<div/>").html(node.htmlCont).text() + '</li>';
-                }
+                }        
                 socnodes.push(information)
             }
 
@@ -330,7 +330,7 @@ function updateLeftPanel_fix( sels , oppos ) {
 
     if(oppos.length>0) {
 	    alterNodesDIV+='<div id="opossitesBox">';//tagcloud
-	    alterNodesDIV+= htmlfied_alternodes( oppos ).join("\n")
+	    alterNodesDIV+= htmlfied_alternodes( oppos ).join("\n") 
 	    alterNodesDIV+= '</div>';
 	}
 
@@ -362,18 +362,18 @@ function updateLeftPanel_fix( sels , oppos ) {
     //using the readmore.js
     // ive put a limit for nodes-name div
     // and opposite-nodes div aka tagcloud div
-    // and im commenting now because github is not
+    // and im commenting now because github is not 
     // pushing my commit
     // because i need more lines, idk
-    $("#names").html(namesDIV).readmore({maxHeight:100});
+    $("#names").html(namesDIV).readmore({maxHeight:100}); 
     $("#tab-container").show();
-    $("#opossiteNodes").html(alterNodesDIV).readmore({maxHeight:200});
-    $("#sameNodes").html(sameNodesDIV).readmore({maxHeight:200});
+    $("#opossiteNodes").html(alterNodesDIV).readmore({maxHeight:200}); 
+    $("#sameNodes").html(sameNodesDIV).readmore({maxHeight:200}); 
     $("#information").html(informationDIV);
     $("#tips").html("");
 
     if(TW.categoriesIndex.length==1) getTopPapers("semantic");
-    else getTopPapers(swclickActual);
+    else getTopPapers(swclickActual); 
 }
 
 function printStates() {
@@ -437,7 +437,7 @@ function graphTagCloudElem(nodes) {
                 nodes_2_colour[t]=false;
                 edges_2_colour[s+";"+t]=true;
                 edges_2_colour[t+";"+s]=true;
-                if( !selections[t]  )
+                if( !selections[t]  ) 
                     voisinage[ Number(t) ] = true;
             }
         }
@@ -461,10 +461,10 @@ function graphTagCloudElem(nodes) {
                 // console.log( "\t" + voisinage[i] + " vs " + voisinage[j] )
                 add1Elem( voisinage[i]+";"+voisinage[j] )
             }
-
+            
         }
     }
-
+    
     futurelevel = false;
 
 
@@ -481,7 +481,7 @@ function graphTagCloudElem(nodes) {
     TW.partialGraph.states[avantlastpos] = {};
     TW.partialGraph.states[avantlastpos].level = present.level;
     TW.partialGraph.states[avantlastpos].selections = present.selections;
-    TW.partialGraph.states[avantlastpos].type = present.type;
+    TW.partialGraph.states[avantlastpos].type = present.type; 
     TW.partialGraph.states[avantlastpos].opposites = present.opposites;
     TW.partialGraph.states[avantlastpos].categories = present.categories;//to_del
     TW.partialGraph.states[avantlastpos].categoriesDict = present.categoriesDict;//to_del
@@ -503,7 +503,7 @@ function graphTagCloudElem(nodes) {
 }
 
 function greyEverything(){
-
+    
     nds = TW.partialGraph._core.graph.nodes.filter(function(n) {
                             return !n['hidden'];
                         });
@@ -515,7 +515,7 @@ function greyEverything(){
             }
             nds[i].attr['grey'] = 1;
     }
-
+    
     eds = TW.partialGraph._core.graph.edges.filter(function(e) {
                             return !e['hidden'];
                         });
@@ -535,18 +535,18 @@ function graphResetColor(){
     eds = TW.partialGraph._core.graph.edges.filter(function(x) {
                             return !x['hidden'];
           });
-
+          
     for(var x in nds){
         n=nds[x];
         n.attr["grey"] = 0;
         n.color = n.attr["true_color"];
     }
-
+    
     for(var x in eds){
         e=eds[x];
         e.attr["grey"] = 0;
         e.color = e.attr["true_color"];
-    }
+    }  
 }
 
 function hideEverything(){
@@ -595,7 +595,7 @@ function add1Elem(id) {
     } else { // It's an edge!
         if(!isUndef(gete(id))) return;
         if(TW.Edges[id] && !TW.Edges[id].lock){
-            // var present = TW.partialGraph.states.slice(-1)[0];
+            // var present = TW.partialGraph.states.slice(-1)[0];            
             var anedge = {
                 id:         id,
                 sourceID:   TW.Edges[id].source,
@@ -625,7 +625,7 @@ function pushFilterValue(filtername,arg){
 }
 
 function saveGraph() {
-
+    
     size = getByID("check_size").checked
     color = getByID("check_color").checked
     atts = {"size":size,"color":color}
@@ -657,15 +657,15 @@ function saveGEXF(nodes,edges,atts){
     gexf += '</attributes>\n';
     gexf += "<nodes>\n";
 
-    for(var n in nodes){
-
+    for(var n in nodes){    
+        
         gexf += '<node id="'+nodes[n].id+'" label="'+nodes[n].label+'">\n';
         gexf += ' <viz:position x="'+nodes[n].x+'"    y="'+nodes[n].y+'"  z="0" />\n';
         if(atts["color"]) gexf += ' <viz:size value="'+nodes[n].size+'" />\n';
         if(atts["color"]) {
             col = hex2rga(nodes[n].color);
             gexf += ' <viz:color r="'+col[0]+'" g="'+col[1]+'" b="'+col[2]+'" a="1"/>\n';
-        }
+        }    
         gexf += ' <attvalues>\n';
         gexf += ' <attvalue for="0" value="'+nodes[n].type+'"/>\n';
         gexf += ' <attvalue for="1" value="'+TW.Nodes[nodes[n].id].CC+'"/>\n';
@@ -673,7 +673,7 @@ function saveGEXF(nodes,edges,atts){
         gexf += '</node>\n';
     }
     gexf += "\n</nodes>\n";
-    gexf += "<edges>\n";
+    gexf += "<edges>\n";    
     cont = 1;
     for(var e in edges){
         gexf += '<edge id="'+cont+'" source="'+edges[e].source.id+'"  target="'+edges[e].target.id+'" weight="'+edges[e].weight+'">\n';
@@ -687,9 +687,9 @@ function saveGEXF(nodes,edges,atts){
 }
 
 function saveGraphIMG(){
-
+        
         var strDownloadMime = "image/octet-stream"
-
+        
         var nodesDiv = TW.partialGraph._core.domElements.nodes;
         var nodesCtx = nodesDiv.getContext("2d");
 

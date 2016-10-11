@@ -47,13 +47,13 @@ var AjaxSync = (function(TYPE, URL, DATA, CT , DT) {
                 }
                 Result = { "OK":true , "format":format , "data":data };
             },
-            error: function(exception) {
+            error: function(exception) { 
                 Result = { "OK":false , "format":false , "data":exception.status };
             }
         });
     return Result;
 }).index();
-
+ 
 function getGexfPath(v){
     var gexfpath=(TW.gexfDictReverse[v])?TW.gexfDictReverse[v]:v;
     return gexfpath;
@@ -73,7 +73,7 @@ var file =""
 if(!isUndef(getUrlParam.mode)) { // if {db|api}.json
     file = getUrlParam.mode
 } else {
-    if( !isUndef(getUrlParam.file) )
+    if( !isUndef(getUrlParam.file) ) 
         TW.mainfile.unshift( getUrlParam.file );
 
     var unique_mainfile = TW.mainfile.filter(function(item, pos) {
@@ -87,7 +87,7 @@ if(RES["OK"]) {
 
     var fileparam;// = { db|api.json , somefile.json|gexf }
     var the_data = RES["data"];
-
+    
 
     var the_file = "";
     if ( !isUndef(getUrlParam.mode) && getUrlParam.mode=="db.json") {
@@ -141,7 +141,7 @@ if(RES["OK"]) {
         fileparam = sub_RES["format"]
         pr(the_data.length)
         pr(fileparam)
-
+        
         getUrlParam.file=the_file;
         console.log(" .  .. . -. - .- . - -.")
         console.log(getUrlParam.file)
@@ -161,7 +161,7 @@ if(RES["OK"]) {
     if ( file!="db.json" && file!="api.json" )
         fileparam = RES["format"];
 
-
+    
     start = new ParseCustom(  fileparam , the_data );
     categories = start.scanFile(); //user should choose the order of categories
     pr("Categories: ")
@@ -186,11 +186,11 @@ if(RES["OK"]) {
 
     for(var i in categories) {
         TW.Filters[i] = {}
-        TW.Filters[i]["#slidercat"+i+"edgesweight"] = true;
-    }
-
+        TW.Filters[i]["#slidercat"+i+"edgesweight"] = true;        
+    } 
+    
     // [ Initiating Sigma-Canvas ]
-    var twjs_ = new TinaWebJS('#sigma-example');
+    var twjs_ = new TinaWebJS('#sigma-example'); 
     console.log( twjs_.AdjustSigmaCanvas() );
     $( window ).resize(function() { console.log(twjs_.AdjustSigmaCanvas()) });
     // [ / Initiating Sigma-Canvas ]
@@ -242,7 +242,7 @@ if(RES["OK"]) {
         var past = TW.partialGraph.states.slice(-2)[0] // avant Last
         console.log("previous level: "+past.level)
         console.log("new level: "+present.level)
-
+        
         console.log(" % % % % % % % % % % ")
         console.log("")
 
@@ -270,7 +270,7 @@ if(RES["OK"]) {
             $("#category0").hide();
             $("#category1").show();
 
-            if($("#slidercat1nodesweight").html()=="")
+            if($("#slidercat1nodesweight").html()=="") 
                 NodeWeightFilter( this.categories , "#slidercat1nodesweight" ,  this.categories[1],  "type" ,"size");
 
             if($("#slidercat1edgesweight").html()=="")
@@ -288,7 +288,7 @@ if(RES["OK"]) {
             $("#category0").show();
             $("#category1").hide();
 
-            if($("#slidercat0nodesweight").html()=="")
+            if($("#slidercat0nodesweight").html()=="") 
                 NodeWeightFilter( this.categories , "#slidercat0nodesweight" ,  this.categories[0],  "type" ,"size");
 
             if($("#slidercat0edgesweight").html()=="")
@@ -300,7 +300,7 @@ if(RES["OK"]) {
             }
             set_ClustersLegend ( "clust_default" )
         } else {
-
+            
         //finished
         $("#slidercat1nodessize").freshslider({
             step:1,
@@ -320,7 +320,7 @@ if(RES["OK"]) {
                        TW.partialGraph.draw();
                 });
             }
-        });
+        }); 
 
         }
 
@@ -370,3 +370,6 @@ ProcessDivsFlags() ;
 $("#searchinput").attr('placeholder', TW.strSearchBar) ;
 
 console.log("finish")
+
+
+

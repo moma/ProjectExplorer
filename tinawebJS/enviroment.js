@@ -13,18 +13,18 @@ function changeType() {
     var level = present.level;
     var sels = present.selections
     var catDict = present.categoriesDict;
-    var type_t0 = present.type;
+    var type_t0 = present.type;    
     var str_type_t0 = type_t0.map(Number).join("|")
 
     var selsbackup = present.selections.slice();
-
+    
     // Complement of the received state ~[X\Y] )
     var type_t1 = []
     for(var i in type_t0) type_t1[i] = !type_t0[i]
     var str_type_t1 = type_t1.map(Number).join("|")
-
+    
     var binSumCats = []
-    for(var i in type_t0)
+    for(var i in type_t0) 
         binSumCats[i] = (type_t0[i]||type_t1[i])
     var str_binSumCats = binSumCats.map(Number).join("|")
 
@@ -40,7 +40,7 @@ function changeType() {
         console.log(past.type)
         if(sum_past>1) {
             nextState = past.type;
-        }
+        }      
     }
     var str_nextState = nextState.map(Number).join("|")
 
@@ -73,14 +73,14 @@ function changeType() {
 
     pr("CHanging the TYpE!!: "+present.level)
 
-    if(present.level) { //If level=Global, fill all {X}-component
+    if(present.level) { //If level=Global, fill all {X}-component 
 
         for(var n in TW.Nodes) {
-            if(type_t1[catDict[TW.Nodes[n].type]])
+            if(type_t1[catDict[TW.Nodes[n].type]]) 
                 add1Elem(n)
         }
         for(var e in TW.Edges) {
-            if(TW.Edges[e].categ==str_type_t1)
+            if(TW.Edges[e].categ==str_type_t1) 
                 add1Elem(e)
         }
     } else /* Local level, change to previous or alter component*/ {
@@ -134,7 +134,7 @@ function changeType() {
 
                 nextState = type_t1;
 
-            }
+            } 
 
             if(sumpastcat==2) {
 
@@ -207,7 +207,7 @@ function changeType() {
             for(var i in sels)
                 nodes_2_colour[sels[i]]=true;
             // output: nodes_2_colour and edges_2_colour
-        }
+        } 
 
         if(sumNextState==2) { // we're moving to bipartite subgraph
             for(var i in TW.Edges) {
@@ -242,7 +242,7 @@ function changeType() {
     TW.partialGraph.states[avantlastpos].LouvainFait = false;
     TW.partialGraph.states[avantlastpos].level = present.level;
     TW.partialGraph.states[avantlastpos].selections = selsbackup;
-    TW.partialGraph.states[avantlastpos].type = present.type;
+    TW.partialGraph.states[avantlastpos].type = present.type; 
     TW.partialGraph.states[avantlastpos].opposites = present.opposites;
     TW.partialGraph.states[avantlastpos].categories = present.categories;//to_del
     TW.partialGraph.states[avantlastpos].categoriesDict = present.categoriesDict;//to_del
@@ -256,7 +256,7 @@ function changeType() {
     TW.partialGraph.states[lastpos].categories = present.categories;//to_del
     TW.partialGraph.states[lastpos].categoriesDict = catDict;//to_del
 
-
+    
     fa2enabled=true; TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8).draw();//.startForceAtlas2();
 }
 
@@ -271,17 +271,17 @@ function changeLevel() {
     var sels = present.selections;//[144, 384, 543]//TW.partialGraph.states.selections;
     var catDict = present.categoriesDict;
 
-    var type_t0 = present.type;
+    var type_t0 = present.type;    
     var str_type_t0 = type_t0.map(Number).join("|")
-
+    
     // [X|Y]-change (NOT operation over the received state [X\Y] )
     var type_t1 = []
     for(var i in type_t0) type_t1[i] = !type_t0[i]
     var str_type_t1 = type_t1.map(Number).join("|")
 
-    //
+    // 
     var binSumCats = []
-    for(var i in type_t0)
+    for(var i in type_t0) 
         binSumCats[i] = (type_t0[i]||type_t1[i])
     var str_binSumCats = binSumCats.map(Number).join("|")
 
@@ -292,7 +292,7 @@ function changeLevel() {
         var sum_past = past.type.map(Number).reduce(function(a, b){return a+b;})
         if(sum_past>1) {
             nextState = past.type;
-        }
+        }      
     }
     var str_nextState = nextState.map(Number).join("|")
 
@@ -311,7 +311,7 @@ function changeLevel() {
                 nodes_2_colour[t]=false;
                 edges_2_colour[s+";"+t]=true;
                 edges_2_colour[t+";"+s]=true;
-                if( !selections[t]  )
+                if( !selections[t]  ) 
                     voisinage[ Number(t) ] = true;
             }
         }
@@ -337,18 +337,18 @@ function changeLevel() {
                     // console.log( "\t" + voisinage[i] + " vs " + voisinage[j] )
                     add1Elem( voisinage[i]+";"+voisinage[j] )
                 }
-
+                
             }
         }
-
+        
         futurelevel = false;
     } else { // [Change to Global] when level=Local(0)
         for(var n in TW.Nodes) {
-            if(type_t0[catDict[TW.Nodes[n].type]])
+            if(type_t0[catDict[TW.Nodes[n].type]]) 
                 add1Elem(n)
         }
         for(var e in TW.Edges) {
-            if(TW.Edges[e].categ==str_type_t0)
+            if(TW.Edges[e].categ==str_type_t0) 
                 add1Elem(e)
         }
         futurelevel = true;
@@ -370,7 +370,7 @@ function changeLevel() {
     TW.partialGraph.states[avantlastpos] = {};
     TW.partialGraph.states[avantlastpos].level = present.level;
     TW.partialGraph.states[avantlastpos].selections = present.selections;
-    TW.partialGraph.states[avantlastpos].type = present.type;
+    TW.partialGraph.states[avantlastpos].type = present.type; 
     TW.partialGraph.states[avantlastpos].opposites = present.opposites;
     TW.partialGraph.states[avantlastpos].categories = present.categories;//to_del
     TW.partialGraph.states[avantlastpos].categoriesDict = present.categoriesDict;//to_del
@@ -440,12 +440,12 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
         });
         return;
     }
-
+    
 
     var lastvalue=("0-"+(steps-1));
 
     pushFilterValue( sliderDivID , lastvalue )
-
+    
     var present = TW.partialGraph.states.slice(-1)[0];
 
     //finished
@@ -506,14 +506,14 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
                     // do the important stuff
                     for( var c in iterarr ) {
-
+                        
                         var i = iterarr[c];
                         ids = finalarray[i]
 
                         if(i>=low && i<=high) {
                             if(addflag) {
                                 // pr("adding "+ids.join())
-                                for(var id in ids) {
+                                for(var id in ids) {                            
                                     ID = ids[id]
                                     TW.Edges[ID].lock = false;
 
@@ -535,7 +535,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                                             }
                                         }
                                     }
-
+                                    
                                 }
                             }
 
@@ -551,7 +551,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                                         // n = ID.split(";")
                                         // if(n.length>1)
                                         //     pr("\t\tsource:("+TW.Nodes[n[0]].x+","+TW.Nodes[n[0]].y+") ||| target:("+TW.Nodes[n[1]].x+","+TW.Nodes[n[1]].y+")")
-                                    }
+                                    }                                    
                                 }
                             }
                         }
@@ -575,21 +575,21 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                 });
                 pushFilterValue( sliderDivID , filtervalue )
             }
-
+            
         }
-    });
+    });    
 }
 
 //   Execution modes:
-// NodeWeightFilter ( "#sliderANodeWeight" ,  "Document" , "type" , "size")
-// NodeWeightFilter ( "#sliderBNodeWeight" ,  "NGram" , "type" , "size")
+// NodeWeightFilter ( "#sliderANodeWeight" ,  "Document" , "type" , "size") 
+// NodeWeightFilter ( "#sliderBNodeWeight" ,  "NGram" , "type" , "size") 
 function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  criteria) {
 
 	// if ($(sliderDivID).html()!="") {
 	// 	pr("\t\t\t\t\t\t[[ algorithm not applied "+sliderDivID+" ]]")
 	// 	return;
 	// }
-
+    
 	// sliderDivID = "#sliderAEdgeWeight"
 	// type = "nodes1"
 	// type_attrb = "label"
@@ -618,7 +618,7 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
     var filterparams = AlgorithmForSliders ( TW.Nodes , type , type_attrb , criteria)
     pr("NodeWeightFilter: "+type)
     pr(filterparams)
-
+    
     var steps = filterparams["steps"]
     var finalarray = filterparams["finalarray"]
     if(steps<3) {
@@ -633,7 +633,7 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
         });
         return;
     }
-
+    
     //finished
     $(sliderDivID).freshslider({
         range: true,
@@ -642,9 +642,9 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
         max:steps-1,
         bgcolor:( type_attrb==categories[0] )?"#27c470":"#FFA500" ,
         value:[0,steps-1],
-        onchange:function(low, high){
+        onchange:function(low, high){    
             var filtervalue = low+"-"+high
-
+            
             if(filtervalue!=lastFilter[sliderDivID]["last"]) {
                 if(lastFilter[sliderDivID]["orig"]=="-") {
                     pushFilterValue( sliderDivID , filtervalue )
@@ -670,7 +670,7 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
                             TW.Nodes[ID].lock = true;
                             if(TW.partialGraph._core.graph.nodesIndex[ID])
                                 TW.partialGraph._core.graph.nodesIndex[ID].hidden = true;
-                        }
+                        }                     
                     }
                 }
                 pushFilterValue(sliderDivID,filtervalue)
@@ -687,7 +687,7 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
                 });
                 // [ / Starting FA2 ]
             }
-
+            
         }
     });
 }
@@ -697,30 +697,30 @@ function getGraphElement(elem) {
     else return TW.partialGraph._core.graph.edgesIndex[elem]
 }
 //   Execution modes:
-// AlgorithmForSliders ( TW.partialGraph._core.graph.edges , "label" , "nodes1" , "weight")
-// AlgorithmForSliders ( TW.partialGraph._core.graph.edges , "label" , "nodes2" , "weight")
-// AlgorithmForSliders ( TW.partialGraph._core.graph.nodes , "type" ,  "Document" ,  "size")
-// AlgorithmForSliders ( TW.partialGraph._core.graph.nodes , "type" ,  "NGram" ,  "size")
+// AlgorithmForSliders ( TW.partialGraph._core.graph.edges , "label" , "nodes1" , "weight") 
+// AlgorithmForSliders ( TW.partialGraph._core.graph.edges , "label" , "nodes2" , "weight") 
+// AlgorithmForSliders ( TW.partialGraph._core.graph.nodes , "type" ,  "Document" ,  "size") 
+// AlgorithmForSliders ( TW.partialGraph._core.graph.nodes , "type" ,  "NGram" ,  "size") 
 function AlgorithmForSliders( elements , type_attrb , type , criteria) {
 	// //  ( 1 )
     // // get visible sigma nodes|edges
     if(isUndef(elements)) return {"steps":0 , "finalarray":[]};
-
+    
     var elems = [];
     for(var e in elements) {
         if( elements[e][type_attrb]==type ) {
             if(getGraphElement(e)) {
                 elems.push(elements[e])
-            }
+            } 
         }
     }
-    if(elems.length==0)
+    if(elems.length==0)  
         return { "steps":0 , "finalarray":[] };
 
     // identifying if you received nodes or edges
     var edgeflag = ( !isNaN(elems.slice(-1)[0].id) || elems.slice(-1)[0].id.split(";").length>1)? true : false;
     // //  ( 2 )
-    // // extract [ "edgeID" : edgeWEIGHT ] | [ "nodeID" : nodeSIZE ]
+    // // extract [ "edgeID" : edgeWEIGHT ] | [ "nodeID" : nodeSIZE ] 
     // // and save this into edges_weight | nodes_size
     var elem_attrb=[]
     for (var i in elems) {
@@ -761,12 +761,12 @@ function AlgorithmForSliders( elements , type_attrb , type , criteria) {
     var stepsize = Math.round( N / steps );
 
     // pr("-----------------------------------")
-    // pr("number of visible nodes|edges: "+N);
-
+    // pr("number of visible nodes|edges: "+N); 
+    
     // pr("number of steps : "+steps)
     // pr("size of one step : "+stepsize)
     // pr("-----------------------------------")
-
+    
 
     var finalarray = []
     var counter=0
@@ -783,7 +783,7 @@ function AlgorithmForSliders( elements , type_attrb , type , criteria) {
             counter++;
         }
         if(IDs.length==0) break;
-
+        
         finalarray[i] = (edgeflag)? IDs : IDs.map(Number);
     }
     // pr("finalarray: ")
@@ -795,10 +795,10 @@ function AlgorithmForSliders( elements , type_attrb , type , criteria) {
 
 
 //============================= < SEARCH > =============================//
-function updateSearchLabels(id,name,type){
+function updateSearchLabels(id,name,type){    
     labels.push({
         'id' : id,
-        'label' : name,
+        'label' : name, 
         'desc': type
     });
 }
@@ -806,7 +806,7 @@ function updateSearchLabels(id,name,type){
 function extractContext(string, context) {
     var matched = string.toLowerCase().indexOf(context.toLowerCase());
 
-    if (matched == -1)
+    if (matched == -1) 
         return string.slice(0, 20) + '...';
 
     var begin_pts = '...', end_pts = '...';
@@ -835,10 +835,10 @@ function extractContext(string, context) {
 
 
 // TODO check duplicate function with sigmaUtils exactfind()
-function searchLabel(string){
+function searchLabel(string){    
     var id_node = '';
     var n;
-
+    
     nds = TW.partialGraph._core.graph.nodes.filter(function(x){return !x["hidden"]});
     for(var i in nds){
         n = nds[i]

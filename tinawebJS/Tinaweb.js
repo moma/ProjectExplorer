@@ -22,10 +22,10 @@
 );
 
 // for new SigmaUtils
-function sigmaLimits( sigmacanvas ) {
+function sigmaLimits( sigmacanvas ) {    
     pw=$( sigmacanvas ).width();
     ph=$( sigmacanvas ).height();
-
+    
     sidebar=$('#rightcolumn').width();
     anchototal=$('#fixedtop').width();
     altototal=$('#rightcolumn').height();
@@ -33,14 +33,14 @@ function sigmaLimits( sigmacanvas ) {
     altodeftop=$('#defaultop').height()
     $( sigmacanvas ).width(anchototal-sidebar);
     $( sigmacanvas ).height(altototal-altofixtop-altodeftop-4);
-
-
+    
+    
     // todo take into account leftcolumn
         //sidebar_left=$('#leftcolumn').width();
         //sidebar_right=$('#rightcolumn').width();
         //$( sigmacanvas ).width(anchototal-sidebar_right-sidebar_left);
-
-
+    
+    
     pw=$( sigmacanvas ).width();
     ph=$( sigmacanvas ).height();
     return "new canvas! w:"+pw+" , h:"+ph;
@@ -52,7 +52,7 @@ function sigmaLimits( sigmacanvas ) {
 
 // will be instanciated as SelInst
 SelectionEngine = function() {
-
+    
     // Selection Engine!! finally...
     this.SelectorEngine_part01 = (function(cursorsize, area ) {
         var clickedNodes = []
@@ -65,12 +65,12 @@ SelectionEngine = function() {
                             return n.id;
                         });
         }
-
+        
         return clickedNodes.map(Number);
     }).index();
 
     this.SelectorEngine_part02 = (function( addvalue , clicktype , prevsels , currsels ) {
-
+        
         console.log("Add[]:")
         console.log(addvalue)
         console.log("clicktype:")
@@ -85,7 +85,7 @@ SelectionEngine = function() {
         var targeted = currsels.map(Number).sort(this.sortNumber);
 
         if(clicktype=="double" && targeted.length==0) return [];
-
+        
         // if(targeted.length>0) {
         if(buffer.length>0) {
             if(JSON.stringify(buffer)==JSON.stringify(targeted)) {
@@ -112,13 +112,13 @@ SelectionEngine = function() {
                 }
                 targeted = Object.keys(whitelist).map(Number);
             } else {// inter = 0 ==> click in other portion of the graph (!= current selection)
-                // Union!
+                // Union! 
                 if(addvalue) {
                     targeted = targeted.concat(buffer.filter(function (item) {
                         return targeted.indexOf(item) < 0;
                     }));
                 }
-                return targeted;
+                return targeted; 
             }
         } else return targeted;
         // }
@@ -129,7 +129,7 @@ SelectionEngine = function() {
     this.SelectorEngine = (function( cursorsize , area , addvalue , clicktype , prevsels , currsels ) {
         var targeted = []
         var buffer = Object.keys(prevsels).map(Number).sort(this.sortNumber);
-
+        
         if( isUndef(currsels) ) { // bunch of nodes from a click in the map
             if(cursorsize>0) {
                 targeted = this.SelectThis2( area )
@@ -146,14 +146,14 @@ SelectionEngine = function() {
                 targeted = currsels.concat(buffer.filter(function (item) {
                     return currsels.indexOf(item) < 0;
                 }));
-            } else targeted = currsels;
+            } else targeted = currsels; 
             return targeted;
         }
-
+        
         targeted = targeted.map(Number)
 
         if(clicktype=="double" && targeted.length==0) return [];
-
+        
         targeted = targeted.sort(this.sortNumber);
 
         if(targeted.length>0) {
@@ -182,13 +182,13 @@ SelectionEngine = function() {
                     }
                     targeted = Object.keys(whitelist).map(Number);
                 } else {// inter = 0 ==> click in other portion of the graph (!= current selection)
-                    // Union!
+                    // Union! 
                     if(addvalue) {
                         targeted = targeted.concat(buffer.filter(function (item) {
                             return targeted.indexOf(item) < 0;
                         }));
                     }
-                    return targeted;
+                    return targeted; 
                 }
             } else return targeted;
         }
@@ -219,8 +219,8 @@ SelectionEngine = function() {
                 coincd.push(results[i].id)
             }
             var targeted = this.SelectorEngine( {
-                            addvalue:checkBox,
-                            clicktype:"simple",
+                            addvalue:checkBox, 
+                            clicktype:"simple", 
                             prevsels:selections,
                             currsels:coincd
                         } )
@@ -293,17 +293,17 @@ SelectionEngine = function() {
                     );
                 if(parseInt(distance)<=cursor_size) {
                     counter++;
-                    actualSel.push(n.id);
+                    actualSel.push(n.id);                                
                 }
             }
         });
         return actualSel;
     }
-
-
+    
+    
     /**
      * Main function for any selecting action
-     *
+     * 
      * @nodes: eg targeted array
      */
     //  external usage : partialGraph , updateLeftPanel_fix();
@@ -312,7 +312,7 @@ SelectionEngine = function() {
         console.log("IN SelectionEngine.MultipleSelection2:")
         // console.log(nodes)
         greyEverything();
-
+        
         // TW.partialGraph.states.slice(-1)[0] is the present graph state
         var typeNow = TW.partialGraph.states.slice(-1)[0].type.map(Number).join("|")
         // console.log ("console.loging the Type:")
@@ -376,9 +376,9 @@ SelectionEngine = function() {
         var the_new_sels = Object.keys(selections).map(Number)
         TW.partialGraph.states.slice(-1)[0].selections = the_new_sels;
         TW.partialGraph.states.slice(-1)[0].setState( { sels: the_new_sels} )
-
+        
         // alert("MultipleSelection2=======\nthe_new_sels:" + JSON.stringify(the_new_sels))
-
+        
         // we send our "gotNodeSet" event
         // (signal for plugins that a search-selection was done or a new hand picked selection)
         $('#searchinput').trigger({
@@ -387,7 +387,7 @@ SelectionEngine = function() {
             nodeIds: the_new_sels
         });
         // console.log("Event [gotNodeSet] sent from Tinaweb MultipleSelection2")
-
+        
 
         var neighsDict = {}
         if(TW.Relations["1|1"]) {
@@ -398,21 +398,21 @@ SelectionEngine = function() {
                         neighsDict[neighs[n]] = 0;
                     neighsDict[neighs[n]]++;
                 }
-            }
-        }
+            }    
+        } 
 
         var oppos = ArraySortByValue(neighsDict, function(a,b){
             return b-a
         });
 
 
-        overNodes=true;
+        overNodes=true; 
 
         TW.partialGraph.draw();
 
         updateLeftPanel_fix( selections , oppos );
 
-        for(var n in neighsDict)
+        for(var n in neighsDict) 
             delete neighsDict[n]
 
     }).index()
@@ -438,7 +438,7 @@ TinaWebJS = function ( sigmacanvas ) {
     }
 
     this.SearchListeners = function () {
-
+        
         var SelInst = new SelectionEngine();
 
         //~ $.ui.autocomplete.prototype._renderItem = function(ul, item) {
@@ -453,7 +453,7 @@ TinaWebJS = function ( sigmacanvas ) {
         $('input#searchinput').autocomplete({
             source: function(request, response) {
                 // console.log("in autocomplete:")
-
+                
                 // labels initialized in settings, filled in updateSearchLabels
                 // console.log(labels.length)
                 // console.log(" - - - - - - - - - ")
@@ -463,7 +463,7 @@ TinaWebJS = function ( sigmacanvas ) {
                 var results = $.grep(labels, function(e) {
                     return matcher.test(e.label); //|| matcher.test(e.desc);
                 });
-
+                
                 if (!results.length) {
                     $("#noresults").text("Pas de résultats");
                 } else {
@@ -471,11 +471,11 @@ TinaWebJS = function ( sigmacanvas ) {
                 }
                 matches = results.slice(0, maxSearchResults);
                 response(matches);
-
+                
             },
             minLength: minLengthAutoComplete,
-
-
+            
+            
             // ----------------------->8---------------------
             // send a "no more suggestions event"
             response: function (event, ui_response_array) {
@@ -485,7 +485,7 @@ TinaWebJS = function ( sigmacanvas ) {
                 //   ...
                 //  ]
                 // }
-
+                
                 if (ui_response_array.content.length == 0) {
                     // we send our "noAutocomplete" event
                     $('#searchinput').trigger("tw:noAutocomplete");
@@ -501,8 +501,8 @@ TinaWebJS = function ( sigmacanvas ) {
                 }
             }
             // ----------------------->8---------------------
-        });
-
+        }); 
+       
         // is_open flag for keydown choice
         $('#searchinput').bind('autocompleteopen', function(event, ui) {
             $(this).data('is_open',true);
@@ -510,7 +510,7 @@ TinaWebJS = function ( sigmacanvas ) {
         $('#searchinput').bind('autocompleteclose', function(event, ui) {
             $(this).data('is_open',false);
         });
-
+        
         // default search value now handled through input/@placeholder
         // $("#searchinput").focus(function () {        });
         // $("#searchinput").blur(function () {        });
@@ -520,11 +520,11 @@ TinaWebJS = function ( sigmacanvas ) {
         $("#searchbutton").click(function() {
             var query = normalizeString($("#searchinput").val())
             // console.log('===\nyour query was: "'+query+'"');
-
+            
             // --- SelectionEngine.search() -------------------
-            //   -> will call sigmaUtils.find()
+            //   -> will call sigmaUtils.find() 
             //           over sigmaUtils.getnodesIndex()
-            //   -> then call this.SelectorEngine
+            //   -> then call this.SelectorEngine 
             //            and this.MultipleSelection2
             SelInst.search_n_select(query)
             // ------------------------------------------------
@@ -534,17 +534,17 @@ TinaWebJS = function ( sigmacanvas ) {
         // i've a list of coincidences and i press enter like a boss >:D
         //  external usage: partialGraph, SelectorEngine() , MultipleSelection2()
         $("#searchinput").keydown(function (e) {
-            if (e.keyCode == 13 && $("input#searchinput").data('is_open') === true) {
+            if (e.keyCode == 13 && $("input#searchinput").data('is_open') === true) {            
                 // Search has several results and you pressed ENTER
-                if(!is_empty(matches)) {
+                if(!is_empty(matches)) {  
                     var coincidences = []
                     for(j=0;j<matches.length;j++){
                         coincidences.push(matches[j].id)
                     }
                     $.doTimeout(30,function (){
                         targeted = SelInst.SelectorEngine( {
-                                        addvalue:checkBox,
-                                        clicktype:"double",
+                                        addvalue:checkBox, 
+                                        clicktype:"double", 
                                         prevsels:selections,
                                         currsels:coincidences
                                     } )
@@ -565,7 +565,7 @@ TinaWebJS = function ( sigmacanvas ) {
                     });
                     //$("input#searchinput").trigger('autocompleteclose');
                 }
-
+            
             // alert("matches[].id\n" + JSON.stringify(matches.map(function(n) {return n.id})))
             }
             else if (e.keyCode == 13 && $("input#searchinput").data('is_open') !== true) {
@@ -577,7 +577,7 @@ TinaWebJS = function ( sigmacanvas ) {
                 SelInst.search_n_select(query)
             }
         });
-
+        
         // i was navigating (with the up|down) sur the coincidences-list and i pressed enter!
         //  external usage: partialGraph, SelectorEngine() , MultipleSelection2()
         $("#searchinput").keyup(function (e) {
@@ -589,8 +589,8 @@ TinaWebJS = function ( sigmacanvas ) {
                     $.doTimeout(30,function (){
 
                             targeted = SelInst.SelectorEngine( {
-                                        addvalue:checkBox,
-                                        clicktype:"double",
+                                        addvalue:checkBox, 
+                                        clicktype:"double", 
                                         prevsels:selections,
                                         currsels:[exfnd.id]
                                     } )
@@ -599,7 +599,7 @@ TinaWebJS = function ( sigmacanvas ) {
                                 SelInst.MultipleSelection2({nodes:targeted});
                             }
                             TW.partialGraph.draw();
-
+                            
                             $("input#searchinput").val("");
                             $("input#searchinput").autocomplete( "close" );
                     });
@@ -608,10 +608,10 @@ TinaWebJS = function ( sigmacanvas ) {
         });
     }
 
-    //  external usage: SelectorEngine*() , MultipleSelection2() ,
+    //  external usage: SelectorEngine*() , MultipleSelection2() , 
     //      enviroment.js:changeType()|changeLevel()|NodeWeightFilter()|EdgeWeightFilter
     this.initListeners = function (categories, partialGraph) {
-
+        
         var SelInst = new SelectionEngine();
 
         $("#semLoader").hide();
@@ -623,8 +623,8 @@ TinaWebJS = function ( sigmacanvas ) {
 
         $('.etabs').click(function(){
             $.doTimeout(500,function () {
-                $("#opossiteNodes").readmore({maxHeight:200});
-                $("#sameNodes").readmore({maxHeight:200});
+                $("#opossiteNodes").readmore({maxHeight:200}); 
+                $("#sameNodes").readmore({maxHeight:200}); 
             });
         });
 
@@ -660,25 +660,25 @@ TinaWebJS = function ( sigmacanvas ) {
             fullwidth=$('#fixedtop').width();
             e.preventDefault();
             // $("#wrapper").toggleClass("active");
-            if(parseFloat(sidebar.css("right"))<0){
-                $("#aUnfold").attr("class","rightarrow");
+            if(parseFloat(sidebar.css("right"))<0){            
+                $("#aUnfold").attr("class","rightarrow"); 
                 sidebar.animate({
                     "right" : sidebar.width()+"px"
-                }, { duration: 400, queue: false });
+                }, { duration: 400, queue: false }); 
 
                 $("#ctlzoom").animate({
                         "right": (sidebar.width()+10)+"px"
-                }, { duration: 400, queue: false });
-
+                }, { duration: 400, queue: false }); 
+                   
                 // $('#sigma-example').width(fullwidth-sidebar.width());
                 $('#sigma-example').animate({
                         "width": fullwidth-sidebar.width()+"px"
-                }, { duration: 400, queue: false });
+                }, { duration: 400, queue: false }); 
                 setTimeout(function() {
                       partialGraph.resize();
                       partialGraph.refresh();
                 }, 400);
-            }
+            } 
             else {
                 //HIDE rightcolumn
                 $("#aUnfold").attr("class","leftarrow");
@@ -688,7 +688,7 @@ TinaWebJS = function ( sigmacanvas ) {
 
                 $("#ctlzoom").animate({
                         "right": "0px"
-                }, { duration: 400, queue: false });
+                }, { duration: 400, queue: false }); 
 
                     // $('#sigma-example').width(fullwidth);
                 $('#sigma-example').animate({
@@ -697,8 +697,8 @@ TinaWebJS = function ( sigmacanvas ) {
                 setTimeout(function() {
                       partialGraph.resize();
                       partialGraph.refresh();
-                }, 400);
-            }
+                }, 400);   
+            }   
         });
 
         pushSWClick("social");
@@ -708,10 +708,10 @@ TinaWebJS = function ( sigmacanvas ) {
         $("#tips").html(getTips());
 
         showMeSomeLabels(6);
-
+        
         // updateDownNodeEvent(false);
-
-        $("#saveAs").click(function() {
+        
+        $("#saveAs").click(function() {        
             $('#savemodal').modal('show');
         });
 
@@ -734,17 +734,17 @@ TinaWebJS = function ( sigmacanvas ) {
             area.y1 = partialGraph._core.mousecaptor.mouseY;
 
             targeted = SelInst.SelectorEngine_part01({
-                            cursorsize:cursor_size,
-                            area:area
+                            cursorsize:cursor_size, 
+                            area:area 
                         })
-
+            
             if(targeted.length>0) {
-                var finalSelection = SelInst.SelectorEngine_part02( {
+                var finalSelection = SelInst.SelectorEngine_part02( { 
                                             addvalue:checkBox ,
                                             clicktype:(checkBox)?"simple":"double",
                                             prevsels:selections,
-                                            currsels:targeted
-                                        });
+                                            currsels:targeted 
+                                        }); 
                 cancelSelection(false);
                 SelInst.MultipleSelection2( {nodes:finalSelection} )
 
@@ -777,10 +777,10 @@ TinaWebJS = function ( sigmacanvas ) {
                     area.x1 = partialGraph._core.mousecaptor.mouseX;
                     area.y1 = partialGraph._core.mousecaptor.mouseY;
                     var targeted = SelInst.SelectorEngine( {
-                                        cursorsize:cursor_size,
+                                        cursorsize:cursor_size, 
                                         area:area,
-                                        addvalue:checkBox,
-                                        clicktype:"simple",
+                                        addvalue:checkBox, 
+                                        clicktype:"simple", 
                                         prevsels:selections
                                     } )
                     if(targeted.length>0) {
@@ -807,8 +807,8 @@ TinaWebJS = function ( sigmacanvas ) {
                 // console.log(sigmaJsMouseProperties.minRatio)
                 // console.log(sigmaJsMouseProperties.maxRatio)
                 partialGraph.zoomTo(
-                    partialGraph._core.width / 2,
-                    partialGraph._core.height / 2,
+                    partialGraph._core.width / 2, 
+                    partialGraph._core.height / 2, 
                     ui.value);
             }
         });
@@ -841,9 +841,9 @@ TinaWebJS = function ( sigmacanvas ) {
             } else {
                 partialGraph.startForceAtlas2();
                 return;
-            }
+            } 
         });
-
+        
         NodeWeightFilter ( categories , "#slidercat0nodesweight" ,  categories[0],  "type" ,"size");
 
         EdgeWeightFilter("#slidercat0edgesweight", "label" , "nodes1", "weight");
@@ -862,22 +862,17 @@ TinaWebJS = function ( sigmacanvas ) {
                        // sigma permet qu'on lui passe une fonction
                        // à effectuer sur l'itérateur
                        partialGraph.iterNodes(function (n) {
-                           // TODO debounce fonction un peu lourde dans le profilage
-
-                           var originalSize = TW.Nodes[n.id].size
-
-                           //debug: no size adjustments at all :)
+                           // TODO fonction un peu lourde dans le profilage
                            if(TW.Nodes[n.id].type==TW.catSoc) {
-                               var newval = parseFloat(originalSize) + parseFloat((value-1))*0.3
+                               var newval = parseFloat(TW.Nodes[n.id].size) + parseFloat((value-1))*0.3
                                n.size = (newval<1.0)?1:newval;
                                sizeMult[TW.catSoc] = parseFloat(value-1)*0.3;
                            }
-
                        });
                        partialGraph.draw();
                 });
             }
-        });
+        }); 
 
         //finished
         $("#slidercat1nodessize").freshslider({
@@ -898,7 +893,7 @@ TinaWebJS = function ( sigmacanvas ) {
                        partialGraph.draw();
                 });
             }
-        });
+        }); 
 
         //Cursor Size slider
         $("#unranged-value").freshslider({
@@ -916,3 +911,4 @@ TinaWebJS = function ( sigmacanvas ) {
     }
 
 };
+

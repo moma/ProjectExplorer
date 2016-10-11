@@ -39,10 +39,10 @@ ParseCustom.prototype.scanFile = function() {
     switch (this.format) {
         case "api.json":
             pr("scanFile: "+this.format)
-            break;
+            break; 
         case "db.json":
             pr("scanFile: "+this.format)
-            break;
+            break; 
         case "json":
             pr("scanFile: "+this.format)
             categories = this.getJSONCategories( this.data );
@@ -53,7 +53,7 @@ ParseCustom.prototype.scanFile = function() {
             categories = this.getGEXFCategories( this.data );
             return categories;
             break;
-        default:
+        default: 
             pr("scanFile   jsaispas: "+this.format)
             break;
     }
@@ -65,10 +65,10 @@ ParseCustom.prototype.makeDicts = function(categories) {
     switch (this.format) {
         case "api.json":
             pr("makeDicts: "+this.format)
-            break;
+            break; 
         case "db.json":
             pr("makeDicts: "+this.format)
-            break;
+            break; 
         case "json":
             pr("makeDicts: "+this.format)
             dictionaries = this.parseJSON( categories );
@@ -79,7 +79,7 @@ ParseCustom.prototype.makeDicts = function(categories) {
             dictionaries = this.parseGEXF( categories );
             return dictionaries;
             break;
-        default:
+        default: 
             pr("makeDicts   jsaispas: "+this.format)
             break;
     }
@@ -90,9 +90,9 @@ ParseCustom.prototype.makeDicts = function(categories) {
 function scanGexf(gexf) {
     var categoriesDict={}, categories=[];
     nodesNodes = gexf.getElementsByTagName('nodes');
-    for(i=0; i<nodesNodes.length; i++){
+    for(i=0; i<nodesNodes.length; i++){       
         var nodesNode = nodesNodes[i];  // Each xml node 'nodes' (plural)
-        node = nodesNode.getElementsByTagName('node');
+        node = nodesNode.getElementsByTagName('node');            
         for(j=0; j<node.length; j++){
             attvalueNodes = node[j].getElementsByTagName('attvalue');
             for(k=0; k<attvalueNodes.length; k++){
@@ -144,53 +144,53 @@ function dictfyGexf( gexf , categories ){
 
     var edges={}, nodes={}, nodes1={}, nodes2=false, bipartiteD2N=false, bipartiteN2D=false;
     if(categories.length>1) {
-        nodes2={}, bipartiteD2N={}, bipartiteN2D={}
+        nodes2={}, bipartiteD2N={}, bipartiteN2D={}        
     }
 
     var i, j, k;
     var nodesAttributes = [];   // The list of attributes of the nodes of the graph that we build in json
     var edgesAttributes = [];   // The list of attributes of the edges of the graph that we build in json
     var attributesNodes = gexf.getElementsByTagName('attributes');  // In the gexf (that is an xml), the list of xml nodes 'attributes' (note the plural 's')
-
+  
     for(i = 0; i<attributesNodes.length; i++){
         var attributesNode = attributesNodes[i];  // attributesNode is each xml node 'attributes' (plural)
         if(attributesNode.getAttribute('class') == 'node'){
             var attributeNodes = attributesNode.getElementsByTagName('attribute');  // The list of xml nodes 'attribute' (no 's')
             for(j = 0; j<attributeNodes.length; j++){
                 var attributeNode = attributeNodes[j];  // Each xml node 'attribute'
-
+        
                 var id = attributeNode.getAttribute('id'),
                 title = attributeNode.getAttribute('title'),
                 type = attributeNode.getAttribute('type');
-
+        
                 var attribute = {
-                    id:id,
-                    title:title,
+                    id:id, 
+                    title:title, 
                     type:type
                 };
                 nodesAttributes.push(attribute);
-
+        
             }
         } else if(attributesNode.getAttribute('class') == 'edge'){
             var attributeNodes = attributesNode.getElementsByTagName('attribute');  // The list of xml nodes 'attribute' (no 's')
             for(j = 0; j<attributeNodes.length; j++){
                 var attributeNode = attributeNodes[j];  // Each xml node 'attribute'
-
+        
                 var id = attributeNode.getAttribute('id'),
                 title = attributeNode.getAttribute('title'),
                 type = attributeNode.getAttribute('type');
-
+          
                 var attribute = {
-                    id:id,
-                    title:title,
+                    id:id, 
+                    title:title, 
                     type:type
                 };
                 edgesAttributes.push(attribute);
-
+        
             }
         }
     } //out: nodesAttributes Array
-
+    
     var nodesNodes = gexf.getElementsByTagName('nodes') // The list of xml nodes 'nodes' (plural)
     labels = [];
     minNodeSize=999.00;
@@ -204,7 +204,7 @@ function dictfyGexf( gexf , categories ){
         for(j=0; j<nodeNodes.length; j++) {
 
             var nodeNode = nodeNodes[j];  // Each xml node 'node' (no 's')
-
+      
             window.NODE = nodeNode;
 
             // [ get ID ]
@@ -220,8 +220,8 @@ function dictfyGexf( gexf , categories ){
               sizeNode = sizeNodes[0];
               size = parseFloat(sizeNode.getAttribute('value'));
             }// [ / get Size ]
-
-            // [ get Coordinates ]
+            
+            // [ get Coordinates ]            
             var x = 100 - 200*Math.random();
             var y = 100 - 200*Math.random();
             var positionNodes = nodeNode.getElementsByTagName('position');
@@ -244,13 +244,13 @@ function dictfyGexf( gexf , categories ){
                     parseFloat(colorNode.getAttribute('g')),
                     parseFloat(colorNode.getAttribute('b')));
             }// [ / get Colour ]
-
+            
             var node = ({
                 id:id,
-                label:label,
-                size:size,
-                x:x,
-                y:y,
+                label:label, 
+                size:size, 
+                x:x, 
+                y:y, 
                 color:color
             });
 
@@ -283,15 +283,15 @@ function dictfyGexf( gexf , categories ){
 
                 // console.log(node)
             }
-
-            if(parseInt(node.size) < parseInt(minNodeSize))
+            
+            if(parseInt(node.size) < parseInt(minNodeSize)) 
                 minNodeSize= node.size;
-
+            
             if(parseInt(node.size) > parseInt(maxNodeSize))
                 maxNodeSize= node.size;
-
+        
         }
-    }
+    }  
 
     var attention = false
     if( TW.Clusters.length == 0 ) {
@@ -320,7 +320,7 @@ function dictfyGexf( gexf , categories ){
         }
         // TW.partialGraph._core.graph.nodesIndex[it].size=Nodes[it].size;
     }
-
+    
 
     var edgeId = 0;
     var edgesNodes = gexf.getElementsByTagName('edges');
@@ -334,7 +334,7 @@ function dictfyGexf( gexf , categories ){
             var type = edgeNode.getAttribute('type');//line or curve
 
             var indice=source+";"+target;
-
+                
             var edge = {
                 id: indice,
                 source: source,
@@ -355,7 +355,7 @@ function dictfyGexf( gexf , categories ){
                 var attr = attvalueNode.getAttribute('for');
                 var val = attvalueNode.getAttribute('value');
                 edge.attributes.push({
-                    attr:attr,
+                    attr:attr, 
                     val:val
                 });
             }
@@ -374,7 +374,7 @@ function dictfyGexf( gexf , categories ){
                 idInRelations = []
                 for(var c in petitDict) idInRelations[catDict[c]] = true;
                 for(var c=0; c<categories.length;c++) {
-                    if(!idInRelations[c]) idInRelations[c] = false;
+                    if(!idInRelations[c]) idInRelations[c] = false; 
                 }
                 idArray = idInRelations.map(Number).join("|")
                 edge.categ = idArray;
@@ -395,43 +395,43 @@ function dictfyGexf( gexf , categories ){
                         nodes1[source] = {
                             label: nodes[source].label,
                             neighbours: []
-                        };
+                        };                    
                     }
                     if(isUndef(nodes1[target])) {
                         nodes1[target] = {
                             label: nodes[target].label,
                             neighbours: []
-                        };
-                    }
+                        };                    
+                    }   
                     nodes1[source].neighbours.push(target);
                     nodes1[target].neighbours.push(source);
                     // TW.partialGraph.addEdge(indice,source,target,edge);
                 }
-
+                
                 if(categories.length>1) {
 
                     // Term <-> Term
-                    if(idS==categories[1] && idT==categories[1]){
+                    if(idS==categories[1] && idT==categories[1]){ 
                         edge.label = "nodes2";
 
                         if(isUndef(nodes2[source])) {
                             nodes2[source] = {
                                 label: nodes[source].label,
                                 neighbours: []
-                            };
+                            };                    
                         }
                         if(isUndef(nodes2[target])) {
                             nodes2[target] = {
                                 label: nodes[target].label,
                                 neighbours: []
-                            };
+                            };                    
                         }
                         nodes2[source].neighbours.push(target);
                         nodes2[target].neighbours.push(source);
-
+                        
                         // otherGraph.addEdge(indice,source,target,edge);
                     }
-
+                    
                     // Doc <-> Term
                     if((idS==categories[0] && idT==categories[1]) ||
                         (idS==categories[1] && idT==categories[0])) {
@@ -444,13 +444,13 @@ function dictfyGexf( gexf , categories ){
                                 bipartiteD2N[source] = {
                                     label: nodes[source].label,
                                     neighbours: []
-                                };
+                                };                    
                             }
                             if(isUndef(bipartiteN2D[target])) {
                                 bipartiteN2D[target] = {
                                     label: nodes[target].label,
                                     neighbours: []
-                                };
+                                };                    
                             }
 
                             bipartiteD2N[source].neighbours.push(target);
@@ -463,13 +463,13 @@ function dictfyGexf( gexf , categories ){
                                 bipartiteN2D[source] = {
                                     label: nodes[source].label,
                                     neighbours: []
-                                };
+                                };                    
                             }
                             if(isUndef(bipartiteD2N[target])) {
                                 bipartiteD2N[target] = {
                                     label: nodes[target].label,
                                     neighbours: []
-                                };
+                                };                    
                             }
                             bipartiteN2D[source].neighbours.push(target);
                             bipartiteD2N[target].neighbours.push(source);
@@ -558,7 +558,7 @@ function dictfyJSON( data , categories ) {
     var edges={}, nodes={}, nodes1={}, nodes2=false, bipartiteD2N=false, bipartiteN2D=false;
 
     if(categories.length>1) {
-        nodes2={}, bipartiteD2N={}, bipartiteN2D={}
+        nodes2={}, bipartiteD2N={}, bipartiteN2D={}        
     }
 
     for(var i in data.nodes) {
@@ -605,7 +605,7 @@ function dictfyJSON( data , categories ) {
         edge.target = parseInt(target);
         edge.weight = weight;
         edge.type = type;
-
+        
         if (nodes[source] && nodes[target]) {
             idS=nodes[source].type;
             idT=nodes[target].type;
@@ -618,7 +618,7 @@ function dictfyJSON( data , categories ) {
             idInRelations = []
             for(var c in petitDict) idInRelations[catDict[c]] = true;
             for(var c=0; c<categories.length;c++) {
-                if(!idInRelations[c]) idInRelations[c] = false;
+                if(!idInRelations[c]) idInRelations[c] = false; 
             }
             idArray = idInRelations.map(Number).join("|")
             edge.categ = idArray;
@@ -639,42 +639,42 @@ function dictfyJSON( data , categories ) {
                     nodes1[source] = {
                         label: nodes[source].label,
                         neighbours: []
-                    };
+                    };                    
                 }
                 if(isUndef(nodes1[target])) {
                     nodes1[target] = {
                         label: nodes[target].label,
                         neighbours: []
-                    };
-                }
+                    };                    
+                }   
                 nodes1[source].neighbours.push(target);
                 nodes1[target].neighbours.push(source);
             }
-
+            
             if(categories.length>1) {
 
                 // Term <-> Term
-                if(idS==categories[1] && idT==categories[1]){
+                if(idS==categories[1] && idT==categories[1]){ 
                     edge.label = "nodes2";
 
                     if(isUndef(nodes2[source])) {
                         nodes2[source] = {
                             label: nodes[source].label,
                             neighbours: []
-                        };
+                        };                    
                     }
                     if(isUndef(nodes2[target])) {
                         nodes2[target] = {
                             label: nodes[target].label,
                             neighbours: []
-                        };
+                        };                    
                     }
                     nodes2[source].neighbours.push(target);
                     nodes2[target].neighbours.push(source);
-
+                    
                     // otherGraph.addEdge(indice,source,target,edge);
                 }
-
+                
                 // Doc <-> Term
                 if((idS==categories[0] && idT==categories[1]) ||
                     (idS==categories[1] && idT==categories[0])) {
@@ -687,13 +687,13 @@ function dictfyJSON( data , categories ) {
                             bipartiteD2N[source] = {
                                 label: nodes[source].label,
                                 neighbours: []
-                            };
+                            };                    
                         }
                         if(isUndef(bipartiteN2D[target])) {
                             bipartiteN2D[target] = {
                                 label: nodes[target].label,
                                 neighbours: []
-                            };
+                            };                    
                         }
 
                         bipartiteD2N[source].neighbours.push(target);
@@ -706,13 +706,13 @@ function dictfyJSON( data , categories ) {
                             bipartiteN2D[source] = {
                                 label: nodes[source].label,
                                 neighbours: []
-                            };
+                            };                    
                         }
                         if(isUndef(bipartiteD2N[target])) {
                             bipartiteD2N[target] = {
                                 label: nodes[target].label,
                                 neighbours: []
-                            };
+                            };                    
                         }
                         bipartiteN2D[source].neighbours.push(target);
                         bipartiteD2N[target].neighbours.push(source);
@@ -759,8 +759,8 @@ function makeSystemStates (cats) {
     var systemstates = {}
     var N=Math.pow(2 , cats.length);
 
-    for (i = 0; i < N; i++) {
-
+    for (i = 0; i < N; i++) { 
+        
         bin = (i).toString(2)
         bin_splitted = []
         for(var j in bin)
@@ -771,7 +771,7 @@ function makeSystemStates (cats) {
         for (k = 0; k < toadd; k++)
             bin_array.push("0")
 
-        for(var j in bin)
+        for(var j in bin) 
             bin_array.push(bin[j])
 
         bin_array = bin_array.map(Number)
