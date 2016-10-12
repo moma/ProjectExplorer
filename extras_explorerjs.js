@@ -79,8 +79,11 @@ function ChangeGraphAppearanceByAtt( manualflag ) {
         var att_s = AttsDict_sorted[i].key;
         var att_c = AttsDict_sorted[i].value;
         var the_method = "clustersBy"
+
+        // variants
         if(att_s.indexOf("clust")>-1) the_method = "colorsBy"
         if(att_s == "growth_rate") the_method = "colorsRelByBins"
+        if(att_s == "age") the_method = "colorsRelByBins"
 
         div_info += '<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+att_s+'('+att_c+')'+'</a></li>'
         pr('<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+att_s+'('+att_c+')'+'</a></li>')

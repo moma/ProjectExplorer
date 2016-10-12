@@ -369,9 +369,14 @@ function colorsRelByBins(daclass) {
 
     // spare color 13 "#64e0f2",
 
+    var tickThresholds = [-1000000,-75,-50,-25,-10,10,25,50,75,100,125,150, 1000000]
 
-    // £TODO calculate thresholds like eg d3.histogram
-    var thresholdsMin = [-1000000,-75,-50,-25,-10,10,25,50,75,100,125,150, 1000000]
+    // £TODO put colors and thresholds as params or calculate thresholds like eg d3.histogram
+    if (daclass == 'age') {
+        tickThresholds = [-1000000,1992,1994,1996,1998,2000,2002,2004,2006,2008,2010,2012,2014,2016]
+        // and add a grey color for the first timeperiod
+        binColors.unshift("#F9F7ED")
+    }
 
     // get the nodes
     var v_nodes = getVisibleNodes();
@@ -382,9 +387,9 @@ function colorsRelByBins(daclass) {
         var theVal = parseFloat(attval)
         if( !isNaN(theVal) ) { //is float
             // iterate over bins
-            for(var j=0 ; j < thresholdsMin.length-1; j++) {
-                var binMin = thresholdsMin[j]
-                var binMax = thresholdsMin[(j+1)]
+            for(var j=0 ; j < tickThresholds.length-1; j++) {
+                var binMin = tickThresholds[j]
+                var binMax = tickThresholds[(j+1)]
                 if((theVal >= binMin) && (theVal < binMax)) {
                     TW.partialGraph._core.graph.nodesIndex[theId].binMin = binMin
                     TW.partialGraph._core.graph.nodesIndex[theId].color = binColors[j]
