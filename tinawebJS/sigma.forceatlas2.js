@@ -149,7 +149,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
           }
 
          } else {
-          
+
           if( self.firstit ) {
             n.x = self.Ox + self.R*Math.cos(Math.PI*self.stepDeg*mult);
             n.y = self.Oy + self.R*Math.sin(Math.PI*self.stepDeg*mult);
@@ -158,7 +158,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
           }
 
          }
-         
+
         });
 
         self.firstit = false ;
@@ -274,21 +274,21 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
         if (self.p.edgeWeightInfluence == 0) {
           while (i < edges.length && i < self.state.index + cInt) {
             var e = edges[i++];
-            if(!e.hidden) { 
+            if(!e.hidden) {
               Attraction.apply_nn(e.source, e.target, 1);
             }
           }
         } else if (self.p.edgeWeightInfluence == 1) {
           while (i < edges.length && i < self.state.index + cInt) {
             var e = edges[i++];
-            if(!e.hidden) { 
+            if(!e.hidden) {
               Attraction.apply_nn(e.source, e.target, e.weight || 1);
             }
           }
         } else {
           while (i < edges.length && i < self.state.index + cInt) {
             var e = edges[i++];
-            if(!e.hidden) { 
+            if(!e.hidden) {
               Attraction.apply_nn(
                 e.source, e.target,
                 Math.pow(e.weight || 1, self.p.edgeWeightInfluence)
@@ -325,7 +325,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
             totalSwinging += n.fa2.mass * swinging;
             swingingSum += swinging;
             promdxdy += (Math.abs(n.fa2.dx)+Math.abs(n.fa2.dy))/2; /**/
-            
+
             totalEffectiveTraction += n.fa2.mass *
                                       0.5 *
                                       Math.sqrt(
@@ -334,16 +334,16 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
                                       );
           }
         });
-        
+
         self.p.totalSwinging = totalSwinging;
-        
+
         var convg= ((Math.pow(nodes.length,2))/promdxdy);    /**/
         var swingingVSnodes_length = swingingSum/nodes.length;     /**/
-        if(stopcriteria && (convg > swingingVSnodes_length)){ 
+        if(stopcriteria && (convg > swingingVSnodes_length)){
             pr("i've applied the stopcriteria: "+self.count)
-            TW.partialGraph.stopForceAtlas2(); 
+            TW.partialGraph.stopForceAtlas2();
         }
-        
+
         self.p.totalEffectiveTraction = totalEffectiveTraction;
 
         // We want that swingingMovement < tolerance * convergenceMovement
@@ -362,7 +362,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
 
         // Save old coordinates
         nodes.forEach(function(n) {
-          if(!n.hidden && n.degree>0) { 
+          if(!n.hidden && n.degree>0) {
             n.old_x = +n.x;
             n.old_y = +n.y;
           }
@@ -403,7 +403,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
             }
           }
 
-          
+
             if(self.isolated>0 && self.count%50 == 0) {
               nodes.forEach(function(n) {
                 if(n.degree>0) {
@@ -994,7 +994,7 @@ sigma.forceatlas2.Region = function(nodes, depth) {
     massCenterX: 0,
     massCenterY: 0
   };
-  
+
   this.updateMassAndGeometry();
 }
 
@@ -1130,7 +1130,7 @@ sigma.publicPrototype.startForceAtlas2 = function() {
     if(isolatedBCauseFilter==ene) {
       TW.partialGraph.stopForceAtlas2();
       return;
-    } 
+    }
 
 
     $("#overviewzone").hide();
@@ -1148,7 +1148,7 @@ sigma.publicPrototype.startForceAtlas2 = function() {
         return;
       }
     });
-    
+
   }
 };
 

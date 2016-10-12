@@ -24,7 +24,7 @@ $("#searchinput").on("tw:eraseNodeSet", function(e) {
 
 // emptyNodeSet event when Tinawab had a search but with no matches
 $("#searchinput").on("tw:emptyNodeSet", function(e) {
-    
+
     $('#savesuggestion').prop('disabled', false) ;
     // when query has no match
     if (e.nodeIds == null || e.nodeIds.length == 0) {
@@ -59,12 +59,12 @@ function save_suggestions(term) {
         "data" : term,
         "date" : (new Date()).toISOString(),
     }
-    
+
     // sqlite columns in new table 'terms'
     // 0|source|CHAR(250)|0||0
     // 1|suggestion|CHAR(250)|0||0
     // 2|time|CHAR(30)|0||0
-    
+
     // console.log( "SAVE INFO:" + info )
     $.ajax({
         type: "POST",
@@ -84,21 +84,21 @@ function save_suggestions(term) {
             p.append(i);
             p.append(' was saved as a suggestion');
             $("#crowdsourcing_answer").html(p) ;
-            
+
             // show "saved" icon
             $("#saveicon").removeClass("glyphicon-save");
             $("#saveicon").addClass("glyphicon-saved");
-            
+
             // reset state after 3 secs
             setTimeout(function() {
                 clean_crowdsourcingzone() ;
-                
+
                 // if we want to reset the input value too
                 // $("#proposed_terms").val('') ;
             }, 3000);
         },
 
-        error: function(exception) { 
+        error: function(exception) {
             console.log(exception)
             console.log("exception!:"+exception.status)
         }
@@ -134,11 +134,11 @@ function clean_crowdsourcingzone() {
                 //~ }, 3000);
             //~ }, 1000);
         //~ },
-//~ 
-        //~ error: function(exception) { 
+//~
+        //~ error: function(exception) {
             //~ console.log(exception)
             //~ console.log("exception!:"+exception.status)
         //~ }
-//~ 
+//~
     //~ })
 //~ }
