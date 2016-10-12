@@ -2,15 +2,46 @@
 /* ---------------------  search histogram  ----------------------- */
 /* ---------------------------------------------------------------- */
 
+// constant values of total docs per year, for normalization
+var wosYearTotals = {
+            "1989" : 844637,
+            "1990" : 869102,
+            "1991" : 888910,
+            "1992" : 910093,
+            "1993" : 950933,
+            "1994" : 997942,
+            "1995" : 1057663,
+            "1996" : 1094382,
+            "1997" : 1119934,
+            "1998" : 1123011,
+            "1999" : 1151948,
+            "2000" : 1171575,
+            "2001" : 1158603,
+            "2002" : 1205361,
+            "2003" : 1243327,
+            "2004" : 1326740,
+            "2005" : 1389262,
+            "2006" : 1460333,
+            "2007" : 1539399,
+            "2008" : 1630036,
+            "2009" : 1704451,
+            "2010" : 1753796,
+            "2011" : 1809678,
+            "2012" : 1868251,
+            "2013" : 1968250,
+            "2014" : 2030613,
+            "2015" : 1772592
+}
+
 
 //method for calling the ISC-API and get pubs-distribution of the suggested term
 function search_proposed_terms_and_draw( the_queries ) {
     // console.log("search_proposed_terms_and_draw:\n"
     //            +"i'm searching:\n"
     //            +JSON.stringify(the_queries)) ;
-    
+
     $("#search_histogram").html("Searching for matching WOS data...")
-    
+
     var args = {
         // the_queries is an array of str
         "q": the_queries,
@@ -18,7 +49,7 @@ function search_proposed_terms_and_draw( the_queries ) {
         "until": 2015
     }
     var docs_years = [] ;
-    
+
     $("#search_histogram")
         .html('<p class="micromessage">Waiting for histogram data</p>')
 
@@ -28,21 +59,29 @@ function search_proposed_terms_and_draw( the_queries ) {
         data: args,
         dataType: "json",
         success : function(data, textStatus, jqXHR) {
-            // ES aggs response, for example 
+            // ES aggs response, for example
             // data = {"took":91,"total":121673,"aggs":{"publicationCount":{"buckets":[{"key":1989,"doc_count":880},{"key":1990,"doc_count":1088},...,{"key":2012,"doc_count":9543},{"key":2013,"doc_count":8832}]}},"hits":{"total":121673,"max_score":0,"hits":[]}}
-            
+
             // console.log(">> incoming api data <<")
             // console.log(data)
-            
+
             if(data.total==0) {
                 return false;
             }
             else {
                 for(var i in data.aggs.publicationCount.buckets) {
                     var elem = data.aggs.publicationCount.buckets[i]
-                    docs_years.push( [ elem.key+"" , elem.doc_count] )
+                    var year = elem.key+""
+                    var ndocs = elem.doc_count
+
+                    // result is over [0;1]
+                    var normalized_ndocs = ndocs / wosYearTotals[year]
+                    docs_years.push( [ year , normalized_ndocs] )
                 }
-                
+
+                // docs_years is now an array of couples [[1989,42],[1990,100],...]
+                console.log("docs_years",docs_years)
+
                 // counts_by_year_array
                 draw_histogram(docs_years, "search_histogram") ;
                 return true ;
@@ -50,7 +89,7 @@ function search_proposed_terms_and_draw( the_queries ) {
         },
 
         error: function(exception) {
-            console.log("search_proposed_terms_and_draw:exception" 
+            console.log("search_proposed_terms_and_draw:exception"
                         + JSON.stringify(exception))
             $("#search_histogram")
                 .html('<p class="micromessage">'
@@ -64,7 +103,7 @@ function search_proposed_terms_and_draw( the_queries ) {
 $("#searchinput").on("tw:gotNodeSet", function(e) {
     // console.log("event 'nodes' --> the event's nodes: " + JSON.stringify(e.nodeIds)) ;
     clean_histogram() ;
-    
+
     // now we may want to do other things (draw histogram, suggest term)
     newnodesHistogramBehavior(e.nodeIds, e.q) ;
 });
@@ -83,12 +122,12 @@ $("#searchinput").on("tw:emptyNodeSet", function(e) {
 
 
 function newnodesHistogramBehavior(selectedNodeIds, unusedQuery) {
-    
+
     // console.log('FUN additionalSearchBehavior' + '\nselectedNodeIds:' +JSON.stringify(selectedNodeIds) ) ;
-    
+
     if( selectedNodeIds != null && selectedNodeIds.length > 0 ) {
         // query : IF in the Map -> GO to ISC-API (search and draw it)
-        
+
         var selectedLabels = [] ;
         for (i in selectedNodeIds) {
             var thisId = selectedNodeIds[i]
@@ -100,7 +139,7 @@ function newnodesHistogramBehavior(selectedNodeIds, unusedQuery) {
             }
         }
         // console.log('\n\n\n<---!--->\nselectedLabels' + JSON.stringify(selectedLabels))
-        
+
         search_proposed_terms_and_draw ( selectedLabels ) ;
     }
 }
@@ -108,21 +147,21 @@ function newnodesHistogramBehavior(selectedNodeIds, unusedQuery) {
 
 // use dygraph lib to draw below the crowdsourcing div
 function draw_histogram(counts_by_year_array, div_id) {
-    
+
     // 1) layout for the div#search_histogram
     //    /!\ this div *needs* padding:0 /!\;
     $("#"+div_id).height("15em") ;
-    
+
     // 2) data preparation
     //~ var years = [] ;
     //~ for (i in counts_by_year_array) {
         //~ couple = counts_by_year_array[i] ;
-        //~ 
+        //~
         //~ // x values (year as int) => Date objects
         //~ counts_by_year_array[i][0] = new Date(couple[0]) ;
     //~ }
     // console.log('=== GRAPH PREPARATION ===') ;
-    
+
     // 3) call histogram lib
     new Dygraph(document.getElementById(div_id),
                   counts_by_year_array,
@@ -138,5 +177,3 @@ function draw_histogram(counts_by_year_array, div_id) {
 function clean_histogram() {
     $("#search_histogram").html("") ;
 }
-
-
