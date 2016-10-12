@@ -45,7 +45,7 @@ function search_proposed_terms_and_draw( the_queries ) {
     var args = {
         // the_queries is an array of str
         "q": the_queries,
-        "since": 1989,
+        "since": 1995,
         "until": 2015
     }
     var docs_years = [] ;
