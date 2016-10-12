@@ -342,31 +342,36 @@ function clustersBy(daclass) {
 }
 
 
+// for debug of colorsRelByBins
+var totalsPerBinMin = {
+    '-1000000':0, '-75':0, '-50':0, '-25':0, '-10':0, '10':0, '25':0, '50':0, '75':0, '100':0, '125':0, '150':0
+  }
+
 // rewrite of clustersBy with binning and for attributes that can have negative float values
 function colorsRelByBins(daclass) {
 
     cancelSelection(false);
-    // 13 colors
+    // 12 colors
     var binColors = [
-        "#005197",  //blue
-        // "#3c76fb",
-        "#5c8af2",
-        "#64c5f2",
-        "#64e0f2",
-        "#bae64f",//epsilon
-        "#f9f008",
-        "#f9da08",
-        "#fab207",
-        "#fa9607",
-        "#fa6e07",
-        "#fa4607", // red
-        "#991B1E"
+        "#005197",  //blue    binMin -∞
+        "#3c76fb",        //  binMin -75
+        "#5c8af2",        //  binMin -50
+        "#64c5f2",        //  binMin -25
+        "#bae64f",//epsilon   binMin -10  binMin 10
+        "#f9f008",        //  binMin 10
+        "#f9da08",        //  binMin 25
+        "#fab207",        //  binMin 50
+        "#fa9607",        //  binMin 75
+        "#fa6e07",        //  binMin 100
+        "#fa4607", // red     binMin 125
+        "#991B1E"         //  binMin 150
     ];
+
+    // spare color 13 "#64e0f2",
 
 
     // £TODO calculate thresholds like eg d3.histogram
-    // var thresholdsMin = [-100,-75,-50,-25,-10,10,25,50,75,100,125,150, 1000000]
-    var thresholdsMin = [-75,-50,-25,-10,10,25,50,75,100,125,150, 1000000]
+    var thresholdsMin = [-1000000,-75,-50,-25,-10,10,25,50,75,100,125,150, 1000000]
 
     // get the nodes
     var v_nodes = getVisibleNodes();
@@ -381,7 +386,10 @@ function colorsRelByBins(daclass) {
                 var binMin = thresholdsMin[j]
                 var binMax = thresholdsMin[(j+1)]
                 if((theVal >= binMin) && (theVal < binMax)) {
+                    TW.partialGraph._core.graph.nodesIndex[theId].binMin = binMin
                     TW.partialGraph._core.graph.nodesIndex[theId].color = binColors[j]
+
+                    totalsPerBinMin[binMin]++
                     break
                 }
             }
