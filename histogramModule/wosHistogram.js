@@ -2,6 +2,9 @@
 /* ---------------------  search histogram  ----------------------- */
 /* ---------------------------------------------------------------- */
 
+// TODO be able to expose things from module like a histo.graph object
+var hg
+
 // constant values of total docs per year, for normalization
 var wosYearTotals = {
             "1989" : 844637,
@@ -47,7 +50,7 @@ function search_proposed_terms_and_draw( the_queries ) {
     var args = {
         // the_queries is an array of str
         "q": the_queries,
-        "since": 1995,
+        "since": 1990,
         "until": 2015
     }
     var docs_years = [] ;
@@ -78,10 +81,10 @@ function search_proposed_terms_and_draw( the_queries ) {
 
                     // result is over [0;1]
                     var normalized_ndocs = ndocs / wosYearTotals[year]
-                    docs_years.push( [ year , normalized_ndocs] )
+                    docs_years.push( [ year , normalized_ndocs, ndocs] )
                 }
 
-                // docs_years is now an array of couples [[1989,42],[1990,100],...]
+                // docs_years is now an array of triples [[1989,0.001,42],[1990,0.0002,100],...]
                 // console.log("docs_years",docs_years)
 
                 // counts_by_year_array
@@ -166,14 +169,37 @@ function draw_histogram(counts_by_year_array) {
     //~ }
     // console.log('=== GRAPH PREPARATION ===') ;
 
+    var emValue = parseFloat(getComputedStyle(document.body).fontSize)
+
     // 3) call histogram lib
-    new Dygraph($search_histogram[0],
+    hg = new Dygraph($search_histogram[0],
                   counts_by_year_array,
                   {
-                    labels: ['year', 'n'],
-                    pixelsPerLabel: 25 ,
+                    labels: ['year', '%', 'n'],
+
+                    // curve  => the % (normalized) value is shown, not the abs n
+                    visibility: [true, false],
+                    //           ^^^    ^^^
+                    //            %      n
+
                     drawPoints: true,
-                    fillGraph: true
+                    // pixels between labels <=> 2.5 em
+                    pixelsPerLabel: 2.5 * emValue,
+                    fillGraph: true,
+                    animatedZoom: false,
+
+                    // legend => selected n (instead of %) thx highlightCallback
+                    highlightCallback: function(e, x, pts, row) {
+                        // n has i == 2 in counts_by_year_array tuples
+                        var this_n = hg.getValue(row, 2);
+                        var legendDiv = document.getElementsByClassName("dygraph-legend")[0]
+                        legendDiv.innerHTML = "<span style='font-weight: bold; background-color:#FFF; color:#070;'>n = " + this_n + "</span>";
+                        legendDiv.style.left = 0
+                        legendDiv.style.paddingLeft = "37%"
+                        legendDiv.style.paddingTop = "1%"
+                        legendDiv.style.display = "block"
+                        legendDiv.style.background = "none"
+                    }
                   });
 }
 
