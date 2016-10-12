@@ -150,7 +150,8 @@ function draw_histogram(counts_by_year_array, div_id) {
 
     // 1) layout for the div#search_histogram
     //    /!\ this div *needs* padding:0 /!\;
-    $("#"+div_id).height("15em") ;
+    $("#"+div_id).height("15em")
+                 .css("background-color", "#F9F9F9")
 
     // 2) data preparation
     //~ var years = [] ;
