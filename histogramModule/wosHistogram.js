@@ -33,6 +33,8 @@ var wosYearTotals = {
             "2015" : 1772592
 }
 
+var $search_histogram = $("#search_histogram")
+
 
 //method for calling the ISC-API and get pubs-distribution of the suggested term
 function search_proposed_terms_and_draw( the_queries ) {
@@ -40,7 +42,7 @@ function search_proposed_terms_and_draw( the_queries ) {
     //            +"i'm searching:\n"
     //            +JSON.stringify(the_queries)) ;
 
-    $("#search_histogram").html("Searching for matching WOS data...")
+    $search_histogram.html("Searching for matching WOS data...")
 
     var args = {
         // the_queries is an array of str
@@ -50,7 +52,7 @@ function search_proposed_terms_and_draw( the_queries ) {
     }
     var docs_years = [] ;
 
-    $("#search_histogram")
+    $search_histogram
         .html('<p class="micromessage">Waiting for histogram data</p>')
 
     $.ajax({
@@ -80,10 +82,10 @@ function search_proposed_terms_and_draw( the_queries ) {
                 }
 
                 // docs_years is now an array of couples [[1989,42],[1990,100],...]
-                console.log("docs_years",docs_years)
+                // console.log("docs_years",docs_years)
 
                 // counts_by_year_array
-                draw_histogram(docs_years, "search_histogram") ;
+                draw_histogram(docs_years) ;
                 return true ;
             }
         },
@@ -91,7 +93,7 @@ function search_proposed_terms_and_draw( the_queries ) {
         error: function(exception) {
             console.log("search_proposed_terms_and_draw:exception"
                         + JSON.stringify(exception))
-            $("#search_histogram")
+            $search_histogram
                 .html('<p class="micromessage">'
                      +'<b>No histogram</b>: too many nodes selected</b>'
                      +'</p>')
@@ -113,11 +115,13 @@ $("#searchinput").on("tw:gotNodeSet", function(e) {
 $("#searchinput").on("tw:eraseNodeSet", function(e) {
     // console.log("event 'erase'") ;
     clean_histogram() ;
+    $search_histogram.hide() ;
 });
 
 // emptyNodeSet event when Tinaweb search found nothing
 $("#searchinput").on("tw:emptyNodeSet", function(e) {
     clean_histogram() ;
+    $search_histogram.hide() ;
 });
 
 
@@ -146,12 +150,11 @@ function newnodesHistogramBehavior(selectedNodeIds, unusedQuery) {
 
 
 // use dygraph lib to draw below the crowdsourcing div
-function draw_histogram(counts_by_year_array, div_id) {
+function draw_histogram(counts_by_year_array) {
 
     // 1) layout for the div#search_histogram
     //    /!\ this div *needs* padding:0 /!\;
-    $("#"+div_id).height("15em")
-                 .css("background-color", "#F9F9F9")
+    $search_histogram.height("15em").show()
 
     // 2) data preparation
     //~ var years = [] ;
@@ -164,7 +167,7 @@ function draw_histogram(counts_by_year_array, div_id) {
     // console.log('=== GRAPH PREPARATION ===') ;
 
     // 3) call histogram lib
-    new Dygraph(document.getElementById(div_id),
+    new Dygraph($search_histogram[0],
                   counts_by_year_array,
                   {
                     labels: ['year', 'n'],
