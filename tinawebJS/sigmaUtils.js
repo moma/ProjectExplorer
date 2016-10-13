@@ -369,13 +369,31 @@ function colorsRelByBins(daclass) {
 
     // spare color 13 "#64e0f2",
 
-    var tickThresholds = [-1000000,-75,-50,-25,-10,10,25,50,75,100,125,150, 1000000]
+    var tickThresholds = [-1000000,-75,-50,-25,-15,15,25,50,75,100,125,150, 1000000]
 
     // £TODO put colors and thresholds as params or calculate thresholds like eg d3.histogram
     if (daclass == 'age') {
         tickThresholds = [-1000000,1992,1994,1996,1998,2000,2002,2004,2006,2008,2010,2012,2014,2016]
         // and add a grey color for the first timeperiod
         binColors.unshift("#F9F7ED")
+    }
+    else if (daclass == 'growth_rate') {
+      binColors[4] = ""
+      binColors = [
+          "#005197",  //blue    binMin -∞
+          "#3c76fb",        //  binMin -75
+          "#5c8af2",        //  binMin -50
+          "#64c5f2",        //  binMin -25
+          "#F9F7ED",//epsilon   binMin -15
+          "#bae64f",        //  binMin 15
+          "#f9f008",        //  binMin 25
+          "#fab207",        //  binMin 50
+          "#fa9607",        //  binMin 75
+          "#fa6e07",        //  binMin 100
+          "#fa4607", // red     binMin 125
+          "#991B1E"         //  binMin 150
+      ];
+
     }
 
     // get the nodes
