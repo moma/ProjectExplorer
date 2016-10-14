@@ -464,14 +464,25 @@ function colorsBy(daclass) {
     }
 
     var v_nodes = getVisibleNodes();
-    // shuffle on entire array is better than random sorting function on each element
-    var randomColorList = shuffle(colorList)
 
-    for(var i in v_nodes) {
-        var the_node = TW.Nodes[ v_nodes[i].id ]
-        var attval = ( isUndef(the_node.attributes) || isUndef(the_node.attributes[daclass]) )? v_nodes[i][daclass]: the_node.attributes[daclass];
-        TW.partialGraph._core.graph.nodesIndex[v_nodes[i].id].color = randomColorList[ attval ]
+
+    if (daclass=="clust_default") {
+        for(var i in v_nodes) {
+          var original_node_color = TW.Nodes[ v_nodes[i].id ].color
+          TW.partialGraph._core.graph.nodesIndex[v_nodes[i].id].color = original_node_color
+        }
     }
+    else {
+      // shuffle on entire array is better than random sorting function on each element
+      var randomColorList = shuffle(colorList)
+
+      for(var i in v_nodes) {
+          var the_node = TW.Nodes[ v_nodes[i].id ]
+          var attval = ( isUndef(the_node.attributes) || isUndef(the_node.attributes[daclass]) )? v_nodes[i][daclass]: the_node.attributes[daclass];
+          TW.partialGraph._core.graph.nodesIndex[v_nodes[i].id].color = randomColorList[ attval ]
+      }
+    }
+
     TW.partialGraph.draw();
 
     //    [ Edge-colour by source-target nodes-colours combination ]
