@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="fr-FR">
+<head>
+  <meta charset="utf-8">
+  <title>Formulaire Community Explorer : se ré-enregistrer</title>
+  <meta name="description" content="Formulaire d'enregistrement sur la plateforme Community Explorer (ISCPIF CNRS UPS 3611)">
+  <meta name="keywords" content="complex systems, community, registration form">
+
+  <!-- CSS -->
+  <link type=text/css rel=stylesheet href="static/css/bootstrap.min.css">
+  <link type=text/css rel=stylesheet href="static/css/topbar_bootstrap_retrocompatibility.css">
+  <link type=text/css rel=stylesheet href="static/js/jquery-ui-1.12.1/jquery-ui.min.css">
+  <link type=text/css rel=stylesheet href="static/js/realperson/jquery.realperson.css">
+  <style type="text/css" media="screen">
+    .white { color:#fff ; }
+    .page {
+      margin-top: 45px;   /* topbar height is 40px */
+    }
+
+    /* for intro text */
+    .mini-hero {
+      margin-top: 1.5em;
+      font-size: 18px;
+      line-height: 27px;
+    }
+
+    /* ==> a question + input block <== */
+    .question {
+      padding: 0 1em;
+      margin-bottom: 2em;
+      /*background-color: red;*/
+    }
+
+    .operation {
+      color: #aa9 ;
+    }
+
+
+    /* small label inside addon group*/
+    .smlabel {
+      /*background-color: green;*/
+      min-width: 7.5em;
+    }
+
+    /* the question's additional legend or caption */
+    .legend {
+      font-family: Cambria, serif;
+      color: #504940 ;
+      font-style: italic;
+      text-align:right;
+      padding: .5em 0 .5em .5em ;
+      margin: 0;
+    }
+
+    /* page sections: style snippets from old bootstrap h2 */
+    h2.oldstyle {
+      font-family: Ubuntu, sans-serif;
+      font-size: 24px;
+      font-weight: bold;
+      line-height: 18px ;
+    }
+
+    /* big categories: like form sections etc. */
+    h3.formcat {
+      margin-top: 2em;
+    }
+
+    .spacerrow {
+      height: 5em;
+    }
+
+    .realperson-challenge {
+      float:right;
+    }
+    .realperson-text {
+      padding: 0 2em;
+    }
+    .realperson-regen {
+      color: #aa9 ;
+    }
+    .bigspacerrow {
+      height: 50em;
+    }
+  </style>
+
+
+  <!-- ## JS ## -->
+
+  <!--   libs   -->
+  <script type="text/javascript" src="static/js/jquery-3.1.1.min.js"></script>
+  <script type="text/javascript" src="static/js/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="static/js/realperson/jquery.plugin.min.js"></script>
+  <script type="text/javascript" src="static/js/realperson/jquery.realperson.min.js"></script>
+  <!--  our js is at the end -->
+
+  <!-- Piwik -->
+  <script type="text/javascript">
+    var _paq = _paq || [];
+    _paq.push(['trackPageView']);
+    _paq.push(['enableLinkTracking']);
+    (function() {
+      var u="//piwik.iscpif.fr/";
+      _paq.push(['setTrackerUrl', u+'piwik.php']);
+      _paq.push(['setSiteId', '4']);
+      var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+      g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+    })();
+  </script>
+  <noscript><p><img src="//piwik.iscpif.fr/piwik.php?idsite=4" style="border:0;" alt="" /></p></noscript>
+  <!-- End Piwik Code -->
+</head>
+<body>
+  <div class="topbar" style="opacity: 0.93;">
+      <div class="topbar-inner">
+          <div class="container-fluid">
+              <a class="brand" href="http://communityexplorer.org/index.html">
+                <span class="glyphicon glyphicon-home white"></i></a>
+              <ul class="white nav">
+                  <li>
+                      <a id="truc" href="http://communityexplorer.org/#"> <strong>Complex systems community explorer</strong></a>
+                  </li>
+              </ul>
+          </div>
+      </div>
+  </div>
+  <div class="page container-fluid">
+    <div class="row">
+      <div class="spacer col-sm-1 col-md-1">&nbsp;</div>
+      <div class="my_form_box col-sm-8 col-md-8">
+
+        <!-- INTRODUCTION TEXT -->
+        <div id="intro">
+          <h2 class="oldstyle">Registration form</h2>
+              <p class="mini-hero">
+                  <strong>Community Explorer</strong> maps your own socio-semantic network and enables to explore the complex systems researchers community.
+                  <br/>
+                  <br/>
+                  This <strong>registration form</strong> will allow us to update your database information and login credentials. The first page contains the essential informations we need for the map, the following pages are optional.
+              </p>
+        </div>
+
+
+        <!-- ########################### ( FORM ) ########################## -->
+        <form id="comex_reg_form" enctype="multipart/form-data"
+              method="post" onsubmit="document.getElementById('formsubmit').disabled = true"
+              action="http://localhost/comex-reg/cgibin/comex_merci_pour_les_infos.py.cgi">
+
+        <!-- todo onsubmit also save to cache -->
+
+
+
+          <!-- NAME & COUNTRY -->
+          <h3 class="formcat"> Basic infos </h3>
+
+          <div class="question input-group">
+            <label for="first_name" class="smlabel input-group-addon">
+              * First name
+            </label>
+            <input id="first_name" name="first_name"
+                   type="text" class="form-control" placeholder="prénom"
+                   onblur="makeBold(this)" onfocus="makeNormal(this)">
+          </div>
+
+          <!-- optionnel -->
+          <div id="group-midname" class="question input-group" style='display:none'>
+            <label for="middle_name" class="smlabel input-group-addon">
+              Middle name
+            </label>
+            <input id="middle_name" name="middle_name"
+                   type="text" class="form-control" placeholder="autres prénoms"
+                   onblur="makeBold(this)" onfocus="makeNormal(this)">
+          </div>
+
+          <div class="question input-group">
+            <label for="last_name" class="smlabel input-group-addon">
+              * Last name
+            </label>
+            <input id="last_name" name="last_name"
+                   type="text" class="form-control" placeholder="nom de famille"
+                   onblur="makeBold(this)" onfocus="makeNormal(this)">
+          </div>
+
+          <button class="btn btn-xs btn-default operation"
+                  title="Add a middle name" id="btn-midname"
+                  type="button" style="margin:1em; float:right"> <!-- border:none; -->
+            <span class="glyphicon glyphicon-plus"></span>
+            Add middle name
+          </button>
+
+          <div class="question input-group">
+            <label for="initials" class="smlabel input-group-addon">* Initials</label>
+            <input id="initials" name="initials" type="text" class="form-control" placeholder="initiales">
+          </div>
+
+          <div class="question input-group">
+            <label for="country" class="smlabel input-group-addon">
+              * Country
+            </label>
+            <input id="country" name="country" type="text" class="form-control" placeholder="pays" class="autocomp">
+          </div>
+
+
+
+
+          <!-- EMAIL & PASSWORD -->
+          <h3 class="formcat"> Login infos </h3>
+
+          <div class="question">
+            <p class="legend">Your email will also be your login for the ISC services.</p>
+            <div class="input-group">
+              <label for="email" class="smlabel input-group-addon">* Email</label>
+              <input id="email" name="email"
+                     type="text" class="form-control" placeholder="email">
+            </div>
+          </div>
+
+          <!-- £TODO js password validation -->
+          <div class="question">
+            <p class="legend">Please make your password difficult to predict.</p>
+            <div class="input-group">
+              <label for="password" class="smlabel input-group-addon">* Password</label>
+              <input id="password" name="password"
+                     type="password" class="form-control" placeholder="Create a password">
+            </div>
+          </div>
+
+          <div class="question">
+            <div class="input-group">
+              <label for="password2" class="smlabel input-group-addon">* Password</label>
+              <input id="password2" name="password2"
+                     type="password" class="form-control" placeholder="Repeat the password">
+            </div>
+            <p id="password-message" class="legend" style="color: #910; font-weight:bold"></p>
+          </div>
+
+
+
+
+          <!-- JOB & INTERESTS -->
+          <h3 class="formcat"> About your job and research </h3>
+
+          <div class="question input-group">
+            <label for="hon_title" class="smlabel input-group-addon">Job Title</label>
+            <input id="hon_title" name="hon_title"
+                   type="text" class="form-control" placeholder="titre"
+                   onblur="makeBold(this)" onfocus="makeNormal(this)">
+          </div>
+
+          <div class="question">
+            <div class="input-group">
+              <label for="keywords" class="smlabel input-group-addon">* Key subjects</label>
+              <input id="keywords" name="keywords"
+                     type="text" class="form-control" placeholder="keywords">
+            </div>
+            <p class="legend">Please enter at most 5 comma-separated keywords</p>
+          </div>
+
+          <div class="row spacerrow">&nbsp;</div><div class="row spacerrow">&nbsp;</div>
+
+          <!-- CAPTCHA -->
+          <h3 class="formcat">Verify and submit</h3>
+
+          <!--pseudo captcha using realperson from http://keith-wood.name/realPerson.html -->
+
+          <p class="legend">(A challenge for spam bots)</p>
+          <div class="question input-group">
+            <label for="my-captcha" class="smlabel input-group-addon">Code</label>
+            <input id="my-captcha" name="my-captcha" style="max-width:60%"
+                   type="text" class="form-control input-lg" placeholder="Enter the 5 letters you see beside =>"
+                   onblur="makeBold(this)" onfocus="makeNormal(this)">
+          </div>
+
+          <div class="row spacerrow">&nbsp;</div>
+
+          <!-- == S U B M I T == -->
+          <input type="submit" class="btn btn-lg btn-success" style="float:right"
+                 id="formsubmit" value="Submit your form" />
+
+        </form>
+
+      </div>
+      <div class="spacer col-sm-2 col-md-2">&nbsp;</div>
+    </div>
+
+    <div class="row spacerrow">&nbsp;</div>
+    <div class="row spacerrow">&nbsp;</div>
+
+    <!-- FOOTER TEXT AND LINKS -->
+    <footer>
+        <!-- This directory is maintained by the <a href="http://cssociety.org" target="blank">Complex Systems Society</a>
+             and the <a href="http://iscpif.fr" target="blank">Complex Systems Institute of Paris Ile-de-France</a>.<br/>-->
+        <center>
+            <a href="http://communityexplorer.org/about.html"><span class="glyphicon glyphicon-question-sign"></span> About</a> -
+            <a href="http://moma.csregistry.org/feedback" target="BLANK"><span class="glyphicon glyphicon-repeat"></span> Feedback</a> -
+            <a href="http://communityexplorer.org/privacy.html"> <span class="glyphicon glyphicon-list-alt"></span> Privacy</a>
+            <br>
+              Directory maintained by the
+                <a href="http://cssociety.org/" target="blank"> Complex Systems Society</a> and the
+                <a href="http://iscpif.fr/" target="blank">Complex Systems Institute of Paris Ile-de-France</a>.
+            <br>
+            <a href="http://cssociety.org/" target="_BLANK">
+              <img src="static/images/css.png" alt="http://cssociety.org"
+                   style="border: none; margin-bottom : -6px;"
+                   title="isc-pif" height="25px">
+            </a>
+
+            <a href="http://iscpif.fr/">
+              <img src="static/images/iscpif_short.png" alt="iscpif.fr"
+              style="border: none; margin-bottom : -6px;"
+              title="isc-pif">
+            </a>
+
+            <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="blank">
+              <img alt="Creative Commons License" style="border: none; margin-bottom : -6px;" src="static/images/cc.png" height="20px">
+            </a> -
+            <!-- <a href="http://moma.csregistry.org/" target="_BLANK"> MOMA</a> -  -->
+            <a href="http://iscpif.fr/" target="_BLANK">ISC-PIF</a> -
+            <a href="http://www.cnrs.fr/fr/recherche/index.htm" target="_BLANK">CNRS</a>.
+        </center>
+        <p>&nbsp;</p>
+    </footer>
+  </div>
+
+  <!--  our js  -->
+  <script src="static/js/comex_reg_form_controllers.js"></script>
+
+</body>
+</html>
