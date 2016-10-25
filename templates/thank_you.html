@@ -2,7 +2,7 @@
 <html lang="fr-FR">
 <head>
   <meta charset="utf-8">
-  <title>Formulaire Community Explorer : se ré-enregistrer</title>
+  <title>Formulaire Community Explorer : réponses enregistrées</title>
   <meta name="description" content="Formulaire d'enregistrement sur la plateforme Community Explorer (ISCPIF CNRS UPS 3611)">
   <meta name="keywords" content="complex systems, community, registration form">
 
@@ -10,36 +10,7 @@
   <link type=text/css rel=stylesheet href="../static/css/bootstrap.min.css">
   <link type=text/css rel=stylesheet href="../static/css/topbar_bootstrap_retrocompatibility.css">
   <link type=text/css rel=stylesheet href="../static/js/jquery-ui-1.12.1/jquery-ui.min.css">
-  <style type="text/css" media="screen">
-    .white { color:#fff ; }
-    .page {
-      margin-top: 45px;   /* topbar height is 40px */
-    }
-
-    /* for intro text */
-    .mini-hero {
-      margin-top: 1.5em;
-      font-size: 18px;
-      line-height: 27px;
-    }
-
-    /* page sections: style snippets from old bootstrap h2 */
-    h2.oldstyle {
-      font-family: Ubuntu, sans-serif;
-      font-size: 24px;
-      font-weight: bold;
-      line-height: 18px ;
-    }
-    .spacerrow {
-      height: 5em;
-    }
-
-    .bigspacerrow {
-      height: 50em;
-    }
-
-
-  </style>
+  <link type=text/css rel=stylesheet href="../static/css/comex_reg.css">
 
 
   <!-- ## JS ## -->
@@ -64,16 +35,17 @@
   <div class="topbar" style="opacity: 0.93;">
       <div class="topbar-inner">
           <div class="container-fluid">
-              <a class="brand" href="http://communityexplorer.org/index.html">
+              <a class="brand" href="http://www.iscpif.fr">
                 <span class="glyphicon glyphicon-home white"></i></a>
-              <ul class="white nav">
+              <ul class="white nav navbar-nav">
                   <li>
-                      <a id="truc" href="http://communityexplorer.org/#"> <strong>Complex systems community explorer</strong></a>
+                      <a id="mainpagelink" href="http://communityexplorer.org/#"> <strong>Complex systems community explorer</strong></a>
                   </li>
               </ul>
           </div>
       </div>
   </div>
+
   <div class="page container-fluid">
     <div class="row spacerrow">&nbsp;</div>
     <div class="row">
@@ -95,6 +67,20 @@
       </div>
       <div class="spacer col-sm-2 col-md-2">&nbsp;</div>
     </div>
+
+    <!-- raw responses for debug -->
+    <div class="row spacerrow">&nbsp;</div>
+    <div class="row">
+      <div class="spacer col-sm-1 col-md-1">&nbsp;</div>
+      <div class="raw-responses col-sm-8 col-md-8">
+        {{raw_answers}}
+        {% for value in raw_answers %}
+          <p> {{value}} </p>
+        {% endfor %}
+      </div>
+      <div class="spacer col-sm-2 col-md-2">&nbsp;</div>
+    </div>
+
 
     <div class="row bigspacerrow">&nbsp;</div>
 

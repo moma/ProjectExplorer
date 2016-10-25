@@ -14,11 +14,16 @@ from cgi         import FieldStorage
 from traceback   import format_exc, format_tb
 from ctypes      import c_int
 from re          import sub
-# from jinja2      import Template, Environment, FileSystemLoader
+from jinja2      import Template, Environment, FileSystemLoader
+from sys         import stdout   # for direct buffer write of utf-8 bytes
 
 # debug
 import cgitb
 cgitb.enable()
+
+# templating setup
+templating_env = Environment(loader = FileSystemLoader('../templates'),
+                             autoescape = False)
 
 ########### SUBS ###########
 def re_hash(userinput, salt=""):
@@ -40,21 +45,28 @@ def re_hash(userinput, salt=""):
 
     return hashk
 
+def get_template(filename):
+    """
+    Retrieve a jinja2 template from ../templates
+    """
+    return templating_env.get_template(filename)
+
+def print_to_buffer(stringy):
+    """
+    print() with utf-8 in a cgi doesn't work well because print is
+    connected to sys.stdout which has hardcoded encoding ASCII...
+    (but in reality html can of course have utf-8 bytes in cgi)
+    so to avoid print function we write to sys.stdout.buffer
+    (inspired by http://stackoverflow.com/questions/14860034)
+    """
+    stdout.buffer.write((stringy+'\n').encode('utf-8'))
+
 ########### MAIN ###########
 if __name__ == "__main__":
 
     # any response must have this
-    print("Content-type: text/html")
-    print()  # blank line <=> end of headers
-
-    #  --------- todo use templates --------------------------->8--------------
-    # template1 = Template('Hello {{ name }}!')
-    # print(template1.render(name='Jogn'))
-    #
-    # template2 = Environment(loader=FileSystemLoader('../templates')).get_template('thank_you.html')
-    #
-    # print(template2.render(form_accepted=True).encode("utf-8"))
-    # -------------------------------------------------------->8-----------------
+    print_to_buffer("Content-type: text/html")
+    print_to_buffer('')  # blank line <=> end of headers
 
     # reception: the cgi library gets vars from html form within received http POST
     this_data = FieldStorage()
@@ -91,36 +103,65 @@ if __name__ == "__main__":
         captcha_userinput = this_data['my-captcha'].value
         captcha_verifhash = int(this_data['my-captchaHash'].value)
         captcha_userhash = re_hash(captcha_userinput)
-        form_accepted = (captcha_userhash == captcha_verifhash)
+        captcha_accepted = (captcha_userhash == captcha_verifhash)
         # ----------------------------------------------------------------------
-
 
         # debug data keys
         # print([k for k in this_data])
 
-        # show received values
-        print("<TITLE>CGI script output</TITLE>")
 
-        print("<p style='font-family:Calibri, sans-serif; font-size:80%'")
-        print('<br>first_name:',first_name)
-        print('<br>midle_name:',middle_name)
-        print('<br>last_name:',last_name)
-        print('<br>initials:',initials)
-        print('<br>email:',email)
-        print('<br>country:',country)
-        print('<br>jobtitle:',jobtitle)
-        print('<br>keywords:',keywordsss)
-        print('<br>captcha is correct ?:',form_accepted)
-        # print('instituton:',institution)
+        # show received values in template
+        template_thanks = get_template("thank_you.html")
+
+        print_to_buffer(
+            template_thanks.render(
+                form_accepted = captcha_accepted,
+                raw_answers = [
+                  first_name,
+                  middle_name,
+                  last_name,
+                  initials,
+                  email,
+                  country,
+                  jobtitle,
+                  keywordsss,
+                ]
+            )
+        )
+        # print('<br>midle_name:',middle_name)
+        # print('<br>last_name:',last_name)
+        # print('<br>initials:',initials)
+        # print('<br>email:',email)
+        # print('<br>country:',country)
+        # print('<br>jobtitle:',jobtitle)
+        # print('<br>keywords:',keywordsss)
+        # print('<br>captcha is correct ?:',form_accepted)
+        # # print('instituton:',institution)
+
+
+
+        # print("<TITLE>CGI script output</TITLE>")
+        #
+        # print("<p style='font-family:Calibri, sans-serif; font-size:80%'")
+        # print('<br>first_name:',first_name)
+        # print('<br>midle_name:',middle_name)
+        # print('<br>last_name:',last_name)
+        # print('<br>initials:',initials)
+        # print('<br>email:',email)
+        # print('<br>country:',country)
+        # print('<br>jobtitle:',jobtitle)
+        # print('<br>keywords:',keywordsss)
+        # print('<br>captcha is correct ?:',form_accepted)
+        # # print('instituton:',institution)
 
     except KeyError as kerrr:
-        print("<h3>Your form was empty</h3")
-        print("<p style='font-family:monospace; font-size:80%'")
-        print(sub(r'\n', "<br/>", format_exc()))
-        print("</p>")
+        print_to_buffer("<h3>Your form was empty</h3")
+        print_to_buffer("<p style='font-family:monospace; font-size:80%'")
+        print_to_buffer(sub(r'\n', "<br/>", format_exc()))
+        print_to_buffer("</p>")
 
     except Exception as errr:
-        print("<h3>There was an error:</h3")
-        print("<p style='font-family:monospace; font-size:80%'")
-        print(sub(r'\n', "<br/>", format_exc()))
-        print("</p>")
+        print_to_buffer("<h3>There was an error:</h3")
+        print_to_buffer("<p style='font-family:monospace; font-size:80%'")
+        print_to_buffer(sub(r'\n', "<br/>", format_exc()))
+        print_to_buffer("</p>")
