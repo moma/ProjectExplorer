@@ -14,6 +14,7 @@ from cgi         import FieldStorage
 from traceback   import format_exc, format_tb
 from ctypes      import c_int
 from re          import sub
+# from jinja2      import Template, Environment, FileSystemLoader
 
 # debug
 import cgitb
@@ -45,6 +46,15 @@ if __name__ == "__main__":
     # any response must have this
     print("Content-type: text/html")
     print()  # blank line <=> end of headers
+
+    #  --------- todo use templates --------------------------->8--------------
+    # template1 = Template('Hello {{ name }}!')
+    # print(template1.render(name='Jogn'))
+    #
+    # template2 = Environment(loader=FileSystemLoader('../templates')).get_template('thank_you.html')
+    #
+    # print(template2.render(form_accepted=True).encode("utf-8"))
+    # -------------------------------------------------------->8-----------------
 
     # reception: the cgi library gets vars from html form within received http POST
     this_data = FieldStorage()
