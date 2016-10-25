@@ -1,0 +1,82 @@
+.white { color:#fff ; }
+.page {
+  margin-top: 45px;   /* topbar height is 40px */
+}
+
+/* for intro text */
+.mini-hero {
+  margin-top: 1.5em;
+  font-size: 18px;
+  line-height: 27px;
+}
+
+/* ==> a question + input block <== */
+.question {
+  padding: 0 1em;
+  margin-bottom: 2em;
+  /*background-color: red;*/
+}
+
+.operation {
+  color: #aa9 ;
+}
+
+#mainpagelink:hover {
+  background-color: transparent !important;
+}
+
+/* small label inside addon group*/
+.smlabel {
+  /*background-color: green;*/
+  min-width: 7.5em;
+}
+
+/* the question's additional legend or caption */
+.legend {
+  font-family: Cambria, serif;
+  color: #504940 ;
+  font-style: italic;
+  text-align:right;
+  padding: .5em 0 .5em .5em ;
+  margin: 0;
+}
+
+/* page sections: style snippets from old bootstrap h2 */
+h2.oldstyle {
+  font-family: Ubuntu, sans-serif;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 18px ;
+}
+
+/* big categories: like form sections etc. */
+h3.formcat {
+  margin-top: 2em;
+}
+
+.spacerrow {
+  height: 4em;
+}
+
+.bigspacerrow {
+  height: 50em;
+}
+
+.realperson-challenge {
+  float:right;
+}
+.realperson-text {
+  padding: 0 2em;
+}
+.realperson-regen {
+  color: #aa9 ;
+}
+.bigspacerrow {
+  height: 50em;
+}
+
+.raw-responses {
+  font-family: Calibri, sans-serif ;
+  font-size: 80%;
+  line-height: 90% ;
+}
