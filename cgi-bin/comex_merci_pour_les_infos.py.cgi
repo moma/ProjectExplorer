@@ -11,13 +11,13 @@ __email__     = "romain.loth@iscpif.fr"
 __status__    = "Test"
 
 from cgi         import FieldStorage
-from traceback   import format_tb
+from traceback   import format_exc, format_tb
 from ctypes      import c_int
+from re          import sub
 
 # debug
 import cgitb
 cgitb.enable()
-
 
 ########### SUBS ###########
 def re_hash(userinput, salt=""):
@@ -39,9 +39,9 @@ def re_hash(userinput, salt=""):
 
     return hashk
 
-
 ########### MAIN ###########
 if __name__ == "__main__":
+
     # any response must have this
     print("Content-type: text/html")
     print()  # blank line <=> end of headers
@@ -53,6 +53,7 @@ if __name__ == "__main__":
     # ['email', 'password', 'password2',
     #  'hon_title', 'first_name', 'middle_name', 'last_name', 'initials',
     #  'keywords', 'country', 'my-captcha', 'my-captchaHash']
+
 
     try:
         # read into local str vars
@@ -105,11 +106,11 @@ if __name__ == "__main__":
     except KeyError as kerrr:
         print("<h3>Your form was empty</h3")
         print("<p style='font-family:monospace; font-size:80%'")
-        print("<br/>".join(format_tb(kerrr.__traceback__)))
+        print(sub(r'\n', "<br/>", format_exc()))
         print("</p>")
 
     except Exception as errr:
         print("<h3>There was an error:</h3")
         print("<p style='font-family:monospace; font-size:80%'")
-        print("<br/>".join(format_tb(errr.__traceback__)))
+        print(sub(r'\n', "<br/>", format_exc()))
         print("</p>")
