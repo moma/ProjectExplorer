@@ -1,3 +1,30 @@
+// 2 actions to do on form submit
+// => block the submit button to avoid resubmit before response
+// => transmit to doors
+var submitButton = document.getElementById('formsubmit')
+function whileSubmit(form) {
+    console.log(form)
+    submitButton.disabled = true
+
+    // submit to doors and wait for response
+    $.ajax({
+        contentType: "application/json",
+        url: "http://localhost:8989/api/user",
+        data: {},
+        type: 'POST',
+        success: function(data) {
+            console.log("ajax success")
+            // console.log(data)
+            setTimeout(
+                function() {
+                    location.reload();
+                }, 5000);
+            },
+            error: function(result) {
+                console.log("ajax error");
+            }
+    });
+}
 
 
 // basic inputs get normal on focus
@@ -28,6 +55,7 @@ var fName = document.getElementById('first_name')
 var mName = document.getElementById('middle_name')
 var lName = document.getElementById('last_name')
 var initialsInput = document.getElementById('initials')
+
 var nameInputs = [fName, mName, lName]
 nameInputs.forEach ( function(nameInput) {
   nameInput.onchange = function () {
