@@ -173,7 +173,6 @@ $(function() {
     "Universidad Nacional Autonoma de Mexico",
     "Institut National de Recherche en Informatique et Automatique",
     "Commissariat à l'Energie Atomique",
-    "Centre National pour la Recherche Scientifique",
     "Université Paris 1 – Panthéon-Sorbonne",
     "University College London",
     "Universitat de Barcelona",

@@ -87,6 +87,7 @@ if __name__ == "__main__":
         country     = this_data['country'].value
         jobtitle    = this_data['hon_title'].value
         keywordsss  = this_data['keywords'].value   # single string but ','-separated
+        organization= this_data['organization'].value
         # keywordzzz = this_data.getlist(keywords)   # array
 
         #  --------- todo ------>8--------------
@@ -125,6 +126,7 @@ if __name__ == "__main__":
                   country,
                   jobtitle,
                   keywordsss,
+                  organization
                 ]
             )
         )
