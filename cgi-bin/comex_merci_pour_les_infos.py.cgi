@@ -16,6 +16,7 @@ from ctypes      import c_int
 from re          import sub
 from jinja2      import Template, Environment, FileSystemLoader
 from sys         import stdout   # for direct buffer write of utf-8 bytes
+from sqlite3     import connect
 
 # debug
 import cgitb
@@ -60,6 +61,42 @@ def print_to_buffer(stringy):
     (inspired by http://stackoverflow.com/questions/14860034)
     """
     stdout.buffer.write((stringy+'\n').encode('utf-8'))
+
+def sanitize(value_array):
+    """
+    simple and radical: leaves only alphanum and '.' '-' ':'
+
+    TODO allow more of the safe chars
+    """
+    sanitized_array = []
+    for val in value_array:
+        str_val = str(val)
+        sanitized_array.append(sub(r'[^\w@\.-:]', '', str_val))
+    return sanitized_array
+
+def save_to_db(records):
+    """
+    Expected columns:
+      FOR TESTS
+      - email
+      - initials
+
+      TODO
+      - first_name
+      - middle_name
+      - last_name
+      - jobtitle
+      - keywords
+      - institution
+      - institution city
+      - team/lab if applicable
+      - organization type
+    """
+    safe_records = sanitize(records)
+    c = connect('../data/registered.db')
+    c.execute('INSERT INTO test_table VALUES (?,?)', safe_records)
+    c.close()
+
 
 ########### MAIN ###########
 if __name__ == "__main__":
@@ -110,6 +147,8 @@ if __name__ == "__main__":
         # debug data keys
         # print([k for k in this_data])
 
+        # sanitize & save to DB
+        save_to_db([email, initials])
 
         # show received values in template
         template_thanks = get_template("thank_you.html")
