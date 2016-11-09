@@ -99,10 +99,11 @@ def save_to_db(safe_records):
       - team/lab if applicable
       - organization type
     """
-    # c = connect('../data/registered.db')
-    c = connect('registered.db')
-    c.execute('INSERT INTO test_table VALUES (?,?)', safe_records)
-    c.close()
+    reg_db = connect('../data/registered.db')
+    reg_db_c = reg_db.cursor()
+    reg_db_c.execute('INSERT INTO test_table VALUES (?,?)', safe_records)
+    reg_db.commit()
+    reg_db.close()
 
 
 ########### MAIN ###########
@@ -123,7 +124,6 @@ if __name__ == "__main__":
     template_thanks = get_template("thank_you.html")
     captcha_accepted = False
 
-
     # for captcha validation -----------------------------------------------
     if 'my-captcha' in incoming_data:
         captcha_userinput = incoming_data['my-captcha'].value
@@ -139,7 +139,7 @@ if __name__ == "__main__":
     if captcha_accepted:
         expected = ['email', 'hon_title', 'first_name', 'middle_name',
                     'last_name', 'initials', 'keywords', 'country',
-                    'organization' 'my-captcha']
+                    'organization']
 
 
         # read in + sanitize values
@@ -147,7 +147,6 @@ if __name__ == "__main__":
         # NB password values have already been sent by ajax to Doors
 
         for field in expected:
-
             if field in incoming_data:
                 clean_records[field] = sanitize(incoming_data[field].value)
             else:
@@ -167,12 +166,14 @@ if __name__ == "__main__":
         # print([k for k in incoming_data])
 
         # sanitize & save to DB
-        # save_to_db([
-        #         clean_records['email'],
-        #         clean_records['initials']
-        #     ])
+        # =====================
+        save_to_db([
+                clean_records['email'],
+                clean_records['initials']
+            ])
 
     # show received values in template
+    # ================================
     print_to_buffer(
         template_thanks.render(
             form_accepted = captcha_accepted,
