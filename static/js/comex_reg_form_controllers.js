@@ -80,21 +80,29 @@ var passwords = [pass1, pass2]
 passwords.forEach ( function(pass) {
   pass.onkeyup = function () {
     if (pass1.value || pass2.value) {
+      var pass1v = pass1.value
+      var pass2v = pass2.value
 
-      if ((pass1.value && pass1.value.length > 6)
-          || (pass2.value && pass2.value.length > 6)) {
+      if ((pass1v && pass1v.length > 7)
+          || (pass2v && pass2v.length > 7)) {
         // test values
-        if (pass1.value == pass2.value) {
-          passMsg.innerHTML = 'ok'
-          passMsg.style.color = '#161'
+        if (pass1v == pass2v) {
+            if (pass1v.match('[^A-z]')) {
+                passMsg.innerHTML = 'Ok valid passwords!'
+                passMsg.style.color = '#161'
+            }
+            else {
+                passMsg.innerHTML = 'Passwords match but contain only letters, please complexify!'
+                passMsg.style.color = '#554'
+            }
         }
         else {
           passMsg.innerHTML = "The passwords don't match yet."
           passMsg.style.color = '#910'
-        }
+      }
       }
       else {
-        passMsg.innerHTML = "The password is too short."
+        passMsg.innerHTML = "The password is too short (8 chars min)."
         passMsg.style.color = '#910'
       }
     }

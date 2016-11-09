@@ -1,5 +1,7 @@
 .white { color:#fff ; }
-.red { color:#972A25 ; }
+.red   { color:#910 ; }
+.green { color:#161 ; }
+.grey  { color:#554 ; }
 
 .page {
   margin-top: 45px;   /* topbar height is 40px */
@@ -18,11 +20,10 @@
 .question {
   padding: 0 1em;
   margin-bottom: 2em;
-  /*background-color: red;*/
 }
 
 .operation {
-  color: #aa9 ;
+  color: #554 ;
 }
 
 #mainpagelink:hover {
@@ -31,14 +32,13 @@
 
 /* small label inside addon group*/
 .smlabel {
-  /*background-color: green;*/
   min-width: 7.5em;
 }
 
 /* the question's additional legend or caption */
 .legend {
   font-family: Cambria, serif;
-  color: #504940 ;
+  color: #554 ;
   font-style: italic;
   text-align:right;
   padding: .5em 0 .5em .5em ;
@@ -73,7 +73,7 @@ h3.formcat {
   padding: 0 2em;
 }
 .realperson-regen {
-  color: #aa9 ;
+  color: #554 ;
 }
 .bigspacerrow {
   height: 50em;
@@ -83,5 +83,5 @@ h3.formcat {
   font-family: Calibri, sans-serif ;
   font-size: 80%;
   line-height: 90% ;
-  background-color: grey;
+  background-color: #554;
 }
