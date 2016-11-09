@@ -146,6 +146,8 @@ if __name__ == "__main__":
         captcha_accepted = (captcha_userhash == captcha_verifhash)
     # ----------------------------------------------------------------------
 
+    got_them_all = None
+
     if captcha_accepted:
         expected = ['email', 'hon_title', 'first_name', 'middle_name',
                     'last_name', 'initials', 'keywords', 'country',
