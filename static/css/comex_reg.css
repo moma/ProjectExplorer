@@ -1,4 +1,6 @@
 .white { color:#fff ; }
+.red { color:#972A25 ; }
+
 .page {
   margin-top: 45px;   /* topbar height is 40px */
 }
@@ -9,6 +11,8 @@
   font-size: 18px;
   line-height: 27px;
 }
+
+
 
 /* ==> a question + input block <== */
 .question {
@@ -79,4 +83,5 @@ h3.formcat {
   font-family: Calibri, sans-serif ;
   font-size: 80%;
   line-height: 90% ;
+  background-color: grey;
 }

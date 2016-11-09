@@ -59,7 +59,9 @@
                 {% if form_accepted %}
                   Thank you for your answers ! We'll soon update the <strong>Community Explorer</strong> database with all the new information.
                 {% else %}
-                  Your answers couldn't be accepted because you filled some wrong information in the verification test !
+                  <span class="red">
+                    Your answers couldn't be accepted because you filled some wrong information in the verification test !
+                  </span>
                 {% endif %}
               </p>
         </div>
@@ -73,9 +75,13 @@
     <div class="row">
       <div class="spacer col-sm-1 col-md-1">&nbsp;</div>
       <div class="raw-responses col-sm-8 col-md-8" style="font-family:Calibri, sans-serif">
-        {% for value in raw_answers %}
-          <p> {{value}} </p>
+        <h3>debug</h3>
+        {% for key in records %}
+          <p> {{key}} {{records[key]}} </p>
         {% endfor %}
+
+        <h3>glob(.)</h3>
+        {{globp}}
       </div>
       <div class="spacer col-sm-2 col-md-2">&nbsp;</div>
     </div>

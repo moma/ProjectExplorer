@@ -22,6 +22,8 @@ from sqlite3     import connect
 import cgitb
 cgitb.enable()
 
+from glob import glob
+
 # templating setup
 templating_env = Environment(loader = FileSystemLoader('../templates'),
                              autoescape = False)
@@ -62,19 +64,24 @@ def print_to_buffer(stringy):
     """
     stdout.buffer.write((stringy+'\n').encode('utf-8'))
 
-def sanitize(value_array):
+def sanitize(value):
     """
     simple and radical: leaves only alphanum and '.' '-' ':'
 
     TODO allow more of the safe chars
     """
-    sanitized_array = []
-    for val in value_array:
-        str_val = str(val)
-        sanitized_array.append(sub(r'[^\w@\.-:]', '', str_val))
-    return sanitized_array
+    vtype = type(value)
+    str_val = str(value)
+    san_val = sub(r'[^\w@\.-:]', '', str_val)
 
-def save_to_db(records):
+    if vtype not in [int, str]:
+        raise ValueError("Value has an incorrect type %s" % str(vtype))
+    else:
+        # cast back to orginal type
+        san_typed_val = vtype(san_val)
+        return san_typed_val
+
+def save_to_db(safe_records):
     """
     Expected columns:
       FOR TESTS
@@ -92,8 +99,8 @@ def save_to_db(records):
       - team/lab if applicable
       - organization type
     """
-    safe_records = sanitize(records)
-    c = connect('../data/registered.db')
+    # c = connect('../data/registered.db')
+    c = connect('registered.db')
     c.execute('INSERT INTO test_table VALUES (?,?)', safe_records)
     c.close()
 
@@ -101,108 +108,82 @@ def save_to_db(records):
 ########### MAIN ###########
 if __name__ == "__main__":
 
-    # any response must have this
+    # any response must have headers (not managed by the templating)
+    # ==============================
     print_to_buffer("Content-type: text/html")
     print_to_buffer('')  # blank line <=> end of headers
 
     # reception: the cgi library gets vars from html form within received http POST
-    this_data = FieldStorage()
+    # ==========
+    incoming_data = FieldStorage()
 
-    # fyi actual form fields were
-    # ['email', 'password', 'password2',
-    #  'hon_title', 'first_name', 'middle_name', 'last_name', 'initials',
-    #  'keywords', 'country', 'my-captcha', 'my-captchaHash']
+    # init vars
+    clean_records = {}
+    missing_fields = []
+    template_thanks = get_template("thank_you.html")
+    captcha_accepted = False
 
 
-    try:
-        # read into local str vars
-        first_name  = this_data['first_name'].value
-        middle_name = this_data['middle_name'].value
-        last_name   = this_data['last_name'].value
-        initials    = this_data['initials'].value
-        email       = this_data['email'].value
-        country     = this_data['country'].value
-        jobtitle    = this_data['hon_title'].value
-        keywordsss  = this_data['keywords'].value   # single string but ','-separated
-        organization= this_data['organization'].value
-        # keywordzzz = this_data.getlist(keywords)   # array
+    # for captcha validation -----------------------------------------------
+    if 'my-captcha' in incoming_data:
+        captcha_userinput = incoming_data['my-captcha'].value
+        captcha_verifhash = int(incoming_data['my-captchaHash'].value)
+        captcha_userhash = re_hash(captcha_userinput)
+        captcha_accepted = (captcha_userhash == captcha_verifhash)
+    # ----------------------------------------------------------------------
+
+
+    # for debug
+    captcha_accepted = True
+
+    if captcha_accepted:
+        expected = ['email', 'hon_title', 'first_name', 'middle_name',
+                    'last_name', 'initials', 'keywords', 'country',
+                    'organization' 'my-captcha']
+
+
+        # read in + sanitize values
+        # =========================
+        # NB password values have already been sent by ajax to Doors
+
+        for field in expected:
+
+            if field in incoming_data:
+                clean_records[field] = sanitize(incoming_data[field].value)
+            else:
+                missing_fields.append(field)
+
+        # keywordsss  = incoming_data['keywords'].value   # single string but ','-separated
+        # keywordzzz = incoming_data.getlist(keywords)    # array
 
         #  --------- todo ------>8--------------
-        # institution = this_data[].value
-
         # optional
         # picture = form["user_picture"]
         # if picture.file & picture.filename:
         #     picture_bytes = picture.value
         # --------------------->8---------------
 
-        # for captcha validation -----------------------------------------------
-        form_accepted = False
-        captcha_userinput = this_data['my-captcha'].value
-        captcha_verifhash = int(this_data['my-captchaHash'].value)
-        captcha_userhash = re_hash(captcha_userinput)
-        captcha_accepted = (captcha_userhash == captcha_verifhash)
-        # ----------------------------------------------------------------------
-
         # debug data keys
-        # print([k for k in this_data])
+        # print([k for k in incoming_data])
 
         # sanitize & save to DB
-        save_to_db([email, initials])
+        # save_to_db([
+        #         clean_records['email'],
+        #         clean_records['initials']
+        #     ])
 
-        # show received values in template
-        template_thanks = get_template("thank_you.html")
-
-        print_to_buffer(
-            template_thanks.render(
-                form_accepted = captcha_accepted,
-                raw_answers = [
-                  first_name,
-                  middle_name,
-                  last_name,
-                  initials,
-                  email,
-                  country,
-                  jobtitle,
-                  keywordsss,
-                  organization
-                ]
-            )
+    # show received values in template
+    print_to_buffer(
+        template_thanks.render(
+            form_accepted = captcha_accepted,
+            # for debug
+            records = clean_records,
+            globp = glob('../data/*')
         )
-        # print('<br>midle_name:',middle_name)
-        # print('<br>last_name:',last_name)
-        # print('<br>initials:',initials)
-        # print('<br>email:',email)
-        # print('<br>country:',country)
-        # print('<br>jobtitle:',jobtitle)
-        # print('<br>keywords:',keywordsss)
-        # print('<br>captcha is correct ?:',form_accepted)
-        # # print('instituton:',institution)
+    )
 
-
-
-        # print("<TITLE>CGI script output</TITLE>")
-        #
-        # print("<p style='font-family:Calibri, sans-serif; font-size:80%'")
-        # print('<br>first_name:',first_name)
-        # print('<br>midle_name:',middle_name)
-        # print('<br>last_name:',last_name)
-        # print('<br>initials:',initials)
-        # print('<br>email:',email)
-        # print('<br>country:',country)
-        # print('<br>jobtitle:',jobtitle)
-        # print('<br>keywords:',keywordsss)
-        # print('<br>captcha is correct ?:',form_accepted)
-        # # print('instituton:',institution)
-
-    except KeyError as kerrr:
-        print_to_buffer("<h3>Your form was empty</h3")
-        print_to_buffer("<p style='font-family:monospace; font-size:80%'")
-        print_to_buffer(sub(r'\n', "<br/>", format_exc()))
-        print_to_buffer("</p>")
-
-    except Exception as errr:
-        print_to_buffer("<h3>There was an error:</h3")
-        print_to_buffer("<p style='font-family:monospace; font-size:80%'")
-        print_to_buffer(sub(r'\n', "<br/>", format_exc()))
-        print_to_buffer("</p>")
+    # except Exception as errr:
+    #     print_to_buffer("<h3>There was an error:</h3")
+    #     print_to_buffer("<p style='font-family:monospace; font-size:80%'")
+    #     print_to_buffer(sub(r'\n', "<br/>", format_exc()))
+    #     print_to_buffer("</p>")
