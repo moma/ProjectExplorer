@@ -3,6 +3,14 @@
 Package: Registration page for comex app
 
 File: CGI script for collecting form
+
+Context:
+    - static input form validated fields and checked if all were present
+      (base_form.html + static/js/comex_reg_form_controllers.js)
+
+    - Doors recorded the email + password combination
+
+    - POSSIBLE Doors validated the email was new ??
 """
 __author__    = "CNRS"
 __copyright__ = "Copyright 2016 ISCPIF-CNRS"
@@ -18,11 +26,12 @@ from jinja2      import Template, Environment, FileSystemLoader
 from sys         import stdout   # for direct buffer write of utf-8 bytes
 from sqlite3     import connect
 
-# debug
+# debug   # £TODO comment before prod  -------------------8<--------------------
 import cgitb
 cgitb.enable()
-
 from glob import glob
+# --------------------------------------------------------8<--------------------
+
 
 # templating setup
 templating_env = Environment(loader = FileSystemLoader('../templates'),
@@ -99,6 +108,11 @@ def save_to_db(safe_records):
       - team/lab if applicable
       - organization type
     """
+
+    # £TODO check if email exists first
+    #   yes =>propose login via doors + overwrite ?)
+    #   no => proceed
+
     reg_db = connect('../data/registered.db')
     reg_db_c = reg_db.cursor()
     reg_db_c.execute('INSERT INTO test_table VALUES (?,?)', safe_records)
@@ -132,14 +146,12 @@ if __name__ == "__main__":
         captcha_accepted = (captcha_userhash == captcha_verifhash)
     # ----------------------------------------------------------------------
 
-
-    # for debug
-    captcha_accepted = True
-
     if captcha_accepted:
         expected = ['email', 'hon_title', 'first_name', 'middle_name',
                     'last_name', 'initials', 'keywords', 'country',
                     'organization']
+
+        columns = ['email', 'initials']
 
 
         # read in + sanitize values
@@ -152,9 +164,6 @@ if __name__ == "__main__":
             else:
                 missing_fields.append(field)
 
-        # keywordsss  = incoming_data['keywords'].value   # single string but ','-separated
-        # keywordzzz = incoming_data.getlist(keywords)    # array
-
         #  --------- todo ------>8--------------
         # optional
         # picture = form["user_picture"]
@@ -165,21 +174,27 @@ if __name__ == "__main__":
         # debug data keys
         # print([k for k in incoming_data])
 
+        # NB will be done in js
+        got_them_all = True
+        for k in columns:
+            if k in missing_fields:
+                got_them_all = False
+                break
+
         # sanitize & save to DB
         # =====================
-        save_to_db([
-                clean_records['email'],
-                clean_records['initials']
-            ])
+        save_to_db([clean_records[k] for k in columns])
+
 
     # show received values in template
     # ================================
     print_to_buffer(
         template_thanks.render(
             form_accepted = captcha_accepted,
+
             # for debug
             records = clean_records,
-            globp = glob('../data/*')
+            message = "got_them_all:" + str(got_them_all)
         )
     )
 
