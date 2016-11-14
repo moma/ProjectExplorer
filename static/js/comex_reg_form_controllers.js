@@ -2,19 +2,34 @@
 // => block the submit button to avoid resubmit before response
 // => transmit to doors
 var submitButton = document.getElementById('formsubmit')
-function whileSubmit(form) {
-    console.log(form)
-    submitButton.disabled = true
+function whileSubmit(form, orignStr, loginOrRegister) {
+    console.warn("=====> CORS <=====")
+    console.warn("origin:", orignStr)
+    // submitButton.disabled = true
 
-    // submit to doors and wait for response
+    var action = 'register'
+    if (loginOrRegister && loginOrRegister == 'login') {
+        action = 'user'
+    }
+
+    console.log("form", form)
+
+    // £TEST normal case: login to doors and wait for response
     $.ajax({
         contentType: "application/json",
-        url: "http://localhost:8989/api/user",
-        data: {},
+        dataType: 'json',
+        url: "http://localhost:8989/api/" + action,
+        data: JSON.stringify({
+            // TODO pass the real values
+            "login": "jpp@om.fr",
+            "password": "droitaubut",
+            "name": "JPP"
+        }),
         type: 'POST',
         success: function(data) {
             console.log("ajax success")
-            // console.log(data)
+            console.log("response data", data)
+            console.log("response data.id", data.id)
             setTimeout(
                 function() {
                     location.reload();
@@ -24,6 +39,8 @@ function whileSubmit(form) {
                 console.log("ajax error");
             }
     });
+
+    console.warn("=====> end of whileSubmit <=====")
 }
 
 

@@ -69,10 +69,22 @@
         </div>
 
 
+
+
+        <!-- ########################### ( debg ) ########################## -->
+        <!-- test cgi user from submit point of view -->
+        <form id="test_user_form" enctype="multipart/form-data"
+              method="post"
+              action="cgi-bin/test_cgi_user.py.cgi">
+
+              <input type="submit" class="btn btn-lg btn-success" style="float:right"
+                     id="testsubmit" value="Test user submit" />
+        </form>
+
         <!-- ########################### ( FORM ) ########################## -->
         <form id="comex_reg_form" enctype="multipart/form-data"
               method="post"
-              onsubmit="whileSubmit(this)"
+              onsubmit="whileSubmit(this, 'from form')"
               action="cgi-bin/comex_merci_pour_les_infos.py.cgi">
 
         <!-- todo onsubmit also save to cache -->
@@ -128,14 +140,6 @@
             </label>
             <input id="country" name="country" type="text" class="form-control" placeholder="pays" class="autocomp">
           </div>
-
-
-          <p>
-              <button onclick='whileSubmit(this.parent.parent)'>
-                  test doors
-              </button>
-          </p>
-
 
           <!-- EMAIL & PASSWORD -->
           <h3 class="formcat"> Login infos </h3>
@@ -221,6 +225,13 @@
                  id="formsubmit" value="Submit your form" />
 
         </form>
+
+        <p>
+            <button onclick='whileSubmit(this, "from button")'>
+                test doors
+            </button>
+        </p>
+
 
       </div>
       <div class="spacer col-sm-2 col-md-2">&nbsp;</div>
