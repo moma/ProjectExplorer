@@ -3,6 +3,11 @@
 .green { color:#161 ; }
 .grey  { color:#554 ; }
 
+/* not used at present but could be useful for autompleted inputs */
+.autocomp {
+}
+
+
 .page {
   margin-top: 45px;   /* topbar height is 40px */
 }
@@ -15,11 +20,26 @@
 }
 
 
+/* a "subpage" container */
+.subpage {
+  width: 100%;
+  max-width: 55em;
+  display: none ;  /*switching page <=> displaying it */
+}
+
 
 /* ==> a question + input block <== */
 .question {
   padding: 0 1em;
   margin-bottom: 2em;
+}
+
+.conditional-q {
+  display: none;
+}
+
+#cnil_warning {
+  /*text-align: center;*/
 }
 
 .operation {

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html5>
 <html lang="fr-FR">
 <head>
   <meta charset="utf-8">
@@ -64,7 +64,7 @@
                   <strong>Community Explorer</strong> maps your own socio-semantic network and enables to explore the complex systems researchers community.
                   <br/>
                   <br/>
-                  This <strong>registration form</strong> will allow us to update your database information and login credentials. The first page contains the essential informations we need for the map, the following pages are optional.
+                  This <strong>registration form</strong> will allow us to update your database information and login credentials. The first page contains the essential informations we need for the map, the following page is optional.
               </p>
         </div>
 
@@ -73,135 +73,268 @@
 
         <!-- ########################### ( debg ) ########################## -->
         <!-- test cgi user from submit point of view -->
-        <form id="test_user_form" enctype="multipart/form-data"
+        <!-- <form id="test_user_form" enctype="multipart/form-data"
               method="post"
               action="cgi-bin/test_cgi_user.py.cgi">
 
               <input type="submit" class="btn btn-lg btn-success" style="float:right"
                      id="testsubmit" value="Test user submit" />
-        </form>
+        </form> -->
 
         <!-- ########################### ( FORM ) ########################## -->
         <form id="comex_reg_form" enctype="multipart/form-data"
               method="post"
               onsubmit="whileSubmit(this, 'from form')"
-              action="cgi-bin/comex_merci_pour_les_infos.py.cgi">
+              action="cgi-bin/comex_merci_pour_les_infos.py.cgi"
+              onchange="testYourself()">
 
         <!-- todo onsubmit also save to cache -->
 
+        <nav aria-label="Page navigation">
+          <ul class="pagination">
+            <li class="page-item"><a class="page-link" onclick="subPage1Style.display='block';subPage2Style.display='none'">1</a></li>
+            <li class="page-item"><a class="page-link" onclick="subPage1Style.display='none';subPage2Style.display='block'">2</a></li>
+          </ul>
+        </nav>
 
 
-          <!-- NAME & COUNTRY -->
-          <h3 class="formcat"> Basic infos </h3>
+        <div class="subpage" id="subpage_1" style="display:block">
 
-          <div class="question input-group">
-            <label for="first_name" class="smlabel input-group-addon">
-              * First name
-            </label>
-            <input id="first_name" name="first_name"
-                   type="text" class="form-control" placeholder="prénom"
-                   onblur="makeBold(this)" onfocus="makeNormal(this)">
-          </div>
+              <!-- NAME & COUNTRY -->
+              <h3 class="formcat"> Basic infos </h3>
 
-          <!-- optionnel -->
-          <div id="group-midname" class="question input-group" style='display:none'>
-            <label for="middle_name" class="smlabel input-group-addon">
-              Middle name
-            </label>
-            <input id="middle_name" name="middle_name"
-                   type="text" class="form-control" placeholder="autres prénoms"
-                   onblur="makeBold(this)" onfocus="makeNormal(this)">
-          </div>
+              <div class="question input-group">
+                <label for="first_name" class="smlabel input-group-addon">
+                  * First name
+                </label>
+                <input id="first_name" name="first_name"
+                       type="text" class="form-control" placeholder="prénom"
+                       onblur="makeBold(this)" onfocus="makeNormal(this)">
+              </div>
 
-          <div class="question input-group">
-            <label for="last_name" class="smlabel input-group-addon">
-              * Last name
-            </label>
-            <input id="last_name" name="last_name"
-                   type="text" class="form-control" placeholder="nom de famille"
-                   onblur="makeBold(this)" onfocus="makeNormal(this)">
-          </div>
+              <!-- optionnel -->
+              <div id="group-midname" class="question input-group" style='display:none'>
+                <label for="middle_name" class="smlabel input-group-addon">
+                  Middle name
+                </label>
+                <input id="middle_name" name="middle_name"
+                       type="text" class="form-control" placeholder="autres prénoms"
+                       onblur="makeBold(this)" onfocus="makeNormal(this)">
+              </div>
 
-          <button class="btn btn-xs btn-default operation"
-                  title="Add a middle name" id="btn-midname"
-                  type="button" style="margin:1em; float:right"> <!-- border:none; -->
-            <span class="glyphicon glyphicon-plus"></span>
-            Add middle name
-          </button>
+              <div class="question input-group">
+                <label for="last_name" class="smlabel input-group-addon">
+                  * Last name
+                </label>
+                <input id="last_name" name="last_name"
+                       type="text" class="form-control" placeholder="nom de famille"
+                       onblur="makeBold(this)" onfocus="makeNormal(this)">
+              </div>
 
-          <div class="question input-group">
-            <label for="initials" class="smlabel input-group-addon">* Initials</label>
-            <input id="initials" name="initials" type="text" class="form-control" placeholder="initiales">
-          </div>
+              <button class="btn btn-xs btn-default operation"
+                      title="Add a middle name" id="btn-midname"
+                      type="button" style="margin:1em; float:right">
+                <span class="glyphicon glyphicon-plus"></span>
+                Add middle name
+              </button>
 
-          <div class="question input-group">
-            <label for="country" class="smlabel input-group-addon">
-              * Country
-            </label>
-            <input id="country" name="country" type="text" class="form-control" placeholder="pays" class="autocomp">
-          </div>
+              <div class="question input-group">
+                <label for="initials" class="smlabel input-group-addon">* Initials</label>
+                <input id="initials" name="initials" type="text" class="form-control" placeholder="initiales">
+              </div>
 
-          <!-- EMAIL & PASSWORD -->
-          <h3 class="formcat"> Login infos </h3>
+              <div class="question input-group">
+                <label for="country" class="smlabel input-group-addon">
+                  * Country
+                </label>
+                <input id="country" name="country"
+                       type="text" class="form-control autocomp"
+                       placeholder="pays"
+                       onblur="if(this.value=='France'){teamCityDiv.style.display = 'block'}">
+              </div>
 
-          <div class="question">
-            <p class="legend">Your email will also be your login for the ISC services.</p>
-            <div class="input-group">
-              <label for="email" class="smlabel input-group-addon">* Email</label>
-              <input id="email" name="email"
-                     type="text" class="form-control" placeholder="email">
+              <!-- EMAIL & PASSWORD -->
+              <h3 class="formcat"> Login infos </h3>
+
+              <div class="question">
+                <p class="legend">Your email will also be your login for the ISC services.</p>
+                <div class="input-group">
+                  <label for="email" class="smlabel input-group-addon">* Email</label>
+                  <input id="email" name="email"
+                         type="text" class="form-control" placeholder="email">
+                </div>
+              </div>
+
+              <!-- £TODO js password validation -->
+              <div class="question">
+                <p class="legend">Please make your password difficult to predict.</p>
+                <div class="input-group">
+                  <label for="password" class="smlabel input-group-addon">* Password</label>
+                  <input id="password" name="password"
+                         type="password" class="form-control" placeholder="Create a password">
+                </div>
+              </div>
+
+              <div class="question">
+                <div class="input-group">
+                  <label for="password2" class="smlabel input-group-addon">* Password</label>
+                  <input id="password2" name="password2"
+                         type="password" class="form-control" placeholder="Repeat the password">
+                </div>
+                <p id="password_message" class="legend red" style="font-weight:bold"></p>
+              </div>
+
+
+              <!-- JOB & INTERESTS -->
+              <h3 class="formcat"> About your job and research </h3>
+
+              <div class="question input-group">
+                <label for="hon_title" class="smlabel input-group-addon">Job Title</label>
+                <input id="hon_title" name="hon_title"
+                       type="text" class="form-control autocomp" placeholder="titre"
+                       onblur="makeBold(this)" onfocus="makeNormal(this)">
+              </div>
+
+              <div class="question">
+                <div class="input-group">
+                  <label for="keywords" class="smlabel input-group-addon">* Key subjects</label>
+                  <input id="keywords" name="keywords autocomp"
+                         type="text" class="form-control" placeholder="keywords">
+                </div>
+                <p class="legend">Please enter at most 5 comma-separated keywords</p>
+              </div>
+
+              <!-- ORGANIZATION -->
+              <h3 class="formcat"> About your current organization </h3>
+
+              <div class="question">
+                <div class="input-group">
+                  <label for="institution" class="smlabel input-group-addon">* Parent Institution</label>
+                  <input id="institution" name="institution autocomp"
+                         type="text" class="form-control" placeholder='eg "CNRS" or "University of Oxford"'>
+                </div>
+              </div>
+
+              <div class="question">
+                <div class="input-group">
+                  <label for="institution_type" class="smlabel input-group-addon">* Institution Type</label>
+                  <select id="institution_type" name="institution_type"
+                          class="custom-select form-control">
+                    <option selected value="1">University</option>
+                    <option value="2">Public sector R&amp;D organization</option>
+                    <option value="2">Other public sector organization</option>
+                    <option value="3">Private sector organization</option>
+                    <option value="4">None at the moment</option>
+                    <option value="5">Other</option>
+                    <!-- TODO other => show text -->
+
+                  </select>
+                </div>
+              </div>
+
+              <div class="question">
+                <div class="input-group">
+                  <label for="team_lab" class="smlabel input-group-addon">Lab / Team / Dept</label>
+                  <input id="team_lab" name="team_lab"
+                         type="text" class="form-control" placeholder="More detailed affiliation, if relevant">
+                </div>
+              </div>
+
+              <!-- Lab city <=> only for France -->
+              <div class="question conditional-q" id="team_city_div">
+                <div class="input-group">
+                  <label for="institution_city" class="smlabel input-group-addon">Lab city</label>
+                  <input id="institution_city" name="institution_city"
+                         type="text" class="form-control" placeholder="Ville de votre institution">
+                </div>
+              </div>
+
+          </div> <!-- / end of subpage_1 -->
+
+          <div class="subpage" id="subpage_2">
+
+            <!-- OTHER PERSONAL INFO -->
+            <h3 class="formcat"> Other infos </h3>
+
+            <div class="question">
+              <p class="legend">Optional, ~15 lines max (1200 chars)</p>
+              <div class="input-group">
+                <label for="interests_text" class="input-group-addon">
+                  Personal interests
+                </label>
+
+                <textarea id="interests_text" name="interests_text"
+                          rows="7" maxlength="1200" style="resize:none"
+                          class="form-control" placeholder="If you wish, you may describe here your personal interests."
+                          onblur="makeBold(this)" onfocus="makeNormal(this)"
+                          ></textarea>
+              </div>
             </div>
-          </div>
 
-          <!-- £TODO js password validation -->
-          <div class="question">
-            <p class="legend">Please make your password difficult to predict.</p>
-            <div class="input-group">
-              <label for="password" class="smlabel input-group-addon">* Password</label>
-              <input id="password" name="password"
-                     type="password" class="form-control" placeholder="Create a password">
+            <div class="question">
+              <p class="legend">Interest groups aka "hashtags" (full suggestion list available shortly)</p>
+              <div class="input-group">
+                <label for="community_hashtags" class="smlabel input-group-addon">Interest groups</label>
+                <input id="community_hashtags" name="community_hashtags"
+                       type="text" class="form-control" placeholder="eg #dataviz or #networks">
+              </div>
             </div>
-          </div>
 
-          <div class="question">
-            <div class="input-group">
-              <label for="password2" class="smlabel input-group-addon">* Password</label>
-              <input id="password2" name="password2"
-                     type="password" class="form-control" placeholder="Repeat the password">
+            <div class="question">
+              <p class="legend">Upload a picture of yours (max source size: 4MB, then the image will be reduced to 200kB)</p>
+              <div class="input-group">
+                <label for="pic_file" class="smlabel input-group-addon">Picture</label>
+                <input type="file" id="pic_file" name="pic_file"
+                       accept="image/png,image/jpeg" class="form-control"
+                       onchange="testPictureBlob(this)">
+              </div>
+              <p id="picture_message" class="legend red" style="font-weight:bold"></p>
             </div>
-            <p id="password-message" class="legend" style="color: #910; font-weight:bold"></p>
-          </div>
 
+            <!-- CNIL WARNING -->
+            <h3 class="formcat"> About your data </h3>
 
-
-
-          <!-- JOB & INTERESTS -->
-          <h3 class="formcat"> About your job and research </h3>
-
-          <div class="question input-group">
-            <label for="hon_title" class="smlabel input-group-addon">Job Title</label>
-            <input id="hon_title" name="hon_title"
-                   type="text" class="form-control" placeholder="titre"
-                   onblur="makeBold(this)" onfocus="makeNormal(this)">
-          </div>
-
-          <div class="question">
-            <div class="input-group">
-              <label for="keywords" class="smlabel input-group-addon">* Key subjects</label>
-              <input id="keywords" name="keywords"
-                     type="text" class="form-control" placeholder="keywords">
+            <div class="question" id="cnil_warning">
+              <p>Les informations recueillies à partir de ce formulaire font l’objet d’un traitement
+                 informatique destiné à: </p>
+                 <p><strong>communityexplorer.org</strong></p>
+              <p>Pour la ou les finalité(s) suivante(s) : </p>
+                 <p><strong>
+                     Modélisation de la communauté des chercheurs
+                     <br />
+                     Diffusion de l'information dans la communauté
+                 </strong></p>
+              <p>Le ou les destinataire(s) des données sont :</p>
+              <p><strong>ISC-PIF (CNRS / UPS 3611)</strong></p>
+              <p>Conformément à la <a href="https://www.cnil.fr/fr/loi-78-17-du-6-janvier-1978-modifiee">
+                loi « informatique et libertés » du 6 janvier 1978 modifiée</a>,
+                vous disposez d’un <a href="https://www.cnil.fr/fr/le-droit-dacces">droit d’accès</a>
+                et <a href="https://www.cnil.fr/fr/le-droit-de-rectification">de rectification</a>
+                aux informations qui vous concernent.
+              </p>
+              <p>Vous pouvez accèder aux informations vous concernant en vous adressant à :</p>
+              <p class="rtecenter"><strong>todo@iscpif.fr</strong></p>
+              <p>Vous pouvez également, pour des motifs légitimes,
+                <a href="https://www.cnil.fr/fr/le-droit-dopposition">vous opposer au traitement
+                  des données vous concernant</a>.
+              </p>
+              <p>Pour en savoir plus, <a href="https://www.cnil.fr/fr/comprendre-vos-droits">
+                consultez vos droits sur le site de la CNIL</a>.
+              </p>
             </div>
-            <p class="legend">Please enter at most 5 comma-separated keywords</p>
-          </div>
 
-          <div class="question">
-            <div class="input-group">
-              <label for="organization" class="smlabel input-group-addon">* Organization</label>
-              <input id="organization" name="organization"
-                     type="text" class="form-control" placeholder="organization">
-            </div>
-            <!-- <p class="legend">Please enter at most 5 comma-separated keywords</p> -->
-          </div>
+          </div> <!-- / end of subpage_2 -->
+
+          <!-- hidden input for modification date -->
+          <input id="reg_timestamp" name="reg_timestamp" type="text" hidden>
+          </input>
+
+          <nav aria-label="Page navigation">
+            <ul class="pagination">
+              <li class="page-item"><a class="page-link" onclick="scroll(0,0);subPage1Style.display='block';subPage2Style.display='none'">1</a></li>
+              <li class="page-item"><a class="page-link" onclick="scroll(0,0);subPage1Style.display='none';subPage2Style.display='block'">2</a></li>
+            </ul>
+          </nav>
 
           <div class="row spacerrow">&nbsp;</div><div class="row spacerrow">&nbsp;</div>
 
@@ -226,12 +359,12 @@
 
         </form>
 
-        <p>
+        <!-- FOR DEBUG: test go-between with Doors -->
+        <!-- <p>
             <button onclick='whileSubmit(this, "from button")'>
                 test doors
             </button>
-        </p>
-
+        </p> -->
 
       </div>
       <div class="spacer col-sm-2 col-md-2">&nbsp;</div>

@@ -1,3 +1,19 @@
+// vars that will be used during the interaction
+// NB other vars defined in main scope but just before the funs
+var theForm = document.getElementById('comex_reg_form')
+var regTimestamp = document.getElementById('reg_timestamp')
+
+var subPage1Style = document.getElementById('subpage_1').style
+var subPage2Style = document.getElementById('subpage_2').style
+var teamCityDivStyle = document.getElementById('team_city_div').style
+
+// cf corresponding css classes
+var colorWhite = '#fff'
+var colorRed = '#910'
+var colorGreen = '#161'
+var colorGrey = '#554'
+
+
 // 2 actions to do on form submit
 // => block the submit button to avoid resubmit before response
 // => transmit to doors
@@ -43,6 +59,43 @@ function whileSubmit(form, orignStr, loginOrRegister) {
     console.warn("=====> end of whileSubmit <=====")
 }
 
+
+// done when anything in the form changes
+function testYourself() {
+  var now = new Date()
+  regTimestamp.value = now.toISOString()
+}
+
+var picMsg = document.getElementById('picture_message')
+function testPictureBlob(fileInput) {
+  // TEMPORARY initial size already 200 kB, user has to do it himself
+  var max_size = 204800
+
+  // TODO  max source image size before resizing
+  //       see libs or stackoverflow.com/a/24015367
+  // 4 MB
+  // var max_size = 4194304
+
+  // Objectify -----------------------
+  // we build entire map for form
+  myFormData = new FormData(theForm);
+  // TODO better  (either use it to send it or only build it from file)
+
+  // retrieve the blob
+  var theFile = myFormData.get(fileInput.id)
+
+  // debug
+  console.log(theFile.name, "size", theFile.size, theFile.lastModifiedDate)
+
+  if (theFile.size > max_size) {
+    picMsg.innerHTML = "The picture is too big (200kB max)!"
+    picMsg.style.color = colorRed
+  }
+  else {
+    picMsg.innerHTML = "Picture ok"
+    picMsg.style.color = colorGreen
+  }
+}
 
 // basic inputs get normal on focus
 function makeNormal(elt) {
@@ -92,7 +145,7 @@ nameInputs.forEach ( function(nameInput) {
 // pass 1 and pass 2 ~~~> do they match?
 var pass1 = document.getElementById('password')
 var pass2 = document.getElementById('password2')
-var passMsg = document.getElementById('password-message')
+var passMsg = document.getElementById('password_message')
 var passwords = [pass1, pass2]
 passwords.forEach ( function(pass) {
   pass.onkeyup = function () {
@@ -106,21 +159,21 @@ passwords.forEach ( function(pass) {
         if (pass1v == pass2v) {
             if (pass1v.match('[^A-z]')) {
                 passMsg.innerHTML = 'Ok valid passwords!'
-                passMsg.style.color = '#161'
+                passMsg.style.color = colorGreen
             }
             else {
                 passMsg.innerHTML = 'Passwords match but contain only letters, please complexify!'
-                passMsg.style.color = '#554'
+                passMsg.style.color = colorRed
             }
         }
         else {
           passMsg.innerHTML = "The passwords don't match yet."
-          passMsg.style.color = '#910'
+          passMsg.style.color = colorRed
       }
       }
       else {
         passMsg.innerHTML = "The password is too short (8 chars min)."
-        passMsg.style.color = '#910'
+        passMsg.style.color = colorRed
       }
     }
   }
@@ -182,168 +235,165 @@ $(function() {
   });
 });
 
-// autocomplete organization
+// autocomplete institution
 $(function() {
-  var $organizationInput = $('#organization')
+  var $institutionInput = $('#institution')
 
   var orgList = [
-    "Centre National de la Recherche Scientifique",
-    "Institut National de la Recherche Agronomique",
-    "Université Paris 6 – Pierre et Marie Curie",
+    "Centre National de la Recherche Scientifique (CNRS)",
+    "Institut National de la Recherche Agronomique (INRA)",
+    "Université Paris 6 – Pierre et Marie Curie (UPMC)",
     "University of Warwick",
     "Instituto Superior das Ciências do Trabalho e da Empresa - Instituto Universitário de Lisboa",
-    "Institut National de Recherche en Informatique et Automatique",
-    "Ecole Polytechnique, U. Paris Saclay",
-    "Ecole Normale Supérieure - Ulm",
+    "Ecole Normale Supérieure (ENS) - Ulm",
+    "Ecole Polytechnique (X), U. Paris Saclay",
+    "Institut National de Recherche en Informatique et Automatique (INRIA)",
     "Université Paris 7 – Diderot",
-    "Universidad Nacional Autonoma de Mexico",
+    "Universidad Nacional Autonoma de Mexico (UNAM)",
+    "Commissariat à l'Energie Atomique (CEA)",
+    "Institut de Recherche en Sciences et Technologies pour l'Environnement et l'Agriculture (IRSTEA)",
     "Université Paris 1 – Panthéon-Sorbonne",
-    "Institut de Recherche en Sciences et Technologies pour l'Environnement et l'Agriculture",
-    "Commissariat à l'Energie Atomique",
-    "University College London",
-    "Universitat de Barcelona",
+    "University College London (UCL)",
+    "State University of São Paulo (UNESP)",
     "Open University",
-    "Institut des Systèmes Complexes Rhône Alpes",
-    "Institut des Systèmes Complexes de Paris Ile-de-France",
-    "Université du Havre",
-    "Institut National de la Santé et de la Recherche Médicale, UMRS 707",
+    "Universitat de Barcelona",
+    "Institut des Systèmes Complexes de Paris Ile-de-France (ISCPIF)",
+    "Institut des Systèmes Complexes Rhône Alpes (IXXI)",
     "Complex System Society",
-    "Université Paris 5 – Descartes",
-    "Université Grenoble-Alpes",
-    "Universitat Politècnica de Catalunya",
-    "Universidad Nacional de Colombia",
-    "State University of São paulo",
-    "Santa Fe Institute",
-    "Northeastern University",
-    "Max Planck Institute for Mathematics in the Sciences",
-    "Institut de Recherche pour le Développement",
-    "Indiana University",
-    "Eotvos Lorand University",
-    "Centre for Nonlinear Studies, Institute of Cybernetics at Tallinn University of Technology",
-    "University of São Paulo",
-    "University of Oxford",
-    "University of Manchester",
-    "University of Limerick",
-    "Université Toulouse 1 – Capitole",
-    "Université Paris 11 – Sud",
-    "Université Lyon 2 – Lumière",
-    "Université Libre de Bruxelles",
-    "Université de Strasbourg",
-    "Université de Nice – Sophia Antipolis",
-    "Universitat de les Illes Balears",
-    "Universidade de Lisboa",
-    "Umeå University",
-    "Institute for Biocomputation and Physics of Complex Systems, University of Zaragoza",
-    "Facultés Universitaires Notre-Dame de la Paix",
-    "ETH Zurich",
-    "Cranfield Universtiy",
-    "Complex Open Systems Research Network (COSNet)",
-    "Commonwealth Scientific and Industrial Research Organization",
-    "Centre de Coopération Internationale en Recherche Agronomique pour le Développement",
-    "Wroclaw University of Technology",
-    "Vrije Universiteit Brussel",
-    "UPM Autonomous Systems Labortory",
-    "University of Surrey",
-    "University of Amsterdam",
-    "Université Paris 14 – Est Créteil",
-    "Université Européenne de Bretagne",
-    "Université de Versailles Saint Quentin",
-    "Université de Rouen",
-    "Université de Lille",
-    "Université de Cergy-Pontoise",
-    "Université catholique de Louvain",
-    "Universitat Rovira i Virgili",
-    "Universidade Federal do Rio Grande do Sul",
-    "Universidad Politécnica de Madrid",
-    "Universidad del Rosario",
-    "Technion - Israel Institute of Technology",
-    "Ruhr Universität Bochum",
-    "Queen Mary, University of London",
-    "Nanyang Technological University",
-    "London School of Economics and Political Sciences",
-    "La Sapienza - University of Rome",
-    "King's College London",
-    "Instituto de Sistemas Complejos de Valparaiso",
-    "Institute for Scientific Interchange Foundation",
-    "Institut Curie",
-    "Ecole Polytechnique Fédérale de Lausanne",
-    "Consiglio Nazionale delle Ricerche",
-    "Chalmers University of Technology",
-    "Center for Genomic Regulation",
-    "Bristol Centre for Complexity Sciences",
-    "Bandung Fe Institute",
-    "Warsaw University of Technology",
-    "Uppsala Universitet",
-    "University of Warsaw",
-    "University of Maryland",
-    "University of Macedonia, Thessaloniki, Greece",
-    "University of Lausanne",
-    "University of Hamburg",
-    "University of Groningen",
-    "University of Exeter",
-    "University of Essex",
-    "University of California, Los Angeles: Human Complex Systems Program",
-    "University of Calgary",
-    "Université Toulouse 3 – Paul Sabatier",
-    "Université Paris 4 – Sorbonne",
-    "Université de Valenciennes et du Hainaut-Cambrésis",
-    "Université de Montréal",
-    "Université de Bourgogne",
-    "Università Roma Tre",
-    "Università degli Studi di Bologna",
-    "Universidade Nova de Lisboa",
-    "Universidade Federal do Rio de Janeiro",
-    "Universidade Estadual de Campinas",
+    "Institut National de la Santé et de la Recherche Médicale (INSERM), UMRS 707",
     "Universidad de Zaragoza",
-    "Universidad Carlos III de Madrid",
-    "The University of Melbourne",
-    "The Australian National University",
-    "Telecom ParisTech",
-    "Tel Aviv University",
-    "Technical University of Denmark",
-    "Swedish Morphological Society",
-    "Sapienza Università di Roma",
-    "Sabanci University",
-    "Northwestern University",
-    "Non-linearity and Complexity Research Group, Aston",
-    "National Centre for Nuclear Research (POLATOM)",
-    "National Center for Scientific Research 'Demokritos'",
-    "Massachusetts Institute of Technology",
-    "Institute of Information and Communication Technologies",
-    "Institute of Energy and Sustainable Development",
-    "Institute of Computer Science AS CR, v.v.i.",
-    "Institute for Mathematics and its Applications",
-    "Institute for Condensed Matter Physics  of the National Academy of Sciences of Ukraine",
-    "Institute for Complex Systems Simulation",
-    "Institute for Complex Systems and Mathematical Biology",
-    "Institut National Sport Expertise Performance",
-    "Institut des Systèmes Complexes en Normandie",
-    "Imperial College London",
-    "Harvard University",
-    "Ghent University",
-    "Emergence Paris",
-    "Ecole Superieure de Physique et Chimie Industrielle",
-    "Ecole des Ponts ParisTech, U. Paris Est",
-    "Ecole des Hautes Etudes en Sciences Sociales",
-    "Eastern Connecticut State University",
-    "Delft University of Technology",
-    "Cracow University of Economics, Cracow, Poland",
-    "Centre for Complex Systems",
-    "Central European University",
-    "Center for the Study of Complex Systems",
-    "Cambridge University",
-    "Brunel University",
-    "Arizona State University",
-    "ARC Centre for Complex Systems (ACCS)",
+    "Université du Havre",
+    "Centre for Nonlinear Studies, Institute of Cybernetics at Tallinn University of Technology",
+    "Eotvos Lorand University",
+    "Indiana University",
+    "Institut de Recherche pour le Développement",
+    "Max Planck Institute for Mathematics in the Sciences",
+    "Northeastern University",
+    "Santa Fe Institute",
+    "Universidad Nacional de Colombia",
+    "Universitat Politècnica de Catalunya (UPC)",
+    "Université Grenoble-Alpes",
+    "Université Paris 5 – Descartes",
+    "Sapienza - Università di Roma",
+    "Centre de Coopération Internationale en Recherche Agronomique pour le Développement",
+    "Commonwealth Scientific and Industrial Research Organization",
+    "Complex Open Systems Research Network (COSNet)",
+    "Cranfield Universtiy",
+    "Facultés Universitaires Notre-Dame de la Paix",
+    "Umeå University",
+    "Universidade de Lisboa",
+    "Universitat de les Illes Balears",
+    "Université de Nice – Sophia Antipolis",
+    "Université de Strasbourg",
+    "Université Libre de Bruxelles",
+    "Université Lyon 2 – Lumière",
+    "Université Paris 11 – Sud",
+    "Université Toulouse 1 – Capitole",
+    "University of Limerick",
+    "University of Manchester",
+    "University of Oxford",
+    "University of Cambridge",
+    "University of Stanford",
+    "University of California (UCal), Berkeley",
+    "ETH Zürich",
+    "Bandung Fe Institute",
+    "Bristol Centre for Complexity Sciences",
+    "Center for Genomic Regulation",
+    "Chalmers University of Technology",
+    "Consiglio Nazionale delle Ricerche",
+    "Ecole Polytechnique Fédérale de Lausanne",
+    "Institut Curie",
+    "Institute for Scientific Interchange Foundation",
+    "Instituto de Sistemas Complejos de Valparaiso",
+    "King's College London",
+    "London School of Economics and Political Sciences",
+    "Nanyang Technological University",
+    "Queen Mary, University of London",
+    "Ruhr Universität Bochum",
+    "Technion - Israel Institute of Technology",
+    "Universidad del Rosario",
+    "Universidad Politécnica de Madrid",
+    "Universidade Federal do Rio Grande do Sul",
+    "Universitat Rovira i Virgili",
+    "Université catholique de Louvain",
+    "Université de Cergy-Pontoise",
+    "Université de Lille",
+    "Université de Rouen",
+    "Université de Versailles Saint Quentin",
+    "Université Européenne de Bretagne",
+    "Université Paris 14 – Est Créteil",
+    "University of Amsterdam",
+    "University of Surrey",
+    "Vrije Universiteit Brussel",
+    "Wroclaw University of Technology",
+    "UPM Autonomous Systems Laboratory (ASLab)",
+    "Agency for Science, Technology and Research (A*STAR), Singapore",
     "Anglia Ruskin University",
-    "Agency for Science, Technology and Research (A*STAR), Singapore"]
+    "ARC Centre for Complex Systems (ACCS)",
+    "Arizona State University",
+    "Brunel University",
+    "Center for the Study of Complex Systems",
+    "Central European University",
+    "Centre for Complex Systems",
+    "Cracow University of Economics, Cracow, Poland",
+    "Delft University of Technology",
+    "Eastern Connecticut State University",
+    "Ecole des Hautes Etudes en Sciences Sociales (EHESS)",
+    "Ecole des Ponts ParisTech, U. Paris Est",
+    "Ecole Superieure de Physique et Chimie Industrielle (ESPCI)",
+    "Emergence Paris",
+    "Ghent University",
+    "Harvard University",
+    "Imperial College London",
+    "Institut des Systèmes Complexes en Normandie",
+    "Institut National Sport Expertise Performance (INSEP)",
+    "Institute for Complex Systems and Mathematical Biology",
+    "Institute for Complex Systems Simulation",
+    "Institute of Energy and Sustainable Development",
+    "Massachusetts Institute of Technology (MIT)",
+    "National Center for Scientific Research 'Demokritos'",
+    "National Centre for Nuclear Research (POLATOM)",
+    "Non-linearity and Complexity Research Group, Aston",
+    "Northwestern University",
+    "Sabanci University",
+    "Swedish Morphological Society",
+    "Technical University of Denmark",
+    "Tel Aviv University",
+    "Telecom ParisTech",
+    "The Australian National University",
+    "The University of Melbourne",
+    "Universidad Carlos III de Madrid",
+    "Universidade Estadual de Campinas",
+    "Universidade Federal do Rio de Janeiro",
+    "Universidade Nova de Lisboa",
+    "Università degli Studi di Bologna",
+    "Università Roma Tre",
+    "Université de Bourgogne",
+    "Université de Montréal",
+    "Université de Valenciennes et du Hainaut-Cambrésis",
+    "Université Paris 4 – Sorbonne",
+    "Université Toulouse 3 – Paul Sabatier",
+    "University of Calgary",
+    "University of Essex",
+    "University of Exeter",
+    "University of Groningen",
+    "University of Hamburg",
+    "University of Lausanne",
+    "University of Macedonia, Thessaloniki, Greece",
+    "University of Maryland",
+    "University of Warsaw",
+    "Uppsala Universitet",
+    "Warsaw University of Technology",
+    "University of California (UCal), Los Angeles",
+    "Institute of Computer Science of Czech Republic (AV ČR)",
+    "Institute for Condensed Matter Physics of the National Academy of Sciences of Ukraine (ICMP)",]
 
-  $organizationInput.autocomplete({
+  $institutionInput.autocomplete({
       source: orgList,
       autoFocus: true,
       select:   function( event, ui ) {
         // console.log(ui)
-        $organizationInput[0].style.fontWeight = "bold"
+        $institutionInput[0].style.fontWeight = "bold"
       }
   });
 });
