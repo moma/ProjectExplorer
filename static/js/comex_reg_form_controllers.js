@@ -105,7 +105,7 @@ function validateSubmit(form, e, orignStr, loginOrRegister) {
         }),
         type: 'POST',
         success: function(data) {
-            console.log("ajax success")
+            console.log("doors ajax success")
             console.log("response data", data)
 
             // EXPECTED DOORS ANSWER
@@ -129,9 +129,11 @@ function validateSubmit(form, e, orignStr, loginOrRegister) {
                 }, 5000);
             },
             error: function(result) {
-                console.log("ajax error", result);
+                console.log("doors ajax err", result);
                 doorsErr = result.statusText
-                valid = false
+
+                // TESTS: no need to invalidate the form until doors server ready
+                // valid = false
             }
     });
 
@@ -194,10 +196,26 @@ function validateSubmit(form, e, orignStr, loginOrRegister) {
       submitButton.disabled = false
 
       var errorMessage = ""
+
+      // TESTS: restore after we get doors server ================================
+      // generate a pseudo doors ID during the tests
       if (!doorsUid) {
-        // todo retrieve more info than statusText
-        errorMessage += "<br/>The email/password registration had an error ("+doorsErr+"), please try again in a minute"
+        var doorsUid = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ\
+                        abcdefghijklmnopqrstuvwxyz\
+                        0123456789";
+        for( var i=0; i < 36; i++ )
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
       }
+
+      // if (!doorsUid) {
+      //   // todo retrieve more info than statusText
+      //   errorMessage += "<br/>The email/password registration had an error ("+doorsErr+"), "
+      //   errorMessage += "please try again in a minute"
+      // }
+
+      // ========================================================================
+
       if (missingFields.length) {
          errorMessage += "<br/>Please fill the missing fields: " + JSON.stringify(missingFields)
       }
