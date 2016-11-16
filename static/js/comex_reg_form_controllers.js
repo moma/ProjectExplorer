@@ -13,24 +13,39 @@ var colorRed = '#910'
 var colorGreen = '#161'
 var colorGrey = '#554'
 
-
-// 2 actions to do on form submit
-// => block the submit button to avoid resubmit before response
-// => transmit to doors
+// validateSubmit() : 5 actions to do on form submit
+// --------------------------------------------------
+// 1) show "submitting" and block the button to avoid resubmit before response
+// 2) transmit to doors
+// 3) validate the doors answer (+ get the doors user ID)
+// 4) validate the columns
+// 5) if 3&4 => trigger the real submit action
+//      else => message the user & unblock the button
 var submitButton = document.getElementById('formsubmit')
-function whileSubmit(form, orignStr, loginOrRegister) {
+var mainMessage = document.getElementById('main_validation_message')
+function validateSubmit(form, orignStr, loginOrRegister) {
+
+    var valid = false
+    var doorsUid = null
+
+    // 1)
+    submitButton.disabled = true
+    mainMessage.style.display = 'block'
+    mainMessage.innerHTML = "Submitting..."
+
+    console.log("form", form)
+
+    // 2) transmit registration to doors
     console.warn("=====> CORS <=====")
     console.warn("origin:", orignStr)
-    // submitButton.disabled = true
+
+    mainMessage.innerHTML = "Registering with ISCPIF Doors..."
 
     var action = 'register'
     if (loginOrRegister && loginOrRegister == 'login') {
         action = 'user'
     }
 
-    console.log("form", form)
-
-    // £TEST normal case: login to doors and wait for response
     $.ajax({
         contentType: "application/json",
         dataType: 'json',
@@ -45,17 +60,43 @@ function whileSubmit(form, orignStr, loginOrRegister) {
         success: function(data) {
             console.log("ajax success")
             console.log("response data", data)
-            console.log("response data.id", data.id)
+
+            // EXPECTED DOORS ANSWER
+            // {
+            //   "status": "login ok",
+            //   "userInfo": {
+            //     "id": {
+            //       "id": "78407900-6f48-44b8-ab37-503901f85458"
+            //     },
+            //     "password": "68d23eab21abab38542184e8fca2199d",
+            //     "name": "JPP",
+            //     "hashAlgorithm": "PBKDF2",
+            //     "hashParameters": {"iterations" : 1000, "keyLength" : 128}
+            //   }
+            // }
+
+            doorsUid = data.userInfo.id.id
             setTimeout(
                 function() {
                     location.reload();
                 }, 5000);
             },
             error: function(result) {
-                console.log("ajax error");
+                console.log("ajax error", result);
             }
     });
 
+    // TODO here entire validation
+
+    if (valid) {
+      form.submit()
+      mainMessage.innerHTML = "Submitting..."
+      mainMessage.style.display = 'block'
+    }
+    else {
+      // TODO global user message
+      submitButton.disabled = false
+    }
     console.warn("=====> end of whileSubmit <=====")
 }
 

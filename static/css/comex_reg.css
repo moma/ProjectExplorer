@@ -55,6 +55,14 @@
   min-width: 7.5em;
 }
 
+/* the main validation message (a special legend) */
+#main_validation_message {
+  font-size: 200%;
+  text-align:center;
+  /*color: #554 ;*/
+}
+
+
 /* the question's additional legend or caption */
 .legend {
   font-family: Cambria, serif;
@@ -64,6 +72,8 @@
   padding: .5em 0 .5em .5em ;
   margin: 0;
 }
+
+
 
 /* page sections: style snippets from old bootstrap h2 */
 h2.oldstyle {

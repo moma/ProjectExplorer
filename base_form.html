@@ -84,7 +84,6 @@
         <!-- ########################### ( FORM ) ########################## -->
         <form id="comex_reg_form" enctype="multipart/form-data"
               method="post"
-              onsubmit="whileSubmit(this, 'from form')"
               action="cgi-bin/comex_merci_pour_les_infos.py.cgi"
               onchange="testYourself()">
 
@@ -337,7 +336,7 @@
 
           <div class="row spacerrow">&nbsp;</div><div class="row spacerrow">&nbsp;</div>
 
-          <!-- CAPTCHA -->
+          <!-- CAPTCHA & SUBMIT BTN + INFOS-->
           <h3 class="formcat">Verify and submit</h3>
 
           <!--pseudo captcha using realperson from http://keith-wood.name/realPerson.html -->
@@ -353,8 +352,16 @@
           <div class="row spacerrow">&nbsp;</div>
 
           <!-- == S U B M I T == -->
-          <input type="submit" class="btn btn-lg btn-success" style="float:right"
-                 id="formsubmit" value="Submit your form" />
+          <!-- button instead of input.submit to validate before real submit action -->
+          <!-- NB also favorable side-effect: prevents ENTER from submitting -->
+          <button class="btn btn-lg btn-success" style="float:right"
+                  id="formsubmit"
+                  onclick="validateSubmit(this.parent, 'from main submit button')">
+                  Submit your form
+          </button>
+
+          <!-- main validation message -->
+          <p id="main_validation_message" class="legend" style="display:none"></p>
 
         </form>
 
