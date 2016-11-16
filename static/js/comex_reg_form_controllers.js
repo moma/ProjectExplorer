@@ -942,7 +942,9 @@ $(function() {
       },
       select: function (event, ui) {
           var terms = this.value.split(/\s*,\s*/) ;
-          console.log(terms)
+
+          // console.log("currently autocompleting segment:",terms)
+
           // remove the current input
           terms.pop();
           // add the selected item
