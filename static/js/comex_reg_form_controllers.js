@@ -1,7 +1,28 @@
+
+// the target columns in DB: tuple (name, mandatoryBool, maxChars)
+var COLS = [ ["doors_uid",              true,        10],
+             ["last_modified_date",     true,        10],
+             ["email",                  true,       255],
+             ["initials",               true,         7],
+             ["country",                true,        60],
+             ["first_name",             true,        30],
+             ["middle_name",           false,        30],
+             ["last_name",              true,        50],
+             ["jobtitle",               true,        30],
+             ["keywords",               true,       350],
+             ["institution",            true,       120],
+             ["institution_type",       true,        50],
+             ["team_lab",              false,        50],
+             ["institution_city",      false,        50],
+             ["interests_text",        false,      1200],
+             ["community_hashtags",    false,       350],
+             ["gender",                false,         1],
+             ["pic_file",              false,      null]]
+
 // vars that will be used during the interaction
 // NB other vars defined in main scope but just before the funs
 var theForm = document.getElementById('comex_reg_form')
-var regTimestamp = document.getElementById('reg_timestamp')
+var regTimestamp = document.getElementById('last_modified_date')
 
 var subPage1Style = document.getElementById('subpage_1').style
 var subPage2Style = document.getElementById('subpage_2').style

@@ -37,6 +37,30 @@ from glob import glob
 templating_env = Environment(loader = FileSystemLoader('../templates'),
                              autoescape = False)
 
+########### PARAMS ###########
+
+# all columns as they are declared in form & DB as tuple:
+#             NAME,               NOT NULL,  N or MAXCHARS (if applicable)
+COLS = [ ("doors_uid",              True,        36),
+         ("last_modified_date",     True,        10),   # 2016-11-16
+         ("email",                  True,       255),
+         ("initials",               True,         7),
+         ("country",                True,        60),
+         ("first_name",             True,        30),
+         ("middle_name",           False,        30),
+         ("last_name",              True,        50),
+         ("jobtitle",               True,        30),
+         ("keywords",               True,       350),
+         ("institution",            True,       120),
+         ("institution_type",       True,        50),
+         ("team_lab",              False,        50),
+         ("institution_city",      False,        50),
+         ("interests_text",        False,      1200),
+         ("community_hashtags",    False,       350),
+         ("gender",                False,         1),   # M|F
+         ("pic_file",              False,      None)]
+
+
 ########### SUBS ###########
 def re_hash(userinput, salt=""):
     """
@@ -92,21 +116,7 @@ def sanitize(value):
 
 def save_to_db(safe_records):
     """
-    Expected columns:
-      FOR TESTS
-      - email
-      - initials
-
-      TODO
-      - first_name
-      - middle_name
-      - last_name
-      - jobtitle
-      - keywords
-      - institution
-      - institution city
-      - team/lab if applicable
-      - organization type
+    see COLS and table_specifications.md
     """
 
     # £TODO check if email exists first
@@ -160,7 +170,8 @@ if __name__ == "__main__":
         # =========================
         # NB password values have already been sent by ajax to Doors
 
-        for field in expected:
+	# TODO redundant with js validation ?
+        for field in COLS:
             if field in incoming_data:
                 clean_records[field] = sanitize(incoming_data[field].value)
             else:
