@@ -106,7 +106,7 @@
                 <label for="first_name" class="smlabel input-group-addon">
                   * First name
                 </label>
-                <input id="first_name" name="first_name"
+                <input id="first_name" name="first_name" maxlength="30"
                        type="text" class="form-control" placeholder="prénom"
                        onblur="makeBold(this)" onfocus="makeNormal(this)">
               </div>
@@ -116,7 +116,7 @@
                 <label for="middle_name" class="smlabel input-group-addon">
                   Middle name
                 </label>
-                <input id="middle_name" name="middle_name"
+                <input id="middle_name" name="middle_name" maxlength="30"
                        type="text" class="form-control" placeholder="autres prénoms"
                        onblur="makeBold(this)" onfocus="makeNormal(this)">
               </div>
@@ -125,7 +125,7 @@
                 <label for="last_name" class="smlabel input-group-addon">
                   * Last name
                 </label>
-                <input id="last_name" name="last_name"
+                <input id="last_name" name="last_name" maxlength="30"
                        type="text" class="form-control" placeholder="nom de famille"
                        onblur="makeBold(this)" onfocus="makeNormal(this)">
               </div>
@@ -139,14 +139,15 @@
 
               <div class="question input-group">
                 <label for="initials" class="smlabel input-group-addon">* Initials</label>
-                <input id="initials" name="initials" type="text" class="form-control" placeholder="initiales">
+                <input id="initials" name="initials" maxlength="7"
+                       type="text" class="form-control" placeholder="initiales">
               </div>
 
               <div class="question input-group">
                 <label for="country" class="smlabel input-group-addon">
                   * Country
                 </label>
-                <input id="country" name="country"
+                <input id="country" name="country" maxlength="60"
                        type="text" class="form-control autocomp"
                        placeholder="pays"
                        onblur="if(this.value=='France'){teamCityDiv.style.display = 'block'}">
@@ -158,8 +159,9 @@
               <div class="question">
                 <p class="legend">Your email will also be your login for the ISC services.</p>
                 <div class="input-group">
+                  <!-- TODO email validation onblur/onchange if value -->
                   <label for="email" class="smlabel input-group-addon">* Email</label>
-                  <input id="email" name="email"
+                  <input id="email" name="email" maxlength="255"
                          type="text" class="form-control" placeholder="email">
                 </div>
               </div>
@@ -168,7 +170,7 @@
                 <p class="legend">Please make your password difficult to predict.</p>
                 <div class="input-group">
                   <label for="password" class="smlabel input-group-addon">* Password</label>
-                  <input id="password" name="password"
+                  <input id="password" name="password" maxlength="30"
                          type="password" class="form-control" placeholder="Create a password">
                 </div>
               </div>
@@ -176,7 +178,7 @@
               <div class="question">
                 <div class="input-group">
                   <label for="password2" class="smlabel input-group-addon">* Password</label>
-                  <input id="password2" name="password2"
+                  <input id="password2" name="password2" maxlength="30"
                          type="password" class="form-control" placeholder="Repeat the password">
                 </div>
                 <p id="password_message" class="legend red" style="font-weight:bold"></p>
@@ -188,7 +190,7 @@
 
               <div class="question input-group">
                 <label for="jobtitle" class="smlabel input-group-addon">Job Title</label>
-                <input id="jobtitle" name="jobtitle"
+                <input id="jobtitle" name="jobtitle" maxlength="30"
                        type="text" class="form-control autocomp" placeholder="titre"
                        onblur="makeBold(this)" onfocus="makeNormal(this)">
               </div>
@@ -196,7 +198,7 @@
               <div class="question">
                 <div class="input-group">
                   <label for="keywords" class="smlabel input-group-addon">* Key subjects</label>
-                  <input id="keywords" name="keywords"
+                  <input id="keywords" name="keywords" maxlength="350"
                          type="text" class="form-control autocomp" placeholder="keywords">
                 </div>
                 <p class="legend">Please enter at most 5 comma-separated keywords</p>
@@ -208,7 +210,7 @@
               <div class="question">
                 <div class="input-group">
                   <label for="institution" class="smlabel input-group-addon">* Parent Institution</label>
-                  <input id="institution" name="institution"
+                  <input id="institution" name="institution" maxlength="120"
                          type="text" class="form-control autocomp" placeholder='eg "CNRS" or "University of Oxford"'>
                 </div>
               </div>
@@ -233,7 +235,7 @@
               <div class="question">
                 <div class="input-group">
                   <label for="team_lab" class="smlabel input-group-addon">Lab / Team / Dept</label>
-                  <input id="team_lab" name="team_lab"
+                  <input id="team_lab" name="team_lab" maxlength="50"
                          type="text" class="form-control" placeholder="More detailed affiliation, if relevant">
                 </div>
               </div>
@@ -242,7 +244,7 @@
               <div class="question conditional-q" id="team_city_div">
                 <div class="input-group">
                   <label for="institution_city" class="smlabel input-group-addon">Lab city</label>
-                  <input id="institution_city" name="institution_city"
+                  <input id="institution_city" name="institution_city" maxlength="50"
                          type="text" class="form-control" placeholder="Ville de votre institution">
                 </div>
               </div>
@@ -252,34 +254,24 @@
           <div class="subpage" id="subpage_2">
 
             <!-- OTHER PERSONAL INFO -->
-            <h3 class="formcat"> Other infos </h3>
+            <h3 class="formcat"> Complementary information </h3>
 
             <div class="question">
-              <p class="legend">Optional, ~15 lines max (1200 chars)</p>
               <div class="input-group">
-                <label for="interests_text" class="input-group-addon">
-                  Personal interests
-                </label>
-
-                <textarea id="interests_text" name="interests_text"
-                          rows="7" maxlength="1200" style="resize:none"
-                          class="form-control" placeholder="If you wish, you may describe here your personal interests."
-                          onblur="makeBold(this)" onfocus="makeNormal(this)"
-                          ></textarea>
+                <label for="gender" class="smlabel input-group-addon">Gender</label>
+                <select id="gender" name="gender"
+                        class="custom-select form-control">
+                  <option selected value="0">Select your gender</option>
+                  <option value="F">Woman</option>
+                  <option value="M">Man</option>
+                </select>
               </div>
             </div>
 
+            <!-- TODO show the picture -->
             <div class="question">
-              <p class="legend">Interest groups aka "hashtags" (full suggestion list available shortly)</p>
-              <div class="input-group">
-                <label for="community_hashtags" class="smlabel input-group-addon">Interest groups</label>
-                <input id="community_hashtags" name="community_hashtags"
-                       type="text" class="form-control" placeholder="eg #dataviz or #networks">
-              </div>
-            </div>
-
-            <div class="question">
-              <p class="legend">Upload a picture of yours (max source size: 4MB, then the image will be reduced to 200kB)</p>
+              <p class="legend">Upload a picture of yours (max source size: 200kB)</p>
+              <!-- <p class="legend">Upload a picture of yours (max source size: 4MB, then the image will be reduced to 200kB)</p> -->
               <div class="input-group">
                 <label for="pic_file" class="smlabel input-group-addon">Picture</label>
                 <input type="file" id="pic_file" name="pic_file"
@@ -287,6 +279,30 @@
                        onchange="testPictureBlob(this)">
               </div>
               <p id="picture_message" class="legend red" style="font-weight:bold"></p>
+            </div>
+
+            <div class="question">
+              <div class="input-group">
+                <label for="community_hashtags" class="smlabel input-group-addon">Interest groups</label>
+                <input id="community_hashtags" name="community_hashtags" maxlength="350"
+                       type="text" class="form-control" placeholder="eg #dataviz or #networks">
+              </div>
+              <p class="legend">Interest groups aka "hashtags" (full suggestion list available shortly)</p>
+            </div>
+
+            <div class="question">
+              <div class="input-group">
+                <label for="interests_text" class="input-group-addon">
+                  Personal interests
+                </label>
+
+                <textarea id="interests_text" name="interests_text" maxlength="1200"
+                          rows="7" style="resize:none"
+                          class="form-control" placeholder="If you wish, you may describe here your personal interests."
+                          onblur="makeBold(this)" onfocus="makeNormal(this)"
+                          ></textarea>
+              </div>
+              <p class="legend">Optional, ~15 lines max (1200 chars)</p>
             </div>
 
             <!-- CNIL WARNING -->
@@ -370,11 +386,11 @@
         </form>
 
         <!-- FOR DEBUG: test go-between with Doors -->
-        <!-- <p>
-            <button onclick='whileSubmit(this, "from button")'>
+        <p>
+            <button onclick='validateSubmit(this, "from button")'>
                 test doors
             </button>
-        </p> -->
+        </p>
 
       </div>
       <div class="spacer col-sm-2 col-md-2">&nbsp;</div>

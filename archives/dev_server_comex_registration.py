@@ -5,6 +5,8 @@ Flask server used to test the registration page for comex app
  => the registration page will be a static form
     with js and cgi-bin answers management )
 
+ => TODO more generic use the server to generate the form and validation
+
 """
 __author__    = "CNRS"
 __copyright__ = "Copyright 2016 ISCPIF-CNRS"
