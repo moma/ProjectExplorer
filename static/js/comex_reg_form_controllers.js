@@ -305,7 +305,15 @@ nameInputs.forEach ( function(nameInput) {
       nameInputs.forEach ( function(nameInput) {
         var txt = nameInput.value
         if (txt.length) {
-          apparentInitials += txt.charAt(0) + '.'
+          if(/[A-Z]/.test(txt)) {
+            var capsArr = txt.match(/[A-Z]/g)
+            for (var i in capsArr) {
+              apparentInitials += capsArr[i] + '.'
+            }
+          }
+          else {
+            apparentInitials += txt.charAt(0) + '.'
+          }
         }
       }) ;
     // update the displayed value
