@@ -17,7 +17,8 @@ create table test_table (
 -- ########################
 create table comex_registrations (
     doors_uid            char(36) not null unique,
-    last_modified_date   char(10) not null,
+    -- ISO stamp like 2016-11-16T17:47:07.308Z
+    last_modified_date   char(24) not null,
     email                varchar(255) not null unique primary key,
     initials             varchar(7) not null,
     country              varchar(60) not null,

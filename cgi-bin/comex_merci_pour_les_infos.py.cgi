@@ -42,7 +42,7 @@ templating_env = Environment(loader = FileSystemLoader('../templates'),
 # all columns as they are declared in form & DB as tuple:
 #             NAME,               NOT NULL,  N or MAXCHARS (if applicable)
 COLS = [ ("doors_uid",              True,        36),
-         ("last_modified_date",     True,        10),   # 2016-11-16
+         ("last_modified_date",     True,        24),   # ex 2016-11-16T17:47:07.308Z
          ("email",                  True,       255),
          ("initials",               True,         7),
          ("country",                True,        60),

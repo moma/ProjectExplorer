@@ -83,7 +83,7 @@
 
         <!-- ########################### ( FORM ) ########################## -->
         <form id="comex_reg_form" enctype="multipart/form-data"
-              method="post" onsubmit="validateSubmit(this, event, 'from form', 'register')"
+              method="post" onsubmit="validateSubmit(event, 'from form', 'register')"
               action="cgi-bin/comex_merci_pour_les_infos.py.cgi">
 
         <!-- todo onsubmit also save to cache -->
@@ -374,7 +374,7 @@
           <!-- button instead of input.submit to validate before real submit action -->
           <button class="btn btn-lg btn-success" style="float:right"
                   id="formsubmit"
-                  onclick="validateSubmit(this.parent, event, 'from main submit button', 'register')">
+                  onclick="validateSubmit(event, 'from main submit button', 'register')">
                   Submit your form
           </button>
 
@@ -385,10 +385,10 @@
 
         <!-- FOR DEBUG: test go-between with Doors -->
         <!-- <p>
-            <button onclick='validateSubmit(this, event, "from button", "login")'>
+            <button onclick='validateSubmit(event, "from button", "login")'>
                 test doors login
             </button>
-            <button onclick='validateSubmit(this, event, "from button", "register")'>
+            <button onclick='validateSubmit(event, "from button", "register")'>
                 test doors register
             </button>
         </p> -->

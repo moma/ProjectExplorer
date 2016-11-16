@@ -1,7 +1,7 @@
 
 // the target columns in DB: tuple (name, mandatoryBool, maxChars (or nChars))
-var COLS = [ ["doors_uid",              true,        36,   'exact'],
-             ["last_modified_date",     true,        10,   'exact'],
+var COLS = [ ["doors_uid",             false,        36,   'exact'],
+             ["last_modified_date",     true,        24,   'exact'],
              ["email",                  true,       255],
              ["initials",               true,         7],
              ["country",                true,        60],
@@ -21,6 +21,7 @@ var COLS = [ ["doors_uid",              true,        36,   'exact'],
 
 // vars that will be used during the interaction
 // NB other vars defined in main scope but just before their respective funs
+var wholeFormData
 var theForm = document.getElementById('comex_reg_form')
 var regTimestamp = document.getElementById('last_modified_date')
 
@@ -54,21 +55,36 @@ var passStatus = false
 var emailStatus = false
 var captchaStatus = false
 submitButton.disabled = true
-theForm.onkeyup = function () {
+theForm.onkeyup = beTestedAsYouGo
+
+// done when anything in the form changes
+function beTestedAsYouGo() {
   if (passStatus && emailStatus && captchaStatus) {
       submitButton.disabled = false
   }
   else {
       submitButton.disabled = true
   }
+  var now = new Date()
+  regTimestamp.value = now.toISOString()
 }
 
+
+function makePseudoDoorsUid() {
+  var rando = ""
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for( var i=0; i < 36; i++ )
+      rando += possible.charAt(Math.floor(Math.random() * possible.length));
+  return rando
+}
+
+
 // validate more precisely at the end
-function validateSubmit(form, e, orignStr, loginOrRegister) {
+function validateSubmit(e, orignStr, loginOrRegister) {
 
     e.preventDefault()
 
-    var valid = false
+    var valid = true
     var doorsUid = null
     var doorsErr = null
 
@@ -77,7 +93,8 @@ function validateSubmit(form, e, orignStr, loginOrRegister) {
     mainMessage.style.display = 'block'
     mainMessage.innerHTML = "Validating the form..."
 
-    console.log("form", form)
+    console.log("form", theForm)
+    console.log("event", e)
 
     // 2) transmit registration to doors
     console.warn("=====> CORS <=====")
@@ -91,57 +108,62 @@ function validateSubmit(form, e, orignStr, loginOrRegister) {
     }
 
     // objectify
-    wholeFormData = new FormData(form);
+    wholeFormData = new FormData(theForm);
+    //
+    // $.ajax({
+    //     contentType: "application/json",
+    //     dataType: 'json',
+    //     url: "http://localhost:8989/api/" + action,
+    //     data: JSON.stringify({
+    //         // these values from the form have been checked by beTestedAsYouGo
+    //         "login": wholeFormData.get("email"),
+    //         "password": wholeFormData.get("password"),
+    //         "name": wholeFormData.get("initials")
+    //     }),
+    //     type: 'POST',
+    //     success: function(data) {
+    //         // console.log("doors ajax success")
+    //         // console.log("response data", data)
+    //
+    //         // EXPECTED DOORS ANSWER
+    //         // {
+    //         //   "status": "login ok",
+    //         //   "userInfo": {
+    //         //     "id": {
+    //         //       "id": "78407900-6f48-44b8-ab37-503901f85458"
+    //         //     },
+    //         //     "password": "68d23eab21abab38542184e8fca2199d",
+    //         //     "name": "JPP",
+    //         //     "hashAlgorithm": "PBKDF2",
+    //         //     "hashParameters": {"iterations" : 1000, "keyLength" : 128}
+    //         //   }
+    //         // }
+    //
+    //         doorsUid = data.userInfo.id.id
+    //         setTimeout(
+    //             function() {
+    //                 location.reload();
+    //             }, 5000);
+    //         },
+    //         error: function(result) {
+    //             // console.log("doors ajax err", result);
+    //             doorsErr = result.statusText
+    //
+    //             // TESTS: no need to invalidate the form until doors server ready
+    //             // valid = false
+    //         }
+    // });
 
-    $.ajax({
-        contentType: "application/json",
-        dataType: 'json',
-        url: "http://localhost:8989/api/" + action,
-        data: JSON.stringify({
-            // TODO pass the real values
-            "login": "jpp@om.fr",
-            "password": "droitaubut",
-            "name": "JPP"
-        }),
-        type: 'POST',
-        success: function(data) {
-            console.log("doors ajax success")
-            console.log("response data", data)
+    doorsUid = makePseudoDoorsUid()
+    // 3) fill in the answer we got
+    wholeFormData.set("doors_uid", doorsUid)
 
-            // EXPECTED DOORS ANSWER
-            // {
-            //   "status": "login ok",
-            //   "userInfo": {
-            //     "id": {
-            //       "id": "78407900-6f48-44b8-ab37-503901f85458"
-            //     },
-            //     "password": "68d23eab21abab38542184e8fca2199d",
-            //     "name": "JPP",
-            //     "hashAlgorithm": "PBKDF2",
-            //     "hashParameters": {"iterations" : 1000, "keyLength" : 128}
-            //   }
-            // }
 
-            doorsUid = data.userInfo.id.id
-            setTimeout(
-                function() {
-                    location.reload();
-                }, 5000);
-            },
-            error: function(result) {
-                console.log("doors ajax err", result);
-                doorsErr = result.statusText
-
-                // TESTS: no need to invalidate the form until doors server ready
-                // valid = false
-            }
-    });
-
-    // here entire validation
+    // 4) here entire validation
     var missingFields = []
     var toolongFields = []
     for (var i in COLS) {
-      console.warn("checking COLS["+i+"]", COLS[i])
+      // console.warn("checking COLS["+i+"]", COLS[i])
       var fieldName = COLS[i][0]
       var mandatory = COLS[i][1]
       var nChars    = COLS[i][2]
@@ -153,11 +175,14 @@ function validateSubmit(form, e, orignStr, loginOrRegister) {
 
       var actualValue = wholeFormData.get(fieldName)
 
+      // console.log("actualValue", actualValue)
+
       // test mandatory -----------------
-      if (mandatory && actualValue == null) {
+      if (mandatory && actualValue == null && actualValue != "") {
           // todo human-readable fieldName here
           missingFields.push(fieldName)
           valid = false
+          console.log("missingField", fieldName)
       }
 
       // test length --------------------
@@ -170,22 +195,28 @@ function validateSubmit(form, e, orignStr, loginOrRegister) {
                                 + "("+actualValue+")"
                                 + "should have exactly "+nChars+" chars")
                   valid = false
+
+                  console.log("wrong value")
               }
           }
           else {
               if (actualValue.length > nChars) {
                   toolongFields.push([fieldName, nChars])
                   valid = false
+
+                  console.log("tooShort")
               }
           }
       }
       // --------------------------------
     } // end for val in COLS
 
+
+    // 5) RESULTS
     if (valid) {
       mainMessage.innerHTML = "Form is valid... Submitting..."
       mainMessage.style.display = 'block'
-      // form.submit()
+      theForm.submit()
       return true
     }
     else {
@@ -198,16 +229,7 @@ function validateSubmit(form, e, orignStr, loginOrRegister) {
       var errorMessage = ""
 
       // TESTS: restore after we get doors server ================================
-      // generate a pseudo doors ID during the tests
-      if (!doorsUid) {
-        var doorsUid = "";
-        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ\
-                        abcdefghijklmnopqrstuvwxyz\
-                        0123456789";
-        for( var i=0; i < 36; i++ )
-            text += possible.charAt(Math.floor(Math.random() * possible.length));
-      }
-
+      // for now we generated a pseudo doors ID above
       // if (!doorsUid) {
       //   // todo retrieve more info than statusText
       //   errorMessage += "<br/>The email/password registration had an error ("+doorsErr+"), "
@@ -232,11 +254,6 @@ function validateSubmit(form, e, orignStr, loginOrRegister) {
 }
 
 
-// done when anything in the form changes
-function testYourself() {
-  var now = new Date()
-  regTimestamp.value = now.toISOString()
-}
 
 var picMsg = document.getElementById('picture_message')
 function testPictureBlob(fileInput) {
@@ -415,7 +432,7 @@ $(function() {
 
 // autocomplete position
 $(function() {
-  var $jobtitlesInput = $('#hon_title')
+  var $jobtitlesInput = $('#jobtitle')
 
   var jobtitlesList = ["Student", "Engineer", "capetown",
                        "PhD Student", "Dr", "Post-Doc",
