@@ -20,7 +20,7 @@ var COLS = [ ["doors_uid",              true,        36,   'exact'],
              ["pic_file",              false,      null]]
 
 // vars that will be used during the interaction
-// NB other vars defined in main scope but just before the funs
+// NB other vars defined in main scope but just before their respective funs
 var theForm = document.getElementById('comex_reg_form')
 var regTimestamp = document.getElementById('last_modified_date')
 
@@ -28,11 +28,15 @@ var subPage1Style = document.getElementById('subpage_1').style
 var subPage2Style = document.getElementById('subpage_2').style
 var teamCityDivStyle = document.getElementById('team_city_div').style
 
+// param for generation & validation
+var realCaptchaLength = 5
+
 // cf corresponding css classes
 var colorWhite = '#fff'
 var colorRed = '#910'
 var colorGreen = '#161'
 var colorGrey = '#554'
+
 
 // validateSubmit() : 5 actions to do on form submit
 // --------------------------------------------------
@@ -45,14 +49,24 @@ var colorGrey = '#554'
 var submitButton = document.getElementById('formsubmit')
 var mainMessage = document.getElementById('main_validation_message')
 
+// validate as we go to even get the submitButton
+var passStatus = false
+var emailStatus = false
+var captchaStatus = false
+submitButton.disabled = true
+theForm.onkeyup = function () {
+  if (passStatus && emailStatus && captchaStatus) {
+      submitButton.disabled = false
+  }
+  else {
+      submitButton.disabled = true
+  }
+}
 
-// theForm.addEventListener('submit', validateSubmit())
-
+// validate more precisely at the end
 function validateSubmit(form, e, orignStr, loginOrRegister) {
 
     e.preventDefault()
-
-    // TODO use the password status immediately
 
     var valid = false
     var doorsUid = null
@@ -282,7 +296,17 @@ nameInputs.forEach ( function(nameInput) {
 })
 
 
+// very basic email validation TODO: better extension and allowed chars set :)
+var email = document.getElementById('email')
+email.onkeyup = basicEmailValidate
+email.onblur = basicEmailValidate
+
+function basicEmailValidate () {
+  emailStatus = /^[-A-z0-9_=.+]+@[-A-z0-9_=.+]+\.[-A-z0-9_=.+]{1,4}$/.test(email.value)
+}
+
 // pass 1 and pass 2 ~~~> do they match?
+// TODO use a most common passwords lists
 var pass1 = document.getElementById('password')
 var pass2 = document.getElementById('password2')
 var passMsg = document.getElementById('password_message')
@@ -297,28 +321,35 @@ passwords.forEach ( function(pass) {
           || (pass2v && pass2v.length > 7)) {
         // test values
         if (pass1v == pass2v) {
-            if (pass1v.match('[^A-z]')) {
+            if (pass1v.match('[^A-z0-9]')) {
                 passMsg.innerHTML = 'Ok valid passwords!'
-                passMsg.style.color = colorGreen
+                passStatus = true
             }
             else {
-                passMsg.innerHTML = 'Passwords match but contain only letters, please complexify!'
-                passMsg.style.color = colorRed
+                passMsg.innerHTML = 'Passwords match but contain only letters and/or digits, please complexify!'
+                passStatus = false
             }
         }
         else {
           passMsg.innerHTML = "The passwords don't match yet."
-          passMsg.style.color = colorRed
+          passStatus = false
       }
       }
       else {
         passMsg.innerHTML = "The password is too short (8 chars min)."
-        passMsg.style.color = colorRed
+        passStatus = false
       }
     }
+    if (!passStatus) passMsg.style.color = colorRed
+    else             passMsg.style.color = colorGreen
   }
 })
 
+
+var captcha = document.getElementById('my-captcha')
+captcha.onkeyup = function() {
+    captchaStatus = (captcha.value.length == realCaptchaLength)
+}
 
 
 // autocomplete countries
@@ -541,7 +572,7 @@ $(function() {
 
 // pseudo captcha
 $.salt = ''
-$('#my-captcha').realperson({length: 5});
+$('#my-captcha').realperson({length: realCaptchaLength});
 
 $('#my-captcha').val('')
 
