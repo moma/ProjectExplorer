@@ -1,7 +1,7 @@
 
-// the target columns in DB: tuple (name, mandatoryBool, maxChars)
-var COLS = [ ["doors_uid",              true,        10],
-             ["last_modified_date",     true,        10],
+// the target columns in DB: tuple (name, mandatoryBool, maxChars (or nChars))
+var COLS = [ ["doors_uid",              true,        36,   'exact'],
+             ["last_modified_date",     true,        10,   'exact'],
              ["email",                  true,       255],
              ["initials",               true,         7],
              ["country",                true,        60],
@@ -16,7 +16,7 @@ var COLS = [ ["doors_uid",              true,        10],
              ["institution_city",      false,        50],
              ["interests_text",        false,      1200],
              ["community_hashtags",    false,       350],
-             ["gender",                false,         1],
+             ["gender",                false,         1,   'exact'],
              ["pic_file",              false,      null]]
 
 // vars that will be used during the interaction
@@ -44,15 +44,24 @@ var colorGrey = '#554'
 //      else => message the user & unblock the button
 var submitButton = document.getElementById('formsubmit')
 var mainMessage = document.getElementById('main_validation_message')
-function validateSubmit(form, orignStr, loginOrRegister) {
+
+
+// theForm.addEventListener('submit', validateSubmit())
+
+function validateSubmit(form, e, orignStr, loginOrRegister) {
+
+    e.preventDefault()
+
+    // TODO use the password status immediately
 
     var valid = false
     var doorsUid = null
+    var doorsErr = null
 
     // 1)
     submitButton.disabled = true
     mainMessage.style.display = 'block'
-    mainMessage.innerHTML = "Submitting..."
+    mainMessage.innerHTML = "Validating the form..."
 
     console.log("form", form)
 
@@ -66,6 +75,9 @@ function validateSubmit(form, orignStr, loginOrRegister) {
     if (loginOrRegister && loginOrRegister == 'login') {
         action = 'user'
     }
+
+    // objectify
+    wholeFormData = new FormData(form);
 
     $.ajax({
         contentType: "application/json",
@@ -104,21 +116,87 @@ function validateSubmit(form, orignStr, loginOrRegister) {
             },
             error: function(result) {
                 console.log("ajax error", result);
+                doorsErr = result.statusText
+                valid = false
             }
     });
 
-    // TODO here entire validation
+    // here entire validation
+    var missingFields = []
+    var toolongFields = []
+    for (var i in COLS) {
+      console.warn("checking COLS["+i+"]", COLS[i])
+      var fieldName = COLS[i][0]
+      var mandatory = COLS[i][1]
+      var nChars    = COLS[i][2]
+      var isExactN = (COLS[i][3] == 'exact')
+
+
+      // skip picture already done
+      if (fieldName == 'pic_file') continue ;
+
+      var actualValue = wholeFormData.get(fieldName)
+
+      // test mandatory -----------------
+      if (mandatory && actualValue == null) {
+          // todo human-readable fieldName here
+          missingFields.push(fieldName)
+          valid = false
+      }
+
+      // test length --------------------
+      else if (actualValue != null) {
+
+          if (isExactN) {
+              // should never happen => trigger error
+              if (actualValue.length != nChars) {
+                  console.error("invalid value for field " + fieldName
+                                + "("+actualValue+")"
+                                + "should have exactly "+nChars+" chars")
+                  valid = false
+              }
+          }
+          else {
+              if (actualValue.length > nChars) {
+                  toolongFields.push([fieldName, nChars])
+                  valid = false
+              }
+          }
+      }
+      // --------------------------------
+    } // end for val in COLS
 
     if (valid) {
-      form.submit()
-      mainMessage.innerHTML = "Submitting..."
+      mainMessage.innerHTML = "Form is valid... Submitting..."
       mainMessage.style.display = 'block'
+      // form.submit()
+      return true
     }
     else {
-      // TODO global user message
+
+      console.warn("form is not valid")
+      // TODO better user message
+      // TODO highlight invalid fields
       submitButton.disabled = false
+
+      var errorMessage = ""
+      if (!doorsUid) {
+        // todo retrieve more info than statusText
+        errorMessage += "<br/>The email/password registration had an error ("+doorsErr+"), please try again in a minute"
+      }
+      if (missingFields.length) {
+         errorMessage += "<br/>Please fill the missing fields: " + JSON.stringify(missingFields)
+      }
+      // TODO should be handled question by question
+      if (toolongFields.length) {
+         errorMessage += "<br/>Please shorten the following fields: " + JSON.stringify(toolongFields)
+      }
+
+      // display (TODO setTimeout and fade)
+      mainMessage.innerHTML = errorMessage
+      return false
     }
-    console.warn("=====> end of whileSubmit <=====")
+    console.warn("=====> end of validateSubmit <=====")
 }
 
 
