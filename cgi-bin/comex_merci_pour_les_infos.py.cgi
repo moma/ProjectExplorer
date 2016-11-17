@@ -105,7 +105,9 @@ def sanitize(value):
     """
     vtype = type(value)
     str_val = str(value)
-    san_val = sub(r'[^\w@\.-:]', '', str_val)
+    clean_val = sub(r'^\s+', '', str_val)
+    clean_val = sub(r'\s+$', '', clean_val)
+    san_val = sub(r'[^\w@\.-:]', '', clean_val)
 
     if vtype not in [int, str]:
         raise ValueError("Value has an incorrect type %s" % str(vtype))
@@ -114,10 +116,13 @@ def sanitize(value):
         san_typed_val = vtype(san_val)
         return san_typed_val
 
-def save_to_db(safe_records):
+def save_to_db(safe_recs_arr):
     """
     see COLS and table_specifications.md
     """
+
+    # expected number of vals (for instance 3 vals ===> "(?,?,?)" )
+    db_mask = '('+ ','.join(['?' for i in range(len(COLS))]) + ')'
 
     # £TODO check if email exists first
     #   yes =>propose login via doors + overwrite ?)
@@ -125,7 +130,7 @@ def save_to_db(safe_records):
 
     reg_db = connect('../data/registered.db')
     reg_db_c = reg_db.cursor()
-    reg_db_c.execute('INSERT INTO test_table VALUES (?,?)', safe_records)
+    reg_db_c.execute('INSERT INTO comex_registrations VALUES' + db_mask , safe_recs_arr)
     reg_db.commit()
     reg_db.close()
 
@@ -156,7 +161,12 @@ if __name__ == "__main__":
         captcha_accepted = (captcha_userhash == captcha_verifhash)
     # ----------------------------------------------------------------------
 
-    got_them_all = None
+    # debug data keys
+    # print_to_buffer(str([k for k in incoming_data]))
+    # print_to_buffer(str(incoming_data))
+
+    # debug doors_uid
+    # print_to_buffer('doors_uid before clean: '+str(incoming_data['doors_uid']))
 
     if captcha_accepted:
         # read in + sanitize values
@@ -175,9 +185,12 @@ if __name__ == "__main__":
         #     picture_bytes = picture.value
         # --------------------->8---------------
 
+        # debug doors_uid
+        # print_to_buffer('doors_uid after clean: '+clean_records['doors_uid'])
+
         # save to DB
         # ===========
-        save_to_db([clean_records[k] for k in columns])
+        save_to_db([clean_records.get(k, None) for k in COLS])
 
 
     # show received values in template

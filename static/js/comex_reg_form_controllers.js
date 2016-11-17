@@ -27,6 +27,11 @@ var regTimestamp = document.getElementById('last_modified_date')
 var uidInput = document.getElementById('doors_uid')
 var email = document.getElementById('email')
 
+// captchaHash should be appended by itself if normal submit,
+// but we need to do it ourselves (b/c of validateSubmit ?)
+var captcha = document.getElementById('my-captcha')
+var captchaCheck = document.getElementById('my-captchaHash')
+
 var subPage1Style = document.getElementById('subpage_1').style
 var subPage2Style = document.getElementById('subpage_2').style
 var teamCityDivStyle = document.getElementById('team_city_div').style
@@ -59,6 +64,7 @@ var captchaStatus = false
 submitButton.disabled = true
 theForm.onkeyup = beTestedAsYouGo
 theForm.onchange = beTestedAsYouGo
+theForm.onblur = beTestedAsYouGo
 
 // done when anything in the form changes
 function beTestedAsYouGo() {
