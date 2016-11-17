@@ -5,10 +5,10 @@ To remember the setup
 # in regcomex dir
 chown -R rloth:www-data .
 
-# accessible
-chmod -R 754 .                    # <=> u+rwx, g+rx, o+r
+# cgi executables
+chmod 754 cgi-bin/*               # <=> u+rwx, g+rx, o+r
 
-# writeable
+# writeable data
 chmod 774 data
 chmod 774 data/registered.db      # <=> u+rwx, g+rwx, o+r
 ```
@@ -49,4 +49,3 @@ sudo a2enmod cgi        # <= needed for cgi
       Require all granted
     </Directory>
 ```
-

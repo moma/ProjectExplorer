@@ -70,6 +70,10 @@ theForm.onblur = beTestedAsYouGo
 function beTestedAsYouGo() {
   basicEmailValidate()
   captchaStatus = (captcha.value.length == realCaptchaLength)
+
+  // for debug
+  checkPassStatus()
+
   if (passStatus && emailStatus && captchaStatus) {
       submitButton.disabled = false
   }
@@ -120,7 +124,10 @@ function validateSubmit(e, orignStr, loginOrRegister) {
 
     // objectify
     wholeFormData = new FormData(theForm);
-    //
+
+
+    // TODO check email availability in doors when user finishes typing mail ?
+
     // $.ajax({
     //     contentType: "application/json",
     //     dataType: 'json',
@@ -366,39 +373,54 @@ var pass1 = document.getElementById('password')
 var pass2 = document.getElementById('password2')
 var passMsg = document.getElementById('password_message')
 var passwords = [pass1, pass2]
-passwords.forEach ( function(pass) {
-  pass.onkeyup = function () {
-    if (pass1.value || pass2.value) {
-      var pass1v = pass1.value
-      var pass2v = pass2.value
 
-      if ((pass1v && pass1v.length > 7)
-          || (pass2v && pass2v.length > 7)) {
-        // test values
-        if (pass1v == pass2v) {
-            if (pass1v.match('[^A-z0-9]')) {
-                passMsg.innerHTML = 'Ok valid passwords!'
-                passStatus = true
-            }
-            else {
-                passMsg.innerHTML = 'Passwords match but contain only letters and/or digits, please complexify!'
-                passStatus = false
-            }
-        }
-        else {
-          passMsg.innerHTML = "The passwords don't match yet."
-          passStatus = false
-      }
+
+// £DEBUG autofill ----------->8------
+email.value="jpp@om.fr"
+pass1.value="123456+789"
+pass2.value="123456+789"
+// --------------------------->8------
+
+
+passwords.forEach ( function(pass) {
+  // could also be attached to form onchange but then called often for nothing
+  pass.onkeyup = checkPassStatus
+  pass.onchange = checkPassStatus
+})
+
+
+function checkPassStatus() {
+  if (pass1.value || pass2.value) {
+    var pass1v = pass1.value
+    var pass2v = pass2.value
+
+    if ((pass1v && pass1v.length > 7)
+        || (pass2v && pass2v.length > 7)) {
+      // test values
+      if (pass1v == pass2v) {
+          if (pass1v.match('[^A-z0-9]')) {
+              passMsg.innerHTML = 'Ok valid passwords!'
+              passStatus = true
+          }
+          else {
+              passMsg.innerHTML = 'Passwords match but contain only letters and/or digits, please complexify!'
+              passStatus = false
+          }
       }
       else {
-        passMsg.innerHTML = "The password is too short (8 chars min)."
+        passMsg.innerHTML = "The passwords don't match yet."
         passStatus = false
-      }
     }
-    if (!passStatus) passMsg.style.color = colorRed
-    else             passMsg.style.color = colorGreen
+    }
+    else {
+      passMsg.innerHTML = "The password is too short (8 chars min)."
+      passStatus = false
+    }
   }
-})
+  if (!passStatus) passMsg.style.color = colorRed
+  else             passMsg.style.color = colorGreen
+  }
+
 
 
 // autocomplete countries
