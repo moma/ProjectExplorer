@@ -624,9 +624,7 @@ $(function() {
 
 
 // pseudo captcha
-$.salt = ''
 $('#my-captcha').realperson({length: realCaptchaLength});
-
 $('#my-captcha').val('')
 
 

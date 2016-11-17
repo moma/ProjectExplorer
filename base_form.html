@@ -18,8 +18,14 @@
   <!--   libs   -->
   <script type="text/javascript" src="static/js/jquery-3.1.1.min.js"></script>
   <script type="text/javascript" src="static/js/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+  <!-- possible to change it and send it each time with makeSalt-->
+  <script type="text/javascript">$.salt = 'verylonverylongverylonverylongverylonverylong'</script>
   <script type="text/javascript" src="static/js/realperson/jquery.plugin.min.js"></script>
-  <script type="text/javascript" src="static/js/realperson/jquery.realperson.min.js"></script>
+  <!-- for some reason jquery.realperson.min.js reacts differently to salt than jquery.realperson.js -->
+  <script type="text/javascript" src="static/js/realperson/jquery.realperson.js"></script>
+
+
+
   <!--  our js is at the end -->
 
   <!-- Piwik -->
@@ -67,8 +73,6 @@
                   This <strong>registration form</strong> will allow us to update your database information and login credentials. The first page contains the essential informations we need for the map, the following page is optional.
               </p>
         </div>
-
-
 
 
         <!-- ########################### ( debg ) ########################## -->

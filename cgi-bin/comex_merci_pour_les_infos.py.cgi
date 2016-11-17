@@ -20,7 +20,7 @@ __status__    = "Test"
 
 from cgi         import FieldStorage
 from traceback   import format_exc, format_tb
-from ctypes      import c_int
+from ctypes      import c_int32
 from re          import sub
 from jinja2      import Template, Environment, FileSystemLoader
 from sys         import stdout   # for direct buffer write of utf-8 bytes
@@ -62,24 +62,33 @@ COLS = [ ("doors_uid",              True,        36),
 
 
 ########### SUBS ###########
-def re_hash(userinput, salt=""):
+def re_hash(userinput, salt="verylonverylongverylonverylongverylonverylong"):
     """
     Build the captcha's verification hash server side
     (my rewrite of keith-wood.name/realPerson.html python's version)
+
+    NB the number of iterations is prop to salt length
+
+    << 5 pads binary repr by 5 zeros on the right (including possible change of sign)
+    NB in all languages except python it truncates on the left
+        => here we need to emulate the same mechanism
+        => using c_int32() works well
     """
     hashk = 5381
 
     value = userinput.upper() + salt
-    for i, char in enumerate(value):
 
-        hashk = c_int( ((hashk << 5) + hashk + ord(char)) & 0xFFFFFFFF ).value
-        # bitwise masks 0xFFFFFFFF to go back to int32 each time
-        # c_int( previous ).value to go from unsigned ints to c signed ints each time
+    # debug
+    # print_to_buffer("<br/><br/><br/><br/><br/><br/>evaluated value:"+value)
+
+    for i, char in enumerate(value):
+        hashk = c_int32(hashk << 5).value + hashk + ord(char)
 
         # debug iterations
-        # print(i, hashk, '<br/>')
+        # print_to_buffer(str(i) + ": " + str(hashk) + '<br/>')
 
     return hashk
+
 
 def get_template(filename):
     """
@@ -157,6 +166,10 @@ if __name__ == "__main__":
     if 'my-captcha' in incoming_data:
         captcha_userinput = incoming_data['my-captcha'].value
         captcha_verifhash = int(incoming_data['my-captchaHash'].value)
+
+        # dbg
+        # print_to_buffer(str(captcha_verifhash))
+
         captcha_userhash = re_hash(captcha_userinput)
         captcha_accepted = (captcha_userhash == captcha_verifhash)
     # ----------------------------------------------------------------------

@@ -155,6 +155,7 @@
 		   @return {number} The hash value. */
 		getHash: function(elem) {
 			var inst = this._getInst(elem);
+            // console.log("inst", inst)
 			return inst ? inst.hash : 0;
 		},
 
@@ -202,15 +203,21 @@
 	   @param value {string} The text to hash.
 	   @return {number} The corresponding hash value. */
 	function hash(value) {
-    console.log("original value:", value)
+    // dbg
+    // console.log("original value:", value)
 		var hash = 5381;
 		for (var i = 0; i < value.length; i++) {
 			hash = ((hash << 5) + hash) + value.charCodeAt(i);
-      console.log(i, hash)
+      // dbg
+    //   console.log(i, hash)
 		}
 
-    console.log("hashed value:", hash)
+    // dbg
+    // console.log("hashed value:", hash)
 		return hash;
 	}
 
 })(jQuery);
+
+
+// console.log("loaded realperson")
