@@ -24,6 +24,8 @@ var COLS = [ ["doors_uid",             false,        36,   'exact'],
 var wholeFormData
 var theForm = document.getElementById('comex_reg_form')
 var regTimestamp = document.getElementById('last_modified_date')
+var uidInput = document.getElementById('doors_uid')
+var email = document.getElementById('email')
 
 var subPage1Style = document.getElementById('subpage_1').style
 var subPage2Style = document.getElementById('subpage_2').style
@@ -56,9 +58,12 @@ var emailStatus = false
 var captchaStatus = false
 submitButton.disabled = true
 theForm.onkeyup = beTestedAsYouGo
+theForm.onchange = beTestedAsYouGo
 
 // done when anything in the form changes
 function beTestedAsYouGo() {
+  basicEmailValidate()
+  captchaStatus = (captcha.value.length == realCaptchaLength)
   if (passStatus && emailStatus && captchaStatus) {
       submitButton.disabled = false
   }
@@ -157,6 +162,7 @@ function validateSubmit(e, orignStr, loginOrRegister) {
     doorsUid = makePseudoDoorsUid()
     // 3) fill in the answer we got
     wholeFormData.set("doors_uid", doorsUid)
+    uidInput.value = doorsUid // todo feels redundant (=> refactor submit into FormData send ?)
 
 
     // 4) here entire validation
@@ -214,6 +220,9 @@ function validateSubmit(e, orignStr, loginOrRegister) {
 
     // 5) RESULTS
     if (valid) {
+      // add the captchaCheck inside the form (jquery interference)
+      captchaCheck.value = $(captcha).realperson('getHash')
+
       mainMessage.innerHTML = "Form is valid... Submitting..."
       mainMessage.style.display = 'block'
       theForm.submit()
@@ -340,10 +349,7 @@ nameInputs.forEach ( function(nameInput) {
 
 
 // very basic email validation TODO: better extension and allowed chars set :)
-var email = document.getElementById('email')
-email.onkeyup = basicEmailValidate
-email.onblur = basicEmailValidate
-
+// (used in tests "as we go")
 function basicEmailValidate () {
   emailStatus = /^[-A-z0-9_=.+]+@[-A-z0-9_=.+]+\.[-A-z0-9_=.+]{1,4}$/.test(email.value)
 }
@@ -387,12 +393,6 @@ passwords.forEach ( function(pass) {
     else             passMsg.style.color = colorGreen
   }
 })
-
-
-var captcha = document.getElementById('my-captcha')
-captcha.onkeyup = function() {
-    captchaStatus = (captcha.value.length == realCaptchaLength)
-}
 
 
 // autocomplete countries
@@ -624,6 +624,7 @@ $('#my-captcha').val('')
 $(function() {
   var $kwInput = $('#keywords')
 
+  // TODO transform into simple array => faster
   var kwFreqs = {
     "complex networks": 154,
     "complex systems": 134,
@@ -983,3 +984,5 @@ $(function() {
       }
   });
 });
+
+console.log("load OK")

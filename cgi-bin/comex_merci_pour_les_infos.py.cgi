@@ -159,23 +159,14 @@ if __name__ == "__main__":
     got_them_all = None
 
     if captcha_accepted:
-        expected = ['email', 'hon_title', 'first_name', 'middle_name',
-                    'last_name', 'initials', 'keywords', 'country',
-                    'organization']
-
-        columns = ['email', 'initials']
-
-
         # read in + sanitize values
         # =========================
         # NB password values have already been sent by ajax to Doors
 
-	# TODO redundant with js validation ?
+        # we should have all the mandatory fields (checked in client-side js)
         for field in COLS:
-            if field in incoming_data:
+            if (field in incoming_data) and (field != pic_file):
                 clean_records[field] = sanitize(incoming_data[field].value)
-            else:
-                missing_fields.append(field)
 
         #  --------- todo ------>8--------------
         # optional
@@ -184,18 +175,8 @@ if __name__ == "__main__":
         #     picture_bytes = picture.value
         # --------------------->8---------------
 
-        # debug data keys
-        # print([k for k in incoming_data])
-
-        # NB will be done in js
-        got_them_all = True
-        for k in columns:
-            if k in missing_fields:
-                got_them_all = False
-                break
-
-        # sanitize & save to DB
-        # =====================
+        # save to DB
+        # ===========
         save_to_db([clean_records[k] for k in columns])
 
 
@@ -207,7 +188,7 @@ if __name__ == "__main__":
 
             # for debug
             records = clean_records,
-            message = "got_them_all:" + str(got_them_all)
+            message = ""
         )
     )
 
