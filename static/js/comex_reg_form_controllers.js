@@ -85,6 +85,88 @@ function beTestedAsYouGo() {
 }
 
 
+/* --------------- doors ajax cors function ----------------
+* @args:
+*     data:       3-uple with mail, pass, name
+*
+*     apiAction:  'register' or 'user' => route to doors api
+*     [optional]   default action is login via doors/api/user route
+*/
+function callDoors(data, apiAction) {
+
+    console.log("data",data)
+    console.log("apiAction",apiAction)
+
+
+    var doorsUid = null
+    var doorsErr = null
+
+    // all mandatory params for doors
+    var mailStr = data[0]
+    var passStr = data[1]
+    var nameStr = data[2]
+
+    // test params
+    var ok = (typeof mailStr != 'undefined'
+            && typeof mailStr != 'undefined'
+            && typeof nameStr != 'undefined'
+            && mailStr && passStr)    // assumes mail and pass will nvr be == 0
+
+    if (!ok) {
+        doorsErr = "Invalid parameters in input data (arg #2)"
+    }
+    else {
+        if (typeof apiAction == 'undefined' || apiAction != 'register') {
+            // currently forces login action unless we got 'register'
+            apiAction = 'user'
+        }
+        $.ajax({
+            contentType: "application/json",
+            dataType: 'json',
+            url: "http://localhost:8989/api/" + apiAction,
+            data: JSON.stringify({
+                "login":    mailStr,
+                "password": passStr,
+                "name":     nameStr
+            }),
+            type: 'POST',
+            success: function(data) {
+                // console.log("doors ajax success")
+                // console.log("response data", data)
+
+                // EXPECTED DOORS ANSWER FORMAT
+                // {
+                //   "status": "login ok",
+                //   "userInfo": {
+                //     "id": {
+                //       "id": "78407900-6f48-44b8-ab37-503901f85458"
+                //     },
+                //     "password": "68d23eab21abab38542184e8fca2199d",
+                //     "name": "JPP",
+                //     "hashAlgorithm": "PBKDF2",
+                //     "hashParameters": {"iterations": 1000, "keyLength": 128}
+                //   }
+                // }
+
+                doorsUid = data.userInfo.id.id
+                setTimeout(
+                    function() {
+                        location.reload();
+                    }, 5000);
+                },
+                error: function(result) {
+                    // console.log("doors ajax err", result);
+                    doorsErr = result.statusText
+
+                    // TESTS: no need to invalidate the form until doors server ready
+                    // valid = false
+                }
+        });
+    }
+
+    return([doorsUid, doorsErr])
+}
+
 function makePseudoDoorsUid() {
   var rando = ""
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -100,8 +182,6 @@ function validateSubmit(e, orignStr, loginOrRegister) {
     e.preventDefault()
 
     var valid = true
-    var doorsUid = null
-    var doorsErr = null
 
     // 1)
     submitButton.disabled = true
@@ -111,72 +191,32 @@ function validateSubmit(e, orignStr, loginOrRegister) {
     console.log("form", theForm)
     console.log("event", e)
 
+    // objectify
+    wholeFormData = new FormData(theForm);
+
+
     // 2) transmit registration to doors
     console.warn("=====> CORS <=====")
     console.warn("origin:", orignStr)
 
     mainMessage.innerHTML = "Registering with ISCPIF Doors..."
 
-    var action = 'register'
-    if (loginOrRegister && loginOrRegister == 'login') {
-        action = 'user'
-    }
+    // these values from the form have been checked by beTestedAsYouGo
+    var doorsData = [wholeFormData.get("email"),wholeFormData.get("password"),wholeFormData.get("initials")]
 
-    // objectify
-    wholeFormData = new FormData(theForm);
+    // ersatz for tests
+    // doorsUid = makePseudoDoorsUid()
 
+    // KNOCKING ON THE DOORS -------------------------------------
+    var doorsResp = callDoors(doorsData, 'register')
+    var doorsUid = doorsResp[0]
+    var doorsErr = doorsResp[1]
 
-    // TODO check email availability in doors when user finishes typing mail ?
-
-    // $.ajax({
-    //     contentType: "application/json",
-    //     dataType: 'json',
-    //     url: "http://localhost:8989/api/" + action,
-    //     data: JSON.stringify({
-    //         // these values from the form have been checked by beTestedAsYouGo
-    //         "login": wholeFormData.get("email"),
-    //         "password": wholeFormData.get("password"),
-    //         "name": wholeFormData.get("initials")
-    //     }),
-    //     type: 'POST',
-    //     success: function(data) {
-    //         // console.log("doors ajax success")
-    //         // console.log("response data", data)
-    //
-    //         // EXPECTED DOORS ANSWER
-    //         // {
-    //         //   "status": "login ok",
-    //         //   "userInfo": {
-    //         //     "id": {
-    //         //       "id": "78407900-6f48-44b8-ab37-503901f85458"
-    //         //     },
-    //         //     "password": "68d23eab21abab38542184e8fca2199d",
-    //         //     "name": "JPP",
-    //         //     "hashAlgorithm": "PBKDF2",
-    //         //     "hashParameters": {"iterations" : 1000, "keyLength" : 128}
-    //         //   }
-    //         // }
-    //
-    //         doorsUid = data.userInfo.id.id
-    //         setTimeout(
-    //             function() {
-    //                 location.reload();
-    //             }, 5000);
-    //         },
-    //         error: function(result) {
-    //             // console.log("doors ajax err", result);
-    //             doorsErr = result.statusText
-    //
-    //             // TESTS: no need to invalidate the form until doors server ready
-    //             // valid = false
-    //         }
-    // });
-
-    doorsUid = makePseudoDoorsUid()
     // 3) fill in the answer we got
     wholeFormData.set("doors_uid", doorsUid)
-    uidInput.value = doorsUid // todo feels redundant (=> refactor submit into FormData send ?)
-
+    uidInput.value = doorsUid
+    // todo doesn't work and feels redundant
+    // (=> refactor submit into FormData send ?)
 
     // 4) here entire validation
     var missingFields = []
