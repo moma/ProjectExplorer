@@ -606,8 +606,12 @@ $(function() {
       source: orgList,
       autoFocus: true,
       select:   function( event, ui ) {
-        // console.log(ui)
-        $institutionInput[0].style.fontWeight = "bold"
+          // console.log(ui)
+
+          // not tab because used to move on to next field
+          if(event.keyCode == 9) return false;
+
+          $institutionInput[0].style.fontWeight = "bold"
       }
   });
 });
