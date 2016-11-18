@@ -123,6 +123,22 @@ function testDoorsUserExists() {
     )
 }
 
+
+// doors register then submit
+function registerDoors() {
+    // /!\ async
+    callDoors(
+        [email.value, pass1.value, initialsInput.value],
+        function(doorsResp) {
+            var doorsUid = doorsResp[0]
+            var doorsMsg = doorsResp[1]
+            var available = (doorsUid == null)
+            displayDoorsStatusInLoginBox(available)
+        },
+        "user"
+    )
+}
+
 function displayDoorsStatusInLoginBox (available) {
 
     if (available) {
@@ -267,48 +283,55 @@ function callDoors(data, callback, apiAction) {
     }
 }
 
-function makePseudoDoorsUid() {
-  var rando = ""
-  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for( var i=0; i < 36; i++ )
-      rando += possible.charAt(Math.floor(Math.random() * possible.length));
-  return rando
-}
+// function makePseudoDoorsUid() {
+//   var rando = ""
+//   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+//   for( var i=0; i < 36; i++ )
+//       rando += possible.charAt(Math.floor(Math.random() * possible.length));
+//   return rando
+// }
 
+function registerDoorsAndSubmit(e){
+    e.preventDefault()  // ? not necessary if button type is set and != "submit"
 
-// validate more precisely at the end
-function validateSubmit(e, orignStr, loginOrRegister) {
-
-    e.preventDefault()
-
-    var valid = true
-
-    // 1)
-    submitButton.disabled = true
-    mainMessage.style.display = 'block'
-    mainMessage.innerHTML = "Validating the form..."
-
-    console.log("form", theForm)
-    console.log("event", e)
-
-    // objectify
-    wholeFormData = new FormData(theForm);
-
-
-    // 2) transmit registration to doors
     console.warn("=====> CORS <=====")
     console.warn("origin:", orignStr)
 
+    submitButton.disabled = true
+    mainMessage.style.display = 'block'
     mainMessage.innerHTML = "Registering with ISCPIF Doors..."
 
-    // these values from the form have been checked by beTestedAsYouGo
-    var doorsData = [wholeFormData.get("email"),wholeFormData.get("password"),wholeFormData.get("initials")]
+
+    wholeFormData = new FormData(theForm);
+
+
+    // KNOCKING ON THE DOORS -------------------------------------
+    // /!\ async
+    callDoors(
+        [
+            // these values from the form have been checked by beTestedAsYouGo
+            wholeFormData.get("email"),
+            wholeFormData.get("password"),
+            wholeFormData.get("initials")
+        ],
+        // VALIDATING + send to DB -------------------
+        validateSubmit(wholeFormData, doorsResp)
+        "register"
+    )
+
+}
+
+// validate more precisely at the end
+function validateSubmit(wholeFormData, doorsResp) {
+
+    var valid = true
+
+    // TODO pass mainMessage ref as arg
+    mainMessage.innerHTML = "Validating the form..."
 
     // ersatz for tests
     // doorsUid = makePseudoDoorsUid()
 
-    // KNOCKING ON THE DOORS -------------------------------------
-    var doorsResp = callDoors(doorsData, 'register')
     var doorsUid = doorsResp[0]
     var doorsMsg = doorsResp[1]
 
