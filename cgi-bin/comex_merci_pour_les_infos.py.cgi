@@ -175,9 +175,9 @@ if __name__ == "__main__":
     # ----------------------------------------------------------------------
 
     # debug data keys
-    print_to_buffer("<br/><br/><br/><br/><br/><br/><br/>")
-    print_to_buffer(str([k for k in incoming_data]))
-    print_to_buffer(str(incoming_data))
+    # print_to_buffer("<br/><br/><br/><br/><br/><br/><br/>")
+    # print_to_buffer(str([k for k in incoming_data]))
+    # print_to_buffer(str(incoming_data))
 
     if captcha_accepted:
         # read in + sanitize values
