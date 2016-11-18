@@ -75,6 +75,8 @@ var colorGrey = '#554'
 var submitButton = document.getElementById('formsubmit')
 var mainMessage = document.getElementById('main_validation_message')
 
+var doorsMessage = document.getElementById('doors_ret_message')
+
 // validate as we go to even get the submitButton
 var passStatus = false
 var emailStatus = false
@@ -103,46 +105,101 @@ function beTestedAsYouGo() {
 }
 
 
+// NB we want reverse status than login
+// => if login ok then user exists then it's bad
+// => TODO a route for doors/api/exists
+// => resulting bool instead of (resp[0] != null)
+function testDoorsUserExists() {
+    // /!\ async
+    callDoors(
+        [email.value, pass1.value, initialsInput.value],
+        function(doorsResp) {
+            var doorsUid = doorsResp[0]
+            var doorsMsg = doorsResp[1]
+            var available = (doorsUid == null)
+            displayDoorsStatusInLoginBox(available)
+        },
+        "user"
+    )
+}
+
+function displayDoorsStatusInLoginBox (available) {
+
+    if (available) {
+        doorsMessage.innerHTML = "This ID + password is available !"
+        doorsMessage.style.color = colorGreen
+    }
+    else {
+        doorsMessage.innerHTML = "Sorry this ID + password is already taken"
+        doorsMessage.style.color = colorRed
+    }
+    doorsMessage.style.display = 'block'
+}
+
 /* --------------- doors ajax cors function ----------------
 * @args:
 *     data:       3-uple with mail, pass, name
 *
+*
+*     callback:   function that will be called after success AND after error
+*                 with the return couple
+*
 *     apiAction:  'register' or 'user' => route to doors api
 *     [optional]   default action is login via doors/api/user route
 *
-* TODO handle returns
-*          return msg like "User jpp@om.fr not found"
-*          return msg if u exists (even if reg) "status":"login ok"
-*          return msg if u has been created "status":"register ok"
+*     returns couple (id, message)
+*     ----------------------------
+*     ajax success    <=>  doorsId should be != null except if unknown error
+*     ajax user infos  ==  doorsMsg
+*
+*     EXPECTED DOORS ANSWER FORMAT
+*     -----------------------------
+*     {
+*       "status": "login ok",
+*       "userInfo": {
+*         "id": {
+*           "id": "78407900-6f48-44b8-ab37-503901f85458"
+*         },
+*         "password": "68d23eab21abab38542184e8fca2199d",
+*         "name": "JPP",
+*         "hashAlgorithm": "PBKDF2",
+*         "hashParameters": {"iterations": 1000, "keyLength": 128}
+*       }
+*     }
 */
-function callDoors(data, apiAction) {
+function callDoors(data, callback, apiAction) {
 
     console.log("data",data)
     console.log("apiAction",apiAction)
 
 
     var doorsUid = null
-    var doorsErr = null
+    var doorsMsg = null
 
     // all mandatory params for doors
     var mailStr = data[0]
     var passStr = data[1]
     var nameStr = data[2]
 
-    // test params
+    // test params and set defaults
+    if (typeof apiAction == 'undefined' || apiAction != 'register') {
+        // currently forces login action unless we got 'register'
+        apiAction = 'user'
+    }
+
+    if (typeof callback != 'function') {
+        callback = function(retval) { return retval }
+    }
+
     var ok = (typeof mailStr != 'undefined'
             && typeof mailStr != 'undefined'
             && typeof nameStr != 'undefined'
             && mailStr && passStr)    // assumes mail and pass will nvr be == 0
 
     if (!ok) {
-        doorsErr = "Invalid parameters in input data (arg #2)"
+        doorsMsg = "Invalid parameters in input data (arg #2)"
     }
     else {
-        if (typeof apiAction == 'undefined' || apiAction != 'register') {
-            // currently forces login action unless we got 'register'
-            apiAction = 'user'
-        }
         $.ajax({
             contentType: "application/json",
             dataType: 'json',
@@ -154,40 +211,60 @@ function callDoors(data, apiAction) {
             }),
             type: 'POST',
             success: function(data) {
-                // console.log("doors ajax success")
-                // console.log("response data", data)
+                    if (typeof data != 'undefined'
+                            && typeof data.userInfo != undefined
+                            && typeof data.userInfo.id != undefined
+                            && typeof data.userInfo.id.id != undefined
+                            && typeof data.status == 'string') {
+                        // main success case
+                        doorsUid = data.userInfo.id.id
+                        doorsMsg = data.status
+                    }
 
-                // EXPECTED DOORS ANSWER FORMAT
-                // {
-                //   "status": "login ok",
-                //   "userInfo": {
-                //     "id": {
-                //       "id": "78407900-6f48-44b8-ab37-503901f85458"
-                //     },
-                //     "password": "68d23eab21abab38542184e8fca2199d",
-                //     "name": "JPP",
-                //     "hashAlgorithm": "PBKDF2",
-                //     "hashParameters": {"iterations": 1000, "keyLength": 128}
-                //   }
-                // }
+                    else {
+                        doorsMsg = "Unknown response for doors apiAction (" + apiAction +"):"
+                        doorsMsg += '"' + JSON.stringify(data).substring(0,10) + '..."'
+                    }
 
-                doorsUid = data.userInfo.id.id
-                // setTimeout(
-                //     function() {
-                //         location.reload();
-                //     }, 5000);
-                },
-                error: function(result) {
-                    console.log("doors ajax err", result);
-                    doorsErr = result.statusText
+                    // start the callback
+                    callback([doorsUid,doorsMsg])
+            },
 
-                    // TESTS: no need to invalidate the form until doors server ready
-                    // valid = false
-                }
+            error: function(result) {
+                    console.log(result)
+                    if (apiAction == 'user'){
+                        if (result.responseText.match(/"User .+@.+ not found"/)) {
+                            doorsMsg = result.responseText.replace(/^"/g, '').replace(/"$/g, '')
+                        }
+                        else {
+                            // POSS: user message
+                            console.warn("Unhandled error doors login (" + result.responseText +")")
+                        }
+                    }
+                    else if (apiAction == 'register'){
+                        if (typeof result.responseJSON != 'undefined'
+                            && typeof result.responseJSON.status == 'string') {
+
+                            doorsMsg = result.responseJSON.status
+                            // will be useful in the future (actually doors errs don't have a status message yet)
+                            // if doorsMsg == ''
+                        }
+                        else {
+                            // POSS: user message
+                            doorsMsg = "Unhandled error doors register (" + result.responseText +")"
+                            console.warn(doorsMsg)
+                        }
+                    }
+                    else {
+                        doorsMsg = "Unhandled error from unknown doors apiAction (" + apiAction +")"
+                        console.error(doorsMsg)
+                    }
+
+                    // start the callback
+                    callback([doorsUid,doorsMsg])
+            }
         });
     }
-
-    return([doorsUid, doorsErr])
 }
 
 function makePseudoDoorsUid() {
@@ -233,7 +310,7 @@ function validateSubmit(e, orignStr, loginOrRegister) {
     // KNOCKING ON THE DOORS -------------------------------------
     var doorsResp = callDoors(doorsData, 'register')
     var doorsUid = doorsResp[0]
-    var doorsErr = doorsResp[1]
+    var doorsMsg = doorsResp[1]
 
     // 3) fill in the answer we got
     wholeFormData.set("doors_uid", doorsUid)
@@ -317,7 +394,7 @@ function validateSubmit(e, orignStr, loginOrRegister) {
       // for now we generated a pseudo doors ID above
       // if (!doorsUid) {
       //   // todo retrieve more info than statusText
-      //   errorMessage += "<br/>The email/password registration had an error ("+doorsErr+"), "
+      //   errorMessage += "<br/>The email/password registration had an error ("+doorsMsg+"), "
       //   errorMessage += "please try again in a minute"
       // }
 

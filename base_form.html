@@ -186,6 +186,16 @@
                 <p id="password_message" class="legend red" style="font-weight:bold"></p>
               </div>
 
+              <button type=button class="btn btn-sm btn-default" style="float:right"
+                      id="knock_on_doors"
+                      onclick="testDoorsUserExists()">
+                      Check login availability at ISCPIF Doors
+              </button>
+
+
+              <!-- doors return value message -->
+              <p id="doors_ret_message" class="legend"></p>
+
 
               <!-- JOB & INTERESTS -->
               <h3 class="formcat"> About your job and research </h3>
@@ -379,6 +389,7 @@
 
           <!-- == S U B M I T == -->
           <!-- button instead of input.submit to validate before real submit action -->
+          <!-- also remember stackoverflow.com/a/3315016/2489184 -->
           <button class="btn btn-lg btn-success" style="float:right"
                   id="formsubmit"
                   onclick="validateSubmit(event, 'from main submit button', 'register')">
@@ -391,14 +402,14 @@
         </form>
 
         <!-- FOR DEBUG: test go-between with Doors -->
-        <p>
-            <button onclick='callDoors([email.value, pass1.value, initialsInput.value], "user")'>
+        <!-- <p>
+            <button type=button onclick='callDoors([email.value, pass1.value, initialsInput.value], console.warn, "user")'>
                 test doors login
             </button>
-            <button onclick='callDoors([email.value, pass1.value, initialsInput.value], "register")'>
+            <button type=button onclick='callDoors([email.value, pass1.value, initialsInput.value], "register", console.warn)'>
                 test doors register
             </button>
-        </p>
+        </p> -->
 
       </div>
       <div class="spacer col-sm-2 col-md-2">&nbsp;</div>
