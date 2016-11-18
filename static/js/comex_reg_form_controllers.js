@@ -1,3 +1,21 @@
+/**
+ * @fileoverview
+ * Validates the comex (communityexplorer.org) registration form
+ *  + adds a timestamp in input#last_modified_date
+ *  + adds autocompletes
+ *  + prepares DB save into COLS
+ *  + transmits login credentials to Doors for login or register (fun callDoors)
+ *
+ * @todo
+ *    - harmonize var names (eg 'email' vs 'initialsInput' are both input elts)
+ *    - package.json
+ *
+ * @version 1
+ * @copyright ISCPIF-CNRS 2016
+ * @author romain.loth@iscpif.fr
+ *
+ * @requires realperson (keith-wood.name/realPerson.html)
+ */
 
 // the target columns in DB: tuple (name, mandatoryBool, maxChars (or nChars))
 var COLS = [ ["doors_uid",             false,        36,   'exact'],
@@ -91,6 +109,11 @@ function beTestedAsYouGo() {
 *
 *     apiAction:  'register' or 'user' => route to doors api
 *     [optional]   default action is login via doors/api/user route
+*
+* TODO handle returns
+*          return msg like "User jpp@om.fr not found"
+*          return msg if u exists (even if reg) "status":"login ok"
+*          return msg if u has been created "status":"register ok"
 */
 function callDoors(data, apiAction) {
 
@@ -149,13 +172,13 @@ function callDoors(data, apiAction) {
                 // }
 
                 doorsUid = data.userInfo.id.id
-                setTimeout(
-                    function() {
-                        location.reload();
-                    }, 5000);
+                // setTimeout(
+                //     function() {
+                //         location.reload();
+                //     }, 5000);
                 },
                 error: function(result) {
-                    // console.log("doors ajax err", result);
+                    console.log("doors ajax err", result);
                     doorsErr = result.statusText
 
                     // TESTS: no need to invalidate the form until doors server ready
@@ -419,6 +442,7 @@ var passwords = [pass1, pass2]
 email.value="jpp@om.fr"
 pass1.value="123456+789"
 pass2.value="123456+789"
+initialsInput.value="JPP"
 // --------------------------->8------
 
 

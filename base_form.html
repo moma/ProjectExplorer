@@ -391,14 +391,14 @@
         </form>
 
         <!-- FOR DEBUG: test go-between with Doors -->
-        <!-- <p>
-            <button onclick='validateSubmit(event, "from button", "login")'>
+        <p>
+            <button onclick='callDoors([email.value, pass1.value, initialsInput.value], "user")'>
                 test doors login
             </button>
-            <button onclick='validateSubmit(event, "from button", "register")'>
+            <button onclick='callDoors([email.value, pass1.value, initialsInput.value], "register")'>
                 test doors register
             </button>
-        </p> -->
+        </p>
 
       </div>
       <div class="spacer col-sm-2 col-md-2">&nbsp;</div>
