@@ -46,7 +46,7 @@ var uidInput = document.getElementById('doors_uid')
 var email = document.getElementById('email')
 
 // captchaHash should be appended by itself if normal submit,
-// but we need to do it ourselves (b/c of validateSubmit ?)
+// but we need to do it ourselves (b/c not submitting via html submit action)
 var captcha = document.getElementById('my-captcha')
 var captchaCheck = document.getElementById('my-captchaHash')
 
@@ -63,15 +63,6 @@ var colorRed = '#910'
 var colorGreen = '#161'
 var colorGrey = '#554'
 
-
-// validateSubmit() : 5 actions to do on form submit
-// --------------------------------------------------
-// 1) show "submitting" and block the button to avoid resubmit before response
-// 2) transmit to doors
-// 3) validate the doors answer (+ get the doors user ID)
-// 4) validate the columns
-// 5) if 3&4 => trigger the real submit action
-//      else => message the user & unblock the button
 var submitButton = document.getElementById('formsubmit')
 var mainMessage = document.getElementById('main_validation_message')
 
@@ -105,10 +96,9 @@ function beTestedAsYouGo() {
 }
 
 
-// NB we want reverse status than login
-// => if login ok then user exists then it's bad
-// => TODO a route for doors/api/exists
-// => resulting bool instead of (resp[0] != null)
+// NB if login ok then user exists then not available
+//      => TODO a route for doors/api/exists
+//      => resulting bool instead of (resp[0] != null)
 function testDoorsUserExists() {
     // /!\ async
     callDoors(
@@ -135,7 +125,7 @@ function registerDoors() {
             var available = (doorsUid == null)
             displayDoorsStatusInLoginBox(available)
         },
-        "user"
+        "register"
     )
 }
 
@@ -185,9 +175,9 @@ function displayDoorsStatusInLoginBox (available) {
 */
 function callDoors(data, callback, apiAction) {
 
+    console.warn("=====> CORS <=====")
     console.log("data",data)
     console.log("apiAction",apiAction)
-
 
     var doorsUid = null
     var doorsMsg = null
@@ -283,25 +273,22 @@ function callDoors(data, callback, apiAction) {
     }
 }
 
-// function makePseudoDoorsUid() {
-//   var rando = ""
-//   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-//   for( var i=0; i < 36; i++ )
-//       rando += possible.charAt(Math.floor(Math.random() * possible.length));
-//   return rando
-// }
+function makeRandomString(nChars) {
+  var rando = ""
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for( var i=0; i < nChars; i++ )
+      rando += possible.charAt(Math.floor(Math.random() * possible.length));
+  return rando
+}
 
 function registerDoorsAndSubmit(e){
     e.preventDefault()  // ? not necessary if button type is set and != "submit"
-
-    console.warn("=====> CORS <=====")
-    console.warn("origin:", orignStr)
 
     submitButton.disabled = true
     mainMessage.style.display = 'block'
     mainMessage.innerHTML = "Registering with ISCPIF Doors..."
 
-
+    // objectify the form
     wholeFormData = new FormData(theForm);
 
 
@@ -315,14 +302,21 @@ function registerDoorsAndSubmit(e){
             wholeFormData.get("initials")
         ],
         // VALIDATING + send to DB -------------------
-        validateSubmit(wholeFormData, doorsResp)
+        function(doorsResp) {
+            doValidate(wholeFormData, doorsResp, doSubmit)
+        },
         "register"
     )
 
 }
 
+// doValidate() : actions to do after doors registration and before send
+//
+//  => validate the columns
+//      valid => trigger the real submit action
+//      else  => message the user & unblock the button
 // validate more precisely at the end
-function validateSubmit(wholeFormData, doorsResp) {
+function doValidate(wholeFormData, doorsResp, submitCallback) {
 
     var valid = true
 
@@ -330,114 +324,127 @@ function validateSubmit(wholeFormData, doorsResp) {
     mainMessage.innerHTML = "Validating the form..."
 
     // ersatz for tests
-    // doorsUid = makePseudoDoorsUid()
+    // doorsUid = makeRandomString(36)
 
     var doorsUid = doorsResp[0]
     var doorsMsg = doorsResp[1]
 
-    // 3) fill in the answer we got
-    wholeFormData.set("doors_uid", doorsUid)
-    uidInput.value = doorsUid
-    // todo doesn't work and feels redundant
-    // (=> refactor submit into FormData send ?)
-
-    // 4) here entire validation
-    var missingFields = []
-    var toolongFields = []
-    for (var i in COLS) {
-      // console.warn("checking COLS["+i+"]", COLS[i])
-      var fieldName = COLS[i][0]
-      var mandatory = COLS[i][1]
-      var nChars    = COLS[i][2]
-      var isExactN = (COLS[i][3] == 'exact')
-
-
-      // skip picture already done
-      if (fieldName == 'pic_file') continue ;
-
-      var actualValue = wholeFormData.get(fieldName)
-
-      // console.log("actualValue", actualValue)
-
-      // test mandatory -----------------
-      if (mandatory && actualValue == null && actualValue != "") {
-          // todo human-readable fieldName here
-          missingFields.push(fieldName)
-          valid = false
-          console.log("missingField", fieldName)
-      }
-
-      // test length --------------------
-      else if (actualValue != null) {
-
-          if (isExactN) {
-              // should never happen => trigger error
-              if (actualValue.length != nChars) {
-                  console.error("invalid value for field " + fieldName
-                                + "("+actualValue+")"
-                                + "should have exactly "+nChars+" chars")
-                  valid = false
-
-                  console.log("wrong value")
-              }
-          }
-          else {
-              if (actualValue.length > nChars) {
-                  toolongFields.push([fieldName, nChars])
-                  valid = false
-
-                  console.log("tooShort")
-              }
-          }
-      }
-      // --------------------------------
-    } // end for val in COLS
-
-
-    // 5) RESULTS
-    if (valid) {
-      // add the captchaCheck inside the form (jquery interference)
-      captchaCheck.value = $(captcha).realperson('getHash')
-
-      mainMessage.innerHTML = "Form is valid... Submitting..."
-      mainMessage.style.display = 'block'
-      theForm.submit()
-      return true
+    if (doorsUid == null) {
+        // TODO harmonize this case with the valid=False case
+        mainMessage.innerHTML = "Problem with doors registration... TODO debug"
+        mainMessage.style.color = colorRed
+        submitButton.disabled = false
     }
     else {
+        // fill in the answer we got
+        wholeFormData.set("doors_uid", doorsUid)
 
-      console.warn("form is not valid")
-      // TODO better user message
-      // TODO highlight invalid fields
-      submitButton.disabled = false
+        // 4) here entire validation
+        var missingFields = []
+        var toolongFields = []
+        for (var i in COLS) {
+          // console.warn("checking COLS["+i+"]", COLS[i])
+          var fieldName = COLS[i][0]
+          var mandatory = COLS[i][1]
+          var nChars    = COLS[i][2]
+          var isExactN = (COLS[i][3] == 'exact')
 
-      var errorMessage = ""
 
-      // TESTS: restore after we get doors server ================================
-      // for now we generated a pseudo doors ID above
-      // if (!doorsUid) {
-      //   // todo retrieve more info than statusText
-      //   errorMessage += "<br/>The email/password registration had an error ("+doorsMsg+"), "
-      //   errorMessage += "please try again in a minute"
-      // }
+          // skip picture already done
+          if (fieldName == 'pic_file') continue ;
 
-      // ========================================================================
+          var actualValue = wholeFormData.get(fieldName)
 
-      if (missingFields.length) {
-         errorMessage += "<br/>Please fill the missing fields: " + JSON.stringify(missingFields)
-      }
-      // TODO should be handled question by question
-      if (toolongFields.length) {
-         errorMessage += "<br/>Please shorten the following fields: " + JSON.stringify(toolongFields)
-      }
+          // console.log("actualValue", actualValue)
 
-      // display (TODO setTimeout and fade)
-      mainMessage.innerHTML = errorMessage
-      return false
+          // test mandatory -----------------
+          if (mandatory && actualValue == null && actualValue != "") {
+              // todo human-readable fieldName here
+              missingFields.push(fieldName)
+              valid = false
+              console.log("missingField", fieldName)
+          }
+
+          // test length --------------------
+          else if (actualValue != null) {
+
+              if (isExactN) {
+                  // should never happen => trigger error
+                  if (actualValue.length != nChars) {
+                      console.error("invalid value for field " + fieldName
+                                    + "("+actualValue+")"
+                                    + "should have exactly "+nChars+" chars")
+                      valid = false
+
+                      console.log("wrong value")
+                  }
+              }
+              else {
+                  if (actualValue.length > nChars) {
+                      toolongFields.push([fieldName, nChars])
+                      valid = false
+
+                      console.log("tooShort")
+                  }
+              }
+          }
+          // --------------------------------
+        } // end for val in COLS
+
+
+        // 5) RESULTS
+        if (valid) {
+          // add the captchaCheck inside the form (jquery interference)
+          captchaCheck.value = $(captcha).realperson('getHash')
+
+          mainMessage.innerHTML = "Form is valid... Submitting..."
+          mainMessage.style.display = 'block'
+          submitCallback(validatedFormData)
+          return true
+        }
+        else {
+
+          console.warn("form is not valid")
+          // TODO better user message
+          // TODO highlight invalid fields
+          submitButton.disabled = false
+
+          var errorMessage = ""
+
+          if (missingFields.length) {
+             errorMessage += "<br/>Please fill the missing fields: " + JSON.stringify(missingFields)
+          }
+          // TODO should be handled question by question
+          if (toolongFields.length) {
+             errorMessage += "<br/>Please shorten the following fields: " + JSON.stringify(toolongFields)
+          }
+
+          // display (TODO setTimeout and fade)
+          mainMessage.innerHTML = errorMessage
+          return false
+        }
     }
-    console.warn("=====> end of validateSubmit <=====")
+    console.warn("=====> end of doValidate <=====")
 }
 
+
+function doSubmit(validatedFormData) {
+    console.log("in submit phase")
+    $.ajax({
+         url: "cgi-bin/comex_merci_pour_les_infos.py.cgi",
+         type: 'POST',
+         async: true,
+         contentType: false,
+         processData: false,
+         data: validatedFormData,
+         success: function(response) {
+             console.log("submit ok", response) ;
+         },
+         error: function(result) {
+              console.log("submit error", result) ;
+         }
+    });
+}
 
 
 var picMsg = document.getElementById('picture_message')
