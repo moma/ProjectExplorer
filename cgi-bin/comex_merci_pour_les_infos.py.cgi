@@ -108,15 +108,15 @@ def print_to_buffer(stringy):
 
 def sanitize(value):
     """
-    simple and radical: leaves only alphanum and '.' '-' ':'
+    simple and radical: leaves only alphanum and '.' '-' ':' ',' '(', ')', ' '
 
-    TODO allow more of the safe chars
+    TODO better
     """
     vtype = type(value)
     str_val = str(value)
     clean_val = sub(r'^\s+', '', str_val)
     clean_val = sub(r'\s+$', '', clean_val)
-    san_val = sub(r'[^\w@\.-:]', '', clean_val)
+    san_val = sub(r'[^\w@\.-:,() ]', '_', clean_val)
 
     if vtype not in [int, str]:
         raise ValueError("Value has an incorrect type %s" % str(vtype))
@@ -175,9 +175,9 @@ if __name__ == "__main__":
     # ----------------------------------------------------------------------
 
     # debug data keys
-    # print_to_buffer("<br/><br/><br/><br/><br/><br/><br/>")
-    # print_to_buffer(str([k for k in incoming_data]))
-    # print_to_buffer(str(incoming_data))
+    print_to_buffer("<br/><br/><br/><br/><br/><br/><br/>")
+    print_to_buffer(str([k for k in incoming_data]))
+    print_to_buffer(str(incoming_data))
 
     if captcha_accepted:
         # read in + sanitize values
