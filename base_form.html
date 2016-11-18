@@ -85,9 +85,9 @@
         </form> -->
 
         <!-- ########################### ( FORM ) ########################## -->
-
-        <!-- cgi submit action nowadays handled in js :-/ -->
-        <form id="comex_reg_form" enctype="multipart/form-data">
+        <form id="comex_reg_form" enctype="multipart/form-data"
+              method="post" onsubmit="validateSubmit(event, 'from form', 'register')"
+              action="cgi-bin/comex_merci_pour_les_infos.py.cgi">
 
         <!-- todo onsubmit also save to cache -->
 

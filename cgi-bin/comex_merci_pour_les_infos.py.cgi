@@ -175,11 +175,9 @@ if __name__ == "__main__":
     # ----------------------------------------------------------------------
 
     # debug data keys
+    # print_to_buffer("<br/><br/><br/><br/><br/><br/><br/>")
     # print_to_buffer(str([k for k in incoming_data]))
     # print_to_buffer(str(incoming_data))
-
-    # debug doors_uid
-    # print_to_buffer('doors_uid before clean: '+str(incoming_data['doors_uid']))
 
     if captcha_accepted:
         # read in + sanitize values
@@ -187,23 +185,23 @@ if __name__ == "__main__":
         # NB password values have already been sent by ajax to Doors
 
         # we should have all the mandatory fields (checked in client-side js)
-        for field in COLS:
-            if (field in incoming_data) and (field != pic_file):
-                clean_records[field] = sanitize(incoming_data[field].value)
+        for field_info in COLS:
+            field = field_info[0]
+            if field in incoming_data:
+                if field not in ["doors_uid", "last_modified_date", "pic_file"]:
+                    clean_records[field] = sanitize(incoming_data[field].value)
 
-        #  --------- todo ------>8--------------
-        # optional
-        # picture = form["user_picture"]
-        # if picture.file & picture.filename:
-        #     picture_bytes = picture.value
-        # --------------------->8---------------
+                # these 3 fields were already validated actually :)
+                else:
+                    clean_records[field] = incoming_data[field].value
 
-        # debug doors_uid
-        # print_to_buffer('doors_uid after clean: '+clean_records['doors_uid'])
+        # debug cleaned data keys
+        print_to_buffer("<br/><br/><br/><br/><br/><br/><br/>")
+        print_to_buffer(str(clean_records))
 
         # save to DB
         # ===========
-        save_to_db([clean_records.get(k, None) for k in COLS])
+        save_to_db([clean_records.get(k[0], None) for k in COLS])
 
 
     # show received values in template

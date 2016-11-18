@@ -46,7 +46,7 @@ var uidInput = document.getElementById('doors_uid')
 var email = document.getElementById('email')
 
 // captchaHash should be appended by itself if normal submit,
-// but we need to do it ourselves (b/c not submitting via html submit action)
+// but we may need to do it ourselves (TODO test)
 var captcha = document.getElementById('my-captcha')
 var captchaCheck = document.getElementById('my-captchaHash')
 
@@ -303,7 +303,7 @@ function registerDoorsAndSubmit(e){
         ],
         // VALIDATING + send to DB -------------------
         function(doorsResp) {
-            doValidate(wholeFormData, doorsResp, doSubmit)
+            validateSubmit(wholeFormData, doorsResp)
         },
         "register"
     )
@@ -316,7 +316,7 @@ function registerDoorsAndSubmit(e){
 //      valid => trigger the real submit action
 //      else  => message the user & unblock the button
 // validate more precisely at the end
-function doValidate(wholeFormData, doorsResp, submitCallback) {
+function validateSubmit(wholeFormData, doorsResp) {
 
     var valid = true
 
@@ -338,8 +338,10 @@ function doValidate(wholeFormData, doorsResp, submitCallback) {
     else {
         // fill in the answer we got
         wholeFormData.set("doors_uid", doorsUid)
+        uidInput.value = doorsUid
+        // todo feels redundant (but if we submit via ajax, cgi-bin response won't be loaded)
 
-        // 4) here entire validation
+        // here entire validation
         var missingFields = []
         var toolongFields = []
         for (var i in COLS) {
@@ -392,14 +394,21 @@ function doValidate(wholeFormData, doorsResp, submitCallback) {
         } // end for val in COLS
 
 
-        // 5) RESULTS
+        // RESULTS
         if (valid) {
           // add the captchaCheck inside the form (jquery interference)
           captchaCheck.value = $(captcha).realperson('getHash')
 
           mainMessage.innerHTML = "Form is valid... Submitting..."
           mainMessage.style.display = 'block'
-          submitCallback(validatedFormData)
+          // maybe need update ?
+          theForm = document.getElementById('comex_reg_form')
+          console.log("uidInput.value", uidInput.value)
+          theForm.submit()
+
+
+          // debug
+          console.log("submited")
           return true
         }
         else {
@@ -427,24 +436,6 @@ function doValidate(wholeFormData, doorsResp, submitCallback) {
     console.warn("=====> end of doValidate <=====")
 }
 
-
-function doSubmit(validatedFormData) {
-    console.log("in submit phase")
-    $.ajax({
-         url: "cgi-bin/comex_merci_pour_les_infos.py.cgi",
-         type: 'POST',
-         async: true,
-         contentType: false,
-         processData: false,
-         data: validatedFormData,
-         success: function(response) {
-             console.log("submit ok", response) ;
-         },
-         error: function(result) {
-              console.log("submit error", result) ;
-         }
-    });
-}
 
 
 var picMsg = document.getElementById('picture_message')
@@ -546,7 +537,7 @@ var passwords = [pass1, pass2]
 
 
 // £DEBUG autofill ----------->8------
-email.value="jpp@om.fr"
+email.value= makeRandomString(10)+"@om.fr"
 pass1.value="123456+789"
 pass2.value="123456+789"
 initialsInput.value="JPP"
