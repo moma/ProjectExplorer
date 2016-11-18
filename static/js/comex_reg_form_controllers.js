@@ -175,8 +175,8 @@ function displayDoorsStatusInLoginBox (available) {
 */
 function callDoors(data, callback, apiAction) {
 
-    console.warn("=====> CORS <=====")
-    console.log("data",data)
+    // console.warn("=====> CORS  <=====")
+    // console.log("data",data)
     console.log("apiAction",apiAction)
 
     var doorsUid = null
@@ -401,14 +401,11 @@ function validateSubmit(wholeFormData, doorsResp) {
 
           mainMessage.innerHTML = "Form is valid... Submitting..."
           mainMessage.style.display = 'block'
-          // maybe need update ?
-          theForm = document.getElementById('comex_reg_form')
-          console.log("uidInput.value", uidInput.value)
+          // console.log("uidInput.value", uidInput.value)
           theForm.submit()
 
-
           // debug
-          console.log("submited")
+          console.log("submitted")
           return true
         }
         else {
@@ -537,10 +534,10 @@ var passwords = [pass1, pass2]
 
 
 // £DEBUG autofill ----------->8------
-email.value= makeRandomString(10)+"@om.fr"
-pass1.value="123456+789"
-pass2.value="123456+789"
-initialsInput.value="JPP"
+// email.value= makeRandomString(10)+"@om.fr"
+// pass1.value="123456+789"
+// pass2.value="123456+789"
+// initialsInput.value="JPP"
 // --------------------------->8------
 
 

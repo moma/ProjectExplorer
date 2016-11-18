@@ -26,10 +26,10 @@ from jinja2      import Template, Environment, FileSystemLoader
 from sys         import stdout   # for direct buffer write of utf-8 bytes
 from sqlite3     import connect
 
-# debug   # £TODO comment before prod  -------------------8<--------------------
-import cgitb
-cgitb.enable()
-from glob import glob
+# debug   # comment before prod  -------------------------8<--------------------
+# import cgitb
+# cgitb.enable()
+# from glob import glob
 # --------------------------------------------------------8<--------------------
 
 
@@ -196,8 +196,8 @@ if __name__ == "__main__":
                     clean_records[field] = incoming_data[field].value
 
         # debug cleaned data keys
-        print_to_buffer("<br/><br/><br/><br/><br/><br/><br/>")
-        print_to_buffer(str(clean_records))
+        # print_to_buffer("<br/><br/><br/><br/><br/><br/><br/>")
+        # print_to_buffer(str(clean_records))
 
         # save to DB
         # ===========
