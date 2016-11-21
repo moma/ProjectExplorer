@@ -1,0 +1,141 @@
+.white { color:#fff ; }
+.red   { color:#910 ; }
+.green { color:#161 ; }
+.grey  { color:#554 ; }
+
+/* not used at present but could be useful for autompleted inputs */
+.autocomp {
+}
+
+
+.page {
+  margin-top: 45px;   /* topbar height is 40px */
+}
+
+/* for intro text */
+.mini-hero {
+  margin-top: 1.5em;
+  font-size: 18px;
+  line-height: 27px;
+}
+
+
+/* a "subpage" container */
+.subpage {
+  width: 100%;
+  max-width: 55em;
+  display: none ;  /*switching page <=> displaying it */
+}
+
+
+/* ==> a question + input block <== */
+.question {
+  padding: 0 1em;
+  margin-bottom: 2em;
+}
+
+.conditional-q {
+  display: none;
+}
+
+#cnil_warning {
+  /*text-align: center;*/
+}
+
+.operation {
+  color: #554 ;
+}
+
+#mainpagelink:hover {
+  background-color: transparent !important;
+}
+
+/* small label inside addon group*/
+.smlabel {
+  min-width: 7.5em;
+}
+
+/* the main validation message (a special legend) */
+#main_validation_message {
+  font-size: 200%;
+  text-align:center;
+  /*color: #554 ;*/
+}
+
+/* the doors status message (a special legend) */
+#doors_ret_message {
+  font-size: 150%;
+  text-align:center;
+  color: #554 ;
+  display:none;
+  /*padding: .5em 0 .5em .5em ;*/
+  padding: 0;
+}
+
+
+/* the question's additional legend or caption */
+.legend {
+  font-family: Cambria, serif;
+  color: #554 ;
+  font-style: italic;
+  text-align:right;
+  padding: .5em 0 .5em .5em ;
+  margin: 0;
+}
+
+
+/* the picture preview */
+#box_show_pic {
+    background-color: #554;
+    border: none ;
+    width:250px;
+    height:250px;
+    margin-bottom: 2em;
+    display: none;
+}
+#show_pic {
+    /* styled via js in static/js/comex_reg_form_controllers.js */
+}
+
+/* page sections: style snippets from old bootstrap h2 */
+h2.oldstyle {
+  font-family: Ubuntu, sans-serif;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 18px ;
+}
+
+/* big categories: like form sections etc. */
+h3.formcat {
+  margin-top: 2em;
+}
+
+.spacerrow {
+  height: 4em;
+}
+
+.bigspacerrow {
+  height: 50em;
+}
+
+.realperson-challenge {
+  float:right;
+}
+.realperson-text {
+  padding: 0 2em;
+}
+.realperson-regen {
+  color: #554 ;
+}
+.bigspacerrow {
+  height: 50em;
+}
+
+.raw-responses {
+  font-family: Calibri, sans-serif ;
+  font-size: 80%;
+  line-height: 90% ;
+  background-color: #554;
+  color: white;
+  padding-bottom: 3em
+}
