@@ -1,3 +1,8 @@
+# For now
+As of nov 2016, the flask framework isn't used as a static form with cgibin posttreatment is enough for our needs.
+
+The flask framework will probably be re-used to generate more diverse forms in the future.
+
 # Flask-User starter app
 This code base serves as a great starting point to write your next Flask application  
 
@@ -56,4 +61,3 @@ With thanks to the following Flask extensions:
 [Flask-User-starter-app](https://github.com/lingthio/Flask-User-starter-app) was used as a starting point for this code repository.
 
     # Please consider leaving the line above in your project's README file. Thank you.
-
