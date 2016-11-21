@@ -1,4 +1,4 @@
-Jinja templates
+Flask templates
 ===============
 
-Simple html templates for jinja2
+More interpolated jinja2 templates (for server)

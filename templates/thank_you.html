@@ -7,10 +7,10 @@
   <meta name="keywords" content="complex systems, community, registration form">
 
   <!-- CSS -->
-  <link type=text/css rel=stylesheet href="../static/css/bootstrap.min.css">
-  <link type=text/css rel=stylesheet href="../static/css/topbar_bootstrap_retrocompatibility.css">
-  <link type=text/css rel=stylesheet href="../static/js/jquery-ui-1.12.1/jquery-ui.min.css">
-  <link type=text/css rel=stylesheet href="../static/css/comex_reg.css">
+  <link type=text/css rel=stylesheet href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  <link type=text/css rel=stylesheet href="{{ url_for('static', filename='css/topbar_bootstrap_retrocompatibility.css') }}">
+  <link type=text/css rel=stylesheet href="{{ url_for('static', filename='js/jquery-ui-1.12.1/jquery-ui.min.css') }}">
+  <link type=text/css rel=stylesheet href="{{ url_for('static', filename='css/comex_reg.css') }}">
 
 
   <!-- ## JS ## -->
@@ -104,19 +104,19 @@
                 <a href="http://iscpif.fr/" target="blank">Complex Systems Institute of Paris Ile-de-France</a>.
             <br>
             <a href="http://cssociety.org/" target="_BLANK">
-              <img src="../static/images/css.png" alt="http://cssociety.org"
+              <img src="{{ url_for('static', filename='images/css.png') }}" alt="http://cssociety.org"
                    style="border: none; margin-bottom : -6px;"
                    title="isc-pif" height="25px">
             </a>
 
             <a href="http://iscpif.fr/">
-              <img src="../static/images/iscpif_short.png" alt="iscpif.fr"
+              <img src="{{ url_for('static', filename='images/iscpif_short.png') }}" alt="iscpif.fr"
               style="border: none; margin-bottom : -6px;"
               title="isc-pif">
             </a>
 
             <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="blank">
-              <img alt="Creative Commons License" style="border: none; margin-bottom : -6px;" src="../static/images/cc.png" height="20px">
+              <img alt="Creative Commons License" style="border: none; margin-bottom : -6px;" src="{{ url_for('static', filename='images/cc.png') }}" height="20px">
             </a> -
             <!-- <a href="http://moma.csregistry.org/" target="_BLANK"> MOMA</a> -  -->
             <a href="http://iscpif.fr/" target="_BLANK">ISC-PIF</a> -

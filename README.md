@@ -6,3 +6,10 @@ This folder contains nov 2016 registration form and cgi
   => the answers are POSTed to a cgi script that writes the new users in a local DB
 
 contact: `romain.loth@iscpif.fr`
+
+
+
+**static => server**
+
+templates            ok
+cgibin to server     todo
