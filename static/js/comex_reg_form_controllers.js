@@ -580,10 +580,10 @@ var passwords = [pass1, pass2]
 
 
 // £DEBUG autofill ----------->8------
-// email.value= makeRandomString(10)+"@om.fr"
-// pass1.value="123456+789"
-// pass2.value="123456+789"
-// initialsInput.value="JPP"
+email.value= makeRandomString(10)+"@om.fr"
+pass1.value="123456+789"
+pass2.value="123456+789"
+initialsInput.value="JPP"
 // --------------------------->8------
 
 
