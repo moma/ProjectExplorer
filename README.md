@@ -1,15 +1,12 @@
-This folder contains nov 2016 registration form and cgi
-=======================================================
+Community explorer registration form
+=====================================
 
-  => the form is static and uses js for validation etc
-  => the registration credentials are transmitted to a doors prototype
-  => the answers are POSTed to a cgi script that writes the new users in a local DB
+This folder contains nov 2016 registration form server
 
-contact: `romain.loth@iscpif.fr`
+  - the form is served by [flask](http://flask.pocoo.org/) and uses [javascript functions](https://github.com/moma/regcomex/blob/master/static/js/comex_reg_form_controllers.js) for validation etc  
+  - the registration credentials are transmitted to a doors prototype  
+  - the answers are POSTed back to server that writes new users in a local DB  
 
+More info in `docs/` directory
 
-
-**static => server**
-
-templates            ok
-cgibin to server     todo
+(c) 2016 ISCPIF-CNRS
