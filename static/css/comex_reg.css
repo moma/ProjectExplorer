@@ -84,6 +84,18 @@
 }
 
 
+/* the picture preview */
+#box_show_pic {
+    background-color: #554;
+    border: none ;
+    width:250px;
+    height:250px;
+    margin-bottom: 2em;
+    display: none;
+}
+#show_pic {
+    /* styled via js in static/js/comex_reg_form_controllers.js */
+}
 
 /* page sections: style snippets from old bootstrap h2 */
 h2.oldstyle {

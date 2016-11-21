@@ -435,35 +435,81 @@ function validateSubmit(wholeFormData, doorsResp) {
 
 
 
+
+
+var fileInput = document.getElementById('pic_file')
+var showPicImg = document.getElementById('show_pic')
+var boxShowPicImg = document.getElementById('box_show_pic')
 var picMsg = document.getElementById('picture_message')
-function testPictureBlob(fileInput) {
-  // TEMPORARY initial size already 200 kB, user has to do it himself
-  var max_size = 204800
 
-  // TODO  max source image size before resizing
-  //       see libs or stackoverflow.com/a/24015367
-  // 4 MB
-  // var max_size = 4194304
+var imgReader = new FileReader();
 
-  // Objectify -----------------------
-  // we build entire map for form
-  myFormData = new FormData(theForm);
-  // TODO better  (either use it to send it or only build it from file)
+function checkShowPic() {
+    // TEMPORARY initial size already 200 kB, user has to do it himself
+    var max_size = 204800
 
-  // retrieve the blob
-  var theFile = myFormData.get(fileInput.id)
+    // TODO  max source image size before resizing
+    //       see libs or stackoverflow.com/a/24015367
+    // 4 MB
 
-  // debug
-  console.log(theFile.name, "size", theFile.size, theFile.lastModifiedDate)
 
-  if (theFile.size > max_size) {
-    picMsg.innerHTML = "The picture is too big (200kB max)!"
-    picMsg.style.color = colorRed
-  }
-  else {
-    picMsg.innerHTML = "Picture ok"
-    picMsg.style.color = colorGreen
-  }
+    // always reset style and width/height calculations
+    boxShowPicImg.style.display = 'none'
+    showPicImg.style.display  = ""
+    showPicImg.style.width  = ""
+    showPicImg.style.height = ""
+
+    // var max_size = 4194304
+    if (fileInput.files) {
+        var theFile = fileInput.files[0]
+
+        // debug
+        console.log(theFile.name, "size", theFile.size, theFile.lastModifiedDate)
+
+        if (theFile.size > max_size) {
+          // msg pb
+          picMsg.innerHTML = "The picture is too big (200kB max)!"
+          picMsg.style.color = colorRed
+        }
+        else {
+          // msg ok
+          picMsg.innerHTML = "Picture ok"
+          picMsg.style.color = colorGreen
+
+          // to show the pic when readAsDataURL
+          imgReader.onload = function () {
+              showPicImg.src = imgReader.result;
+
+              // prepare max size while preserving ratio
+              var imgW = window.getComputedStyle(showPicImg).getPropertyValue("width")
+              var imgH = window.getComputedStyle(showPicImg).getPropertyValue("height")
+              console.log("img wid", imgW)
+              console.log("img hei", imgH)
+
+              if (imgW > imgH) {
+                  showPicImg.style.width  = "100%"
+                  showPicImg.style.height  = "auto"
+              }
+              else {
+                  showPicImg.style.width  = "auto"
+                  showPicImg.style.height = "100%"
+              }
+
+              // now reaadjust outer box and show
+              boxShowPicImg.style.display = 'block'
+              // possible re-adjust outerbox ?
+
+            //   showPicImg.style.border = "2px dashed " + colorGrey
+
+          }
+
+          // create fake src url & trigger the onload
+          imgReader.readAsDataURL(theFile);
+        }
+    }
+    else {
+        console.warn("skipping testPictureBlob called w/o picture in fileInput")
+    }
 }
 
 // basic inputs get normal on focus

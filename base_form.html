@@ -280,17 +280,20 @@
               </div>
             </div>
 
-            <!-- TODO show the picture -->
-            <div class="question">
+            <div class="question" style="margin-bottom:.5em" >
               <p class="legend">Upload a picture of yours (max source size: 200kB)</p>
               <!-- <p class="legend">Upload a picture of yours (max source size: 4MB, then the image will be reduced to 200kB)</p> -->
               <div class="input-group">
                 <label for="pic_file" class="smlabel input-group-addon">Picture</label>
                 <input type="file" id="pic_file" name="pic_file"
                        accept="image/png,image/jpeg" class="form-control"
-                       onchange="testPictureBlob(this)">
+                       onchange="checkShowPic(this)">
               </div>
               <p id="picture_message" class="legend red" style="font-weight:bold"></p>
+            </div>
+
+            <div id="box_show_pic">
+                <img id="show_pic" src=""></img>
             </div>
 
             <div class="question">
