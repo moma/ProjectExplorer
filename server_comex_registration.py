@@ -86,27 +86,23 @@ def one_big_form():
 
         if captcha_userhash != captcha_verifhash:
             print("captcha rejected")
-            return render_template("thank_you.html", form_accepted = False)
+            form_accepted = False
 
         # normal case
         else:
-            print("OK accepted")
-        from_reception_to_save(request.form)     #£TODO debug this
+            # print("OK accepted")
+            form_accepted = True
 
-        return render_template("thank_you.html", form_accepted = True)
+            clean_records = read_records(request.form)
 
-    # TODO combine with:
-    # show received values in template
-    # ================================
-    print_to_buffer(
-        template_thanks.render(
-            form_accepted = captcha_accepted,
+            # save to DB
+            save_to_db([clean_records.get(k[0], None) for k in COLS])
 
-            # for debug
-            records = clean_records,
-            message = ""
-        )
-    )
+        return render_template("thank_you.html",
+                                records = clean_records,
+                                form_accepted = True,
+                                message = "")
+
 
 
 
@@ -185,12 +181,9 @@ def save_to_db(safe_recs_arr):
     reg_db.close()
 
 
-def from_reception_to_save(incoming_data):
+def read_records(incoming_data):
     """
-    WIP: function to relate between one_big_form POST reception and previous cgi-bin post-treatment
-
-    TODO: integrate partly into one_big_form and maybe into save_to_db
-
+    runs sanitization as needed
     """
 
     # init var
@@ -210,11 +203,11 @@ def from_reception_to_save(incoming_data):
                 clean_records[field] = incoming_data[field]
 
     # debug cleaned data keys
-    # print(str(clean_records))
+    # print(clean_records)
 
-    # save to DB
-    # ===========
-    save_to_db([clean_records.get(k[0], None) for k in COLS])
+    return clean_records
+
+
 
 ########### MAIN ###########
 if __name__ == "__main__":
