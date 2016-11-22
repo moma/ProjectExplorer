@@ -8,6 +8,8 @@ Context:
 
     - POSSIBLE Doors validated the email was new ??
 
+    - exposed as "regcomex.app" for the outside
+
 
 """
 __author__    = "CNRS"
