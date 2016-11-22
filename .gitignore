@@ -1,4 +1,6 @@
 *.sqlite
 *.db
-*.json
-env/
+logs/nginx/*
+setup/regcomex_venv/*
+archives_local/*
+__pycache__/
