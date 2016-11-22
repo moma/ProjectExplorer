@@ -62,12 +62,14 @@ COLS = [ ("doors_uid",              True,        36),
 
 # ============= views =============
 
-# ------------------------------------------------------------------
-# /!\ All routes will be prefixed by comexsomething/reg in prod /!\
-# ------------------------------------------------------------------
+# -----------------------------------------------------------------------
+# /!\ Routes are not prefixed by nginx in prod so we do it ourselves /!\
+# -----------------------------------------------------------------------
 
+# prefix must match what nginx conf expects
+ROUTE_PREFIX = "/regcomex"
 
-@app.route("/", methods=['GET','POST'])
+@app.route(ROUTE_PREFIX+"/", methods=['GET','POST'])
 def one_big_form():
     if request.method == 'GET':
         return render_template("base_form.html")
