@@ -69,7 +69,7 @@ COLS = [ ("doors_uid",              True,        36),
 # prefix must match what nginx conf expects
 ROUTE_PREFIX = "/regcomex"
 
-@app.route(ROUTE_PREFIX+"/", methods=['GET','POST'])
+@app.route(ROUTE_PREFIX+"", methods=['GET','POST'])
 def one_big_form():
     if request.method == 'GET':
         return render_template("base_form.html")
