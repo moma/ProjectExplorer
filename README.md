@@ -39,6 +39,23 @@ The form server is now accessible locally on `127.0.0.1:9090/regcomex`
 (the default ROUTE_PREFIX is /regcomex, but TODO can be changed in config file)
 
 
+#### Running via docker
+Prerequisites:
+  - `docker`
+  - `docker-compose` (>= v. 1.7.0)
+
+```
+cd setup/dockers
+
+docker build flask_ispcif_light/ -t flask_ispcif_light:latest
+
+docker run -p 9090 --name comex_flask_test  flask_ispcif_light
+
+# run the app + mysql (TODO actually use mysql!)
+docker-compose up
+```
+
+
 #### Running in prod
 Secondly we ask nginx to reverse-proxy our app
 

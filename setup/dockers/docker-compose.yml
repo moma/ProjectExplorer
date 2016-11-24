@@ -1,0 +1,25 @@
+# NB this config assumes we have already built flask_ispcif_light
+    version: '2'
+    services:
+
+      mysql:
+        image: mysql
+        environment:
+         - MYSQL_ROOT_PASSWORD=very-safe-pass
+
+      flask_ispcif_light:
+        # todo simplify path
+        image: flask_ispcif_light
+        environment:
+         - HOST=0.0.0.0      # will bind the server to this address
+         - DEBUG_FLAG=true
+        ports:
+         - "9090:32790"
+        # volumes:
+        #  - .:/code
+        depends_on:
+         - mysql
+        #  - doors
+
+    #   doors:
+    #     image: doors
