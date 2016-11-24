@@ -5,12 +5,11 @@ Context:
       (base_form.html + static/js/comex_reg_form_controllers.js)
 
     - Doors recorded the email + password combination
+        - POSSIBLE Doors validated the email was new ??
 
-    - POSSIBLE Doors validated the email was new ??
-
-    - exposed as "regcomex.app" for the outside
-
-
+    - exposed as "server_comex_registration.app" for the outside
+        - can be served in dev by python3 server_comex_registration.py
+        - better to serve it via gunicorn (cf run.sh)
 """
 __author__    = "CNRS"
 __copyright__ = "Copyright 2016 ISCPIF-CNRS"
@@ -27,8 +26,8 @@ from re          import sub
 from os          import environ
 
 # ============= read environ =============
-MY_DEBUG_FLAG = ('DEBUG_FLAG' in environ)
 MY_HOST = environ.get('HOST', '0.0.0.0')
+MY_DEBUG_FLAG = environ.get('DEBUG_FLAG') == 'true'
 
 # ============= app creation =============
 app = Flask(__name__)
@@ -106,6 +105,7 @@ def one_big_form():
             # save to DB
             save_to_db([clean_records.get(k[0], None) for k in COLS])
 
+        # TODO use MY_DEBUG_FLAG here
         return render_template("thank_you.html",
                                 records = clean_records,
                                 form_accepted = True,

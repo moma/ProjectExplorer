@@ -5,6 +5,8 @@ FROM ubuntu:xenial
 # MAINTAINER Frode Egeland <egeland@gmail.com>
 
 # Base
+ENV HOST 0.0.0.0
+ENV DEBUG_FLAG false
 ENV LANG fr_FR.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -21,7 +23,7 @@ RUN dpkg-reconfigure locales
 # ENV LC_ALL fr_FR.UTF-8
 
 RUN apt-get update && apt-get autoclean
-RUN apt-get install -y python3-pip git
+RUN apt-get install -y python3-pip git nano
 
 # Install global dependencies
 RUN pip3 install --upgrade pip
@@ -32,9 +34,7 @@ RUN git clone https://github.com/moma/regcomex.git
 
 # main CMD to start the app
 WORKDIR /regcomex
-# CMD gunicorn -b 127.0.0.1:9090 server_comex_registration:app
-# CMD bash run.sh
-CMD bash debug.sh
+CMD bash run.sh
 
 # if REALLY needed virtualenv (TODO avoid it)
 # RUN apt install python3-virtualenv
@@ -46,5 +46,5 @@ CMD bash debug.sh
 # VOLUME ["/root/app/logs"]
 
 # Ports
-EXPOSE 5000:5000
-EXPOSE 9090:9090
+EXPOSE 5000
+EXPOSE 9090

@@ -2,5 +2,6 @@
 *.db
 logs/nginx/*
 setup/regcomex_venv/*
+setup/dockers/tests
 archives_local/*
 __pycache__/
