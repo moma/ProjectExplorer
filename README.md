@@ -86,7 +86,9 @@ TODO config file for the doors api routes
 
 ### Connecting the data to *communityexplorer.org*
 
-Currently the data is collected in `data/registered.db`  
+Currently the data is collected in `data/shared_mysql_data`
+  - the DB name is `comex_shared`  
+  - the table is `comex_registrations`  
 
 The communityexplorer.org app is using a separate DB from legacy wiki csv
 (cf [detailed doc](https://github.com/moma/regcomex/blob/master/doc/nginx_conf.md) for real-life conf)
