@@ -21,6 +21,9 @@ export SQLDOCKERIP=$(docker inspect comex_db | jq -r '.[0].NetworkSettings.IPAdd
 mysql -uroot -pvery-safe-pass -h $SQLDOCKERIP -P 3306
 # -----------------------------------------------------
 
+# stop it when you're done
+docker stop comex_db
+
 
 # NB
 # also now mysqld --initilize created the following files

@@ -19,27 +19,31 @@ More info in `doc/` directory
 First we need to run the app
 ```
 # install prerequisites
-> sudo apt install python3
-> sudo apt install python3-virtualenv
+> sudo apt install python3 docker jq
 
-# start a virtualenv
-> virtualenv --python=/usr/bin/python3 setup/regcomex_venv
-> source setup/regcomex_venv/bin/activate
+cd $INSTALL_DIR
 
-# additional requirements
-(regcomex_venv) > pip3 install -r setup/requirements.txt
+# run the database docker
+docker run --detach --name comex_db \
+           -v $INSTALL_DIR/data/shared_mysql_data:/var/lib/mysql \
+           --env="MYSQL_ROOT_PASSWORD=very-safe-pass" mysql
 
-# run the app    ----------------------------------------------------------
-(regcomex_venv) > gunicorn -b 127.0.0.1:9090 server_comex_registration:app
-#                ----------------------------------------------------------
+# get its IP into the env
+export SQLDOCKERIP=$(docker inspect comex_db | jq -r '.[0].NetworkSettings.IPAddress')
+
+# run the app --------------------------------------------
+gunicorn -b 127.0.0.1:9090 server_comex_registration:app
+# -------------------------------------------------------
 ```
-
 The form server is now accessible locally on `127.0.0.1:9090/regcomex`  
 
-(the default ROUTE_PREFIX is /regcomex, but TODO can be changed in config file)
+**Remarks:**
+  - the default ROUTE_PREFIX is /regcomex, but TODO can be changed in config file  
+  - the mysql DB needs to be [built first](https://github.com/moma/regcomex/blob/master/setup/dockers/1-create_sql_container.md), but TODO automatize  
 
+-------
 
-#### Running via docker
+#### Running it all via docker
 Prerequisites:
   - `docker`
   - `docker-compose` (>= v. 1.7.0)
@@ -51,15 +55,17 @@ docker build flask_ispcif_light/ -t flask_ispcif_light:latest
 
 docker run -p 9090 --name comex_flask_test  flask_ispcif_light
 
-# run the app + mysql (TODO actually use mysql!)
 docker-compose up
 ```
 
+-------
 
 #### Running in prod
+TODO
 Secondly we ask nginx to reverse-proxy our app
 
 This is a minimal conf (cf [detailed doc](https://github.com/moma/regcomex/blob/master/doc/nginx_conf.md) for real-life conf)
+
 ```
 # nginx exemple
 server {
