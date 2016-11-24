@@ -60,7 +60,12 @@
                   Thank you for your answers ! We have updated the <strong>Community Explorer</strong> registration database with this new information.
                 {% else %}
                   <span class="red">
-                    Your answers couldn't be accepted because you filled some wrong information in the verification test !
+                    Your answers couldn't be accepted
+                    {% if backend_error %}
+                    because there was an <b>error in the DB save</b> (see detail below)
+                    {% else %}
+                    because you filled some wrong information in the verification test !
+                    {% endif %}
                     <br/> (if you click "back" you should be able to have your answers still in the form)
                   </span>
                 {% endif %}
@@ -82,7 +87,9 @@
         {% endfor %}
 
         <h5>debug message</h5>
-        {{message}}
+        <p>
+            {{message|safe}}
+        </p>
       </div>
       <div class="spacer col-sm-2 col-md-2">&nbsp;</div>
     </div>

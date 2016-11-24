@@ -9,16 +9,16 @@ sudo usermod -aG docker
 mkdir ../shared_mysql_data
 docker create mysql
 
-docker run --detach --name test_again \
-           -v /home/romain/comex/shared_mysql_data:/var/lib/mysql \
-           --env="MYSQL_ROOT_PASSWORD=mypassword" mysql
+docker run --detach --name comex_db \
+           -v /home/romain/comex/regcomex/data/shared_mysql_data:/var/lib/mysql \
+           --env="MYSQL_ROOT_PASSWORD=very-safe-pass" mysql
 
 
 # get the ip
-export SQLDOCKERIP=$(docker inspect test_again | jq -r '.[0].NetworkSettings.IPAddress')
+export SQLDOCKERIP=$(docker inspect comex_db | jq -r '.[0].NetworkSettings.IPAddress')
 
-# connect ---------------------------------------------
-mysql -uroot -pmypassword -h $SQLDOCKERIP -P 3306
+# connect --------------------------------------------
+mysql -uroot -pvery-safe-pass -h $SQLDOCKERIP -P 3306
 # -----------------------------------------------------
 
 

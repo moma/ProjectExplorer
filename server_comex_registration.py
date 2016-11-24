@@ -21,13 +21,15 @@ from flask       import Flask, render_template, request
 from ctypes      import c_int32
 # from time     import sleep
 from jinja2      import Template, Environment, FileSystemLoader
-from sqlite3     import connect
+from MySQLdb     import connect, ProgrammingError
 from re          import sub
 from os          import environ
+from traceback   import format_tb
 
 # ============= read environ =============
 MY_HOST = environ.get('HOST', '0.0.0.0')
 MY_DEBUG_FLAG = environ.get('DEBUG_FLAG') == 'true'
+MY_SQLDOCKERIP = environ.get('SQLDOCKERIP', '172.17.0.2')
 
 # ============= app creation =============
 app = Flask(__name__)
@@ -102,8 +104,18 @@ def one_big_form():
 
             clean_records = read_records(request.form)
 
+            # try:
             # save to DB
             save_to_db([clean_records.get(k[0], None) for k in COLS])
+            # except Exception as perr:
+            #     return render_template("thank_you.html",
+            #                             records = clean_records,
+            #                             form_accepted = False,
+            #                             backend_error = True,
+            #                             message = ("ERROR ("+str(perr.__class__)+"):<br/>"
+            #                                         + ("<br/>".join(format_tb(perr.__traceback__)))
+            #                                         )
+            #                            )
 
         # TODO use MY_DEBUG_FLAG here
         return render_template("thank_you.html",
@@ -173,18 +185,53 @@ def sanitize(value):
 def save_to_db(safe_recs_arr):
     """
     see COLS and table_specifications.md
+    see http://mysql-python.sourceforge.net/MySQLdb.html#some-examples
     """
 
-    # expected number of vals (for instance 3 vals ===> "(?,?,?)" )
-    db_mask = '('+ ','.join(['?' for i in range(len(COLS))]) + ')'
-
-    # £TODO check if email exists first
+    # TODO double-check if email exists first
     #   yes =>propose login via doors + overwrite ?)
     #   no => proceed
 
-    reg_db = connect('data/registered.db')
+    db_fields = []
+    db_vals = []
+    # we filter ourselves
+    for i in range(len(COLS)):
+        col = COLS[i]
+        val = safe_recs_arr[i]
+        if val != None:
+            db_fields.append(col[0])
+            db_vals.append(val)
+
+    # expected colnames "(doors_uid, last_modified_date, email, ...)"
+
+    db_mask_str = ','.join(db_fields)
+
+    # TODO check if str(tuple(vals)) is ok for quotes
+    # and injection (although we've sanitized them b4)
+    db_vals_str = str(tuple(db_vals))
+
+
+
+    print("dbmask = ", db_mask_str)
+    print("actual len = ", len(db_vals))
+    print("actual values str", db_vals_str)
+
+    # DB is actually in a docker and forwarded to localhost:3306
+    reg_db = connect( host=MY_SQLDOCKERIP,
+                      user="root",   # TODO change db ownership to a comexreg user
+                      passwd="very-safe-pass",
+                      db="comex_shared"
+                      )
+
     reg_db_c = reg_db.cursor()
-    reg_db_c.execute('INSERT INTO comex_registrations VALUES' + db_mask , safe_recs_arr)
+
+    # print("INSERTING values", safe_recs_arr)
+    reg_db_c.execute(
+                    'INSERT INTO comex_registrations (%s) VALUES %s' % (
+                            db_mask_str,
+                            db_vals_str
+                        )
+                    )
     reg_db.commit()
     reg_db.close()
 
@@ -204,9 +251,20 @@ def read_records(incoming_data):
     for field_info in COLS:
         field = field_info[0]
         if field in incoming_data:
-            if field not in ["doors_uid", "last_modified_date", "pic_file"]:
-                clean_records[field] = sanitize(incoming_data[field])
-            # these 3 fields were already validated actually :)
+
+            if field not in ["doors_uid", "last_modified_date"]:
+                if field == "pic_file":
+                    # TODO check blob copy goes well here
+                    val = incoming_data[field]
+                else:
+                    val = sanitize(incoming_data[field])
+                if val != '':
+                    clean_records[field] = val
+                else:
+                    # mysql will want None instead of ''
+                    val = None
+
+            # these 2 fields already validated
             else:
                 clean_records[field] = incoming_data[field]
 
