@@ -24,12 +24,16 @@ from ctypes      import c_int32
 from jinja2      import Template, Environment, FileSystemLoader
 from sqlite3     import connect
 from re          import sub
+from os          import environ
+
+# ============= read environ =============
+MY_DEBUG_FLAG = ('MY_DEBUG_FLAG' in environ)
+MY_HOST = environ.get('HOST', '0.0.0.0')
 
 # ============= app creation =============
 app = Flask(__name__)
 
-app.config['DEBUG'] = True
-
+app.config['DEBUG'] = ('MY_DEBUG_FLAG' in environ)
 
 
 # templating setup
@@ -216,6 +220,5 @@ def read_records(incoming_data):
 ########### MAIN ###########
 if __name__ == "__main__":
     # our app should be bound to an ip (cf. http://stackoverflow.com/a/30329547/2489184)
-    # TODO read host ip from config
-    app.run(host='0.0.0.0')
+    app.run(host=MY_HOST)
 
