@@ -215,4 +215,7 @@ def read_records(incoming_data):
 
 ########### MAIN ###########
 if __name__ == "__main__":
-    app.run()
+    # our app should be bound to an ip (cf. http://stackoverflow.com/a/30329547/2489184)
+    # TODO read host ip from config
+    app.run(host='0.0.0.0')
+
