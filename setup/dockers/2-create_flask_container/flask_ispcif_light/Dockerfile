@@ -30,16 +30,11 @@ RUN pip3 install gunicorn flask
 # pull the comex server from repository
 RUN git clone https://github.com/moma/regcomex.git
 
-# don't do this ( start the app at image build XD )
-# WORKDIR /regcomex
-# RUN gunicorn -b 127.0.0.1:9090 server_comex_registration:app
-
-# but use the running script instead
-
-# if Install gunicorn running script
-# ADD run /usr/local/bin/run
-# RUN chmod +x /usr/local/bin/run
-
+# main CMD to start the app
+WORKDIR /regcomex
+# CMD gunicorn -b 127.0.0.1:9090 server_comex_registration:app
+# CMD bash run.sh
+CMD bash debug.sh
 
 # if REALLY needed virtualenv (TODO avoid it)
 # RUN apt install python3-virtualenv
@@ -47,7 +42,7 @@ RUN git clone https://github.com/moma/regcomex.git
 # RUN setup/regcomex_venv/bin/activate && pip3 install -r setup/requirements.txt
 
 
-# Volumes
+# Volumes TODO
 # VOLUME ["/root/app/logs"]
 
 # Ports
