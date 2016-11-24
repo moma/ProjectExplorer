@@ -27,13 +27,13 @@ from re          import sub
 from os          import environ
 
 # ============= read environ =============
-MY_DEBUG_FLAG = ('MY_DEBUG_FLAG' in environ)
+MY_DEBUG_FLAG = ('DEBUG_FLAG' in environ)
 MY_HOST = environ.get('HOST', '0.0.0.0')
 
 # ============= app creation =============
 app = Flask(__name__)
 
-app.config['DEBUG'] = ('MY_DEBUG_FLAG' in environ)
+app.config['DEBUG'] = MY_DEBUG_FLAG
 
 
 # templating setup
@@ -221,4 +221,3 @@ def read_records(incoming_data):
 if __name__ == "__main__":
     # our app should be bound to an ip (cf. http://stackoverflow.com/a/30329547/2489184)
     app.run(host=MY_HOST)
-
