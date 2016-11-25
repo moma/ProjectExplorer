@@ -93,20 +93,33 @@ def one_big_form():
             # print("OK accepted")
             form_accepted = True
 
-            clean_records = read_records(request.form)
+            clean_records = {}
+            pic_blob = None
 
-            try:
-                # save to DB
-                save_to_db([clean_records.get(k[0], None) for k in COLS])
-            except Exception as perr:
-                return render_template("thank_you.html",
-                                        records = clean_records,
-                                        form_accepted = False,
-                                        backend_error = True,
-                                        message = ("ERROR ("+str(perr.__class__)+"):<br/>"
-                                                    + ("<br/>".join(format_tb(perr.__traceback__)))
-                                                    )
-                                       )
+            # 1) handles all the text/options inputs
+            (duuid, rdate, clean_records) = read_records(request.form)
+
+            # 2) handles the pic_file if present
+            if hasattr(request, "files") and 'pic_file' in request.files:
+                # it's a werkzeug.datastructures.FileStorage
+                pic = request.files['pic_file']
+                print("INFO: Storing a picture (%s)" % pic.filename)
+                pic_blob = pic.stream.read()
+
+            # 3) pass it on
+            # try:
+            # save to DB
+            save_to_db([duuid, rdate] + [clean_records.get(k[0], None) for k in COLS[2:-1]] + [pic_blob])
+
+            # except Exception as perr:
+            #     return render_template("thank_you.html",
+            #                             records = clean_records,
+            #                             form_accepted = False,
+            #                             backend_error = True,
+            #                             message = ("ERROR ("+str(perr.__class__)+"):<br/>"
+            #                                         + ("<br/>".join(format_tb(perr.__traceback__)))
+            #                                         )
+            #                            )
 
         # TODO use MY_DEBUG_FLAG here
         return render_template("thank_you.html",
@@ -149,7 +162,7 @@ def re_hash(userinput, salt="verylonverylongverylonverylongverylonverylong"):
 
 def sanitize(value):
     """
-    simple and radical: leaves only alphanum and '.' '-' ':' ',' '(', ')', ' '
+    simple and radical: leaves only alphanum and '.' '-' ':' ',' '(', ')', '#', ' '
 
     TODO better
     """
@@ -157,7 +170,7 @@ def sanitize(value):
     str_val = str(value)
     clean_val = sub(r'^\s+', '', str_val)
     clean_val = sub(r'\s+$', '', clean_val)
-    san_val = sub(r'[^\w@\.-:,() ]', '_', clean_val)
+    san_val = sub(r'[^\w@\.-:,()# ]', '_', clean_val)
 
     if vtype not in [int, str]:
         raise ValueError("Value has an incorrect type %s" % str(vtype))
@@ -176,29 +189,51 @@ def save_to_db(safe_recs_arr):
     #   yes =>propose login via doors + overwrite ?)
     #   no => proceed
 
-    db_fields = []
-    db_vals = []
-    # we filter ourselves
+    db_tgtcols = []
+    # db_pyvals = []
+    db_qstrvals = []
+    actual_len_dbg = 0
+
+    # REMARK:
+    # => In theory should be possible to execute(statment, values) to insert all
+    #    (or reg_db.literal(db_pyvals) to convert all)
+
+    # => But currently bug in MySQLdb for binary values)
+    #    (see also MySQLdb.converters)
+
+    # => So for now we buid the values string ourselves in db_qstrvals instead
+    #                           -------------              -----------
+    #    and then we execute(full_statmt)         :-)
+
+
+    # + we also filter ourselves
+    # ---------------------------
     for i in range(len(COLS)):
         col = COLS[i]
+        colname = col[0]
+        # NB: each val already contains no quotes because of sanitize()
         val = safe_recs_arr[i]
+
         if val != None:
-            db_fields.append(col[0])
-            db_vals.append(val)
+            actual_len_dbg += 1
+            quotedstrval = ""
+            if colname != 'pic_file':
+                quotedstrval = "'"+str(val)+"'"
+            else:
+                # str(val) for a bin is already quoted but has the 'b' prefix
+                quotedstrval = '_binary'+str(val)[1:]
+                # print("DEBUG: added pic blob: " + quotedstrval[:15] + '...' + quotedstrval[-5:])
+
+            # anyways
+            db_tgtcols.append(colname)
+            db_qstrvals.append(quotedstrval)
+            # db_pyvals.append(val)
 
     # expected colnames "(doors_uid, last_modified_date, email, ...)"
+    db_tgtcols_str = ','.join(db_tgtcols)
 
-    db_mask_str = ','.join(db_fields)
-
-    # TODO check if str(tuple(vals)) is ok for quotes
-    # and injection (although we've sanitized them b4)
-    db_vals_str = str(tuple(db_vals))
-
-
-
-    print("dbmask = ", db_mask_str)
-    print("actual len = ", len(db_vals))
-    print("actual values str", db_vals_str)
+    # fields converted to sql syntax
+    db_vals_str = ','.join(db_qstrvals)
 
     # DB is actually in a docker and forwarded to localhost:3306
     reg_db = connect( host=MY_SQLDOCKERIP,
@@ -209,13 +244,13 @@ def save_to_db(safe_recs_arr):
 
     reg_db_c = reg_db.cursor()
 
-    # print("INSERTING values", safe_recs_arr)
-    reg_db_c.execute(
-                    'INSERT INTO comex_registrations (%s) VALUES %s' % (
-                            db_mask_str,
-                            db_vals_str
-                        )
-                    )
+    # full_statement with formated values
+    full_statmt = 'INSERT INTO comex_registrations (%s) VALUES (%s)' % (
+                        db_tgtcols_str,
+                        db_vals_str
+                   )
+
+    reg_db_c.execute(full_statmt)
     reg_db.commit()
     reg_db.close()
 
@@ -231,31 +266,30 @@ def read_records(incoming_data):
     # =========================
     # NB password values have already been sent by ajax to Doors
 
+    duuid = None
+    rdate = None
+
     # we should have all the mandatory fields (checked in client-side js)
     for field_info in COLS:
         field = field_info[0]
         if field in incoming_data:
 
             if field not in ["doors_uid", "last_modified_date"]:
-                if field == "pic_file":
-                    # TODO check blob copy goes well here
-                    val = incoming_data[field]
-                else:
-                    val = sanitize(incoming_data[field])
+                val = sanitize(incoming_data[field])
                 if val != '':
                     clean_records[field] = val
                 else:
                     # mysql will want None instead of ''
                     val = None
 
-            # these 2 fields already validated
-            else:
-                clean_records[field] = incoming_data[field]
+            # these 2 fields already validated and useful separately
+            elif field == 'doors_uid':
+                duuid = incoming_data[field]
+            elif field == 'last_modified_date':
+                rdate = incoming_data[field]
 
-    # debug cleaned data keys
-    # print(clean_records)
 
-    return clean_records
+    return (duuid, rdate, clean_records)
 
 
 

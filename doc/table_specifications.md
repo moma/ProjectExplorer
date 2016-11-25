@@ -9,7 +9,8 @@ registered.db is a sqlite3 db, with 2 tables:
 -- #########################
 create table test_table (
     email varchar(255) unique,
-    initials varchar(7)
+    initials varchar(7),
+    pic_file blob
 ) ;
 
 
@@ -34,6 +35,6 @@ create table comex_registrations (
     interests_text       varchar(1200),
     community_hashtags   varchar(350),
     gender               char(1),
-    pic_file             blob
+    pic_file             mediumblob
 ) ;
 ```
