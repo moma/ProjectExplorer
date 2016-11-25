@@ -13,15 +13,53 @@ More info in `doc/` directory
 
 -------
 
-### Setting up the server on an nginx server
+### Setting up the servers
+
+#### Running it all via docker
+Prerequisites:
+  - `docker`
+  - `docker-compose` (>= v. 1.7.0)  
+
+Steps to run:
+```
+cd setup/dockers
+
+# build the components
+docker build -t flask_iscpif_regcomex:latest flask_iscpif_regcomex/
+docker build -t minidoors:latest minidoors/
+docker create mysql
+mkdir ../shared_mysql_data
+
+# run them and link them
+docker-compose up
+```
+
+-------
 
 #### Running in dev
-First we need to run the app
+Minimal config:
 ```
-# install prerequisites
-> sudo apt install python3 docker jq
+sudo apt install python3
+sudo pip3 install -r setup/requirements.txt
+source setup/regcomex.ini
+```
+
+Then to run the regcomex app in the simplest way just do:
+```
+python3 server_comex_registration.py
+```
+The form server is then accessible locally on `127.0.0.1:5000/regcomex`  
+
+-------
+
+Or, to run the app with a real webserver (gunicorn) and a new mysql database:
+```
+# install more prerequisites
+sudo apt install docker jq
 
 cd $INSTALL_DIR
+
+mkdir ../shared_mysql_data
 
 # run the database docker
 docker run --detach --name comex_db \
@@ -29,13 +67,13 @@ docker run --detach --name comex_db \
            --env="MYSQL_ROOT_PASSWORD=very-safe-pass" mysql
 
 # get its IP into the env
-export SQLDOCKERIP=$(docker inspect comex_db | jq -r '.[0].NetworkSettings.IPAddress')
+export SQL_HOST=$(docker inspect comex_db | jq -r '.[0].NetworkSettings.IPAddress')
 
-# run the app --------------------------------------------
+# run the app
 gunicorn -b 127.0.0.1:9090 server_comex_registration:app
-# -------------------------------------------------------
 ```
-The form server is now accessible locally on `127.0.0.1:9090/regcomex`  
+
+The form server is then accessible locally on `127.0.0.1:9090/regcomex`  
 
 **Remarks:**
   - the default ROUTE_PREFIX is /regcomex, but TODO can be changed in config file  
@@ -43,26 +81,9 @@ The form server is now accessible locally on `127.0.0.1:9090/regcomex`
 
 -------
 
-#### Running it all via docker
-Prerequisites:
-  - `docker`
-  - `docker-compose` (>= v. 1.7.0)
-
-```
-cd setup/dockers
-
-docker build flask_ispcif_light/ -t flask_ispcif_light:latest
-
-docker run -p 9090 --name comex_flask_test  flask_ispcif_light
-
-docker-compose up
-```
-
--------
 
 #### Running in prod
-TODO
-Secondly we ask nginx to reverse-proxy our app
+TODO => we ask nginx to reverse-proxy our app
 
 This is a minimal conf (cf [detailed doc](https://github.com/moma/regcomex/blob/master/doc/nginx_conf.md) for real-life conf)
 
@@ -80,12 +101,11 @@ server {
 
 ### Setting up the doors connection
 
-TODO config file for the doors api routes
+The environment variable `DOORS_HOST` must simply be set to the doors server's hostname or IP.
 
 -------
 
 ### Connecting the data to *communityexplorer.org*
-
 Currently the data is collected in `data/shared_mysql_data`
   - the DB name is `comex_shared`  
   - the table is `comex_registrations`  

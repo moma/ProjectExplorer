@@ -41,9 +41,13 @@ var COLS = [ ["doors_uid",             false,        36,   'exact'],
 // NB other vars defined in main scope but just before their respective funs
 var wholeFormData
 var theForm = document.getElementById('comex_reg_form')
+
+
 var regTimestamp = document.getElementById('last_modified_date')
 var uidInput = document.getElementById('doors_uid')
 var email = document.getElementById('email')
+
+var doorsHost = document.getElementById('doors_host').value
 
 // captchaHash should be appended by itself if normal submit,
 // but we may need to do it ourselves (TODO test)
@@ -209,7 +213,7 @@ function callDoors(data, callback, apiAction) {
         $.ajax({
             contentType: "application/json",
             dataType: 'json',
-            url: "http://localhost:8989/api/" + apiAction,
+            url: "http://"+doorsHost+":8989/api/" + apiAction,
             data: JSON.stringify({
                 "login":    mailStr,
                 "password": passStr,

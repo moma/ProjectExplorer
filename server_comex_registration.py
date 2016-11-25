@@ -27,7 +27,9 @@ from traceback   import format_tb
 # ============= read environ =============
 MY_HOST = environ.get('HOST', '0.0.0.0')
 MY_DEBUG_FLAG = environ.get('DEBUG_FLAG') == 'true'
-MY_SQLDOCKERIP = environ.get('SQLDOCKERIP', '172.17.0.2')
+MY_SQL_HOST = environ.get('SQL_HOST', '172.17.0.2')
+MY_DOORS_HOST = environ.get('DOORS_HOST', '0.0.0.0')
+# TODO add doors port if != 8989
 
 # ============= app creation =============
 app = Flask(__name__)
@@ -71,7 +73,7 @@ ROUTE_PREFIX = "/regcomex"
 @app.route(ROUTE_PREFIX+"", methods=['GET','POST'])
 def one_big_form():
     if request.method == 'GET':
-        return render_template("base_form.html")
+        return render_template("base_form.html", doors_host=MY_DOORS_HOST)
     elif request.method == 'POST':
         # ex: request.form = ImmutableMultiDict([('initials', 'R.L.'), ('email', 'romain.loth@iscpif.fr'), ('last_name', 'Loth'), ('country', 'France'), ('first_name', 'Romain'), ('my-captchaHash', '-773776109'), ('my-captcha', 'TSZVIN')])
         # print("GOT ANSWERS <<========<<", request.form)
@@ -236,7 +238,7 @@ def save_to_db(safe_recs_arr):
     db_vals_str = ','.join(db_qstrvals)
 
     # DB is actually in a docker and forwarded to localhost:3306
-    reg_db = connect( host=MY_SQLDOCKERIP,
+    reg_db = connect( host=MY_SQL_HOST,
                       user="root",   # TODO change db ownership to a comexreg user
                       passwd="very-safe-pass",
                       db="comex_shared"
