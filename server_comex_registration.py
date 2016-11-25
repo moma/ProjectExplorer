@@ -77,12 +77,9 @@ def one_big_form():
         # print("GOT ANSWERS <<========<<", request.form)
 
         # 1 - testing the captcha answer
-
-
         captcha_userinput = request.form['my-captcha']
         captcha_userhash = re_hash(captcha_userinput)
         captcha_verifhash = int(request.form['my-captchaHash'])
-
 
         # dbg
         # print(str(captcha_verifhash))
@@ -98,18 +95,18 @@ def one_big_form():
 
             clean_records = read_records(request.form)
 
-            # try:
-            # save to DB
-            save_to_db([clean_records.get(k[0], None) for k in COLS])
-            # except Exception as perr:
-            #     return render_template("thank_you.html",
-            #                             records = clean_records,
-            #                             form_accepted = False,
-            #                             backend_error = True,
-            #                             message = ("ERROR ("+str(perr.__class__)+"):<br/>"
-            #                                         + ("<br/>".join(format_tb(perr.__traceback__)))
-            #                                         )
-            #                            )
+            try:
+                # save to DB
+                save_to_db([clean_records.get(k[0], None) for k in COLS])
+            except Exception as perr:
+                return render_template("thank_you.html",
+                                        records = clean_records,
+                                        form_accepted = False,
+                                        backend_error = True,
+                                        message = ("ERROR ("+str(perr.__class__)+"):<br/>"
+                                                    + ("<br/>".join(format_tb(perr.__traceback__)))
+                                                    )
+                                       )
 
         # TODO use MY_DEBUG_FLAG here
         return render_template("thank_you.html",
