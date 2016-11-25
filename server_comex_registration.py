@@ -19,8 +19,6 @@ __status__    = "Dev"
 
 from flask       import Flask, render_template, request
 from ctypes      import c_int32
-# from time     import sleep
-from jinja2      import Template, Environment, FileSystemLoader
 from MySQLdb     import connect, ProgrammingError
 from re          import sub
 from os          import environ
@@ -36,10 +34,6 @@ app = Flask(__name__)
 
 app.config['DEBUG'] = MY_DEBUG_FLAG
 
-
-# templating setup
-templating_env = Environment(loader = FileSystemLoader('templates'),
-                             autoescape = False)
 
 ########### PARAMS ###########
 
@@ -155,13 +149,6 @@ def re_hash(userinput, salt="verylonverylongverylonverylongverylonverylong"):
     return hashk
 
 
-def get_template(filename):
-    """
-    Retrieve a jinja2 template from templates
-
-    £TODO: check if necessary in server context ?
-    """
-    return templating_env.get_template(filename)
 
 def sanitize(value):
     """
