@@ -84,6 +84,8 @@ theForm.onblur = beTestedAsYouGo
 
 // done when anything in the form changes
 function beTestedAsYouGo() {
+  console.log("beTestedAsYouGo Go")
+
   basicEmailValidate()
   captchaStatus = (captcha.value.length == realCaptchaLength)
 
@@ -101,62 +103,86 @@ function beTestedAsYouGo() {
 }
 
 
-// NB if login ok then user exists then not available
-//      => TODO a route for doors/api/exists
-//      => resulting bool instead of (resp[0] != null)
-function testDoorsUserExists() {
+// NB using new route in doors api/userExists
+// case true => Ok("""{"status":"login exists"}""")
+// case false => Ok("""{"status":"login available"}""")
+function testDoorsUserExists(emailValue) {
     // /!\ async
     callDoors(
-        [email.value, pass1.value, initialsInput.value],
+        "userExists",
+        [emailValue],
         function(doorsResp) {
             var doorsUid = doorsResp[0]
             var doorsMsg = doorsResp[1]
-            var available = (doorsUid == null)
-            displayDoorsStatusInLoginBox(available)
-        },
-        "user"
+            var available = (doorsMsg == "login available")
+            displayDoorsStatusInLoginBox(available, emailValue)
+        }
     )
 }
 
 
-// doors register then submit
-function registerDoors() {
+function registerDoorsAndSubmit(e){
+    e.preventDefault()  // ? not necessary if button type is set and != "submit"
+
+    submitButton.disabled = true
+    mainMessage.style.display = 'block'
+    mainMessage.innerHTML = "Registering with ISCPIF Doors..."
+
+    // objectify the form
+    wholeFormData = new FormData(theForm);
+
+
+    // KNOCKING ON THE DOORS -------------------------------------
     // /!\ async
     callDoors(
-        [email.value, pass1.value, initialsInput.value],
+        "register",
+        [
+            // these values from the form have been checked by beTestedAsYouGo
+            wholeFormData.get("email"),
+            wholeFormData.get("password"),
+            wholeFormData.get("initials")
+        ],
+        // VALIDATING + send to DB -------------------
         function(doorsResp) {
-            var doorsUid = doorsResp[0]
-            var doorsMsg = doorsResp[1]
-            var available = (doorsUid == null)
-            displayDoorsStatusInLoginBox(available)
-        },
-        "register"
+            validateSubmit(wholeFormData, doorsResp)
+        }
     )
+
 }
 
-function displayDoorsStatusInLoginBox (available) {
+var lastEmailValueCheckedDisplayed = null
+var doorsIcon = document.getElementById('doors_ret_icon')
+function displayDoorsStatusInLoginBox (available, emailValue) {
 
     if (available) {
-        doorsMessage.innerHTML = "This ID + password is available !"
-        doorsMessage.style.color = colorGreen
+        doorsMessage.title = "This email ID is available !"
+        doorsIcon.classList.remove('glyphicon-remove')
+        doorsIcon.classList.remove('glyphicon-question-sign')
+        doorsIcon.classList.add('glyphicon-ok')
+        doorsIcon.style.color = colorGreen
     }
     else {
-        doorsMessage.innerHTML = "Sorry this ID + password is already taken"
-        doorsMessage.style.color = colorRed
+        doorsMessage.title = "Sorry this email ID is already taken"
+        doorsIcon.classList.remove('glyphicon-ok')
+        doorsIcon.classList.remove('glyphicon-question-sign')
+        doorsIcon.classList.add('glyphicon-remove')
+        doorsIcon.style.color = colorRed
     }
-    doorsMessage.style.display = 'block'
+
+    // to debounce further actions in basicEmailValidate
+    // return to neutral is also in basicEmailValidate
+    lastEmailValueCheckedDisplayed = emailValue
 }
 
 /* --------------- doors ajax cors function ----------------
 * @args:
-*     data:       3-uple with mail, pass, name
+*     apiAction:  'register' or 'user' or 'userExists' => route to doors api
+*                  if unknown type, default action is login via doors/api/user
 *
+*     data:       3-uple with mail, pass, name
 *
 *     callback:   function that will be called after success AND after error
 *                 with the return couple
-*
-*     apiAction:  'register' or 'user' => route to doors api
-*     [optional]   default action is login via doors/api/user route
 *
 *     returns couple (id, message)
 *     ----------------------------
@@ -178,7 +204,7 @@ function displayDoorsStatusInLoginBox (available) {
 *       }
 *     }
 */
-function callDoors(data, callback, apiAction) {
+function callDoors(apiAction, data, callback) {
 
     // console.warn("=====> CORS  <=====")
     // console.log("data",data)
@@ -193,22 +219,27 @@ function callDoors(data, callback, apiAction) {
     var nameStr = data[2]
 
     // test params and set defaults
-    if (typeof apiAction == 'undefined' || apiAction != 'register') {
-        // currently forces login action unless we got 'register'
+    if (typeof apiAction == 'undefined'
+        || (apiAction != 'register' && apiAction != 'userExists')) {
+        // currently forces login action unless we got 'register' or userExists
         apiAction = 'user'
+        console.warn('DBG: forcing user route')
     }
 
     if (typeof callback != 'function') {
         callback = function(retval) { return retval }
     }
 
-    var ok = (typeof mailStr != 'undefined'
-            && typeof mailStr != 'undefined'
-            && typeof nameStr != 'undefined'
-            && mailStr && passStr)    // assumes mail and pass will nvr be == 0
+    console.log("mailStr",mailStr)
+    var ok = ((apiAction == 'userExists' && typeof mailStr != 'undefined' && mailStr)
+             || (typeof mailStr != 'undefined'
+               && typeof mailStr != 'undefined'
+               && typeof nameStr != 'undefined'
+               && mailStr && passStr))  // assumes mail and pass will nvr be == 0
 
     if (!ok) {
-        doorsMsg = "Invalid parameters in input data (arg #2)"
+        doorsMsg = "Invalid parameters in input data (arg #1)"
+        console.warn('DEBUG callDoors() internal validation failed before ajax')
     }
     else {
         $.ajax({
@@ -223,15 +254,20 @@ function callDoors(data, callback, apiAction) {
             type: 'POST',
             success: function(data) {
                     if (typeof data != 'undefined'
+                         && apiAction == 'userExists') {
+                        // userExists success case: it's all in the message :)
+                        doorsUid =  null
+                        doorsMsg = data.status
+                    }
+                    else if (typeof data != 'undefined'
                             && typeof data.userInfo != undefined
                             && typeof data.userInfo.id != undefined
                             && typeof data.userInfo.id.id != undefined
                             && typeof data.status == 'string') {
-                        // main success case
+                        // main success case: get the id
                         doorsUid = data.userInfo.id.id
                         doorsMsg = data.status
                     }
-
                     else {
                         doorsMsg = "Unknown response for doors apiAction (" + apiAction +"):"
                         doorsMsg += '"' + JSON.stringify(data).substring(0,10) + '..."'
@@ -284,35 +320,6 @@ function makeRandomString(nChars) {
   for( var i=0; i < nChars; i++ )
       rando += possible.charAt(Math.floor(Math.random() * possible.length));
   return rando
-}
-
-function registerDoorsAndSubmit(e){
-    e.preventDefault()  // ? not necessary if button type is set and != "submit"
-
-    submitButton.disabled = true
-    mainMessage.style.display = 'block'
-    mainMessage.innerHTML = "Registering with ISCPIF Doors..."
-
-    // objectify the form
-    wholeFormData = new FormData(theForm);
-
-
-    // KNOCKING ON THE DOORS -------------------------------------
-    // /!\ async
-    callDoors(
-        [
-            // these values from the form have been checked by beTestedAsYouGo
-            wholeFormData.get("email"),
-            wholeFormData.get("password"),
-            wholeFormData.get("initials")
-        ],
-        // VALIDATING + send to DB -------------------
-        function(doorsResp) {
-            validateSubmit(wholeFormData, doorsResp)
-        },
-        "register"
-    )
-
 }
 
 // doValidate() : actions to do after doors registration and before send
@@ -573,7 +580,27 @@ nameInputs.forEach ( function(nameInput) {
 // very basic email validation TODO: better extension and allowed chars set :)
 // (used in tests "as we go")
 function basicEmailValidate () {
-  emailStatus = /^[-A-z0-9_=.+]+@[-A-z0-9_=.+]+\.[-A-z0-9_=.+]{1,4}$/.test(email.value)
+
+  var newValue = email.value
+  // tests if email is well-formed
+  emailStatus = /^[-A-z0-9_=.+]+@[-A-z0-9_=.+]+\.[-A-z0-9_=.+]{1,4}$/.test(newValue)
+
+  console.log("basicEmailValidate: emailStatus", emailStatus)
+
+  if (! emailStatus) {
+      // restore original lack of message
+      doorsMessage.title = 'The email will be checked in our DB after you type and leave the box.'
+      doorsIcon.classList.remove('glyphicon-remove')
+      doorsIcon.classList.remove('glyphicon-ok')
+      doorsIcon.classList.add('glyphicon-question-sign')
+      doorsIcon.style.color = colorGrey
+  }
+  else if (emailStatus && (newValue != lastEmailValueCheckedDisplayed)) {
+      // additional ajax to check login availability
+      // doesn't change the boolean but displays a message
+      testDoorsUserExists(newValue)
+  }
+
 }
 
 // pass 1 and pass 2 ~~~> do they match?

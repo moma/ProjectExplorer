@@ -8,7 +8,7 @@ FROM java:8
 # cf. doors/application/build.sbt for correct version
 ENV SCALA_VERSION 2.11.8
 ENV SBT_VERSION 0.13.12
-ENV DOORS_COMMIT ef7c5e0
+ENV DOORS_COMMIT fca0f79
 
 # Install Scala
 ## Piping curl directly in tar

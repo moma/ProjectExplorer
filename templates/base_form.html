@@ -150,10 +150,21 @@
               <div class="question">
                 <p class="legend">Your email will also be your login for the ISC services.</p>
                 <div class="input-group">
-                  <!-- TODO email validation onblur/onchange if value -->
+                  <!-- email validation onblur/onchange
+                            is done by basicEmailValidate
+                                   and testDoorsUserExists
+                            in comex_reg_form_controllers.js -->
                   <label for="email" class="smlabel input-group-addon">* Email</label>
                   <input id="email" name="email" maxlength="255"
                          type="text" class="form-control" placeholder="email">
+
+                  <!-- doors return value icon -->
+                  <div id="doors_ret_message" class="input-group-addon"
+                       title="The email will be checked in our DB after you type and leave the box.">
+                    <span id="doors_ret_icon"
+                          class="glyphicon glyphicon-question-sign grey"
+                          ></span>
+                  </div>
                 </div>
               </div>
 
@@ -174,17 +185,6 @@
                 </div>
                 <p id="password_message" class="legend red" style="font-weight:bold"></p>
               </div>
-
-              <button type=button class="btn btn-sm btn-default" style="float:right"
-                      id="knock_on_doors"
-                      onclick="testDoorsUserExists()">
-                      Check login availability at ISCPIF Doors
-              </button>
-
-
-              <!-- doors return value message -->
-              <p id="doors_ret_message" class="legend"></p>
-
 
               <!-- JOB & INTERESTS -->
               <h3 class="formcat"> About your job and research </h3>
@@ -399,11 +399,14 @@
 
         <!-- FOR DEBUG: test go-between with Doors -->
         <!-- <p>
-            <button type=button onclick='callDoors([email.value, pass1.value, initialsInput.value], console.warn, "user")'>
+            <button type=button onclick='callDoors("user", [email.value, pass1.value, initialsInput.value], console.warn)'>
                 test doors login
             </button>
-            <button type=button onclick='callDoors([email.value, pass1.value, initialsInput.value], "register", console.warn)'>
+            <button type=button onclick='callDoors("register", [email.value, pass1.value, initialsInput.value], console.warn)'>
                 test doors register
+            </button>
+            <button type=button onclick='callDoors("userExists", [email.value, null, null], console.warn)'>
+                test doors userExists
             </button>
         </p> -->
 
