@@ -1,2 +1,3 @@
 gunicorn
 flask
+mysqlclient  # provides MySQLdb

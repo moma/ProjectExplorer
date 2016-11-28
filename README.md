@@ -40,9 +40,9 @@ docker-compose up
 
 #### Minimal config
 ```
-sudo apt install python3
-sudo pip3 install -r setup/requirements.txt
+sudo apt install python3 libmysqlclient-dev
 cd $INSTALL_DIR
+sudo pip3 install -r setup/requirements.txt
 source setup/regcomex_config.ini
 ```
 
