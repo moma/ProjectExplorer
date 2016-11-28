@@ -37,7 +37,7 @@ WORKDIR /root/doors/application
 # build and compile it once so it downloads dependencies
 RUN sbt "project lab" compile test package
 
-# sset docker run command to run doors servers
+# set docker run command to run doors servers
 CMD sbt "project lab" run
 
 # ports

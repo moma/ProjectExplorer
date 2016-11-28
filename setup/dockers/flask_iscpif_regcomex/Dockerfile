@@ -13,21 +13,30 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN locale-gen fr_FR fr_FR.UTF-8
 RUN dpkg-reconfigure locales
 
-RUN apt-get update && apt-get autoclean
-RUN apt-get install -y python3-pip git nano
-
-# Install global dependencies
+# Install global dependencies and utilities
+RUN apt update && apt autoclean
+RUN apt install -y python3-pip libmysqlclient-dev git nano tree htop
 RUN pip3 install --upgrade pip
-RUN pip3 install gunicorn flask
 
 # for regcomex itself ----------------------------------------------------------
 # pull the comex server from repository
 RUN git clone https://github.com/moma/regcomex.git
 
+# Install project dependencies
+RUN pip3 install -r regcomex/setup/requirements.txt
+
 # main CMD to start the app
 WORKDIR /regcomex
+
+# flask dev server
+# CMD python3 server_comex_registration.py
+
+# gunicorn production server
 CMD bash run.sh
 
-# Ports
-EXPOSE 5000
+# ports ------------------------------------------------------------------------
+# flask dev server
+# EXPOSE 5000
+
+# gunicorn production server
 EXPOSE 9090

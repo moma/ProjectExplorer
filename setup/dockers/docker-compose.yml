@@ -17,7 +17,7 @@
          - "32789:8989"
          # POSSIBLE volume for h2 DB itself
 
-      flask_ispcif_regcomex:
+      comex_test:
         image: flask_iscpif_regcomex
         depends_on:
          - mysql_regcomex
