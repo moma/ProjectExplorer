@@ -3,7 +3,7 @@
     version: '2'
     services:
 
-      mysql_regcomex:
+      comex_db_test:
         image: mysql
         environment:
          - MYSQL_ROOT_PASSWORD=very-safe-pass
@@ -18,12 +18,14 @@
          # POSSIBLE volume for h2 DB itself
 
       comex_test:
+        ports:
+         - "32790:9090"
         image: flask_iscpif_regcomex
         depends_on:
-         - mysql_regcomex
+         - comex_db_test
          - doors_test
         links:
-         - mysql_regcomex:comex_db_backend
+         - comex_db_test:comex_db_backend
          - doors_test:doors_backend
         environment:
          - HOST=0.0.0.0                # script will bind server to this address
