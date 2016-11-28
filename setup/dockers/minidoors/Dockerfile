@@ -5,6 +5,7 @@
 # Pull base image
 FROM java:8
 
+# cf. doors/application/build.sbt for correct version
 ENV SCALA_VERSION 2.11.8
 ENV SBT_VERSION 0.13.12
 ENV DOORS_COMMIT ef7c5e0
@@ -32,7 +33,11 @@ RUN git clone https://github.com/ISCPIF/doors.git
 WORKDIR /root/doors
 RUN git checkout $DOORS_COMMIT
 WORKDIR /root/doors/application
-RUN sbt "project lab"
+
+# build and compile it once so it downloads dependencies
+RUN sbt "project lab" compile test package
+
+# sset docker run command to run doors servers
 CMD sbt "project lab" run
 
 # ports

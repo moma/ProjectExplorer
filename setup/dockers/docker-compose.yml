@@ -14,13 +14,11 @@
       doors_test:
         image: minidoors
         ports:
-         - "8989:32789"
+         - "32789:8989"
          # POSSIBLE volume for h2 DB itself
 
       flask_ispcif_regcomex:
         image: flask_iscpif_regcomex
-        ports:
-         - "9090:32790"
         depends_on:
          - mysql_regcomex
          - doors_test
@@ -28,9 +26,12 @@
          - mysql_regcomex:comex_db_backend
          - doors_test:doors_backend
         environment:
-         - HOST=0.0.0.0               # script will bind server to this address
+         - HOST=0.0.0.0                # script will bind server to this address
          - DEBUG_FLAG=false
-         - SQL_HOST=comex_db_backend  # script will read/write sql to this host
-         - DOORS_HOST=doors_backend   # script will log/register users to this host
+         - SQL_HOST=comex_db_backend   # script will read/write sql to this host
+         #- DOORS_HOST=doors_backend   # script will log/register users to this host
+         #- DOORS_PORT=8989            # original port on doors_backend
+         - DOORS_HOST=localhost
+         - DOORS_PORT=32789            # forwarded port we're accessing in tests
 
       #TODO add php legacy communityexplorer site

@@ -47,7 +47,8 @@ var regTimestamp = document.getElementById('last_modified_date')
 var uidInput = document.getElementById('doors_uid')
 var email = document.getElementById('email')
 
-var doorsHost = document.getElementById('doors_host').value
+// str of the form: doors_hostname:doors_port
+var doorsConnectParam = document.getElementById('doors_connect').value
 
 // captchaHash should be appended by itself if normal submit,
 // but we may need to do it ourselves (TODO test)
@@ -213,7 +214,7 @@ function callDoors(data, callback, apiAction) {
         $.ajax({
             contentType: "application/json",
             dataType: 'json',
-            url: "http://"+doorsHost+":8989/api/" + apiAction,
+            url: "http://"+doorsConnectParam+"/api/" + apiAction,
             data: JSON.stringify({
                 "login":    mailStr,
                 "password": passStr,

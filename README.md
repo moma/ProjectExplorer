@@ -41,7 +41,7 @@ Minimal config:
 ```
 sudo apt install python3
 sudo pip3 install -r setup/requirements.txt
-source setup/regcomex.ini
+source setup/regcomex_config.ini
 ```
 
 Then to run the regcomex app in the simplest way just do:
@@ -52,13 +52,19 @@ The form server is then accessible locally on `127.0.0.1:5000/regcomex`
 
 -------
 
-Or, to run the app with a real webserver (gunicorn) and a new mysql database:
+Or, to run the app with a real-world config:
+  - gunicorn webserver
+  - external mysql database
+  - external doors (simulated by docker)
+
 ```
 # install more prerequisites
 sudo apt install docker jq
 
 cd $INSTALL_DIR
+source setup/regcomex_config.ini
 
+# external mysql setup
 mkdir ../shared_mysql_data
 
 # run the database docker
@@ -68,6 +74,8 @@ docker run --detach --name comex_db \
 
 # get its IP into the env
 export SQL_HOST=$(docker inspect comex_db | jq -r '.[0].NetworkSettings.IPAddress')
+
+# here also set up the doors connection
 
 # run the app
 gunicorn -b 127.0.0.1:9090 server_comex_registration:app
@@ -99,9 +107,22 @@ server {
 ```
 -------
 
-### Setting up the doors connection
+### Setting up a doors connection
+The environment variable `DOORS_HOST` must simply be set to the doors server's hostname or IP, and `DOORS_PORT` to the doors server's exposed port.
 
-The environment variable `DOORS_HOST` must simply be set to the doors server's hostname or IP.
+For tests you can use a `minidoors` container
+```
+# build the docker image (once)
+cd setup/dockers
+docker build -t minidoors:latest minidoors/
+
+# run the container (each time)
+docker run -it -p 32789:8989 --name doors_test minidoors
+
+# pass the info to the env before running regcomex
+export DOORS_HOST=localhost
+export DOORS_PORT=8989
+```
 
 -------
 

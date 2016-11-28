@@ -350,8 +350,9 @@
             </ul>
           </nav>
 
-          <!-- hidden input for doors hostname -->
-          <input id="doors_host" name="doors_host" type="text" hidden>{{doors_host|safe}}</input>
+          <!-- hidden input for doors "hostname:port" -->
+          <input id="doors_connect" name="doors_connect" type="text" hidden value="{{doors_connect|safe}}">
+          </input>
 
           <!-- hidden input for modification date -->
           <input id="last_modified_date" name="last_modified_date" type="text" hidden>
