@@ -13,9 +13,9 @@ More info in `doc/` directory
 
 -------
 
-### Setting up the servers
+## Setting up the servers
 
-#### Running it all via docker
+### Running it all via docker
 Prerequisites:
   - `docker`
   - `docker-compose` (>= v. 1.7.0)  
@@ -118,9 +118,10 @@ The form server is then accessible locally on `0.0.0.0:9090/regcomex`
 
 -------
 
+### Running in prod
 
-#### Running in prod
-TODO => we ask nginx to reverse-proxy our app
+#### Nginx
+We ask nginx to reverse-proxy our app
 
 This is a minimal conf (cf [detailed doc](https://github.com/moma/regcomex/blob/master/doc/nginx_conf.md) for real-life conf)
 
@@ -130,7 +131,7 @@ server {
     listen 80;
 
     location /$ROUTE_PREFIX {
-        proxy_pass http://127.0.0.1:9090;
+        proxy_pass http://0.0.0.0:9090;
     }
 }
 ```
@@ -143,7 +144,7 @@ Currently the data is collected in `data/shared_mysql_data`
 The communityexplorer.org app is using a separate DB from legacy wiki csv
 (cf [detailed doc](https://github.com/moma/regcomex/blob/master/doc/nginx_conf.md) for real-life conf)
 
-**TODO:** connect the two
+**TODO:** connect the two DBs
 
 -------
 
