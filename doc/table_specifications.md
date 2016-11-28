@@ -1,24 +1,14 @@
-
-## Parameters for *`data/registered.db`*
-
-
-registered.db is a sqlite3 db, with 2 tables:
+### Set up the tables
 
 ```
--- test_table: used in debug
--- #########################
-create table test_table (
-    email varchar(255) unique,
-    initials varchar(7),
-    pic_file blob
-) ;
+# connect to your sql host or container
+mysql -uroot -pvery-safe-pass -h $SQL_HOST -P 3306
 
-
--- real_table: used in prod
--- ########################
-create table comex_registrations (
+# --- after connection to mysql
+CREATE DATABASE comex_shared ;
+USE comex_shared ;
+CREATE TABLE comex_registrations (
     doors_uid            char(36) not null unique,
-    -- ISO stamp like 2016-11-16T17:47:07.308Z
     last_modified_date   char(24) not null,
     email                varchar(255) not null unique primary key,
     initials             varchar(7) not null,

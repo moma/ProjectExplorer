@@ -36,11 +36,13 @@ docker-compose up
 
 -------
 
-#### Running in dev
-Minimal config:
+### Running in dev
+
+#### Minimal config
 ```
 sudo apt install python3
 sudo pip3 install -r setup/requirements.txt
+cd $INSTALL_DIR
 source setup/regcomex_config.ini
 ```
 
@@ -52,40 +54,67 @@ The form server is then accessible locally on `127.0.0.1:5000/regcomex`
 
 -------
 
-Or, to run the app with a real-world config:
-  - gunicorn webserver
-  - external mysql database
-  - external doors (simulated by docker)
+#### Real-world config
+  1. external mysql database  
+  2. external doors (or simulated by docker)  
+  3. gunicorn webserver (linked to 1 & 2 via `$SQL_HOST` and `$DOORS_HOST`)  
+
+##### 1) Set up your mysql database
+
+###### If you have your own local mysql
+```
+export SQL_HOST=localhost      # or any other hostname/IP
+```
+Then just create the table following [the table specifications](https://github.com/moma/regcomex/blob/master/doc/table_specifications.md)
+
+###### If you want a dedicated mysql in docker
+
+  - Follow the detailed steps in [mysql_prerequisites](https://github.com/moma/regcomex/blob/master/setup/dockers/mysql_prerequisites.md): it will explain how to create the docker and connect to it.
+
+  - Then create the table following [the table specifications](https://github.com/moma/regcomex/blob/master/doc/table_specifications.md)
+  - Now run it as follows:
 
 ```
-# install more prerequisites
-sudo apt install docker jq
-
-cd $INSTALL_DIR
-source setup/regcomex_config.ini
-
-# external mysql setup
-mkdir ../shared_mysql_data
-
 # run the database docker
-docker run --detach --name comex_db \
-           -v $INSTALL_DIR/data/shared_mysql_data:/var/lib/mysql \
-           --env="MYSQL_ROOT_PASSWORD=very-safe-pass" mysql
+docker start comex_db
 
 # get its IP into the env
 export SQL_HOST=$(docker inspect comex_db | jq -r '.[0].NetworkSettings.IPAddress')
-
-# here also set up the doors connection
-
-# run the app
-gunicorn -b 127.0.0.1:9090 server_comex_registration:app
 ```
 
-The form server is then accessible locally on `127.0.0.1:9090/regcomex`  
+##### 2) Set up a doors connection
+Again, the environment variable `DOORS_HOST` must simply be set to the doors server's hostname or IP, and `DOORS_PORT` to the doors server's exposed port.
 
-**Remarks:**
-  - the default ROUTE_PREFIX is /regcomex, but TODO can be changed in config file  
-  - the mysql DB needs to be [built first](https://github.com/moma/regcomex/blob/master/setup/dockers/1-create_sql_container.md), but TODO automatize  
+###### If you have a doors server
+```
+export DOORS_HOST=yourdoorsserver
+export DOORS_PORT=8989
+```
+
+###### If you have no doors server
+
+For tests you can use a `minidoors` container
+```
+# build the docker image (once)
+cd setup/dockers
+docker build -t minidoors:latest minidoors/
+
+# run the container (each time)
+docker run -it -p 32789:8989 --name doors_test minidoors
+
+# pass the info to the env before running regcomex
+export DOORS_HOST=localhost
+export DOORS_PORT=8989
+```
+
+##### 3) Run the regomex app with gunicorn
+```
+gunicorn -b 0.0.0.0:9090 server_comex_registration:app
+```
+
+The form server is then accessible locally on `0.0.0.0:9090/regcomex`  
+
+**Remark:** the default ROUTE_PREFIX is /regcomex, but TODO can be changed in config file  
 
 -------
 
@@ -105,28 +134,8 @@ server {
     }
 }
 ```
--------
 
-### Setting up a doors connection
-The environment variable `DOORS_HOST` must simply be set to the doors server's hostname or IP, and `DOORS_PORT` to the doors server's exposed port.
-
-For tests you can use a `minidoors` container
-```
-# build the docker image (once)
-cd setup/dockers
-docker build -t minidoors:latest minidoors/
-
-# run the container (each time)
-docker run -it -p 32789:8989 --name doors_test minidoors
-
-# pass the info to the env before running regcomex
-export DOORS_HOST=localhost
-export DOORS_PORT=8989
-```
-
--------
-
-### Connecting the data to *communityexplorer.org*
+#### Connecting the data to *communityexplorer.org*
 Currently the data is collected in `data/shared_mysql_data`
   - the DB name is `comex_shared`  
   - the table is `comex_registrations`  
