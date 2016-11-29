@@ -22,4 +22,7 @@ docker run --detach \
 
 # get the ip into SQL_HOST
 export SQL_HOST=$(docker inspect comex_db | jq -r '.[0].NetworkSettings.IPAddress')
+
+# variant if run by docker-compose
+export SQL_HOST=$(sudo docker inspect dockers_comex_db_test_1 | jq -r '.[0].NetworkSettings.Networks.dockers_default.IPAddress')
 ```
