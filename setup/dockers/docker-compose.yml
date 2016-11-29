@@ -10,17 +10,18 @@
         volumes:
          - ../../data/shared_mysql_data:/var/lib/mysql
 
-      # in the future: external service (=> just remove doors_test & change DOORS_HOST)
+      # in the future: external service (=> just remove doors_test & change DOORS_HOST and DOORS_PORT)
       doors_test:
-        image: minidoors
+        build: ./minidoors
+        image: minidoors:latest
         ports:
          - "32789:8989"
-         # POSSIBLE volume for h2 DB itself
 
       comex_test:
         ports:
          - "32790:9090"
-        image: flask_iscpif_regcomex
+        build: ./flask_iscpif_regcomex
+        image: flask_iscpif_regcomex:latest
         depends_on:
          - comex_db_test
          - doors_test
@@ -31,9 +32,8 @@
          - HOST=0.0.0.0                # script will bind server to this address
          - DEBUG_FLAG=false
          - SQL_HOST=comex_db_backend   # script will read/write sql to this host
-         #- DOORS_HOST=doors_backend   # script will log/register users to this host
-         #- DOORS_PORT=8989            # original port on doors_backend
          - DOORS_HOST=localhost
          - DOORS_PORT=32789            # forwarded port we're accessing in tests
 
-      #TODO add php legacy communityexplorer site
+      # POSSIBLE add php legacy communityexplorer site
+      # (currently served in parallel: see doc/nginx_conf.md)
