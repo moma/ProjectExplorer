@@ -76,7 +76,7 @@
 
         <!-- ########################### ( FORM ) ########################## -->
         <form id="comex_reg_form" enctype="multipart/form-data"
-              method="post" onsubmit="validateSubmit(event, 'from form', 'register')">
+              method="post" onsubmit="console.info('submitted')">
 
         <!-- todo onsubmit also save to cache -->
 
@@ -400,7 +400,7 @@
               <!-- also remember stackoverflow.com/a/3315016/2489184 -->
               <button class="btn btn-lg btn-success" style="float:right"
                       id="formsubmit" type=button
-                      onclick="registerDoorsAndSubmit(event)">
+                      onclick="if (validateAndMsg(event)) {registerDoorsAndSubmit()}">
                       Submit your form
               </button>
 
