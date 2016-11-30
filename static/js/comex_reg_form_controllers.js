@@ -83,16 +83,24 @@ theForm.onkeyup = beTestedAsYouGo
 theForm.onchange = beTestedAsYouGo
 theForm.onblur = beTestedAsYouGo
 
+var lastEmailValueCheckedDisplayed = null
+
+
 // done when anything in the form changes
 function beTestedAsYouGo() {
-  console.log("beTestedAsYouGo Go")
+  // console.log("beTestedAsYouGo Go")
 
-  basicEmailValidate()
+  if (email.value != lastEmailValueCheckedDisplayed) {
+      // will update the emailStatus boolean
+      basicEmailValidate(email.value)
+  }
+
   captchaStatus = (captcha.value.length == realCaptchaLength)
 
   // for debug
   checkPassStatus()
 
+  // TODO all other mandatory fields should be checked here
   if (passStatus && emailStatus && captchaStatus) {
       submitButton.disabled = false
   }
@@ -115,8 +123,11 @@ function testDoorsUserExists(emailValue) {
         function(doorsResp) {
             var doorsUid = doorsResp[0]
             var doorsMsg = doorsResp[1]
-            var available = (doorsMsg == "login available")
-            displayDoorsStatusInLoginBox(available, emailValue)
+
+            // the global status can be true iff login is available and format ok
+            emailStatus = (doorsMsg == "login available")
+
+            displayDoorsStatusInLoginBox(emailStatus, emailValue)
         }
     )
 }
@@ -151,7 +162,6 @@ function registerDoorsAndSubmit(e){
 
 }
 
-var lastEmailValueCheckedDisplayed = null
 var doorsIcon = document.getElementById('doors_ret_icon')
 function displayDoorsStatusInLoginBox (available, emailValue) {
 
@@ -170,8 +180,8 @@ function displayDoorsStatusInLoginBox (available, emailValue) {
         doorsIcon.style.color = colorRed
     }
 
-    // to debounce further actions in basicEmailValidate
-    // return to neutral is also in basicEmailValidate
+    // to debounce further actions in beTestedAsYouGo
+    // return to neutral is also in beTestedAsYouGo
     lastEmailValueCheckedDisplayed = emailValue
 }
 
@@ -209,7 +219,7 @@ function callDoors(apiAction, data, callback) {
 
     // console.warn("=====> CORS  <=====")
     // console.log("data",data)
-    console.log("apiAction",apiAction)
+    // console.log("apiAction",apiAction)
 
     var doorsUid = null
     var doorsMsg = null
@@ -231,7 +241,6 @@ function callDoors(apiAction, data, callback) {
         callback = function(retval) { return retval }
     }
 
-    console.log("mailStr",mailStr)
     var ok = ((apiAction == 'userExists' && typeof mailStr != 'undefined' && mailStr)
              || (typeof mailStr != 'undefined'
                && typeof mailStr != 'undefined'
@@ -580,28 +589,26 @@ nameInputs.forEach ( function(nameInput) {
 
 // very basic email validation TODO: better extension and allowed chars set :)
 // (used in tests "as we go")
-function basicEmailValidate () {
+function basicEmailValidate (emailValue) {
 
-  var newValue = email.value
   // tests if email is well-formed
-  emailStatus = /^[-A-z0-9_=.+]+@[-A-z0-9_=.+]+\.[-A-z0-9_=.+]{1,4}$/.test(newValue)
+  var emailFormatOk = /^[-A-z0-9_=.+]+@[-A-z0-9_=.+]+\.[-A-z0-9_=.+]{1,4}$/.test(emailValue)
 
-  console.log("basicEmailValidate: emailStatus", emailStatus)
-
-  if (! emailStatus) {
+  if (! emailFormatOk) {
       // restore original lack of message
       doorsMessage.title = 'The email will be checked in our DB after you type and leave the box.'
       doorsIcon.classList.remove('glyphicon-remove')
       doorsIcon.classList.remove('glyphicon-ok')
       doorsIcon.classList.add('glyphicon-question-sign')
       doorsIcon.style.color = colorGrey
+      emailStatus = false
   }
-  else if (emailStatus && (newValue != lastEmailValueCheckedDisplayed)) {
+  else {
       // additional ajax to check login availability
-      // doesn't change the boolean but displays a message
-      testDoorsUserExists(newValue)
+      //  => updates the emailStatus global boolean
+      //  => displays an icon
+      testDoorsUserExists(emailValue)
   }
-
 }
 
 // pass 1 and pass 2 ~~~> do they match?
