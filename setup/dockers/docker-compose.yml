@@ -16,6 +16,8 @@
         image: minidoors:latest
         ports:
          - "32789:8989"
+        volumes:
+         - ../../../shared_minidoors_data:/root/.doors
 
       comex_test:
         ports:
