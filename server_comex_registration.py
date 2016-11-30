@@ -13,7 +13,7 @@ Context:
 """
 __author__    = "CNRS"
 __copyright__ = "Copyright 2016 ISCPIF-CNRS"
-__version__   = "1"
+__version__   = "1.2"
 __email__     = "romain.loth@iscpif.fr"
 __status__    = "Dev"
 
