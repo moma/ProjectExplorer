@@ -32,6 +32,32 @@ mkdir ../shared_mysql_data
 
 # run them and link them
 docker-compose up
+
+
+#             |---------------------|
+#             |        nginx        | 
+#             |---------------------|
+#                   /            \
+#                  /              \
+#          (reverse proxy)        $host/
+#          $host/regcomex/           \
+#                |               |-------------------|
+#     |--------------------|     |  site php         |
+#     |  regcomex docker   |     |  (à versionner)   |
+#     |  (serveur python)  |     |  (à adapter)      |
+#     |--------------------|     |-------------------|
+#         |             \                 |
+#         |              \                |
+# |-------------------|   \             TODO
+# | minidoors docker  |    \            lien
+# | émule futur doors |     \          manquant
+# |-------------------|      \            |
+#                             \           |
+#                             |-----------------|
+#                             |  mysql docker   |
+#                             |  "comex_shared" |
+#                             |-----------------|
+
 ```
 
 -------
