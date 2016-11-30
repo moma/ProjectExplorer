@@ -15,7 +15,7 @@ RUN dpkg-reconfigure locales
 
 # Install global dependencies and utilities
 RUN apt update && apt autoclean
-RUN apt install -y python3-pip libmysqlclient-dev git nano tree htop
+RUN apt install -y python3-pip libmysqlclient-dev git nano tree iputils-ping
 RUN pip3 install --upgrade pip
 
 # for regcomex itself ----------------------------------------------------------
