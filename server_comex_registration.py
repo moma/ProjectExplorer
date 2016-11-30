@@ -273,6 +273,8 @@ def save_to_db(safe_recs_arr):
 def read_records(incoming_data):
     """
     runs sanitization as needed
+
+    NB custom made for regcomex/templates/base_form
     """
 
     # init var
@@ -303,6 +305,9 @@ def read_records(incoming_data):
             elif field == 'last_modified_date':
                 rdate = incoming_data[field]
 
+    # special treatment for "other" subquestions
+    if clean_records['institution_type'] == 'other' and 'other_institution_type' in incoming_data:
+        clean_records['institution_type'] = sanitize(incoming_data['other_institution_type'])
 
     return (duuid, rdate, clean_records)
 

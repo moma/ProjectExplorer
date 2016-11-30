@@ -58,6 +58,7 @@ var captchaCheck = document.getElementById('my-captchaHash')
 var subPage1Style = document.getElementById('subpage_1').style
 var subPage2Style = document.getElementById('subpage_2').style
 var teamCityDivStyle = document.getElementById('team_city_div').style
+var otherInstDivStyle = document.getElementById('other_institution_div').style
 
 // param for generation & validation
 var realCaptchaLength = 5
@@ -612,16 +613,16 @@ var passwords = [pass1, pass2]
 
 
 // £DEBUG autofill ----------->8------
-//first_name.value = "Jean"
-//last_name.value = "Tartampion"
-//initialsInput.value="JPP"
-//document.getElementById('country').value = "France"
-//email.value= makeRandomString(10)+"@om.fr"
-//pass1.value="123456+789"
-//pass2.value="123456+789"
-//document.getElementById('jobtitle').value = "atitle"
-//document.getElementById('keywords').value = "Blabla"
-//document.getElementById('institution').value = "CNRS"
+first_name.value = "Jean"
+last_name.value = "Tartampion"
+initialsInput.value="JPP"
+document.getElementById('country').value = "France"
+email.value= makeRandomString(10)+"@om.fr"
+pass1.value="123456+789"
+pass2.value="123456+789"
+document.getElementById('jobtitle').value = "atitle"
+document.getElementById('keywords').value = "Blabla"
+document.getElementById('institution').value = "CNRS"
 // --------------------------->8------
 
 
