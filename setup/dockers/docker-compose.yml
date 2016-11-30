@@ -32,8 +32,8 @@
          - HOST=0.0.0.0                # script will bind server to this address
          - DEBUG_FLAG=false
          - SQL_HOST=comex_db_backend   # script will read/write sql to this host
-         - DOORS_HOST=localhost
-         - DOORS_PORT=32789            # forwarded port we're accessing in tests
+         - DOORS_HOST=134.158.75.71
+         - DOORS_PORT=80               # forwarded port we're accessing via ajax in tests
 
       # POSSIBLE add php legacy communityexplorer site
       # (currently served in parallel: see doc/nginx_conf.md)
