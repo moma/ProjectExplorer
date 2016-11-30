@@ -382,7 +382,7 @@ function validateSubmit(wholeFormData, doorsResp) {
           // console.log("actualValue", actualValue)
 
           // test mandatory -----------------
-          if (mandatory && actualValue == null && actualValue != "") {
+          if (mandatory && (actualValue == null || actualValue == "")) {
               // todo human-readable fieldName here
               missingFields.push(fieldName)
               valid = false
@@ -433,19 +433,15 @@ function validateSubmit(wholeFormData, doorsResp) {
         else {
 
           console.warn("form is not valid")
-          // TODO better user message
           // TODO highlight invalid fields
           submitButton.disabled = false
 
-          var errorMessage = ""
-
+          var errorMessage = ''
           if (missingFields.length) {
-             errorMessage += "<br/>Please fill the missing fields: " + JSON.stringify(missingFields)
+             errorMessage += "Please fill the missing fields: " + ulListFromLabelsArray(missingFields, ["red"])
           }
-          // TODO should be handled question by question
-          if (toolongFields.length) {
-             errorMessage += "<br/>Please shorten the following fields: " + JSON.stringify(toolongFields)
-          }
+
+          // length is handled by each input's maxlength
 
           // display (TODO setTimeout and fade)
           mainMessage.innerHTML = errorMessage
@@ -456,7 +452,16 @@ function validateSubmit(wholeFormData, doorsResp) {
 }
 
 
-
+function ulListFromLabelsArray(strArray, ulClassList) {
+    ulClasses=["minilabels"].concat(ulClassList).join(" ")
+    var resultHtml = '<ul class="'+ulClasses+'">'
+    for (var i in strArray) {
+        var label = strArray[i].replace(/_/, " ")
+        resultHtml += '<li class="minilabel">'+label+'</li>'
+    }
+    resultHtml += '</ul>'
+    return resultHtml
+}
 
 
 var fileInput = document.getElementById('pic_file')
@@ -620,16 +625,16 @@ var passwords = [pass1, pass2]
 
 
 // £DEBUG autofill ----------->8------
-first_name.value = "Jean"
-last_name.value = "Tartampion"
-initialsInput.value="JPP"
-document.getElementById('country').value = "France"
-email.value= makeRandomString(10)+"@om.fr"
-pass1.value="123456+789"
-pass2.value="123456+789"
-document.getElementById('jobtitle').value = "atitle"
-document.getElementById('keywords').value = "Blabla"
-document.getElementById('institution').value = "CNRS"
+// first_name.value = "Jean"
+// last_name.value = "Tartampion"
+// initialsInput.value="JPP"
+// document.getElementById('country').value = "France"
+// email.value= makeRandomString(10)+"@om.fr"
+// pass1.value="123456+789"
+// pass2.value="123456+789"
+// document.getElementById('jobtitle').value = "atitle"
+// document.getElementById('keywords').value = "Blabla"
+// document.getElementById('institution').value = "CNRS"
 // --------------------------->8------
 
 

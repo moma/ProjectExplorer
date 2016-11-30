@@ -28,6 +28,14 @@
 }
 
 
+.cartouche {
+  border: .4em dotted #988 ;
+  border-radius: 2em;
+  padding: 1em 3em;
+  text-align: center;
+}
+
+
 /* ==> a question + input block <== */
 .question {
   padding: 0 1em;
@@ -53,13 +61,6 @@
 /* small label inside addon group*/
 .smlabel {
   min-width: 7.5em;
-}
-
-/* the main validation message (a special legend) */
-#main_validation_message {
-  font-size: 200%;
-  text-align:center;
-  /*color: #554 ;*/
 }
 
 /* the question's additional legend or caption */
@@ -99,12 +100,16 @@ h3.formcat {
   margin-top: 2em;
 }
 
+h3.formcatfirst {
+  margin-top: .5em;
+}
+
 .spacerrow {
-  height: 4em;
+  height: 2em;
 }
 
 .bigspacerrow {
-  height: 50em;
+  height: 15em;
 }
 
 .realperson-challenge {
@@ -116,9 +121,6 @@ h3.formcat {
 .realperson-regen {
   color: #554 ;
 }
-.bigspacerrow {
-  height: 50em;
-}
 
 .raw-responses {
   font-family: Calibri, sans-serif ;
@@ -127,4 +129,23 @@ h3.formcat {
   background-color: #554;
   color: white;
   padding-bottom: 3em
+}
+
+
+/* the main validation message (a special legend) */
+#main_validation_message {
+  font-size: 200%;
+  text-align:center;
+  /*color: #554 ;*/
+}
+
+
+ul.minilabels {
+  padding-top: .5em;
+  list-style-type: none;
+  font-size: 75% ;
+}
+
+li.minilabel {
+    font-weight: bold ;
 }

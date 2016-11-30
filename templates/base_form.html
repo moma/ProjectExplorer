@@ -91,7 +91,7 @@
         <div class="subpage" id="subpage_1" style="display:block">
 
               <!-- NAME & COUNTRY -->
-              <h3 class="formcat"> Basic infos </h3>
+              <h3 class="formcatfirst"> Basic infos </h3>
 
               <div class="question input-group">
                 <label for="first_name" class="smlabel input-group-addon">
@@ -266,7 +266,7 @@
           <div class="subpage" id="subpage_2">
 
             <!-- OTHER PERSONAL INFO -->
-            <h3 class="formcat"> Complementary information </h3>
+            <h3 class="formcatfirst"> Complementary information </h3>
 
             <div class="question">
               <div class="input-group">
@@ -321,9 +321,9 @@
             </div>
 
             <!-- CNIL WARNING -->
-            <h3 class="formcat"> About your data </h3>
 
-            <div class="question" id="cnil_warning">
+            <h3 class="formcat"> About your data </h3>
+            <div class="cartouche" id="cnil_warning">
               <p>Les informations recueillies à partir de ce formulaire font l’objet d’un traitement
                  informatique destiné à: </p>
                  <p><strong>communityexplorer.org</strong></p>
@@ -339,15 +339,11 @@
                 loi « informatique et libertés » du 6 janvier 1978 modifiée</a>,
                 vous disposez d’un <a href="https://www.cnil.fr/fr/le-droit-dacces">droit d’accès</a>
                 et <a href="https://www.cnil.fr/fr/le-droit-de-rectification">de rectification</a>
-                aux informations qui vous concernent.
-              </p>
-              <p>Vous pouvez accèder aux informations vous concernant en vous adressant à :</p>
+                aux informations qui vous concernent, en vous adressant à :</p>
               <p class="rtecenter"><strong>todo@iscpif.fr</strong></p>
               <p>Vous pouvez également, pour des motifs légitimes,
                 <a href="https://www.cnil.fr/fr/le-droit-dopposition">vous opposer au traitement
-                  des données vous concernant</a>.
-              </p>
-              <p>Pour en savoir plus, <a href="https://www.cnil.fr/fr/comprendre-vos-droits">
+                  des données vous concernant</a>. Pour en savoir plus, <a href="https://www.cnil.fr/fr/comprendre-vos-droits">
                 consultez vos droits sur le site de la CNIL</a>.
               </p>
             </div>
@@ -377,36 +373,40 @@
           <input id="my-captchaHash" name="my-captchaHash" type="text" hidden>
           </input>
 
-          <div class="row spacerrow">&nbsp;</div><div class="row spacerrow">&nbsp;</div>
 
-          <!-- CAPTCHA & SUBMIT BTN + INFOS-->
-          <h3 class="formcat">Verify and submit</h3>
+          <div class="subpage" id="subpage_3" style="display:block">
+              <div class="row spacerrow">&nbsp;</div>
 
-          <!--pseudo captcha using realperson from http://keith-wood.name/realPerson.html -->
 
-          <p class="legend">(A challenge for spam bots)</p>
-          <div class="question input-group">
-            <label for="my-captcha" class="smlabel input-group-addon">Code</label>
-            <input id="my-captcha" name="my-captcha" style="max-width:60%"
-                   type="text" class="form-control input-lg" placeholder="Enter the 5 letters you see beside =>"
-                   onblur="makeBold(this)" onfocus="makeNormal(this)">
-          </div>
+              <!-- main validation message -->
+              <p id="main_validation_message" class="legend" style="display:none"></p>
 
-          <div class="row spacerrow">&nbsp;</div>
 
-          <!-- == S U B M I T == -->
-          <!-- button instead of input.submit to validate before real submit action -->
-          <!-- also remember stackoverflow.com/a/3315016/2489184 -->
-          <button class="btn btn-lg btn-success" style="float:right"
-                  id="formsubmit" type=button
-                  onclick="registerDoorsAndSubmit(event)">
-                  Submit your form
-          </button>
+              <!-- CAPTCHA & SUBMIT BTN + INFOS-->
+              <h3 class="formcat">Verify and submit</h3>
 
-          <!-- main validation message -->
-          <p id="main_validation_message" class="legend" style="display:none"></p>
+              <!--pseudo captcha using realperson from http://keith-wood.name/realPerson.html -->
 
-        </form>
+              <p class="legend">(A challenge for spam bots)</p>
+              <div class="question input-group">
+                <label for="my-captcha" class="smlabel input-group-addon">Code</label>
+                <input id="my-captcha" name="my-captcha" style="max-width:60%"
+                       type="text" class="form-control input-lg" placeholder="Enter the 5 letters you see beside =>"
+                       onblur="makeBold(this)" onfocus="makeNormal(this)">
+              </div>
+
+              <!-- == S U B M I T == -->
+              <!-- button instead of input.submit to validate before real submit action -->
+              <!-- also remember stackoverflow.com/a/3315016/2489184 -->
+              <button class="btn btn-lg btn-success" style="float:right"
+                      id="formsubmit" type=button
+                      onclick="registerDoorsAndSubmit(event)">
+                      Submit your form
+              </button>
+
+
+            </form>
+        </div>
 
         <!-- FOR DEBUG: test go-between with Doors -->
         <!-- <p>
@@ -425,8 +425,7 @@
       <div class="spacer col-sm-2 col-md-2">&nbsp;</div>
     </div>
 
-    <div class="row spacerrow">&nbsp;</div>
-    <div class="row spacerrow">&nbsp;</div>
+    <div class="row bigspacerrow">&nbsp;</div>
 
     <!-- FOOTER TEXT AND LINKS -->
     <footer>
