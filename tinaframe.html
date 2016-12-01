@@ -1,0 +1,249 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+Copyright (C) 2009-2011 CREA Lab, CNRS/Ecole Polytechnique UMR 7656 (Fr)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html xml:lang="en-GB" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Tinaweb</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="description" content="TinaViz"/>
+    <meta name="keywords" content="TinaViz"/>
+    <meta name="tinaviz" content=""/>
+    <link rel="shortcut icon" href="css/branding/favicon.ico" type="image/x-icon"/>
+    <!-- CSS LINKS -->
+    <!-- JQUERY UI CSS -->
+    <link type="text/css" rel="stylesheet" href="css/brownian-motion/jquery-ui-1.8.16.custom.css"/>
+    <link type="text/css" rel="stylesheet" href="css/start_redstart/jquery-ui-1.8.10.custom.css"/>
+    <link type="text/css" rel="stylesheet" href="css/start_greenstart/jquery-ui-1.8.10.custom.css"/>
+    <link type="text/css" rel="stylesheet" href="css/ui.spinner.css"/>
+    <link type="text/css" rel="stylesheet" href="css/jquery.qtip.min.css"/>
+    <link type="text/css" rel="stylesheet" href="css/ui.notify.css"/>
+    <!--<link href='js/rating/jquery.ratings.16.css' type="text/css" rel="stylesheet"/>-->
+    <!--TINASOFT CSS -->
+    <link type="text/css" rel="stylesheet" href="css/tinaweb.css"/>
+
+    <!-- ENABLE DEBUG -->
+    <!--<script type="text/javascript" src="js/firebug-lite/firebug-lite.js"></script> -->
+
+    <!-- JQUERY -->
+    <script type="text/javascript" src="js/jquery/jquery-1.7.min.js"></script>
+    <script type="text/javascript" src="js/jquery/jquery.ba-dotimeout.min.js"></script>
+    <script type="text/javascript" src="js/jquery/jquery.json-2.2.min.js"></script>
+    <script type="text/javascript" src="js/jquery/jquery.qtip.min.js"></script>
+
+    <!-- JQUERY UI -->
+    <script type="text/javascript" src="js/jquery-ui/jquery-ui-1.8.16.custom.min.js"></script>
+    <script type="text/javascript" src="js/jquery/jquery.notify.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui/ui.spinner.min.js"></script>
+    <!--<script type="text/javascript" src='js/rating/jquery.ratings.js' ></script>-->
+
+    <!--TINAWEB APPLET LOADER -->
+    <script type="text/javascript" src="js/tinaviz/deployJava.js"></script>
+    <!-- PREFERENCES -->
+    <script type="text/javascript" src="js/config.js"></script>
+    
+    <script type="text/javascript" src="js/misc/underscore.min.js"></script>
+    <!-- SOME FUNCTIONS -->
+    <script type="text/javascript" src="js/utils.js"></script>
+    <script type="text/javascript" src="js/jquery-nap.js"></script>
+    
+    <!-- TINAVIZ -->
+    <script type="text/javascript" src="js/tinaviz/tinaviz.js"></script>
+    <!-- WE USE TINAWEB UTILS-->
+    <script type="text/javascript" src="js/tinaweb-utils.js"></script>
+    <!-- TINAWEB MAIN -->
+    <script type="text/javascript" src="js/tinaweb-demo.js"></script>
+    <!-- TINAWEB MAIN -->
+    <script type="text/javascript" src="js/tinaweb-default.js"></script>
+    <!-- TINAWEB MAIN -->
+    <script type="text/javascript" src="js/tinaweb-main.js"></script>
+     <!-- WE USE TINAWEB INFO PANEL -->
+    <script type="text/javascript" src="js/tinaweb-toolbar.js"></script>
+    <!-- WE USE TINAWEB INFO PANEL -->
+    <script type="text/javascript" src="js/tinaweb-info.js"></script>
+
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-30062222-1']);
+  _gaq.push(['_setDomainName', 'csregistry.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</head>
+<body>
+<div id="doc3" class="yui-t5 ui-widget">
+    <div id="hd" class="ui-widget">
+        <div id="hdb">
+            <div id="htoolbar" class="toolbardiv fg-toolbar ui-widget-header ui-corner-all ui-helper-clearfix">
+                <div id="title" class="unselectable toolbar-left">
+                    <button id="toggle-paused" class="fg-button toolbar-left">play</button>
+                    <button id="toggle-switch" class="fg-button toolbar-left">switch category</button>
+                    <button id="level" class="fg-button toolbar-left">macro</button>
+
+                    <div id="cursor-size-block" class="toolbar-left" style="width: 100px; margin-left: 15px; margin-right: 20px;">
+                            <span class="sliderLabel"> &nbsp;&nbsp;&nbsp;&nbsp;cursor size</span>
+                            <div id="sliderSelectionZone"></div>
+                    </div>
+                </div>
+
+
+                <!-- block for Category A Filter -->
+                <div id="category-A" class="unselectable toolbar-middle" style="width: 120px;">
+                    <div>
+                        &nbsp;&nbsp;&nbsp;&nbsp;Documents
+                    </div>
+                    <div style="height: 16px; width: 100px;">
+                        <div id="nodeAFilterMinValue"></div><div id="sliderANodeWeight" class="greenstart"></div><div id="nodeAFilterMaxValue"></div>
+                    </div>
+                    <div style="height: 16px; width: 100px;">
+                        <div id="edgeAFilterMinValue"></div><div id="sliderAEdgeWeight" class="greenstart"></div><div id="edgeAFilterMaxValue"></div>
+                    </div>
+                     <div style="height: 16px; width: 100px;">
+                        <div id="sliderANodeSize" class="greenstart"></div>
+                    </div>
+                </div>
+
+                <!-- block for Document/NGram label -->
+                <div  id="category-legend" class="unselectable toolbar-middle" style="width: 80px;">
+                    <div>&nbsp;</div>
+                    <div style="height: 16px;">
+                        Node Filter
+                    </div>
+                    <div style="height: 16px;">
+                        Edge Filter
+                    </div>
+                    <div style="height: 16px;">
+                        Node Size
+                    </div>
+                </div>
+
+                 <!-- block for Category B Filter -->
+                <div id="category-B" class="unselectable toolbar-middle" style="width: 120px;">
+                    <div>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NGrams
+                    </div>
+                    <div style="height: 16px; width: 100px;">
+                        <div id="nodeBFilterMinValue"></div><div id="sliderBNodeWeight" class="redstart"></div><div id="nodeBFilterMaxValue"></div>
+                    </div>
+                    <div style="height: 16px; width: 100px;">
+                        <div id="edgeBFilterMinValue"></div><div id="sliderBEdgeWeight" class="redstart"></div><div id="edgeBFilterMaxValue"></div>
+                    </div>
+                     <div style="height: 16px; width: 100px;">
+                        <div id="sliderBNodeSize" class="redstart"></div>
+                    </div>
+                </div>
+
+                 <div class="toolbar-right">
+                    <!--
+                    <button id="export-png" class="unselectable fg-button toolbar-right">PNG</button>
+                    <button id="export-pdf" class="unselectable fg-button toolbar-right">PDF</button>
+                    -->
+                    <button id="export-gexf" class="unselectable fg-button">export</button>
+                    <button id="toggle-recenter" class="unselectable fg-button">center</button>
+                    <form id="search" action="#">
+                        <input id="search_input" type="text" value=""/>
+                        <button id="search_button" class="unselectable fg-button">search</button>
+                        <!--
+                        <button id="searchCurrent_button" class="unselectable fg-button">search current</button>
+                        <button id="searchOpposite_button" class="unselectable fg-button">search opposite</button>
+                        -->
+                    </form>
+                </div>
+            </div>
+            <!-- End of htoolbar -->
+        </div>
+        <!-- End of hdb -->
+    </div>
+    <!-- End of hd -->
+
+
+    <div id="bd">
+        <div id="yui-main">
+            <div class="yui-b">
+                <div class="yui-gc">
+                    <!-- LEFT MAIN COLUMN-->
+                    <div id="appletdiv" class="yui-u first">
+                        <div id="appletInfo" class="appletInfo">Please wait while loading..</div>
+                        <div id="vizdiv"></div>
+
+                    <!-- RIGHT MAIN COLUMN-->
+                        <div id="infodiv">
+                            <h3><a href="#">Current selection
+                                <button id="toggle-unselect" class="redstart"></button>
+                            </a></h3>
+                            <div id="node_details">
+                                <!-- Modif David inversion des accordéon + ajout-->
+                                <div id="node_label" class="ui-widget-header ui-corner-all"></div>
+                                <div id="node_neighbourhood" class="ui-widget-content ui-corner-all"></div>
+                                <div id="node_contents" class="ui-widget-content ui-corner-all"></div>
+                            </div>
+                            <!-- /accordion 1 -->
+                            <h3><a href="#">Global Web Searches</a></h3>
+                            <div>
+                                <div id="node_neighbourhoodForSearch" class="ui-widget-content ui-corner-all">
+                                </div>
+                                <div id="node_neighbourhoodCopy" class="ui-widget-content ui-corner-all">
+                                </div>
+
+                            </div>
+                            <!-- /accordion 2 -->
+                            <h3><a href="#">All nodes</a></h3>
+
+                            <div>
+                                <div id="node_list">
+
+                                    <table id="node_table">
+                                        <thead>
+                                        <tr>
+                                            <th>List of all nodes of the current category<span
+                                                    class="ui-icon ui-icon-help icon-right"
+                                                    title="click on a label to switch to its meso view"></span></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!--<img alt='' src='css/branding/whereRU.gif' style='float: left;' border='0' height='100'>&nbsp; &nbsp;-->
+                            </div>
+                            <!-- accordion 3 -->
+                        </div>
+                        <!-- /infodiv  -->
+
+                    </div>
+                    <!-- / INFODIVPARENT -->
+                </div>
+                <!-- end of yui-gc -->
+            </div>
+            <!-- end of yui-b -->
+        </div>
+        <!-- end of yui-main -->
+    </div>
+    <!-- end of bd -->
+    <div style="clear: both;"></div>
+
+    <!-- end of ft -->
+</div>
+<!-- end of doc3 -->
+</body>
+</html>

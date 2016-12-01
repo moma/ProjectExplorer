@@ -1,0 +1,573 @@
+/*
+ * jQuery UI CSS Framework 1.8.10
+ *
+ * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://jquery.org/license
+ *
+ * http://docs.jquery.com/UI/Theming/API
+ */
+
+/* Layout helpers
+----------------------------------*/
+.greenstart .ui-helper-hidden { display: none; }
+.greenstart .ui-helper-hidden-accessible { position: absolute !important; clip: rect(1px 1px 1px 1px); clip: rect(1px,1px,1px,1px); }
+.greenstart .ui-helper-reset { margin: 0; padding: 0; border: 0; outline: 0; line-height: 1.3; text-decoration: none; font-size: 100%; list-style: none; }
+.greenstart .ui-helper-clearfix:after { content: "."; display: block; height: 0; clear: both; visibility: hidden; }
+.greenstart .ui-helper-clearfix { display: inline-block; }
+/* required comment for clearfix to work in Opera \*/
+* html .ui-helper-clearfix { height:1%; }
+.greenstart .ui-helper-clearfix { display:block; }
+/* end clearfix */
+.greenstart .ui-helper-zfix { width: 100%; height: 100%; top: 0; left: 0; position: absolute; opacity: 0; filter:Alpha(Opacity=0); }
+
+
+/* Interaction Cues
+----------------------------------*/
+.greenstart .ui-state-disabled { cursor: default !important; }
+
+
+/* Icons
+----------------------------------*/
+
+/* states and images */
+.greenstart .ui-icon { display: block; text-indent: -99999px; overflow: hidden; background-repeat: no-repeat; }
+
+
+/* Misc visuals
+----------------------------------*/
+
+/* Overlays */
+.greenstart .ui-widget-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+
+/*
+ * jQuery UI CSS Framework 1.8.10
+ *
+ * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://jquery.org/license
+ *
+ * http://docs.jquery.com/UI/Theming/API
+ *
+ * To view and modify this theme, visit http://jqueryui.com/themeroller/?ffDefault=Verdana,Arial,sans-serif&fwDefault=normal&fsDefault=1.1em&cornerRadius=5px&bgColorHeader=84c021&bgTextureHeader=12_gloss_wave.png&bgImgOpacityHeader=75&borderColorHeader=a8d742&fcHeader=eaf5f7&iconColorHeader=edf3d8&bgColorContent=fcfdfd&bgTextureContent=06_inset_hard.png&bgImgOpacityContent=100&borderColorContent=a6c9e2&fcContent=222222&iconColorContent=0078ae&bgColorDefault=27ae00&bgTextureDefault=02_glass.png&bgImgOpacityDefault=45&borderColorDefault=bbf777&fcDefault=ffffff&iconColorDefault=e0fdff&bgColorHover=7eec79&bgTextureHover=02_glass.png&bgImgOpacityHover=75&borderColorHover=57ae44&fcHover=029024&iconColorHover=4c9305&bgColorActive=85ac2c&bgTextureActive=12_gloss_wave.png&bgImgOpacityActive=50&borderColorActive=9bdd4a&fcActive=ffffff&iconColorActive=f5e175&bgColorHighlight=f8da4e&bgTextureHighlight=02_glass.png&bgImgOpacityHighlight=55&borderColorHighlight=fcd113&fcHighlight=915608&iconColorHighlight=f7a50d&bgColorError=e14f1c&bgTextureError=12_gloss_wave.png&bgImgOpacityError=45&borderColorError=cd0a0a&fcError=ffffff&iconColorError=fcd113&bgColorOverlay=aaaaaa&bgTextureOverlay=01_flat.png&bgImgOpacityOverlay=75&opacityOverlay=30&bgColorShadow=999999&bgTextureShadow=01_flat.png&bgImgOpacityShadow=55&opacityShadow=45&thicknessShadow=0px&offsetTopShadow=5px&offsetLeftShadow=5px&cornerRadiusShadow=5px
+ */
+
+
+/* Component containers
+----------------------------------*/
+.greenstart .ui-widget { font-family: Verdana,Arial,sans-serif; font-size: 1.1em; }
+.greenstart .ui-widget .ui-widget { font-size: 1em; }
+.greenstart .ui-widget input, .greenstart .ui-widget select, .greenstart .ui-widget textarea, .greenstart .ui-widget button { font-family: Verdana,Arial,sans-serif; font-size: 1em; }
+.greenstart .ui-widget-content { border: 1px solid #a6c9e2; background: #fcfdfd url(images/ui-bg_inset-hard_100_fcfdfd_1x100.png) 50% bottom repeat-x; color: #222222; }
+.greenstart .ui-widget-content a { color: #222222; }
+.greenstart .ui-widget-header { border: 1px solid #a8d742; background: #84c021 url(images/ui-bg_gloss-wave_75_84c021_500x100.png) 50% 50% repeat-x; color: #eaf5f7; font-weight: bold; }
+.greenstart .ui-widget-header a { color: #eaf5f7; }
+
+/* Interaction states
+----------------------------------*/
+.greenstart .ui-state-default, .greenstart .ui-widget-content .ui-state-default, .greenstart .ui-widget-header .ui-state-default { border: 1px solid #bbf777; background: #27ae00 url(images/ui-bg_glass_45_27ae00_1x400.png) 50% 50% repeat-x; font-weight: normal; color: #ffffff; }
+.greenstart .ui-state-default a, .greenstart .ui-state-default a:link, .greenstart .ui-state-default a:visited { color: #ffffff; text-decoration: none; }
+.greenstart .ui-state-hover, .greenstart .ui-widget-content .ui-state-hover, .greenstart .ui-widget-header .ui-state-hover, .greenstart .ui-state-focus, .greenstart .ui-widget-content .ui-state-focus, .greenstart .ui-widget-header .ui-state-focus { border: 1px solid #57ae44; background: #7eec79 url(images/ui-bg_glass_75_7eec79_1x400.png) 50% 50% repeat-x; font-weight: normal; color: #029024; }
+.greenstart .ui-state-hover a, .greenstart .ui-state-hover a:hover { color: #029024; text-decoration: none; }
+.greenstart .ui-state-active, .greenstart .ui-widget-content .ui-state-active, .greenstart .ui-widget-header .ui-state-active { border: 1px solid #9bdd4a; background: #85ac2c url(images/ui-bg_gloss-wave_50_85ac2c_500x100.png) 50% 50% repeat-x; font-weight: normal; color: #ffffff; }
+.greenstart .ui-state-active a, .greenstart .ui-state-active a:link, .greenstart .ui-state-active a:visited { color: #ffffff; text-decoration: none; }
+.greenstart .ui-widget :active { outline: none; }
+
+/* Interaction Cues
+----------------------------------*/
+.greenstart .ui-state-highlight, .greenstart .ui-widget-content .ui-state-highlight, .greenstart .ui-widget-header .ui-state-highlight  {border: 1px solid #fcd113; background: #f8da4e url(images/ui-bg_glass_55_f8da4e_1x400.png) 50% 50% repeat-x; color: #915608; }
+.greenstart .ui-state-highlight a, .greenstart .ui-widget-content .ui-state-highlight a,.ui-widget-header .ui-state-highlight a { color: #915608; }
+.greenstart .ui-state-error, .greenstart .ui-widget-content .ui-state-error, .greenstart .ui-widget-header .ui-state-error {border: 1px solid #cd0a0a; background: #e14f1c url(images/ui-bg_gloss-wave_45_e14f1c_500x100.png) 50% top repeat-x; color: #ffffff; }
+.greenstart .ui-state-error a, .greenstart .ui-widget-content .ui-state-error a, .greenstart .ui-widget-header .ui-state-error a { color: #ffffff; }
+.greenstart .ui-state-error-text, .greenstart .ui-widget-content .ui-state-error-text, .greenstart .ui-widget-header .ui-state-error-text { color: #ffffff; }
+.greenstart .ui-priority-primary, .greenstart .ui-widget-content .ui-priority-primary, .greenstart .ui-widget-header .ui-priority-primary { font-weight: bold; }
+.greenstart .ui-priority-secondary, .greenstart .ui-widget-content .ui-priority-secondary,  .ui-widget-header .ui-priority-secondary { opacity: .7; filter:Alpha(Opacity=70); font-weight: normal; }
+.greenstart .ui-state-disabled, .greenstart .ui-widget-content .ui-state-disabled, .greenstart .ui-widget-header .ui-state-disabled { opacity: .35; filter:Alpha(Opacity=35); background-image: none; }
+
+/* Icons
+----------------------------------*/
+
+/* states and images */
+.greenstart .ui-icon { width: 16px; height: 16px; background-image: url(images/ui-icons_0078ae_256x240.png); }
+.greenstart .ui-widget-content .ui-icon {background-image: url(images/ui-icons_0078ae_256x240.png); }
+.greenstart .ui-widget-header .ui-icon {background-image: url(images/ui-icons_edf3d8_256x240.png); }
+.greenstart .ui-state-default .ui-icon { background-image: url(images/ui-icons_e0fdff_256x240.png); }
+.greenstart .ui-state-hover .ui-icon, .greenstart .ui-state-focus .ui-icon {background-image: url(images/ui-icons_4c9305_256x240.png); }
+.greenstart .ui-state-active .ui-icon {background-image: url(images/ui-icons_f5e175_256x240.png); }
+.greenstart .ui-state-highlight .ui-icon {background-image: url(images/ui-icons_f7a50d_256x240.png); }
+.greenstart .ui-state-error .ui-icon, .greenstart .ui-state-error-text .ui-icon {background-image: url(images/ui-icons_fcd113_256x240.png); }
+
+/* positioning */
+.greenstart .ui-icon-carat-1-n { background-position: 0 0; }
+.greenstart .ui-icon-carat-1-ne { background-position: -16px 0; }
+.greenstart .ui-icon-carat-1-e { background-position: -32px 0; }
+.greenstart .ui-icon-carat-1-se { background-position: -48px 0; }
+.greenstart .ui-icon-carat-1-s { background-position: -64px 0; }
+.greenstart .ui-icon-carat-1-sw { background-position: -80px 0; }
+.greenstart .ui-icon-carat-1-w { background-position: -96px 0; }
+.greenstart .ui-icon-carat-1-nw { background-position: -112px 0; }
+.greenstart .ui-icon-carat-2-n-s { background-position: -128px 0; }
+.greenstart .ui-icon-carat-2-e-w { background-position: -144px 0; }
+.greenstart .ui-icon-triangle-1-n { background-position: 0 -16px; }
+.greenstart .ui-icon-triangle-1-ne { background-position: -16px -16px; }
+.greenstart .ui-icon-triangle-1-e { background-position: -32px -16px; }
+.greenstart .ui-icon-triangle-1-se { background-position: -48px -16px; }
+.greenstart .ui-icon-triangle-1-s { background-position: -64px -16px; }
+.greenstart .ui-icon-triangle-1-sw { background-position: -80px -16px; }
+.greenstart .ui-icon-triangle-1-w { background-position: -96px -16px; }
+.greenstart .ui-icon-triangle-1-nw { background-position: -112px -16px; }
+.greenstart .ui-icon-triangle-2-n-s { background-position: -128px -16px; }
+.greenstart .ui-icon-triangle-2-e-w { background-position: -144px -16px; }
+.greenstart .ui-icon-arrow-1-n { background-position: 0 -32px; }
+.greenstart .ui-icon-arrow-1-ne { background-position: -16px -32px; }
+.greenstart .ui-icon-arrow-1-e { background-position: -32px -32px; }
+.greenstart .ui-icon-arrow-1-se { background-position: -48px -32px; }
+.greenstart .ui-icon-arrow-1-s { background-position: -64px -32px; }
+.greenstart .ui-icon-arrow-1-sw { background-position: -80px -32px; }
+.greenstart .ui-icon-arrow-1-w { background-position: -96px -32px; }
+.greenstart .ui-icon-arrow-1-nw { background-position: -112px -32px; }
+.greenstart .ui-icon-arrow-2-n-s { background-position: -128px -32px; }
+.greenstart .ui-icon-arrow-2-ne-sw { background-position: -144px -32px; }
+.greenstart .ui-icon-arrow-2-e-w { background-position: -160px -32px; }
+.greenstart .ui-icon-arrow-2-se-nw { background-position: -176px -32px; }
+.greenstart .ui-icon-arrowstop-1-n { background-position: -192px -32px; }
+.greenstart .ui-icon-arrowstop-1-e { background-position: -208px -32px; }
+.greenstart .ui-icon-arrowstop-1-s { background-position: -224px -32px; }
+.greenstart .ui-icon-arrowstop-1-w { background-position: -240px -32px; }
+.greenstart .ui-icon-arrowthick-1-n { background-position: 0 -48px; }
+.greenstart .ui-icon-arrowthick-1-ne { background-position: -16px -48px; }
+.greenstart .ui-icon-arrowthick-1-e { background-position: -32px -48px; }
+.greenstart .ui-icon-arrowthick-1-se { background-position: -48px -48px; }
+.greenstart .ui-icon-arrowthick-1-s { background-position: -64px -48px; }
+.greenstart .ui-icon-arrowthick-1-sw { background-position: -80px -48px; }
+.greenstart .ui-icon-arrowthick-1-w { background-position: -96px -48px; }
+.greenstart .ui-icon-arrowthick-1-nw { background-position: -112px -48px; }
+.greenstart .ui-icon-arrowthick-2-n-s { background-position: -128px -48px; }
+.greenstart .ui-icon-arrowthick-2-ne-sw { background-position: -144px -48px; }
+.greenstart .ui-icon-arrowthick-2-e-w { background-position: -160px -48px; }
+.greenstart .ui-icon-arrowthick-2-se-nw { background-position: -176px -48px; }
+.greenstart .ui-icon-arrowthickstop-1-n { background-position: -192px -48px; }
+.greenstart .ui-icon-arrowthickstop-1-e { background-position: -208px -48px; }
+.greenstart .ui-icon-arrowthickstop-1-s { background-position: -224px -48px; }
+.greenstart .ui-icon-arrowthickstop-1-w { background-position: -240px -48px; }
+.greenstart .ui-icon-arrowreturnthick-1-w { background-position: 0 -64px; }
+.greenstart .ui-icon-arrowreturnthick-1-n { background-position: -16px -64px; }
+.greenstart .ui-icon-arrowreturnthick-1-e { background-position: -32px -64px; }
+.greenstart .ui-icon-arrowreturnthick-1-s { background-position: -48px -64px; }
+.greenstart .ui-icon-arrowreturn-1-w { background-position: -64px -64px; }
+.greenstart .ui-icon-arrowreturn-1-n { background-position: -80px -64px; }
+.greenstart .ui-icon-arrowreturn-1-e { background-position: -96px -64px; }
+.greenstart .ui-icon-arrowreturn-1-s { background-position: -112px -64px; }
+.greenstart .ui-icon-arrowrefresh-1-w { background-position: -128px -64px; }
+.greenstart .ui-icon-arrowrefresh-1-n { background-position: -144px -64px; }
+.greenstart .ui-icon-arrowrefresh-1-e { background-position: -160px -64px; }
+.greenstart .ui-icon-arrowrefresh-1-s { background-position: -176px -64px; }
+.greenstart .ui-icon-arrow-4 { background-position: 0 -80px; }
+.greenstart .ui-icon-arrow-4-diag { background-position: -16px -80px; }
+.greenstart .ui-icon-extlink { background-position: -32px -80px; }
+.greenstart .ui-icon-newwin { background-position: -48px -80px; }
+.greenstart .ui-icon-refresh { background-position: -64px -80px; }
+.greenstart .ui-icon-shuffle { background-position: -80px -80px; }
+.greenstart .ui-icon-transfer-e-w { background-position: -96px -80px; }
+.greenstart .ui-icon-transferthick-e-w { background-position: -112px -80px; }
+.greenstart .ui-icon-folder-collapsed { background-position: 0 -96px; }
+.greenstart .ui-icon-folder-open { background-position: -16px -96px; }
+.greenstart .ui-icon-document { background-position: -32px -96px; }
+.greenstart .ui-icon-document-b { background-position: -48px -96px; }
+.greenstart .ui-icon-note { background-position: -64px -96px; }
+.greenstart .ui-icon-mail-closed { background-position: -80px -96px; }
+.greenstart .ui-icon-mail-open { background-position: -96px -96px; }
+.greenstart .ui-icon-suitcase { background-position: -112px -96px; }
+.greenstart .ui-icon-comment { background-position: -128px -96px; }
+.greenstart .ui-icon-person { background-position: -144px -96px; }
+.greenstart .ui-icon-print { background-position: -160px -96px; }
+.greenstart .ui-icon-trash { background-position: -176px -96px; }
+.greenstart .ui-icon-locked { background-position: -192px -96px; }
+.greenstart .ui-icon-unlocked { background-position: -208px -96px; }
+.greenstart .ui-icon-bookmark { background-position: -224px -96px; }
+.greenstart .ui-icon-tag { background-position: -240px -96px; }
+.greenstart .ui-icon-home { background-position: 0 -112px; }
+.greenstart .ui-icon-flag { background-position: -16px -112px; }
+.greenstart .ui-icon-calendar { background-position: -32px -112px; }
+.greenstart .ui-icon-cart { background-position: -48px -112px; }
+.greenstart .ui-icon-pencil { background-position: -64px -112px; }
+.greenstart .ui-icon-clock { background-position: -80px -112px; }
+.greenstart .ui-icon-disk { background-position: -96px -112px; }
+.greenstart .ui-icon-calculator { background-position: -112px -112px; }
+.greenstart .ui-icon-zoomin { background-position: -128px -112px; }
+.greenstart .ui-icon-zoomout { background-position: -144px -112px; }
+.greenstart .ui-icon-search { background-position: -160px -112px; }
+.greenstart .ui-icon-wrench { background-position: -176px -112px; }
+.greenstart .ui-icon-gear { background-position: -192px -112px; }
+.greenstart .ui-icon-heart { background-position: -208px -112px; }
+.greenstart .ui-icon-star { background-position: -224px -112px; }
+.greenstart .ui-icon-link { background-position: -240px -112px; }
+.greenstart .ui-icon-cancel { background-position: 0 -128px; }
+.greenstart .ui-icon-plus { background-position: -16px -128px; }
+.greenstart .ui-icon-plusthick { background-position: -32px -128px; }
+.greenstart .ui-icon-minus { background-position: -48px -128px; }
+.greenstart .ui-icon-minusthick { background-position: -64px -128px; }
+.greenstart .ui-icon-close { background-position: -80px -128px; }
+.greenstart .ui-icon-closethick { background-position: -96px -128px; }
+.greenstart .ui-icon-key { background-position: -112px -128px; }
+.greenstart .ui-icon-lightbulb { background-position: -128px -128px; }
+.greenstart .ui-icon-scissors { background-position: -144px -128px; }
+.greenstart .ui-icon-clipboard { background-position: -160px -128px; }
+.greenstart .ui-icon-copy { background-position: -176px -128px; }
+.greenstart .ui-icon-contact { background-position: -192px -128px; }
+.greenstart .ui-icon-image { background-position: -208px -128px; }
+.greenstart .ui-icon-video { background-position: -224px -128px; }
+.greenstart .ui-icon-script { background-position: -240px -128px; }
+.greenstart .ui-icon-alert { background-position: 0 -144px; }
+.greenstart .ui-icon-info { background-position: -16px -144px; }
+.greenstart .ui-icon-notice { background-position: -32px -144px; }
+.greenstart .ui-icon-help { background-position: -48px -144px; }
+.greenstart .ui-icon-check { background-position: -64px -144px; }
+.greenstart .ui-icon-bullet { background-position: -80px -144px; }
+.greenstart .ui-icon-radio-off { background-position: -96px -144px; }
+.greenstart .ui-icon-radio-on { background-position: -112px -144px; }
+.greenstart .ui-icon-pin-w { background-position: -128px -144px; }
+.greenstart .ui-icon-pin-s { background-position: -144px -144px; }
+.greenstart .ui-icon-play { background-position: 0 -160px; }
+.greenstart .ui-icon-pause { background-position: -16px -160px; }
+.greenstart .ui-icon-seek-next { background-position: -32px -160px; }
+.greenstart .ui-icon-seek-prev { background-position: -48px -160px; }
+.greenstart .ui-icon-seek-end { background-position: -64px -160px; }
+.greenstart .ui-icon-seek-start { background-position: -80px -160px; }
+/* ui-icon-seek-first is deprecated, use ui-icon-seek-start instead */
+.greenstart .ui-icon-seek-first { background-position: -80px -160px; }
+.greenstart .ui-icon-stop { background-position: -96px -160px; }
+.greenstart .ui-icon-eject { background-position: -112px -160px; }
+.greenstart .ui-icon-volume-off { background-position: -128px -160px; }
+.greenstart .ui-icon-volume-on { background-position: -144px -160px; }
+.greenstart .ui-icon-power { background-position: 0 -176px; }
+.greenstart .ui-icon-signal-diag { background-position: -16px -176px; }
+.greenstart .ui-icon-signal { background-position: -32px -176px; }
+.greenstart .ui-icon-battery-0 { background-position: -48px -176px; }
+.greenstart .ui-icon-battery-1 { background-position: -64px -176px; }
+.greenstart .ui-icon-battery-2 { background-position: -80px -176px; }
+.greenstart .ui-icon-battery-3 { background-position: -96px -176px; }
+.greenstart .ui-icon-circle-plus { background-position: 0 -192px; }
+.greenstart .ui-icon-circle-minus { background-position: -16px -192px; }
+.greenstart .ui-icon-circle-close { background-position: -32px -192px; }
+.greenstart .ui-icon-circle-triangle-e { background-position: -48px -192px; }
+.greenstart .ui-icon-circle-triangle-s { background-position: -64px -192px; }
+.greenstart .ui-icon-circle-triangle-w { background-position: -80px -192px; }
+.greenstart .ui-icon-circle-triangle-n { background-position: -96px -192px; }
+.greenstart .ui-icon-circle-arrow-e { background-position: -112px -192px; }
+.greenstart .ui-icon-circle-arrow-s { background-position: -128px -192px; }
+.greenstart .ui-icon-circle-arrow-w { background-position: -144px -192px; }
+.greenstart .ui-icon-circle-arrow-n { background-position: -160px -192px; }
+.greenstart .ui-icon-circle-zoomin { background-position: -176px -192px; }
+.greenstart .ui-icon-circle-zoomout { background-position: -192px -192px; }
+.greenstart .ui-icon-circle-check { background-position: -208px -192px; }
+.greenstart .ui-icon-circlesmall-plus { background-position: 0 -208px; }
+.greenstart .ui-icon-circlesmall-minus { background-position: -16px -208px; }
+.greenstart .ui-icon-circlesmall-close { background-position: -32px -208px; }
+.greenstart .ui-icon-squaresmall-plus { background-position: -48px -208px; }
+.greenstart .ui-icon-squaresmall-minus { background-position: -64px -208px; }
+.greenstart .ui-icon-squaresmall-close { background-position: -80px -208px; }
+.greenstart .ui-icon-grip-dotted-vertical { background-position: 0 -224px; }
+.greenstart .ui-icon-grip-dotted-horizontal { background-position: -16px -224px; }
+.greenstart .ui-icon-grip-solid-vertical { background-position: -32px -224px; }
+.greenstart .ui-icon-grip-solid-horizontal { background-position: -48px -224px; }
+.greenstart .ui-icon-gripsmall-diagonal-se { background-position: -64px -224px; }
+.greenstart .ui-icon-grip-diagonal-se { background-position: -80px -224px; }
+
+
+/* Misc visuals
+----------------------------------*/
+
+/* Corner radius */
+.greenstart .ui-corner-tl { -moz-border-radius-topleft: 5px; -webkit-border-top-left-radius: 5px; border-top-left-radius: 5px; }
+.greenstart .ui-corner-tr { -moz-border-radius-topright: 5px; -webkit-border-top-right-radius: 5px; border-top-right-radius: 5px; }
+.greenstart .ui-corner-bl { -moz-border-radius-bottomleft: 5px; -webkit-border-bottom-left-radius: 5px; border-bottom-left-radius: 5px; }
+.greenstart .ui-corner-br { -moz-border-radius-bottomright: 5px; -webkit-border-bottom-right-radius: 5px; border-bottom-right-radius: 5px; }
+.greenstart .ui-corner-top { -moz-border-radius-topleft: 5px; -webkit-border-top-left-radius: 5px; border-top-left-radius: 5px; -moz-border-radius-topright: 5px; -webkit-border-top-right-radius: 5px; border-top-right-radius: 5px; }
+.greenstart .ui-corner-bottom { -moz-border-radius-bottomleft: 5px; -webkit-border-bottom-left-radius: 5px; border-bottom-left-radius: 5px; -moz-border-radius-bottomright: 5px; -webkit-border-bottom-right-radius: 5px; border-bottom-right-radius: 5px; }
+.greenstart .ui-corner-right {  -moz-border-radius-topright: 5px; -webkit-border-top-right-radius: 5px; border-top-right-radius: 5px; -moz-border-radius-bottomright: 5px; -webkit-border-bottom-right-radius: 5px; border-bottom-right-radius: 5px; }
+.greenstart .ui-corner-left { -moz-border-radius-topleft: 5px; -webkit-border-top-left-radius: 5px; border-top-left-radius: 5px; -moz-border-radius-bottomleft: 5px; -webkit-border-bottom-left-radius: 5px; border-bottom-left-radius: 5px; }
+.greenstart .ui-corner-all { -moz-border-radius: 5px; -webkit-border-radius: 5px; border-radius: 5px; }
+
+/* Overlays */
+.greenstart .ui-widget-overlay { background: #aaaaaa url(images/ui-bg_flat_75_aaaaaa_40x100.png) 50% 50% repeat-x; opacity: .30;filter:Alpha(Opacity=30); }
+.greenstart .ui-widget-shadow { margin: 5px 0 0 5px; padding: 0px; background: #999999 url(images/ui-bg_flat_55_999999_40x100.png) 50% 50% repeat-x; opacity: .45;filter:Alpha(Opacity=45); -moz-border-radius: 5px; -webkit-border-radius: 5px; border-radius: 5px; }/*
+ * jQuery UI Resizable 1.8.10
+ *
+ * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://jquery.org/license
+ *
+ * http://docs.jquery.com/UI/Resizable#theming
+ */
+.greenstart .ui-resizable { position: relative;}
+.greenstart .ui-resizable-handle { position: absolute;font-size: 0.1px;z-index: 99999; display: block;}
+.greenstart .ui-resizable-disabled .ui-resizable-handle, .greenstart .ui-resizable-autohide .ui-resizable-handle { display: none; }
+.greenstart .ui-resizable-n { cursor: n-resize; height: 7px; width: 100%; top: -5px; left: 0; }
+.greenstart .ui-resizable-s { cursor: s-resize; height: 7px; width: 100%; bottom: -5px; left: 0; }
+.greenstart .ui-resizable-e { cursor: e-resize; width: 7px; right: -5px; top: 0; height: 100%; }
+.greenstart .ui-resizable-w { cursor: w-resize; width: 7px; left: -5px; top: 0; height: 100%; }
+.greenstart .ui-resizable-se { cursor: se-resize; width: 12px; height: 12px; right: 1px; bottom: 1px; }
+.greenstart .ui-resizable-sw { cursor: sw-resize; width: 9px; height: 9px; left: -5px; bottom: -5px; }
+.greenstart .ui-resizable-nw { cursor: nw-resize; width: 9px; height: 9px; left: -5px; top: -5px; }
+.greenstart .ui-resizable-ne { cursor: ne-resize; width: 9px; height: 9px; right: -5px; top: -5px;}/*
+ * jQuery UI Selectable 1.8.10
+ *
+ * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://jquery.org/license
+ *
+ * http://docs.jquery.com/UI/Selectable#theming
+ */
+.greenstart .ui-selectable-helper { position: absolute; z-index: 100; border:1px dotted black; }
+/*
+ * jQuery UI Accordion 1.8.10
+ *
+ * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://jquery.org/license
+ *
+ * http://docs.jquery.com/UI/Accordion#theming
+ */
+/* IE/Win - Fix animation bug - #4615 */
+.greenstart .ui-accordion { width: 100%; }
+.greenstart .ui-accordion .ui-accordion-header { cursor: pointer; position: relative; margin-top: 1px; zoom: 1; }
+.greenstart .ui-accordion .ui-accordion-li-fix { display: inline; }
+.greenstart .ui-accordion .ui-accordion-header-active { border-bottom: 0 !important; }
+.greenstart .ui-accordion .ui-accordion-header a { display: block; font-size: 1em; padding: .5em .5em .5em .7em; }
+.greenstart .ui-accordion-icons .ui-accordion-header a { padding-left: 2.2em; }
+.greenstart .ui-accordion .ui-accordion-header .ui-icon { position: absolute; left: .5em; top: 50%; margin-top: -8px; }
+.greenstart .ui-accordion .ui-accordion-content { padding: 1em 2.2em; border-top: 0; margin-top: -2px; position: relative; top: 1px; margin-bottom: 2px; overflow: auto; display: none; zoom: 1; }
+.greenstart .ui-accordion .ui-accordion-content-active { display: block; }
+/*
+ * jQuery UI Autocomplete 1.8.10
+ *
+ * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://jquery.org/license
+ *
+ * http://docs.jquery.com/UI/Autocomplete#theming
+ */
+.greenstart .ui-autocomplete { position: absolute; cursor: default; }	
+
+/* workarounds */
+* html .ui-autocomplete { width:1px; } /* without this, the menu expands to 100% in IE6 */
+
+/*
+ * jQuery UI Menu 1.8.10
+ *
+ * Copyright 2010, AUTHORS.txt (http://jqueryui.com/about)
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://jquery.org/license
+ *
+ * http://docs.jquery.com/UI/Menu#theming
+ */
+.greenstart .ui-menu {
+	list-style:none;
+	padding: 2px;
+	margin: 0;
+	display:block;
+	float: left;
+}
+.greenstart .ui-menu .ui-menu {
+	margin-top: -3px;
+}
+.greenstart .ui-menu .ui-menu-item {
+	margin:0;
+	padding: 0;
+	zoom: 1;
+	float: left;
+	clear: left;
+	width: 100%;
+}
+.greenstart .ui-menu .ui-menu-item a {
+	text-decoration:none;
+	display:block;
+	padding:.2em .4em;
+	line-height:1.5;
+	zoom:1;
+}
+.greenstart .ui-menu .ui-menu-item a.ui-state-hover,
+.greenstart .ui-menu .ui-menu-item a.ui-state-active {
+	font-weight: normal;
+	margin: -1px;
+}
+/*
+ * jQuery UI Button 1.8.10
+ *
+ * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://jquery.org/license
+ *
+ * http://docs.jquery.com/UI/Button#theming
+ */
+.greenstart .ui-button { display: inline-block; position: relative; padding: 0; margin-right: .1em; text-decoration: none !important; cursor: pointer; text-align: center; zoom: 1; overflow: visible; } /* the overflow property removes extra width in IE */
+.greenstart .ui-button-icon-only { width: 2.2em; } /* to make room for the icon, a width needs to be set here */
+button.ui-button-icon-only { width: 2.4em; } /* button elements seem to need a little more width */
+.greenstart .ui-button-icons-only { width: 3.4em; } 
+button.ui-button-icons-only { width: 3.7em; } 
+
+/*button text element */
+.greenstart .ui-button .ui-button-text { display: block; line-height: 1.4;  }
+.greenstart .ui-button-text-only .ui-button-text { padding: .4em 1em; }
+.greenstart .ui-button-icon-only .ui-button-text, .greenstart .ui-button-icons-only .ui-button-text { padding: .4em; text-indent: -9999999px; }
+.greenstart .ui-button-text-icon-primary .ui-button-text, .greenstart .ui-button-text-icons .ui-button-text { padding: .4em 1em .4em 2.1em; }
+.greenstart .ui-button-text-icon-secondary .ui-button-text, .greenstart .ui-button-text-icons .ui-button-text { padding: .4em 2.1em .4em 1em; }
+.greenstart .ui-button-text-icons .ui-button-text { padding-left: 2.1em; padding-right: 2.1em; }
+/* no icon support for input elements, provide padding by default */
+input.ui-button { padding: .4em 1em; }
+
+/*button icon element(s) */
+.greenstart .ui-button-icon-only .ui-icon, .greenstart .ui-button-text-icon-primary .ui-icon, .greenstart .ui-button-text-icon-secondary .ui-icon, .greenstart .ui-button-text-icons .ui-icon, .greenstart .ui-button-icons-only .ui-icon { position: absolute; top: 50%; margin-top: -8px; }
+.greenstart .ui-button-icon-only .ui-icon { left: 50%; margin-left: -8px; }
+.greenstart .ui-button-text-icon-primary .ui-button-icon-primary, .greenstart .ui-button-text-icons .ui-button-icon-primary, .greenstart .ui-button-icons-only .ui-button-icon-primary { left: .5em; }
+.greenstart .ui-button-text-icon-secondary .ui-button-icon-secondary, .greenstart .ui-button-text-icons .ui-button-icon-secondary, .greenstart .ui-button-icons-only .ui-button-icon-secondary { right: .5em; }
+.greenstart .ui-button-text-icons .ui-button-icon-secondary, .greenstart .ui-button-icons-only .ui-button-icon-secondary { right: .5em; }
+
+/*button sets*/
+.greenstart .ui-buttonset { margin-right: 7px; }
+.greenstart .ui-buttonset .ui-button { margin-left: 0; margin-right: -.3em; }
+
+/* workarounds */
+button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra padding in Firefox */
+/*
+ * jQuery UI Dialog 1.8.10
+ *
+ * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://jquery.org/license
+ *
+ * http://docs.jquery.com/UI/Dialog#theming
+ */
+.greenstart .ui-dialog { position: absolute; padding: .2em; width: 300px; overflow: hidden; }
+.greenstart .ui-dialog .ui-dialog-titlebar { padding: .4em 1em; position: relative;  }
+.greenstart .ui-dialog .ui-dialog-title { float: left; margin: .1em 16px .1em 0; } 
+.greenstart .ui-dialog .ui-dialog-titlebar-close { position: absolute; right: .3em; top: 50%; width: 19px; margin: -10px 0 0 0; padding: 1px; height: 18px; }
+.greenstart .ui-dialog .ui-dialog-titlebar-close span { display: block; margin: 1px; }
+.greenstart .ui-dialog .ui-dialog-titlebar-close:hover, .greenstart .ui-dialog .ui-dialog-titlebar-close:focus { padding: 0; }
+.greenstart .ui-dialog .ui-dialog-content { position: relative; border: 0; padding: .5em 1em; background: none; overflow: auto; zoom: 1; }
+.greenstart .ui-dialog .ui-dialog-buttonpane { text-align: left; border-width: 1px 0 0 0; background-image: none; margin: .5em 0 0 0; padding: .3em 1em .5em .4em; }
+.greenstart .ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset { float: right; }
+.greenstart .ui-dialog .ui-dialog-buttonpane button { margin: .5em .4em .5em 0; cursor: pointer; }
+.greenstart .ui-dialog .ui-resizable-se { width: 14px; height: 14px; right: 3px; bottom: 3px; }
+.greenstart .ui-draggable .ui-dialog-titlebar { cursor: move; }
+/*
+ * jQuery UI Slider 1.8.10
+ *
+ * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://jquery.org/license
+ *
+ * http://docs.jquery.com/UI/Slider#theming
+ */
+.greenstart .ui-slider { position: relative; text-align: left; }
+.greenstart .ui-slider .ui-slider-handle { position: absolute; z-index: 2; width: 1.2em; height: 1.2em; cursor: default; }
+.greenstart .ui-slider .ui-slider-range { position: absolute; z-index: 1; font-size: .7em; display: block; border: 0; background-position: 0 0; }
+
+.greenstart .ui-slider-horizontal { height: .8em; }
+.greenstart .ui-slider-horizontal .ui-slider-handle { top: -.3em; margin-left: -.6em; }
+.greenstart .ui-slider-horizontal .ui-slider-range { top: 0; height: 100%; }
+.greenstart .ui-slider-horizontal .ui-slider-range-min { left: 0; }
+.greenstart .ui-slider-horizontal .ui-slider-range-max { right: 0; }
+
+.greenstart .ui-slider-vertical { width: .8em; height: 100px; }
+.greenstart .ui-slider-vertical .ui-slider-handle { left: -.3em; margin-left: 0; margin-bottom: -.6em; }
+.greenstart .ui-slider-vertical .ui-slider-range { left: 0; width: 100%; }
+.greenstart .ui-slider-vertical .ui-slider-range-min { bottom: 0; }
+.greenstart .ui-slider-vertical .ui-slider-range-max { top: 0; }/*
+ * jQuery UI Tabs 1.8.10
+ *
+ * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://jquery.org/license
+ *
+ * http://docs.jquery.com/UI/Tabs#theming
+ */
+.greenstart .ui-tabs { position: relative; padding: .2em; zoom: 1; } /* position: relative prevents IE scroll bug (element with position: relative inside container with overflow: auto appear as "fixed") */
+.greenstart .ui-tabs .ui-tabs-nav { margin: 0; padding: .2em .2em 0; }
+.greenstart .ui-tabs .ui-tabs-nav li { list-style: none; float: left; position: relative; top: 1px; margin: 0 .2em 1px 0; border-bottom: 0 !important; padding: 0; white-space: nowrap; }
+.greenstart .ui-tabs .ui-tabs-nav li a { float: left; padding: .5em 1em; text-decoration: none; }
+.greenstart .ui-tabs .ui-tabs-nav li.ui-tabs-selected { margin-bottom: 0; padding-bottom: 1px; }
+.greenstart .ui-tabs .ui-tabs-nav li.ui-tabs-selected a, .greenstart .ui-tabs .ui-tabs-nav li.ui-state-disabled a, .greenstart .ui-tabs .ui-tabs-nav li.ui-state-processing a { cursor: text; }
+.greenstart .ui-tabs .ui-tabs-nav li a, .greenstart .ui-tabs.ui-tabs-collapsible .ui-tabs-nav li.ui-tabs-selected a { cursor: pointer; } /* first selector in group seems obsolete, but required to overcome bug in Opera applying cursor: text overall if defined elsewhere... */
+.greenstart .ui-tabs .ui-tabs-panel { display: block; border-width: 0; padding: 1em 1.4em; background: none; }
+.greenstart .ui-tabs .ui-tabs-hide { display: none !important; }
+/*
+ * jQuery UI Datepicker 1.8.10
+ *
+ * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://jquery.org/license
+ *
+ * http://docs.jquery.com/UI/Datepicker#theming
+ */
+.greenstart .ui-datepicker { width: 17em; padding: .2em .2em 0; display: none; }
+.greenstart .ui-datepicker .ui-datepicker-header { position:relative; padding:.2em 0; }
+.greenstart .ui-datepicker .ui-datepicker-prev, .greenstart .ui-datepicker .ui-datepicker-next { position:absolute; top: 2px; width: 1.8em; height: 1.8em; }
+.greenstart .ui-datepicker .ui-datepicker-prev-hover, .greenstart .ui-datepicker .ui-datepicker-next-hover { top: 1px; }
+.greenstart .ui-datepicker .ui-datepicker-prev { left:2px; }
+.greenstart .ui-datepicker .ui-datepicker-next { right:2px; }
+.greenstart .ui-datepicker .ui-datepicker-prev-hover { left:1px; }
+.greenstart .ui-datepicker .ui-datepicker-next-hover { right:1px; }
+.greenstart .ui-datepicker .ui-datepicker-prev span, .greenstart .ui-datepicker .ui-datepicker-next span { display: block; position: absolute; left: 50%; margin-left: -8px; top: 50%; margin-top: -8px;  }
+.greenstart .ui-datepicker .ui-datepicker-title { margin: 0 2.3em; line-height: 1.8em; text-align: center; }
+.greenstart .ui-datepicker .ui-datepicker-title select { font-size:1em; margin:1px 0; }
+.greenstart .ui-datepicker select.ui-datepicker-month-year {width: 100%;}
+.greenstart .ui-datepicker select.ui-datepicker-month, 
+.greenstart .ui-datepicker select.ui-datepicker-year { width: 49%;}
+.greenstart .ui-datepicker table {width: 100%; font-size: .9em; border-collapse: collapse; margin:0 0 .4em; }
+.greenstart .ui-datepicker th { padding: .7em .3em; text-align: center; font-weight: bold; border: 0;  }
+.greenstart .ui-datepicker td { border: 0; padding: 1px; }
+.greenstart .ui-datepicker td span, .greenstart .ui-datepicker td a { display: block; padding: .2em; text-align: right; text-decoration: none; }
+.greenstart .ui-datepicker .ui-datepicker-buttonpane { background-image: none; margin: .7em 0 0 0; padding:0 .2em; border-left: 0; border-right: 0; border-bottom: 0; }
+.greenstart .ui-datepicker .ui-datepicker-buttonpane button { float: right; margin: .5em .2em .4em; cursor: pointer; padding: .2em .6em .3em .6em; width:auto; overflow:visible; }
+.greenstart .ui-datepicker .ui-datepicker-buttonpane button.ui-datepicker-current { float:left; }
+
+/* with multiple calendars */
+.greenstart .ui-datepicker.ui-datepicker-multi { width:auto; }
+.greenstart .ui-datepicker-multi .ui-datepicker-group { float:left; }
+.greenstart .ui-datepicker-multi .ui-datepicker-group table { width:95%; margin:0 auto .4em; }
+.greenstart .ui-datepicker-multi-2 .ui-datepicker-group { width:50%; }
+.greenstart .ui-datepicker-multi-3 .ui-datepicker-group { width:33.3%; }
+.greenstart .ui-datepicker-multi-4 .ui-datepicker-group { width:25%; }
+.greenstart .ui-datepicker-multi .ui-datepicker-group-last .ui-datepicker-header { border-left-width:0; }
+.greenstart .ui-datepicker-multi .ui-datepicker-group-middle .ui-datepicker-header { border-left-width:0; }
+.greenstart .ui-datepicker-multi .ui-datepicker-buttonpane { clear:left; }
+.greenstart .ui-datepicker-row-break { clear:both; width:100%; }
+
+/* RTL support */
+.greenstart .ui-datepicker-rtl { direction: rtl; }
+.greenstart .ui-datepicker-rtl .ui-datepicker-prev { right: 2px; left: auto; }
+.greenstart .ui-datepicker-rtl .ui-datepicker-next { left: 2px; right: auto; }
+.greenstart .ui-datepicker-rtl .ui-datepicker-prev:hover { right: 1px; left: auto; }
+.greenstart .ui-datepicker-rtl .ui-datepicker-next:hover { left: 1px; right: auto; }
+.greenstart .ui-datepicker-rtl .ui-datepicker-buttonpane { clear:right; }
+.greenstart .ui-datepicker-rtl .ui-datepicker-buttonpane button { float: left; }
+.greenstart .ui-datepicker-rtl .ui-datepicker-buttonpane button.ui-datepicker-current { float:right; }
+.greenstart .ui-datepicker-rtl .ui-datepicker-group { float:right; }
+.greenstart .ui-datepicker-rtl .ui-datepicker-group-last .ui-datepicker-header { border-right-width:0; border-left-width:1px; }
+.greenstart .ui-datepicker-rtl .ui-datepicker-group-middle .ui-datepicker-header { border-right-width:0; border-left-width:1px; }
+
+/* IE6 IFRAME FIX (taken from datepicker 1.5.3 */
+.greenstart .ui-datepicker-cover {
+    display: none; /*sorry for IE5*/
+    display/**/: block; /*sorry for IE5*/
+    position: absolute; /*must have*/
+    z-index: -1; /*must have*/
+    filter: mask(); /*must have*/
+    top: -4px; /*must have*/
+    left: -4px; /*must have*/
+    width: 200px; /*must have*/
+    height: 200px; /*must have*/
+}/*
+ * jQuery UI Progressbar 1.8.10
+ *
+ * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://jquery.org/license
+ *
+ * http://docs.jquery.com/UI/Progressbar#theming
+ */
+.greenstart .ui-progressbar { height:2em; text-align: left; }
+.greenstart .ui-progressbar .ui-progressbar-value {margin: -1px; height:100%; }

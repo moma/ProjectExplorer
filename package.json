@@ -1,0 +1,45 @@
+{
+   "license" : "BSD",
+    "author" : {
+        "name" : "Julian Bilcke",
+        "email" : "julian.bilcke@gmail.com",
+        "url" : "http://github.com/moma"
+   },
+  "name": "tinaweb",
+  "description": "tinaweb",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/moma/tinaweb.git"
+  },
+    "keywords" : [
+       "tinasoft",
+       "tinaviz",
+       "tinaeb"
+    ],
+    
+    "directories" : {
+      "lib" : "./js",
+      "example" : "./example",
+      "test" : "./test"
+    },
+  "scripts" : {
+    "build" : "coffee --bare --compile --output js/ src/",
+    "watch" : "coffee --bare --watch --compile --output js/ src/",    
+    "pretest" : "coffee --bare --compile --output js/ src/",    
+    "test" : "vows --spec"
+  },
+  "engines": {
+    "node": "0.4.x || 0.6.x"
+  },
+  "dependencies": {
+     "pkginfo"      : "0.2.x", 
+     "coffee-script": "1.2.x",
+     "js2coffee"    : "0.1.x"
+        
+  },
+  "devDependencies": {
+    "mocha": "0.8.x",
+    "coffee-script" : "1.2.x"
+  }
+}
