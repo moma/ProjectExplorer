@@ -1,14 +1,3 @@
 *.db
 *.sqlite
-common/*
-Highcharts-2.2.0/*
-custom/*
-js/*
-src/*
-custom_sites/*
-less/*
-iscn/*
-script/*
-php/*.db
-static_regcomex/*
-ego/*
+*.pyc
