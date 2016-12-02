@@ -1,0 +1,4 @@
+Flask
+simplejson
+gunicorn
+networkx

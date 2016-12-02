@@ -8,7 +8,6 @@ src/*
 custom_sites/*
 less/*
 iscn/*
-comex_install/*
 script/*
 php/*.db
 static_regcomex/*
