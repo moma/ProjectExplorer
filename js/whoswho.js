@@ -159,8 +159,7 @@ $(document).ready(function() {
     return popfilter("tagged", "tags", []);
   });
   $("#register").click(function() {
-    console.log("clicked on print");
-    return window.open("http://main.csregistry.org/Whoswhodata");
+    return window.open("/regcomex");
   });
   $("#searchname").scholarcomplete({
     minLength: 2,
