@@ -1,8 +1,8 @@
 <?php
-
+include ("comex_library.php");
 include ("parametres.php");
 include ("normalize.php");
-include ("comex_library.php");
+
 //include("../common/library/fonctions_php.php");
 
 $meta = '<!DOCTYPE html>
@@ -18,6 +18,7 @@ $meta = '<!DOCTYPE html>
 		<![endif]-->
         <!-- Le styles -->
         <link href="css/bootstrap_iscpif.css" rel="stylesheet">
+        <link href="css/bootstrap_directory.css" rel="stylesheet">
         <link type="text/css" href="css/brownian-motion/jquery-ui-1.8.16.custom.css">
         <link href="http://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet" type="text/css">
         <script type="text/javascript" src="js/jquery/jquery-1.7.min.js"></script>

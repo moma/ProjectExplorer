@@ -1,14 +1,15 @@
 <?php
 // calcul les différents profils à partir d'une requete
-// sort un $content 
+// sort un $content
 
 
-echo '    
+echo '
     <body>';
 include ("analytics.php");
-echo '        <script type="text/javascript" src="js/whoswho.js"></script>
+echo '        <script type="text/javascript" src="js/jquery/jquery-1.7.min.js"></script>
+              <script type="text/javascript" src="js/whoswho.js"></script>
     <div class="container">
-        
+
         <!-- Main hero unit for a primary marketing message or call to action -->
         <div class="hero-unit">
    ';
@@ -17,7 +18,7 @@ echo '        <script type="text/javascript" src="js/whoswho.js"></script>
 $imsize = 150;
 
 $content='';
-        
+
 
 
 
@@ -33,8 +34,8 @@ foreach ($scholars as $scholar) {
     }
     $loop+=1;
     $content.= '<div class="row">
-                <div class="span12">                    
-                    <div class="row">           
+                <div class="span12">
+                    <div class="row">
                         <div class="span9" align="justify">';
     $content .= '<div>';
     if ($scholar['photo_url'] != null) {
@@ -53,9 +54,9 @@ foreach ($scholars as $scholar) {
     if (($scholar['position'] != null)||($scholar['lab'] != null)||($scholar['affiliation'] != null)) {
        $content .= '<dl>';
     }
-    
+
     if ($scholar['position'] != null) {
-  
+
     $content .= '<dt>' . $scholar['position'] . '</dt>';
     }
     $affiliation = '';
@@ -66,7 +67,7 @@ foreach ($scholars as $scholar) {
     if ($scholar['affiliation'] != null) {
         $affiliation.=$scholar['affiliation'];
         $orga_list[]=$scholar['affiliation'];
-        
+
         //echo $scholar['affiliation'].'<br/>';
 
         //$lab_query.='OR name="'.$scholar['affiliation'].'" ';
@@ -111,13 +112,13 @@ foreach ($scholars as $scholar) {
         } else {
             $content .= '<dd><i class="icon-user"></i> CSS Member</dd> ';
         }
-    
+
     }
 
    if (($scholar['position'] != null)||($scholar['lab'] != null)||($scholar['affiliation'] != null)) {
        $content .= '</dl>';
     }
-    
+
 
     $content .= '</div>';
 
@@ -133,11 +134,11 @@ foreach ($scholars as $scholar) {
 
     if (($scholar['keywords'] != null) || ($scholar['address'] != null) || ($scholar['phone'] != null)) {
         $content .= '<div class="span3" align="justify">';
-        
+
         if ($scholar['keywords'] != null){
-                 $content .= '<i class="icon-tags"></i> ' . clean_exp($scholar['keywords']). '.<br/><br/>';  
+                 $content .= '<i class="icon-tags"></i> ' . clean_exp($scholar['keywords']). '.<br/><br/>';
         }
-            
+
         if ($scholar['address'] != null) {
             $content .= '<address><i class="icon-envelope"></i> ' . $scholar['address'] . '<br/>' . $scholar['city'] . '<br/>' . $scholar['postal_code'] . '<br/></address>';
         }
@@ -150,16 +151,16 @@ foreach ($scholars as $scholar) {
             }
             if ($scholar['fax'] != null) {
                 $content .='<strong>Fax</strong>: '.$scholar['fax'] . '<br/>';
-            }            
+            }
         }
 
         $content .= '</div>';
-    }   
+    }
 $content .= '</div>';
 
     $content .= '</div>';
     $content .= '</div>';
-    
+
     $content .= '
 <center><img src="img/bar.png"></center>';
     $content .= '<br/>';
@@ -246,9 +247,9 @@ foreach ($orga_list as $name) {
         $info['fax'] = $row['fax'];
         $info['login'] = $row['login'];
         $organiz[$row['id']] = $info;
-        $temp=false;        
+        $temp=false;
         }
-    }        
+    }
     }
 
 }
