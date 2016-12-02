@@ -16,10 +16,6 @@ def main():
 
     db=SQLite('../community.db')
 
-    print(request.args)
-    print('unique_id' in request.args)
-    print()
-
     if 'query' in request.args:
         filteredquery = request.args['query']
         scholars = db.getScholarsList("filter",filteredquery)

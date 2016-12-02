@@ -323,7 +323,9 @@ class extract:
 
 
     def toHTML(self,string):
-        return escape(string).encode("ascii", "xmlcharrefreplace")
+        escaped = escape(string).encode("ascii", "xmlcharrefreplace")
+        print(type(escaped))
+        return escaped
 
 
     def buildJSON_sansfa2(self,graph,coordsRAW=None):
@@ -338,7 +340,7 @@ class extract:
         edgesA=0
         edgesB=0
         edgesAB=0
-        print("printing in buildJSON_sansfa2()")
+        # print("printing in buildJSON_sansfa2()")
         nodes = {}
         edges = {}
         if coordsRAW:
@@ -427,9 +429,12 @@ class extract:
 
                 dacountry = self.scholars[idNode]["country"]
                 code=inst.searchCode(dacountry)
+
+                # country code
                 if code: node["CC"] = code
                 else: node["CC"]="-"
 
+                # Affiliation
                 node["ACR"] = self.scholars[idNode]["ACR"]
                 if node["ACR"]=="": node["ACR"]="-"
 
@@ -499,10 +504,9 @@ class extract:
 
         pprint(graph["stats"])
 
-        print("scholars",nodesA)
-        print("concepts",nodesB)
-        print("nodes1",edgesA)
-        print("nodes2",edgesB)
-        print("bipartite",edgesAB)
-        print(type(graph))
+        # print("scholars",nodesA)
+        # print("concepts",nodesB)
+        # print("nodes1",edgesA)
+        # print("nodes2",edgesB)
+        # print("bipartite",edgesAB)
         return graph
