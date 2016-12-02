@@ -323,7 +323,7 @@ class extract:
 
 
     def toHTML(self,string):
-        escaped = escape(string).encode("ascii", "xmlcharrefreplace")
+        escaped = escape(string).encode("ascii", "xmlcharrefreplace").decode()
         print(type(escaped))
         return escaped
 
