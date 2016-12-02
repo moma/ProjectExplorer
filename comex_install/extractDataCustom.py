@@ -128,10 +128,9 @@ class extract:
         """
         i = 0
         chunk = []
-        add_to_chunk = chunk.append
         for key in l:
             i+=1
-            add_to_chunk(key)
+            chunk.append(key)
             if i % n == 0:
                 yield chunk
                 chunk = []
@@ -241,13 +240,19 @@ class extract:
         chunkedTerms = list(self.chunks(termsMatrix.keys(), 500))
         for chunk_i in chunkedTerms:
             if len(chunk_i)>0:
-                query = "SELECT term,id,occurrences FROM terms where id="
-                conditions = " or id=".join(chunk_i)
+                # TODO temporary table + JOIN would be faster than IN
+                query = "SELECT term,id,occurrences FROM terms WHERE id IN "
+                conditions = ' (' + ','.join(sorted(chunk_i)) + ')'
                 sqlarray.append(query+conditions)
 
 
         for sql in sqlarray:
+            # debug
+            # print("SQL query ===============================")
+            # print(sql)
+            # print("/SQL query ==============================")
             for res in self.cursor.execute(sql):
+                print(res)
                 idT = res['id']
                 info = {}
                 info['id'] = idT
@@ -371,9 +376,17 @@ class extract:
         for idNode in graph.nodes_iter():
             if idNode[0]=="N":#If it is NGram
                 numID=int(idNode.split("::")[1])
-                nodeLabel= self.terms_array[numID]['term'].replace("&"," and ")
-                colorg=max(0,180-(100*self.terms_colors[numID]))
-                term_occ = self.terms_array[numID]['occurrences']
+                # print("DBG terms_array:", self.terms_array)
+                try:
+                    nodeLabel= self.terms_array[numID]['term'].replace("&"," and ")
+                    colorg=max(0,180-(100*self.terms_colors[numID]))
+                    term_occ = self.terms_array[numID]['occurrences']
+
+                except KeyError:
+                    print("WARN: couldn't find label and meta for term " + str(numID))
+                    nodeLabel = "UNKNOWN"
+                    colorg = 0
+                    term_occ = 1
 
                 node = {}
                 node["type"] = "NGram"
