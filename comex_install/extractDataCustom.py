@@ -7,6 +7,8 @@ import cgi
 import json
 
 import sys
+from converter import CountryConverter
+import pprint
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -333,7 +335,6 @@ class extract:
 
     def buildJSON_sansfa2(self,graph,coordsRAW=None):
 
-	from converter import CountryConverter
 	inst = CountryConverter("","","","")
 	ISO=inst.getCountries("countries_ISO3166.txt")
 	Alternatives=inst.getCountries("countries_alternatives.txt")
@@ -497,7 +498,6 @@ class extract:
 	graph["stats"] = { "sch":nodesA,"kw":nodesB,"n1":edgesA,"n2":edgesB,"nbi":edgesAB ,  }
 	graph["ID"] = self.unique_id
 
-	import pprint
 	pprint.pprint(graph["stats"])
 
 #	print "scholars",nodesA

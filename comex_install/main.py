@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from FA2 import ForceAtlas2
+# from FA2 import ForceAtlas2
 from extractDataCustom import extract as SQLite
 
 import sys
