@@ -122,19 +122,6 @@ class extract:
                 print(error)
 
 
-    def chunks(self,l, n):
-        """
-        l is a dict.keys(): iterable but not subscriptable
-        """
-        i = 0
-        chunk = []
-        for key in l:
-            i+=1
-            chunk.append(key)
-            if i % n == 0:
-                yield chunk
-                chunk = []
-
     def extract(self,scholar_array):
         """
         Adding each connected scholar per unique_id
@@ -236,29 +223,20 @@ class extract:
 ##    print(sql)
 ##    print("nb terms:",len(termsMatrix))
 
-        sqlarray = []
-        chunkedTerms = list(self.chunks(termsMatrix.keys(), 500))
-        for chunk_i in chunkedTerms:
-            if len(chunk_i)>0:
-                # TODO temporary table + JOIN would be faster than IN
-                query = "SELECT term,id,occurrences FROM terms WHERE id IN "
-                conditions = ' (' + ','.join(sorted(chunk_i)) + ')'
-                sqlarray.append(query+conditions)
+        query = "SELECT term,id,occurrences FROM terms WHERE id IN "
+        conditions = ' (' + ','.join(sorted(list(termsMatrix))) + ')'
 
-
-        for sql in sqlarray:
-            # debug
-            # print("SQL query ===============================")
-            # print(sql)
-            # print("/SQL query ==============================")
-            for res in self.cursor.execute(sql):
-                print(res)
-                idT = res['id']
-                info = {}
-                info['id'] = idT
-                info['occurrences'] = res['occurrences']
-                info['term'] = res['term']
-                self.terms_array[idT] = info
+        # debug
+        # print("SQL query ===============================")
+        # print(query+conditions)
+        # print("/SQL query ==============================")
+        for res in self.cursor.execute(query+conditions):
+            idT = res['id']
+            info = {}
+            info['id'] = idT
+            info['occurrences'] = res['occurrences']
+            info['term'] = res['term']
+            self.terms_array[idT] = info
         count=1
 
         for term in self.terms_array:
