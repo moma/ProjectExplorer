@@ -53,12 +53,7 @@ border: 1px solid #eee;
 -moz-box-shadow: 0 0 3px #000;
 box-shadow: 0 0 3px #000;
 }
-.filter {
-/*position:relative;
-display: block;
-top:50%;
-margin-top:20px;*/
-}
+
 .filterselect {
 background: rgba(220,220,220, 0.70);
 border-color: rgba(0,0,0,0.2);
@@ -160,4 +155,71 @@ input.name {
 	font-size: 29px;
 	width: 250px;
 
+}
+
+.nav > li > a.topbarlink:hover {
+     /* prevents white of hover bg (ugly on black topbar) */
+    background-color: inherit !important;
+    color: #fff;
+}
+
+.nav-legend {
+    vertical-align: middle;
+    font-size: 13px;
+    color: #fff ;
+    padding: 7px 0 ;
+    margin: .3em 0 0 0 ;
+}
+
+/* dropdown buttons should look like just menu select (based on select.small) */
+.nav-inline-selectable {
+    display: inline-block;
+    align-items: center;
+    cursor: default;
+    line-height: 18px;
+    vertical-align: middle;
+
+    color: #000 !important;
+    background-color: #fff;
+
+    /*font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;*/
+    text-shadow: none !important ;
+    font-weight: normal;
+
+    padding: 4px !important ;
+    margin: .4em 1em .3em 1em;
+
+    box-sizing: border-box;
+
+    border: 2px solid #fff ;
+    border-radius: 3px;
+}
+
+.nav-inline-selectable .caret {
+    opacity: 1;
+}
+.nav-inline-selectable:hover .caret, .nav-inline-selectable:active .caret {
+    background-color: rgb(220,255,220) ;
+}
+
+.nav-inline-selectable:hover, .nav-inline-selectable:active {
+    display: inline-block;
+    cursor: pointer;
+    background-color: #fff ;
+    border: 2px solid rgb(170,255,120) ;
+    border-radius: 3px;
+    text-shadow: none !important ;
+}
+
+.filter {
+    line-height: 18px;
+    vertical-align: middle;
+    font-size: 13px;
+    padding: 0 !important ;
+    padding: 0 !important;
+    margin: .25em 0 0 0 !important;
+}
+.filter > span {
+    padding 0 0 1em 0 !important ;
+    /*margin: 0 0 1em 0 !important;*/
 }

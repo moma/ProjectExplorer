@@ -85,28 +85,30 @@ $(function(){
             }(document, 'script', 'facebook-jssdk'));
         </script>
         <script type="text/javascript" src="js/whoswho.js"/></script>
-        <div class="topbar" data-dropdown="dropdown">
+        <div class="topbar">
             <div class="topbar-inner">
                 <div class="container-fluid">
-                    <a class="brand" href="index.html">
-                   <i class="icon-home icon-white"></i></a>
-                    <ul class="nav">
-                        <li id="mapping" style="margin-top:5px;">
-                            <span style="color: #fff;"> <strong>SELECT</strong> </span>
-                            <select id="categorya" class="small" style="background: rgb(220,255,220, 0.8);">
+                    <!-- MAIN NAVBAR -->
+                    <ul class="nav" style="margin-top:5px;">
+                        <li>
+                            <a class="topbarlink" href="index.html"><span class="icon-home icon-white"></i></a>
+                        </li>
+                        <li id="mapping" class="nav-legend">
+                            <span> <strong>SELECT Keywords</strong> </span>
+                            <!-- <select id="categorya" class="small" style="background: rgb(220,255,220, 0.8);">
                                 <option selected="true">Keywords</option>
-                                <!--<option>Scholars</option>
+                                <option>Scholars</option>
                                 <option>Labs</option>
                                 <option>Organizations</option>
-                                <option>Countries</option>-->
-                            </select>
-                            <span style="color: #fff;"> <strong>AND</strong> </span>
-                            <select id="categoryb" class="small" style="background: rgb(255,220,220, 0.8);">
+                                <option>Countries</option>
+                            </select> -->
+                            <span> <strong>AND Scholars</strong> </span>
+                            <!-- <select id="categoryb" class="small" style="background: rgb(255,220,220, 0.8);">
                                 <option selected="true">Scholars</option>
-                                <!--<option>Labs</option>
+                                <option>Labs</option>
                                 <option>Organizations</option>
-                                <option>Countries</option>-->
-                            </select>
+                                <option>Countries</option>
+                            </select> -->
                         </li>
                         <!--
                         <li class="dropdown">
@@ -122,37 +124,40 @@ $(function(){
                         </li>
                         -->
                         <li id="refine" class="dropdown">
-                            <a class="dropdown-toggle">refine</a>
+                            <a class="btn-default nav-inline-selectable"
+                               onclick='$(this).next(".dropdown-menu").toggle();'
+                               >refine<i class="caret"></i></a>
                             <ul class="dropdown-menu">
                                 <li>
-                                <a id="addfiltercountry" href="#">Filter by country</a>
+                                    <a id="addfiltercountry" href="#">Filter by country</a>
                                 </li>
-                                <!--<li>
-                                                            <a id="addcolor" href="#">Color by</a>
-                                </li>-->
                                 <li>
                                     <a id="addfilterkeyword" href="#">Filter by keyword</a>
                                 </li>
-                                                                <li>
-                                <a id="addfiltertag" href="#">Filter by community tags</a>
+                                <li>
+                                    <a id="addfiltertag" href="#">Filter by community tags</a>
                                 </li>
                                 <li>
-                                <a id="addfilterorganization" href="#">Filter by organization</a>
+                                    <a id="addfilterorganization" href="#">Filter by organization</a>
                                 </li>
                                 <li>
-                                <a id="addfilterlaboratory" href="#">Filter by laboratory</a>
+                                    <a id="addfilterlaboratory" href="#">Filter by laboratory</a>
                                 </li>
+
+                                <!--<li>
+                                    <a id="addcolor" href="#">Color by</a>
+                                </li>-->
 
                             </ul>
                         </li>
                         <li>
-                            <a id="print" href="#"> <strong>CREATE DIRECTORY</strong></a>
+                            <a class="topbarlink" id="print" href="#"> <i class="icon-arrow-right icon-white"></i> <strong>CREATE DIRECTORY</strong></a>
                         </li>
                         <li style="margin-top: 10px;">
                             <span style="color: #fff;"> <strong>&nbsp;OR&nbsp;</strong> </span>
                         </li>
-                                                <li>
-                            <a id="generate" href="#"> <strong>MAP</strong></a>
+                        <li>
+                            <a class="topbarlink" id="generate" href="#"> <i class="icon-arrow-right icon-white"></i> <strong>MAP</strong></a>
                         </li>
 
                     </ul>
@@ -215,12 +220,7 @@ $(function(){
                         <i class="icon-info-sign"></i> View our <a href="tips.html">tips</a> for best experience. This directory is <strong>open</strong> to everybody working in the field of Complex Systems science and Complexity science. Map and explore communities or generate a printable version of their directory.
                          Updated every few minutes.
                         <br/>
-                        <i class="icon-exclamation-sign"></i> You must have a <strong>recent browser</strong> (e.g. <img src=img/firefox_logo.png width=20> Firefox 10+ or   <img src=img/chrome.png width=20>  Chrome 17+) with a <strong>java plug-in</strong> see the maps. If this is not the case, you can still print the communities directories unless your browser is really outdated. In that case, you can still consult the <a href="http://main.csregistry.org/tiki-index.php?page=Complex%20Systems%20Scholars"> pure html version</a>.
-
-
-
-
-
+    
                                                 <!--    <i class="icon-list-alt"></i> Personal data are given on a voluntary basis and people are responsible for the validity and integrity of their data. <br/>
 
                         <i class="icon-repeat"></i> Suggestions or comments ? <a href="http://moma.csregistry.org/feedback"  target="BLANK">Please feedback.</a> <br/>
