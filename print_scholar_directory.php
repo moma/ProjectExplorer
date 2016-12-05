@@ -72,27 +72,33 @@ function is_utf8($string) {
 $login = $_GET['query'];
 
 
-$base = new PDO("sqlite:" . $dbname);
+// $base = new PDO("sqlite:" . $dbname);
+$base = new PDO($dsn, $user, $pass, $opt);
 
 if ($login) {
     if (sizeof($login) > 0) {
 // liste des chercheurs
-        $sql = "SELECT keywords_ids,last_name,first_name FROM scholars where unique_id='" . $login . "'";
+        $sql = "SELECT keywords,last_name,first_name FROM comex_registrations WHERE doors_uid='" . $login . "'";
         foreach ($base->query($sql) as $row) {
-            $keywords_ids = explode(',', $row['keywords_ids']);
+            $keywords = explode(',', $row['keywords']);
             $scholar_array = array();
             $target_name=$row['first_name'].' '.$row['last_name'];
-            foreach ($keywords_ids as $keywords_id) {
+            foreach ($keywords as $keyword) {
 
-                $sql2 = "SELECT * FROM scholars2terms where term_id=" . trim($keywords_id);
-                #pt($sql2);
-                foreach ($base->query($sql2) as $row) {
-                    if (array_key_exists($row['scholar'], $scholar_array)){
-                        $scholar_array[$row['scholar']] += 1;
-                    }else{
-                        $scholar_array[$row['scholar']] = 1;
+                if (strlen($keyword) > 0) {
+
+                    // TODO RESTORE index keywords
+                    // $sql2 = "SELECT * FROM scholars2terms where term_id=" . trim($keywords_id);
+                    $sql2 = "SELECT doors_uid FROM comex_registrations WHERE keywords LIKE \"%" . trim($keyword)."%\"";
+                    // echo($sql2."<br/>");
+                    foreach ($base->query($sql2) as $row) {
+                        if (array_key_exists($row['doors_uid'], $scholar_array)){
+                            $scholar_array[$row['doors_uid']] += 1;
+                        }else{
+                            $scholar_array[$row['doors_uid']] = 1;
+                        }
+
                     }
-
                 }
             }
         }
@@ -100,48 +106,51 @@ if ($login) {
     }
 }
 
-        // les scholars sont affichés par ordre de pertinence
-        arsort($scholar_array);
+// les scholars sont affichés par ordre de pertinence
+arsort($scholar_array);
 
-        $scholar_id_array=array_keys($scholar_array);
+$scholar_id_array=array_keys($scholar_array);
+// echo var_dump($scholar_id_array)."<br/>" ;
+
 // liste des chercheurs
 $scholars = array();
-
+//
 foreach ($scholar_id_array as $scholar_id){
-$sql = "SELECT * FROM scholars where unique_id='" . $scholar_id. "'";
-
+$sql = "SELECT * FROM comex_registrations where doors_uid='" . $scholar_id. "'";
+// echo var_dump($scholar_id)."<br/>" ;
 //$query = "SELECT * FROM scholars";
 foreach ($base->query($sql) as $row) {
     $info = array();
-    $info['unique_id'] = $row['unique_id'];
+    $info['unique_id'] = $row['doors_uid'];
     $info['first_name'] = $row['first_name'];
     $info['initials'] = $row['initials'];
     $info['last_name'] = $row['last_name'];
-    $info['nb_keywords'] = $row['nb_keywords'];
-    $info['css_voter'] = $row['css_voter'];
-    $info['css_member'] = $row['css_member'];
-    $info['keywords_ids'] = explode(',', $row['keywords_ids']);
+    // $info['nb_keywords'] = $row['nb_keywords'];
+    // $info['css_voter'] = $row['css_voter'];
+    // $info['css_member'] = $row['css_member'];
+    // $info['keywords_ids'] = explode(',', $row['keywords_ids']);
     $info['keywords'] = $row['keywords'];
-    $info['status'] = $row['status'];
+    // $info['status'] = $row['status'];
     $info['country'] = $row['country'];
-    $info['homepage'] = $row['homepage'];
-    $info['lab'] = $row['lab'];
-    $info['affiliation'] = $row['affiliation'];
-    $info['lab2'] = $row['lab2'];
-    $info['affiliation2'] = $row['affiliation2'];
-    $info['homepage'] = $row['homepage'];
-    $info['title'] = $row['title'];
-    $info['position'] = $row['position'];
-    $info['photo_url'] = $row['photo_url'];
-    $info['interests'] = $row['interests'];
-    $info['address'] = $row['address'];
-    $info['city'] = $row['city'];
-    $info['postal_code'] = $row['postal_code'];
-    $info['phone'] = $row['phone'];
-    $info['mobile'] = $row['mobile'];
-    $info['fax'] = $row['fax'];
-    $info['affiliation_acronym'] = $row['affiliation_acronym'];
-    $scholars[$row['unique_id']] = $info;
+    // $info['homepage'] = $row['homepage'];
+    $info['lab'] = $row['team_lab'];
+    $info['affiliation'] = $row['institution'];
+    // $info['lab2'] = $row['lab2'];
+    // $info['affiliation2'] = $row['affiliation2'];
+    // $info['homepage'] = $row['homepage'];
+    $info['title'] = $row['jobtitle'];
+    $info['position'] = $row['jobtitle'];
+    // $info['photo_url'] = $row['photo_url'];
+    $info['pic_file'] = $row['pic_file'];
+    $info['interests'] = $row['interests_text'];
+    // $info['address'] = $row['address'];
+    // $info['city'] = $row['city'];
+    // $info['postal_code'] = $row['postal_code'];
+    // $info['phone'] = $row['phone'];
+    // $info['mobile'] = $row['mobile'];
+    // $info['fax'] = $row['fax'];
+    // $info['affiliation_acronym'] = $row['affiliation_acronym'];
+    $scholars[$row['doors_uid']] = $info;
 }
 
 }
@@ -210,7 +219,7 @@ Contributions and ideas are welcome to improve this directory.
 
 echo $meta.' '.$stats.'</head>';
 if (count($scholars)==0){
-echo  '<h2>Sorry, '.$target_name.' did not mentioned any keywords ... we cannot process it\'s network.</h2><br/>
+echo  '<h2>Sorry, '.$target_name.' did not mention any keywords ... we cannot process its network.</h2><br/>
     If you are '.$target_name.', you can  <a href="http://main.csregistry.org/Whoswhodata"  target="_BLANK">modify your profile</a> and see your
         network in few minutes.';
 }else{

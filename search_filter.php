@@ -1,14 +1,14 @@
 <?php
 
 /*
- * Génère le gexf des scholars à partir de la base sqlite
+ * Génère le gexf des scholars à partir de la base mysql
  */
 include("parametres.php");
 //include("../common/library/fonctions_php.php");
 include("normalize.php");
 
 
-$base = new PDO("sqlite:" . $dbname);
+$base = new PDO($dsn, $user, $pass, $opt);
 
 $category = trim(strtolower($_GET['category']));
 $term =  trim(strtolower($_GET['term']));
@@ -20,7 +20,10 @@ if ($category == 'country' || $category == 'countries') {
   $cat = "country";
   $query = 'LIKE upper(\''.strtoupper($q).'\')';
 } elseif ($category == 'organization' || $category == 'organizations') {
-  $cat = "affiliation";
+
+  // POSSIBLE: `concat(institution, ", ", IFNULL(team_lab, ""))``
+  //           (change in $cat here and in print_directory args downstream)
+  $cat = 'institution';
   $query = 'LIKE upper(\''.strtoupper($q).'\')';
 } elseif ($category == 'keyword' || $category == 'keywords') {
   $cat = "keywords";
@@ -29,7 +32,7 @@ if ($category == 'country' || $category == 'countries') {
   $cat = "tags";
   $query = 'LIKE upper(\''.strtoupper($q).'\')';
 } elseif ($category == 'labs' || $category == 'laboratories' || $category == 'laboratory') {
-  $cat = "lab";
+  $cat = "team_lab";
   $query = 'LIKE upper(\''.strtoupper($q).'\')';
 } else {
   echo ("ERROR");
@@ -41,17 +44,18 @@ $filtered = array (
 );
 function filter_word($value) {
   if ($value == null) return true;
-  return ! in_array(strtolower($value),$filtered); 
+  return ! in_array(strtolower($value),$filtered);
 }
 
-$req = "SELECT ".$cat." AS key, count(".$cat.") AS value FROM scholars WHERE ".$cat." ".$query." GROUP BY ".$cat." ORDER BY value DESC";
+$req = "SELECT ".$cat." AS clef, count(".$cat.") AS value FROM comex_registrations WHERE ".$cat." ".$query." GROUP BY ".$cat." ORDER BY value DESC";
+// echo $req;
 $results = array();
 $i = 0;
 foreach ($base->query($req) as $row) {
   $nb = $row['value'];
   if ($cat == "keywords" || $cat == "tags") {
     //echo "in keywords\n";
-     $words = explode(",", $row["key"]);
+     $words = explode(",", $row["clef"]);
     foreach ($words as $word) {
 
     $pos = strpos($word,$term);
@@ -69,9 +73,9 @@ foreach ($base->query($req) as $row) {
         }
     }
   } else {
-    $word = $row["key"];
+    $word = $row["clef"];
      if ($cat == "country") {
-        $word = normalize_country($word);  
+        $word = normalize_country($word);
     }
 
     if (filter_word($word)) {
@@ -98,7 +102,7 @@ foreach($results as $key => $value) {
         'label' => $key,
        // 'value' => $value,
        'score' => $value,
-       
+
      // F*** it, I'll put the meta data here...
        'category' => $cat,
           "term" => $term,

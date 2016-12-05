@@ -40,7 +40,51 @@ foreach ($scholars as $scholar) {
     $content .= '<div>';
     if ($scholar['photo_url'] != null) {
         $content .= '<img style="margin: 7px 10px 10px 0px" src="http://main.csregistry.org/' . $scholar['photo_url'] . '" width="' . $imsize . 'px" align="left">';
-    } else {
+    }
+    // raw binary picture
+    elseif ($scholar['pic_file'] != null) {
+
+        // create temp file
+        // -----------------
+
+
+
+        $finfo    = finfo_open(FILEINFO_MIME_TYPE);
+        // $mimetype = finfo_buffer($finfo, base64_encode(convert_uudecode($scholar['pic_file'])));
+        // $mimetype = finfo_buffer($finfo, convert_uudecode($scholar['pic_file']));
+        $mimetype = finfo_buffer($finfo, $scholar['pic_file']);
+        finfo_close($finfo);
+
+
+        // £TODO more experiments to fix display here
+
+        // find format
+        $raw_beginning = substr($scholar['pic_file'], 0,8);
+        $mimeguess = null;
+        $JPEG = "/^xffxd8xf/";
+        $GIF  = "/^GIF/";
+        $PNG  = "/^x89PNG/";
+        if (preg_match ($JPEG, $raw_beginning)) {
+            // echo "<p>got JPEG</p>";
+            $mimeguess="image/jpeg";
+        }
+        else if (preg_match ($GIF, $raw_beginning)) {
+            // echo "<p>got GIF</p>";
+            $mimeguess="image/gif";
+        }
+        else if (preg_match ($PNG, $raw_beginning)) {
+            // echo "<p>got PNG</p>";
+            $mimeguess="image/png";
+        }
+        else {
+            // echo "<p>no match :(</p>";
+        }
+
+        echo "<p>mimetype:".$mimeguess."</p>";
+
+        $content .= '<img style="margin: 7px 10px 10px 0px" src="data:'.$mimeguess.';base64,'.$perhaps_decoded.'"/>';
+    }
+    else {
         if (count($scholars) < 2000) {
             $im_id = floor(rand(0, 11));
             $content .= '<img style="margin: 7px 10px 10px 0px" src="img/' . $im_id . '.png" width="' . $imsize . 'px" align="left">';
@@ -77,43 +121,42 @@ foreach ($scholars as $scholar) {
     }
 
 
-    $affiliation2 = '';
-    if ($scholar['lab2'] != null) {
-        $affiliation2.=$scholar['lab2'] . ', ';
-        $lab_list[]=$scholar['lab2'];
-    }
-    if ($scholar['affiliation2'] != null) {
-        $affiliation2.=$scholar['affiliation2'];
-        $orga_list[]=$scholar['affiliation2'];
-        //echo $scholar['affiliation2'].'<br/>';
-    }
-    if (($scholar['affiliation2'] != null) | ($scholar['lab2'] != null)) {
-        $content .= '<dd><i>Second affiliation: </i>' . clean_exp($affiliation2) . '</dd>';
-    }
+    // $affiliation2 = '';
+    // if ($scholar['lab2'] != null) {
+    //     $affiliation2.=$scholar['lab2'] . ', ';
+    //     $lab_list[]=$scholar['lab2'];
+    // }
+    // if ($scholar['affiliation2'] != null) {
+    //     $affiliation2.=$scholar['affiliation2'];
+    //     $orga_list[]=$scholar['affiliation2'];
+    //     //echo $scholar['affiliation2'].'<br/>';
+    // }
+    // if (($scholar['affiliation2'] != null) | ($scholar['lab2'] != null)) {
+    //     $content .= '<dd><i>Second affiliation: </i>' . clean_exp($affiliation2) . '</dd>';
+    // }
+    //
+    // if ((strcmp($affiliation2, '') != 0) | (strcmp($affiliation, '') != 0)) {
+    //     $content .= '<br/>';
+    // }
 
-    if ((strcmp($affiliation2, '') != 0) | (strcmp($affiliation, '') != 0)) {
-        $content .= '<br/>';
-    }
-
-    $www = '';
-    if (substr($scholar['homepage'], 0, 3) === 'www') {
-        $www.=' <a href=' . trim(str_replace('&', ' and ', 'http://' . $scholar['homepage'])) . ' target=blank > ' . trim(str_replace('&', ' and ', 'http://' . $scholar['homepage'])) . '  </a ><br/>';
-    } elseif (substr($scholar['homepage'], 0, 4) === 'http') {
-        $www.=' <a href=' . trim(str_replace('&', ' and ', $scholar['homepage'])) . ' target=blank > ' . trim(str_replace('&', ' and ', $scholar['homepage'])) . ' </a ><br/>';
-    }
-
-    if (strcmp($www, '') != 0) {
-        $content .= '<dd><i class="icon-home"></i>' . $www . '</dd> ';
-    }
-
-    if ($scholar['css_member'] === 'Yes') {
-        if ($scholar['css_voter'] === 'Yes') {
-            $content .= '<dd><i class="icon-user"></i> CSS Voting Member</dd> ';
-        } else {
-            $content .= '<dd><i class="icon-user"></i> CSS Member</dd> ';
-        }
-
-    }
+    // $www = '';
+    // if (substr($scholar['homepage'], 0, 3) === 'www') {
+    //     $www.=' <a href=' . trim(str_replace('&', ' and ', 'http://' . $scholar['homepage'])) . ' target=blank > ' . trim(str_replace('&', ' and ', 'http://' . $scholar['homepage'])) . '  </a ><br/>';
+    // } elseif (substr($scholar['homepage'], 0, 4) === 'http') {
+    //     $www.=' <a href=' . trim(str_replace('&', ' and ', $scholar['homepage'])) . ' target=blank > ' . trim(str_replace('&', ' and ', $scholar['homepage'])) . ' </a ><br/>';
+    // }
+    //
+    // if (strcmp($www, '') != 0) {
+    //     $content .= '<dd><i class="icon-home"></i>' . $www . '</dd> ';
+    // }
+    //
+    // if ($scholar['css_member'] === 'Yes') {
+    //     if ($scholar['css_voter'] === 'Yes') {
+    //         $content .= '<dd><i class="icon-user"></i> CSS Voting Member</dd> ';
+    //     } else {
+    //         $content .= '<dd><i class="icon-user"></i> CSS Member</dd> ';
+    //     }
+    // }
 
    if (($scholar['position'] != null)||($scholar['lab'] != null)||($scholar['affiliation'] != null)) {
        $content .= '</dl>';
@@ -139,20 +182,20 @@ foreach ($scholars as $scholar) {
                  $content .= '<i class="icon-tags"></i> ' . clean_exp($scholar['keywords']). '.<br/><br/>';
         }
 
-        if ($scholar['address'] != null) {
-            $content .= '<address><i class="icon-envelope"></i> ' . $scholar['address'] . '<br/>' . $scholar['city'] . '<br/>' . $scholar['postal_code'] . '<br/></address>';
-        }
-
-
-        if ($scholar['phone'] != null) {
-            $content .= '<address><strong>Phone</strong>: '.$scholar['phone'] . '<br/>';
-            if ($scholar['mobile'] != null) {
-                $content .='<strong>Mobile</strong>: '.$scholar['mobile']. '<br/>';
-            }
-            if ($scholar['fax'] != null) {
-                $content .='<strong>Fax</strong>: '.$scholar['fax'] . '<br/>';
-            }
-        }
+        // if ($scholar['address'] != null) {
+        //     $content .= '<address><i class="icon-envelope"></i> ' . $scholar['address'] . '<br/>' . $scholar['city'] . '<br/>' . $scholar['postal_code'] . '<br/></address>';
+        // }
+        //
+        //
+        // if ($scholar['phone'] != null) {
+        //     $content .= '<address><strong>Phone</strong>: '.$scholar['phone'] . '<br/>';
+        //     if ($scholar['mobile'] != null) {
+        //         $content .='<strong>Mobile</strong>: '.$scholar['mobile']. '<br/>';
+        //     }
+        //     if ($scholar['fax'] != null) {
+        //         $content .='<strong>Fax</strong>: '.$scholar['fax'] . '<br/>';
+        //     }
+        // }
 
         $content .= '</div>';
     }
@@ -181,38 +224,39 @@ if (strcmp(substr($orga_query, 0,2),'OR')==0){
 // liste des labs ////////
 //////////////////////////
 $labs = array();
-sort($lab_list);
+// TODO RESTORE
+// sort($lab_list);
 
-foreach ($lab_list as $name) {
-    if ((trim($name)) != NULL) {
-        $sql = 'SELECT * FROM labs where name="' . $name . '" OR acronym="' . $name . '"';
-        //echo $sql.'<br/>';
-        foreach ($base->query($sql) as $row) {
-            //echo 'toto';
-            $info = array();
-            $info['unique_id'] = $row['id'];
-            $info['name'] = $row['name'];
-            $info['acronym'] = $row['acronym'];
-            $info['homepage'] = $row['homepage'];
-            $info['keywords'] = $row['keywords'];
-            $info['country'] = $row['country'];
-            $info['address'] = $row['address'];
-            $info['organization'] = $row['organization'];
-            $info['organization2'] = $row['organization2'];
-            $orga_list[] = $row['organization'];
-            $orga_list[] = $row['organization2'];
-            $info['object'] = $row['object'];
-            $info['methods'] = $row['methods'];
-            $info['director'] = $row['director'];
-            $info['admin'] = $row['admin'];
-            $info['phone'] = $row['phone'];
-            $info['fax'] = $row['fax'];
-            $info['login'] = $row['login'];
-            //print_r($info);
-            $labs[$row['id']] = $info;
-        }
-    }
-}
+// foreach ($lab_list as $name) {
+//     if ((trim($name)) != NULL) {
+//         $sql = 'SELECT * FROM labs where name="' . $name . '" OR acronym="' . $name . '"';
+//         //echo $sql.'<br/>';
+//         foreach ($base->query($sql) as $row) {
+//             //echo 'toto';
+//             $info = array();
+//             $info['unique_id'] = $row['id'];
+//             $info['name'] = $row['name'];
+//             $info['acronym'] = $row['acronym'];
+//             $info['homepage'] = $row['homepage'];
+//             $info['keywords'] = $row['keywords'];
+//             $info['country'] = $row['country'];
+//             $info['address'] = $row['address'];
+//             $info['organization'] = $row['organization'];
+//             $info['organization2'] = $row['organization2'];
+//             $orga_list[] = $row['organization'];
+//             $orga_list[] = $row['organization2'];
+//             $info['object'] = $row['object'];
+//             $info['methods'] = $row['methods'];
+//             $info['director'] = $row['director'];
+//             $info['admin'] = $row['admin'];
+//             $info['phone'] = $row['phone'];
+//             $info['fax'] = $row['fax'];
+//             $info['login'] = $row['login'];
+//             //print_r($info);
+//             $labs[$row['id']] = $info;
+//         }
+//     }
+// }
 
 //print_r($labs);
 
@@ -222,37 +266,38 @@ foreach ($lab_list as $name) {
 // liste des organizations ////////
 //////////////////////////
 $organiz = array();
-sort($orga_list);
-foreach ($orga_list as $name) {
-    if ((trim($name))!=NULL){
-    $sql = "SELECT * FROM organizations where name='" . $name. "' OR acronym='".$name."'";
-
-    $temp=true;
-    foreach ($base->query($sql) as $row) {
-        if ($temp){
-        $info = array();
-        $info['unique_id'] = $row['id'];
-        $info['name'] = $row['name'];
-        $info['acronym'] = $row['acronym'];
-        $info['homepage'] = $row['homepage'];
-        $info['keywords'] = $row['keywords'];
-        $info['country'] = $row['country'];
-        $info['street'] = $row['street'];
-        $info['city'] = $row['city'];
-        $info['state'] = $row['state'];
-        $info['postal_code'] = $row['postal_code'];
-        $info['fields'] = $row['fields'];
-        $info['admin'] = $row['admin'];
-        $info['phone'] = $row['phone'];
-        $info['fax'] = $row['fax'];
-        $info['login'] = $row['login'];
-        $organiz[$row['id']] = $info;
-        $temp=false;
-        }
-    }
-    }
-
-}
+// TODO RESTORE
+// sort($orga_list);
+// foreach ($orga_list as $name) {
+//     if ((trim($name))!=NULL){
+//     $sql = "SELECT * FROM organizations where name='" . $name. "' OR acronym='".$name."'";
+//
+//     $temp=true;
+//     foreach ($base->query($sql) as $row) {
+//         if ($temp){
+//         $info = array();
+//         $info['unique_id'] = $row['id'];
+//         $info['name'] = $row['name'];
+//         $info['acronym'] = $row['acronym'];
+//         $info['homepage'] = $row['homepage'];
+//         $info['keywords'] = $row['keywords'];
+//         $info['country'] = $row['country'];
+//         $info['street'] = $row['street'];
+//         $info['city'] = $row['city'];
+//         $info['state'] = $row['state'];
+//         $info['postal_code'] = $row['postal_code'];
+//         $info['fields'] = $row['fields'];
+//         $info['admin'] = $row['admin'];
+//         $info['phone'] = $row['phone'];
+//         $info['fax'] = $row['fax'];
+//         $info['login'] = $row['login'];
+//         $organiz[$row['id']] = $info;
+//         $temp=false;
+//         }
+//     }
+//     }
+//
+// }
 
 
 
@@ -261,6 +306,8 @@ foreach ($orga_list as $name) {
 $content .='<br/> <A NAME="labs"> </A>
 <h1>Labs by alphabetical order</h1>
 <p><i>List of labs to which scholars are affiliated</i></p>';
+
+// TODO RESTORE
 include('labs_list.php');
 
 
@@ -271,6 +318,7 @@ $content .= '<br/> <A NAME="orga"> </A>
 <h1>Organizations by alphabetical order</h1>
 <br/>
 <p><i>List of organizations to which scholars are affiliated</i></p>';
+// TODO RESTORE
 include('orga_list.php');
 
 /// ajout des organisations

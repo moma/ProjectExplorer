@@ -16,14 +16,16 @@ function clean_exp($string){
     }
 }
 
-function get_value($cle_value,$table='data',$cle='cle',$valeur='valeur'){    
+
+// NB actually (2016-12) this is unused TODO use !!!
+function get_value($cle_value,$table='data',$cle='cle',$valeur='valeur'){
 // renvoie la valeur correspondant à la clé $cle dans la table data
-   
+
 $sql = 'SELECT '.$valeur.' from '.$table.' WHERE '.$cle.'="'.trim($cle_value).'"';
 $resultat=mysql_query($sql);
     while ($ligne=mysql_fetch_array($resultat)) {
         $out=$ligne[$valeur];
         }
 return $out;
-}   
+}
 ?>

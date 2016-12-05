@@ -55,7 +55,7 @@ $meta = '<!DOCTYPE html>
 define('_is_utf8_split', 5000);
 
 function is_utf8($string) {
-   
+
     // From http://w3.org/International/questions/qa-forms-utf-8.html
     return preg_match('%^(?:
           [\x09\x0A\x0D\x20-\x7E]            # ASCII
@@ -67,7 +67,7 @@ function is_utf8($string) {
         | [\xF1-\xF3][\x80-\xBF]{3}          # planes 4-15
         |  \xF4[\x80-\x8F][\x80-\xBF]{2}     # plane 16
     )*$%xs', $string);
-   
+
 }
 
 $data = json_decode($_GET['query']);
@@ -78,7 +78,7 @@ function objectToArray($d) {
 			// with get_object_vars function
 			$d = get_object_vars($d);
 		}
- 
+
 		if (is_array($d)) {
 			/*
 			* Return array converted to object
@@ -103,11 +103,21 @@ $laboratories = $data["laboratories"];
 $organizations = $data["organizations"];
 $tags = $data["tags"];
 
+
+// echo '<p style="color:white">params:  $categorya =====> '. var_dump($categorya) ."<p>";
+// echo '<p style="color:white">params:  $categoryb =====> '. var_dump($categoryb)."<p>";
+// echo '<p style="color:white">params:  $countries =====> '. var_dump($countries) ."<p>";
+// echo '<p style="color:white">params:  $keywords =====> '. var_dump($keywords) ."<p>";
+// echo '<p style="color:white">params:  $laboratories =====> '. var_dump($laboratories) ."<p>";
+// echo '<p style="color:white">params:  $organizations =====> '. var_dump($organizations) ."<p>";
+// echo '<p style="color:white">params:  $tags =====> '. var_dump($tags) ."<p>";
+
 $query_details='<ul>';
 
 $f = "";// requête
 $labfilter='';
 if ($tags) {
+    echo '<p style="color:white">MATCHING ON tags<p>';
 	if (sizeof($tags) > 0) {
 		$f .= 'AND (';
 	}
@@ -121,14 +131,15 @@ if ($tags) {
 			if ($i > 0)
 				$f .= " OR ";
 			$f .= 'tags LIKE "%' . $word . '%" ';
-                        $query_details.=$word.', '; 
+                        $query_details.=$word.', ';
 			$i++;
 		}
 	}
-	$f .= ") ";	
+	$f .= ") ";
 }
 
 if ($keywords) {
+    echo '<p style="color:white">MATCHING ON keywords<p>';
 	if (sizeof($keywords) > 0) {
 		$f .= 'AND (';
 	}
@@ -140,16 +151,16 @@ if ($keywords) {
 			$word = sanitize_input(trim(strtolower($word)));
 			if ($word == "") continue;
                         $query_details.=$word.', ';
-			if ($i > 0)                            
+			if ($i > 0)
 				$f .= " OR ";
 			$f .= 'keywords LIKE "%' . $word . '%" ';
 			$i++;
 		}
 	}
-	$f .= ")  ";	
+	$f .= ")  ";
 }
 if ($countries) {
-
+    echo '<p style="color:white">MATCHING ON countries<p>';
 	if (sizeof($countries) > 0) {
 		$f .= 'AND (';
 	}
@@ -161,14 +172,14 @@ if ($countries) {
 		if ($country == "") continue;
 		if ($i > 0)
 			$f .= " OR ";
-		$f .= 'country = "' . $country . '" ';                
-                $query_details.=$country.', '; 
+		$f .= 'country = "' . $country . '" ';
+                $query_details.=$country.', ';
 		$i++;
 	}
 	$f .= ")  ";
 }
 if ($laboratories) {
-
+    echo '<p style="color:white">MATCHING ON labs<p>';
 	if (sizeof($laboratories) > 0) {
 		$f .= 'AND (';
 	}
@@ -179,39 +190,39 @@ if ($laboratories) {
 		if ($lab == "") continue;
 		if ($i > 0)
 			$f .= " OR ";
-		$f .= 'lab LIKE "%' . $lab . '%" ';
-                $query_details.=$lab.', '; 
+		$f .= 'team_lab LIKE "%' . $lab . '%" ';
+                $query_details.=$lab.', ';
 		$i++;
 	}
-	$f .= ")  ";        
+	$f .= ")  ";
 }
 
 if ($organizations) {
-
+    echo '<p style="color:white">MATCHING ON organizations<p>';
 	if (sizeof($organizations) > 0) {
 		$f .= 'AND (';
 	}
         $query_details.='<li><strong>In the organization named : </strong>';
 	$i = 0;
 	foreach ($organizations as $org) {
+        // echo '<p style="color:white">========> org =====> '. $org ."<p>";
 		$org = sanitize_input(trim(strtolower($org)));
-		
+
 		if ($org == "") continue;
-                $query_details.=$org.', '; 
-		$f .= 'affiliation LIKE "%' . $org . '%" OR affiliation2 LIKE "%' . $org . '%" ';                
+                $query_details.=$org.', ';
+		$f .= 'institution LIKE "%' . $org . '%" ';
                 //'affiliation LIKE "%' . $org . '% OR affiliation2 LIKE "%' . $org . '%"';
 		$i++;
 	}
-	$f .= ")  ";	
+	$f .= ")  ";
 }
 
 $query_details.='</ul>';
 
-$base = new PDO("sqlite:" . $dbname);
+$base = new PDO($dsn, $user, $pass, $opt);
 $termsMatrix = array(); // liste des termes présents chez les scholars avec leurs cooc avec les autres termes
 $scholarsMatrix = array(); // liste des scholars avec leurs cooc avec les autres termes
 $scholarsIncluded = 0;
-
 
 // liste des chercheurs
 if (substr($f, 0,3)=='AND'){
@@ -224,14 +235,15 @@ if (substr($labfilter, 0,3)=='AND'){
 $imsize = 150;
 
 $content='';
-        
+
 if (strlen($f)>0){
-$sql = "SELECT * FROM scholars where " . " " . $f.' ORDER BY last_name';
+$sql = "SELECT * FROM comex_registrations where " . " " . $f.' ORDER BY last_name';
 }else{
-    $sql = "SELECT * FROM scholars ORDER BY last_name";
+    $sql = "SELECT * FROM comex_registrations ORDER BY last_name";
 }
 
 //echo $sql.'<br/>';
+echo '<p style="color:white">query:'. $sql ."<p>";
 
 // liste des chercheurs
 $scholars = array();
@@ -239,41 +251,44 @@ $scholars = array();
 //$query = "SELECT * FROM scholars";
 foreach ($base->query($sql) as $row) {
 
+
+    // TODO RESTORE
     $info = array();
-    $info['unique_id'] = $row['unique_id'];
+    $info['unique_id'] = $row['doors_uid'];
     $info['first_name'] = $row['first_name'];
     $info['initials'] = $row['initials'];
     $info['last_name'] = $row['last_name'];
-    $info['nb_keywords'] = $row['nb_keywords'];
-    $info['css_voter'] = $row['css_voter'];
-    $info['css_member'] = $row['css_member'];
-    $info['keywords_ids'] = explode(',', $row['keywords_ids']);
+
+    // => TODO RESTORE
+    // $info['nb_keywords'] = $row['nb_keywords'];
+    // $info['css_voter'] = $row['css_voter'];
+    // $info['css_member'] = $row['css_member'];
+    // $info['keywords_ids'] = explode(',', $row['keywords_ids']);
     $info['keywords'] = $row['keywords'];
-    $info['status'] = $row['status'];
+    // $info['status'] = $row['status'];
     $info['country'] = $row['country'];
-    $info['homepage'] = $row['homepage'];
-    $info['lab'] = $row['lab'];
-    $info['affiliation'] = $row['affiliation'];
-    $info['lab2'] = $row['lab2'];
-    $info['affiliation2'] = $row['affiliation2'];
-    $info['homepage'] = $row['homepage'];
-    $info['title'] = $row['title'];
-    $info['position'] = $row['position'];
-    $info['photo_url'] = $row['photo_url'];
-    $info['interests'] = $row['interests'];
-    $info['address'] = $row['address'];
-    $info['city'] = $row['city'];
-    $info['postal_code'] = $row['postal_code'];
-    $info['phone'] = $row['phone'];
-    $info['mobile'] = $row['mobile'];
-    $info['fax'] = $row['fax'];
-    $info['affiliation_acronym'] = $row['affiliation_acronym'];
-    $scholars[$row['unique_id']] = $info;
+    // $info['homepage'] = $row['homepage'];
+    $info['lab'] = $row['team_lab'];
+    $info['affiliation'] = $row['institution'];
+    // $info['lab2'] = $row['lab2'];
+    // $info['affiliation2'] = $row['affiliation2'];
+    // $info['homepage'] = $row['homepage'];
+    $info['title'] = $row['jobtitle'];
+    $info['position'] = $row['jobtitle'];
+    // $info['photo_url'] = $row['photo_url'];
+    $info['pic_file'] = $row['pic_file'];
+    $info['interests'] = $row['interests_text'];
+    // $info['address'] = $row['address'];
+    // $info['city'] = $row['city'];
+    // $info['postal_code'] = $row['postal_code'];
+    // $info['phone'] = $row['phone'];
+    // $info['mobile'] = $row['mobile'];
+    // $info['fax'] = $row['fax'];
+    // $info['affiliation_acronym'] = $row['affiliation_acronym'];
+    $scholars[$row['doors_uid']] = $info;
 }
 /// stats
-//$base = new PDO('sqlite:' . $dbname);
 include ('stat-prep_from_array.php');///
-
 
 
 include ("directory_content.php");
@@ -285,7 +300,7 @@ include ("directory_content.php");
 $content .= '</div>';
 $content .= '</div>
             <footer>
-                GENERATED BY <a href="http://iscpif.fr"><img src="css/branding/logo-iscpif_medium.png" alt="iscpif.fr" style="border: none; margin-bottom : -6px;" title="isc-pif" /></a>-  <a href="http://sciencemapping.com" target="_BLANK">MOMA</a> - <a href="http://www.crea.polytechnique.fr/LeCREA/" target="_BLANK">CREA</a> - <a href="http://www.cnrs.fr/fr/recherche/index.htm" target="_BLANK">CNRS</a> 
+                GENERATED BY <a href="http://iscpif.fr"><img src="css/branding/logo-iscpif_medium.png" alt="iscpif.fr" style="border: none; margin-bottom : -6px;" title="isc-pif" /></a>-  <a href="http://sciencemapping.com" target="_BLANK">MOMA</a> - <a href="http://www.crea.polytechnique.fr/LeCREA/" target="_BLANK">CREA</a> - <a href="http://www.cnrs.fr/fr/recherche/index.htm" target="_BLANK">CNRS</a>
             </footer>
         </div>
 </body>
@@ -304,20 +319,20 @@ This directory presents the profiles of <a href="#scholars">'.  count($scholars)
 .  count($labs).' labs</a> and <a href="#orga">'.$orga_count.' organizations</a> in
 the field of Complex Systems';
 if (strlen(trim($query_details))>3){
-$header .= ': </p>'.$query_details;    
+$header .= ': </p>'.$query_details;
 }else{
     $header .='.</p> ';
 }
-$header .='<p>Its aims are to foster interactions 
+$header .='<p>Its aims are to foster interactions
 between protagonists in the fields of Complex Systems science and Complexity
 science,   as well as  to increase their visibility at the international scale.</p>
-    
+
 <ul>
 <li><b><i>This directory is open</i></b>. Anybody can have her profile included
 provided it is related to Complex Systems science and Complexity science. Personal data are given on a
 voluntary basis and people are responsible for the validity and integrity of their data.
 <li><i><b>This directory is browsable online</b> on the website of the complex systems society :</i> http://csbrowser.cssociety.org
-</ul> 
+</ul>
 </p>
 
 <p>
@@ -325,7 +340,7 @@ This directory is edited by the Complex Systems Registry. This initiative is sup
 Society</i> (<a href="http://cssociety.org">http://cssociety.org</a>).
 </p>
 <br/>
-<p>Contributions and ideas are welcome to improve this directory. 
+<p>Contributions and ideas are welcome to improve this directory.
 <a href="http://css.csregistry.org/whoswho+feedback">Please feedback</a></p>
 <br/>
 <h2>Global statistics</h2>
