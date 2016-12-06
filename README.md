@@ -35,22 +35,22 @@ docker-compose up
 
 
 #             |---------------------|
-#             |        nginx        | 
+#             |        nginx        |
 #             |---------------------|
 #                   /            \
 #                  /              \
 #          (reverse proxy)        $host/
 #          $host/regcomex/           \
-#                |               |-------------------|
-#     |--------------------|     |  site php         |
-#     |  regcomex docker   |     |  (à versionner)   |
-#     |  (serveur python)  |     |  (à adapter)      |
-#     |--------------------|     |-------------------|
+#                |               |-----------------------|
+#     |--------------------|     |     site php          |
+#     |  regcomex docker   |     | moma/legacy_php_comex |
+#     |  (serveur python)  |     | (adaptation en cours) |
+#     |--------------------|     |-----------------------|
 #         |             \                 |
 #         |              \                |
-# |-------------------|   \             TODO
-# | minidoors docker  |    \            lien
-# | émule futur doors |     \          manquant
+# |-------------------|   \               |
+# | minidoors docker  |    \              |
+# | émule futur doors |     \             |
 # |-------------------|      \            |
 #                             \           |
 #                             |-----------------|
@@ -167,10 +167,36 @@ Currently the data is collected in `data/shared_mysql_data`
   - the DB name is `comex_shared`  
   - the table is `comex_registrations`  
 
-The communityexplorer.org app is using a separate DB from legacy wiki csv
-(cf [detailed doc](https://github.com/moma/regcomex/blob/master/doc/nginx_conf.md) for real-life conf)
+Prerequisites for the comex php legacy app
+```
+# php support for nginx
+sudo apt install php7.0-fpm
 
-**TODO:** connect the two DBs
+# for legacy sqlite base
+sudo apt install php7.0-sqlite3
+
+# for new mysql base
+sudo apt install php7.0-mysql
+```
+
+Then installing the site itself is from repository:
+```
+# go to your nginx documentroot
+# for instance cd /var/www
+
+# get the legacy site into the current folder
+git clone https://github.com/moma/legacy_php_comex ./
+
+# checkout the branch that uses our new SQL
+git checkout mysql_refacto_prototype
+
+# edit ini file to put the correct SQL_HOST
+nano parametres_comex.ini
+```
+
+NB: The communityexplorer.org app was using a separate DB from legacy wiki csv (cf. master branch of the `moma/legacy_php_comex` repository)
+
+Finally, simply configure the serving of your php|www documentroot in nginx (cf [detailed doc](https://github.com/moma/regcomex/blob/master/doc/nginx_conf.md) for real-life conf).
 
 -------
 
