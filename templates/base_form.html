@@ -190,8 +190,15 @@
               <h3 class="formcat"> About your job and research </h3>
 
               <div class="question input-group">
-                <label for="jobtitle" class="smlabel input-group-addon">* Job Title</label>
-                <input id="jobtitle" name="jobtitle" maxlength="30"
+                <label for="hon_title" class="smlabel input-group-addon"> Title </label>
+                <input id="hon_title" name="hon_title" maxlength="30"
+                       type="text" class="form-control autocomp" placeholder="titre"
+                       onblur="makeBold(this)" onfocus="makeNormal(this)">
+              </div>
+
+              <div class="question input-group">
+                <label for="position" class="smlabel input-group-addon">* Job Title</label>
+                <input id="position" name="position" maxlength="30"
                        type="text" class="form-control autocomp" placeholder="titre"
                        onblur="makeBold(this)" onfocus="makeNormal(this)">
               </div>
@@ -210,16 +217,16 @@
 
               <div class="question">
                 <div class="input-group">
-                  <label for="institution" class="smlabel input-group-addon">* Parent Institution</label>
-                  <input id="institution" name="institution" maxlength="120"
+                  <label for="org" class="smlabel input-group-addon">* Parent Institution</label>
+                  <input id="org" name="org" maxlength="120"
                          type="text" class="form-control autocomp" placeholder='eg "CNRS" or "University of Oxford"'>
                 </div>
               </div>
 
               <div class="question">
                 <div class="input-group">
-                  <label for="institution_type" class="smlabel input-group-addon">* Institution Type</label>
-                  <select id="institution_type" name="institution_type"
+                  <label for="org_type" class="smlabel input-group-addon">* Institution Type</label>
+                  <select id="org_type" name="org_type"
                           class="custom-select form-control"
                           onchange="if(this.value=='other'){otherInstDivStyle.display = 'block'} else {otherInstDivStyle.display='none'}">
                     <option selected value="university">University</option>
@@ -234,10 +241,10 @@
                   </select>
                 </div>
                 <!-- Other institution type <=> only if previous choice == 5 -->
-                <div class="question conditional-q" id="other_institution_div">
+                <div class="question conditional-q" id="other_org_div">
                   <div class="input-group">
-                    <label for="other_institution_type" class="smlabel input-group-addon">Other type</label>
-                    <input id="other_institution_type" name="other_institution_type" maxlength="120"
+                    <label for="other_org_type" class="smlabel input-group-addon">Other type</label>
+                    <input id="other_org_type" name="other_org_type" maxlength="120"
                            type="text" class="form-control" placeholder="Clarify here the type of your parent institution">
                   </div>
                 </div>
@@ -255,8 +262,8 @@
               <!-- Lab city <=> only for France -->
               <div class="question conditional-q" id="team_city_div">
                 <div class="input-group">
-                  <label for="institution_city" class="smlabel input-group-addon">Lab city</label>
-                  <input id="institution_city" name="institution_city" maxlength="50"
+                  <label for="org_city" class="smlabel input-group-addon">Lab city</label>
+                  <input id="org_city" name="org_city" maxlength="50"
                          type="text" class="form-control" placeholder="Ville de votre institution">
                 </div>
               </div>
@@ -280,8 +287,25 @@
               </div>
             </div>
 
+            <div class="question">
+              <div class="input-group">
+                <label for="home_url" class="smlabel input-group-addon">Homepage</label>
+                <input id="home_url" name="home_url" maxlength="120"
+                       type="text" class="form-control autocomp" placeholder='eg "http://www.wittyexample.org/~me"'>
+              </div>
+            </div>
+
+            <div class="question">
+              <p class="legend">Link to a picture of yours...</p>
+              <div class="input-group">
+                <label for="pic_url" class="smlabel input-group-addon">Picture link</label>
+                <input id="pic_url" name="pic_url" maxlength="120"
+                       type="text" class="form-control autocomp" placeholder='eg "http://www.wittyexample.org/~me/my_great_pic.png"'>
+              </div>
+            </div>
+
             <div class="question" style="margin-bottom:.5em" >
-              <p class="legend">Upload a picture of yours (max source size: 200kB)</p>
+              <p class="legend">... or upload a picture (png, jpg or gif, max source size: 200kB)</p>
               <!-- <p class="legend">Upload a picture of yours (max source size: 4MB, then the image will be reduced to 200kB)</p> -->
               <div class="input-group">
                 <label for="pic_file" class="smlabel input-group-addon">Picture</label>
@@ -318,6 +342,28 @@
                           ></textarea>
               </div>
               <p class="legend">Optional, ~15 lines max (1200 chars)</p>
+            </div>
+
+            <div class="question">
+              <div class="input-group">
+                <label for="job_bool" class="smlabel input-group-addon">Looking for a job?</label>
+                <select id="job_bool" name="job_bool"
+                        class="custom-select form-control"
+                        onchange="if(this.value=='Yes'){jobLookingDivStyle.display = 'block'} else {jobLookingDivStyle.display='none';jobDate.value=''}">
+                  <option selected value="No" onclick="jobDate.value=''">No</option>
+                  <option value="Yes" onclick="jobLookingDivStyle.display = 'block'">Yes</option>
+                </select>
+              </div>
+              <!-- job_looking_date_div <=> only if previous choice == Yes -->
+              <div class="question conditional-q" id="job_looking_div">
+                <p class="legend">Until when are you interested in job offers like post-doc positions, etc. ? (YYYY/MM/DD)</p>
+                <div class="input-group">
+                  <label for="job_looking_date" class="smlabel input-group-addon">Job search limit</label>
+                  <input id="job_looking_date" name="job_looking_date" maxlength="10"
+                         type="text" class="form-control" placeholder="ex: 2019/09/30">
+                </div>
+                <p id="job_date_message" class="legend red" style="font-weight:bold"></p>
+              </div>
             </div>
 
             <!-- CNIL WARNING -->

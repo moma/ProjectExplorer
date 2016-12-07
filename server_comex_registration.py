@@ -4,16 +4,22 @@ Context:
     - templates-based input form validated fields and checked if all were present
       (base_form.html + static/js/comex_reg_form_controllers.js)
 
-    - Doors recorded the email + password combination
-        - POSSIBLE Doors validated the email was new ??
+    - Doors already validated and recorded the (email, password) combination
 
-    - exposed as "server_comex_registration.app" for the outside
+    - labels of SOURCE_FIELDS are identical to the name of their target COLS
+        - fields will land into the 3 main db tables:
+            - *scholars*
+            - *affiliations*
+            - *keywords* (and *sch_kw* mapping table)
+        - a few fields give no columns, for ex: "other_org_type"
+
+    - webapp is exposed as "server_comex_registration.app" for the outside
         - can be served in dev by python3 server_comex_registration.py
         - better to serve it via gunicorn (cf run.sh)
 """
 __author__    = "CNRS"
 __copyright__ = "Copyright 2016 ISCPIF-CNRS"
-__version__   = "1.2"
+__version__   = "1.3"
 __email__     = "romain.loth@iscpif.fr"
 __status__    = "Dev"
 
@@ -44,26 +50,76 @@ app.config['DEBUG'] = MY_DEBUG_FLAG
 
 ########### PARAMS ###########
 
-# all columns as they are declared in form & DB as tuple:
-#             NAME,               NOT NULL,  N or MAXCHARS (if applicable)
-COLS = [ ("doors_uid",              True,        36),
-         ("last_modified_date",     True,        24),   # ex 2016-11-16T17:47:07.308Z
+# all inputs as they are declared in form, as a couple
+SOURCE_FIELDS = [
+#             NAME,              SANITIZE?
+         ("doors_uid",             False  ),
+         ("last_modified_date",    False  ),   # ex 2016-11-16T17:47:07.308Z
+         ("email",                  True  ),
+         ("country",                True  ),
+         ("first_name",             True  ),
+         ("middle_name",            True  ),
+         ("last_name",              True  ),
+         ("initials",               True  ),
+         # => for *scholars* table
+
+         ("position",               True  ),
+         ("hon_title",              True  ),
+         ("interests_text",         True  ),
+         ("community_hashtags",     True  ),
+         ("gender",                 True  ),   # M|F
+         ("job_looking_date",       True  ),   # def null: not looking for a job
+         ("home_url",               True  ),   # scholar's homepage
+         ("pic_url",                True  ),
+         ("pic_file",              False  ),   # mediumblob
+         # => for *scholars* table (optional)
+
+         ("org",                    True  ),
+         ("org_type",              False  ),   # values are predefined for this
+         (  "other_org_type",       True  ),   # +=> org_type in read_record()
+         ("team_lab",               True  ),
+         ("org_city",               True  ),
+         # => for *affiliations* table
+
+         ("keywords",               True  )
+         # => for *keywords* table (after split str)
+      ]
+
+# NB password values have already been sent by ajax to Doors
+
+
+# sorted columns as declared in DB, as a tuple
+USER_COLS = [
+#          NAME,               NOT NULL,  N or MAXCHARS (if applicable)
+         ("doors_uid",              True,        36),
+         ("last_modified_date",     True,        24),
          ("email",                  True,       255),
-         ("initials",               True,         7),
          ("country",                True,        60),
          ("first_name",             True,        30),
          ("middle_name",           False,        30),
          ("last_name",              True,        50),
-         ("jobtitle",               True,        30),
-         ("keywords",               True,       350),
-         ("institution",            True,       120),
-         ("institution_type",       True,        50),
-         ("team_lab",              False,        50),
-         ("institution_city",      False,        50),
+         ("initials",               True,         7),
+         ("affiliation_id",        False,      None),   # from db_get_or_create_affiliation
+         ("position",              False,        30),
+         ("hon_title",             False,        30),
          ("interests_text",        False,      1200),
          ("community_hashtags",    False,       350),
-         ("gender",                False,         1),   # M|F
-         ("pic_file",              False,      None)]
+         ("gender",                False,         1),
+         ("job_looking_date",      False,        24),
+         ("home_url",              False,       120),
+         ("pic_url",               False,       120),
+         ("pic_file",              False,      None)
+      ]
+
+ORG_COLS = [
+         ("org",                    True,       120),
+         ("org_type",               True,        50),
+         ("team_lab",              False,       120),
+         ("org_city",              False,        50)
+    ]
+
+# mandatory minimum of keywords
+MIN_KW = 5
 
 
 # ============= views =============
@@ -74,13 +130,8 @@ COLS = [ ("doors_uid",              True,        36),
 
 # prefix must match what nginx conf expects
 ROUTE_PREFIX = "/regcomex"
-# ROUTE_PREFIX = "/"
-#
-# @app.route("/regcomex", methods=['GET','POST'])
-# def one_big_form2():
-#     one_big_form()
 
-@app.route("/regcomex/", methods=['GET','POST'])
+@app.route(ROUTE_PREFIX + "/", methods=['GET','POST'])
 def one_big_form():
     if request.method == 'GET':
         return render_template(
@@ -100,48 +151,67 @@ def one_big_form():
         # print(str(captcha_verifhash))
 
         if captcha_userhash != captcha_verifhash:
-            print("captcha rejected")
+            print("INFO: pb captcha rejected")
             form_accepted = False
 
         # normal case
         else:
-            # print("OK accepted")
+            print("INFO: ok form accepted")
             form_accepted = True
 
+            # only safe values
             clean_records = {}
-            pic_blob = None
+            kw_array = []
 
-            # 1) handles all the text/options inputs
-            (duuid, rdate, clean_records) = read_records(request.form)
+            # 1) handles all the inputs from form, no matter what target table
+            (duuid, rdate, kw_array, clean_records) = read_record(request.form)
 
             # 2) handles the pic_file if present
             if hasattr(request, "files") and 'pic_file' in request.files:
-                # it's a werkzeug.datastructures.FileStorage
-                pic = request.files['pic_file']
-                print("INFO: Storing a picture (%s)" % pic.filename)
-                pic_blob = pic.stream.read()
+                # type: werkzeug.datastructures.FileStorage.stream
+                pic_blob = request.files['pic_file'].stream.read()
+                if len(pic_blob) != 0:
+                    clean_records['pic_file'] = pic_blob
 
-            # 3) pass it on
-            # try:
-            # save to DB
-            save_to_db([duuid, rdate] + [clean_records.get(k[0], None) for k in COLS[2:-1]] + [pic_blob])
+            # 3) save to DB
+            try:
+                # A) DB config + connection
+                reg_db = connect(
+                    host=MY_SQL_HOST,
+                    user="root",   # TODO change db ownership to a comexreg user
+                    passwd="very-safe-pass",
+                    db="comex_shared"
+                )
 
-            # except Exception as perr:
-            #     return render_template("thank_you.html",
-            #                             records = clean_records,
-            #                             form_accepted = False,
-            #                             backend_error = True,
-            #                             message = ("ERROR ("+str(perr.__class__)+"):<br/>"
-            #                                         + ("<br/>".join(format_tb(perr.__traceback__)))
-            #                                         )
-            #                            )
+                # B) read/fill the affiliation table to get associated id
+                clean_records['affiliation_id'] = db_get_or_create_affiliation(clean_records, reg_db)
 
-        # TODO use MY_DEBUG_FLAG here
+                # C) create record into the primary user table
+                # ---------------------------------------------
+                db_save_scholar(duuid, rdate, clean_records, reg_db)
+
+                # D) read/fill each keyword and save the (uid <=> kwid) pairings
+                kwids = db_get_or_create_keywords(kw_array, reg_db)
+                db_save_pairs_sch_kw([(duuid, kwid) for kwid in kwids], reg_db)
+
+                # E) end connection
+                reg_db.close()
+
+            except Exception as perr:
+                return render_template("thank_you.html",
+                                        debug_records = clean_records,
+                                        form_accepted = False,
+                                        backend_error = True,
+                                        message = ("ERROR ("+str(perr.__doc__)+"):<br/>"
+                                                    + ("<br/>".join(format_tb(perr.__traceback__)+[repr(perr)]))
+                                                    )
+                                       )
+
         return render_template("thank_you.html",
-                                records = clean_records,
+                                debug_records = (clean_records if MY_DEBUG_FLAG else {}),
                                 form_accepted = True,
+                                backend_error = False,
                                 message = "")
-
 
 
 
@@ -174,7 +244,6 @@ def re_hash(userinput, salt="verylonverylongverylonverylongverylonverylong"):
     return hashk
 
 
-
 def sanitize(value):
     """
     simple and radical: leaves only alphanum and '.' '-' ':' ',' '(', ')', '#', ' '
@@ -194,20 +263,144 @@ def sanitize(value):
         san_typed_val = vtype(san_val)
         return san_typed_val
 
-def save_to_db(safe_recs_arr):
+
+def db_get_or_create_keywords(kw_list, comex_db):
     """
-    see COLS and table_specifications.md
-    see http://mysql-python.sourceforge.net/MySQLdb.html#some-examples
+        kw_str -> lookup/add to *keywords* table -> kw_id
+        -------------------------------------------------
+
+    kw_list is an array of strings
+
+    NB keywords are mandatory: each registration should provide at least MIN_KW
+
+
+    for loop
+       1) query to *keywords* table (exact match)
+       2) return id
+          => if a keyword matches return kwid
+          => if no keyword matches create new and return kwid
     """
 
-    # TODO double-check if email exists first
-    #   yes =>propose login via doors + overwrite ?)
-    #   no => proceed
+    db_cursor = comex_db.cursor()
+    found_ids = []
+    for kw_str in kw_list:
 
+        # TODO better string normalization here or in read_record
+        kw_str = kw_str.lower()
+
+        n_matched = db_cursor.execute('SELECT kwid FROM keywords WHERE kwstr = "%s"' % kw_str)
+
+        # ok existing keyword => row id
+        if n_matched == 1:
+            found_ids.append(db_cursor.fetchone()[0])
+
+        # no matching keyword => add => row id
+        elif n_matched == 0:
+            db_cursor.execute('INSERT INTO keywords(kwstr) VALUES ("%s")' % kw_str)
+            comex_db.commit()
+
+            if MY_DEBUG_FLAG:
+                print("DEBUG: Added keyword '%s'" % kw_str)
+
+            found_ids.append(db_cursor.lastrowid)
+
+        else:
+            raise Exception("ERROR: non-unique keyword '%s'" % kw_str)
+    return found_ids
+
+
+def db_save_pairs_sch_kw(pairings_list, comex_db):
+    """
+    Simply save all pairings (uid, kwid) in the list
+    """
+    db_cursor = comex_db.cursor()
+    for id_pair in pairings_list:
+        db_cursor.execute('INSERT INTO sch_kw VALUES %s' % str(id_pair))
+        comex_db.commit()
+        if MY_DEBUG_FLAG:
+            print("DEBUG: Keywords: saved %s pair" % str(id_pair))
+
+
+def db_get_or_create_affiliation(org_info, comex_db):
+    """
+    (parent organization + lab) ---> lookup/add to *affiliations* table -> affid
+
+    org_info should contain properties like in ORG_COLS names
+
+     1) query to *affiliations* table
+     2) return id
+        => TODO if institution almost matches send suggestion
+        => TODO unicity constraint on institution + lab
+        => if an institution matches return affid
+        => if no institution matches create new and return affid
+    """
+
+    the_aff_id = None
     db_tgtcols = []
-    # db_pyvals = []
     db_qstrvals = []
-    actual_len_dbg = 0
+    db_constraints = []
+
+    for colinfo in ORG_COLS:
+        colname = colinfo[0]
+        val = org_info.get(colname, None)
+
+        if val != None:
+             # TODO better string normalization but not lowercase for acronyms...
+            quotedstrval = "'"+str(val)+"'"
+
+            # for insert
+            db_tgtcols.append(colname)
+            db_qstrvals.append(quotedstrval)
+
+            # for select
+            if colname != 'org_type':
+                db_constraints.append("%s = %s" % (colname, quotedstrval))
+        else:
+            if colname != 'org_type':
+                db_constraints.append("%s IS NULL" % colname)
+
+    db_cursor = comex_db.cursor()
+
+    n_matched = db_cursor.execute(
+                    'SELECT affid FROM affiliations WHERE %s' %
+                                        " AND ".join(db_constraints)
+                )
+
+    # ok existing affiliation => row id
+    if n_matched == 1:
+        the_aff_id = db_cursor.fetchone()[0]
+        if MY_DEBUG_FLAG:
+            print("DEBUG: Found affiliation (affid %i) (WHERE %s)" % (the_aff_id, " AND ".join(db_constraints)))
+
+    # no matching affiliation => add => row id
+    elif n_matched == 0:
+        db_cursor.execute('INSERT INTO affiliations(%s) VALUES (%s)' % (
+                            ','.join(db_tgtcols),
+                            ','.join(db_qstrvals)
+                           )
+                         )
+        the_aff_id = db_cursor.lastrowid
+        comex_db.commit()
+        if MY_DEBUG_FLAG:
+            print("DEBUG: Added affiliation '%s'" % str(db_qstrvals))
+    else:
+        raise Exception("ERROR: non-unique affiliation '%s'" % str(db_qstrvals))
+
+    return the_aff_id
+
+
+def db_save_scholar(uid, date, safe_recs, reg_db):
+    """
+    Useful for new registration:
+      -> add to *scholars* table
+
+    see also COLS variable and doc/table_specifications.md
+    """
+
+    # we already have the first two columns
+    db_tgtcols = ['doors_uid', 'last_modified_date']
+    db_qstrvals = ["'"+str(uid)+"'", "'"+str(date)+"'"]
+    actual_len_dbg = 2
 
     # REMARK:
     # => In theory should be possible to execute(statment, values) to insert all
@@ -221,13 +414,11 @@ def save_to_db(safe_recs_arr):
     #    and then we execute(full_statmt)         :-)
 
 
-    # + we also filter ourselves
-    # ---------------------------
-    for i in range(len(COLS)):
-        col = COLS[i]
-        colname = col[0]
+    for colinfo in USER_COLS[2:]:
+        colname = colinfo[0]
+
         # NB: each val already contains no quotes because of sanitize()
-        val = safe_recs_arr[i]
+        val = safe_recs.get(colname, None)
 
         if val != None:
             actual_len_dbg += 1
@@ -235,14 +426,16 @@ def save_to_db(safe_recs_arr):
             if colname != 'pic_file':
                 quotedstrval = "'"+str(val)+"'"
             else:
+                print("picture file is len0?", len(val) == 0 )
                 # str(val) for a bin is already quoted but has the 'b' prefix
-                quotedstrval = '_binary'+str(val)[1:]
-                # print("DEBUG: added pic blob: " + quotedstrval[:15] + '...' + quotedstrval[-5:])
+                quotedstrval = '_binary'+str(val)[1:]  # TODO check if \x needs to land in target sql ?
+
+                if MY_DEBUG_FLAG:
+                    print("DEBUG: added pic blob: " + quotedstrval[:25] + '...' + quotedstrval[-10:])
 
             # anyways
             db_tgtcols.append(colname)
             db_qstrvals.append(quotedstrval)
-            # db_pyvals.append(val)
 
     # expected colnames "(doors_uid, last_modified_date, email, ...)"
     db_tgtcols_str = ','.join(db_tgtcols)
@@ -250,48 +443,38 @@ def save_to_db(safe_recs_arr):
     # fields converted to sql syntax
     db_vals_str = ','.join(db_qstrvals)
 
-    # DB is actually in a docker and forwarded to localhost:3306
-    reg_db = connect( host=MY_SQL_HOST,
-                      user="root",   # TODO change db ownership to a comexreg user
-                      passwd="very-safe-pass",
-                      db="comex_shared"
-                      )
-
     reg_db_c = reg_db.cursor()
 
     # full_statement with formated values
-    full_statmt = 'INSERT INTO comex_registrations (%s) VALUES (%s)' % (
+    full_statmt = 'INSERT INTO scholars (%s) VALUES (%s)' % (
                         db_tgtcols_str,
                         db_vals_str
                    )
 
     reg_db_c.execute(full_statmt)
     reg_db.commit()
-    reg_db.close()
 
 
-def read_records(incoming_data):
+def read_record(incoming_data):
     """
-    runs sanitization as needed
-
-    NB custom made for regcomex/templates/base_form
+    Runs sanitization + string normalization as needed
+      - custom made for regcomex/templates/base_form
+      - uses SOURCE_FIELDS
     """
 
     # init var
     clean_records = {}
-    # read in + sanitize values
-    # =========================
-    # NB password values have already been sent by ajax to Doors
 
+    # read in + sanitize values
     duuid = None
     rdate = None
 
     # we should have all the mandatory fields (checked in client-side js)
-    for field_info in COLS:
+    for field_info in SOURCE_FIELDS:
         field = field_info[0]
+        do_sanitize = field_info[1]
         if field in incoming_data:
-
-            if field not in ["doors_uid", "last_modified_date"]:
+            if do_sanitize:
                 val = sanitize(incoming_data[field])
                 if val != '':
                     clean_records[field] = val
@@ -305,11 +488,24 @@ def read_records(incoming_data):
             elif field == 'last_modified_date':
                 rdate = incoming_data[field]
 
-    # special treatment for "other" subquestions
-    if clean_records['institution_type'] == 'other' and 'other_institution_type' in incoming_data:
-        clean_records['institution_type'] = sanitize(incoming_data['other_institution_type'])
+            # any other fields that don't need sanitization (ex: menu options)
+            else:
+                clean_records[field] = incoming_data[field]
 
-    return (duuid, rdate, clean_records)
+    # special treatment for "other" subquestions
+    if clean_records['org_type'] == 'other' and 'other_org_type' in clean_records:
+        clean_records['org_type'] = clean_records['other_org_type']
+
+
+    # split for kw_array
+    kw_array = []
+    if 'keywords' in clean_records:
+        for kw in clean_records['keywords'].split(','):
+            kw = sanitize(kw)
+            if kw != '':
+                kw_array.append(kw)
+
+    return (duuid, rdate, kw_array, clean_records)
 
 
 

@@ -18,24 +18,33 @@
  */
 
 // the target columns in DB: tuple (name, mandatoryBool, maxChars (or nChars))
-var COLS = [ ["doors_uid",             false,        36,   'exact'],
+var COLS = [ ["doors_uid",              true,        36,   'exact'],
              ["last_modified_date",     true,        24,   'exact'],
              ["email",                  true,       255],
-             ["initials",               true,         7],
              ["country",                true,        60],
              ["first_name",             true,        30],
              ["middle_name",           false,        30],
              ["last_name",              true,        50],
-             ["jobtitle",               true,        30],
-             ["keywords",               true,       350],
-             ["institution",            true,       120],
-             ["institution_type",       true,        50],
-             ["team_lab",              false,        50],
-             ["institution_city",      false,        50],
+             ["initials",               true,         7],
+             ["position",              false,        30],
+             ["hon_title",             false,        30],
              ["interests_text",        false,      1200],
              ["community_hashtags",    false,       350],
              ["gender",                false,         1,   'exact'],
-             ["pic_file",              false,      null]]
+             ["job_looking_date",      false,        24,   'exact'],
+             ["home_url",              false,       120],
+             ["pic_url",               false,       120],
+             ["pic_file",              false,      null],
+             // ==> *scholars* table
+
+             ["keywords",               true,       350],
+             // ==> *keywords* table
+
+             ["org",                    true,       120],
+             ["org_type",               true,        50],
+             ["team_lab",              false,       120],
+             ["org_city",              false,        50]]
+             // ==> *affiliations* table
 
 // vars that will be used during the interaction
 // NB other vars defined in main scope but just before their respective funs
@@ -46,6 +55,9 @@ var theForm = document.getElementById('comex_reg_form')
 var regTimestamp = document.getElementById('last_modified_date')
 var uidInput = document.getElementById('doors_uid')
 var email = document.getElementById('email')
+
+// dates up to 2049/12/31
+var validDate = new RegExp( /^20[0-4][0-9]\/(?:0?[1-9]|1[0-2])\/(?:0?[1-9]|[1-2][0-9]|3[0-1])$/)
 
 // str of the form: doors_hostname:doors_port
 var doorsConnectParam = document.getElementById('doors_connect').value
@@ -58,7 +70,8 @@ var captchaCheck = document.getElementById('my-captchaHash')
 var subPage1Style = document.getElementById('subpage_1').style
 var subPage2Style = document.getElementById('subpage_2').style
 var teamCityDivStyle = document.getElementById('team_city_div').style
-var otherInstDivStyle = document.getElementById('other_institution_div').style
+var otherInstDivStyle = document.getElementById('other_org_div').style
+var jobLookingDivStyle = document.getElementById('job_looking_div').style
 
 // param for generation & validation
 var realCaptchaLength = 5
@@ -78,6 +91,7 @@ var doorsMessage = document.getElementById('doors_ret_message')
 var passStatus = false
 var emailStatus = false
 var captchaStatus = false
+var jobLookingDateStatus = false
 submitButton.disabled = true
 theForm.onkeyup = testAsYouGo
 theForm.onchange = testAsYouGo
@@ -97,11 +111,10 @@ function testAsYouGo() {
 
   captchaStatus = (captcha.value.length == realCaptchaLength)
 
-  // for debug
   checkPassStatus()
+  checkJobDateStatus()
 
-  // TODO all other mandatory fields should be checked here
-  if (passStatus && emailStatus && captchaStatus) {
+  if (passStatus && emailStatus && captchaStatus && jobLookingDateStatus) {
       submitButton.disabled = false
   }
   else {
@@ -369,13 +382,17 @@ function validateAndMsg() {
     submitButton.disabled = true
     mainMessage.style.display = 'block'
 
-    // objectify the form
-    wholeFormData = new FormData(theForm);
-
     var valid = true
 
     // TODO pass mainMessage ref as arg
     mainMessage.innerHTML = "Validating the form..."
+
+    // also reformat the jobDate from "YYYY/MM/DD" to ISO
+
+    if (jobDate.value.length) jobDate.value = (new Date(jobDate.value)).toISOString()
+
+    // objectify the form
+    wholeFormData = new FormData(theForm);
 
     var missingFields = []
     var toolongFields = []
@@ -406,7 +423,7 @@ function validateAndMsg() {
       }
 
       // test length --------------------
-      else if (actualValue != null) {
+      else if (mandatory || (actualValue != null && actualValue != "")) {
 
           if (isExactN) {
               // should never happen => trigger error
@@ -454,6 +471,9 @@ function validateAndMsg() {
       }
 
       // length is handled by each input's maxlength
+
+      // re change the jobDate from ISO to YYYY/MM/DD
+      if (jobDate.value.length) jobDate.value = jobDate.value.slice(0,10).replace(/-/g,"/")
 
       // display (TODO setTimeout and fade)
       mainMessage.innerHTML = errorMessage
@@ -588,11 +608,11 @@ nameInputs.forEach ( function(nameInput) {
           if(/[A-Z]/.test(txt)) {
             var capsArr = txt.match(/[A-Z]/g)
             for (var i in capsArr) {
-              apparentInitials += capsArr[i] + '.'
+              apparentInitials += capsArr[i]
             }
           }
           else {
-            apparentInitials += txt.charAt(0) + '.'
+            apparentInitials += txt.charAt(0)
           }
         }
       }) ;
@@ -633,22 +653,6 @@ var pass2 = document.getElementById('password2')
 var passMsg = document.getElementById('password_message')
 var passwords = [pass1, pass2]
 
-
-// £DEBUG autofill ----------->8------
-// fName.value = "Jean"
-// lName.value = "Tartampion"
-// initialsInput.value="JPP"
-// document.getElementById('country').value = "France"
-// email.value= makeRandomString(7)+"@om.fr"
-// pass1.value="123456+789"
-// pass2.value="123456+789"
-// document.getElementById('jobtitle').value = "atitle"
-// document.getElementById('keywords').value = "Blabla"
-// document.getElementById('institution').value = "CNRS"
-// basicEmailValidate(email.value)
-// --------------------------->8------
-
-
 passwords.forEach ( function(pass) {
   // could also be attached to form onchange but then called often for nothing
   pass.onkeyup = checkPassStatus
@@ -686,7 +690,29 @@ function checkPassStatus() {
   }
   if (!passStatus) passMsg.style.color = colorRed
   else             passMsg.style.color = colorGreen
+}
+
+
+
+// jobLookingDateStatus ~~~> is job date a valid date?
+var jobBool = document.getElementById('job_bool')
+var jobDate = document.getElementById('job_looking_date')
+var jobDateMsg = document.getElementById('job_date_message')
+
+jobDate.onkeyup = checkJobDateStatus
+jobDate.onchange = checkJobDateStatus
+
+function checkJobDateStatus() {
+  jobLookingDateStatus = (jobBool.value == "No" || validDate.test(jobDate.value))
+  if (!jobLookingDateStatus) {
+      jobDateMsg.style.color = colorRed
+      jobDateMsg.innerHTML = 'Date is not yet in the valid format YYYY/MM/DD'
   }
+  else {
+      jobDateMsg.style.color = colorGreen
+      jobDateMsg.innerHTML = 'Ok valid date!'
+  }
+}
 
 
 
@@ -725,13 +751,27 @@ $(function() {
 });
 
 
+// autocomplete hon_title
+$(function() {
+  var $hontitlesInput = $('#hon_title')
+
+  var hontitlesList = ["Student", "PhD Student", "Doctor"]
+
+  $hontitlesInput.autocomplete({
+      source: hontitlesList,
+      autoFocus: true,
+      select:   function( event, ui ) {
+        $hontitlesInput[0].style.fontWeight = "bold"
+      }
+  });
+});
+
+
 // autocomplete position
 $(function() {
-  var $jobtitlesInput = $('#jobtitle')
+  var $jobtitlesInput = $('#position')
 
-  var jobtitlesList = ["Student", "Engineer", "capetown",
-                       "PhD Student", "Dr", "Post-Doc",
-                       "Lecturer", "Associate Professor", "Professor",
+  var jobtitlesList = ["Engineer", "Lecturer", "Associate Professor", "Professor",
                        "Research Fellow", "Research Director", "Chairman"]
 
   $jobtitlesInput.autocomplete({
@@ -744,9 +784,10 @@ $(function() {
   });
 });
 
+
 // autocomplete institution
 $(function() {
-  var $institutionInput = $('#institution')
+  var $orgInput = $('#org')
 
   var orgList = [
     "Centre National de la Recherche Scientifique (CNRS)",
@@ -897,7 +938,7 @@ $(function() {
     "Institute of Computer Science of Czech Republic (AV ČR)",
     "Institute for Condensed Matter Physics of the National Academy of Sciences of Ukraine (ICMP)",]
 
-  $institutionInput.autocomplete({
+  $orgInput.autocomplete({
       source: orgList,
       autoFocus: true,
       select:   function( event, ui ) {
@@ -906,7 +947,7 @@ $(function() {
           // not tab because used to move on to next field
           if(event.keyCode == 9) return false;
 
-          $institutionInput[0].style.fontWeight = "bold"
+          $orgInput[0].style.fontWeight = "bold"
       }
   });
 });
@@ -1283,3 +1324,17 @@ $(function() {
 });
 
 console.log("load OK")
+
+// £DEBUG autofill ----------->8------
+fName.value = "Jean"
+lName.value = "Tartampion"
+initialsInput.value="JPP"
+document.getElementById('country').value = "France"
+email.value= makeRandomString(7)+"@om.fr"
+pass1.value="123456+789"
+pass2.value="123456+789"
+document.getElementById('position').value = "atitle"
+document.getElementById('keywords').value = "Blabla"
+document.getElementById('org').value = "CNRS"
+basicEmailValidate(email.value)
+// --------------------------->8------

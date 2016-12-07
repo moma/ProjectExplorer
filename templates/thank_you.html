@@ -82,8 +82,8 @@
       <div class="spacer col-sm-1 col-md-1">&nbsp;</div>
       <div class="raw-responses col-sm-8 col-md-8" style="font-family:Calibri, sans-serif">
         <h3>debug</h3>
-        {% for key in records %}
-          <p> {{key}} {{records[key]}} </p>
+        {% for key in debug_records %}
+          <p> {{key}} {{debug_records[key]}} </p>
         {% endfor %}
 
         <p style="font-family: monospace; font-weight: bold">
