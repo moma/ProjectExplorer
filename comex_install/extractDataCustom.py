@@ -1,27 +1,29 @@
-from sqlite3   import connect, Row
+from MySQLdb   import connect, cursors
 from networkx  import Graph, DiGraph
 from random    import randint
 from math      import floor
 from cgi       import escape
 from converter import CountryConverter
 from pprint    import pprint
-# from json      import loads  # for external FA2
 
-class extract:
 
-    def __init__(self,dbpath):
-        self.connection=connect(dbpath)
-        print("sqlite3 connected:", self.connection)
-        self.connection.row_factory = Row# Magic line!
-        self.cursor=self.connection.cursor()
-        print("sqlite3 gotcursor:", self.cursor)
+class MyExtractor:
+
+    def __init__(self,dbhost):
+        self.connection=connect(
+            host=dbhost, db="comex_shared",
+            user="root", passwd="very-safe-pass"
+        )
+        print("MySQL connected:", self.connection)
+        self.cursor=self.connection.cursor(cursors.DictCursor)
+        print("MySQL gotcursor:", self.cursor)
         self.scholars = {}
         self.scholars_colors = {}
         self.terms_colors = {}
         self.Graph = DiGraph()
         self.min_num_friends=0
         self.imsize=80
-        self.terms_array = {}
+        self.terms_dict = {}
         self.unique_id = {}
 
 
@@ -41,29 +43,57 @@ class extract:
                 if idflag:
                     ID=i
                     idflag=False
-                if isinstance(i, (long, int)):
+                if i is None:
+                    continue
+                elif isinstance(i, int):
                     suma+=1
                 else: suma+=len(i)
         return suma
 
 
     def getScholarsList(self,qtype,query):
+        # debug
+        # print("getScholarsList<============")
+        # print("qtype", qtype)
+        # print("query", query)
+
+        # remove quotes from id
+        unique_id = query[1:-1]
         scholar_array = {}
         sql1=None
         sql2=None
         if qtype == "unique_id":
             try:
-                sql1="SELECT * FROM scholars where unique_id='"+query+"'"
+                # old way
+                # sql1="SELECT * FROM scholars WHERE doors_uid='"+unique_id+"'"
+
+                # TODO this query brings back doors_uid and keywords_ids
+                #      as the old way used to do, but with keywords scholar index
+                #      we won't need STR_keywords_ids anymore
+                sql1="""
+                SELECT
+                        doors_uid,
+                        COUNT(keywords.kwid) AS nb_keywords,
+                        GROUP_CONCAT(keywords.kwid) AS keywords_ids
+                FROM scholars
+                JOIN sch_kw ON doors_uid = uid
+                JOIN keywords ON sch_kw.kwid = keywords.kwid
+                WHERE doors_uid = "%s"
+                GROUP BY doors_uid
+                """ % unique_id
 
                 STR_keywords_ids = ""
 
                 self.cursor.execute(sql1)
                 results=self.cursor.fetchall()
 
-                if len(results)==0: return []
+                print("getScholarsList<==len(results) =", len(results))
+
+                if len(results)==0:
+                    return []
 
                 if len(results)==1:
-                    self.unique_id = { query : "D::"+str(results[0]["id"]) }
+                    self.unique_id = { unique_id : "D::"+str(results[0]["doors_uid"][0:8]) }
                     STR_keywords_ids = results[0]["keywords_ids"]
 
                 # [ Solving duplicates ]
@@ -77,20 +107,23 @@ class extract:
 
                     candidates = sorted(candidates, key=lambda candit: candit[1], reverse=True)
                     print("candidates:",candidates)
-                    self.unique_id = { query : "D::"+str(candidates[0][0]) }
+                    self.unique_id = { unique_id : "D::"+str(candidates[0]["doors_uid"][0:8]) }
                     STR_keywords_ids = candidates[0][2]
 
                 # [ / Solving duplicates ]
 
                 keywords_ids = STR_keywords_ids.split(',')
                 for keywords_id in keywords_ids:
+                    # debug
+                    # print("kwid >> ", keywords_id)
+
                     if keywords_id != "":
-                        sql2 = "SELECT * FROM scholars2terms where term_id="+keywords_id
+                        sql2 = "SELECT * FROM sch_kw where kwid="+keywords_id
                         try:
                             self.cursor.execute(sql2)
                             res2=self.cursor.fetchone()
                             while res2 is not None:
-                                scholar_array[res2['scholar']]=1
+                                scholar_array[res2['uid']]=1
                                 res2=self.cursor.fetchone()#res2++
                         except Exception as error:
                             print("sql2:\t"+sql2)
@@ -106,6 +139,8 @@ class extract:
                     print("sql2:\t"+sql2)
                 print(error)
 
+
+        # TODO fix ('refine' button)
         if qtype == "filter":
             try:
                 self.cursor.execute(query)
@@ -126,44 +161,63 @@ class extract:
         """
         Adding each connected scholar per unique_id
         """
+        # debug
+        # print("MySQL extract scholar_array:", scholar_array)
+
         for scholar_id in scholar_array:
-            sql3='SELECT * FROM scholars where unique_id="'+scholar_id+'"'
+            sql3='''
+                    SELECT
+                        scholars.*,
+                        affiliations.*,
+                        COUNT(keywords.kwid) AS keywords_nb,
+                        GROUP_CONCAT(keywords.kwid) AS keywords_ids,
+                        GROUP_CONCAT(kwstr) AS keywords_list
+                    FROM scholars
+                    JOIN sch_kw
+                        ON doors_uid = uid
+                    JOIN keywords
+                        ON sch_kw.kwid = keywords.kwid
+                    LEFT JOIN affiliations
+                        ON affiliation_id = affid
+                    WHERE doors_uid = "%s"
+                    GROUP BY doors_uid ;
+            ''' % scholar_id
 
             # debug
             # print("db.extract: sql3="+sql3)
 
             try:
                 self.cursor.execute(sql3)
-                res3=self.cursor.fetchall()
-                n=len(res3)#in the DB, there are unique_ids duplicated
+                res3=self.cursor.fetchone()
                 info = {};
-                #With (n-1) we're fetching only the last result.
-                ide="D::"+str(res3[n-1]['id']);
+                # POSS: semantic short ID
+                # ex "D::JFK/4913d6c7"
+
+                # for now we use uid substring [0:8]
+                # ex ide="D::4913d6c7"
+                ide="D::"+res3['doors_uid'][0:8];
                 info['id'] = ide;
-                info['unique_id'] = res3[n-1]['unique_id'];
-                info['photo_url'] = res3[n-1]['photo_url'];
-                info['first_name'] = res3[n-1]['first_name'];
-                info['initials'] = res3[n-1]['initials'];
-                info['last_name'] = res3[n-1]['last_name'];
-                info['nb_keywords'] = res3[n-1]['nb_keywords'];
-                info['css_voter'] = res3[n-1]['css_voter'];
-                info['css_member'] = res3[n-1]['css_member'];
-                info['keywords_ids'] = res3[n-1]['keywords_ids'].split(',');
-                info['keywords'] = res3[n-1]['keywords'];
-                info['country'] = res3[n-1]['country'];
-                info['ACR'] = res3[n-1]['affiliation_acronym']
-                #info['CC'] = res3[n-1]['norm_country'];
-                info['homepage'] = res3[n-1]['homepage'];
-                info['lab'] = res3[n-1]['lab'];
-                info['affiliation'] = res3[n-1]['affiliation'];
-                info['lab2'] = res3[n-1]['lab2'];
-                info['affiliation2'] = res3[n-1]['affiliation2'];
-                info['homepage'] = res3[n-1]['homepage'];
-                info['title'] = res3[n-1]['title'];
-                info['position'] = res3[n-1]['position'];
-                info['job_market'] = res3[n-1]['job_market'];
-                info['login'] = res3[n-1]['login'];
-                if info['nb_keywords']>0:
+                info['doors_uid'] = res3['doors_uid'];
+                info['pic_url'] = res3['pic_url'];
+                info['first_name'] = res3['first_name'];
+                info['mid_initial'] = res3['middle_name'][0] if res3['middle_name'] else ""       # TODO adapt usage
+                info['last_name'] = res3['last_name'];
+                info['keywords_nb'] = res3['keywords_nb'];
+                info['keywords_ids'] = res3['keywords_ids'].split(',');
+                info['keywords_list'] = res3['keywords_list'];
+                info['country'] = res3['country'];
+                # info['ACR'] = res3['org_acronym']       # TODO create
+                #info['CC'] = res3['norm_country'];
+                info['home_url'] = res3['home_url'];
+                info['team_lab'] = res3['team_lab'];
+                info['org'] = res3['org'];
+                # info['lab2'] = res3['lab2'];                 # TODO restore
+                # info['affiliation2'] = res3['affiliation2'];
+                info['hon_title'] = res3['hon_title'] if res3['hon_title'] else ""
+                info['position'] = res3['position'];
+                info['job_looking_date'] = res3['job_looking_date'];
+                info['email'] = res3['email'];
+                if info['keywords_nb']>0:
                     self.scholars[ide] = info;
 
             except Exception as error:
@@ -179,7 +233,7 @@ class extract:
         scholarsIncluded = 0;
 
         for i in self.scholars:
-            self.scholars_colors[self.scholars[i]['login'].strip()]=0;
+            self.scholars_colors[self.scholars[i]['email'].strip()]=0;
             scholar_keywords = self.scholars[i]['keywords_ids'];
             for k in range(len(scholar_keywords)):
                 kw_k = scholar_keywords[k]
@@ -205,55 +259,52 @@ class extract:
                                 termsMatrix[kw_k]['cooc'][kw_l] += 1
                             else:
                                 termsMatrix[kw_k]['cooc'][kw_l] = 1;
-        sql='select login from jobs';
-        for res in self.cursor.execute(sql):
-            if res['login'].strip() in self.scholars_colors:
-                self.scholars_colors[res['login'].strip()]+=1;
 
-#    sql="SELECT term,id,occurrences FROM terms"
-#    #self.cursor.execute(sql)
-#    cont=0
-#
-##    for t in termsMatrix:
-##        if cont==0:
-##            sql+=' where id='+t
-##            cont+=1
-##        else: sql+=' or id='+t
-##    print("before crash")
-##    print(sql)
-##    print("nb terms:",len(termsMatrix))
+        # TODO restore job snippet 1
+        # sql='select login from jobs';
+        # for res in self.cursor.execute(sql):
+        #     if res['login'].strip() in self.scholars_colors:
+        #         self.scholars_colors[res['login'].strip()]+=1;
 
-        query = "SELECT term,id,occurrences FROM terms WHERE id IN "
+        # TODO add occurrences ?
+        # query = "SELECT kwstr,kwid,occurrences FROM keywords WHERE kwid IN "
+        query = "SELECT kwstr,kwid FROM keywords WHERE kwid IN "
         conditions = ' (' + ','.join(sorted(list(termsMatrix))) + ')'
 
         # debug
-        # print("SQL query ===============================")
-        # print(query+conditions)
-        # print("/SQL query ==============================")
-        for res in self.cursor.execute(query+conditions):
-            idT = res['id']
+        print("SQL query ===============================")
+        print(query+conditions)
+        print("/SQL query ==============================")
+
+        self.cursor.execute(query+conditions)
+        results4 = self.cursor.fetchall()
+
+        for res in results4:
+            idT = res['kwid']
             info = {}
-            info['id'] = idT
-            info['occurrences'] = res['occurrences']
-            info['term'] = res['term']
-            self.terms_array[idT] = info
+            info['kwid'] = idT
+            # info['occurrences'] = res['occurrences']  # TODO add occurrences ?
+            info['kwstr'] = res['kwstr']
+            self.terms_dict[idT] = info
         count=1
 
-        for term in self.terms_array:
+        for term in self.terms_dict:
             self.terms_colors[term]=0
 
-        sql='select term_id from jobs2terms'
-        for row in self.cursor.execute(sql):
-            if row['term_id'] in self.terms_colors:
-                self.terms_colors[row['term_id']]+=1
+        # TODO restore job snippet 2
+        # sql='select term_id from jobs2terms'
+        # for row in self.cursor.execute(sql):
+        #     if row['term_id'] in self.terms_colors:
+        #         self.terms_colors[row['term_id']]+=1
 
         cont=0
-        for term in self.terms_array:
-            #sql="SELECT scholar FROM scholars2terms where term_id='"+str(term)+"'";
-            sql="SELECT scholars.id FROM scholars,scholars2terms where term_id='"+str(term)+"' and scholars.unique_id=scholars2terms.scholar"
+        for term_id in self.terms_dict:
+            sql="SELECT uid FROM sch_kw WHERE kwid=%i" % term_id
             term_scholars=[]
-            for row in self.cursor.execute(sql):
-                term_scholars.append("D::"+str(row['id']))
+            self.cursor.execute(sql)
+            rows = self.cursor.fetchall()
+            for row in rows:
+                term_scholars.append("D::"+row['uid'][0:8])
 
             for k in range(len(term_scholars)):
                 if term_scholars[k] in scholarsMatrix:
@@ -298,15 +349,17 @@ class extract:
                             self.Graph.add_edge( source , target , {'weight':1,'type':"bipartite"})
                             #Some bipartite relations are missing (just the 1%)
 
-        for term in self.terms_array:
-            nodeId1 = self.terms_array[term]['id'];
+        for term in self.terms_dict:
+            nodeId1 = self.terms_dict[term]['kwid'];
             if str(nodeId1) in termsMatrix:
                 neighbors = termsMatrix[str(nodeId1)]['cooc'];
                 for i, neigh in enumerate(neighbors):
                     if neigh != str(term):
                         source="N::"+str(term)
                         target="N::"+neigh
-                        weight=neighbors[str(neigh)]/float(self.terms_array[term]['occurrences'])
+                        # TODO restore keywords.occurrences
+                        # weight=neighbors[str(neigh)]/float(self.terms_dict[term]['occurrences'])
+                        weight=neighbors[str(neigh)]
                         self.Graph.add_edge( source , target , {'weight':weight,'type':"nodes2"})
 
         for scholar in self.scholars:
@@ -356,11 +409,11 @@ class extract:
         for idNode in graph.nodes_iter():
             if idNode[0]=="N":#If it is NGram
                 numID=int(idNode.split("::")[1])
-                # print("DBG terms_array:", self.terms_array)
+                # print("DBG terms_dict:", self.terms_dict)
                 try:
-                    nodeLabel= self.terms_array[numID]['term'].replace("&"," and ")
+                    nodeLabel= self.terms_dict[numID]['term'].replace("&"," and ")
                     colorg=max(0,180-(100*self.terms_colors[numID]))
-                    term_occ = self.terms_array[numID]['occurrences']
+                    term_occ = self.terms_dict[numID]['occurrences']
 
                 except KeyError:
                     print("WARN: couldn't find label and meta for term " + str(numID))
@@ -383,42 +436,51 @@ class extract:
                 nodesB+=1
 
             if idNode[0]=='D':#If it is Document
-                nodeLabel= self.scholars[idNode]['title']+" "+self.scholars[idNode]['first_name']+" "+self.scholars[idNode]['initials']+" "+self.scholars[idNode]['last_name']
+                nodeLabel= self.scholars[idNode]['hon_title']+" "+self.scholars[idNode]['first_name']+" "+self.scholars[idNode]['mid_initial']+" "+self.scholars[idNode]['last_name']
                 color=""
-                if self.scholars_colors[self.scholars[idNode]['login']]==1:
+                if self.scholars_colors[self.scholars[idNode]['email']]==1:
                     color='243,183,19'
-                elif self.scholars[idNode]['job_market'] == "Yes":
+
+                # TODO test the date
+                elif self.scholars[idNode]['job_looking_date'] is not None:
                     color = '139,28,28'
                 else:
                     color = '78,193,127'
 
                 content=""
-                photo_url=self.scholars[idNode]['photo_url']
-                if photo_url != "":
-                    content += '<img  src=http://main.csregistry.org/' + photo_url + ' width=' + str(self.imsize) + 'px  style=float:left;margin:5px>';
+                pic_url=self.scholars[idNode]['pic_url']
+
+                # TODO double case pic_url or pic_file
+                if pic_url and pic_url != "":
+                    content += '<img  src="'+pic_url+'" width=' + str(self.imsize) + 'px  style=float:left;margin:5px>';
                 else:
                     if len(self.scholars)<2000:
                         im_id = int(floor(randint(0, 11)))
-                        content += '<img src=http://communityexplorer.org/img/'  + str(im_id) +  '.png width='  + str(self.imsize) +  'px   style=float:left;margin:5px>'
+                        content += '<img src="img/'+str(im_id)+'.png" width='  + str(self.imsize) +  'px   style=float:left;margin:5px>'
 
                 content += '<b>Country: </b>' + self.scholars[idNode]['country'] + '</br>'
 
-                if self.scholars[idNode]['position'] != "":
+                if self.scholars[idNode]['position'] and self.scholars[idNode]['position'] != "":
                     content += '<b>Position: </b>' +self.scholars[idNode]['position'].replace("&"," and ")+ '</br>'
 
                 affiliation=""
-                if self.scholars[idNode]['lab'] != "":
-                    affiliation += self.scholars[idNode]['lab']+ ','
-                if self.scholars[idNode]['affiliation'] != "":
-                    affiliation += self.scholars[idNode]['affiliation']
-                if self.scholars[idNode]['affiliation'] != "" or self.scholars[idNode]['lab'] != "":
-                    content += '<b>Affiliation: </b>' + affiliation.replace("&"," and ") + '</br>'
-                if len(self.scholars[idNode]['keywords']) > 3:
-                    content += '<b>Keywords: </b>' + self.scholars[idNode]['keywords'][:-2].replace(",",", ")+'.</br>'
-                if self.scholars[idNode]['homepage'][0:3] == "www":
-                    content += '[ <a href=http://' +self.scholars[idNode]['homepage'].replace("&"," and ")+ ' target=blank > View homepage </a ><br/>]'
-                elif self.scholars[idNode]['homepage'][0:4] == "http":
-                    content += '[ <a href=' +self.scholars[idNode]['homepage'].replace("&"," and ")+ ' target=blank > View homepage </a >]<br/>'
+                if self.scholars[idNode]['team_lab'] and self.scholars[idNode]['team_lab'] != "":
+                    affiliation += self.scholars[idNode]['team_lab']+ ','
+                if self.scholars[idNode]['org'] and self.scholars[idNode]['org'] != "":
+                    affiliation += self.scholars[idNode]['org']
+
+                # TODO restore if not redundant with org
+                # if self.scholars[idNode]['affiliation'] != "" or self.scholars[idNode]['lab'] != "":
+                #     content += '<b>Affiliation: </b>' + affiliation.replace("&"," and ") + '</br>'
+
+                if len(self.scholars[idNode]['keywords_list']) > 3:
+                    content += '<b>Keywords: </b>' + self.scholars[idNode]['keywords_list'].replace(",",", ")+'.</br>'
+
+                if self.scholars[idNode]['home_url']:
+                    if self.scholars[idNode]['home_url'][0:3] == "www":
+                        content += '[ <a href=http://' +self.scholars[idNode]['home_url'].replace("&"," and ")+ ' target=blank > View homepage </a ><br/>]'
+                    elif self.scholars[idNode]['home_url'][0:4] == "http":
+                        content += '[ <a href=' +self.scholars[idNode]['home_url'].replace("&"," and ")+ ' target=blank > View homepage </a >]<br/>'
 
 
                 node = {}
@@ -435,7 +497,9 @@ class extract:
                 else: node["CC"]="-"
 
                 # Affiliation
-                node["ACR"] = self.scholars[idNode]["ACR"]
+                # TODO restore with org_acronym
+                # node["ACR"] = self.scholars[idNode]["ACR"]
+                node["ACR"] = self.scholars[idNode]["org"]
                 if node["ACR"]=="": node["ACR"]="-"
 
                 node["term_occ"] = "12"

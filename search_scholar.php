@@ -21,7 +21,7 @@ $q = "%".sanitize_input($login)."%";
 
 $query = 'concat(first_name, " ", IFNULL(middle_name,""), " ", last_name) LIKE "%'.$q.'%"';
 
-$req = "SELECT doors_uid, email, first_name, last_name, keywords FROM comex_registrations WHERE ".$query." GROUP BY doors_uid";
+$req = "SELECT doors_uid, first_name, middle_name, last_name FROM scholars WHERE ".$query." GROUP BY doors_uid";
 // echo "req: ".$req.";";
 $results = array();
 $i = 0;

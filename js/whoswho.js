@@ -189,7 +189,7 @@ $(document).ready(function() {
           hide(".hero-unit");
           return $("#welcome").fadeOut("slow", function() {
             show("#loading", "fast");
-            return window.location.href="explorerjs.html?nodeidparam=" + ui.item.id;
+            return window.location.href='explorerjs.html?type="uid"&nodeidparam="' + ui.item.id + '"';
             //return loadGraph("get_scholar_graph.php?login=" + ui.item.id);
           });
         });
@@ -239,7 +239,7 @@ $(document).ready(function() {
     return $("#welcome").fadeOut("slow", function() {
       show("#loading", "fast");
       return collectFilters(function(query) {
-        return window.location.href="explorerjs.html?nodeidparam=" + query;
+        return window.location.href='explorerjs.html?type="filter"&nodeidparam="' + query +'"';
         //return loadGraph("getgraph.php?query=" + query);
       });
     });

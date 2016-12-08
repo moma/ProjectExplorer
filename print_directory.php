@@ -117,7 +117,9 @@ $query_details='<ul>';
 $f = "";// requête
 $labfilter='';
 if ($tags) {
-    echo '<p style="color:white">MATCHING ON tags<p>';
+    // debug
+    // echo '<p style="color:white">MATCHING ON tags<p>';
+
 	if (sizeof($tags) > 0) {
 		$f .= 'AND (';
 	}
@@ -139,8 +141,10 @@ if ($tags) {
 }
 
 if ($keywords) {
-    echo '<p style="color:white">MATCHING ON keywords<p>';
-	if (sizeof($keywords) > 0) {
+    // debug
+    // echo '<p style="color:white">MATCHING ON keywords<p>';
+
+    if (sizeof($keywords) > 0) {
 		$f .= 'AND (';
 	}
         $query_details.='<li><strong>Working on: </strong>';
@@ -153,15 +157,17 @@ if ($keywords) {
                         $query_details.=$word.', ';
 			if ($i > 0)
 				$f .= " OR ";
-			$f .= 'keywords LIKE "%' . $word . '%" ';
+			$f .= 'keywords_list LIKE "%' . $word . '%" ';
 			$i++;
 		}
 	}
 	$f .= ")  ";
 }
 if ($countries) {
-    echo '<p style="color:white">MATCHING ON countries<p>';
-	if (sizeof($countries) > 0) {
+    // debug
+    // echo '<p style="color:white">MATCHING ON countries<p>';
+
+    if (sizeof($countries) > 0) {
 		$f .= 'AND (';
 	}
         $query_details.='<li><strong>In the following country: </strong>';
@@ -179,7 +185,8 @@ if ($countries) {
 	$f .= ")  ";
 }
 if ($laboratories) {
-    echo '<p style="color:white">MATCHING ON labs<p>';
+    // debug
+    // echo '<p style="color:white">MATCHING ON labs<p>';
 	if (sizeof($laboratories) > 0) {
 		$f .= 'AND (';
 	}
@@ -198,8 +205,10 @@ if ($laboratories) {
 }
 
 if ($organizations) {
-    echo '<p style="color:white">MATCHING ON organizations<p>';
-	if (sizeof($organizations) > 0) {
+    // debug
+    // echo '<p style="color:white">MATCHING ON organizations<p>';
+
+    if (sizeof($organizations) > 0) {
 		$f .= 'AND (';
 	}
         $query_details.='<li><strong>In the organization named : </strong>';
@@ -210,7 +219,7 @@ if ($organizations) {
 
 		if ($org == "") continue;
                 $query_details.=$org.', ';
-		$f .= 'institution LIKE "%' . $org . '%" ';
+		$f .= 'org LIKE "%' . $org . '%" ';
                 //'affiliation LIKE "%' . $org . '% OR affiliation2 LIKE "%' . $org . '%"';
 		$i++;
 	}
@@ -236,14 +245,36 @@ $imsize = 150;
 
 $content='';
 
-if (strlen($f)>0){
-$sql = "SELECT * FROM comex_registrations where " . " " . $f.' ORDER BY last_name';
-}else{
-    $sql = "SELECT * FROM comex_registrations ORDER BY last_name";
+// filtered query
+if (strlen($f)>0) {
+    $filter = "WHERE {$f}";
 }
+// unfiltered query
+else {
+    $filter = "";
+}
+$sql = <<< END_QUERY
+SELECT * FROM
+    (SELECT
+        scholars.*,
+        affiliations.*,
+        COUNT(keywords.kwid) AS keywords_nb,
+        GROUP_CONCAT(keywords.kwid) AS keywords_ids,
+        GROUP_CONCAT(kwstr) AS keywords_list
+    FROM scholars
+    JOIN sch_kw
+        ON doors_uid = uid
+    JOIN keywords
+        ON sch_kw.kwid = keywords.kwid
+    LEFT JOIN affiliations
+        ON affiliation_id = affid
+    GROUP BY doors_uid) AS full_scholars_info
+    {$filter}
+END_QUERY;
 
-//echo $sql.'<br/>';
-echo '<p style="color:white">query:'. $sql ."<p>";
+
+// debug
+// echo '<p style="color:white">query:'. $sql ."<p>";
 
 // liste des chercheurs
 $scholars = array();
@@ -252,30 +283,31 @@ $scholars = array();
 foreach ($base->query($sql) as $row) {
 
 
-    // TODO RESTORE
     $info = array();
     $info['unique_id'] = $row['doors_uid'];
     $info['first_name'] = $row['first_name'];
-    $info['initials'] = $row['initials'];
+    $info['mid_initial'] = (strlen($row['middle_name']) ? substr($row['middle_name'],0,1)."." : "");
     $info['last_name'] = $row['last_name'];
+    $info['initials'] = $row['initials'];
 
-    // => TODO RESTORE
-    // $info['nb_keywords'] = $row['nb_keywords'];
-    // $info['css_voter'] = $row['css_voter'];
-    // $info['css_member'] = $row['css_member'];
-    // $info['keywords_ids'] = explode(',', $row['keywords_ids']);
-    $info['keywords'] = $row['keywords'];
+    // retrieved from secondary table and GROUP_CONCATenated
+    $info['keywords_ids'] = explode(',', $row['keywords_ids']);
+    $info['nb_keywords'] = $row['keywords_nb'];
+    $info['keywords'] = $row['keywords_list'];
+
+
     // $info['status'] = $row['status'];
+    $info['record_status'] = $row['record_status'];  // TODO use this one
+
     $info['country'] = $row['country'];
-    // $info['homepage'] = $row['homepage'];
+    $info['homepage'] = $row['home_url'];
     $info['lab'] = $row['team_lab'];
-    $info['affiliation'] = $row['institution'];
+    $info['affiliation'] = $row['org'];
     // $info['lab2'] = $row['lab2'];
     // $info['affiliation2'] = $row['affiliation2'];
-    // $info['homepage'] = $row['homepage'];
-    $info['title'] = $row['jobtitle'];
-    $info['position'] = $row['jobtitle'];
-    // $info['photo_url'] = $row['photo_url'];
+    $info['title'] = $row['hon_title'];
+    $info['position'] = $row['position'];
+    $info['photo_url'] = $row['pic_url'];
     $info['pic_file'] = $row['pic_file'];
     $info['interests'] = $row['interests_text'];
     // $info['address'] = $row['address'];
@@ -290,8 +322,11 @@ foreach ($base->query($sql) as $row) {
 /// stats
 include ('stat-prep_from_array.php');///
 
+// debug
+// $content .= var_dump($scholars) ;
 
 include ("directory_content.php");
+
 
 // liste des chercheurs
 

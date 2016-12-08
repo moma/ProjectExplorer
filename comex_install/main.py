@@ -3,20 +3,29 @@ comex helper backend to create json graphs from sqlite3 db
 
 TODO integrate with new regcomex server
 """
-from extractDataCustom import extract as SQLite
+from extractDataCustom import MyExtractor as MySQL
 
-from flask import Flask
-from flask import request
+from flask import Flask, request
 from json  import dumps
+from os    import environ
+
+# ============= app creation ==============
 app = Flask(__name__)
 
+# ============= read environ ==============
+MY_SQL_HOST = environ.get('SQL_HOST', '172.17.0.2')
+
+# ================= views =================
 # @app.route("/getJSON")        # route renamed
 @app.route("/comexAPI")
 def main():
 
-    db=SQLite('../community.db')
+    # db=SQLite('../community.db')
+    db=MySQL(MY_SQL_HOST)
 
     if 'query' in request.args:
+        # TODO fix ('refine' button)
+        # query is a json {cat:filtervalue} , not an executable SQL query !!
         filteredquery = request.args['query']
         scholars = db.getScholarsList("filter",filteredquery)
     else:

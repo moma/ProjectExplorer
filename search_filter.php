@@ -21,17 +21,19 @@ if ($category == 'country' || $category == 'countries') {
   $query = 'LIKE upper(\''.strtoupper($q).'\')';
 } elseif ($category == 'organization' || $category == 'organizations') {
 
-  // POSSIBLE: `concat(institution, ", ", IFNULL(team_lab, ""))``
+  // POSSIBLE: `concat(institution, ", ", IFNULL(team_lab, ""))`
   //           (change in $cat here and in print_directory args downstream)
-  $cat = 'institution';
+  $cat = 'org';
   $query = 'LIKE upper(\''.strtoupper($q).'\')';
 } elseif ($category == 'keyword' || $category == 'keywords') {
-  $cat = "keywords";
+  $cat = "keywords_list";
   $query = 'LIKE upper(\''.strtoupper($q).'\')';
-} elseif ($category == 'tag' || $category == 'tags') {
-  $cat = "tags";
+}
+elseif ($category == 'tag' || $category == 'tags') {
+  $cat = "community_hashtags";
   $query = 'LIKE upper(\''.strtoupper($q).'\')';
-} elseif ($category == 'labs' || $category == 'laboratories' || $category == 'laboratory') {
+}
+elseif (v == 'labs' || $category == 'laboratories' || $category == 'laboratory') {
   $cat = "team_lab";
   $query = 'LIKE upper(\''.strtoupper($q).'\')';
 } else {
@@ -47,13 +49,44 @@ function filter_word($value) {
   return ! in_array(strtolower($value),$filtered);
 }
 
-$req = "SELECT ".$cat." AS clef, count(".$cat.") AS value FROM comex_registrations WHERE ".$cat." ".$query." GROUP BY ".$cat." ORDER BY value DESC";
+// old way
+// $req = "SELECT ".$cat." AS clef, count(".$cat.") AS value FROM scholars WHERE ".$cat." ".$query." GROUP BY ".$cat." ORDER BY value DESC";
+
+// TODO differentiate req's target cols earlier: above in "if ($category == X)"
+$req = <<<END_QUERY
+    SELECT
+        {$cat} AS clef,
+        count({$cat}) AS value
+    FROM (
+        SELECT
+            -- we create all needed cats for the outer select
+            -- ==============================================
+            scholars.doors_uid,
+            scholars.country,
+            scholars.community_hashtags,
+            affiliations.org,
+            affiliations.team_lab,
+            GROUP_CONCAT(kwstr) AS keywords_list
+        FROM scholars
+        JOIN sch_kw
+            ON scholars.doors_uid = sch_kw.uid
+        JOIN keywords
+            ON sch_kw.kwid = keywords.kwid
+        LEFT JOIN affiliations
+            ON scholars.affiliation_id = affiliations.affid
+        GROUP BY doors_uid
+        ) AS full_scholars_info
+    WHERE {$cat} {$query}                          -- <== our filter
+    GROUP BY $cat
+    ORDER BY value DESC ;
+END_QUERY;
+
 // echo $req;
 $results = array();
 $i = 0;
 foreach ($base->query($req) as $row) {
   $nb = $row['value'];
-  if ($cat == "keywords" || $cat == "tags") {
+  if ($cat == "keywords_list" || $cat == "tags") {
     //echo "in keywords\n";
      $words = explode(",", $row["clef"]);
     foreach ($words as $word) {
@@ -84,7 +117,7 @@ foreach ($base->query($req) as $row) {
         } else {
             $results[ $word ] = intval($nb);
         }
-    }
+      }
    }
 }
 

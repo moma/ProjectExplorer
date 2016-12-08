@@ -77,32 +77,39 @@ $base = new PDO($dsn, $user, $pass, $opt);
 
 if ($login) {
     if (sizeof($login) > 0) {
-// liste des chercheurs
-        $sql = "SELECT keywords,last_name,first_name FROM comex_registrations WHERE doors_uid='" . $login . "'";
-        foreach ($base->query($sql) as $row) {
-            $keywords = explode(',', $row['keywords']);
-            $scholar_array = array();
+        // nom du chercheur $target_name
+        $sql0 = "SELECT last_name,first_name FROM scholars WHERE doors_uid='" . $login . "'";
+
+        foreach ($base->query($sql0) as $row) {
+            // always one record by design of uid
             $target_name=$row['first_name'].' '.$row['last_name'];
-            foreach ($keywords as $keyword) {
-
-                if (strlen($keyword) > 0) {
-
-                    // TODO RESTORE index keywords
-                    // $sql2 = "SELECT * FROM scholars2terms where term_id=" . trim($keywords_id);
-                    $sql2 = "SELECT doors_uid FROM comex_registrations WHERE keywords LIKE \"%" . trim($keyword)."%\"";
-                    // echo($sql2."<br/>");
-                    foreach ($base->query($sql2) as $row) {
-                        if (array_key_exists($row['doors_uid'], $scholar_array)){
-                            $scholar_array[$row['doors_uid']] += 1;
-                        }else{
-                            $scholar_array[$row['doors_uid']] = 1;
-                        }
-
-                    }
-                }
-            }
         }
 
+        // liste des chercheurs
+
+        // old way in two steps without a scholars <=> keywords table
+        // $sql1 = "SELECT keywords,last_name,first_name FROM scholars WHERE doors_uid='" . $login . "'";
+        // $sql2 = "SELECT uid FROM sch_kw JOIN keywords ON sch_kw.kwid = keywords.kwid WHERE kwstr LIKE \"%" . trim($keyword)."%\"";
+
+        // new way in one query
+        $sql1 = <<< HERE_QUERY
+        SELECT second_level.uid
+        FROM      sch_kw
+        LEFT JOIN sch_kw
+            AS second_level
+            ON sch_kw.kwid = second_level.kwid
+        WHERE sch_kw.uid = "{$login}"
+            AND second_level.uid != sch_kw.uid
+        GROUP BY second_level.uid ;
+HERE_QUERY;
+
+        foreach ($base->query($sql1) as $row) {
+            if (array_key_exists($row['uid'], $scholar_array)){
+                $scholar_array[$row['uid']] += 1;
+            }else{
+                $scholar_array[$row['uid']] = 1;
+            }
+        }
     }
 }
 
@@ -116,31 +123,53 @@ $scholar_id_array=array_keys($scholar_array);
 $scholars = array();
 //
 foreach ($scholar_id_array as $scholar_id){
-$sql = "SELECT * FROM comex_registrations where doors_uid='" . $scholar_id. "'";
+$sql = <<< END_QUERY
+SELECT
+    scholars.*,
+    affiliations.*,
+    COUNT(keywords.kwid) AS keywords_nb,
+    GROUP_CONCAT(keywords.kwid) AS keywords_ids,
+    GROUP_CONCAT(kwstr) AS keywords_list
+FROM scholars
+JOIN sch_kw
+    ON doors_uid = uid
+JOIN keywords
+    ON sch_kw.kwid = keywords.kwid
+LEFT JOIN affiliations
+    ON affiliation_id = affid
+WHERE doors_uid = "{$scholar_id}"
+GROUP BY doors_uid
+END_QUERY;
+
+
+
 // echo var_dump($scholar_id)."<br/>" ;
 //$query = "SELECT * FROM scholars";
 foreach ($base->query($sql) as $row) {
     $info = array();
     $info['unique_id'] = $row['doors_uid'];
     $info['first_name'] = $row['first_name'];
-    $info['initials'] = $row['initials'];
+    $info['mid_initial'] = (strlen($row['middle_name']) ? substr($row['middle_name'],0,1)."." : "");
     $info['last_name'] = $row['last_name'];
-    // $info['nb_keywords'] = $row['nb_keywords'];
-    // $info['css_voter'] = $row['css_voter'];
-    // $info['css_member'] = $row['css_member'];
-    // $info['keywords_ids'] = explode(',', $row['keywords_ids']);
-    $info['keywords'] = $row['keywords'];
+    $info['initials'] = $row['initials'];
+
+    // retrieved from secondary table and GROUP_CONCATenated
+    $info['keywords_ids'] = explode(',', $row['keywords_ids']);
+    $info['nb_keywords'] = $row['keywords_nb'];
+    $info['keywords'] = $row['keywords_list'];
+
     // $info['status'] = $row['status'];
+    $info['record_status'] = $row['record_status'];  // TODO use this one
+
     $info['country'] = $row['country'];
-    // $info['homepage'] = $row['homepage'];
+    $info['homepage'] = $row['home_url'];
     $info['lab'] = $row['team_lab'];
-    $info['affiliation'] = $row['institution'];
+    $info['affiliation'] = $row['org'];
     // $info['lab2'] = $row['lab2'];
     // $info['affiliation2'] = $row['affiliation2'];
-    // $info['homepage'] = $row['homepage'];
-    $info['title'] = $row['jobtitle'];
-    $info['position'] = $row['jobtitle'];
-    // $info['photo_url'] = $row['photo_url'];
+    $info['title'] = $row['hon_title'];
+    $info['position'] = $row['position'];
+    $info['photo_url'] = $row['pic_url'];
     $info['pic_file'] = $row['pic_file'];
     $info['interests'] = $row['interests_text'];
     // $info['address'] = $row['address'];

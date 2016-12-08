@@ -80,7 +80,8 @@ foreach ($scholars as $scholar) {
             // echo "<p>no match :(</p>";
         }
 
-        echo "<p>mimetype:".$mimeguess."</p>";
+        // debug
+        // echo "<p>mimetype:".$mimeguess."</p>";
 
         $content .= '<img style="margin: 7px 10px 10px 0px" src="data:'.$mimeguess.';base64,'.$perhaps_decoded.'"/>';
     }
@@ -91,7 +92,7 @@ foreach ($scholars as $scholar) {
         }
     }
 
-    $content .= '<h2 >' . $scholar['title'] . ' ' . $scholar['first_name'] . ' ' . $scholar['initials'] . ' ' . $scholar['last_name'] .
+    $content .= '<h2 >' . $scholar['title'] . ' ' . $scholar['first_name'] . ' ' . $scholar['mid_initial'] . ' ' . $scholar['last_name'] .
             ' <small> - ' . $scholar['country'] . '</small></h2>';
 
 
@@ -224,39 +225,40 @@ if (strcmp(substr($orga_query, 0,2),'OR')==0){
 // liste des labs ////////
 //////////////////////////
 $labs = array();
-// TODO RESTORE
-// sort($lab_list);
+sort($lab_list);
 
-// foreach ($lab_list as $name) {
-//     if ((trim($name)) != NULL) {
-//         $sql = 'SELECT * FROM labs where name="' . $name . '" OR acronym="' . $name . '"';
-//         //echo $sql.'<br/>';
-//         foreach ($base->query($sql) as $row) {
-//             //echo 'toto';
-//             $info = array();
-//             $info['unique_id'] = $row['id'];
-//             $info['name'] = $row['name'];
-//             $info['acronym'] = $row['acronym'];
-//             $info['homepage'] = $row['homepage'];
-//             $info['keywords'] = $row['keywords'];
-//             $info['country'] = $row['country'];
-//             $info['address'] = $row['address'];
-//             $info['organization'] = $row['organization'];
-//             $info['organization2'] = $row['organization2'];
-//             $orga_list[] = $row['organization'];
-//             $orga_list[] = $row['organization2'];
-//             $info['object'] = $row['object'];
-//             $info['methods'] = $row['methods'];
-//             $info['director'] = $row['director'];
-//             $info['admin'] = $row['admin'];
-//             $info['phone'] = $row['phone'];
-//             $info['fax'] = $row['fax'];
-//             $info['login'] = $row['login'];
-//             //print_r($info);
-//             $labs[$row['id']] = $info;
-//         }
-//     }
-// }
+foreach ($lab_list as $name) {
+    if ((trim($name)) != NULL) {
+        // $sql = 'SELECT * FROM affiliations where team_lab="' . $name . '" OR acronym="' . $name . '"';
+        $sql = 'SELECT * FROM affiliations WHERE team_lab="' . $name . '"';
+        //echo $sql.'<br/>';
+        foreach ($base->query($sql) as $row) {
+            //echo 'toto';
+            $info = array();
+            $info['unique_id'] = $row['affid'];
+            $info['name'] = $row['team_lab'];
+            // TODO RESTORE
+            // $info['acronym'] = $row['acronym'];
+            // $info['homepage'] = $row['homepage'];
+            // $info['keywords'] = $row['keywords'];
+            // $info['country'] = $row['country'];
+            // $info['address'] = $row['address'];
+            // $info['organization'] = $row['organization'];
+            // $info['organization2'] = $row['organization2'];
+            // $orga_list[] = $row['organization'];
+            // $orga_list[] = $row['organization2'];
+            // $info['object'] = $row['object'];
+            // $info['methods'] = $row['methods'];
+            // $info['director'] = $row['director'];
+            // $info['admin'] = $row['admin'];
+            // $info['phone'] = $row['phone'];
+            // $info['fax'] = $row['fax'];
+            // $info['login'] = $row['login'];
+            //print_r($info);
+            $labs[$row['id']] = $info;
+        }
+    }
+}
 
 //print_r($labs);
 
@@ -265,39 +267,43 @@ $labs = array();
 //////////////////////////
 // liste des organizations ////////
 //////////////////////////
+
+// debug
+// $content .= var_dump($orga_list) ;
+
 $organiz = array();
-// TODO RESTORE
-// sort($orga_list);
-// foreach ($orga_list as $name) {
-//     if ((trim($name))!=NULL){
-//     $sql = "SELECT * FROM organizations where name='" . $name. "' OR acronym='".$name."'";
-//
-//     $temp=true;
-//     foreach ($base->query($sql) as $row) {
-//         if ($temp){
-//         $info = array();
-//         $info['unique_id'] = $row['id'];
-//         $info['name'] = $row['name'];
-//         $info['acronym'] = $row['acronym'];
-//         $info['homepage'] = $row['homepage'];
-//         $info['keywords'] = $row['keywords'];
-//         $info['country'] = $row['country'];
-//         $info['street'] = $row['street'];
-//         $info['city'] = $row['city'];
-//         $info['state'] = $row['state'];
-//         $info['postal_code'] = $row['postal_code'];
-//         $info['fields'] = $row['fields'];
-//         $info['admin'] = $row['admin'];
-//         $info['phone'] = $row['phone'];
-//         $info['fax'] = $row['fax'];
-//         $info['login'] = $row['login'];
-//         $organiz[$row['id']] = $info;
-//         $temp=false;
-//         }
-//     }
-//     }
-//
-// }
+sort($orga_list);
+foreach ($orga_list as $name) {
+    if ((trim($name))!=NULL){
+    $sql = "SELECT * FROM affiliations WHERE org='" . $name. "'";
+
+    $temp=true;
+    foreach ($base->query($sql) as $row) {
+        if ($temp){
+        $info = array();
+        $info['unique_id'] = $row['affid'];
+        $info['name'] = $row['org'];
+        // TODO RESTORE
+        // $info['acronym'] = $row['acronym'];
+        // $info['homepage'] = $row['homepage'];
+        // $info['keywords'] = $row['keywords'];
+        // $info['country'] = $row['country'];
+        // $info['street'] = $row['street'];
+        // $info['city'] = $row['city'];
+        // $info['state'] = $row['state'];
+        // $info['postal_code'] = $row['postal_code'];
+        // $info['fields'] = $row['fields'];
+        // $info['admin'] = $row['admin'];
+        // $info['phone'] = $row['phone'];
+        // $info['fax'] = $row['fax'];
+        // $info['login'] = $row['login'];
+        $organiz[$row['affid']] = $info;
+        $temp=false;
+        }
+    }
+    }
+
+}
 
 
 

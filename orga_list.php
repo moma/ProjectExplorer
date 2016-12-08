@@ -6,6 +6,10 @@ $content .='<br/>
 <br/>';
 
 $orga_count = 0;
+
+// debug
+// $content .= var_dump($organiz) ;
+
 foreach ($organiz as $orga) {
 
     if ($loop % 100){
