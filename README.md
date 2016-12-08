@@ -164,8 +164,13 @@ server {
 
 #### Connecting the data to *communityexplorer.org*
 Currently the data is collected in `data/shared_mysql_data`
-  - the DB name is `comex_shared`  
-  - the table is `comex_registrations`  
+  - the DB name is *`comex_shared`*  
+  - the main table is `scholars`
+  - additional tables:
+    - `affiliations` for labs and institutions (TODO ~~> 2 tables)
+    - `linked_ids` for other ids of the researcher (eg: [ORCID](http://orcid.org/))
+    - `keywords`
+      - and `sch_kw` for scholars <=> keywords mapping
 
 Prerequisites for the comex php legacy app
 ```
