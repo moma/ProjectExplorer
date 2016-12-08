@@ -755,7 +755,7 @@ $(function() {
 $(function() {
   var $hontitlesInput = $('#hon_title')
 
-  var hontitlesList = ["Student", "PhD Student", "Doctor"]
+  var hontitlesList = ["Mr", "Ms", "Dr.", "Prof.", "Prof. Dr."]
 
   $hontitlesInput.autocomplete({
       source: hontitlesList,
@@ -771,8 +771,9 @@ $(function() {
 $(function() {
   var $jobtitlesInput = $('#position')
 
-  var jobtitlesList = ["Engineer", "Lecturer", "Associate Professor", "Professor",
-                       "Research Fellow", "Research Director", "Chairman"]
+  var jobtitlesList = ["Graduate Student", "Post-Graduate Student", "Engineer",
+                        "Lecturer", "Associate Professor", "Professor",
+                       "PhD Student", "Research Fellow", "Research Director"]
 
   $jobtitlesInput.autocomplete({
       source: jobtitlesList,
