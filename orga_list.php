@@ -15,8 +15,8 @@ foreach ($organiz as $orga) {
     if ($orga['name'] != null) {
         $orga_count+=1;
         $content.= '<div class="row">
-                <div class="span12">                    
-                    <div class="row">           
+                <div class="span12">
+                    <div class="row">
                         <div class="span9" align="justify">';
         $content .= '<div>';
 
@@ -46,11 +46,11 @@ foreach ($organiz as $orga) {
             $content .= '<div><p>';
             //echo $orga['fields'].'<br/>';
             $fields=trim(str_replace('Other','',clean_exp($orga['fields'])));
-            
+
             if (strcmp(',', substr($fields,-1,1))==0){
                 $fields=substr($fields,0,-1);
             }
-            $fields=str_replace('%%%', ', ',$fields);           
+            $fields=str_replace('%%%', ', ',$fields);
             $content .= '<i>Fields: </i> ' . str_replace(", , ", ", ", $fields). '.<br/><br/>';
 
             $content .= '</p></div>';
@@ -71,12 +71,12 @@ foreach ($organiz as $orga) {
                 $content .= '<address><i class="icon-info-sign"></i> Administrative contact: ' . ucwords($orga['admin']) . '<br/></address>';
             }
             if (trim($orga['street']) != null) {
-                $address = $orga['street'] . ', ' . $orga['city'] . ', ' . $orga['postal_code'] 
+                $address = $orga['street'] . ', ' . $orga['city'] . ', ' . $orga['postal_code']
                 . ', ' . $orga['state']. ', ' . $orga['country'];
-                $address = str_replace(", , , , ", ", ", $address);                
-                $address = str_replace(", , , ", ", ", $address);                
+                $address = str_replace(", , , , ", ", ", $address);
+                $address = str_replace(", , , ", ", ", $address);
                 $address = str_replace(", , ", ", ", $address);
-                
+
                 $content .= '<address><i class="icon-envelope"></i> ' . $address . '<br/></address>';
             }
 

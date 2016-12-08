@@ -72,35 +72,35 @@ foreach ($jobs as $row) {
         $position_list[$position] = 1;
     }
 
-    
+
     // traitement des organismes de rattachement
     $affiliation = trim($row["affiliation"]);
-    
+
     if (strcmp($affiliation, "") == 0) {
         $missing_affiliation+=1;
-    } else {        
+    } else {
 
         if (array_key_exists($affiliation, $organizations_list)) {
             $organizations_list[$affiliation]+=1;
         } else {
             $organizations_list[$affiliation] = 1;
-           
+
         }
     }
     $affiliation2 = trim($row["affiliation2"]);
-    
+
     if (strcmp($affiliation2, "") == 0) {
         $missing_affiliation+=1;
-    } else {        
+    } else {
 
         if (array_key_exists($affiliation2, $organizations_list)) {
             $organizations_list[$affiliation2]+=1;
         } else {
             $organizations_list[$affiliation2] = 1;
-           
+
         }
     }
-    
+
 }
 
 
@@ -119,7 +119,7 @@ foreach ($country_list as $key => $value) {
         } else {
             $other_country+=$value;
         }
-    
+
 }
 //if (false) {
 if ($missing_country>0){
@@ -231,7 +231,7 @@ $(document).ready(function() {
 			name: "Position",' . $position_data .
         '}]
 	});
-        
+
 
 
 

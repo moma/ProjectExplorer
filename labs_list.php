@@ -12,15 +12,15 @@ foreach ($labs as $lab) {
     }
     $loop+=1;
     $content.= '<div class="row">
-                <div class="span12">                    
-                    <div class="row">           
+                <div class="span12">
+                    <div class="row">
                         <div class="span9" align="justify">';
     $content .= '<div>';
-    
+
     $content .= '<h2 >' . $lab['name'];
     if ($lab['acronym'] != null){
         $content.=' ('.$lab['acronym'].')';
-    } 
+    }
     $content.=' <small> - ' . $lab['country'] . '</small></h2>';
 
 
@@ -34,7 +34,7 @@ foreach ($labs as $lab) {
     if (strcmp($www, '') != 0) {
         $content .= '<dl><dd><i class="icon-home"></i>' . $www . '</dd></dl> ';
     }
-    
+
     if ($lab['organization'] != null) {
         $content .= '<dl>
         <dt>Institutions:</dt>';
@@ -101,7 +101,7 @@ foreach ($labs as $lab) {
             $content .= '<address><strong>Phone</strong>: '.$lab['phone'] . '<br/>';
             if ($lab['fax'] != null) {
                 $content .='<strong>Fax</strong>: '.$lab['fax'] . '<br/>';
-            }            
+            }
         }
 
         $content .= '</div>';
@@ -111,7 +111,7 @@ $content .= '</div>';
 
     $content .= '</div>';
     $content .= '</div>';
-    
+
     $content .= '
 <center><img src="img/bar.png"></center>';
     $content .= '<br/>';

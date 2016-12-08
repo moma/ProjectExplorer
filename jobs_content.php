@@ -1,14 +1,14 @@
 <?php
 // calcul les différents profils à partir d'une requete
-// sort un $content 
+// sort un $content
 
 
-echo '    
+echo '
     <body>';
 include ("analytics.php");
 echo '        <script type="text/javascript" src="js/whoswho.js"></script>
     <div class="container-fluid">
-        
+
         <!-- Main hero unit for a primary marketing message or call to action -->
         <div class="hero-unit">
    ';
@@ -17,7 +17,7 @@ echo '        <script type="text/javascript" src="js/whoswho.js"></script>
 $imsize = 150;
 
 $content='';
-        
+
 
 
 
@@ -33,8 +33,8 @@ foreach ($jobs as $job) {
     }
     $loop+=1;
     $content.= '<div class="row">
-                <div class="span12">                    
-                    <div class="row">           
+                <div class="span12">
+                    <div class="row">
                         <div class="span9" align="justify">';
     $content .= '<div>';
 
@@ -46,21 +46,21 @@ foreach ($jobs as $job) {
     if (($job['country'] != null)||($job['lab'] != null)||($job['affiliation'] != null)) {
        $content .= '<dl>';
     }
-    
+
     if ($job['country'] != null) {
-  
+
     $content .= '<dt>Location: '. '</dt>';
     $content .= '<dd><strong>Country:</strong> ' .  $job['country'] . '</dd>';
     }
     $affiliation = '';
     if ($job['lab'] != null) {
-        $content .= '<dd><strong>' . clean_exp('Lab:</strong> '.$job['lab']) . '</dd> ';        
+        $content .= '<dd><strong>' . clean_exp('Lab:</strong> '.$job['lab']) . '</dd> ';
         $lab_list[]=$job['lab'];
     }
     if ($job['organization'] != null) {
-        $content .= '<dd><strong>' . clean_exp('Organization:</strong> '.$job['organization']) . '</dd> ';        
+        $content .= '<dd><strong>' . clean_exp('Organization:</strong> '.$job['organization']) . '</dd> ';
         $orga_list[]=$job['organization'];
-        
+
         //echo $job['affiliation'].'<br/>';
 
         //$lab_query.='OR name="'.$job['affiliation'].'" ';
@@ -71,7 +71,7 @@ foreach ($jobs as $job) {
 
 
     $affiliation2 = '';
-             
+
 
     if ((strcmp($affiliation2, '') != 0) | (strcmp($affiliation, '') != 0)) {
         $content .= '<br/>';
@@ -88,34 +88,34 @@ foreach ($jobs as $job) {
         $content .= '<dd><i class="icon-home"></i>' . $www . '</dd> ';
     }
 
-  
+
    if (($job['position'] != null)||($job['lab'] != null)||($job['affiliation'] != null)) {
        $content .= '</dl>';
     }
-    
+
 
     $content .= '</div>';
- 
+
 
     $content .= '</div>';
 
     if (($job['keywords'] != null) || ($job['address'] != null) || ($job['phone'] != null)) {
         $content .= '<div class="span3" align="justify">';
-        
+
         if ($job['keywords'] != null){
-                 $content .= '<i class="icon-tags"></i> ' . clean_exp($job['keywords']). '.<br/><br/>';  
+                 $content .= '<i class="icon-tags"></i> ' . clean_exp($job['keywords']). '.<br/><br/>';
         }
-          
+
         if ($job['deadline'] != null) {
             $content .= '<address><i class="icon-calendar"></i><br/> <strong>Deadline: </strong>' . $job['deadline'] . '<br/>';
-            
+
             if ($job['start_date'] != null) {
             $content .= '</i><strong>Start date:</strong> ' . $job['start_date'] . '<br/>';
         }
         $content .= '</address>';
         }
-        
-        
+
+
 
 
         if ($job['phone'] != null) {
@@ -125,16 +125,16 @@ foreach ($jobs as $job) {
             }
             if ($job['fax'] != null) {
                 $content .='<strong>Fax</strong>: '.$job['fax'] . '<br/>';
-            }            
+            }
         }
 
         $content .= '</div>';
-    }   
+    }
 $content .= '</div>';
 
     $content .= '</div>';
     $content .= '</div>';
-    
+
     $content .= '
 <center><img src="img/bar.png"></center>';
     $content .= '<br/>';
@@ -217,9 +217,9 @@ foreach ($orga_list as $name) {
         $info['fax'] = $row['fax'];
         $info['login'] = $row['login'];
         $organiz[$row['id']] = $info;
-        $temp=false;        
+        $temp=false;
         }
-    }        
+    }
     }
 
 }
