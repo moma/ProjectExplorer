@@ -182,6 +182,10 @@ sudo apt install php7.0-sqlite3
 
 # for new mysql base
 sudo apt install php7.0-mysql
+
+# for the helper app
+sudo apt install libmysqlclient-dev
+sudo pip3 install mysqlclient
 ```
 
 Then installing the site itself is from repository:
@@ -195,8 +199,15 @@ git clone https://github.com/moma/legacy_php_comex ./
 # checkout the branch that uses our new SQL
 git checkout mysql_refacto_prototype
 
+# correct permissions
+sudo chown -R $USER:www-data .
+
 # edit ini file to put the correct SQL_HOST
 nano parametres_comex.ini
+
+# start helper service
+cd comex_install/
+nohup python3 main.py &
 ```
 
 NB: The communityexplorer.org app was using a separate DB from legacy wiki csv (cf. master branch of the `moma/legacy_php_comex` repository)
