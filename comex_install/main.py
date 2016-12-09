@@ -5,15 +5,20 @@ TODO integrate with new regcomex server
 """
 from extractDataCustom import MyExtractor as MySQL
 
-from flask import Flask, request
-from json  import dumps
-from os    import environ
-
+from flask        import Flask, request
+from json         import dumps
+from os           import environ
+from configparser import ConfigParser
 # ============= app creation ==============
 app = Flask(__name__)
 
 # ============= read environ ==============
-MY_SQL_HOST = environ.get('SQL_HOST', '172.17.0.2')
+MY_SQL_HOST = environ.get('SQL_HOST', None)
+
+if not MY_SQL_HOST:
+    ini = ConfigParser()
+    ini.read("../parametres_comex.ini")
+    MY_SQL_HOST = ini['services']['SQL_HOST']
 
 # ================= views =================
 # @app.route("/getJSON")        # route renamed
