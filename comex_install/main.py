@@ -45,4 +45,5 @@ def main():
 
 
 if __name__ == "__main__":
+    print(" * Using %s:3306 as SQL_HOST" % MY_SQL_HOST)
     app.run(host="0.0.0.0", port=8484)

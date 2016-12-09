@@ -5,7 +5,15 @@ from math      import floor
 from cgi       import escape
 from converter import CountryConverter
 from pprint    import pprint
+from re        import sub
 
+whoswho_to_sqlnames = {
+    "keywords": "keywords.kwstr",
+    "countries": "scholars.country",
+    "organizations": "affiliations.org",
+    "laboratories": "affiliations.team_lab",
+    "tags": "scholars.community_hashtags"
+}
 
 class MyExtractor:
 
@@ -53,12 +61,12 @@ class MyExtractor:
 
     def getScholarsList(self,qtype,query):
         # debug
-        # print("getScholarsList<============")
-        # print("qtype", qtype)
-        # print("query", query)
+        print("getScholarsList<============")
+        print("qtype", qtype)
+        print("query", query)
 
         # remove quotes from id
-        unique_id = query[1:-1]
+        unique_id = sub(r'^"|"$', '', query)
         scholar_array = {}
         sql1=None
         sql2=None
@@ -87,7 +95,8 @@ class MyExtractor:
                 self.cursor.execute(sql1)
                 results=self.cursor.fetchall()
 
-                print("getScholarsList<==len(results) =", len(results))
+                # debug
+                # print("getScholarsList<==len(results) =", len(results))
 
                 if len(results)==0:
                     return []
@@ -129,6 +138,9 @@ class MyExtractor:
                             print("sql2:\t"+sql2)
                             print(error)
 
+                # debug
+                print("getScholarsList<==scholar_array", scholar_array)
+
 
                 return scholar_array
 
@@ -140,9 +152,60 @@ class MyExtractor:
                 print(error)
 
 
-        # TODO fix ('refine' button)
         if qtype == "filter":
+            print("filter: query is", query)
+            # query is a set of filters like: key <=> array of values
+            # (expressed as rest parameters: "keyA[]=valA1&keyB[]=valB1&keyB[]=valB2")
+
+            # we map it to an sql conjunction of alternatives
+            # ==> WHERE colA IN ("valA1") AND colB IN ("valB1", "valB2")
             try:
+                filter_dict = restparse(query)
+
+                # build WHERE-clause elements for each table
+                # ==========================================
+                sql_constraints = []
+                for key in filter_dict:
+                    col = whoswho_to_sqlnames[key]
+
+                    clause = ""
+                    if isinstance(val, list) or isinstance(val, tuple):
+                        qwliststr = repr(val)
+                        qwliststr = sub(r'^\[', '(', qwliststr)
+                        qwliststr = sub(r'\[$', ')', qwliststr)
+                        clause = 'IN '+qwliststr
+                    elif isinstance(val, int):
+                        clause = '= %i' % val
+                    elif isinstance(val, float):
+                        clause = '= %f' % val
+                    elif isinstance(val, str):
+                        clause = '= "%s"' % val
+
+                    sql_constraints.append("(%s %s)" % (col, clause))
+
+                query = """
+                    SELECT
+                        scholars.*,
+                        affiliations.*,
+
+                        -- kws info
+                        COUNT(keywords.kwid) AS keywords_nb,
+                        GROUP_CONCAT(kwstr) AS keywords_list,
+                        GROUP_CONCAT(kwid) AS keywords_ids
+
+                    FROM scholars
+
+                    -- two step JOIN for keywords
+                    JOIN sch_kw
+                        ON doors_uid = uid
+                    JOIN keywords
+                        ON sch_kw.kwid = keywords.kwid
+                    LEFT JOIN affiliations
+                        ON affiliation_id = affid
+                    WHERE  %s
+                    GROUP BY doors_uid
+                """ % " AND ".join(sql_constraints)
+
                 self.cursor.execute(query)
                 res1=self.cursor.fetchall()
                 #            print(res1)
@@ -272,9 +335,9 @@ class MyExtractor:
         conditions = ' (' + ','.join(sorted(list(termsMatrix))) + ')'
 
         # debug
-        print("SQL query ===============================")
-        print(query+conditions)
-        print("/SQL query ==============================")
+        # print("SQL query ===============================")
+        # print(query+conditions)
+        # print("/SQL query ==============================")
 
         self.cursor.execute(query+conditions)
         results4 = self.cursor.fetchall()
@@ -377,7 +440,6 @@ class MyExtractor:
 
     def toHTML(self,string):
         escaped = escape(string).encode("ascii", "xmlcharrefreplace").decode()
-        print(type(escaped))
         return escaped
 
 
@@ -408,9 +470,11 @@ class MyExtractor:
 
         for idNode in graph.nodes_iter():
             if idNode[0]=="N":#If it is NGram
-                print("terms idNode:", idNode)
+
+                # debug
+                # print("terms idNode:", idNode)
+
                 numID=int(idNode.split("::")[1])
-                print("DBG terms_dict:", self.terms_dict)
                 try:
                     nodeLabel= self.terms_dict[numID]['kwstr'].replace("&"," and ")
                     colorg=max(0,180-(100*self.terms_colors[numID]))
@@ -578,3 +642,35 @@ class MyExtractor:
         # print("nodes2",edgesB)
         # print("bipartite",edgesAB)
         return graph
+
+
+def restparse(paramstr):
+    """
+    "keyA[]=valA1&keyB[]=valB1&keyB[]=valB2&keyC=valC"
+
+    => {
+        "keyA": [valA1],
+        "keyB": [valB1, valB2],
+        "keyC": valC
+        }
+    """
+    resultdict = {}
+    components = paramstr.split('&')
+    for comp in components:
+        (keystr, valstr) = comp.split('=')
+
+        # type array
+        if len(keystr) > 2 and keystr[-2:] == "[]":
+            key = keystr[0:-2]
+
+            if key in resultdict:
+                resultdict[key].append(valstr)
+            else:
+                resultdict[key] = [valstr]
+
+        # atomic type
+        else:
+            key = keystr
+            resultdict[key]=valstr
+
+    return resultdict

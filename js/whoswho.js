@@ -219,18 +219,31 @@ $(document).ready(function() {
       return t;
     };
     log("reading filters forms..");
+
+
     query = {
-      categorya: $.trim($("#categorya :selected").text()),
-      categoryb: $.trim($("#categoryb :selected").text()),
-      keywords: collect("keywords"),
-      countries: collect("countries"),
-      laboratories: collect("laboratories"),
-      coloredby: [],
-      tags: collect("tags"),
-      organizations: collect("organizations")
-    };
+
+    // TODO in the future multiple categories
+    // categorya: $.trim($("#categorya :selected").text()),
+    // categoryb: $.trim($("#categoryb :selected").text()),
+
+    // TODO in the future coloredby
+    // query.coloredby =  []
+
+    }
+
+    for (filterName of ["keywords", "countries", "laboratories", "tags", "organizations"]) {
+        var filterValuesArray = collect(filterName)
+
+        // we add only if something to add :)
+        if (filterValuesArray.length) {
+            query[filterName] = filterValuesArray
+        }
+    }
+
     log("raw query: ");
     log(query);
+
     query = encodeURIComponent(JSON.stringify(query));
     return cb(query);
   };
