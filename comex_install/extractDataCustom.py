@@ -408,12 +408,16 @@ class MyExtractor:
 
         for idNode in graph.nodes_iter():
             if idNode[0]=="N":#If it is NGram
+                print("terms idNode:", idNode)
                 numID=int(idNode.split("::")[1])
-                # print("DBG terms_dict:", self.terms_dict)
+                print("DBG terms_dict:", self.terms_dict)
                 try:
-                    nodeLabel= self.terms_dict[numID]['term'].replace("&"," and ")
+                    nodeLabel= self.terms_dict[numID]['kwstr'].replace("&"," and ")
                     colorg=max(0,180-(100*self.terms_colors[numID]))
-                    term_occ = self.terms_dict[numID]['occurrences']
+
+                    # TODO restore keywords.occurrences
+                    # term_occ = self.terms_dict[numID]['occurrences']
+                    term_occ = 1
 
                 except KeyError:
                     print("WARN: couldn't find label and meta for term " + str(numID))
