@@ -17,7 +17,7 @@ MY_SQL_HOST = environ.get('SQL_HOST', None)
 
 if not MY_SQL_HOST:
     ini = ConfigParser()
-    ini.read("../parametres_comex.ini")
+    ini.read("../../parametres_comex.ini")
     MY_SQL_HOST = ini['services']['SQL_HOST']
 
 # ================= views =================

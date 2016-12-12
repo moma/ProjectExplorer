@@ -1,24 +1,25 @@
-## comex app ready for future refactoring
+## comex app with refactoring in progress
 
 It contains:  
   - an html index based on old bootstrap
   - several php files specialized in retrieving custom lists of scholars, labs, jobs for directory showing
-    - whoswho.js is used to GUIise the queries
+    - `whoswho.js` is used to GUIise the queries
     - legacy jquery and highcharts are used to GUIise the directories
   - a linked couple python server + tinawebJS to explore the same data in graph view
-    - the python server is in comex_install/ dir
+    - the python server is in `services/db_to_tina_api` dir
     - run it with `python3 main.py` and reverse-proxy its host:port to `/comexAPI` location
-    - the twjs is in a legacy version, downloadable at [via this subtree](https://github.com/moma/tinawebJS/tree/comex_wip)
+    - the twjs is in a legacy version, downloadable [via this subtree](https://github.com/moma/tinawebJS/tree/comex_wip)
+
 ------
 ### Installation
   1. clone this repo
-  2. get the tinawebJS contents into `./tinawebJS`
-  3. get the community.db sqlite3 database into `./`
+  2. checkout the `mysql_refacto_prototype` branch
+  3. set the correct MySQL host in `parametres_comex.ini`
 
 #### TODOES for future refactoring
-  1. remove the legacy links to csregistry.org
-  2. replace the registration/profile pages with the new [regcomex app server](https://github.com/moma/regcomex) [DONE]
-  3. replace community.db PDO connections by the new comex_shared MySQL tables [IN PROGRESS]
+  - remove the legacy links to csregistry.org
+  - merge the user services ([regcomex](https://github.com/moma/regcomex)) with the db_to_tina_api services (ex-comex_install)
+  - merge the static files
 
 
 ------
@@ -63,3 +64,15 @@ JOIN keywords
     ON sch_kw.kwid = keywords.kwid
 GROUP BY uid ;
 ```
+
+##### Copyright
+###### Authors
+  - Researchers and engineers of the ISC-PIF
+     - David Chavalarias
+     - Samuel Castillo
+     - Romain Loth
+
+###### Acknowledgments
+  - Former Tina developers (java-based software from which tinawebJS is adapted)
+     - Elias Showk
+     - Julian Bilcke
