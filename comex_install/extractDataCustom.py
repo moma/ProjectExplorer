@@ -118,10 +118,13 @@ class MyExtractor:
             elif qtype == "filter":
                 sql_query = None
 
-                # debug
-                print("filter: REST query is", queryargs)
+                filter_dict = restparse(queryargs)
 
-                if "query" in queryargs and queryargs["query"] == "*":
+                # debug
+                # print("filter: REST query is", filter_dict)
+
+                if "query" in filter_dict and filter_dict["query"] == "*":
+                    print("bombaclass")
                     # query is "*" <=> all scholars
                     sql_query = """
                         SELECT doors_uid
@@ -140,7 +143,6 @@ class MyExtractor:
 
                     # build constraints from the args
                     # ================================
-                    filter_dict = restparse(queryargs)
                     sql_constraints = []
                     for key in filter_dict:
                         known_filter = None
@@ -154,20 +156,25 @@ class MyExtractor:
 
                         val = filter_dict[known_filter]
 
-                        clause = ""
-                        if isinstance(val, list) or isinstance(val, tuple):
-                            qwliststr = repr(val)
-                            qwliststr = sub(r'^\[', '(', qwliststr)
-                            qwliststr = sub(r'\]$', ')', qwliststr)
-                            clause = 'IN '+qwliststr
-                        elif isinstance(val, int):
-                            clause = '= %i' % val
-                        elif isinstance(val, float):
-                            clause = '= %f' % val
-                        elif isinstance(val, str):
-                            clause = '= "%s"' % val
+                        if len(val):
+                            clause = ""
+                            if isinstance(val, list) or isinstance(val, tuple):
+                                tested_array = [x for x in val if x != '']
+                                print("tested_array", tested_array)
+                                if len(tested_array):
+                                    qwliststr = repr(tested_array)
+                                    qwliststr = sub(r'^\[', '(', qwliststr)
+                                    qwliststr = sub(r'\]$', ')', qwliststr)
+                                    clause = 'IN '+qwliststr
+                            elif isinstance(val, int):
+                                clause = '= %i' % val
+                            elif isinstance(val, float):
+                                clause = '= %f' % val
+                            elif isinstance(val, str):
+                                clause = '= "%s"' % val
 
-                        sql_constraints.append("(%s %s)" % (sql_column, clause))
+                            if len(clause):
+                                sql_constraints.append("(%s %s)" % (sql_column, clause))
 
                     # debug
                     print("sql_constraints", sql_constraints)
@@ -198,10 +205,11 @@ class MyExtractor:
 
                     """ % (" AND ".join(sql_constraints))
 
-                    self.cursor.execute(sql_query)
-                    scholar_rows=self.cursor.fetchall()
-                    for row in scholar_rows:
-                        scholar_array[ row['doors_uid'] ] = 1
+                # in both cases "*" or constraints
+                self.cursor.execute(sql_query)
+                scholar_rows=self.cursor.fetchall()
+                for row in scholar_rows:
+                    scholar_array[ row['doors_uid'] ] = 1
 
             return scholar_array
 
