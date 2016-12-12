@@ -53,7 +53,7 @@ else {
     }
     else {
         console.log("Received query of type:", qtype)
-        if(qtype == "filter" || qtype == "unique_id"){
+        if(qtype == "filter" || qtype == "uid"){
             bringTheNoise(param,qtype);
         }
         else {
