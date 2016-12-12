@@ -28,14 +28,17 @@ def main():
     # db=SQLite('../community.db')
     db=MySQL(MY_SQL_HOST)
 
-    if 'query' in request.args:
-        # TODO fix ('refine' button)
-        # query is a json {cat:filtervalue} , not an executable SQL query !!
-        filteredquery = request.args['query']
-        scholars = db.getScholarsList("filter",filteredquery)
+    if 'qtype' in request.args:
+        if request.args['qtype'] == "filters":
+            # all the other args are a series of constraints for filtering
+            # ex: qtype=filters&keywords[]=complex%20networks&keywords[]=complexity%20theory&countries[]=France&countries[]=USA
+            scholars = db.getScholarsList("filter",request.query_string.decode())
+        else:
+            unique_id = request.args['unique_id']
+            scholars = db.getScholarsList("unique_id",unique_id)
     else:
-        unique_id = request.args['unique_id']
-        scholars = db.getScholarsList("unique_id",unique_id)
+        raise TypeError("API query is missing qtype (should be 'filters' or 'uid')")
+
     if scholars and len(scholars):
         db.extract(scholars)
     # < / Data Extraction > #

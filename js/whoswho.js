@@ -245,6 +245,8 @@ $(document).ready(function() {
     log(query);
 
     query = encodeURIComponent(JSON.stringify(query));
+
+    console.log("calling callback with encoded query:", query)
     return cb(query);
   };
   $("#generate").click(function() {
@@ -252,7 +254,7 @@ $(document).ready(function() {
     return $("#welcome").fadeOut("slow", function() {
       show("#loading", "fast");
       return collectFilters(function(query) {
-        return window.location.href='explorerjs.html?type="filter"&nodeidparam="' + query +'"';
+        return window.location.href='explorerjs.html?type="filter"&nodeidparam="' + escape(query) +'"';
         //return loadGraph("getgraph.php?query=" + query);
       });
     });

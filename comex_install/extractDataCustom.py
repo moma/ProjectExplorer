@@ -6,8 +6,10 @@ from cgi       import escape
 from converter import CountryConverter
 from pprint    import pprint
 from re        import sub
+from traceback import format_tb
+from urllib.parse import unquote
 
-whoswho_to_sqlnames = {
+whoswhofilters_to_sqlnames = {
     "keywords": "keywords.kwstr",
     "countries": "scholars.country",
     "organizations": "affiliations.org",
@@ -41,183 +43,177 @@ class MyExtractor:
         else:
             return cooc*cooc/float(occ1*occ2)
 
+    def getScholarsList(self,qtype,queryargs):
+        """
+        select one or more scholars to map in the graph
 
-    def getRealSize(self,array):
-        suma = 0
-        ID = 0
-        idflag = True
-        for i in array:
-            if i!="":
-                if idflag:
-                    ID=i
-                    idflag=False
-                if i is None:
-                    continue
-                elif isinstance(i, int):
-                    suma+=1
-                else: suma+=len(i)
-        return suma
+        returns a dict of scholar's uids
 
+        method1 (case unique_id)
+          - unique_id defines our starting point (scholar_0)
+          - we follow all 2 step coupling paths (scholar_0 <=> keyword_X <=> scholar_i)
 
-    def getScholarsList(self,qtype,query):
-        # debug
-        print("getScholarsList<============")
-        print("qtype", qtype)
-        print("query", query)
-
-        # remove quotes from id
-        unique_id = sub(r'^"|"$', '', query)
+        method2 (case filter constraints)
+          - in progress
+        """
         scholar_array = {}
-        sql1=None
-        sql2=None
-        if qtype == "unique_id":
-            try:
-                # old way
-                # sql1="SELECT * FROM scholars WHERE doors_uid='"+unique_id+"'"
+        sql_query = None
 
-                # TODO this query brings back doors_uid and keywords_ids
-                #      as the old way used to do, but with keywords scholar index
-                #      we won't need STR_keywords_ids anymore
-                sql1="""
+        # debug
+        # print("=> getScholarsList.qtype", qtype)
+        # print("=> getScholarsList.queryargs", queryargs)
+
+        try:
+            if qtype == "unique_id":
+                # remove quotes from id
+                unique_id = sub(r'^"|"$', '', queryargs)
+
+
+                # old way
+                # sql1="SELECT * FROM scholars WHERE doors_uid='"+unique_id+"'"       ## <= starting point (scholar_0)
+                # sql2 = "SELECT * FROM scholars2terms where term_id="+keywords_id    ## <= coupling edges (scholar_0 <=> keyword_X <=> scholar_i)
+
+                # new way (using scholars<=>kw map to do only one sql query)
+                sql_query="""
                 SELECT
-                        doors_uid,
-                        COUNT(keywords.kwid) AS nb_keywords,
-                        GROUP_CONCAT(keywords.kwid) AS keywords_ids
+                    neighbors_by_kw.uid,
+                    COUNT(matching.kwid) AS cooc
+
                 FROM scholars
-                JOIN sch_kw ON doors_uid = uid
-                JOIN keywords ON sch_kw.kwid = keywords.kwid
+                -- step 1
+                JOIN sch_kw AS matching
+                            ON matching.uid = scholars.doors_uid
+                -- step 2
+                JOIN sch_kw AS neighbors_by_kw
+                            ON neighbors_by_kw.kwid = matching.kwid
+
                 WHERE doors_uid = "%s"
-                GROUP BY doors_uid
+                GROUP BY neighbors_by_kw.uid
+                ORDER BY cooc DESC
                 """ % unique_id
 
-                STR_keywords_ids = ""
-
-                self.cursor.execute(sql1)
+                self.cursor.execute(sql_query)
                 results=self.cursor.fetchall()
 
                 # debug
-                # print("getScholarsList<==len(results) =", len(results))
+                # print("getScholarsList<== len(all 2-step neighbors) =", len(results))
 
-                if len(results)==0:
+                if len(results) == 0:
+                    # should never happen if input unique_id is valid
                     return []
 
-                if len(results)==1:
-                    self.unique_id = { unique_id : "D::"+str(results[0]["doors_uid"][0:8]) }
-                    STR_keywords_ids = results[0]["keywords_ids"]
+                if len(results)>0:
+                    for row in results:
+                        # print("the row:", row)
+                        node_uid = row['uid']
+                        node_shortid = "D::"+node_uid[0:8]
 
-                # [ Solving duplicates ]
-                if len(results)>1:
-                    candidates = []
-                    for res1 in results:
-                        elementSize = self.getRealSize(res1)
-                        candidate = [ res1["id"] , elementSize, res1["keywords_ids"] ]
-                        #    candidate = ( integerID , realSize , #keywords )
-                        candidates.append(candidate)
+                        #    old way: candidate = ( integerID , realSize , #keywords )
+                        #    new way: scholars_array[uid] = ( ID , occ size )
 
-                    candidates = sorted(candidates, key=lambda candit: candit[1], reverse=True)
-                    print("candidates:",candidates)
-                    self.unique_id = { unique_id : "D::"+str(candidates[0]["doors_uid"][0:8]) }
-                    STR_keywords_ids = candidates[0][2]
+                        scholar_array[node_uid] = 1
+                # debug
+                # print("getScholarsList<==scholar_array", scholar_array)
 
-                # [ / Solving duplicates ]
-
-                keywords_ids = STR_keywords_ids.split(',')
-                for keywords_id in keywords_ids:
-                    # debug
-                    # print("kwid >> ", keywords_id)
-
-                    if keywords_id != "":
-                        sql2 = "SELECT * FROM sch_kw where kwid="+keywords_id
-                        try:
-                            self.cursor.execute(sql2)
-                            res2=self.cursor.fetchone()
-                            while res2 is not None:
-                                scholar_array[res2['uid']]=1
-                                res2=self.cursor.fetchone()#res2++
-                        except Exception as error:
-                            print("sql2:\t"+sql2)
-                            print(error)
+            elif qtype == "filter":
+                sql_query = None
 
                 # debug
-                print("getScholarsList<==scholar_array", scholar_array)
+                print("filter: REST query is", queryargs)
 
+                if "query" in queryargs and queryargs["query"] == "*":
+                    # query is "*" <=> all scholars
+                    sql_query = """
+                        SELECT doors_uid
+                        FROM scholars
+                    """
 
-                return scholar_array
+                else:
+                    # query is a set of filters like: key <=> array of values
+                    # (expressed as rest parameters: "keyA[]=valA1&keyB[]=valB1&keyB[]=valB2")
 
-            except Exception as error:
-                if sql1 != None:
-                    print("sql1:\t"+sql1)
-                if sql2 != None:
-                    print("sql2:\t"+sql2)
-                print(error)
+                    # 1. we receive the original request.query_string
+                    #    and restparse rebuilds the corresponding dict
 
+                    # 2. we map it to an sql conjunction of alternatives
+                    #    ==> WHERE colA IN ("valA1") AND colB IN ("valB1", "valB2")
 
-        if qtype == "filter":
-            print("filter: query is", query)
-            # query is a set of filters like: key <=> array of values
-            # (expressed as rest parameters: "keyA[]=valA1&keyB[]=valB1&keyB[]=valB2")
+                    # build constraints from the args
+                    # ================================
+                    filter_dict = restparse(queryargs)
+                    sql_constraints = []
+                    for key in filter_dict:
+                        known_filter = None
+                        sql_column = None
 
-            # we map it to an sql conjunction of alternatives
-            # ==> WHERE colA IN ("valA1") AND colB IN ("valB1", "valB2")
-            try:
-                filter_dict = restparse(query)
+                        if key not in whoswhofilters_to_sqlnames:
+                            continue
+                        else:
+                            known_filter = key
+                            sql_column = whoswhofilters_to_sqlnames[key]
 
-                # build WHERE-clause elements for each table
-                # ==========================================
-                sql_constraints = []
-                for key in filter_dict:
-                    col = whoswho_to_sqlnames[key]
+                        val = filter_dict[known_filter]
 
-                    clause = ""
-                    if isinstance(val, list) or isinstance(val, tuple):
-                        qwliststr = repr(val)
-                        qwliststr = sub(r'^\[', '(', qwliststr)
-                        qwliststr = sub(r'\[$', ')', qwliststr)
-                        clause = 'IN '+qwliststr
-                    elif isinstance(val, int):
-                        clause = '= %i' % val
-                    elif isinstance(val, float):
-                        clause = '= %f' % val
-                    elif isinstance(val, str):
-                        clause = '= "%s"' % val
+                        clause = ""
+                        if isinstance(val, list) or isinstance(val, tuple):
+                            qwliststr = repr(val)
+                            qwliststr = sub(r'^\[', '(', qwliststr)
+                            qwliststr = sub(r'\]$', ')', qwliststr)
+                            clause = 'IN '+qwliststr
+                        elif isinstance(val, int):
+                            clause = '= %i' % val
+                        elif isinstance(val, float):
+                            clause = '= %f' % val
+                        elif isinstance(val, str):
+                            clause = '= "%s"' % val
 
-                    sql_constraints.append("(%s %s)" % (col, clause))
+                        sql_constraints.append("(%s %s)" % (sql_column, clause))
 
-                query = """
-                    SELECT
-                        scholars.*,
-                        affiliations.*,
+                    # debug
+                    print("sql_constraints", sql_constraints)
 
-                        -- kws info
-                        COUNT(keywords.kwid) AS keywords_nb,
-                        GROUP_CONCAT(kwstr) AS keywords_list,
-                        GROUP_CONCAT(kwid) AS keywords_ids
+                    # use constraints as WHERE-clause
+                    sql_query = """
+                        SELECT
+                            scholars.doors_uid,
 
-                    FROM scholars
+                            -- kws info
+                            COUNT(keywords.kwid) AS keywords_nb,
+                            GROUP_CONCAT(keywords.kwstr) AS keywords_list,
+                            GROUP_CONCAT(keywords.kwid) AS keywords_ids
 
-                    -- two step JOIN for keywords
-                    JOIN sch_kw
-                        ON doors_uid = uid
-                    JOIN keywords
-                        ON sch_kw.kwid = keywords.kwid
-                    LEFT JOIN affiliations
-                        ON affiliation_id = affid
-                    WHERE  %s
-                    GROUP BY doors_uid
-                """ % " AND ".join(sql_constraints)
+                        FROM scholars
 
-                self.cursor.execute(query)
-                res1=self.cursor.fetchall()
-                #            print(res1)
-                for unique_id in res1:
-                    scholar_array[ unique_id[0] ] = 1
-                return scholar_array
-            except Exception as error:
-                if sql1 != None:
-                    print("qtype filter sql1:\t"+sql1)
-                if sql2 != None:
-                    print("qtype filter sql2:\t"+sql2)
-                print(error)
+                        -- two step JOIN for keywords
+                        JOIN sch_kw
+                            ON doors_uid = uid
+                        JOIN keywords
+                            ON sch_kw.kwid = keywords.kwid
+                        LEFT JOIN affiliations
+                            ON affiliation_id = affid
+
+                        -- our filtering constraints fit here
+                        WHERE  %s
+                        GROUP BY doors_uid
+
+                    """ % (" AND ".join(sql_constraints))
+
+                    self.cursor.execute(sql_query)
+                    scholar_rows=self.cursor.fetchall()
+                    for row in scholar_rows:
+                        scholar_array[ row['doors_uid'] ] = 1
+
+            return scholar_array
+
+        except Exception as error:
+            print("===== getScholarsList SQL ERROR ====")
+            if queryargs != None:
+                print("qtype "+qtype+" received REST queryargs:\t"+str(queryargs))
+            if sql_query != None:
+                print("qtype filter attempted SQL query:\t"+sql_query)
+            print(repr(error) + "("+error.__doc__+")")
+            print("stack (\n\t"+"\t".join(format_tb(error.__traceback__))+"\n)")
+            print("==== /getScholarsList SQL ERROR ====")
 
 
     def extract(self,scholar_array):
@@ -653,6 +649,9 @@ def restparse(paramstr):
         "keyB": [valB1, valB2],
         "keyC": valC
         }
+
+    NB better than flask's request.args (aka MultiDict)
+       because we remove the '[]' and we rebuild the arrays
     """
     resultdict = {}
     components = paramstr.split('&')
@@ -661,16 +660,16 @@ def restparse(paramstr):
 
         # type array
         if len(keystr) > 2 and keystr[-2:] == "[]":
-            key = keystr[0:-2]
+            key = unquote(keystr[0:-2])
 
             if key in resultdict:
-                resultdict[key].append(valstr)
+                resultdict[key].append(unquote(valstr))
             else:
-                resultdict[key] = [valstr]
+                resultdict[key] = [unquote(valstr)]
 
         # atomic type
         else:
-            key = keystr
-            resultdict[key]=valstr
+            key = unquote(keystr)
+            resultdict[key]=unquote(valstr)
 
     return resultdict

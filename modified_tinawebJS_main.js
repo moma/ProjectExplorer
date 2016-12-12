@@ -9,62 +9,56 @@ $( window ).resize(function() {
 
 
 
-mainfile = (isUndef(getUrlParam.file))?false:true;
+mainfile = (isUndef(ourGetUrlParam.file))?false:true;
 //  === [what to do at start] === //
 if (mainfile) {
 
-	if(!isUndef(getUrlParam.file)){
+	if(!isUndef(ourGetUrlParam.file)){
 	    $.doTimeout(30,function (){
 
-            var filename = getUrlParam.file;
+            var filename = ourGetUrlParam.file;
             if( filename.indexOf(".json") > -1 ) {
                 bringTheNoise( filename , "mono");
-                
+
             } else {
                 listGexfs();
-        		parse(getUrlParam.file);
-        		nb_cats = scanCategories();  
+        		parse(filename);
+        		nb_cats = scanCategories();
         		pr("nb_cats: "+nb_cats);
-        		
+
                 graphtype=(nb_cats==1)?"mono":"bi";
-        		bringTheNoise(getUrlParam.file,graphtype);
-        		
+        		bringTheNoise(filename,graphtype);
+
         		$.doTimeout(30,function (){
-        		    if(!isUndef(gexfDict[getUrlParam.file])){
-        		        $("#currentGraph").html(gexfDict[getUrlParam.file]);
-        		    } else $("#currentGraph").html(getUrlParam.file);
+                    var filename = ourGetUrlParam.file
+        		    if(!isUndef(gexfDict[filename])){
+        		        $("#currentGraph").html(gexfDict[filename.file]);
+        		    } else $("#currentGraph").html(filename);
         		    scanDataFolder();
                     listGexfs();
-        		});            
+        		});
             }
 	    });
 	} else {
 	    window.location.href=window.location.origin+window.location.pathname+"?file="+mainfile;
 	}
-} //url-mode 
+} //url-mode
 else {
 
-    if(isUndef(getUrlParam.nodeidparam)) {
-        console.warn("missing nodes filter/id param");
-        // pr(getUrlParam.nodeidparam)
-        // $('#mainmodal').modal('show');
-        // $("#my-text-input").tokenInput("try.json");
-        //    pr("doing something 'cause i'm a doer"); mainfile=true;
-	    // bringTheNoise("data/140907Syneco.gexf","mono");
-        // scanCategories();
-    } else {
-        console.log("Received query of type:", getUrlParam.type)
-	    if(getUrlParam.type == "filter"){
-    		//gexfPath = "php/bridgeClientServer_filter.php?query="+getUrlParam.nodeidparam;
-            param=getUrlParam.nodeidparam;
-            // pr(param)
-            bringTheNoise(param,"filtermode");
+    var param = ourGetUrlParam.nodeidparam
+    var qtype = ourGetUrlParam.type
 
-	    } else {
-    		param=getUrlParam.nodeidparam;
-            // pr(param)
-            bringTheNoise(param,"unique_id");
-	    }
+    if(isUndef(param) || isUndef(qtype)) {
+        console.warn("missing nodes filter/id param");
+    }
+    else {
+        console.log("Received query of type:", qtype)
+        if(qtype == "filter" || qtype == "unique_id"){
+            bringTheNoise(param,qtype);
+        }
+        else {
+            console.warn ("=> unsupported query type !")
+        }
     }
 }//  === [ / what to do at start ] === //
 
@@ -72,11 +66,11 @@ else {
 //just CSS
 function sigmaLimits(){
     pr("\t*** sigmaLimits()")
-    
+
     pw=$('#sigma-example').width();
-    ph=$('#sigma-example').height();    
+    ph=$('#sigma-example').height();
     pr("\t\tprevsigma:("+pw+","+ph+")");
-    
+
     sidebar=$('#leftcolumn').width();
     anchototal=$('#fixedtop').width();
     altototal=$('#leftcolumn').height();
@@ -84,14 +78,14 @@ function sigmaLimits(){
     altodeftop=$('#defaultop').height()
     $('#sigma-example').width(anchototal-sidebar);
     $('#sigma-example').height(altototal-altofixtop-altodeftop-4);
-    
+
     pw=$('#sigma-example').width();
     ph=$('#sigma-example').height();
     pr("\t\tnowsigma:("+pw+","+ph+")");
 }
 
-function bringTheNoise(pathfile,type){
-    
+function bringTheNoise(sourceinfo,type){
+
     $("#semLoader").hide();
 
 
@@ -100,7 +94,7 @@ function bringTheNoise(pathfile,type){
 
     //  === get width and height   === //
     sigmaLimits();
-    
+
     //  === sigma canvas resize  with previous values === //
     partialGraph = sigma.init(document.getElementById('sigma-example'))
     .drawingProperties(sigmaJsDrawingProperties)
@@ -117,8 +111,8 @@ function bringTheNoise(pathfile,type){
 
     $('.etabs').click(function(){
         $.doTimeout(500,function (){
-            $("#opossiteNodes").readmore({maxHeight:200}); 
-            $("#sameNodes").readmore({maxHeight:200}); 
+            $("#opossiteNodes").readmore({maxHeight:200});
+            $("#sameNodes").readmore({maxHeight:200});
         });
     });
 
@@ -159,25 +153,25 @@ function bringTheNoise(pathfile,type){
         fullwidth=$('#fixedtop').width();
         e.preventDefault();
         // $("#wrapper").toggleClass("active");
-        if(parseFloat(sidebar.css("right"))<0){            
-            $("#aUnfold").attr("class","rightarrow"); 
+        if(parseFloat(sidebar.css("right"))<0){
+            $("#aUnfold").attr("class","rightarrow");
             sidebar.animate({
                 "right" : sidebar.width()+"px"
-            }, { duration: 400, queue: false }); 
+            }, { duration: 400, queue: false });
 
             $("#ctlzoom").animate({
                     "right": (sidebar.width()+10)+"px"
-            }, { duration: 400, queue: false }); 
-               
+            }, { duration: 400, queue: false });
+
             // $('#sigma-example').width(fullwidth-sidebar.width());
             $('#sigma-example').animate({
                     "width": fullwidth-sidebar.width()+"px"
-            }, { duration: 400, queue: false }); 
+            }, { duration: 400, queue: false });
             setTimeout(function() {
                   partialGraph.resize();
                   partialGraph.refresh();
             }, 400);
-        } 
+        }
         else {
             //HIDE leftcolumn
             $("#aUnfold").attr("class","leftarrow");
@@ -187,7 +181,7 @@ function bringTheNoise(pathfile,type){
 
             $("#ctlzoom").animate({
                     "right": "0px"
-            }, { duration: 400, queue: false }); 
+            }, { duration: 400, queue: false });
 
                 // $('#sigma-example').width(fullwidth);
             $('#sigma-example').animate({
@@ -197,24 +191,26 @@ function bringTheNoise(pathfile,type){
                   partialGraph.resize();
                   partialGraph.refresh();
             }, 400);
-            
-        }   
+
+        }
     });
 
 
     // $("#statsicon").click(function(){
     //     $('#statsmodal').modal('show');
     // });
-    
+
 
     //  === start minimap library... currently off  === //
     startMiniMap();
-    
 
-    console.log("parsing...");    
+
+    console.log("parsing...");
     // < === EXTRACTING DATA === >
     if(mainfile) {
         pr("mainfile: "+mainfile)
+
+        var pathfile = sourceinfo
 
         if(gexfDict[pathfile]) $("#network").html(gexfDict[pathfile]);
         else $("#network").html(pathfile);
@@ -229,7 +225,7 @@ function bringTheNoise(pathfile,type){
             if( pathfile.indexOf(".json") > -1 ) {
                 JSONFile( pathfile )
             } else {
-                onepartiteExtract(); 
+                onepartiteExtract();
             }
 
             pushSWClick("social");
@@ -241,7 +237,7 @@ function bringTheNoise(pathfile,type){
 
             pr(partialGraph._core.graph.nodes.length)
             pr(partialGraph._core.graph.edges.length)
-	    } 
+	    }
 
         if(type=="bi")  {
 
@@ -255,39 +251,78 @@ function bringTheNoise(pathfile,type){
 
 
         partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8).draw(2,2,2);
-        theListeners(); 
-        $("#closeloader").click(); 
+        theListeners();
+        $("#closeloader").click();
 
     } else {
-      // 
         var theurl,thedata,thename;
 
-    	$('#modalloader').modal('show');
-    	
-	    if(type=="unique_id") {
-		    pr("bring the noise, case: unique_id");
-            pr(getClientTime()+" : DataExt Ini");
+        $('#modalloader').modal('show');
+
+        // console.warn("===> PASSING ON QUERY (type "+type+") TO BRIDGE <===")
+        if(type=="uid") {
+            // pr("bring the noise, case: unique_id");
+            // pr(getClientTime()+" : DataExt Ini");
             // < === DATA EXTRACTION === >
             theurl = bridge["forNormalQuery"]
-            thedata = "unique_id="+getUrlParam.nodeidparam+"&it="+iterationsFA2;
-            thename = true;
-	    }
+            thedata = "qtype=uid&unique_id="+sourceinfo+"&it="+iterationsFA2;
+            thename = "unique scholar";
+        }
 
-
-        if (type=="filtermode") {
-            pr("bring the noise, case: multipleQuery");
-            pr(getClientTime()+" : DataExt Ini");
+        if (type=="filter") {
+            // pr("bring the noise, case: multipleQuery");
+            // pr(getClientTime()+" : DataExt Ini");
             theurl = bridge["forFilteredQuery"];
-            thedata = "query="+getUrlParam.nodeidparam;
-            thename = false;
-            thedata = thedata.replace("#","_char_");//possible bugfix
+
+            // json is twice URI encoded by whoswho to avoid both '"' and '%22'
+            var json_constraints = decodeURIComponent(sourceinfo)
+
+            console.log("multipleQuery RECEIVED", json_constraints)
+
+            // safe parsing of the URL's untrusted JSON
+            var filteringKeyArrayPairs = JSON.parse( json_constraints)
+
+            // INPUT json: <= { keywords: ['complex systems', 'something'],
+            //                  countries: ['France', 'USA'], laboratories: []}
+
+            // we build 2 OUTPUT strings:
+
+            // => thedata (for comexAPI):
+            //   keywords[]="complex systems"&keywords[]="something"&countries="France"&countries[]="USA"
+
+            // => thename (for user display):
+            //   ("complex systems" or "something") and ("France" or "USA")
+
+            // console.log("decoded filtering query", filteringKeyArrayPairs)
+
+            var restParams = []
+            var nameElts = []
+            // build REST parameters from filtering arrays
+            // and name from each filter value
+            for (var fieldName in filteringKeyArrayPairs) {
+                var nameSubElts = []
+                for (var value of filteringKeyArrayPairs[fieldName]) {
+                    // exemple: "countries[]=France"
+                    restParams.push(fieldName+"[]="+value)
+                    nameSubElts.push ('"'+value+'"')
+                }
+                nameElts.push("("+nameSubElts.join(" or ")+")")
+            }
+
+            if (restParams.length) {
+                thedata = "qtype=filters&" + restParams.join("&")
+                thename = nameElts.join(" and ")
+            }
+            else {
+                thedata = "qtype=filters&query=*"
+                thename = "(ENTIRE NETWORK)"
+            }
         }
 
         // Assigning name for the network
-        if (thename) thename = getUrlParam.nodeidparam.replace(/\_/g, ' ').toUpperCase();
-        else {
+        if (! thename) {
             elements = []
-            queryarray = JSON.parse(getUrlParam.nodeidparam)
+            queryarray = JSON.parse(ourGetUrlParam.nodeidparam)
             for(var i in queryarray) {
                 item = queryarray[i]
                 if(Array.isArray(item) && item.length>0) {
@@ -298,10 +333,8 @@ function bringTheNoise(pathfile,type){
         }
 
         SigmaLayouting( theurl , thedata , thename );
-    }  
+    }
 }
-
-//http://communityexplorer.org/explorerjs.html?nodeidparam={%22categorya%22%3A%22Keywords%22%2C%22categoryb%22%3A%22Scholars%22%2C%22tags%22%3A[%22%23resident%22]}
 
 
 function theListeners(){
@@ -309,21 +342,21 @@ function theListeners(){
     // leftPanel("close");
     $("#closeloader").click();//modal.hide doesnt work :c
 
-    cancelSelection(false);        
+    cancelSelection(false);
     $("#tips").html(getTips());
     //$('#sigma-example').css('background-color','white');
     $("#category-B").hide();
     $("#labelchange").hide();
-    $("#availableView").hide(); 
+    $("#availableView").hide();
     showMeSomeLabels(6);
     initializeMap();
     updateMap();
     updateDownNodeEvent(false);
     partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8).draw(2,2,2);
-    $("#saveAs").click(function() {        
+    $("#saveAs").click(function() {
         $('#savemodal').modal('show');
     });
-    
+
         /******************* /SEARCH ***********************/
     $.ui.autocomplete.prototype._renderItem = function(ul, item) {
         var searchVal = $("#searchinput").val();
@@ -343,7 +376,7 @@ function theListeners(){
             var results = $.grep(labels, function(e) {
                 return matcher.test(e.label); //|| matcher.test(e.desc);
             });
-            
+
             if (!results.length) {
                 $("#noresults").text("Pas de résultats");
             } else {
@@ -351,11 +384,11 @@ function theListeners(){
             }
             matches = results.slice(0, maxSearchResults);
             response(matches);
-            
+
         },
         minLength: minLengthAutoComplete
-    }); 
-   
+    });
+
     $('#searchinput').bind('autocompleteopen', function(event, ui) {
         $(this).data('is_open',true);
     });
@@ -372,12 +405,12 @@ function theListeners(){
             $(this).val(strSearchBar);
         }
     });
-    
+
     // i've a list of coincidences and i press enter like a boss
     $("#searchinput").keydown(function (e) {
         if (e.keyCode == 13 && $("input#searchinput").data('is_open') === true) {
             // Search has several results and you pressed ENTER
-            if(!is_empty(matches)) {                
+            if(!is_empty(matches)) {
                 var coincidences = []
                 for(j=0;j<matches.length;j++){
                 	coincidences.push(matches[j].id)
@@ -391,7 +424,7 @@ function theListeners(){
             }
         }
     });
-    
+
     $("#searchinput").keyup(function (e) {
         if (e.keyCode == 13 && $("input#searchinput").data('is_open') !== true) {
             pr("search KEY UP");
@@ -401,10 +434,10 @@ function theListeners(){
                 	MultipleSelection(exfnd.id , true);//true-> apply deselection algorithm
                     $("input#searchinput").val("");
                     $("input#searchinput").autocomplete( "close" );
-            });     
+            });
         }
     });
-    
+
     $("#searchsubmit").click(function () {
         pr("searchsubmit CLICK");
         var s = $("#searchinput").val();
@@ -420,12 +453,12 @@ function theListeners(){
         partialGraph.refresh();
         // partialGraph.startForceAtlas2();
     });
-    
+
     $('#sigma-example').dblclick(function(event) {
         pr("in the double click event");
 
         var targeted = [];
-        
+
         if(cursor_size>0) {
                     //Multiple selection
             x1 = partialGraph._core.mousecaptor.mouseX;
@@ -440,7 +473,7 @@ function theListeners(){
                         );
                     if(parseInt(distance)<=cursor_size) {
                         counter++;
-                        actualSel.push(n.id);                                
+                        actualSel.push(n.id);
                     }
                 }
             });
@@ -457,14 +490,14 @@ function theListeners(){
         }
 
         if(!is_empty(targeted)) {
-            graphTagCloudElem(targeted); 
+            graphTagCloudElem(targeted);
         } else {
             if(!is_empty(selections)){
-                cancelSelection(false);                
+                cancelSelection(false);
             }
         }
     });
-    
+
     // minimap stuff
     // $("#overview")
     //    .mousemove(onOverviewMove)
@@ -472,7 +505,7 @@ function theListeners(){
     //    .mouseup(endMove)
     //    .mouseout(endMove)
     //    .mousewheel(onGraphScroll);
-    
+
     $("#sigma-example")
         .mousemove(function(){
             if(!isUndef(partialGraph)) {
@@ -494,7 +527,7 @@ function theListeners(){
                 }).map(function(n) {
                     return n.id;
                 });
-                
+
                 partialGraph.dispatch(
                     e['type'] == 'mousedown' ?
                     'downgraph' :
@@ -515,7 +548,7 @@ function theListeners(){
                                 );
                             if(parseInt(distance)<=cursor_size) {
                                 counter++;
-                                actualSel.push(n.id);                                
+                                actualSel.push(n.id);
                             }
                         }
                     });
@@ -545,9 +578,9 @@ function theListeners(){
                     // //The most brilliant way of knowing if an array is empty in the world of JavaScript
                     i=0; for(var s in actualSel) { i++; break;}
 
-                    if(is_empty(actualSel) || i==0){ 
-                        pr("cursor radius ON, mouseDown -> selecciones vacias"); 
-                        cancelSelection(false);   
+                    if(is_empty(actualSel) || i==0){
+                        pr("cursor radius ON, mouseDown -> selecciones vacias");
+                        cancelSelection(false);
                         //$("#names").html("");
                         //$("#opossiteNodes").html("");
                         //$("#information").html("");
@@ -555,7 +588,7 @@ function theListeners(){
                         //$("#tips").html(getTips());
                         //changeButton("unselectNodes");
                         //if(counter>0) graphResetColor();
-                    }      
+                    }
 
                 } else {
                     //Unique Selection
@@ -563,11 +596,11 @@ function theListeners(){
                         e['type'] == 'mousedown' ? 'downnodes' : 'upnodes',
                         targeted
                         );
-                }      
-                
+                }
+
                 partialGraph.draw();
-                trackMouse();    
-                
+                trackMouse();
+
 
             }
         });
@@ -585,12 +618,12 @@ function theListeners(){
         	// pr(sigmaJsMouseProperties.minRatio)
         	// pr(sigmaJsMouseProperties.maxRatio)
             partialGraph.zoomTo(
-                partialGraph._core.width / 2, 
-                partialGraph._core.height / 2, 
+                partialGraph._core.width / 2,
+                partialGraph._core.height / 2,
                 ui.value);
         }
     });
-    
+
     $("#zoomPlusButton").click(function () {
         partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, partialGraph._core.mousecaptor.ratio * 1.5);
         $("#zoomSlider").slider("value",partialGraph.position().ratio);
@@ -602,7 +635,7 @@ function theListeners(){
         $("#zoomSlider").slider("value",partialGraph.position().ratio);
         return false;
     });
-    
+
     $("#edgesButton").click(function () {
         fa2enabled=true;
         if(!isUndef(partialGraph.forceatlas2)) {
@@ -620,9 +653,9 @@ function theListeners(){
             partialGraph.startForceAtlas2();
             return;
         }
-        
+
     });
-    
+
 
 
     //  finished but not used
@@ -644,51 +677,16 @@ function theListeners(){
 
 
     //finished
-    $("#sliderANodeSize").freshslider({
-        step:1,
-        min:1,
-        max:25,
-        value:1,
-        bgcolor:"#27c470",
-        onchange:function(value){
-            $.doTimeout(100,function (){
-                   partialGraph.iterNodes(function (n) {
-                       if(Nodes[n.id].type==catSoc) {
-                           n.size = parseFloat(Nodes[n.id].size) + parseFloat((value-1))*0.3;
-                           sizeMult[catSoc] = parseFloat(value-1)*0.3;
-                       }
-                   });
-                   partialGraph.draw();
-            });
-        }
-    }); 
+    NodeSizeSlider("#sliderANodeSize","Document", 10, "#27c470")
 
-    //finished
-    $("#sliderBNodeSize").freshslider({
-        step:1,
-        min:1,
-        max:25,
-        value:1,
-        bgcolor:"#FFA500",
-        onchange:function(value){
-            $.doTimeout(100,function (){
-                   partialGraph.iterNodes(function (n) {
-                       if(Nodes[n.id].type==catSem) {
-                           n.size = parseFloat(Nodes[n.id].size) + parseFloat((value-1))*0.3;
-                           sizeMult[catSem] = parseFloat(value-1)*0.3;
-                       }
-                   });
-                   partialGraph.draw();
-            });
-        }
-    }); 
+    //finished     TODO check if doing it is useful at init
+    NodeSizeSlider("#sliderBNodeSize","NGram", 1, "#FFA500")
 
-
-    // NodeWeightFilter ( "#sliderBNodeWeight" ,  "NGram" , "type" , "size") 
+    // NodeWeightFilter ( "#sliderBNodeWeight" ,  "NGram" , "type" , "size")
 
     // EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
-    
-    
+
+
     //finished
     $("#unranged-value").freshslider({
         step: 1,
@@ -726,7 +724,7 @@ function SigmaLayouting( URL, DATA, NAME) {
         async: true,
         success : function(data) {
         	        pr(data)
-                    if(!isUndef(getUrlParam.seed))seed=getUrlParam.seed;
+                    if(!isUndef(ourGetUrlParam.seed))seed=ourGetUrlParam.seed;
                     extractFromJson(data,seed);
 
                     // changeToMacro("social");
@@ -801,7 +799,7 @@ function SigmaLayouting( URL, DATA, NAME) {
 
                         // [ semantic layouting ]
                         var ForceAtlas2_ = new Worker("tinawebJS/asyncFA2.js");
-                        ForceAtlas2_.postMessage({ 
+                        ForceAtlas2_.postMessage({
                             "nodes": otherGraph._core.graph.nodes,
                             "edges": otherGraph._core.graph.edges,
                             "it":iterationsFA2_
@@ -828,30 +826,30 @@ function SigmaLayouting( URL, DATA, NAME) {
 
                             semanticConverged = true;
                             $("#semLoader").hide();
-                            if( NOW=="B" ) { 
+                            if( NOW=="B" ) {
 
                                 changeToMacro("semantic");
-                                partialGraph.draw();            
+                                partialGraph.draw();
                                 // $("#sliderBEdgeWeight").html("");
                                 // $("#sliderBNodeWeight").html("");
                                 $("#category-B").show();
                                 EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
                                 NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size");
                                 $("#colorGraph").hide();
-                            
-                                
+
+
                             }
-    
+
                             console.log("Parsing and FA2 complete for SemanticGraph.");
                         });
                         // [ / semantic layouting ]
 
 
 
-                        theListeners(); 
-                    }); 
+                        theListeners();
+                    });
         },
-        error: function(){ 
+        error: function(){
 	    console.log("in the main.js")
 	    console.log(URL)
             pr("Page Not found. parseCustom, inside the IF");
