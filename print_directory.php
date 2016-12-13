@@ -1,7 +1,7 @@
 <?php
-include ("comex_library.php");
-include ("parametres.php");
-include ("normalize.php");
+include ("php_library/comex_library.php");
+include ("php_library/parametres.php");
+include ("php_library/normalize.php");
 
 //include("../common/library/fonctions_php.php");
 
@@ -324,12 +324,12 @@ foreach ($base->query($sql) as $row) {
     $scholars[$row['doors_uid']] = $info;
 }
 /// stats
-include ('stat-prep_from_array.php');///
+include ("php_library/stat-prep_from_array.php");
 
 // debug
 // $content .= var_dump($scholars) ;
 
-include ("directory_content.php");
+include ("php_library/directory_content.php");
 
 
 // liste des chercheurs

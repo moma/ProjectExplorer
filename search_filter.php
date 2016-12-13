@@ -3,9 +3,8 @@
 /*
  * Génère le gexf des scholars à partir de la base mysql
  */
-include("parametres.php");
-//include("../common/library/fonctions_php.php");
-include("normalize.php");
+include("php_library/parametres.php");
+include("php_library/normalize.php");
 
 
 $base = new PDO($dsn, $user, $pass, $opt);

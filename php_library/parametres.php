@@ -2,11 +2,8 @@
 
 /* liste de parametres */
 
-$dbname='community.db';
-
 $min_num_friends=0;// nombre minimal de voisin que doit avoir un scholar pour être affiché
 // $compress='No';
-
 
 /* parametres externes: nom de l'hôte SQL*/
 $params = parse_ini_file("parametres_comex.ini");

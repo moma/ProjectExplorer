@@ -1,10 +1,9 @@
 <?php
 // affiche la liste de jobs correspondant à une requête
 
-include ("parametres.php");
-include ("normalize.php");
-include ("comex_library.php");
-//include("../common/library/fonctions_php.php");
+include ("php_library/parametres.php");
+include ("php_library/normalize.php");
+include ("php_library/comex_library.php");
 
 $meta = '<!DOCTYPE html>
 <html lang="en">
@@ -237,11 +236,11 @@ foreach ($base->query($sql) as $row) {
 
 /// stats
 //$base = new PDO('sqlite:' . $dbname);
-include ('jobs_stat-prep_from_array.php');///
+include ('php_library/jobs_stat-prep_from_array.php');///
 
 
 
-include ("jobs_content.php");
+include ("php_library/jobs_content.php");
 
 // liste des chercheurs
 

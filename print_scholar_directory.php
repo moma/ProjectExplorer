@@ -1,8 +1,7 @@
 <?php
-include ("comex_library.php");
-include ("parametres.php");
-include ("normalize.php");
-//include("../common/library/fonctions_php.php");
+include ("php_library/comex_library.php");
+include ("php_library/parametres.php");
+include ("php_library/normalize.php");
 
 $meta = '<!DOCTYPE html>
 <html lang="en">
@@ -188,9 +187,9 @@ foreach ($base->query($sql) as $row) {
 }
 
 }
-include ('stat-prep_from_array.php');///
+include ('php_library/stat-prep_from_array.php');
 
-include ("directory_content.php");
+include ('php_library/directory_content.php');
 
 
 
