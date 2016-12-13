@@ -7,13 +7,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="utf-8">
 
-    <link rel="stylesheet" href="explorerlibs/jquery/jquery-ui.css" media="screen">
-    <link rel="stylesheet" href="explorerlibs/bootstrap/css/bootstrap.css" media="screen">
-    <link rel="stylesheet" href="explorerlibs/css2/freshslider.css" media="screen">
-    <link rel="stylesheet" href="explorerlibs/css2/custom.css" media="screen">
-    <link rel="stylesheet" href="explorerlibs/css2/sidebar.css" media="screen">
-    <link rel="stylesheet" href="explorerlibs/bootswatch/css/bootswatch.css">
-    <link rel="stylesheet" href="explorerlibs/css2/font.css" type="text/css">
+    <link rel="stylesheet" href="static/explorerlibs/jquery/jquery-ui.css" media="screen">
+    <link rel="stylesheet" href="static/explorerlibs/bootstrap/css/bootstrap.css" media="screen">
+    <link rel="stylesheet" href="static/explorerlibs/css2/freshslider.css" media="screen">
+    <link rel="stylesheet" href="static/explorerlibs/css2/custom.css" media="screen">
+    <link rel="stylesheet" href="static/explorerlibs/css2/sidebar.css" media="screen">
+    <link rel="stylesheet" href="static/explorerlibs/bootswatch/css/bootswatch.css">
+    <link rel="stylesheet" href="static/explorerlibs/css2/font.css" type="text/css">
 
 
 </head>
@@ -24,7 +24,7 @@
       <div class="container">
 
         <div class="navbar-header">
-          <a href="index.html" class="navbar-brand"> <img width="20px" src="explorerlibs/img2/home.png"></img> ComexJS</a>
+          <a href="index.html" class="navbar-brand"> <img width="20px" src="static/explorerlibs/img2/home.png"></img> ComexJS</a>
           <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
@@ -157,7 +157,7 @@
                   <ul id="colorGraph" class="nav navbar-nav navbar-right">
                      <li class="dropdown">
                      	<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                              <img title="Set Colors" src="explorerlibs/img2/colors.png" width="20px"><b class="caret"></b></img>
+                              <img title="Set Colors" src="static/explorerlibs/img2/colors.png" width="20px"><b class="caret"></b></img>
                      	</a>
       				        <ul class="dropdown-menu">
       				          <li><a href="#" onclick='clustersBy("country")'>By Country</a></li>
@@ -205,7 +205,7 @@
           <div style="visibility: hidden;" id="sigma-othergraph"></div>
 
           <div id="semLoader" style="position:absolute; top:50%; left:40%; width:80px; visibility: hidden;">
-            <img src="explorerlibs/img2/loading-bar.gif"></img>
+            <img src="static/explorerlibs/img2/loading-bar.gif"></img>
           </div>
 
 	        <ul id="ctlzoom">
@@ -221,20 +221,20 @@
 
                    <li>
                       <a href="#" id="geomapicon" onclick="$('#geomapmodal').modal('show'); callGeomap();">
-                        <img title="World Map Distribution" width="34px" src="explorerlibs/img2/world.png"></img>
+                        <img title="World Map Distribution" width="34px" src="static/explorerlibs/img2/world.png"></img>
                       </a>
                   </li>
 
 
                    <li>
                       <a href="#" id="snapicon" onclick="saveGraphIMG();" >
-                        <img title="Take a photo!" width="34px" src="explorerlibs/img2/camera.png"></img>
+                        <img title="Take a photo!" width="34px" src="static/explorerlibs/img2/camera.png"></img>
                       </a>
                   </li>
 
                    <li>
                       <a href="#" id="saveAs">
-                        <img width="30px" title="Save As..." src="explorerlibs/img2/save.png"></img>
+                        <img width="30px" title="Save As..." src="static/explorerlibs/img2/save.png"></img>
                       </a>
                   </li>
 
@@ -359,7 +359,7 @@
 
 <div id="modalloader" class="modal fade">
     <div id="loader" class="loader">
-        <img src="explorerlibs/img2/loader.gif"></img>
+        <img src="static/explorerlibs/img2/loader.gif"></img>
     </div>
     <div id="closeloader" data-dismiss="modal"></div>
 </div>
@@ -382,44 +382,44 @@
       <div id="closegeomap" data-dismiss="modal"></div>
 </div>
 
-    <script src="explorerlibs/jquery/jquery-1.10.2.js" type="text/javascript"></script>
-    <script src="explorerlibs/jquery/jquery-ui.js" type="text/javascript"></script>
-    <script src="explorerlibs/jquery/jquery.ba-dotimeout.min.js" type="text/javascript"></script>
-    <script src="explorerlibs/jquery/jquery.mousewheel.min.js" type="text/javascript"></script>
+    <script src="static/explorerlibs/jquery/jquery-1.10.2.js" type="text/javascript"></script>
+    <script src="static/explorerlibs/jquery/jquery-ui.js" type="text/javascript"></script>
+    <script src="static/explorerlibs/jquery/jquery.ba-dotimeout.min.js" type="text/javascript"></script>
+    <script src="static/explorerlibs/jquery/jquery.mousewheel.min.js" type="text/javascript"></script>
 
-    <script type="text/javascript" src="explorerlibs/freshslider.1.0.js"></script>
-    <script src="explorerlibs/readmore.js" type="text/javascript"></script>
-    <script src="explorerlibs/jquery/jquery.easytabs.min.js" type="text/javascript"></script>
+    <script type="text/javascript" src="static/explorerlibs/freshslider.1.0.js"></script>
+    <script src="static/explorerlibs/readmore.js" type="text/javascript"></script>
+    <script src="static/explorerlibs/jquery/jquery.easytabs.min.js" type="text/javascript"></script>
 
-    <script src="explorerlibs/bootstrap/js/bootstrap.min.js"></script>
-    <script src="explorerlibs/bootswatch/js/bootswatch.js"></script>
-    <script src="explorerlibs/bootstrap/js/bootstrap-modal.js" type="text/javascript"></script>
-    <script src="explorerlibs/bootstrap/js/bootstrap-hover-dropdown.min.js" type="text/javascript"></script>
-
-
-    <script src="tinawebJS/globalUtils.js" type="text/javascript"></script>
+    <script src="static/explorerlibs/bootstrap/js/bootstrap.min.js"></script>
+    <script src="static/explorerlibs/bootswatch/js/bootswatch.js"></script>
+    <script src="static/explorerlibs/bootstrap/js/bootstrap-modal.js" type="text/javascript"></script>
+    <script src="static/explorerlibs/bootstrap/js/bootstrap-hover-dropdown.min.js" type="text/javascript"></script>
 
 
-    <script src="explorerlibs/geomap2/js/raphael/raphael-min.js" charset="utf-8" ></script>
-    <script src="explorerlibs/geomap2/js/jquery.mapael.js" charset="utf-8" ></script>
-    <script src="explorerlibs/geomap2/js/maps/world_countries.js" charset="utf-8" ></script>
-    <script src="explorerlibs/geomap2/examples.js" charset="utf-8" ></script>
-    <script src="explorerlibs/geomap2/js/countries_iso3166.js" charset="utf-8" ></script>
-    <link rel="stylesheet" type="text/css" href="explorerlibs/geomap2/css/geo.css" />
+    <script src="static/tinawebJS/globalUtils.js" type="text/javascript"></script>
 
 
-    <script src="tinawebJS/sigma.min.js" type="text/javascript" language="javascript"></script>
-    <script src="tinawebJS/sigma.forceatlas2.js" type="text/javascript" language="javascript"></script>
-    <script src="tinawebJS/settings_explorerjs.js" type="text/javascript" language="javascript"></script>
-    <script src="tinawebJS/sigma.parseCustom.js" type="text/javascript" language="javascript"></script>
-    <script src="tinawebJS/extras_explorerjs.js" type="text/javascript" language="javascript"></script>
-    <script src="tinawebJS/sigmaUtils.js" type="text/javascript" language="javascript"></script>
-    <script src="tinawebJS/methods.js" type="text/javascript" language="javascript"></script>
-    <script src="tinawebJS/minimap.js" type="text/javascript" language="javascript"></script>
-    <script src="tinawebJS/enviroment.js" type="text/javascript" language="javascript"></script>
-    <script src="tinawebJS/asyncFA2.js" type="text/javascript" language="javascript"></script>
-    <script src="tinawebJS/DataScanner.js" type="text/javascript" language="javascript"></script>
-    <script src="tinawebJS/main.js" type="text/javascript" language="javascript"></script>
+    <script src="static/explorerlibs/geomap2/js/raphael/raphael-min.js" charset="utf-8" ></script>
+    <script src="static/explorerlibs/geomap2/js/jquery.mapael.js" charset="utf-8" ></script>
+    <script src="static/explorerlibs/geomap2/js/maps/world_countries.js" charset="utf-8" ></script>
+    <script src="static/explorerlibs/geomap2/examples.js" charset="utf-8" ></script>
+    <script src="static/explorerlibs/geomap2/js/countries_iso3166.js" charset="utf-8" ></script>
+    <link rel="stylesheet" type="text/css" href="static/explorerlibs/geomap2/css/geo.css" />
+
+
+    <script src="static/tinawebJS/sigma.min.js" type="text/javascript" language="javascript"></script>
+    <script src="static/tinawebJS/sigma.forceatlas2.js" type="text/javascript" language="javascript"></script>
+    <script src="static/tinawebJS/settings_explorerjs.js" type="text/javascript" language="javascript"></script>
+    <script src="static/tinawebJS/sigma.parseCustom.js" type="text/javascript" language="javascript"></script>
+    <script src="static/tinawebJS/extras_explorerjs.js" type="text/javascript" language="javascript"></script>
+    <script src="static/tinawebJS/sigmaUtils.js" type="text/javascript" language="javascript"></script>
+    <script src="static/tinawebJS/methods.js" type="text/javascript" language="javascript"></script>
+    <script src="static/tinawebJS/minimap.js" type="text/javascript" language="javascript"></script>
+    <script src="static/tinawebJS/enviroment.js" type="text/javascript" language="javascript"></script>
+    <script src="static/tinawebJS/asyncFA2.js" type="text/javascript" language="javascript"></script>
+    <script src="static/tinawebJS/DataScanner.js" type="text/javascript" language="javascript"></script>
+    <script src="static/tinawebJS/main.js" type="text/javascript" language="javascript"></script>
 
   <script type="text/javascript">
       $('#tab-container').easytabs({updateHash:false});

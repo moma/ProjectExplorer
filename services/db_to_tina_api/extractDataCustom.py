@@ -528,7 +528,7 @@ class MyExtractor:
                 else:
                     if len(self.scholars)<2000:
                         im_id = int(floor(randint(0, 11)))
-                        content += '<img src="img/'+str(im_id)+'.png" width='  + str(self.imsize) +  'px   style=float:left;margin:5px>'
+                        content += '<img src="static/img/'+str(im_id)+'.png" width='  + str(self.imsize) +  'px   style=float:left;margin:5px>'
 
                 content += '<b>Country: </b>' + self.scholars[idNode]['country'] + '</br>'
 
