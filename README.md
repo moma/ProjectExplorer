@@ -1,9 +1,70 @@
-Community explorer registration form
-=====================================
+Community Explorer v.2 beta
+===========================
+
+## comex app with refactoring in progress
+
+It contains:  
+  - an html index based on old bootstrap
+  - several php files specialized in retrieving custom lists of scholars, labs, jobs for directory showing
+    - `whoswho.js` is used to GUIise the queries
+    - legacy jquery and highcharts are used to GUIise the directories
+  - a linked couple python server + tinawebJS to explore the same data in graph view
+    - the python server is in `services/db_to_tina_api` dir
+    - run it with `python3 main.py` and reverse-proxy its host:port to `/comexAPI` location
+    - the twjs is in a legacy version, downloadable [via this subtree](https://github.com/moma/tinawebJS/tree/comex_wip)
 
 
-### Overview
-This folder contains nov 2016 registration form server
+#### TODOES for future refactoring
+  - remove the legacy links to csregistry.org
+  - merge the static files
+
+
+------
+### DB structure
+
+###### Overview
+  - `scholars` is the main table, with a **doors_uid** as primary key
+     - email is also unique in this table
+  - we have three related tables
+    - `affiliations` (directly pointed by an **affiliation_id** in scholars table)
+    - `keywords` (pointed by an intermediate user id <=> keyword id table `sch_kw`)
+    - `linked_ids` (not used yet, to join the uid with external ids like ORCID)
+
+###### More info
+Full table structure is described in [this documentation file](https://github.com/moma/regcomex/blob/c5badbc/doc/table_specifications.md).
+
+###### Exemple queries
+```SQL
+
+-- ==========================
+-- FOR SCHOLAR + AFFILIATIONS
+-- ==========================
+SELECT
+    scholars.*,
+    affiliations.*,
+FROM scholars
+LEFT JOIN affiliations
+    ON affiliation_id = affid
+
+
+-- ==================================
+-- FOR SCHOLAR + KEYWORDS IN ONE LINE
+-- ==================================
+SELECT
+    scholars.*,
+    COUNT(keywords.kwid) AS keywords_nb,
+    GROUP_CONCAT(kwstr) AS keywords_list
+FROM scholars
+JOIN sch_kw
+    ON doors_uid = uid
+JOIN keywords
+    ON sch_kw.kwid = keywords.kwid
+GROUP BY uid ;
+```
+
+
+### User and registration service
+This was merged in dec 2016 with the registration form server
 
   - the form is served by [flask](http://flask.pocoo.org/) and uses [javascript functions](https://github.com/moma/regcomex/blob/master/static/js/comex_reg_form_controllers.js) for validation etc  
   - the registration credentials are transmitted to a doors prototype  
@@ -41,11 +102,11 @@ docker-compose up
 #                  /              \
 #          (reverse proxy)        $host/
 #          $host/regcomex/           \
-#                |               |-----------------------|
-#     |--------------------|     |     site php          |
-#     |  regcomex docker   |     | moma/legacy_php_comex |
-#     |  (serveur python)  |     | (adaptation en cours) |
-#     |--------------------|     |-----------------------|
+#                |                    \
+#     |--------------------|     |-------------------------|
+#     |    services/user   |     | services/db_to_tina_api |
+#     |  (serveur python)  |     |    +  site php          |
+#     |--------------------|     |-------------------------|
 #         |             \                 |
 #         |              \                |
 # |-------------------|   \               |
@@ -215,7 +276,14 @@ NB: The communityexplorer.org app was using a separate DB from legacy wiki csv (
 
 Finally, simply configure the serving of your php|www documentroot in nginx (cf [detailed doc](https://github.com/moma/regcomex/blob/master/doc/nginx_conf.md) for real-life conf).
 
--------
+##### Copyright
+###### Authors
+  - Researchers and engineers of the ISC-PIF
+     - David Chavalarias
+     - Samuel Castillo
+     - Romain Loth
 
-**contact** romain.loth@iscpif.fr  
-(c) 2016 ISCPIF-CNRS  
+###### Acknowledgments
+  - Former Tina developers (java-based software from which tinawebJS is adapted)
+     - Elias Showk
+     - Julian Bilcke

@@ -1,7 +1,5 @@
 *.sqlite
 *.db
-logs/nginx/*
-setup/regcomex_venv/*
-setup/dockers/tests
+*.pyc
 archives_local/*
 __pycache__/

@@ -1,0 +1,88 @@
+	
+		.geomapCont {
+			margin:auto;
+			width:80%;
+			text-align:center;
+			white-space: nowrap;
+		}
+		
+		.distBar {
+			width:200px;
+			height:10px;
+            border-radius:3px;
+			border:1px solid #848484;
+			display: inline-block;
+                        -moz-border-radius: 0px 0px 0px 0px;
+                        -webkit-border-radius: 0px 0px 0px 0px;
+                        background: -moz-linear-gradient(center left, #FFFF00 0%,#FF0000 100%);
+                        background: -webkit-gradient(linear, left bottom, right bottom, color-stop(0, #FFFF00),color-stop(1, #FF0000));
+        }
+        .min,.max {
+			width:100px;
+			height:100px;
+			display: inline-block;
+        }
+
+                
+        .mapTooltip {
+			position:absolute;/*position:fixed;*/
+			background-color : #fff;
+			moz-opacity:0.70;
+			opacity: 0.70;
+			filter:alpha(opacity=70);
+			border-radius:10px;
+			padding : 10px;
+			z-index: 1000;
+			max-width: 200px;
+			display:none;
+			color:#343434;
+		}
+		
+		
+		.mapLegend {
+		}
+		
+		
+		.map, .therange{
+            /* IE10 Consumer Preview */ 
+            background-image: -ms-radial-gradient(left top, ellipse farthest-corner, #FFFFFF 0%, #45CDFF 100%);
+            /* Mozilla Firefox */ 
+            background-image: -moz-radial-gradient(left top, ellipse farthest-corner, #FFFFFF 0%, #45CDFF 100%);
+            /* Opera */ 
+            background-image: -o-radial-gradient(left top, ellipse farthest-corner, #FFFFFF 0%, #45CDFF 100%);
+            /* Webkit (Safari/Chrome 10) */ 
+            background-image: -webkit-gradient(radial, left top, 0, left top, 994, color-stop(0, #FFFFFF), color-stop(1, #45CDFF));
+            /* Webkit (Chrome 11+) */ 
+            background-image: -webkit-radial-gradient(left top, ellipse farthest-corner, #FFFFFF 0%, #45CDFF 100%);
+            /* W3C Markup, IE10 Release Preview */ 
+            background-image: radial-gradient(ellipse farthest-corner at left top, #FFFFFF 0%, #45CDFF 100%);
+			position:relative;
+		}
+
+                
+		.zoomIn, .zoomOut {
+			background-color:#fff;
+			border:1px solid #ccc;
+			color:#000;
+			width:15px;
+			height:15px;
+			line-height: 15px;
+			text-align:center;
+			border-radius:3px;
+			cursor:pointer;
+			position:absolute;
+			top : 10px;
+			font-weight:bold;
+			left : 10px;
+			
+			-webkit-user-select: none; 
+			-khtml-user-select: none;
+			-moz-user-select: none; 
+			-o-user-select: none;
+			user-select: none; 
+		}
+		
+		.zoomOut {
+			top:30px;
+		}
+                
