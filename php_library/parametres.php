@@ -6,7 +6,7 @@ $min_num_friends=0;// nombre minimal de voisin que doit avoir un scholar pour ê
 // $compress='No';
 
 /* parametres externes: nom de l'hôte SQL*/
-$params = parse_ini_file("parametres_comex.ini");
+$params = parse_ini_file("config/parametres_comex.ini");
 
 /* tout pour le MySQL */
 $host =  $params['SQL_HOST'];

@@ -29,17 +29,20 @@ from MySQLdb     import connect, ProgrammingError
 from re          import sub
 from os          import path
 from traceback   import format_tb
+from json        import dumps
 
 if __package__ == 'services':
     # when we're run via import
     from services.user import comex_user
     from services.text import keywords
     from services.tools import read_config
+    from services.db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 else:
     # when this script is run directly
     from user          import comex_user
     from text          import keywords
     from tools         import read_config
+    from db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 
 # ============= read config ============
 
@@ -136,9 +139,9 @@ MIN_KW = 5
 # /!\ Routes are not prefixed by nginx in prod so we do it ourselves /!\
 # -----------------------------------------------------------------------
 
-
-@app.route(config['USR_PREFIX'] + "/", methods=['GET','POST'])
-def one_big_form():
+# /services/user/register
+@app.route(config['PREFIX'] + config['USR_ROUTE'] + '/register', methods=['GET','POST'])
+def register():
     if request.method == 'GET':
         return render_template(
             "base_form.html",
@@ -220,6 +223,33 @@ def one_big_form():
                                 backend_error = False,
                                 message = "")
 
+
+# API to provide json extracts of the DB to tinaweb
+# (originally @ moma/legacy_php_comex/tree/master/comex_install)
+# (original author S. Castillo)
+# /services/api/
+@app.route(config['PREFIX'] + config['API_ROUTE'])
+def api_main():
+
+    db=MySQL(config['SQL_HOST'])
+
+    if 'qtype' in request.args:
+        if request.args['qtype'] == "filters":
+            # all the other args are a series of constraints for filtering
+            # ex: qtype=filters&keywords[]=complex%20networks&keywords[]=complexity%20theory&countries[]=France&countries[]=USA
+            scholars = db.getScholarsList("filter",request.query_string.decode())
+        else:
+            unique_id = request.args['unique_id']
+            scholars = db.getScholarsList("unique_id",unique_id)
+    else:
+        raise TypeError("API query is missing qtype (should be 'filters' or 'uid')")
+
+    if scholars and len(scholars):
+        db.extract(scholars)
+    # < / Data Extraction > #
+
+    graphArray = db.buildJSON_sansfa2(db.Graph)
+    return dumps(graphArray)
 
 
 ########### SUBS ###########

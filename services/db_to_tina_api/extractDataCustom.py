@@ -3,11 +3,14 @@ from networkx  import Graph, DiGraph
 from random    import randint
 from math      import floor
 from cgi       import escape
-from converter import CountryConverter
 from pprint    import pprint
 from re        import sub
 from traceback import format_tb
 from urllib.parse import unquote
+
+
+from .converter import CountryConverter
+
 
 whoswhofilters_to_sqlnames = {
     "keywords": "keywords.kwstr",
@@ -124,7 +127,6 @@ class MyExtractor:
                 # print("filter: REST query is", filter_dict)
 
                 if "query" in filter_dict and filter_dict["query"] == "*":
-                    print("bombaclass")
                     # query is "*" <=> all scholars
                     sql_query = """
                         SELECT doors_uid
@@ -450,8 +452,8 @@ class MyExtractor:
     def buildJSON_sansfa2(self,graph,coordsRAW=None):
 
         inst = CountryConverter("","","","")
-        ISO=inst.getCountries("countries_ISO3166.txt")
-        Alternatives=inst.getCountries("countries_alternatives.txt")
+        ISO=inst.getCountries("services/db_to_tina_api/countries_ISO3166.txt")
+        Alternatives=inst.getCountries("services/db_to_tina_api/countries_alternatives.txt")
         inst.createInvertedDicts(ISO,Alternatives)
 
         nodesA=0

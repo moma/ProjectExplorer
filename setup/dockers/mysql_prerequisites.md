@@ -1,5 +1,5 @@
 ## Sql config tips
-If you have an sql running, just fill your sql hostname in `$SQL_HOST` and skip to [Set up the tables](https://github.com/moma/regcomex/blob/master/doc/table_specifications.md).
+If you have an sql running, just fill your sql hostname in `$SQL_HOST` and skip to [Set up the tables](https://github.com/moma/comex2/blob/master/doc/table_specifications.md).
 
 #### Prerequisites
 We'll use docker and jq here

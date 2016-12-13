@@ -1,5 +1,5 @@
-# Regcomex minimal dockerfile
-# ----------------------------
+# Comex2 minimal dockerfile
+# --------------------------
 # based on https://github.com/egeland/docker-gunicorn-python3-flask by F Egeland
 
 FROM ubuntu:xenial
@@ -15,18 +15,19 @@ RUN dpkg-reconfigure locales
 
 # Install global dependencies and utilities
 RUN apt update && apt autoclean
+# if without nginx add php7.0-fpm php7.0-mysql
 RUN apt install -y python3-pip libmysqlclient-dev git nano tree iputils-ping
 RUN pip3 install --upgrade pip
 
-# for regcomex itself ----------------------------------------------------------
+# for comex2 itself ----------------------------------------------------------
 # pull the comex server from repository
-RUN git clone https://github.com/moma/regcomex.git
+RUN git clone https://github.com/moma/comex2.git
 
 # Install project dependencies
-RUN pip3 install -r regcomex/setup/requirements.txt
+RUN pip3 install -r comex2/setup/requirements.txt
 
 # main CMD to start the app
-WORKDIR /regcomex
+WORKDIR /comex2
 
 # flask dev server
 # CMD python3 server_comex_registration.py

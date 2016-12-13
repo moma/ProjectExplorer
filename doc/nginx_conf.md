@@ -28,20 +28,25 @@ sudo nano comex.conf
 
 This below is a full config exemple you can paste in nano:
   - it serves the comex app (legacy php), in `/`
-  - it also serves registration app, in `/regcomex`  
+  - it also serves registration app, in `/services/user/register`  
 
 
 ```ini
-# Full server config: php comex as root and regcomex as subpath
-# =============================================================
+# Full server config: php comex as root and api + reg as services subpath
+# ========================================================================
 server {
     listen 80 ;
     listen [::]:80 ;
 
-    server_name _;
+    server_name communityexplorer.org;
 
     # adapt path to your php docroot
-    root /home/romain/comex/www ;
+    root /home/me/comex2 ;
+
+    # get the logs in a custom place
+    # (adapt paths)
+    access_log /home/me/somewhere/access.log ;
+    error_log /home/me/somewhere/error.log ;
 
     location / {
         index     index.html index.php ;
@@ -52,13 +57,13 @@ server {
         fastcgi_pass unix:/run/php/php7.0-fpm.sock;
 
         # here we adapted $documentroot to our real php docroot
-        fastcgi_param SCRIPT_FILENAME /home/romain/comex/www/$fastcgi_script_name;
-        #                             -----------------------
+        fastcgi_param SCRIPT_FILENAME /home/me/comex2/$fastcgi_script_name;
+        #                             ----------------
     }
 
-    # no root here => independant app
+    # no root here => independant app serving both services/user (formerly know as regcomex) and services/api (ex formerly known as comex_install)
     # (but /locationpath must match this app's default route)
-    location /regcomex {
+    location /services {
         # point to gunicorn server
         proxy_pass http://0.0.0.0:9090;
         proxy_redirect     off;
@@ -68,16 +73,11 @@ server {
         proxy_set_header   X-Real-IP $remote_addr;
         proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header   X-Forwarded-Host $server_name;
-
-        # get the logs in a custom place
-        # (adapt paths)
-        access_log /home/romain/comex/regcomex/logs/nginx/access.log ;
-        error_log /home/romain/comex/regcomex/logs/nginx/error.log debug;
     }
 
     # faster static serving
     location /static {
-        alias  /home/romain/comex/regcomex/static/;
+        alias  /home/me/comex2/static/;
         autoindex on;
     }
 

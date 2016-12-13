@@ -8,30 +8,30 @@ It contains:
   - several php files specialized in retrieving custom lists of scholars, labs, jobs for directory showing
     - `whoswho.js` is used to GUIise the queries
     - legacy jquery and highcharts are used to GUIise the directories
-  - a linked couple python server + tinawebJS to explore the same data in graph view
-    - the python server is in `services/db_to_tina_api` dir
-    - run it with `python3 main.py` and reverse-proxy its host:port to `/comexAPI` location
+  - a linked couple python server + tinawebJS to explore the data in graph view
     - the twjs is in a legacy version, downloadable [via this subtree](https://github.com/moma/tinawebJS/tree/comex_wip)
+    - the server can be run with `nohup bash run.sh`
 
 
-#### TODOES for future refactoring
+#### TODOES
   - remove the legacy links to csregistry.org
-  - merge the static files
-
+  - do the profile pages beyond register
 
 ------
 ### DB structure
 
 ###### Overview
+  - the DB name is *`comex_shared`*  
   - `scholars` is the main table, with a **doors_uid** as primary key
      - email is also unique in this table
   - we have three related tables
-    - `affiliations` (directly pointed by an **affiliation_id** in scholars table)
-    - `keywords` (pointed by an intermediate user id <=> keyword id table `sch_kw`)
-    - `linked_ids` (not used yet, to join the uid with external ids like ORCID)
+    - `affiliations` (directly pointed by an **affiliation_id** in scholars table), for labs and institutions (TODO ~~> 2 tables)
+    - `keywords`
+      - and `sch_kw` for scholars <=> keywords mapping
+    - `linked_ids` for other ids of the researcher (eg: [ORCID](http://orcid.org/), not used yet)
 
 ###### More info
-Full table structure is described in [this documentation file](https://github.com/moma/regcomex/blob/c5badbc/doc/table_specifications.md).
+Full table structure is described in [this documentation file](https://github.com/moma/comex2/blob/master/doc/table_specifications.md).
 
 ###### Exemple queries
 ```SQL
@@ -63,10 +63,11 @@ GROUP BY uid ;
 ```
 
 
-### User and registration service
-This was merged in dec 2016 with the registration form server
 
-  - the form is served by [flask](http://flask.pocoo.org/) and uses [javascript functions](https://github.com/moma/regcomex/blob/master/static/js/comex_reg_form_controllers.js) for validation etc  
+### User and registration service
+The comex app was refactored and merged in dec 2016 with a new registration form server
+
+  - the form is served by [flask](http://flask.pocoo.org/) and uses [javascript functions](https://github.com/moma/comex2/blob/master/static/js/comex_reg_form_controllers.js) for validation etc  
   - the registration credentials are transmitted to a doors prototype  
   - the answers are POSTed back to server that writes new users in a local DB  
 
@@ -83,42 +84,42 @@ Prerequisites:
 
 Steps to run:
 ```
-cd setup/dockers
+# prepare the data directory (or copy one if you already have data)
+mkdir data/shared_mysql_data
 
 # build the components
-docker build -t flask_iscpif_regcomex:latest flask_iscpif_regcomex/
-docker build -t minidoors:latest minidoors/
+cd setup/dockers
 docker create mysql
-mkdir ../shared_mysql_data
+docker build -t comex2_services:latest comex2_services/
+docker build -t minidoors:latest minidoors/
 
 # run them and link them
 docker-compose up
 
-
-#             |---------------------|
-#             |        nginx        |
-#             |---------------------|
-#                   /            \
-#                  /              \
-#          (reverse proxy)        $host/
-#          $host/regcomex/           \
-#                |                    \
-#     |--------------------|     |-------------------------|
-#     |    services/user   |     | services/db_to_tina_api |
-#     |  (serveur python)  |     |    +  site php          |
-#     |--------------------|     |-------------------------|
-#         |             \                 |
-#         |              \                |
-# |-------------------|   \               |
-# | minidoors docker  |    \              |
-# | émule futur doors |     \             |
-# |-------------------|      \            |
-#                             \           |
-#                             |-----------------|
-#                             |  mysql docker   |
-#                             |  "comex_shared" |
-#                             |-----------------|
-
+             |---------------------|
+             |        nginx        |
+             |---------------------|
+                   /            \
+                  /              \
+          (reverse proxy)        $host/
+          $host/services/           \
+                |                    \
+     |----------------------------------------------|
+     |     (serveur python3     +     site php)     |
+     |- - - - - - - - - - - - - - - +---------------|
+     | services/api | services/user |      |
+     |------------------------------|      |
+                       / \                 |
+                      /   \                |
+   |-------------------|   \               |
+   | minidoors docker  |    \              |
+   | émule futur doors |     \             |
+   |-------------------|      \            |
+                               \           |
+                             |-----------------|
+                             |  mysql docker   |
+                             |  "comex_shared" |
+                             |-----------------|
 ```
 
 -------
@@ -126,23 +127,35 @@ docker-compose up
 ### Running in dev
 
 #### Minimal config
+
+NB: The communityexplorer.org app was using a separate DB from legacy wiki csv (cf. master branch of the `moma/legacy_php_comex` repository)
+
+
+
 ```
-sudo apt install python3 libmysqlclient-dev
+# get the site
+git clone https://github.com/moma/comex2
+
+# get prerequisites
+sudo apt install php7.0-fpm php7.0-mysql python3 libmysqlclient-dev
 cd $INSTALL_DIR
 sudo pip3 install -r setup/requirements.txt
-source setup/regcomex_config.ini
 ```
 
-Then to run the regcomex app in the simplest way just do:
+Then to run the comex2 services in the simplest way just do:
 ```
 cd services
 python3 comex_main_backend.py
 ```
-The form server is then accessible locally on `0.0.0.0:5000/regcomex`  
+The form server is then accessible locally on `0.0.0.0:5000/services/user`  
+The tina api server is on `0.0.0.0:5000/services/api`  
+
+Finally, simply configure the serving of your php|www documentroot in nginx (cf [detailed doc](https://github.com/moma/comex2/blob/master/doc/nginx_conf.md) for real-life conf).
+
 
 -------
 
-#### Real-world config
+#### Real-world dev config
   1. external mysql database  
   2. external doors (or simulated by docker)  
   3. gunicorn webserver (linked to 1 & 2 via `$SQL_HOST` and `$DOORS_HOST`)  
@@ -151,23 +164,27 @@ The form server is then accessible locally on `0.0.0.0:5000/regcomex`
 
 ###### If you have your own local mysql
 ```
-export SQL_HOST=localhost      # or any other hostname/IP
+# edit ini file to put the correct SQL_HOST (or IP)
+nano config/parametres_comex.ini
 ```
-Then just create the table following [the table specifications](https://github.com/moma/regcomex/blob/master/doc/table_specifications.md)
+Then just create the table following [the table specifications](https://github.com/moma/comex2/blob/master/doc/table_specifications.md)
 
 ###### If you want a dedicated mysql in docker
 
-  - Follow the detailed steps in [mysql_prerequisites](https://github.com/moma/regcomex/blob/master/setup/dockers/mysql_prerequisites.md): it will explain how to create the docker and connect to it.
+  - Follow the detailed steps in [mysql_prerequisites](https://github.com/moma/comex2/blob/master/setup/dockers/mysql_prerequisites.md): it will explain how to create the docker and connect to it.
 
-  - Then create the table following [the table specifications](https://github.com/moma/regcomex/blob/master/doc/table_specifications.md)
+  - Then create the table following [the table specifications](https://github.com/moma/comex2/blob/master/doc/table_specifications.md)
   - Now run it as follows:
 
 ```
 # run the database docker
 docker start comex_db
 
-# get its IP into the env
-export SQL_HOST=$(docker inspect comex_db | jq -r '.[0].NetworkSettings.IPAddress')
+# read its IP
+docker inspect comex_db | jq -r '.[0].NetworkSettings.IPAddress'
+
+# edit ini file to put it as SQL_HOST
+nano config/parametres_comex.ini
 ```
 
 ##### 2) Set up a doors connection
@@ -175,8 +192,8 @@ Again, the environment variable `DOORS_HOST` must simply be set to the doors ser
 
 ###### If you have a doors server
 ```
-export DOORS_HOST=yourdoorsserver
-export DOORS_PORT=8989
+# edit ini file to put it as DOORS_HOST and DOORS_PORT
+nano config/parametres_comex.ini
 ```
 
 ###### If you have no doors server
@@ -189,10 +206,6 @@ docker build -t minidoors:latest minidoors/
 
 # run the container (each time)
 docker run -it -p 32789:8989 --name doors_test minidoors
-
-# pass the info to the env before running regcomex
-export DOORS_HOST=localhost
-export DOORS_PORT=8989
 ```
 
 ##### 3) Run the regomex app with gunicorn
@@ -200,9 +213,9 @@ export DOORS_PORT=8989
 bash run.sh
 ```
 
-The form server is then accessible locally on `0.0.0.0:9090/regcomex`  
+The form server is then accessible locally on `0.0.0.0:9090/services/user/register`  
 
-**Remark:** the default ROUTE_PREFIX is /regcomex, but TODO can be changed in config file  
+**Remark:** the prefix `/services` and the user route `/user` can both be changed in the config file
 
 -------
 
@@ -211,70 +224,18 @@ The form server is then accessible locally on `0.0.0.0:9090/regcomex`
 #### Nginx
 We ask nginx to reverse-proxy our app
 
-This is a minimal conf (cf [detailed doc](https://github.com/moma/regcomex/blob/master/doc/nginx_conf.md) for real-life conf)
+This is a minimal conf (cf [detailed doc](https://github.com/moma/comex2/blob/master/doc/nginx_conf.md) for real-life conf)
 
 ```
 # nginx exemple
 server {
     listen 80;
 
-    location /$ROUTE_PREFIX {
+    location /$PREFIX {
         proxy_pass http://0.0.0.0:9090;
     }
 }
 ```
-
-#### Connecting the data to *communityexplorer.org*
-Currently the data is collected in `data/shared_mysql_data`
-  - the DB name is *`comex_shared`*  
-  - the main table is `scholars`
-  - additional tables:
-    - `affiliations` for labs and institutions (TODO ~~> 2 tables)
-    - `linked_ids` for other ids of the researcher (eg: [ORCID](http://orcid.org/))
-    - `keywords`
-      - and `sch_kw` for scholars <=> keywords mapping
-
-Prerequisites for the comex php legacy app
-```
-# php support for nginx
-sudo apt install php7.0-fpm
-
-# for legacy sqlite base
-sudo apt install php7.0-sqlite3
-
-# for new mysql base
-sudo apt install php7.0-mysql
-
-# for the helper app
-sudo apt install libmysqlclient-dev
-sudo pip3 install mysqlclient
-```
-
-Then installing the site itself is from repository:
-```
-# go to your nginx documentroot
-# for instance cd /var/www
-
-# get the legacy site into the current folder
-git clone https://github.com/moma/legacy_php_comex ./
-
-# checkout the branch that uses our new SQL
-git checkout mysql_refacto_prototype
-
-# correct permissions
-sudo chown -R $USER:www-data .
-
-# edit ini file to put the correct SQL_HOST
-nano parametres_comex.ini
-
-# start helper service
-cd comex_install/
-nohup python3 main.py &
-```
-
-NB: The communityexplorer.org app was using a separate DB from legacy wiki csv (cf. master branch of the `moma/legacy_php_comex` repository)
-
-Finally, simply configure the serving of your php|www documentroot in nginx (cf [detailed doc](https://github.com/moma/regcomex/blob/master/doc/nginx_conf.md) for real-life conf).
 
 ##### Copyright
 ###### Authors
