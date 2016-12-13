@@ -6,7 +6,7 @@
 echo '
     <body>';
 include ("analytics.php");
-echo '        <script type="text/javascript" src="js/whoswho.js"></script>
+echo '        <script type="text/javascript" src="static/js/whoswho.js"></script>
     <div class="container-fluid">
 
         <!-- Main hero unit for a primary marketing message or call to action -->
@@ -136,7 +136,7 @@ $content .= '</div>';
     $content .= '</div>';
 
     $content .= '
-<center><img src="img/bar.png"></center>';
+<center><img src="static/img/bar.png"></center>';
     $content .= '<br/>';
     $content .= '<br/>';
     // fin du profil

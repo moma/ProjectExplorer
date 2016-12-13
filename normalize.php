@@ -47,25 +47,25 @@ function normalize_country($value) {
 }
 
 function sanitize_input($value) {
-	//$value = mysql_real_escape_string($value);
+    //$value = mysql_real_escape_string($value);
 
-	//the use of addslashes() for string escaping in MySQL queries can lead to SQL injection
-	//through the abuse of multibyte character sets. In his example he relies on addslashes()
-	//to convert an invalid multibyte sequence into a valid one, which also has an embedded ' that
-	//is not escaped. And in an ironic twist, the function intended to protect against SQL injection
-	// is used to actually trigger it.
+    //the use of addslashes() for string escaping in MySQL queries can lead to SQL injection
+    //through the abuse of multibyte character sets. In his example he relies on addslashes()
+    //to convert an invalid multibyte sequence into a valid one, which also has an embedded ' that
+    //is not escaped. And in an ironic twist, the function intended to protect against SQL injection
+    // is used to actually trigger it.
 
-	// lame security
+    // lame security
     $value=str_replace('drop','', $value);
     $value=str_replace('select','', $value);
     $value=str_replace('update','', $value);
     $value=str_replace('delete','', $value);
 
-	$value = addcslashes($value, '%_');
-	$value = trim($value);
-	$value = htmlspecialchars($value);
+    $value = addcslashes($value, '%_');
+    $value = trim($value);
+    $value = htmlspecialchars($value);
 
-	return $value;
+    return $value;
 }
 
 ?>

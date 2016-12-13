@@ -12,44 +12,48 @@ $meta = '<!DOCTYPE html>
         <title>Complex Systems Scholars</title>
         <meta name="description" content="">
         <meta name="author" content="">
-        <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
-        <!--[if lt IE 9]>
-		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-		<![endif]-->
+
         <!-- Le styles -->
-        <link href="css/bootstrap_iscpif.css" rel="stylesheet">
-        <link href="css/bootstrap_directory.css" rel="stylesheet">
-        <link type="text/css" href="css/brownian-motion/jquery-ui-1.8.16.custom.css">
-        <link href="http://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet" type="text/css">
-        <script type="text/javascript" src="js/jquery/jquery-1.7.min.js"></script>
-        <script type="text/javascript" src="js/jquery-ui/jquery-ui-1.8.16.custom.min.js"></script>
-        <script type="text/javascript" src="js/bootstrap/bootstrap-dropdown-fade.js"></script>
-        <script type="text/javascript" src="js/misc/underscore.min.js"></script>
-        <script type="text/javascript" src="js/jquery/jquery.highlight-3.js"></script>
-        <script type="text/javascript" src="js/misc/json2.js"></script>
-        <script type="text/javascript" src="js/utils.js"></script>
-        <script type="text/javascript" src="Highcharts-2.2.0/js/highcharts.js"></script>
-        <script type="text/javascript" src="Highcharts-2.2.0/js/modules/exporting.js"></script>
+        <link type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
+        <link type="text/css" href="static/css/bootstrap_directory.css" rel="stylesheet">
+        <link type="text/css" href="static/css/brownian-motion/jquery-ui-1.8.16.custom.css" rel="stylesheet">
+        <link type="text/css" href="static/css/whoswho.css" rel="stylesheet">
 
-        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+        <!-- TODO test if each is really needed -->
+        <!-- TODO upgrade versions as per comments -->
+        <script type="text/javascript" src="static/js/jquery/jquery-1.7.min.js"></script>
+        <script type="text/javascript" src="static/js/jquery-ui-1.8.16.custom.min.js"></script>
+        <!-- upgraded available files
+            <script type="text/javascript" src="static/js/jquery/jquery-3.1.1.min.js"></script>
+            <script type="text/javascript" src="static/js/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+        -->
+        <script type="text/javascript" src="static/js/jquery-ui-1.8.16.custom.min.js"></script>
+        <script type="text/javascript" src="static/js/bootstrap/bootstrap-dropdown-fade.js"></script>
+        <script type="text/javascript" src="static/js/misc/underscore.min.js"></script>
+        <script type="text/javascript" src="static/js/jquery/jquery.highlight-3.js"></script>
+        <script type="text/javascript" src="static/js/misc/json2.js"></script>
+        <script type="text/javascript" src="static/js/utils.js"></script>
 
-        <link href="css/whoswho.css" rel="stylesheet" type="text/css">
+        <script type="text/javascript" src="static/js/highcharts-2.2/js/highcharts.js"></script>
+        <script type="text/javascript" src="static/js/highcharts-2.2/modules/exporting.js"></script>
+
         <link rel="shortcut icon" href="images/favicon.ico">
         <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
         <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
         <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
-          	<script type="text/javascript">
-		  var _gaq = _gaq || [];
-		  _gaq.push([\'_setAccount\', \'UA-30062222-1\']);
-		  _gaq.push([\'_setDomainName\', \'communityexplorer.org\']);
-		  _gaq.push([\'_trackPageview\']);
 
-		  (function() {
-		    var ga = document.createElement(\'script\'); ga.type = \'text/javascript\'; ga.async = true;
-		    ga.src = (\'https:\' == document.location.protocol ? \'https://ssl\' : \'http://www\') + \'.google-analytics.com/ga.js\';
-		    var s = document.getElementsByTagName(\'script\')[0]; s.parentNode.insertBefore(ga, s);
-		  })();
-		</script>
+        <script type="text/javascript">
+          var _gaq = _gaq || [];
+          _gaq.push([\'_setAccount\', \'UA-30062222-1\']);
+          _gaq.push([\'_setDomainName\', \'communityexplorer.org\']);
+          _gaq.push([\'_trackPageview\']);
+
+          (function() {
+            var ga = document.createElement(\'script\'); ga.type = \'text/javascript\'; ga.async = true;
+            ga.src = (\'https:\' == document.location.protocol ? \'https://ssl\' : \'http://www\') + \'.google-analytics.com/ga.js\';
+            var s = document.getElementsByTagName(\'script\')[0]; s.parentNode.insertBefore(ga, s);
+          })();
+        </script>
             ';
 
 define('_is_utf8_split', 5000);
@@ -73,25 +77,25 @@ function is_utf8($string) {
 $data = json_decode($_GET['query']);
 
 function objectToArray($d) {
-		if (is_object($d)) {
-			// Gets the properties of the given object
-			// with get_object_vars function
-			$d = get_object_vars($d);
-		}
+        if (is_object($d)) {
+            // Gets the properties of the given object
+            // with get_object_vars function
+            $d = get_object_vars($d);
+        }
 
-		if (is_array($d)) {
-			/*
-			* Return array converted to object
-			* Using __FUNCTION__ (Magic constant)
-			* for recursive call
-			*/
-			return array_map(__FUNCTION__, $d);
-		}
-		else {
-			// Return array
-			return $d;
-		}
-	}
+        if (is_array($d)) {
+            /*
+            * Return array converted to object
+            * Using __FUNCTION__ (Magic constant)
+            * for recursive call
+            */
+            return array_map(__FUNCTION__, $d);
+        }
+        else {
+            // Return array
+            return $d;
+        }
+    }
 
 $data = objectToArray($data);
 
@@ -120,24 +124,24 @@ if ($tags) {
     // debug
     // echo '<p style="color:white">MATCHING ON tags<p>';
 
-	if (sizeof($tags) > 0) {
-		$f .= 'AND (';
-	}
+    if (sizeof($tags) > 0) {
+        $f .= 'AND (';
+    }
         $query_details.='<li><strong>Community tags: </strong>';
-	foreach ($tags as $kw) {
-		$words = explode(',', $kw);
-		$i = 0;
-		foreach ($words as $word) {
-			$word = sanitize_input(trim(strtolower($word)));
-			if ($word == "") continue;
-			if ($i > 0)
-				$f .= " OR ";
-			$f .= 'tags LIKE "%' . $word . '%" ';
+    foreach ($tags as $kw) {
+        $words = explode(',', $kw);
+        $i = 0;
+        foreach ($words as $word) {
+            $word = sanitize_input(trim(strtolower($word)));
+            if ($word == "") continue;
+            if ($i > 0)
+                $f .= " OR ";
+            $f .= 'tags LIKE "%' . $word . '%" ';
                         $query_details.=$word.', ';
-			$i++;
-		}
-	}
-	$f .= ") ";
+            $i++;
+        }
+    }
+    $f .= ") ";
 }
 
 if ($keywords) {
@@ -145,63 +149,63 @@ if ($keywords) {
     // echo '<p style="color:white">MATCHING ON keywords<p>';
 
     if (sizeof($keywords) > 0) {
-		$f .= 'AND (';
-	}
+        $f .= 'AND (';
+    }
         $query_details.='<li><strong>Working on: </strong>';
-	foreach ($keywords as $kw) {
-		$words = explode(',', $kw);
-		$i = 0;
-		foreach ($words as $word) {
-			$word = sanitize_input(trim(strtolower($word)));
-			if ($word == "") continue;
+    foreach ($keywords as $kw) {
+        $words = explode(',', $kw);
+        $i = 0;
+        foreach ($words as $word) {
+            $word = sanitize_input(trim(strtolower($word)));
+            if ($word == "") continue;
                         $query_details.=$word.', ';
-			if ($i > 0)
-				$f .= " OR ";
-			$f .= 'keywords_list LIKE "%' . $word . '%" ';
-			$i++;
-		}
-	}
-	$f .= ")  ";
+            if ($i > 0)
+                $f .= " OR ";
+            $f .= 'keywords_list LIKE "%' . $word . '%" ';
+            $i++;
+        }
+    }
+    $f .= ")  ";
 }
 if ($countries) {
     // debug
     // echo '<p style="color:white">MATCHING ON countries<p>';
 
     if (sizeof($countries) > 0) {
-		$f .= 'AND (';
-	}
+        $f .= 'AND (';
+    }
         $query_details.='<li><strong>In the following country: </strong>';
-	$i = 0;
-	foreach ($countries as $country) {
-		//$country = sanitize_input(trim(strtolower($country)));
+    $i = 0;
+    foreach ($countries as $country) {
+        //$country = sanitize_input(trim(strtolower($country)));
                 $country = sanitize_input(trim($country ));
-		if ($country == "") continue;
-		if ($i > 0)
-			$f .= " OR ";
-		$f .= 'country = "' . $country . '" ';
+        if ($country == "") continue;
+        if ($i > 0)
+            $f .= " OR ";
+        $f .= 'country = "' . $country . '" ';
                 $query_details.=$country.', ';
-		$i++;
-	}
-	$f .= ")  ";
+        $i++;
+    }
+    $f .= ")  ";
 }
 if ($laboratories) {
     // debug
     // echo '<p style="color:white">MATCHING ON labs<p>';
-	if (sizeof($laboratories) > 0) {
-		$f .= 'AND (';
-	}
+    if (sizeof($laboratories) > 0) {
+        $f .= 'AND (';
+    }
         $query_details.='<li><strong>In the lab named : </strong>';
-	$i = 0;
-	foreach ($laboratories as $lab) {
-		$lab = sanitize_input(trim(strtolower($lab)));
-		if ($lab == "") continue;
-		if ($i > 0)
-			$f .= " OR ";
-		$f .= 'team_lab LIKE "%' . $lab . '%" ';
+    $i = 0;
+    foreach ($laboratories as $lab) {
+        $lab = sanitize_input(trim(strtolower($lab)));
+        if ($lab == "") continue;
+        if ($i > 0)
+            $f .= " OR ";
+        $f .= 'team_lab LIKE "%' . $lab . '%" ';
                 $query_details.=$lab.', ';
-		$i++;
-	}
-	$f .= ")  ";
+        $i++;
+    }
+    $f .= ")  ";
 }
 
 if ($organizations) {
@@ -209,21 +213,21 @@ if ($organizations) {
     // echo '<p style="color:white">MATCHING ON organizations<p>';
 
     if (sizeof($organizations) > 0) {
-		$f .= 'AND (';
-	}
+        $f .= 'AND (';
+    }
         $query_details.='<li><strong>In the organization named : </strong>';
-	$i = 0;
-	foreach ($organizations as $org) {
+    $i = 0;
+    foreach ($organizations as $org) {
         // echo '<p style="color:white">========> org =====> '. $org ."<p>";
-		$org = sanitize_input(trim(strtolower($org)));
+        $org = sanitize_input(trim(strtolower($org)));
 
-		if ($org == "") continue;
+        if ($org == "") continue;
                 $query_details.=$org.', ';
-		$f .= 'org LIKE "%' . $org . '%" ';
+        $f .= 'org LIKE "%' . $org . '%" ';
                 //'affiliation LIKE "%' . $org . '% OR affiliation2 LIKE "%' . $org . '%"';
-		$i++;
-	}
-	$f .= ")  ";
+        $i++;
+    }
+    $f .= ")  ";
 }
 
 $query_details.='</ul>';
@@ -335,7 +339,7 @@ include ("directory_content.php");
 $content .= '</div>';
 $content .= '</div>
             <footer>
-                GENERATED BY <a href="http://iscpif.fr"><img src="css/branding/logo-iscpif_medium.png" alt="iscpif.fr" style="border: none; margin-bottom : -6px;" title="isc-pif" /></a>-  <a href="http://sciencemapping.com" target="_BLANK">MOMA</a> - <a href="http://www.crea.polytechnique.fr/LeCREA/" target="_BLANK">CREA</a> - <a href="http://www.cnrs.fr/fr/recherche/index.htm" target="_BLANK">CNRS</a>
+                GENERATED BY <a href="http://iscpif.fr"><img src="static/css/branding/logo-iscpif_medium.png" alt="iscpif.fr" style="border: none; margin-bottom : -6px;" title="isc-pif" /></a>-  <a href="http://sciencemapping.com" target="_BLANK">MOMA</a> - <a href="http://www.crea.polytechnique.fr/LeCREA/" target="_BLANK">CREA</a> - <a href="http://www.cnrs.fr/fr/recherche/index.htm" target="_BLANK">CNRS</a>
             </footer>
         </div>
 </body>
@@ -344,7 +348,7 @@ $content .= '</div>
 //////// Header
 $header = '<div class="row" id="welcome">
     <div class="span12" align="justify">
-<img src="img/RegistryBanner.png" align="center">
+<img src="static/img/RegistryBanner.png" align="center">
 <br/><br/>
 <h1>Complex Systems Scholars</h1>
 <br/>

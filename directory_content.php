@@ -6,8 +6,8 @@
 echo '
     <body>';
 include ("analytics.php");
-echo '        <script type="text/javascript" src="js/jquery/jquery-1.7.min.js"></script>
-              <script type="text/javascript" src="js/whoswho.js"></script>
+echo '        <script type="text/javascript" src="static/js/jquery/jquery-3.1.1.min.js"></script>
+              <script type="text/javascript" src="static/js/whoswho.js"></script>
     <div class="container">
 
         <!-- Main hero unit for a primary marketing message or call to action -->
@@ -88,7 +88,7 @@ foreach ($scholars as $scholar) {
     else {
         if (count($scholars) < 2000) {
             $im_id = floor(rand(0, 11));
-            $content .= '<img style="margin: 7px 10px 10px 0px" src="img/' . $im_id . '.png" width="' . $imsize . 'px" align="left">';
+            $content .= '<img style="margin: 7px 10px 10px 0px" src="static/img/' . $im_id . '.png" width="' . $imsize . 'px" align="left">';
         }
     }
 
@@ -206,7 +206,7 @@ $content .= '</div>';
     $content .= '</div>';
 
     $content .= '
-<center><img src="img/bar.png"></center>';
+<center><img src="static/img/bar.png"></center>';
     $content .= '<br/>';
     $content .= '<br/>';
     // fin du profil

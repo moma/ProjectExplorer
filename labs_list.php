@@ -113,7 +113,7 @@ $content .= '</div>';
     $content .= '</div>';
 
     $content .= '
-<center><img src="img/bar.png"></center>';
+<center><img src="static/img/bar.png"></center>';
     $content .= '<br/>';
     $content .= '<br/>';
     // fin du profil
