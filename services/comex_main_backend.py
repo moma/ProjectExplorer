@@ -30,6 +30,15 @@ from re          import sub
 from os          import environ
 from traceback   import format_tb
 
+if __package__ == 'services':
+    # when we're run via import
+    from services.user import comex_user
+    from services.text import keywords
+else:
+    # when this script is run directly
+    from user          import comex_user
+    from text          import keywords
+
 # ============= read environ =============
 MY_HOST = environ.get('HOST', '0.0.0.0')
 MY_DEBUG_FLAG = environ.get('DEBUG_FLAG') == 'true'
@@ -44,7 +53,7 @@ if MY_DEBUG_FLAG:
 # TODO add doors port if != 8989
 
 # ============= app creation =============
-app = Flask(__name__)
+app = Flask("services", static_folder="../static", template_folder="../templates")
 
 app.config['DEBUG'] = MY_DEBUG_FLAG
 

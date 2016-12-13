@@ -74,9 +74,10 @@ source setup/regcomex_config.ini
 
 Then to run the regcomex app in the simplest way just do:
 ```
-python3 server_comex_registration.py
+cd services
+python3 comex_main_backend.py
 ```
-The form server is then accessible locally on `127.0.0.1:5000/regcomex`  
+The form server is then accessible locally on `0.0.0.0:5000/regcomex`  
 
 -------
 
@@ -135,7 +136,7 @@ export DOORS_PORT=8989
 
 ##### 3) Run the regomex app with gunicorn
 ```
-gunicorn -b 0.0.0.0:9090 server_comex_registration:app
+bash run.sh
 ```
 
 The form server is then accessible locally on `0.0.0.0:9090/regcomex`  
