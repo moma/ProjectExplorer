@@ -184,6 +184,7 @@ def one_big_form():
                 # A) DB config + connection
                 reg_db = connect(
                     host=config['SQL_HOST'],
+                    port=int(config['SQL_PORT']),
                     user="root",   # TODO change db ownership to a comexreg user
                     passwd="very-safe-pass",
                     db="comex_shared"
