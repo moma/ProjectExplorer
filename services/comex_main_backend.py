@@ -1,5 +1,5 @@
 """
-Flask server used for the registration page for comex app
+Flask server used for the registration page for **COMEX** app
 Context:
     - templates-based input form validated fields and checked if all were present
       (base_form.html + static/js/comex_reg_form_controllers.js)
@@ -27,35 +27,34 @@ from flask       import Flask, render_template, request
 from ctypes      import c_int32
 from MySQLdb     import connect, ProgrammingError
 from re          import sub
-from os          import environ
+from os          import path
 from traceback   import format_tb
 
 if __package__ == 'services':
     # when we're run via import
     from services.user import comex_user
     from services.text import keywords
+    from services.tools import read_config
 else:
     # when this script is run directly
     from user          import comex_user
     from text          import keywords
+    from tools         import read_config
 
-# ============= read environ =============
-MY_HOST = environ.get('HOST', '0.0.0.0')
-MY_DEBUG_FLAG = environ.get('DEBUG_FLAG') == 'true'
-MY_SQL_HOST = environ.get('SQL_HOST', '172.17.0.2')
-MY_DOORS_HOST = environ.get('DOORS_HOST', '0.0.0.0')
-MY_DOORS_PORT = environ.get('DOORS_PORT', '8989')
+# ============= read config ============
 
-if MY_DEBUG_FLAG:
-    print("DEBUG: DOORS environ.get...       =>", environ.get('DOORS_HOST'), environ.get('DOORS_PORT'))
-    print("DEBUG: DOORS final connect params =>", MY_DOORS_HOST+':'+MY_DOORS_PORT)
-    print("DEBUG: MYSQL final connect params =>", MY_SQL_HOST +':3306')
-# TODO add doors port if != 8989
+config = read_config()
 
-# ============= app creation =============
-app = Flask("services", static_folder="../static", template_folder="../templates")
+# ============= verbose msg =============
+if config['DEBUG_FLAG']:
+    print("DEBUG: conf\n  "+"\n  ".join(["%s=%s"%(k,v) for k,v in config.items()]))
 
-app.config['DEBUG'] = MY_DEBUG_FLAG
+# ============= app creation ============
+app = Flask("services",
+             static_folder=path.join(config['HOME'],"static"),
+             template_folder=path.join(config['HOME'],"templates"))
+
+app.config['DEBUG'] = config['DEBUG_FLAG']
 
 ########### PARAMS ###########
 
@@ -137,15 +136,13 @@ MIN_KW = 5
 # /!\ Routes are not prefixed by nginx in prod so we do it ourselves /!\
 # -----------------------------------------------------------------------
 
-# prefix must match what nginx conf expects
-ROUTE_PREFIX = "/regcomex"
 
-@app.route(ROUTE_PREFIX + "/", methods=['GET','POST'])
+@app.route(config['USR_PREFIX'] + "/", methods=['GET','POST'])
 def one_big_form():
     if request.method == 'GET':
         return render_template(
             "base_form.html",
-            doors_connect=MY_DOORS_HOST+':'+MY_DOORS_PORT
+            doors_connect=config['DOORS_HOST']+':'+config['DOORS_PORT']
         )
     elif request.method == 'POST':
         # ex: request.form = ImmutableMultiDict([('initials', 'R.L.'), ('email', 'romain.loth@iscpif.fr'), ('last_name', 'Loth'), ('country', 'France'), ('first_name', 'Romain'), ('my-captchaHash', '-773776109'), ('my-captcha', 'TSZVIN')])
@@ -186,7 +183,7 @@ def one_big_form():
             try:
                 # A) DB config + connection
                 reg_db = connect(
-                    host=MY_SQL_HOST,
+                    host=config['SQL_HOST'],
                     user="root",   # TODO change db ownership to a comexreg user
                     passwd="very-safe-pass",
                     db="comex_shared"
@@ -217,7 +214,7 @@ def one_big_form():
                                        )
 
         return render_template("thank_you.html",
-                                debug_records = (clean_records if MY_DEBUG_FLAG else {}),
+                                debug_records = (clean_records if config['DEBUG_FLAG'] else {}),
                                 form_accepted = True,
                                 backend_error = False,
                                 message = "")
@@ -308,7 +305,7 @@ def db_get_or_create_keywords(kw_list, comex_db):
             db_cursor.execute('INSERT INTO keywords(kwstr) VALUES ("%s")' % kw_str)
             comex_db.commit()
 
-            if MY_DEBUG_FLAG:
+            if config['DEBUG_FLAG']:
                 print("DEBUG: Added keyword '%s'" % kw_str)
 
             found_ids.append(db_cursor.lastrowid)
@@ -326,7 +323,7 @@ def db_save_pairs_sch_kw(pairings_list, comex_db):
     for id_pair in pairings_list:
         db_cursor.execute('INSERT INTO sch_kw VALUES %s' % str(id_pair))
         comex_db.commit()
-        if MY_DEBUG_FLAG:
+        if config['DEBUG_FLAG']:
             print("DEBUG: Keywords: saved %s pair" % str(id_pair))
 
 
@@ -378,7 +375,7 @@ def db_get_or_create_affiliation(org_info, comex_db):
     # ok existing affiliation => row id
     if n_matched == 1:
         the_aff_id = db_cursor.fetchone()[0]
-        if MY_DEBUG_FLAG:
+        if config['DEBUG_FLAG']:
             print("DEBUG: Found affiliation (affid %i) (WHERE %s)" % (the_aff_id, " AND ".join(db_constraints)))
 
     # no matching affiliation => add => row id
@@ -390,7 +387,7 @@ def db_get_or_create_affiliation(org_info, comex_db):
                          )
         the_aff_id = db_cursor.lastrowid
         comex_db.commit()
-        if MY_DEBUG_FLAG:
+        if config['DEBUG_FLAG']:
             print("DEBUG: Added affiliation '%s'" % str(db_qstrvals))
     else:
         raise Exception("ERROR: non-unique affiliation '%s'" % str(db_qstrvals))
@@ -439,7 +436,7 @@ def db_save_scholar(uid, date, safe_recs, reg_db):
                 # str(val) for a bin is already quoted but has the 'b' prefix
                 quotedstrval = '_binary'+str(val)[1:]  # TODO check if \x needs to land in target sql ?
 
-                if MY_DEBUG_FLAG:
+                if config['DEBUG_FLAG']:
                     print("DEBUG: added pic blob: " + quotedstrval[:25] + '...' + quotedstrval[-10:])
 
             # anyways
@@ -520,5 +517,5 @@ def read_record(incoming_data):
 
 ########### MAIN ###########
 if __name__ == "__main__":
-    # our app should be bound to an ip (cf. http://stackoverflow.com/a/30329547/2489184)
-    app.run(host=MY_HOST)
+    # our app should be bound to an ip (cf stackoverflow.com/a/30329547/2489184)
+    app.run(host=config['COMEX_HOST'], port=config['COMEX_PORT'])
