@@ -28,11 +28,10 @@
         links:
          - comex_db_test:comex_db_backend
          - doors_test:doors_backend
-
         # links the outside config parametres_comex.ini to the inside
         # /!\ this erases the contained config with the outside one /!\
         volumes:
-         - ../../config:/comex2/config
+         - ../../config/:/comex2/config
 
         # # moved from env vars to new config vars via volume config
         # environment:

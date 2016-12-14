@@ -140,6 +140,7 @@ MIN_KW = 5
 # -----------------------------------------------------------------------
 
 # /services/user/register
+print("register route: ", config['PREFIX'] + config['USR_ROUTE'] + '/register')
 @app.route(config['PREFIX'] + config['USR_ROUTE'] + '/register', methods=['GET','POST'])
 def register():
     if request.method == 'GET':

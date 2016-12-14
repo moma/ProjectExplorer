@@ -21,6 +21,7 @@ RUN pip3 install --upgrade pip
 
 # for comex2 itself ----------------------------------------------------------
 # pull the comex server from repository
+RUN echo "updating git"
 RUN git clone https://github.com/moma/comex2.git
 
 # Install project dependencies

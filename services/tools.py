@@ -13,8 +13,8 @@ CONFIGMENU = [
             {"sec": 'main',       "var":'COMEX_HOST',   "def": '0.0.0.0'    },
             {"sec": 'main',       "var":'COMEX_PORT',   "def": '9090'       },
             {"sec": 'routes',     "var":'PREFIX',       "def": '/services'  },
-            {"sec": 'routes',     "var":'USR_ROUTE',    "def": '/user/'     },
-            {"sec": 'routes',     "var":'API_ROUTE',    "def": '/api/'      },
+            {"sec": 'routes',     "var":'USR_ROUTE',    "def": '/user'      },
+            {"sec": 'routes',     "var":'API_ROUTE',    "def": '/api'       },
             {"sec": 'services',   "var":'SQL_HOST',     "def": '172.17.0.2' },
             {"sec": 'services',   "var":'SQL_PORT',     "def": '3306'       },
             {"sec": 'services',   "var":'DOORS_HOST',   "def": '0.0.0.0'    },
@@ -42,10 +42,12 @@ def read_config():
     our_home = home_path()
 
     ini = ConfigParser()
-    ini.read(path.join(our_home, "parametres_comex.ini"))
+    inipath = path.join(our_home, "config", "parametres_comex.ini")
+    ini.read(inipath)
 
     # debug sections
-    # print("ini sections:", [sec for sec in ini.keys()])
+    if "main" not in ini:
+        print("WARNING: the config file at '%s' seems empty, I will use env or default values")
 
     # read ini file and use 2 fallbacks: env or default
     for citem in CONFIGMENU:
@@ -53,6 +55,7 @@ def read_config():
         varname = citem['var']
         default = citem['def']
         is_bool = (type(default) == bool)
+
         if section in ini and varname in ini[section]:
             if is_bool:
                 out_dict[varname] = ini.getboolean(section, varname)
