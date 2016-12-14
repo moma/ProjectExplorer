@@ -9,13 +9,13 @@
          - ../../data/shared_mysql_data:/var/lib/mysql
 
       # in the future: external service (=> just remove doors_test & change DOORS_HOST and DOORS_PORT)
-    #   doors_test:
-    #     build: ./minidoors
-    #     image: minidoors:latest
-    #     ports:
-    #      - "32789:8989"
-    #     volumes:
-    #      - ../../../shared_minidoors_data:/root/.doors
+      doors_test:
+        build: ./minidoors
+        image: minidoors:latest
+        ports:
+         - "32789:8989"
+        volumes:
+         - ../../../shared_minidoors_data:/root/.doors
 
       comex_test:
         ports:
@@ -24,7 +24,7 @@
         image: comex2_services:testing
         depends_on:
          - comex_db_test
-        #  - doors_test
+         - doors_test
         links:
          - comex_db_test:comex_db_backend
         #  - doors_test:doors_backend
