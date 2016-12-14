@@ -32,8 +32,8 @@ def home_path():
 def read_config():
     """
     reads all global config vars trying in order:
-        1) the config file $HOME/parametres_comex.ini
-        2) env variables of the same name
+        1) env variables of the same name
+        2) the config file $HOME/parametres_comex.ini
         3) hard-coded default values
 
     output is a simple dict
@@ -56,18 +56,28 @@ def read_config():
         default = citem['def']
         is_bool = (type(default) == bool)
 
-        if section in ini and varname in ini[section]:
-            if is_bool:
-                out_dict[varname] = ini.getboolean(section, varname)
-            else:
-                out_dict[varname] = ini.get(section, varname)
-        elif varname in environ:
+        print("DEBUG: config for '%s'"%varname)
+
+        if varname in environ:
             if is_bool:
                 out_dict[varname] = (environ[varname] == 'true')
             else:
                 out_dict[varname] = environ[varname]
+            print("DEBUG: ok from env for '%s'"%varname)
+
+        elif section in ini and varname in ini[section]:
+            if is_bool:
+                out_dict[varname] = ini.getboolean(section, varname)
+            else:
+                out_dict[varname] = ini.get(section, varname)
+            print("DEBUG: ok from file for '%s'"%varname)
+
         else:
             out_dict[varname] = default
+            print("DEBUG: ok from default for '%s'"%varname)
+
+    # DEBUG FORCED
+    out_dict['DEBUG_FLAG'] = True
 
     # also add our project home since we have it and we'll need it
     out_dict['HOME'] = our_home

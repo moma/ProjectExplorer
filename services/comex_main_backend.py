@@ -31,6 +31,9 @@ from os          import path
 from traceback   import format_tb
 from json        import dumps
 
+
+print("HELLO starting comex_main_backend.py====================")
+
 if __package__ == 'services':
     # when we're run via import
     from services.user import comex_user
@@ -47,6 +50,10 @@ else:
 # ============= read config ============
 
 config = read_config()
+
+
+# DEBUG
+print("config is=====>", config)
 
 # ============= verbose msg =============
 if config['DEBUG_FLAG']:
@@ -550,4 +557,4 @@ def read_record(incoming_data):
 ########### MAIN ###########
 if __name__ == "__main__":
     # our app should be bound to an ip (cf stackoverflow.com/a/30329547/2489184)
-    app.run(host=config['COMEX_HOST'], port=config['COMEX_PORT'])
+    app.run(host=config['COMEX_HOST'], port=int(config['COMEX_PORT']))

@@ -9,34 +9,33 @@
          - ../../data/shared_mysql_data:/var/lib/mysql
 
       # in the future: external service (=> just remove doors_test & change DOORS_HOST and DOORS_PORT)
-      doors_test:
-        build: ./minidoors
-        image: minidoors:latest
-        ports:
-         - "32789:8989"
-        volumes:
-         - ../../../shared_minidoors_data:/root/.doors
+    #   doors_test:
+    #     build: ./minidoors
+    #     image: minidoors:latest
+    #     ports:
+    #      - "32789:8989"
+    #     volumes:
+    #      - ../../../shared_minidoors_data:/root/.doors
 
       comex_test:
         ports:
          - "32790:9090"
         build: ./comex2_services
-        image: comex2_services:latest
+        image: comex2_services:testing
         depends_on:
          - comex_db_test
-         - doors_test
+        #  - doors_test
         links:
          - comex_db_test:comex_db_backend
-         - doors_test:doors_backend
+        #  - doors_test:doors_backend
         # links the outside config parametres_comex.ini to the inside
         # /!\ this erases the contained config with the outside one /!\
         volumes:
-         - ../../config/:/comex2/config
-
-        # # moved from env vars to new config vars via volume config
+         - ../../config:/comex2/config
+        # moved from env vars to new config vars via volume config
         # environment:
         #  - HOST=0.0.0.0                # script will bind server to this address
-        #  - DEBUG_FLAG=false
+        #  - DEBUG_FLAG=true
         #  - SQL_HOST=comex_db_backend   # script will read/write sql to this host
         #  - DOORS_HOST=134.158.75.71
         #  - DOORS_PORT=80               # forwarded port we're accessing via ajax in tests
