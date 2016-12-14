@@ -648,38 +648,3 @@ class MyExtractor:
         # print("nodes2",edgesB)
         # print("bipartite",edgesAB)
         return graph
-
-
-def restparse(paramstr):
-    """
-    "keyA[]=valA1&keyB[]=valB1&keyB[]=valB2&keyC=valC"
-
-    => {
-        "keyA": [valA1],
-        "keyB": [valB1, valB2],
-        "keyC": valC
-        }
-
-    NB better than flask's request.args (aka MultiDict)
-       because we remove the '[]' and we rebuild the arrays
-    """
-    resultdict = {}
-    components = paramstr.split('&')
-    for comp in components:
-        (keystr, valstr) = comp.split('=')
-
-        # type array
-        if len(keystr) > 2 and keystr[-2:] == "[]":
-            key = unquote(keystr[0:-2])
-
-            if key in resultdict:
-                resultdict[key].append(unquote(valstr))
-            else:
-                resultdict[key] = [unquote(valstr)]
-
-        # atomic type
-        else:
-            key = unquote(keystr)
-            resultdict[key]=unquote(valstr)
-
-    return resultdict

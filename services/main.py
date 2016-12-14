@@ -31,33 +31,26 @@ from os          import path
 from traceback   import format_tb
 from json        import dumps
 
-
-print("HELLO starting comex_main_backend.py====================")
-
 if __package__ == 'services':
     # when we're run via import
+    print("*** comex services ***")
     from services.user import comex_user
     from services.text import keywords
-    from services.tools import read_config
+    from services.tools import read_config, restparse
     from services.db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 else:
     # when this script is run directly
+    print("*** comex services (dev server mode) ***")
     from user          import comex_user
     from text          import keywords
-    from tools         import read_config
+    from tools         import read_config, restparse
     from db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 
 # ============= read config ============
-
 config = read_config()
 
-
-# DEBUG
-print("config is=====>", config)
-
-# ============= verbose msg =============
-if config['DEBUG_FLAG']:
-    print("DEBUG: conf\n  "+"\n  ".join(["%s=%s"%(k,v) for k,v in config.items()]))
+# if config['DEBUG_FLAG']:
+print("DEBUG: conf\n  "+"\n  ".join(["%s=%s"%(k,v) for k,v in config.items()]))
 
 # ============= app creation ============
 app = Flask("services",
@@ -136,7 +129,7 @@ ORG_COLS = [
          ("org_city",              False,        50)
     ]
 
-# mandatory minimum of keywords
+# mandatory minimum of keywords # TODO use
 MIN_KW = 5
 
 
@@ -146,10 +139,48 @@ MIN_KW = 5
 # /!\ Routes are not prefixed by nginx in prod so we do it ourselves /!\
 # -----------------------------------------------------------------------
 
+# /services
+@app.route(config['PREFIX'], methods=['GET'])
+def services():
+    return register()
+
+# /services/api/
+@app.route(config['PREFIX'] + config['API_ROUTE'])
+def api_main():
+    """
+    API to provide json extracts of the DB to tinaweb
+    (originally @ moma/legacy_php_comex/tree/master/comex_install)
+    (original author S. Castillo)
+    """
+
+    db=MySQL(config['SQL_HOST'])
+
+    if 'qtype' in request.args:
+        if request.args['qtype'] == "filters":
+            # all the other args are a series of constraints for filtering
+            # ex: qtype=filters&keywords[]=complex%20networks&keywords[]=complexity%20theory&countries[]=France&countries[]=USA
+            scholars = db.getScholarsList("filter", restparse(request.query_string.decode()))
+        else:
+            unique_id = request.args['unique_id']
+            scholars = db.getScholarsList("unique_id",unique_id)
+    else:
+        raise TypeError("API query is missing qtype (should be 'filters' or 'uid')")
+
+    if scholars and len(scholars):
+        # Data Extraction
+        db.extract(scholars)
+
+    graphArray = db.buildJSON_sansfa2(db.Graph)
+    return dumps(graphArray)
+
+
 # /services/user/register
-print("register route: ", config['PREFIX'] + config['USR_ROUTE'] + '/register')
 @app.route(config['PREFIX'] + config['USR_ROUTE'] + '/register', methods=['GET','POST'])
 def register():
+
+    # debug
+    # print("register route: ", config['PREFIX'] + config['USR_ROUTE'] + '/register')
+
     if request.method == 'GET':
         return render_template(
             "base_form.html",
@@ -232,63 +263,63 @@ def register():
                                 message = "")
 
 
-# API to provide json extracts of the DB to tinaweb
-# (originally @ moma/legacy_php_comex/tree/master/comex_install)
-# (original author S. Castillo)
-# /services/api/
-@app.route(config['PREFIX'] + config['API_ROUTE'])
-def api_main():
-
-    db=MySQL(config['SQL_HOST'])
-
-    if 'qtype' in request.args:
-        if request.args['qtype'] == "filters":
-            # all the other args are a series of constraints for filtering
-            # ex: qtype=filters&keywords[]=complex%20networks&keywords[]=complexity%20theory&countries[]=France&countries[]=USA
-            scholars = db.getScholarsList("filter",request.query_string.decode())
-        else:
-            unique_id = request.args['unique_id']
-            scholars = db.getScholarsList("unique_id",unique_id)
-    else:
-        raise TypeError("API query is missing qtype (should be 'filters' or 'uid')")
-
-    if scholars and len(scholars):
-        db.extract(scholars)
-    # < / Data Extraction > #
-
-    graphArray = db.buildJSON_sansfa2(db.Graph)
-    return dumps(graphArray)
-
-
 ########### SUBS ###########
-def re_hash(userinput, salt="verylonverylongverylonverylongverylonverylong"):
+
+def read_record(incoming_data):
     """
-    Build the captcha's verification hash server side
-    (my rewrite of keith-wood.name/realPerson.html python's version)
-
-    NB the number of iterations is prop to salt length
-
-    << 5 pads binary repr by 5 zeros on the right (including possible change of sign)
-    NB in all languages except python it truncates on the left
-        => here we need to emulate the same mechanism
-        => using c_int32() works well
+    Runs sanitization + string normalization as needed
+      - custom made for regcomex/templates/base_form
+      - uses SOURCE_FIELDS
     """
-    hashk = 5381
 
-    value = userinput.upper() + salt
+    # init var
+    clean_records = {}
 
-    # debug
-    # print("evaluated value:"+value)
+    # read in + sanitize values
+    duuid = None
+    rdate = None
 
-    for i, char in enumerate(value):
-        hashk = c_int32(hashk << 5).value + hashk + ord(char)
+    # we should have all the mandatory fields (checked in client-side js)
+    # TODO recheck b/c if post comes from elsewhere
+    for field_info in SOURCE_FIELDS:
+        field = field_info[0]
+        do_sanitize = field_info[1]
+        if field in incoming_data:
+            if do_sanitize:
+                val = sanitize(incoming_data[field])
+                if val != '':
+                    clean_records[field] = val
+                else:
+                    # mysql will want None instead of ''
+                    val = None
 
-        # debug iterations
-        # print(str(i) + ": " + str(hashk))
+            # these 2 fields already validated and useful separately
+            elif field == 'doors_uid':
+                duuid = incoming_data[field]
+            elif field == 'last_modified_date':
+                rdate = incoming_data[field]
 
-    return hashk
+            # any other fields that don't need sanitization (ex: menu options)
+            else:
+                clean_records[field] = incoming_data[field]
+
+    # special treatment for "other" subquestions
+    if clean_records['org_type'] == 'other' and 'other_org_type' in clean_records:
+        clean_records['org_type'] = clean_records['other_org_type']
 
 
+    # split for kw_array
+    kw_array = []
+    if 'keywords' in clean_records:
+        for kw in clean_records['keywords'].split(','):
+            kw = sanitize(kw)
+            if kw != '':
+                kw_array.append(kw)
+
+    return (duuid, rdate, kw_array, clean_records)
+
+
+# TODO move to text submodules
 def sanitize(value):
     """
     simple and radical: leaves only alphanum and '.' '-' ':' ',' '(', ')', '#', ' '
@@ -309,6 +340,7 @@ def sanitize(value):
         return san_typed_val
 
 
+# TODO move to db submodules
 def db_get_or_create_keywords(kw_list, comex_db):
     """
         kw_str -> lookup/add to *keywords* table -> kw_id
@@ -498,60 +530,6 @@ def db_save_scholar(uid, date, safe_recs, reg_db):
 
     reg_db_c.execute(full_statmt)
     reg_db.commit()
-
-
-def read_record(incoming_data):
-    """
-    Runs sanitization + string normalization as needed
-      - custom made for regcomex/templates/base_form
-      - uses SOURCE_FIELDS
-    """
-
-    # init var
-    clean_records = {}
-
-    # read in + sanitize values
-    duuid = None
-    rdate = None
-
-    # we should have all the mandatory fields (checked in client-side js)
-    for field_info in SOURCE_FIELDS:
-        field = field_info[0]
-        do_sanitize = field_info[1]
-        if field in incoming_data:
-            if do_sanitize:
-                val = sanitize(incoming_data[field])
-                if val != '':
-                    clean_records[field] = val
-                else:
-                    # mysql will want None instead of ''
-                    val = None
-
-            # these 2 fields already validated and useful separately
-            elif field == 'doors_uid':
-                duuid = incoming_data[field]
-            elif field == 'last_modified_date':
-                rdate = incoming_data[field]
-
-            # any other fields that don't need sanitization (ex: menu options)
-            else:
-                clean_records[field] = incoming_data[field]
-
-    # special treatment for "other" subquestions
-    if clean_records['org_type'] == 'other' and 'other_org_type' in clean_records:
-        clean_records['org_type'] = clean_records['other_org_type']
-
-
-    # split for kw_array
-    kw_array = []
-    if 'keywords' in clean_records:
-        for kw in clean_records['keywords'].split(','):
-            kw = sanitize(kw)
-            if kw != '':
-                kw_array.append(kw)
-
-    return (duuid, rdate, kw_array, clean_records)
-
 
 
 ########### MAIN ###########
