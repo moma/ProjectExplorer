@@ -86,6 +86,8 @@ var submitButton = document.getElementById('formsubmit')
 var mainMessage = document.getElementById('main_validation_message')
 
 var doorsMessage = document.getElementById('doors_ret_message')
+var doorsIconMessage = document.getElementById('doors_ret_icon_msg')
+var doorsIcon = document.getElementById('doors_ret_icon')
 
 // validate as we go to even get the submitButton
 var passStatus = false
@@ -200,18 +202,30 @@ var doorsIcon = document.getElementById('doors_ret_icon')
 function displayDoorsStatusInLoginBox (available, emailValue) {
 
     if (available) {
-        doorsMessage.title = "This email ID is available !"
+        // icon
+        doorsIconMessage.title = "Ok ID available on Doors"
+        doorsIcon.style.color = colorGreen
         doorsIcon.classList.remove('glyphicon-remove')
         doorsIcon.classList.remove('glyphicon-question-sign')
         doorsIcon.classList.add('glyphicon-ok')
-        doorsIcon.style.color = colorGreen
+
+        // message in legend
+        doorsMessage.innerHTML = "Ok, this email ID is available on Doors!"
+        doorsMessage.style.color = colorGreen
+
     }
     else {
-        doorsMessage.title = "Sorry this email ID is already taken"
+        // icon
+        doorsIconMessage.title = "Sorry ID already taken on Doors!"
+        doorsIcon.style.color = colorRed
         doorsIcon.classList.remove('glyphicon-ok')
         doorsIcon.classList.remove('glyphicon-question-sign')
         doorsIcon.classList.add('glyphicon-remove')
-        doorsIcon.style.color = colorRed
+
+        // message in legend
+        doorsMessage.innerHTML = "Sorry this email ID is already taken on Doors!"
+        doorsMessage.style.color = colorRed
+
     }
 
     // to debounce further actions in testAsYouGo
