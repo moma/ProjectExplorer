@@ -3,13 +3,16 @@ from networkx  import Graph, DiGraph
 from random    import randint
 from math      import floor
 from cgi       import escape
-from pprint    import pprint
 from re        import sub
 from traceback import format_tb
 from urllib.parse import unquote
 
-
 from .converter import CountryConverter
+
+if __package__ == "services.db_to_tina_api":
+    from services.tools import mlog
+else:
+    from tools          import mlog
 
 
 whoswhofilters_to_sqlnames = {
@@ -27,9 +30,9 @@ class MyExtractor:
             host=dbhost, db="comex_shared",
             user="root", passwd="very-safe-pass"
         )
-        print("MySQL connected:", self.connection)
+        mlog("DEBUG", "MySQL connected:", self.connection)
         self.cursor=self.connection.cursor(cursors.DictCursor)
-        print("MySQL gotcursor:", self.cursor)
+        mlog("DEBUG", "MySQL gotcursor:", self.cursor)
         self.scholars = {}
         self.scholars_colors = {}
         self.terms_colors = {}
@@ -63,8 +66,8 @@ class MyExtractor:
         sql_query = None
 
         # debug
-        # print("=> getScholarsList.qtype", qtype)
-        # print("=> getScholarsList.queryargs", queryargs)
+        # mlog("DEBUG", "=> getScholarsList.qtype", qtype)
+        # mlog("DEBUG", "=> getScholarsList.queryargs", queryargs)
 
         try:
             if qtype == "unique_id":
@@ -99,7 +102,7 @@ class MyExtractor:
                 results=self.cursor.fetchall()
 
                 # debug
-                # print("getScholarsList<== len(all 2-step neighbors) =", len(results))
+                # mlog("DEBUG", "getScholarsList<== len(all 2-step neighbors) =", len(results))
 
                 if len(results) == 0:
                     # should never happen if input unique_id is valid
@@ -107,7 +110,7 @@ class MyExtractor:
 
                 if len(results)>0:
                     for row in results:
-                        # print("the row:", row)
+                        # mlog("DEBUG", "the row:", row)
                         node_uid = row['uid']
                         node_shortid = "D::"+node_uid[0:8]
 
@@ -116,7 +119,7 @@ class MyExtractor:
 
                         scholar_array[node_uid] = 1
                 # debug
-                # print("getScholarsList<==scholar_array", scholar_array)
+                # mlog("DEBUG", "getScholarsList<==scholar_array", scholar_array)
 
             elif qtype == "filter":
                 sql_query = None
@@ -124,7 +127,7 @@ class MyExtractor:
                 filter_dict = restparse(queryargs)
 
                 # debug
-                # print("filter: REST query is", filter_dict)
+                # mlog("DEBUG", "filter: REST query is", filter_dict)
 
                 if "query" in filter_dict and filter_dict["query"] == "*":
                     # query is "*" <=> all scholars
@@ -162,7 +165,7 @@ class MyExtractor:
                             clause = ""
                             if isinstance(val, list) or isinstance(val, tuple):
                                 tested_array = [x for x in val if x != '']
-                                print("tested_array", tested_array)
+                                mlog("DEBUG", "tested_array", tested_array)
                                 if len(tested_array):
                                     qwliststr = repr(tested_array)
                                     qwliststr = sub(r'^\[', '(', qwliststr)
@@ -179,7 +182,7 @@ class MyExtractor:
                                 sql_constraints.append("(%s %s)" % (sql_column, clause))
 
                     # debug
-                    print("sql_constraints", sql_constraints)
+                    mlog("DEBUG", "sql_constraints", sql_constraints)
 
                     # use constraints as WHERE-clause
                     sql_query = """
@@ -216,14 +219,14 @@ class MyExtractor:
             return scholar_array
 
         except Exception as error:
-            print("===== getScholarsList SQL ERROR ====")
+            mlog("ERROR", "===== getScholarsList SQL ERROR ====")
             if queryargs != None:
-                print("qtype "+qtype+" received REST queryargs:\t"+str(queryargs))
+                mlog("ERROR", "qtype "+qtype+" received REST queryargs:\t"+str(queryargs))
             if sql_query != None:
-                print("qtype filter attempted SQL query:\t"+sql_query)
-            print(repr(error) + "("+error.__doc__+")")
-            print("stack (\n\t"+"\t".join(format_tb(error.__traceback__))+"\n)")
-            print("==== /getScholarsList SQL ERROR ====")
+                mlog("ERROR", "qtype filter attempted SQL query:\t"+sql_query)
+            mlog("ERROR", repr(error) + "("+error.__doc__+")")
+            mlog("ERROR", "stack (\n\t"+"\t".join(format_tb(error.__traceback__))+"\n)")
+            mlog("ERROR", "==== /getScholarsList SQL ERROR ====")
 
 
     def extract(self,scholar_array):
@@ -231,7 +234,7 @@ class MyExtractor:
         Adding each connected scholar per unique_id
         """
         # debug
-        # print("MySQL extract scholar_array:", scholar_array)
+        # mlog("DEBUG", "MySQL extract scholar_array:", scholar_array)
 
         for scholar_id in scholar_array:
             sql3='''
@@ -253,7 +256,7 @@ class MyExtractor:
             ''' % scholar_id
 
             # debug
-            # print("db.extract: sql3="+sql3)
+            # mlog("DEBUG", "db.extract: sql3="+sql3)
 
             try:
                 self.cursor.execute(sql3)
@@ -290,8 +293,8 @@ class MyExtractor:
                     self.scholars[ide] = info;
 
             except Exception as error:
-                print("sql3:\t"+sql3)
-                print(error)
+                mlog("ERROR", "sql3:\t"+sql3)
+                mlog("ERROR", error)
 
 
         # génère le gexf
@@ -307,7 +310,7 @@ class MyExtractor:
             for k in range(len(scholar_keywords)):
                 kw_k = scholar_keywords[k]
                 if kw_k != None and kw_k!="":
-                    #print(kw_k)
+                    # mlog("DEBUG", kw_k)
                     if kw_k in termsMatrix:
                         termsMatrix[kw_k]['occ'] = termsMatrix[kw_k]['occ'] + 1
 
@@ -341,9 +344,9 @@ class MyExtractor:
         conditions = ' (' + ','.join(sorted(list(termsMatrix))) + ')'
 
         # debug
-        # print("SQL query ===============================")
-        # print(query+conditions)
-        # print("/SQL query ==============================")
+        # mlog("DEBUG", "SQL query ===============================")
+        # mlog("DEBUG", query+conditions)
+        # mlog("DEBUG", "/SQL query ==============================")
 
         self.cursor.execute(query+conditions)
         results4 = self.cursor.fetchall()
@@ -440,7 +443,7 @@ class MyExtractor:
                         source=str(scholar)
                         target=str(neigh)
                         weight=self.jaccard(scholarsMatrix[nodeId1]['occ'],scholarsMatrix[neigh]['occ'],neighbors[str(neigh)])
-                        #print("\t"+source+","+target+" = "+str(weight))
+                        #mlog("DEBUG", "\t"+source+","+target+" = "+str(weight))
                         self.Graph.add_edge( source , target , {'weight':weight,'type':"nodes1"})
 
 
@@ -461,24 +464,24 @@ class MyExtractor:
         edgesA=0
         edgesB=0
         edgesAB=0
-        # print("printing in buildJSON_sansfa2()")
+        # mlog("DEBUG", "printing in buildJSON_sansfa2()")
         nodes = {}
         edges = {}
         if coordsRAW:
             xy = coordsRAW #For FA2.java: loads(coordsRAW)
-            #print(xy)
+            #mlog("DEBUG", xy)
             coords = {}
             for i in xy:
                 coords[i['sID']] = {}
                 coords[i['sID']]['x'] = i['x']
                 coords[i['sID']]['y'] = i['y']
-            #print(coords)
+            #mlog("DEBUG", coords)
 
         for idNode in graph.nodes_iter():
             if idNode[0]=="N":#If it is NGram
 
                 # debug
-                # print("terms idNode:", idNode)
+                # mlog("DEBUG", "terms idNode:", idNode)
 
                 numID=int(idNode.split("::")[1])
                 try:
@@ -490,7 +493,7 @@ class MyExtractor:
                     term_occ = 1
 
                 except KeyError:
-                    print("WARN: couldn't find label and meta for term " + str(numID))
+                    mlog("WARNING", "couldn't find label and meta for term " + str(numID))
                     nodeLabel = "UNKNOWN"
                     colorg = 0
                     term_occ = 1
@@ -505,7 +508,7 @@ class MyExtractor:
 
                 nodes[idNode] = node
 
-#            print("NGR","\t",idNode,"\t",nodeLabel,"\t",term_occ)
+#            mlog("DEBUG", "NGR","\t",idNode,"\t",nodeLabel,"\t",term_occ)
 
                 nodesB+=1
 
@@ -583,7 +586,7 @@ class MyExtractor:
 
                 nodes[idNode] = node
 
-#            print("SCH","\t",idNode,"\t",nodeLabel)
+#            mlog("DEBUG", "SCH","\t",idNode,"\t",nodeLabel)
 
                 nodesA+=1
 
@@ -617,13 +620,13 @@ class MyExtractor:
             if GG[n[0]][n[1]]['type']=="nodes2": edgesB+=1
             if GG[n[0]][n[1]]['type']=="bipartite": edgesAB+=1
 
-#        print(edge["type"],"\t",nodes[n[0]]["label"],"\t",nodes[n[1]]["label"],"\t",edge["w"])
+#        mlog("DEBUG", edge["type"],"\t",nodes[n[0]]["label"],"\t",nodes[n[1]]["label"],"\t",edge["w"])
 
-#        if edge["type"]=="nodes1": print(wr)
+#        if edge["type"]=="nodes1": mlog("DEBUG", wr)
             edges[str(e)] = edge
             e+=1
             #if e%1000 == 0:
-            #    print(e)
+            #    mlog("INFO", e)
 #    for n in GG.nodes_iter():
 #        if nodes[n]["type"]=="NGram":
 #            concepto = nodes[n]["label"]
@@ -632,7 +635,7 @@ class MyExtractor:
 #            for i in neigh:
 #                if nodes[i]["type"]=="NGram":
 #                    nodes2.append(nodes[i]["label"])
-#            print(concepto,"\t",", ".join(nodes2))
+#            mlog("DEBUG", concepto,"\t",", ".join(nodes2))
 
         graph = {}
         graph["nodes"] = nodes
@@ -640,11 +643,11 @@ class MyExtractor:
         graph["stats"] = { "sch":nodesA,"kw":nodesB,"n1":edgesA,"n2":edgesB,"nbi":edgesAB ,  }
         graph["ID"] = self.unique_id
 
-        pprint(graph["stats"])
+        mlog("INFO", graph["stats"])
 
-        # print("scholars",nodesA)
-        # print("concepts",nodesB)
-        # print("nodes1",edgesA)
-        # print("nodes2",edgesB)
-        # print("bipartite",edgesAB)
+        # mlog("DEBUG", "scholars",nodesA)
+        # mlog("DEBUG", "concepts",nodesB)
+        # mlog("DEBUG", "nodes1",edgesA)
+        # mlog("DEBUG", "nodes2",edgesB)
+        # mlog("DEBUG", "bipartite",edgesAB)
         return graph

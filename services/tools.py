@@ -5,13 +5,15 @@ __author__    = "CNRS"
 __copyright__ = "Copyright 2016 ISCPIF-CNRS"
 __email__     = "romain.loth@iscpif.fr"
 
+# for reading config
 from configparser import ConfigParser
 from os           import environ, path
 
 CONFIGMENU = [
-            {"sec": 'main',       "var":'DEBUG_FLAG',   "def": True         },
+            {"sec": 'main',       "var":'LOG_LEVEL',    "def": "INFO"       },
             {"sec": 'main',       "var":'COMEX_HOST',   "def": '0.0.0.0'    },
             {"sec": 'main',       "var":'COMEX_PORT',   "def": '9090'       },
+            {"sec": 'main',       "var":'LOG_FILE',   "def": 'services.log' },
             {"sec": 'routes',     "var":'PREFIX',       "def": '/services'  },
             {"sec": 'routes',     "var":'USR_ROUTE',    "def": '/user'      },
             {"sec": 'routes',     "var":'API_ROUTE',    "def": '/api'       },
@@ -21,6 +23,8 @@ CONFIGMENU = [
             {"sec": 'backends',   "var":'DOORS_PORT',   "def": '8989'       }
           ]
 
+# a copy of the config dict just for this module
+REALCONFIG = {}
 
 def home_path():
     """
@@ -36,9 +40,8 @@ def read_config():
         2) the config file $HOME/parametres_comex.ini
         3) hard-coded default values
 
-    output is a simple dict
+    output is a simple dict (also exposed above as REALCONFIG)
     """
-    out_dict = {}
     our_home = home_path()
 
     ini = ConfigParser()
@@ -62,29 +65,29 @@ def read_config():
 
         if varname in environ:
             if is_bool:
-                out_dict[varname] = (environ[varname] == 'true')
+                REALCONFIG[varname] = (environ[varname] == 'true')
             else:
-                out_dict[varname] = environ[varname]
+                REALCONFIG[varname] = environ[varname]
 
             print("ini debug: '%10s' ok from env" % varname)
 
         elif section in ini and varname in ini[section]:
             if is_bool:
-                out_dict[varname] = ini.getboolean(section, varname)
+                REALCONFIG[varname] = ini.getboolean(section, varname)
             else:
-                out_dict[varname] = ini.get(section, varname)
+                REALCONFIG[varname] = ini.get(section, varname)
 
             print("ini debug: '%10s' ok from file" % varname)
 
         else:
-            out_dict[varname] = default
+            REALCONFIG[varname] = default
 
             print("ini debug: '%10s' ok from default" % varname)
 
     # also add our project home since we have it and we'll need it
-    out_dict['HOME'] = our_home
+    REALCONFIG['HOME'] = our_home
 
-    return out_dict
+    return REALCONFIG
 
 
 def restparse(paramstr):
@@ -120,3 +123,28 @@ def restparse(paramstr):
             resultdict[key]=unquote(valstr)
 
     return resultdict
+
+
+def mlog(loglvl, *args):
+    """
+    prints the logs to the output file specified in config (by default: ./services.log)
+
+    loglvl is simply a string in ["DEBUG", "INFO", "WARNING", "ERROR"]
+    """
+    levels = {"DEBUG":0, "INFO":1, "WARNING":2, "ERROR":3}
+
+    if 'LOG_FILE' in REALCONFIG:
+        logfile = open(REALCONFIG["LOG_FILE"], "a")    # a <=> append
+
+        if loglvl in levels:
+            if levels[loglvl] >= levels[REALCONFIG["LOG_LEVEL"]]:
+                print(loglvl+':', args, file=logfile)
+        if loglvl not in levels:
+            first_arg = loglvl
+            loglvl = "INFO"
+            if levels[loglvl] >= levels[REALCONFIG["LOG_LEVEL"]]:
+                print(loglvl+':', first_arg, args, file=logfile)
+
+        logfile.close()
+    else:
+        print("WARNING: attempt to use mlog before read_config")

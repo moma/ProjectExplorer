@@ -36,28 +36,27 @@ if __package__ == 'services':
     print("*** comex services ***")
     from services.user import comex_user
     from services.text import keywords
-    from services.tools import read_config, restparse
+    from services.tools import read_config, restparse, mlog
     from services.db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 else:
     # when this script is run directly
     print("*** comex services (dev server mode) ***")
     from user          import comex_user
     from text          import keywords
-    from tools         import read_config, restparse
+    from tools         import read_config, restparse, mlog
     from db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 
 # ============= read config ============
 config = read_config()
 
-# if config['DEBUG_FLAG']:
-print("DEBUG: conf\n  "+"\n  ".join(["%s=%s"%(k,v) for k,v in config.items()]))
+mlog("DEBUG", "conf\n  "+"\n  ".join(["%s=%s"%(k,v) for k,v in config.items()]))
 
 # ============= app creation ============
 app = Flask("services",
              static_folder=path.join(config['HOME'],"static"),
              template_folder=path.join(config['HOME'],"templates"))
 
-app.config['DEBUG'] = config['DEBUG_FLAG']
+app.config['DEBUG'] = (config['LOG_LEVEL'] == "DEBUG")
 
 ########### PARAMS ###########
 
@@ -179,7 +178,7 @@ def api_main():
 def register():
 
     # debug
-    # print("register route: ", config['PREFIX'] + config['USR_ROUTE'] + '/register')
+    # mlog("DEBUG", "register route: ", config['PREFIX'] + config['USR_ROUTE'] + '/register')
 
     if request.method == 'GET':
         return render_template(
@@ -188,7 +187,7 @@ def register():
         )
     elif request.method == 'POST':
         # ex: request.form = ImmutableMultiDict([('initials', 'R.L.'), ('email', 'romain.loth@iscpif.fr'), ('last_name', 'Loth'), ('country', 'France'), ('first_name', 'Romain'), ('my-captchaHash', '-773776109'), ('my-captcha', 'TSZVIN')])
-        # print("GOT ANSWERS <<========<<", request.form)
+        # mlog("DEBUG", "GOT ANSWERS <<========<<", request.form)
 
         # 1 - testing the captcha answer
         captcha_userinput = request.form['my-captcha']
@@ -196,15 +195,15 @@ def register():
         captcha_verifhash = int(request.form['my-captchaHash'])
 
         # dbg
-        # print(str(captcha_verifhash))
+        # mlog("DEBUG", str(captcha_verifhash))
 
         if captcha_userhash != captcha_verifhash:
-            print("INFO: pb captcha rejected")
+            mlog("INFO", "pb captcha rejected")
             form_accepted = False
 
         # normal case
         else:
-            print("INFO: ok form accepted")
+            mlog("INFO", "ok form accepted")
             form_accepted = True
 
             # only safe values
@@ -376,8 +375,7 @@ def db_get_or_create_keywords(kw_list, comex_db):
             db_cursor.execute('INSERT INTO keywords(kwstr) VALUES ("%s")' % kw_str)
             comex_db.commit()
 
-            if config['DEBUG_FLAG']:
-                print("DEBUG: Added keyword '%s'" % kw_str)
+            mlog("DEBUG", "Added keyword '%s'" % kw_str)
 
             found_ids.append(db_cursor.lastrowid)
 
@@ -394,8 +392,7 @@ def db_save_pairs_sch_kw(pairings_list, comex_db):
     for id_pair in pairings_list:
         db_cursor.execute('INSERT INTO sch_kw VALUES %s' % str(id_pair))
         comex_db.commit()
-        if config['DEBUG_FLAG']:
-            print("DEBUG: Keywords: saved %s pair" % str(id_pair))
+        mlog("DEBUG", "Keywords: saved %s pair" % str(id_pair))
 
 
 def db_get_or_create_affiliation(org_info, comex_db):
@@ -446,8 +443,7 @@ def db_get_or_create_affiliation(org_info, comex_db):
     # ok existing affiliation => row id
     if n_matched == 1:
         the_aff_id = db_cursor.fetchone()[0]
-        if config['DEBUG_FLAG']:
-            print("DEBUG: Found affiliation (affid %i) (WHERE %s)" % (the_aff_id, " AND ".join(db_constraints)))
+        mlog("DEBUG", "Found affiliation (affid %i) (WHERE %s)" % (the_aff_id, " AND ".join(db_constraints)))
 
     # no matching affiliation => add => row id
     elif n_matched == 0:
@@ -458,8 +454,7 @@ def db_get_or_create_affiliation(org_info, comex_db):
                          )
         the_aff_id = db_cursor.lastrowid
         comex_db.commit()
-        if config['DEBUG_FLAG']:
-            print("DEBUG: Added affiliation '%s'" % str(db_qstrvals))
+        mlog("DEBUG", "Added affiliation '%s'" % str(db_qstrvals))
     else:
         raise Exception("ERROR: non-unique affiliation '%s'" % str(db_qstrvals))
 
@@ -503,12 +498,11 @@ def db_save_scholar(uid, date, safe_recs, reg_db):
             if colname != 'pic_file':
                 quotedstrval = "'"+str(val)+"'"
             else:
-                print("picture file is len0?", len(val) == 0 )
+                mlog("DEBUG", "picture file is len0?", len(val) == 0 )
                 # str(val) for a bin is already quoted but has the 'b' prefix
                 quotedstrval = '_binary'+str(val)[1:]  # TODO check if \x needs to land in target sql ?
 
-                if config['DEBUG_FLAG']:
-                    print("DEBUG: added pic blob: " + quotedstrval[:25] + '...' + quotedstrval[-10:])
+                mlog("DEBUG", "added pic blob: " + quotedstrval[:25] + '...' + quotedstrval[-10:])
 
             # anyways
             db_tgtcols.append(colname)

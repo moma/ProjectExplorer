@@ -1,5 +1,11 @@
 from sqlite3  import connect, Row
 
+if __package__ == "services.db_to_tina_api":
+    from services.tools import mlog
+else:
+    from tools          import mlog
+
+
 class CountryConverter:
     def __init__(self,dbname,dbtable,dbcolumnID,dbcolumnName):
 
@@ -87,7 +93,7 @@ class CountryConverter:
                     self.cursorDBLP.execute(q3)
                     self.connDBLP.commit()
             else: fails[i[dbcolumnID]]=ind
-            print(str(i[dbcolumnID])+" / "+str(total))
+            mlog("INFO", str(i[dbcolumnID])+" / "+str(total))
 
         self.connDBLP.close()
         return fails
