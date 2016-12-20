@@ -22,6 +22,8 @@
       comex_test:
         image: comex2_services:testing
         build: ./comex2_services
+        # logs will show all that's printed to STDOUT with tty:true
+        tty: true
         ports:
          - "32790:9090"
         links:
