@@ -138,12 +138,12 @@ def mlog(loglvl, *args):
 
         if loglvl in levels:
             if levels[loglvl] >= levels[REALCONFIG["LOG_LEVEL"]]:
-                print(loglvl+':', args, file=logfile)
+                print(loglvl+':', *args, file=logfile)
         if loglvl not in levels:
             first_arg = loglvl
             loglvl = "INFO"
             if levels[loglvl] >= levels[REALCONFIG["LOG_LEVEL"]]:
-                print(loglvl+':', first_arg, args, file=logfile)
+                print(loglvl+':', first_arg, *args, file=logfile)
 
         logfile.close()
     else:
