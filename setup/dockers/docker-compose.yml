@@ -36,9 +36,8 @@
          - ../../logs:/comex2/logs
         environment:
             # override values from parametres_comex.ini
-            # for a triple reason:
+            # for a double reason:
             #   - both apps have ENV vals preempt INI vals
-            #   - the php app INI support is buggy
             #   - if we're here (in docker-compose) then by definition the mysql must be coming from comex_db_test container
             - SQL_HOST=comex_db_test
             - SQL_PORT=3306

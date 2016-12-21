@@ -10,7 +10,7 @@ $min_num_friends=0;// nombre minimal de voisin que doit avoir un scholar pour ê
 
     We attempt in order:
       1 - retrieve SQL_HOST from bash ENV (set by docker-compose or admin)
-      2 - otherwise retrieve from INI file (buggy)
+      2 - otherwise retrieve from INI file
       3 - otherwise try 172.17.0.2 (first docker IP)
 
     POSSIBLE: use same behavior for the other sql vars (port, db, user & pass)
@@ -21,7 +21,6 @@ $sql_host = getenv("SQL_HOST");
 
 # 2 - INI file read
 if (empty($sql_host)) {
-    // TODO debug
     $params = parse_ini_file("config/parametres_comex.ini");
     $sql_host = $params['SQL_HOST'] ;
 }
