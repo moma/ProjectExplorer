@@ -25,12 +25,15 @@
         # logs will show all that's printed to STDOUT with tty:true
         tty: true
         ports:
-         - "32790:9090"
+         # we expose the entire contained nginx
+         - "8080:80"
         links:
          - comex_db_test
         volumes:
          # /!\ this uses outside conf to replace :contained conf
          - ../../config:/comex2/config
+         # similar logic used to expose inner logs
+         - ../../logs:/comex2/logs
         environment:
             # override values from parametres_comex.ini
             # for a triple reason:

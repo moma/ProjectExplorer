@@ -18,6 +18,13 @@ RUN apt install -y python3-pip libmysqlclient-dev git nano tree iputils-ping ngi
 RUN pip3 install --upgrade pip
 
 # for comex2 itself ----------------------------------------------------------
+# copy and symlink the nginx conf
+ADD comex2_php_and_services.nginx.conf /etc/nginx/sites-available
+WORKDIR /etc/nginx/sites-enabled
+RUN rm default
+RUN ln -s ../sites-available/comex2_php_and_services.nginx.conf
+WORKDIR /
+
 # pull the comex server from repository...
 RUN echo "updating git"
 RUN git clone https://github.com/moma/comex2.git
@@ -38,9 +45,10 @@ WORKDIR /comex2
 # gunicorn production server
 CMD bash run.sh
 
-# ports ------------------------------------------------------------------------
-# flask dev server
-# EXPOSE 5000
+# ports -----------------------------------------------------------------------
 
-# gunicorn production server
-EXPOSE 9090
+# nginx server (redirecting to php AND services)
+EXPOSE 80
+
+# TODO SSL configuration
+# EXPOSE 443
