@@ -8,6 +8,7 @@ __email__     = "romain.loth@iscpif.fr"
 # for reading config
 from configparser import ConfigParser
 from os           import environ, path
+from urllib.parse import unquote
 
 CONFIGMENU = [
             {"sec": 'main',       "var":'LOG_LEVEL',    "def": "INFO"       },

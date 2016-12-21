@@ -5,7 +5,6 @@ from math      import floor
 from cgi       import escape
 from re        import sub
 from traceback import format_tb
-from urllib.parse import unquote
 
 from .converter import CountryConverter
 
