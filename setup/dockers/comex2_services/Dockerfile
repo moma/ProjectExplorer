@@ -15,6 +15,11 @@ RUN dpkg-reconfigure locales
 # Install global dependencies and utilities
 RUN apt update && apt autoclean
 RUN apt install -y python3-pip libmysqlclient-dev git nano tree iputils-ping nginx-full php7.0-fpm php7.0-mysql
+
+# Configure php fpm to allow environment variables (uncomment removing the ';')
+RUN mv /etc/php/7.0/fpm/pool.d/www.conf /etc/php/7.0/fpm/pool.d/www.conf.bak
+RUN sed 's/;clear_env = no/clear_env = no/' /etc/php/7.0/fpm/pool.d/www.conf.bak > /etc/php/7.0/fpm/pool.d/www.conf
+
 RUN pip3 install --upgrade pip
 
 # for comex2 itself ----------------------------------------------------------
@@ -26,7 +31,6 @@ RUN ln -s ../sites-available/comex2_php_and_services.nginx.conf
 WORKDIR /
 
 # pull the comex server from repository...
-RUN echo "updating git"
 RUN git clone https://github.com/moma/comex2.git
 
 # ...or copy it locally
@@ -42,7 +46,7 @@ WORKDIR /comex2
 # flask dev server
 # CMD python3 server_comex_registration.py
 
-# gunicorn production server
+# start nginx inner wrapper and gunicorn production server
 CMD bash run.sh
 
 # ports -----------------------------------------------------------------------

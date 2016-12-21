@@ -8,6 +8,12 @@ if grep --quiet docker /proc/1/cgroup
     export REAL_DOCKER_HOST=$(hostname -i)
     echo "starting nginx on $REAL_DOCKER_HOST"
     service nginx start
+
+    echo "starting php 7 with clear_env = no"
+    /etc/init.d/php7.0-fpm start
+    # NB if we started it with the "service" command
+    #    all our env vars would be intercepted by it
+    #    even though we set "clear_env=no" in www.conf
 fi
 
 # anyway we always need a simple web server to run the services
