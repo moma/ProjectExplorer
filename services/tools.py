@@ -14,7 +14,7 @@ CONFIGMENU = [
             {"sec": 'main',       "var":'LOG_LEVEL',    "def": "INFO"       },
             {"sec": 'main',       "var":'COMEX_HOST',   "def": '0.0.0.0'    },
             {"sec": 'main',       "var":'COMEX_PORT',   "def": '9090'       },
-            {"sec": 'main',       "var":'LOG_FILE',   "def": 'services.log' },
+            {"sec": 'main',       "var":'LOG_FILE',   "def": 'logs/services.log' },
             {"sec": 'routes',     "var":'PREFIX',       "def": '/services'  },
             {"sec": 'routes',     "var":'USR_ROUTE',    "def": '/user'      },
             {"sec": 'routes',     "var":'API_ROUTE',    "def": '/api'       },
