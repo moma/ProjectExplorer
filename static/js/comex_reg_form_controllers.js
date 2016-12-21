@@ -1341,15 +1341,15 @@ $(function() {
 console.log("load OK")
 
 // £DEBUG autofill ----------->8------
-fName.value = "Jean"
-lName.value = "Tartampion"
-initialsInput.value="JPP"
-document.getElementById('country').value = "France"
-email.value= makeRandomString(7)+"@om.fr"
-pass1.value="123456+789"
-pass2.value="123456+789"
-document.getElementById('position').value = "atitle"
-document.getElementById('keywords').value = "Blabla"
-document.getElementById('org').value = "CNRS"
-basicEmailValidate(email.value)
+// fName.value = "Jean"
+// lName.value = "Tartampion"
+// initialsInput.value="JPP"
+// document.getElementById('country').value = "France"
+// email.value= makeRandomString(7)+"@om.fr"
+// pass1.value="123456+789"
+// pass2.value="123456+789"
+// document.getElementById('position').value = "atitle"
+// document.getElementById('keywords').value = "Blabla"
+// document.getElementById('org').value = "CNRS"
+// basicEmailValidate(email.value)
 // --------------------------->8------
