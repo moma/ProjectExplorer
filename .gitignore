@@ -1,5 +1,6 @@
 *.sqlite
 *.db
 *.pyc
-archives_local/*
+logs/
+logs/services.log
 __pycache__/

@@ -9,9 +9,9 @@ from traceback import format_tb
 from .converter import CountryConverter
 
 if __package__ == "services.db_to_tina_api":
-    from services.tools import mlog
+    from services.tools import mlog, restparse
 else:
-    from tools          import mlog
+    from tools          import mlog, restparse
 
 
 whoswhofilters_to_sqlnames = {
@@ -126,7 +126,7 @@ class MyExtractor:
                 filter_dict = restparse(queryargs)
 
                 # debug
-                # mlog("DEBUG", "filter: REST query is", filter_dict)
+                mlog("DEBUG", "filter: REST query is", filter_dict)
 
                 if "query" in filter_dict and filter_dict["query"] == "*":
                     # query is "*" <=> all scholars
