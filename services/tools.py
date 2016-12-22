@@ -9,6 +9,7 @@ __email__     = "romain.loth@iscpif.fr"
 from configparser import ConfigParser
 from os           import environ, path
 from urllib.parse import unquote
+from ctypes       import c_int32
 
 CONFIGMENU = [
             {"sec": 'main',       "var":'LOG_LEVEL',    "def": "INFO"       },
@@ -89,6 +90,34 @@ def read_config():
     REALCONFIG['HOME'] = our_home
 
     return REALCONFIG
+
+
+def re_hash(userinput, salt="verylonverylongverylonverylongverylonverylong"):
+    """
+    Build the captcha's verification hash server side
+    (my rewrite of keith-wood.name/realPerson.html python's version)
+
+    NB the number of iterations is prop to salt length
+
+    << 5 pads binary repr by 5 zeros on the right (including possible change of sign)
+    NB in all languages except python it truncates on the left
+        => here we need to emulate the same mechanism
+        => using c_int32() works well
+    """
+    hashk = 5381
+
+    value = userinput.upper() + salt
+
+    # debug
+    # print("evaluated value:"+value)
+
+    for i, char in enumerate(value):
+        hashk = c_int32(hashk << 5).value + hashk + ord(char)
+
+        # debug iterations
+        # print(str(i) + ": " + str(hashk))
+
+    return hashk
 
 
 def restparse(paramstr):
