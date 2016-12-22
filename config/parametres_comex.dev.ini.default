@@ -1,11 +1,11 @@
 [main]
 #; that's where we'll be serving our routes for web server
-#; (must match inner nginx reverse proxy **target**)
+#; (must match apache/nginx reverse proxy **target**)
 COMEX_HOST=0.0.0.0
 COMEX_PORT=9090
 
 #; that's how much we'll log from services: DEBUG, INFO, WARNING or ERROR
-LOG_LEVEL=INFO
+LOG_LEVEL=DEBUG
 LOG_FILE=logs/services.log
 
 [routes]
@@ -13,15 +13,15 @@ PREFIX=/services
 USR_ROUTE=/user
 API_ROUTE=/api
 
-#; NB: prefix should match your inner nginx reverse proxy **location**
+#; NB: prefix should match your apache/nginx reverse proxy **location**
 
 [backends]
 #; local address of mysql subservice for the comex_shared database
 #; used by php and python, can be overidden by env vars with same name
-SQL_HOST=comex_db
+SQL_HOST=172.18.0.3
 SQL_PORT=3306
 
 #; outer address for doors server (doors <=> client authentication)
 #; (used only in ajax context of sending credentials) #; TODO SSL
-DOORS_HOST=134.158.75.71
-DOORS_PORT=80
+DOORS_HOST=172.18.0.2
+DOORS_PORT=8989
