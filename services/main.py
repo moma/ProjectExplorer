@@ -155,13 +155,7 @@ def api_main():
     db=MySQL(config['SQL_HOST'])
 
     if 'qtype' in request.args:
-        if request.args['qtype'] == "filters":
-            # all the other args are a series of constraints for filtering
-            # ex: qtype=filters&keywords[]=complex%20networks&keywords[]=complexity%20theory&countries[]=France&countries[]=USA
-            scholars = db.getScholarsList("filter", restparse(request.query_string.decode()))
-        else:
-            unique_id = request.args['unique_id']
-            scholars = db.getScholarsList("unique_id",unique_id)
+        scholars = db.getScholarsList(request.args['qtype'], restparse(request.query_string.decode()))
     else:
         raise TypeError("API query is missing qtype (should be 'filters' or 'uid')")
 

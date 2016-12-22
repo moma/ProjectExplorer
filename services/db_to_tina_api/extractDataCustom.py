@@ -9,9 +9,9 @@ from traceback import format_tb
 from .converter import CountryConverter
 
 if __package__ == "services.db_to_tina_api":
-    from services.tools import mlog, restparse
+    from services.tools import mlog
 else:
-    from tools          import mlog, restparse
+    from tools          import mlog
 
 
 whoswhofilters_to_sqlnames = {
@@ -48,37 +48,34 @@ class MyExtractor:
         else:
             return cooc*cooc/float(occ1*occ2)
 
-    def getScholarsList(self,qtype,queryargs):
+    def getScholarsList(self,qtype,filter_dict):
         """
         select one or more scholars to map in the graph
 
         returns a dict of scholar's uids
 
-        method1 (case unique_id)
-          - unique_id defines our starting point (scholar_0)
+        method1 (qtype "uid")
+          - filter_dict['unique_id'] defines our starting point (scholar_0)
           - we follow all 2 step coupling paths (scholar_0 <=> keyword_X <=> scholar_i)
 
-        method2 (case filter constraints)
-          - in progress
+        method2 (qtype "filters" constraints)
+          - filter_thing is a dict of all the whoswho filters
+            ex: {'countries':[France,USA], 'keywords':[blabla]}
+          - they are converted to WHERE-clauses in an SQL query
         """
         scholar_array = {}
         sql_query = None
 
         # debug
-        # mlog("DEBUG", "=> getScholarsList.qtype", qtype)
-        # mlog("DEBUG", "=> getScholarsList.queryargs", queryargs)
+        mlog("DEBUG", "=> getScholarsList.qtype", qtype)
+        mlog("DEBUG", "=> getScholarsList.filter_dict", filter_dict)
 
         try:
-            if qtype == "unique_id":
+            if qtype == "uid":
                 # remove quotes from id
-                unique_id = sub(r'^"|"$', '', queryargs)
+                unique_id = sub(r'^"|"$', '', filter_dict['unique_id'])
 
-
-                # old way
-                # sql1="SELECT * FROM scholars WHERE doors_uid='"+unique_id+"'"       ## <= starting point (scholar_0)
-                # sql2 = "SELECT * FROM scholars2terms where term_id="+keywords_id    ## <= coupling edges (scholar_0 <=> keyword_X <=> scholar_i)
-
-                # new way (using scholars<=>kw map to do only one sql query)
+                # we use the sch_kw table (scholars <=> kw map)
                 sql_query="""
                 SELECT
                     neighbors_by_kw.uid,
@@ -120,13 +117,11 @@ class MyExtractor:
                 # debug
                 # mlog("DEBUG", "getScholarsList<==scholar_array", scholar_array)
 
-            elif qtype == "filter":
+            elif qtype == "filters":
                 sql_query = None
 
-                filter_dict = restparse(queryargs)
-
                 # debug
-                mlog("DEBUG", "filter: REST query is", filter_dict)
+                mlog("DEBUG", "filters: REST query is", filter_dict)
 
                 if "query" in filter_dict and filter_dict["query"] == "*":
                     # query is "*" <=> all scholars
@@ -139,9 +134,7 @@ class MyExtractor:
                     # query is a set of filters like: key <=> array of values
                     # (expressed as rest parameters: "keyA[]=valA1&keyB[]=valB1&keyB[]=valB2")
 
-                    # 1. we receive the original request.query_string
-                    #    and restparse rebuilds the corresponding dict
-
+                    # 1. we receive it as a dict of arrays
                     # 2. we map it to an sql conjunction of alternatives
                     #    ==> WHERE colA IN ("valA1") AND colB IN ("valB1", "valB2")
 
