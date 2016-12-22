@@ -19,15 +19,19 @@ $min_num_friends=0;// nombre minimal de voisin que doit avoir un scholar pour ê
 # 1 - ENV read
 $sql_host = getenv("SQL_HOST");
 
+$dbglog = "<p>from ENV got \$sql_host=$sql_host</p>";
+
 # 2 - INI file read
 if (empty($sql_host)) {
     $params = parse_ini_file("config/parametres_comex.ini");
     $sql_host = $params['SQL_HOST'] ;
+    $dbglog .= "<p>from INI got \$sql_host=$sql_host</p>";
 }
 
 # 3 - default val
 if (empty($sql_host)) {
     $sql_host = "172.17.0.2" ;
+    $dbglog .= "<p>from DEF got \$sql_host=$sql_host</p>";
 }
 
 # other sql vars
