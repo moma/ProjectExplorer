@@ -1,0 +1,131 @@
+{% extends "base_layout.html" %}
+
+{% block headers %}
+  <title>Login to your Community Explorer Profile</title>
+  <meta name="description" content="Community Explorer Scholar User Login">
+  <meta name="keywords" content="login page, complex systems, community">
+
+
+  <!-- possible to change it and send it each time with makeSalt-->
+  <script type="text/javascript">$.salt = 'verylonverylongverylonverylongverylonverylong'</script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/realperson/jquery.plugin.min.js') }}"></script>
+  <!-- for some reason jquery.realperson.min.js reacts differently to salt than jquery.realperson.js -->
+  <script type="text/javascript" src="{{ url_for('static', filename='js/realperson/jquery.realperson.js') }}"></script>
+{% endblock %}
+
+<!-- ======================================================================= -->
+
+{% block main_content %}
+    <div class="row">
+      <div class="spacer col-sm-1 col-md-1">&nbsp;</div>
+      <div class="my_form_box col-sm-8 col-md-8">
+
+        <!-- INTRODUCTION TEXT -->
+        <div id="intro">
+          <h2 class="oldstyle">Login</h2>
+              <p class="mini-hero">
+                  Enter your email and password
+              </p>
+        </div>
+
+
+        <!-- ########################### ( FORM ) ########################## -->
+        <form id="comex_login_form" enctype="multipart/form-data"
+              method="post" onsubmit="console.info('login submitted')">
+
+              <div class="question">
+                <p class="legend">(It is the same login for all the ISC services.)</p>
+                <div class="input-group">
+                  <!-- email validation onblur/onchange
+                            is done by basicEmailValidate
+                                   and testDoorsUserExists
+                            in comex_reg_form_controllers.js -->
+                  <label for="email" class="smlabel input-group-addon">Email</label>
+                  <input id="email" name="email" maxlength="255"
+                         type="text" class="form-control" placeholder="email">
+
+                  <!-- doors return value icon -->
+                  <div id="doors_ret_icon_msg" class="input-group-addon"
+                       title="The email will be checked in our DB after you type and leave the box.">
+                    <span id="doors_ret_icon"
+                          class="glyphicon glyphicon-question-sign grey"
+                          ></span>
+                  </div>
+                </div>
+                <!-- doors return value message -->
+                <p id="doors_ret_message" class="legend"></p>
+              </div>
+
+              <div class="question">
+                <div class="input-group">
+                  <label for="password" class="smlabel input-group-addon">Password</label>
+                  <input id="password" name="password" maxlength="30"
+                         type="password" class="form-control" placeholder="password">
+                </div>
+              </div>
+
+          <!-- hidden input for doors "hostname:port" -->
+          <input id="doors_connect" name="doors_connect" type="text" hidden value="{{doors_connect|safe}}">
+          </input>
+
+          <!-- hidden input for doors user id -->
+          <input id="doors_uid" name="doors_uid" type="text" hidden>
+          </input>
+
+          <!-- hidden input for captcha verification hash -->
+          <input id="my-captchaHash" name="my-captchaHash" type="text" hidden>
+          </input>
+
+          <div class="row spacerrow">&nbsp;</div>
+
+
+          <!-- main validation message -->
+          <p id="main_validation_message" class="legend" style="display:none"></p>
+
+          <!--pseudo captcha using realperson from http://keith-wood.name/realPerson.html -->
+
+          <p class="legend">(A challenge for spam bots)</p>
+          <div class="question input-group">
+            <label for="my-captcha" class="smlabel input-group-addon">Code</label>
+            <input id="my-captcha" name="my-captcha" style="max-width:60%"
+                   type="text" class="form-control input-lg" placeholder="Enter the 5 letters you see beside =>"
+                   onblur="makeBold(this)" onfocus="makeNormal(this)">
+          </div>
+
+          <!-- == S U B M I T == -->
+          <!-- button instead of input.submit to validate before real submit action -->
+          <!-- also remember stackoverflow.com/a/3315016/2489184 -->
+          <button class="btn btn-lg btn-success" style="float:right"
+                  id="formsubmit" type=button
+                  onclick="doorsThenTestUidAndSubmit()">
+                  LOGIN
+          </button>
+
+        </form>
+      </div>
+
+        <!-- FOR DEBUG: test go-between with Doors -->
+        <p>
+            <button type=button onclick='callDoors("user", [email.value, pass1.value, initialsInput.value], console.warn)'>
+                test doors login
+            </button>
+            <button type=button onclick='callDoors("register", [email.value, pass1.value, initialsInput.value], console.warn)'>
+                test doors register
+            </button>
+            <button type=button onclick='callDoors("userExists", [email.value, null, null], console.warn)'>
+                test doors userExists
+            </button>
+        </p>
+
+      <div class="spacer col-sm-2 col-md-2">&nbsp;</div>
+    </div>
+
+{% endblock %}
+
+<!-- ======================================================================= -->
+
+{% block last_imports %}
+    <!--  our js  -->
+    <script src="{{ url_for('static', filename='js/comex_user_shared_auth.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/comex_user_login_controllers.js') }}"></script>
+{% endblock %}
