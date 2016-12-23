@@ -20,11 +20,9 @@
 // common vars to user forms
 // NB other vars defined in main scope but just before their respective funs
 var theFormId = "comex_login_form"
-
 var theForm = document.getElementById(theFormId)
-
 var wholeFormData
-var theForm = document.getElementById(theFormId)
+
 // cf corresponding css classes
 var colorWhite = '#fff'
 var colorRed = '#910'
@@ -32,6 +30,41 @@ var colorGreen = '#161'
 var colorGrey = '#554'
 
 // vars that will be used during the interaction
+var submitButton = document.getElementById('formsubmit')
+var mainMessage = document.getElementById('main_validation_message')
+
+var jobLookingDateStatus = false
+submitButton.disabled = true
+theForm.onkeyup = testAsYouGo
+theForm.onchange = testAsYouGo
+theForm.onblur = testAsYouGo
+
+var lastEmailValueCheckedDisplayed = null
+
+// done when anything in the form changes
+function testAsYouGo() {
+  // console.log("testAsYouGo Go")
+
+  if (email.value != lastEmailValueCheckedDisplayed) {
+      // will update the emailStatus boolean
+      basicEmailValidate(email.value)
+  }
+
+  captchaStatus = (captcha.value.length == realCaptchaLength)
+
+  checkPassStatus()
+  checkJobDateStatus()
+
+  if (passStatus && emailStatus && captchaStatus && jobLookingDateStatus) {
+      submitButton.disabled = false
+  }
+  else {
+      submitButton.disabled = true
+  }
+  var now = new Date()
+  regTimestamp.value = now.toISOString()
+}
+
 
 // the target columns in DB: tuple (name, mandatoryBool, maxChars (or nChars))
 var COLS = [ ["doors_uid",              true,        36,   'exact'],
@@ -71,42 +104,6 @@ var subPage2Style = document.getElementById('subpage_2').style
 var teamCityDivStyle = document.getElementById('team_city_div').style
 var otherInstDivStyle = document.getElementById('other_org_div').style
 var jobLookingDivStyle = document.getElementById('job_looking_div').style
-
-var submitButton = document.getElementById('formsubmit')
-var mainMessage = document.getElementById('main_validation_message')
-
-var jobLookingDateStatus = false
-submitButton.disabled = true
-theForm.onkeyup = testAsYouGo
-theForm.onchange = testAsYouGo
-theForm.onblur = testAsYouGo
-
-var lastEmailValueCheckedDisplayed = null
-
-
-// done when anything in the form changes
-function testAsYouGo() {
-  // console.log("testAsYouGo Go")
-
-  if (email.value != lastEmailValueCheckedDisplayed) {
-      // will update the emailStatus boolean
-      basicEmailValidate(email.value)
-  }
-
-  captchaStatus = (captcha.value.length == realCaptchaLength)
-
-  checkPassStatus()
-  checkJobDateStatus()
-
-  if (passStatus && emailStatus && captchaStatus && jobLookingDateStatus) {
-      submitButton.disabled = false
-  }
-  else {
-      submitButton.disabled = true
-  }
-  var now = new Date()
-  regTimestamp.value = now.toISOString()
-}
 
 
 // NB using new route in doors api/userExists
@@ -213,15 +210,6 @@ function displayDoorsStatusInRegisterBox (available, emailValue) {
     // to debounce further actions in testAsYouGo
     // return to neutral is also in testAsYouGo
     lastEmailValueCheckedDisplayed = emailValue
-}
-
-function makeRandomString(nChars) {
-  var rando = ""
-  var possible = "abcdefghijklmnopqrstuvwxyz0123456789";
-  var len = possible.length
-  for( var i=0; i < nChars; i++ )
-      rando += possible.charAt(Math.floor(Math.random() * len));
-  return rando
 }
 
 // validateAndMsg() : bool (validates fields before doors registration and send)
@@ -339,18 +327,6 @@ function validateAndMsg() {
 }
 
 
-function ulListFromLabelsArray(strArray, ulClassList) {
-    ulClasses=["minilabels"].concat(ulClassList).join(" ")
-    var resultHtml = '<ul class="'+ulClasses+'">'
-    for (var i in strArray) {
-        var label = strArray[i].replace(/_/, " ")
-        resultHtml += '<li class="minilabel">'+label+'</li>'
-    }
-    resultHtml += '</ul>'
-    return resultHtml
-}
-
-
 var fileInput = document.getElementById('pic_file')
 var showPicImg = document.getElementById('show_pic')
 var boxShowPicImg = document.getElementById('box_show_pic')
@@ -425,17 +401,6 @@ function checkShowPic() {
         console.warn("skipping testPictureBlob called w/o picture in fileInput")
     }
 }
-
-// basic inputs get normal on focus
-function makeNormal(elt) {
-    elt.style.fontWeight = "normal"
-}
-
-// basic inputs get bold on blur
-function makeBold(elt){
-  if (elt.value != "")   elt.style.fontWeight = "bold"
-}
-
 
 // show middlename button binding
 var mnBtn = document.getElementById('btn-midname')
