@@ -19,11 +19,12 @@ Context:
 """
 __author__    = "CNRS"
 __copyright__ = "Copyright 2016 ISCPIF-CNRS"
-__version__   = "1.3"
+__version__   = "1.4"
 __email__     = "romain.loth@iscpif.fr"
 __status__    = "Dev"
 
-from flask       import Flask, render_template, request
+from flask       import Flask, render_template, request, redirect, url_for
+from flask_login import login_required, current_user
 from re          import sub
 from os          import path
 from traceback   import format_tb
@@ -32,7 +33,7 @@ from json        import dumps
 if __package__ == 'services':
     # when we're run via import
     print("*** comex services ***")
-    from services.user  import comex_user
+    from services.user  import User, login_manager
     from services.text  import keywords
     from services.tools import read_config, restparse, mlog, re_hash
     from services.db    import connect_db, get_or_create_keywords, save_pairs_sch_kw, get_or_create_affiliation, save_scholar
@@ -40,7 +41,7 @@ if __package__ == 'services':
 else:
     # when this script is run directly
     print("*** comex services (dev server mode) ***")
-    from user           import comex_user
+    from user           import User, login_manager
     from text           import keywords
     from tools          import read_config, restparse, mlog, re_hash
     from db             import connect_db, get_or_create_keywords, save_pairs_sch_kw, get_or_create_affiliation, save_scholar
@@ -57,6 +58,8 @@ app = Flask("services",
              template_folder=path.join(config['HOME'],"templates"))
 
 app.config['DEBUG'] = (config['LOG_LEVEL'] == "DEBUG")
+
+login_manager.init_app(app)
 
 ########### PARAMS ###########
 
@@ -107,13 +110,14 @@ MIN_KW = 5
 # /!\ Routes are not prefixed by nginx in prod so we do it ourselves /!\
 # -----------------------------------------------------------------------
 
-# /services
-@app.route(config['PREFIX'], methods=['GET'])
+# /services/
+@app.route(config['PREFIX']+'/', methods=['GET'])
 def services():
-    return register()
+    return redirect(url_for('login'))
+
 
 # /services/api/
-@app.route(config['PREFIX'] + config['API_ROUTE'])
+@app.route(config['PREFIX'] + config['API_ROUTE'] + '/')
 def api_main():
     """
     API to provide json extracts of the DB to tinaweb
@@ -136,8 +140,49 @@ def api_main():
     return dumps(graphArray)
 
 
-# /services/user/register
-@app.route(config['PREFIX'] + config['USR_ROUTE'] + '/register', methods=['GET','POST'])
+# /services/user/
+@app.route(config['PREFIX'] + config['USR_ROUTE']+'/', methods=['GET'])
+def user():
+    return redirect(url_for('login'))
+
+
+# /services/user/login/
+@app.route(config['PREFIX'] + config['USR_ROUTE'] + '/login/', methods=['GET'])
+def login():
+    if request.method == 'GET':
+        return render_template(
+            "login.html"
+        )
+    elif request.method == 'POST':
+        # TODO sanitize
+        email = request.form['email']
+        pwd = request.form['password']
+
+        # we do our doors request here server-side to avoid MiM attack on result
+        (logged_in, user_info) = doors_login(email, pwd)
+
+        if logged_in:
+            # WHERE ???
+            login_user(User(uid))
+
+        return render_template(
+            "profile.html",
+            logged_in = doors_response.ok
+        )
+
+
+# /services/user/profile/
+@app.route(config['PREFIX'] + config['USR_ROUTE'] + '/profile/', methods=['GET'])
+@login_required
+def profile():
+    return render_template(
+        "profile.html",
+        logged_in = True
+    )
+
+
+# /services/user/register/
+@app.route(config['PREFIX'] + config['USR_ROUTE'] + '/register/', methods=['GET','POST'])
 def register():
 
     # debug

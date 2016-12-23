@@ -1,0 +1,379 @@
+{% extends "base_layout.html" %}
+
+{% block headers %}
+  <title>Community Explorer Profile</title>
+  <meta name="description" content="Community Explorer Scholar User Profile">
+  <meta name="keywords" content="complex systems, community, user profile">
+{% endblock %}
+
+<!-- ======================================================================= -->
+
+{% block main_content %}
+    <div class="row">
+      <div class="spacer col-sm-1 col-md-1">&nbsp;</div>
+      <div class="my_form_box col-sm-8 col-md-8">
+
+        <!-- INTRODUCTION TEXT -->
+        <div id="intro">
+          <h2 class="oldstyle">Profile</h2>
+              <p class="mini-hero">
+                  Take the time to complete your <strong>Community Explorer</strong> profile to generate better maps of your own socio-semantic network .
+                  <br/>
+                  <br/>
+                  The <strong>keywords</strong>, <strong>affilitations</strong> and <strong>hashtags</strong> will all count as similarities to identify network neighbours.
+                  <br/>
+                  <br/>
+                  The <strong>home page (url)</strong>, <strong>picture (url or file)</strong> and <strong>free description</strong> will allow your neighbours to know you a little better.
+              </p>
+        </div>
+
+
+        <!-- ########################### ( FORM ) ########################## -->
+        <form id="comex_profil_form" enctype="multipart/form-data"
+              method="post" onsubmit="console.info('submitted')">
+
+        <!-- todo onsubmit also save to cache -->
+
+          <!-- NAME & COUNTRY -->
+          <h3 class="formcatfirst"> Basic infos </h3>
+
+          <div class="question input-group">
+            <label for="first_name" class="smlabel input-group-addon">
+              * First name
+            </label>
+            <input id="first_name" name="first_name" maxlength="30"
+                   type="text" class="form-control" placeholder="prénom"
+                   onblur="makeBold(this)" onfocus="makeNormal(this)">
+          </div>
+
+          <!-- optionnel -->
+          <div id="group-midname" class="question input-group" style='display:none'>
+            <label for="middle_name" class="smlabel input-group-addon">
+              Middle name
+            </label>
+            <input id="middle_name" name="middle_name" maxlength="30"
+                   type="text" class="form-control" placeholder="autres prénoms"
+                   onblur="makeBold(this)" onfocus="makeNormal(this)">
+          </div>
+
+          <div class="question input-group">
+            <label for="last_name" class="smlabel input-group-addon">
+              * Last name
+            </label>
+            <input id="last_name" name="last_name" maxlength="30"
+                   type="text" class="form-control" placeholder="nom de famille"
+                   onblur="makeBold(this)" onfocus="makeNormal(this)">
+          </div>
+
+          <button class="btn btn-xs btn-default operation"
+                  title="Add a middle name" id="btn-midname"
+                  type="button" style="margin:1em; float:right">
+            <span class="glyphicon glyphicon-plus"></span>
+            Add middle name
+          </button>
+
+          <div class="question input-group">
+            <label for="initials" class="smlabel input-group-addon">* Initials</label>
+            <input id="initials" name="initials" maxlength="7"
+                   type="text" class="form-control" placeholder="initiales">
+          </div>
+
+          <div class="question input-group">
+            <label for="country" class="smlabel input-group-addon">
+              * Country
+            </label>
+            <input id="country" name="country" maxlength="60"
+                   type="text" class="form-control autocomp"
+                   placeholder="pays"
+                   onblur="if(this.value=='France'){teamCityDivStyle.display = 'block'} else {teamCityDivStyle.display='none'}">
+          </div>
+
+          <!-- EMAIL & PASSWORD -->
+          <h3 class="formcat"> Login infos </h3>
+
+          <div class="question">
+            <p class="legend">Your email will also be your login for the ISC services.</p>
+            <div class="input-group">
+              <!-- email validation onblur/onchange
+                        is done by basicEmailValidate
+                               and testDoorsUserExists
+                        in comex_reg_form_controllers.js -->
+              <label for="email" class="smlabel input-group-addon">* Email</label>
+              <input id="email" name="email" maxlength="255"
+                     type="text" class="form-control" placeholder="email">
+
+              <!-- doors return value icon -->
+              <div id="doors_ret_icon_msg" class="input-group-addon"
+                   title="The email will be checked in our DB after you type and leave the box.">
+                <span id="doors_ret_icon"
+                      class="glyphicon glyphicon-question-sign grey"
+                      ></span>
+              </div>
+            </div>
+            <!-- doors return value message -->
+            <p id="doors_ret_message" class="legend"></p>
+          </div>
+
+          <div class="question">
+            <p class="legend">Please make your password difficult to predict.</p>
+            <div class="input-group">
+              <label for="password" class="smlabel input-group-addon">* Password</label>
+              <input id="password" name="password" maxlength="30"
+                     type="password" class="form-control" placeholder="Create a password">
+            </div>
+          </div>
+
+          <div class="question">
+            <div class="input-group">
+              <label for="password2" class="smlabel input-group-addon">* Password</label>
+              <input id="password2" name="password2" maxlength="30"
+                     type="password" class="form-control" placeholder="Repeat the password">
+            </div>
+            <p id="password_message" class="legend red" style="font-weight:bold"></p>
+          </div>
+
+          <!-- JOB & INTERESTS -->
+          <h3 class="formcat"> About your job and research </h3>
+
+          <div class="question input-group">
+            <label for="hon_title" class="smlabel input-group-addon"> Title </label>
+            <input id="hon_title" name="hon_title" maxlength="30"
+                   type="text" class="form-control autocomp" placeholder="titre"
+                   onblur="makeBold(this)" onfocus="makeNormal(this)">
+          </div>
+
+          <div class="question input-group">
+            <label for="position" class="smlabel input-group-addon">* Job Position</label>
+            <input id="position" name="position" maxlength="30"
+                   type="text" class="form-control autocomp" placeholder="titre"
+                   onblur="makeBold(this)" onfocus="makeNormal(this)">
+          </div>
+
+          <div class="question">
+            <div class="input-group">
+              <label for="keywords" class="smlabel input-group-addon">* Key subjects</label>
+              <input id="keywords" name="keywords" maxlength="350"
+                     type="text" class="form-control autocomp" placeholder="keywords">
+            </div>
+            <p class="legend">Please enter at least 5 comma-separated keywords</p>
+          </div>
+
+          <!-- ORGANIZATION -->
+          <h3 class="formcat"> About your current organization </h3>
+
+          <div class="question">
+            <div class="input-group">
+              <label for="org" class="smlabel input-group-addon">* Parent Institution</label>
+              <input id="org" name="org" maxlength="120"
+                     type="text" class="form-control autocomp" placeholder='eg "CNRS" or "University of Oxford"'>
+            </div>
+          </div>
+
+          <div class="question">
+            <div class="input-group">
+              <label for="org_type" class="smlabel input-group-addon">* Institution Type</label>
+              <select id="org_type" name="org_type"
+                      class="custom-select form-control"
+                      onchange="if(this.value=='other'){otherInstDivStyle.display = 'block'} else {otherInstDivStyle.display='none'}">
+                <option selected value="university">University</option>
+                <option value="public R&amp;D org">Public sector R&amp;D organization</option>
+                <option value="public other org">Other public sector organization</option>
+                <option value="private org">Private sector organization</option>
+                <option value="none">None at the moment</option>
+                <option value="other"
+                        onclick="otherInstDivStyle.display = 'block'"
+                        >Other</option>
+
+              </select>
+            </div>
+            <!-- Other institution type <=> only if previous choice == 5 -->
+            <div class="question conditional-q" id="other_org_div">
+              <div class="input-group">
+                <label for="other_org_type" class="smlabel input-group-addon">Other type</label>
+                <input id="other_org_type" name="other_org_type" maxlength="120"
+                       type="text" class="form-control" placeholder="Clarify here the type of your parent institution">
+              </div>
+            </div>
+          </div>
+
+
+          <div class="question">
+            <div class="input-group">
+              <label for="team_lab" class="smlabel input-group-addon">Lab / Team / Dept</label>
+              <input id="team_lab" name="team_lab" maxlength="120"
+                     type="text" class="form-control" placeholder="More detailed affiliation, if relevant">
+            </div>
+          </div>
+
+          <!-- Lab city <=> only for France -->
+          <div class="question conditional-q" id="team_city_div">
+            <div class="input-group">
+              <label for="org_city" class="smlabel input-group-addon">Lab city</label>
+              <input id="org_city" name="org_city" maxlength="50"
+                     type="text" class="form-control" placeholder="Ville de votre institution">
+            </div>
+          </div>
+
+        <!-- OTHER PERSONAL INFO -->
+        <h3 class="formcatfirst"> Complementary information </h3>
+
+        <div class="question">
+          <div class="input-group">
+            <label for="gender" class="smlabel input-group-addon">Gender</label>
+            <select id="gender" name="gender"
+                    class="custom-select form-control">
+              <option selected value="0">Select your gender</option>
+              <option value="F">Woman</option>
+              <option value="M">Man</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="input-group">
+            <label for="home_url" class="smlabel input-group-addon">Homepage</label>
+            <input id="home_url" name="home_url" maxlength="120"
+                   type="text" class="form-control autocomp" placeholder='eg "http://www.wittyexample.org/~me"'>
+          </div>
+        </div>
+
+        <div class="question">
+          <p class="legend">Link to a picture of yours...</p>
+          <div class="input-group">
+            <label for="pic_url" class="smlabel input-group-addon">Picture link</label>
+            <input id="pic_url" name="pic_url" maxlength="120"
+                   type="text" class="form-control autocomp" placeholder='eg "http://www.wittyexample.org/~me/my_great_pic.png"'>
+          </div>
+        </div>
+
+        <div class="question" style="margin-bottom:.5em" >
+          <p class="legend">... or upload a picture (png, jpg or gif, max source size: 200kB)</p>
+          <!-- <p class="legend">Upload a picture of yours (max source size: 4MB, then the image will be reduced to 200kB)</p> -->
+          <div class="input-group">
+            <label for="pic_file" class="smlabel input-group-addon">Picture</label>
+            <input type="file" id="pic_file" name="pic_file"
+                   accept="image/png,image/jpeg" class="form-control"
+                   onchange="checkShowPic(this)">
+          </div>
+          <p id="picture_message" class="legend red" style="font-weight:bold"></p>
+        </div>
+
+        <div id="box_show_pic">
+            <img id="show_pic" src=""></img>
+        </div>
+
+        <div class="question">
+          <div class="input-group">
+            <label for="community_hashtags" class="smlabel input-group-addon">Interest groups</label>
+            <input id="community_hashtags" name="community_hashtags" maxlength="350"
+                   type="text" class="form-control" placeholder="eg #dataviz or #networks">
+          </div>
+          <p class="legend">Interest groups aka "hashtags" (full suggestion list available shortly)</p>
+        </div>
+
+        <div class="question">
+          <div class="input-group">
+            <label for="interests_text" class="input-group-addon">
+              Personal interests
+            </label>
+
+            <textarea id="interests_text" name="interests_text" maxlength="1200"
+                      rows="7" style="resize:none"
+                      class="form-control" placeholder="If you wish, you may describe here your personal interests."
+                      onblur="makeBold(this)" onfocus="makeNormal(this)"
+                      ></textarea>
+          </div>
+          <p class="legend">Optional, ~15 lines max (1200 chars)</p>
+        </div>
+
+        <div class="question">
+          <div class="input-group">
+            <label for="job_bool" class="smlabel input-group-addon">Looking for a job?</label>
+            <select id="job_bool" name="job_bool"
+                    class="custom-select form-control"
+                    onchange="if(this.value=='Yes'){jobLookingDivStyle.display = 'block'} else {jobLookingDivStyle.display='none';jobDate.value=''}">
+              <option selected value="No" onclick="jobDate.value=''">No</option>
+              <option value="Yes" onclick="jobLookingDivStyle.display = 'block'">Yes</option>
+            </select>
+          </div>
+          <!-- job_looking_date_div <=> only if previous choice == Yes -->
+          <div class="question conditional-q" id="job_looking_div">
+            <p class="legend">Until when are you interested in job offers like post-doc positions, etc. ? (YYYY/MM/DD)</p>
+            <div class="input-group">
+              <label for="job_looking_date" class="smlabel input-group-addon">Job search limit</label>
+              <input id="job_looking_date" name="job_looking_date" maxlength="10"
+                     type="text" class="form-control" placeholder="ex: 2019/09/30">
+            </div>
+            <p id="job_date_message" class="legend red" style="font-weight:bold"></p>
+          </div>
+        </div>
+
+        <!-- CNIL WARNING -->
+
+        <h3 class="formcat"> About your data </h3>
+        <div class="cartouche" id="cnil_warning">
+          <p>Les informations recueillies à partir de ce formulaire font l’objet d’un traitement
+             informatique destiné à: </p>
+             <p><strong>communityexplorer.org</strong></p>
+          <p>Pour la ou les finalité(s) suivante(s) : </p>
+             <p><strong>
+                 Modélisation de la communauté des chercheurs
+                 <br />
+                 Diffusion de l'information dans la communauté
+             </strong></p>
+          <p>Le ou les destinataire(s) des données sont :</p>
+          <p><strong>ISC-PIF (CNRS / UPS 3611)</strong></p>
+          <p>Conformément à la <a href="https://www.cnil.fr/fr/loi-78-17-du-6-janvier-1978-modifiee">
+            loi « informatique et libertés » du 6 janvier 1978 modifiée</a>,
+            vous disposez d’un <a href="https://www.cnil.fr/fr/le-droit-dacces">droit d’accès</a>
+            et <a href="https://www.cnil.fr/fr/le-droit-de-rectification">de rectification</a>
+            aux informations qui vous concernent, en vous adressant à :</p>
+          <p class="rtecenter"><strong>todo@iscpif.fr</strong></p>
+          <p>Vous pouvez également, pour des motifs légitimes,
+            <a href="https://www.cnil.fr/fr/le-droit-dopposition">vous opposer au traitement
+              des données vous concernant</a>. Pour en savoir plus, <a href="https://www.cnil.fr/fr/comprendre-vos-droits">
+            consultez vos droits sur le site de la CNIL</a>.
+          </p>
+        </div>
+
+          <!-- hidden input for modification date -->
+          <input id="last_modified_date" name="last_modified_date" type="text" hidden>
+          </input>
+
+          <!-- hidden input for doors user id -->
+          <input id="doors_uid" name="doors_uid" type="text" hidden>
+          </input>
+
+
+          <div class="row spacerrow">&nbsp;</div>
+
+
+          <!-- main validation message -->
+          <p id="main_validation_message" class="legend" style="display:none"></p>
+
+
+          <!-- SUBMIT BTN + INFOS-->
+          <h3 class="formcat">Save profile</h3>
+
+          <!-- button instead of input.submit to validate before real submit action -->
+          <!-- also remember stackoverflow.com/a/3315016/2489184 -->
+          <button class="btn btn-lg btn-success" style="float:right"
+                  id="formsubmit" type=button
+                  onclick="if (validateAndMsg(event)) {registerDoorsAndSubmit()}">
+                  Save profile
+          </button>
+
+        </form>
+      </div>
+      <div class="spacer col-sm-2 col-md-2">&nbsp;</div>
+    </div>
+
+{% endblock %}
+
+<!-- ======================================================================= -->
+
+{% block last_imports %}
+    <!--  our js  -->
+    <!-- £TODO refactor reg/profile/login controls-->
+    <script src="{{ url_for('static', filename='js/comex_reg_form_controllers.js') }}"></script>
+{% endblock %}

@@ -159,7 +159,7 @@ $(document).ready(function() {
     return popfilter("tagged", "tags", []);
   });
   $("#register").click(function() {
-    return window.open("/services/user/register");
+    return window.open("/services/user/register/");
   });
   $("#searchname").scholarcomplete({
     minLength: 2,
