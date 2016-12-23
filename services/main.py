@@ -145,7 +145,7 @@ def register():
 
     if request.method == 'GET':
         return render_template(
-            "base_form.html",
+            "registration_full_form.html",
             doors_connect=config['DOORS_HOST']+':'+config['DOORS_PORT']
         )
     elif request.method == 'POST':

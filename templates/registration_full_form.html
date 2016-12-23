@@ -1,63 +1,21 @@
-<!DOCTYPE html5>
-<html lang="fr-FR">
-<head>
-  <meta charset="utf-8">
+{% extends "base_layout.html" %}
+
+{% block headers %}
   <title>Formulaire Community Explorer : se ré-enregistrer</title>
   <meta name="description" content="Formulaire d'enregistrement sur la plateforme Community Explorer (ISCPIF CNRS UPS 3611)">
   <meta name="keywords" content="complex systems, community, registration form">
 
-  <!-- CSS -->
-  <link type=text/css rel=stylesheet href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-  <link type=text/css rel=stylesheet href="{{ url_for('static', filename='css/topbar_bootstrap_retrocompatibility.css') }}">
-  <link type=text/css rel=stylesheet href="{{ url_for('static', filename='js/jquery-ui-1.12.1/jquery-ui.min.css') }}">
-  <link type=text/css rel=stylesheet href="{{ url_for('static', filename='js/realperson/jquery.realperson.css') }}">
-  <link type=text/css rel=stylesheet href="{{ url_for('static', filename='css/comex_reg.css') }}">
 
-  <!-- ## JS ## -->
-
-  <!--   libs   -->
-  <script type="text/javascript" src="{{ url_for('static', filename='js/jquery/jquery-3.1.1.min.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-ui-1.12.1/jquery-ui.min.js') }}"></script>
   <!-- possible to change it and send it each time with makeSalt-->
   <script type="text/javascript">$.salt = 'verylonverylongverylonverylongverylonverylong'</script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/realperson/jquery.plugin.min.js') }}"></script>
   <!-- for some reason jquery.realperson.min.js reacts differently to salt than jquery.realperson.js -->
   <script type="text/javascript" src="{{ url_for('static', filename='js/realperson/jquery.realperson.js') }}"></script>
+{% endblock %}
 
+<!-- ======================================================================= -->
 
-  <!--  our js is at the end -->
-
-  <!-- Piwik -->
-  <script type="text/javascript">
-    var _paq = _paq || [];
-    _paq.push(['trackPageView']);
-    _paq.push(['enableLinkTracking']);
-    (function() {
-      var u="//piwik.iscpif.fr/";
-      _paq.push(['setTrackerUrl', u+'piwik.php']);
-      _paq.push(['setSiteId', '4']);
-      var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-      g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
-    })();
-  </script>
-  <noscript><p><img src="//piwik.iscpif.fr/piwik.php?idsite=4" style="border:0;" alt="" /></p></noscript>
-  <!-- End Piwik Code -->
-</head>
-<body>
-  <div class="topbar" style="opacity: 0.93;">
-      <div class="topbar-inner">
-          <div class="container-fluid">
-              <a class="brand" href="http://www.iscpif.fr">
-                <span class="glyphicon glyphicon-home white"></i></a>
-              <ul class="white nav navbar-nav">
-                  <li>
-                      <a id="mainpagelink" href="/"> <strong>Complex systems community explorer</strong></a>
-                  </li>
-              </ul>
-          </div>
-      </div>
-  </div>
-  <div class="page container-fluid">
+{% block main_content %}
     <div class="row">
       <div class="spacer col-sm-1 col-md-1">&nbsp;</div>
       <div class="my_form_box col-sm-8 col-md-8">
@@ -473,46 +431,11 @@
       <div class="spacer col-sm-2 col-md-2">&nbsp;</div>
     </div>
 
-    <div class="row bigspacerrow">&nbsp;</div>
+{% endblock %}
 
-    <!-- FOOTER TEXT AND LINKS -->
-    <footer>
-        <!-- This directory is maintained by the <a href="http://cssociety.org" target="blank">Complex Systems Society</a>
-             and the <a href="http://iscpif.fr" target="blank">Complex Systems Institute of Paris Ile-de-France</a>.<br/>-->
-        <center>
-            <a href="http://communityexplorer.org/about.html"><span class="glyphicon glyphicon-question-sign"></span> About</a> -
-            <a href="http://moma.csregistry.org/feedback" target="BLANK"><span class="glyphicon glyphicon-repeat"></span> Feedback</a> -
-            <a href="http://communityexplorer.org/privacy.html"> <span class="glyphicon glyphicon-list-alt"></span> Privacy</a>
-            <br>
-              Directory maintained by the
-                <a href="http://cssociety.org/" target="blank"> Complex Systems Society</a> and the
-                <a href="http://iscpif.fr/" target="blank">Complex Systems Institute of Paris Ile-de-France</a>.
-            <br>
-            <a href="http://cssociety.org/" target="_BLANK">
-              <img src="{{ url_for('static', filename='images/css.png') }}" alt="http://cssociety.org"
-                   style="border: none; margin-bottom : -6px;"
-                   title="isc-pif" height="25px">
-            </a>
+<!-- ======================================================================= -->
 
-            <a href="http://iscpif.fr/">
-              <img src="{{ url_for('static', filename='images/iscpif_short.png') }}" alt="iscpif.fr"
-              style="border: none; margin-bottom : -6px;"
-              title="isc-pif">
-            </a>
-
-            <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="blank">
-              <img alt="Creative Commons License" style="border: none; margin-bottom : -6px;" src="{{ url_for('static', filename='images/cc.png') }}" height="20px">
-            </a> -
-            <!-- <a href="http://moma.csregistry.org/" target="_BLANK"> MOMA</a> -  -->
-            <a href="http://iscpif.fr/" target="_BLANK">ISC-PIF</a> -
-            <a href="http://www.cnrs.fr/fr/recherche/index.htm" target="_BLANK">CNRS</a>.
-        </center>
-        <p>&nbsp;</p>
-    </footer>
-  </div>
-
-  <!--  our js  -->
-  <script src="{{ url_for('static', filename='js/comex_reg_form_controllers.js') }}"></script>
-
-</body>
-</html>
+{% block last_imports %}
+<!--  our js  -->
+<script src="{{ url_for('static', filename='js/comex_reg_form_controllers.js') }}"></script>
+{% endblock %}
