@@ -6,7 +6,7 @@
  *  + prepares DB save into COLS
  *
  * @todo
- *    - harmonize var names (eg 'email' vs 'initialsInput' are both input elts)
+ *    - harmonize var names (eg 'cmxClt.uauth.email' vs 'initialsInput' are both input elts)
  *    - package.json
  *
  * @version 1
@@ -17,49 +17,32 @@
  * @requires comex_user_shared_auth
  */
 
-// common vars to user forms
-// NB other vars defined in main scope but just before their respective funs
-var theFormId = "comex_login_form"
-var theForm = document.getElementById(theFormId)
-var wholeFormData
+// initialize form controllers
+cmxClt.uform.initialize("comex_reg_form", testAsYouGo)   // our form is now in cmxClt.uform.theForm
 
-// cf corresponding css classes
-var colorWhite = '#fff'
-var colorRed = '#910'
-var colorGreen = '#161'
-var colorGrey = '#554'
-
-// vars that will be used during the interaction
-var submitButton = document.getElementById('formsubmit')
-var mainMessage = document.getElementById('main_validation_message')
+// initialize auth with doors
+cmxClt.uauth.emailIdSupposedToExist = false
 
 var jobLookingDateStatus = false
-submitButton.disabled = true
-theForm.onkeyup = testAsYouGo
-theForm.onchange = testAsYouGo
-theForm.onblur = testAsYouGo
 
-var lastEmailValueCheckedDisplayed = null
+
 
 // done when anything in the form changes
 function testAsYouGo() {
   // console.log("testAsYouGo Go")
 
-  if (email.value != lastEmailValueCheckedDisplayed) {
-      // will update the emailStatus boolean
-      basicEmailValidate(email.value)
-  }
+  cmxClt.uauth.earlyValidate()
 
-  captchaStatus = (captcha.value.length == realCaptchaLength)
-
-  checkPassStatus()
   checkJobDateStatus()
 
-  if (passStatus && emailStatus && captchaStatus && jobLookingDateStatus) {
-      submitButton.disabled = false
+  if (cmxClt.uauth.passStatus
+        && cmxClt.uauth.emailStatus
+        && cmxClt.uauth.captchaStatus
+        && jobLookingDateStatus) {
+      cmxClt.uform.submitButton.disabled = false
   }
   else {
-      submitButton.disabled = true
+      cmxClt.uform.submitButton.disabled = true
   }
   var now = new Date()
   regTimestamp.value = now.toISOString()
@@ -111,7 +94,7 @@ var jobLookingDivStyle = document.getElementById('job_looking_div').style
 // case false => Ok("""{"status":"login available"}""")
 function testDoorsUserExists(emailValue) {
     // /!\ async
-    callDoors(
+    cmxClt.uauth.callDoors(
         "userExists",
         [emailValue],
         function(doorsResp) {
@@ -119,6 +102,7 @@ function testDoorsUserExists(emailValue) {
             var doorsMsg = doorsResp[1]
 
             // the global status can be true iff login is available and format ok
+            // £TODO fix scope (use uauth)
             emailStatus = (doorsMsg == "login available")
 
             displayDoorsStatusInRegisterBox(emailStatus, emailValue)
@@ -131,8 +115,8 @@ function registerDoorsAndSubmit(){
     mainMessage.innerHTML = "Registering with ISCPIF Doors..."
 
     // all values from the form have now been validated
-    var emailValue = email.value
-    var passValue = pass1.value
+    var emailValue = cmxClt.uauth.email.value
+    var passValue = cmxClt.uauth.pass1.value
     var wholenameValue = ""
 
     if (mName.value != "") {
@@ -143,7 +127,7 @@ function registerDoorsAndSubmit(){
     }
 
 
-    // KNOCKING ON THE DOORS -------------------------------------
+    // REGISTERING ON THE DOORS -------------------------------------
     // /!\ async
     callDoors(
         "register",
@@ -151,6 +135,7 @@ function registerDoorsAndSubmit(){
 
         // callback: send to DB -------------------
         function(doorsResp) {
+            console.log("register resp:", doorsResp)
             addUidThenSubmit(doorsResp)
         }
     )
@@ -161,55 +146,21 @@ function addUidThenSubmit(doorsResp) {
     var doorsMsg = doorsResp[1]
 
     if (doorsUid == null) {
-        mainMessage.innerHTML = "Problem with doors registration... TODO debug"
-        mainMessage.style.color = colorRed
-        submitButton.disabled = false
+        cmxClt.uform.mainMessage.innerHTML = "Problem with doors registration... TODO debug"
+        cmxClt.uform.mainMessage.style.color = cmxClt.colorRed
+        cmxClt.uform.submitButton.disabled = false
     }
     else {
         // fill in the answer we got
+        // £TODO fix scope uauth and uform ?
         uidInput.value = doorsUid
 
         console.info("form was validated and registered@doors: submitting now")
 
-        //==== SEND! ====
-         theForm.submit()
-        //===============
+        //==== SEND! ==================
+         cmxClt.uform.theForm.submit()
+        //=============================
     }
-}
-
-var doorsIcon = document.getElementById('doors_ret_icon')
-function displayDoorsStatusInRegisterBox (available, emailValue) {
-
-    if (available) {
-        // icon
-        doorsIconMessage.title = "Ok ID available on Doors"
-        doorsIcon.style.color = colorGreen
-        doorsIcon.classList.remove('glyphicon-remove')
-        doorsIcon.classList.remove('glyphicon-question-sign')
-        doorsIcon.classList.add('glyphicon-ok')
-
-        // message in legend
-        doorsMessage.innerHTML = "Ok, this email ID is available on Doors!"
-        doorsMessage.style.color = colorGreen
-
-    }
-    else {
-        // icon
-        doorsIconMessage.title = "Sorry ID already taken on Doors!"
-        doorsIcon.style.color = colorRed
-        doorsIcon.classList.remove('glyphicon-ok')
-        doorsIcon.classList.remove('glyphicon-question-sign')
-        doorsIcon.classList.add('glyphicon-remove')
-
-        // message in legend
-        doorsMessage.innerHTML = "Sorry this email ID is already taken on Doors!"
-        doorsMessage.style.color = colorRed
-
-    }
-
-    // to debounce further actions in testAsYouGo
-    // return to neutral is also in testAsYouGo
-    lastEmailValueCheckedDisplayed = emailValue
 }
 
 // validateAndMsg() : bool (validates fields before doors registration and send)
@@ -224,20 +175,19 @@ function validateAndMsg() {
     // not necessary b/c button type is set and is != "submit"
     // submitEvent.preventDefault()
 
-    submitButton.disabled = true
-    mainMessage.style.display = 'block'
+    cmxClt.uform.submitButton.disabled = true
+    cmxClt.uform.mainMessage.style.display = 'block'
 
     var valid = true
 
-    // TODO pass mainMessage ref as arg
-    mainMessage.innerHTML = "Validating the form..."
+    cmxClt.uform.mainMessage.innerHTML = "Validating the form..."
 
     // also reformat the jobDate from "YYYY/MM/DD" to ISO
 
     if (jobDate.value.length) jobDate.value = (new Date(jobDate.value)).toISOString()
 
     // objectify the form
-    wholeFormData = new FormData(theForm);
+    cmxClt.uform.wholeFormData = new FormData(theForm);
 
     var missingFields = []
     var toolongFields = []
@@ -255,7 +205,7 @@ function validateAndMsg() {
       // skip doors_uid done afterwards if form ok
       if (fieldName == 'doors_uid') continue ;
 
-      var actualValue = wholeFormData.get(fieldName)
+      var actualValue = cmxClt.uform.wholeFormData.get(fieldName)
 
       // console.log("actualValue", actualValue)
 
@@ -296,11 +246,11 @@ function validateAndMsg() {
 
     // RESULTS
     if (valid) {
-      // add the captchaCheck inside the form (jquery interference)
-      captchaCheck.value = $(captcha).realperson('getHash')
+      // add the captchaCheck inside the form (TODO should be automatic via realperson or uauth submodules)
+      cmxClt.uauth.captchaCheck.value = $(captcha).realperson('getHash')
 
-      mainMessage.innerHTML = "Form is valid... Will register and submit..."
-      mainMessage.style.display = 'block'
+      cmxClt.uform.mainMessage.innerHTML = "Form is valid... Will register and submit..."
+      cmxClt.uform.mainMessage.style.display = 'block'
 
       return true
     }
@@ -308,11 +258,11 @@ function validateAndMsg() {
 
       console.warn("form is not valid")
       // TODO highlight invalid fields
-      submitButton.disabled = false
+      cmxClt.uform.submitButton.disabled = false
 
       var errorMessage = ''
       if (missingFields.length) {
-         errorMessage += "Please fill the missing fields: " + ulListFromLabelsArray(missingFields, ["red"])
+         errorMessage += "Please fill the missing fields: " + cmxClt.ulListFromLabelsArray(missingFields, ["red"])
       }
 
       // length is handled by each input's maxlength
@@ -321,7 +271,7 @@ function validateAndMsg() {
       if (jobDate.value.length) jobDate.value = jobDate.value.slice(0,10).replace(/-/g,"/")
 
       // display (TODO setTimeout and fade)
-      mainMessage.innerHTML = errorMessage
+      cmxClt.uform.mainMessage.innerHTML = errorMessage
       return false
     }
 }
@@ -359,12 +309,12 @@ function checkShowPic() {
         if (theFile.size > max_size) {
           // msg pb
           picMsg.innerHTML = "The picture is too big (200kB max)!"
-          picMsg.style.color = colorRed
+          picMsg.style.color = cmxClt.colorRed
         }
         else {
           // msg ok
           picMsg.innerHTML = "Picture ok"
-          picMsg.style.color = colorGreen
+          picMsg.style.color = cmxClt.colorGreen
 
           // to show the pic when readAsDataURL
           imgReader.onload = function () {
@@ -389,7 +339,7 @@ function checkShowPic() {
               boxShowPicImg.style.display = 'block'
               // possible re-adjust outerbox ?
 
-            //   showPicImg.style.border = "2px dashed " + colorGrey
+            //   showPicImg.style.border = "2px dashed " + cmxClient.colorGrey
 
           }
 
@@ -456,16 +406,21 @@ jobDate.onchange = checkJobDateStatus
 function checkJobDateStatus() {
   jobLookingDateStatus = (jobBool.value == "No" || validDate.test(jobDate.value))
   if (!jobLookingDateStatus) {
-      jobDateMsg.style.color = colorRed
+      jobDateMsg.style.color = cmxClt.colorRed
       jobDateMsg.innerHTML = 'Date is not yet in the valid format YYYY/MM/DD'
   }
   else {
-      jobDateMsg.style.color = colorGreen
+      jobDateMsg.style.color = cmxClt.colorGreen
       jobDateMsg.innerHTML = 'Ok valid date!'
   }
 }
 
 
+
+// £TODO1 move autocomp data to an autocomplete module
+//          -> local data for countries, jobtitles
+//          -> ajax fetcher for the scholars, kws and labs
+// £TODO2 add a fetcher API on services side
 
 // autocomplete countries
 $(function() {
@@ -1077,11 +1032,12 @@ console.log("reg controllers load OK")
 // lName.value = "Tartampion"
 // initialsInput.value="JPP"
 // document.getElementById('country').value = "France"
-// email.value= makeRandomString(7)+"@om.fr"
-// pass1.value="123456+789"
-// pass2.value="123456+789"
 // document.getElementById('position').value = "atitle"
 // document.getElementById('keywords').value = "Blabla"
 // document.getElementById('org').value = "CNRS"
-// basicEmailValidate(email.value)
+
+// cmxClt.uauth.email.value= cmxClt.makeRandomString(7)+"@om.fr"
+// cmxClt.uauth.pass1.value="123456+789"
+// cmxClt.uauth.pass2.value="123456+789"
+// cmxClt.uauth.testMailFormatAndExistence(email.value, false)
 // --------------------------->8------

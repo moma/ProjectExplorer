@@ -13,9 +13,22 @@
       <div class="spacer col-sm-1 col-md-1">&nbsp;</div>
       <div class="my_form_box col-sm-8 col-md-8">
 
-        <!-- INTRODUCTION TEXT -->
+
+
+
+        <!-- ##################### ( PROFILE OVERVIEW ) #################### -->
+
+
         <div id="intro">
-          <h2 class="oldstyle">Profile</h2>
+            <h2 class="oldstyle">Your Profile Info</h2>
+                <p class="mini-hero">
+                </p>
+        </div>
+
+
+        <!-- FORM COMPLETING INTRO TEXT -->
+        <div id="intro">
+          <h2 class="oldstyle">Complete your profile</h2>
               <p class="mini-hero">
                   Take the time to complete your <strong>Community Explorer</strong> profile to generate better maps of your own socio-semantic network .
                   <br/>
@@ -26,7 +39,6 @@
                   The <strong>home page (url)</strong>, <strong>picture (url or file)</strong> and <strong>free description</strong> will allow your neighbours to know you a little better.
               </p>
         </div>
-
 
         <!-- ########################### ( FORM ) ########################## -->
         <form id="comex_profil_form" enctype="multipart/form-data"
@@ -94,10 +106,7 @@
           <div class="question">
             <p class="legend">Your email will also be your login for the ISC services.</p>
             <div class="input-group">
-              <!-- email validation onblur/onchange
-                        is done by basicEmailValidate
-                               and testDoorsUserExists
-                        in comex_reg_form_controllers.js -->
+              <!-- email validation onblur/onchange is done by cmxClt.uauth in comex_user_shared_auth.js -->
               <label for="email" class="smlabel input-group-addon">* Email</label>
               <input id="email" name="email" maxlength="255"
                      type="text" class="form-control" placeholder="email">
@@ -375,5 +384,5 @@
 {% block last_imports %}
     <!--  our js  -->
     <script src="{{ url_for('static', filename='js/comex_user_shared.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/comex_profile_form_controllers.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/comex_page_profile_controllers.js') }}"></script>
 {% endblock %}

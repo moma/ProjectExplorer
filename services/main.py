@@ -151,7 +151,8 @@ def user():
 def login():
     if request.method == 'GET':
         return render_template(
-            "login.html"
+            "login.html",
+            doors_connect = config['DOORS_HOST']+':'+config['DOORS_PORT']
         )
     elif request.method == 'POST':
         # TODO sanitize
@@ -341,9 +342,8 @@ def sanitize(value):
         return san_typed_val
 
 
-
-
 ########### MAIN ###########
+# this only uses the dev server (in prod we're run by unicorn and not as main)
 if __name__ == "__main__":
     # our app should be bound to an ip (cf stackoverflow.com/a/30329547/2489184)
     app.run(host=config['COMEX_HOST'], port=int(config['COMEX_PORT']))

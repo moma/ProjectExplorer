@@ -36,10 +36,7 @@
               <div class="question">
                 <p class="legend">(It is the same login for all the ISC services.)</p>
                 <div class="input-group">
-                  <!-- email validation onblur/onchange
-                            is done by basicEmailValidate
-                                   and testDoorsUserExists
-                            in comex_reg_form_controllers.js -->
+                  <!-- email validation onblur/onchange is done by cmxClt.uauth in comex_user_shared_auth.js -->
                   <label for="email" class="smlabel input-group-addon">Email</label>
                   <input id="email" name="email" maxlength="255"
                          type="text" class="form-control" placeholder="email">
@@ -89,7 +86,7 @@
             <label for="my-captcha" class="smlabel input-group-addon">Code</label>
             <input id="my-captcha" name="my-captcha" style="max-width:60%"
                    type="text" class="form-control input-lg" placeholder="Enter the 5 letters you see beside =>"
-                   onblur="makeBold(this)" onfocus="makeNormal(this)">
+                   onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)">
           </div>
 
           <!-- == S U B M I T == -->
@@ -106,13 +103,10 @@
 
         <!-- FOR DEBUG: test go-between with Doors -->
         <p>
-            <button type=button onclick='callDoors("user", [email.value, pass1.value, initialsInput.value], console.warn)'>
+            <button type=button onclick='cmxClt.uauth.callDoors("user", [cmxClt.uauth.email.value, cmxClt.uauth.pass1.value, null], console.warn)'>
                 test doors login
             </button>
-            <button type=button onclick='callDoors("register", [email.value, pass1.value, initialsInput.value], console.warn)'>
-                test doors register
-            </button>
-            <button type=button onclick='callDoors("userExists", [email.value, null, null], console.warn)'>
+            <button type=button onclick='cmxClt.uauth.callDoors("userExists", [cmxClt.uauth.email.value, null, null], console.warn)'>
                 test doors userExists
             </button>
         </p>
@@ -128,5 +122,5 @@
     <!--  our js  -->
     <script src="{{ url_for('static', filename='js/comex_user_shared.js') }}"></script>
     <script src="{{ url_for('static', filename='js/comex_user_shared_auth.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/comex_user_login_controllers.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/comex_page_login_controllers.js') }}"></script>
 {% endblock %}

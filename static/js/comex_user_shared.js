@@ -1,6 +1,8 @@
 /**
  * @fileoverview
- * Shared vars and functions for all user forms
+ * Comex Client Module: initialize and expose as *cmxClt* var
+ *   -> shared vars for css
+ *   -> shared vars and functions for all user forms in *cmxClt.uform* submodule
  *
  * @todo
  *    - package.json
@@ -11,56 +13,73 @@
  *
  */
 
-// common vars to user forms
-// NB other vars defined in main scope but just before their respective funs
-var theFormId = "comex_login_form"
-var theForm = document.getElementById(theFormId)
-var wholeFormData
 
-// cf corresponding css classes
-var colorWhite = '#fff'
-var colorRed = '#910'
-var colorGreen = '#161'
-var colorGrey = '#554'
+// initialize and export cmxClt module
+var cmxClt = (function() {
 
-// vars that will be used during the interaction
-var submitButton = document.getElementById('formsubmit')
-var mainMessage = document.getElementById('main_validation_message')
-theForm.onkeyup = testAsYouGo
-theForm.onchange = testAsYouGo
-theForm.onblur = testAsYouGo
+    ccModule = {}
 
-var lastEmailValueCheckedDisplayed = null
-
-function makeRandomString(nChars) {
-  var rando = ""
-  var possible = "abcdefghijklmnopqrstuvwxyz0123456789";
-  var len = possible.length
-  for( var i=0; i < nChars; i++ )
-      rando += possible.charAt(Math.floor(Math.random() * len));
-  return rando
-}
+    // cf corresponding css classes
+    ccModule.colorWhite = '#fff'
+    ccModule.colorRed = '#910'
+    ccModule.colorGreen = '#161'
+    ccModule.colorGrey = '#554'
 
 
-function ulListFromLabelsArray(strArray, ulClassList) {
-    ulClasses=["minilabels"].concat(ulClassList).join(" ")
-    var resultHtml = '<ul class="'+ulClasses+'">'
-    for (var i in strArray) {
-        var label = strArray[i].replace(/_/, " ")
-        resultHtml += '<li class="minilabel">'+label+'</li>'
+    ccModule.makeRandomString = function (nChars) {
+      var rando = ""
+      var possible = "abcdefghijklmnopqrstuvwxyz0123456789";
+      var len = possible.length
+      for( var i=0; i < nChars; i++ )
+          rando += possible.charAt(Math.floor(Math.random() * len));
+      return rando
     }
-    resultHtml += '</ul>'
-    return resultHtml
-}
+
+    ccModule.ulListFromLabelsArray = function (strArray, ulClassList) {
+        ulClasses=["minilabels"].concat(ulClassList).join(" ")
+        var resultHtml = '<ul class="'+ulClasses+'">'
+        for (var i in strArray) {
+            var label = strArray[i].replace(/_/, " ")
+            resultHtml += '<li class="minilabel">'+label+'</li>'
+        }
+        resultHtml += '</ul>'
+        return resultHtml
+    }
+
+    // basic inputs get normal on focus
+    ccModule.makeNormal = function (elt) {
+        elt.style.fontWeight = "normal"
+    }
+
+    // basic inputs get bold on blur
+    ccModule.makeBold = function (elt){
+      if (elt.value != "")   elt.style.fontWeight = "bold"
+    }
 
 
-// basic inputs get normal on focus
-function makeNormal(elt) {
-    elt.style.fontWeight = "normal"
-}
+    // common vars to user forms
+    ccModule.uform = {}
+    ccModule.uform.theFormId = null
+    ccModule.uform.theForm = null
+    ccModule.uform.wholeFormData = null
 
-// basic inputs get bold on blur
-function makeBold(elt){
-  if (elt.value != "")   elt.style.fontWeight = "bold"
-}
+    // vars that will be used during the interaction
+    ccModule.uform.submitButton = document.getElementById('formsubmit')
+    ccModule.uform.mainMessage = document.getElementById('main_validation_message')
 
+    ccModule.uform.initialize = function(aFormId, aValidationFun) {
+        ccModule.uform.theFormId = aFormId
+        ccModule.uform.theForm = document.getElementById(aFormId)
+
+        ccModule.uform.theForm.onkeyup = aValidationFun
+        ccModule.uform.theForm.onchange = aValidationFun
+        ccModule.uform.theForm.onblur = aValidationFun
+
+    }
+
+    return ccModule
+}()) ;
+
+
+
+console.log("shared load OK")

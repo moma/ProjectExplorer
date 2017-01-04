@@ -57,7 +57,7 @@
                 </label>
                 <input id="first_name" name="first_name" maxlength="30"
                        type="text" class="form-control" placeholder="prénom"
-                       onblur="makeBold(this)" onfocus="makeNormal(this)">
+                       onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)">
               </div>
 
               <!-- optionnel -->
@@ -67,7 +67,7 @@
                 </label>
                 <input id="middle_name" name="middle_name" maxlength="30"
                        type="text" class="form-control" placeholder="autres prénoms"
-                       onblur="makeBold(this)" onfocus="makeNormal(this)">
+                       onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)">
               </div>
 
               <div class="question input-group">
@@ -76,7 +76,7 @@
                 </label>
                 <input id="last_name" name="last_name" maxlength="30"
                        type="text" class="form-control" placeholder="nom de famille"
-                       onblur="makeBold(this)" onfocus="makeNormal(this)">
+                       onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)">
               </div>
 
               <button class="btn btn-xs btn-default operation"
@@ -108,10 +108,7 @@
               <div class="question">
                 <p class="legend">Your email will also be your login for the ISC services.</p>
                 <div class="input-group">
-                  <!-- email validation onblur/onchange
-                            is done by basicEmailValidate
-                                   and testDoorsUserExists
-                            in comex_reg_form_controllers.js -->
+                  <!-- email validation onblur/onchange is done by cmxClt.uauth in comex_user_shared_auth.js -->
                   <label for="email" class="smlabel input-group-addon">* Email</label>
                   <input id="email" name="email" maxlength="255"
                          type="text" class="form-control" placeholder="email">
@@ -153,14 +150,14 @@
                 <label for="hon_title" class="smlabel input-group-addon"> Title </label>
                 <input id="hon_title" name="hon_title" maxlength="30"
                        type="text" class="form-control autocomp" placeholder="titre"
-                       onblur="makeBold(this)" onfocus="makeNormal(this)">
+                       onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)">
               </div>
 
               <div class="question input-group">
                 <label for="position" class="smlabel input-group-addon">* Job Position</label>
                 <input id="position" name="position" maxlength="30"
                        type="text" class="form-control autocomp" placeholder="titre"
-                       onblur="makeBold(this)" onfocus="makeNormal(this)">
+                       onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)">
               </div>
 
               <div class="question">
@@ -298,7 +295,7 @@
                 <textarea id="interests_text" name="interests_text" maxlength="1200"
                           rows="7" style="resize:none"
                           class="form-control" placeholder="If you wish, you may describe here your personal interests."
-                          onblur="makeBold(this)" onfocus="makeNormal(this)"
+                          onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
                           ></textarea>
               </div>
               <p class="legend">Optional, ~15 lines max (1200 chars)</p>
@@ -398,7 +395,7 @@
                 <label for="my-captcha" class="smlabel input-group-addon">Code</label>
                 <input id="my-captcha" name="my-captcha" style="max-width:60%"
                        type="text" class="form-control input-lg" placeholder="Enter the 5 letters you see beside =>"
-                       onblur="makeBold(this)" onfocus="makeNormal(this)">
+                       onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)">
               </div>
 
               <!-- == S U B M I T == -->
@@ -416,13 +413,13 @@
 
         <!-- FOR DEBUG: test go-between with Doors -->
         <!-- <p>
-            <button type=button onclick='callDoors("user", [email.value, pass1.value, initialsInput.value], console.warn)'>
+            <button type=button onclick='cmxClt.uauth.callDoors("user", [cmxClt.uauth.email.value, cmxClt.uauth.pass1.value, initialsInput.value], console.warn)'>
                 test doors login
             </button>
-            <button type=button onclick='callDoors("register", [email.value, pass1.value, initialsInput.value], console.warn)'>
+            <button type=button onclick='cmxClt.uauth.callDoors("register", [cmxClt.uauth.email.value, cmxClt.uauth.pass1.value, initialsInput.value], console.warn)'>
                 test doors register
             </button>
-            <button type=button onclick='callDoors("userExists", [email.value, null, null], console.warn)'>
+            <button type=button onclick='cmxClt.uauth.callDoors("userExists", [cmxClt.uauth.email.value, null, null], console.warn)'>
                 test doors userExists
             </button>
         </p> -->
@@ -439,5 +436,5 @@
     <!--  our js  -->
     <script src="{{ url_for('static', filename='js/comex_user_shared.js') }}"></script>
     <script src="{{ url_for('static', filename='js/comex_user_shared_auth.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/comex_user_reg_controllers.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/comex_page_reg_controllers.js') }}"></script>
 {% endblock %}
