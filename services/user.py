@@ -48,7 +48,7 @@ def doors_login(email, password, config):
     """
     uid = None
 
-    # TODO https here + certificate for doors
+    # £TODO https here !! + certificate for doors
     doors_base_url = 'http://'+config['DOORS_HOST']+':'+config['DOORS_PORT']
     doors_response = post(doors_base_url+'/api/user', data=dumps({'login':email, 'password':password}))
 

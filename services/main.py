@@ -24,7 +24,7 @@ __email__     = "romain.loth@iscpif.fr"
 __status__    = "Dev"
 
 from flask       import Flask, render_template, request, redirect, url_for
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, login_user
 from re          import sub
 from os          import path
 from traceback   import format_tb
@@ -33,7 +33,7 @@ from json        import dumps
 if __package__ == 'services':
     # when we're run via import
     print("*** comex services ***")
-    from services.user  import User, login_manager
+    from services.user  import User, login_manager, doors_login
     from services.text  import keywords
     from services.tools import read_config, restparse, mlog, re_hash
     from services.db    import connect_db, get_or_create_keywords, save_pairs_sch_kw, get_or_create_affiliation, save_scholar
@@ -41,7 +41,7 @@ if __package__ == 'services':
 else:
     # when this script is run directly
     print("*** comex services (dev server mode) ***")
-    from user           import User, login_manager
+    from user           import User, login_manager, doors_login
     from text           import keywords
     from tools          import read_config, restparse, mlog, re_hash
     from db             import connect_db, get_or_create_keywords, save_pairs_sch_kw, get_or_create_affiliation, save_scholar
@@ -58,6 +58,8 @@ app = Flask("services",
              template_folder=path.join(config['HOME'],"templates"))
 
 app.config['DEBUG'] = (config['LOG_LEVEL'] == "DEBUG")
+
+app.config['SECRET_KEY'] = 'TODO fill secret key for sessions for login'
 
 login_manager.init_app(app)
 
@@ -147,7 +149,7 @@ def user():
 
 
 # /services/user/login/
-@app.route(config['PREFIX'] + config['USR_ROUTE'] + '/login/', methods=['GET'])
+@app.route(config['PREFIX'] + config['USR_ROUTE'] + '/login/', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
         return render_template(
@@ -160,16 +162,13 @@ def login():
         pwd = request.form['password']
 
         # we do our doors request here server-side to avoid MiM attack on result
-        (logged_in, user_info) = doors_login(email, pwd)
+        uid = doors_login(email, pwd, config)
 
-        if logged_in:
-            # WHERE ???
+        if uid:
+            # £TODO usage ?
             login_user(User(uid))
 
-        return render_template(
-            "profile.html",
-            logged_in = doors_response.ok
-        )
+        return redirect(url_for('profile'))
 
 
 # /services/user/profile/

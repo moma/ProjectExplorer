@@ -90,11 +90,10 @@
           </div>
 
           <!-- == S U B M I T == -->
-          <!-- button instead of input.submit to validate before real submit action -->
-          <!-- also remember stackoverflow.com/a/3315016/2489184 -->
+          <!-- normal submit button
+               (login to doors will happen b/w servers: no need to do it by ajax) -->
           <button class="btn btn-lg btn-success" style="float:right"
-                  id="formsubmit" type=button disabled
-                  onclick="doorsThenTestUidAndSubmit()">
+                  id="formsubmit" disabled>
                   LOGIN
           </button>
 
@@ -102,14 +101,14 @@
       </div>
 
         <!-- FOR DEBUG: test go-between with Doors -->
-        <p>
-            <button type=button onclick='cmxClt.uauth.callDoors("user", [cmxClt.uauth.email.value, cmxClt.uauth.pass1.value, null], console.warn)'>
+        <!-- <p>
+            <button type=button onclick='cmxClt.uauth.callDoors("user", [cmxClt.uauth.email.value, cmxClt.uauth.pass1.value], console.warn)'>
                 test doors login
             </button>
-            <button type=button onclick='cmxClt.uauth.callDoors("userExists", [cmxClt.uauth.email.value, null, null], console.warn)'>
+            <button type=button onclick='cmxClt.uauth.callDoors("userExists", [cmxClt.uauth.email.value], console.warn)'>
                 test doors userExists
             </button>
-        </p>
+        </p> -->
 
       <div class="spacer col-sm-2 col-md-2">&nbsp;</div>
     </div>
