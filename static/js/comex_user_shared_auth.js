@@ -21,8 +21,6 @@ cmxClt = (function(ccModule) {
     // common vars to authenticating/registering in user area
     ccModule.uauth = {}
 
-    var bidule = "trux"
-
     ccModule.uauth.emailIdSupposedToExist = null
 
     ccModule.uauth.uidInput = document.getElementById('doors_uid')
@@ -48,22 +46,34 @@ cmxClt = (function(ccModule) {
     ccModule.uauth.doorsIconMessage = document.getElementById('doors_ret_icon_msg')
     ccModule.uauth.doorsIcon = document.getElementById('doors_ret_icon')
 
-    // cmxClt.u.auth validators (needed to even get the submitButton)
-    ccModule.uauth.passStatus = false
+    // cmxClt.uauth flags (usually needed to even get the submitButton)
     ccModule.uauth.emailStatus = false
+    ccModule.uauth.passStatus = false
     ccModule.uauth.captchaStatus = false
-    ccModule.uauth.lastEmailValueCheckedDisplayed = null
 
     ccModule.uauth.earlyValidate = function() {
         // will update the ccModule.uauth.emailStatus boolean
         ccModule.uauth.testMailFormatAndExistence(ccModule.uauth.email.value, ccModule.uauth.emailIdSupposedToExist)
 
-        ccModule.uauth.captchaStatus = (ccModule.uauth.captcha.value.length == ccModule.uauth.realCaptchaLength)
+        // will update ccModule.uauth.passStatus
+        if (ccModule.uauth.pass2) {
+            ccModule.uauth.doubleCheck()
+        }
+        else {
+            ccModule.uauth.checkPassFormat()
+        }
 
+        // finally also update ccModule.uauth.captchaStatus
+        ccModule.uauth.captchaStatus = (ccModule.uauth.captcha.value.length == ccModule.uauth.realCaptchaLength)
     }
+
 
     // email validation and side-effects
     // =================================
+    ccModule.uauth.lastEmailValueCheckedDisplayed = null
+
+    // function testMailFormatAndExistence
+    // ------------------------------------
     // NB for login, use --------> expectExists = true
     //    for registration, use -> expectExists = false
 
@@ -150,8 +160,7 @@ cmxClt = (function(ccModule) {
                           ccModule.uauth.emailLbl.style.backgroundColor = ccModule.colorRed
                       }
 
-                      // to debounce further actions in testAsYouGo
-                      // return to neutral is also in testAsYouGo
+                      // to debounce re-invocations
                       ccModule.uauth.lastEmailValueCheckedDisplayed = emailValue
                   }
               )
@@ -160,55 +169,61 @@ cmxClt = (function(ccModule) {
     }
 
     // -----------------------------------------------------------------------
-    // pass 1 and pass 2 ~~~> do they match?
+    // Password validations
     // TODO use a most common passwords lists
     ccModule.uauth.pass1 = document.getElementById('password')
     ccModule.uauth.pass2 = document.getElementById('password2')
     ccModule.uauth.passMsg = document.getElementById('password_message')
 
-    ccModule.uauth.pass1.onkeyup = ccModule.uauth.checkPassStatus
-    ccModule.uauth.pass1.onchange = ccModule.uauth.checkPassStatus
-
+    // register <=> do pass 1 and pass 2 match?
     if (ccModule.uauth.pass2) {
-      // could also be attached to form onchange but then called often for nothing
-      ccModule.uauth.pass2.onkeyup = ccModule.uauth.checkPassStatus
-      ccModule.uauth.pass2.onchange = ccModule.uauth.checkPassStatus
+      ccModule.uauth.pass1.onkeyup = ccModule.uauth.doubleCheck
+      ccModule.uauth.pass1.onchange = ccModule.uauth.doubleCheck
+      ccModule.uauth.pass2.onkeyup = ccModule.uauth.doubleCheck
+      ccModule.uauth.pass2.onchange = ccModule.uauth.doubleCheck
+    }
+    // login <=> just one password
+    else {
+        ccModule.uauth.pass1.onkeyup = ccModule.uauth.checkPassFormat
+        ccModule.uauth.pass1.onchange = ccModule.uauth.checkPassFormat
     }
 
+    // used only for logins
+    ccModule.uauth.checkPassFormat = function () {
+        ccModule.uauth.passStatus = (ccModule.uauth.pass1.value.length > 7)
+    }
 
-    ccModule.uauth.checkPassStatus = function () {
-      // £TODO 2 functions:
-      //   - check pass #X is valid (with arg pass1 or pass2) [for Login + Register]
-      //   - check 2 passes are identical (only for Register)
-      if (pass1.value || pass2.value) {
-        var pass1v = pass1.value
-        var pass2v = pass2.value
+    // 2 in 1: used only for registration
+    ccModule.uauth.doubleCheck = function () {
+      if (ccModule.uauth.pass1.value || ccModule.uauth.pass2.value) {
+        var pass1v = ccModule.uauth.pass1.value
+        var pass2v = ccModule.uauth.pass2.value
 
         if ((pass1v && pass1v.length > 7)
             || (pass2v && pass2v.length > 7)) {
           // test values
           if (pass1v == pass2v) {
               if (pass1v.match('[^A-z0-9]')) {
-                  passMsg.innerHTML = 'Ok valid passwords!'
-                  passStatus = true
+                  ccModule.uauth.passMsg.innerHTML = 'Ok valid passwords!'
+                  ccModule.uauth.passStatus = true
               }
               else {
-                  passMsg.innerHTML = 'Passwords match but contain only letters and/or digits, please complexify!'
-                  passStatus = false
+                  ccModule.uauth.passMsg.innerHTML = "Passwords match but don't contain any special characters, please complexify!"
+                  ccModule.uauth.passStatus = false
               }
           }
           else {
-            passMsg.innerHTML = "The passwords don't match yet."
-            passStatus = false
+            ccModule.uauth.passMsg.innerHTML = "The passwords don't match yet."
+            ccModule.uauth.passStatus = false
         }
         }
         else {
-          passMsg.innerHTML = "The password is too short (8 chars min)."
-          passStatus = false
+          ccModule.uauth.passMsg.innerHTML = "The password is too short (8 chars min)."
+          ccModule.uauth.passStatus = false
         }
       }
-      if (!passStatus) passMsg.style.color = ccModule.colorRed
-      else             passMsg.style.color = ccModule.colorGreen
+      if (!ccModule.uauth.passStatus) ccModule.uauth.passMsg.style.color = ccModule.colorRed
+      else                            ccModule.uauth.passMsg.style.color = ccModule.colorGreen
     }
 
 
@@ -244,9 +259,9 @@ cmxClt = (function(ccModule) {
     */
     ccModule.uauth.callDoors = function(apiAction, data, callback) {
 
-        // console.warn("=====> CORS  <=====")
-        // console.log("data",data)
-        // console.log("apiAction",apiAction)
+        console.warn("=====> CORS  <=====")
+        console.log("data",data)
+        console.log("apiAction",apiAction)
 
         var doorsUid = null
         var doorsMsg = null
@@ -257,9 +272,9 @@ cmxClt = (function(ccModule) {
         var nameStr = data[2]
 
         // test params and set defaults
-        if (typeof apiAction == 'undefined'
-            || (apiAction != 'register' && apiAction != 'userExists')) {
-            // currently forces login action unless we got 'register' or userExists
+        if (typeof apiAction != 'string'
+            || (! /user|register|userExists/.test(apiAction))) {
+            // currently forces login action unless we got an accepted action
             apiAction = 'user'
             console.warn('DBG: forcing user route')
         }
@@ -268,12 +283,18 @@ cmxClt = (function(ccModule) {
             callback = function(retval) { return retval }
         }
 
-        var ok = ((apiAction == 'userExists' && typeof mailStr != 'undefined' && mailStr)
-                 || (typeof mailStr != 'undefined'
-                   && typeof mailStr != 'undefined'
-                   && typeof nameStr != 'undefined'
-                   && mailStr && passStr))  // assumes mail and pass will nvr be == 0
+        var ok = (
+                    (apiAction == 'userExists'
+                        && typeof mailStr == 'string' && mailStr)
+                 || (apiAction == 'user'
+                        && typeof mailStr == 'string' && mailStr
+                        && typeof passStr == 'string' && passStr)
 
+                 || (apiAction == 'register'
+                        && typeof mailStr == 'string' && mailStr
+                        && typeof passStr == 'string' && passStr
+                        && typeof nameStr == 'string' && nameStr)
+               )
         if (!ok) {
             doorsMsg = "Invalid parameters in input data (arg #1)"
             console.warn('DEBUG callDoors() internal validation failed before ajax')
