@@ -17,6 +17,7 @@
 
 
 // cmxClt module augmentation
+// POSS remove ccModule.auth. namespace prefix from local scope vars
 cmxClt = (function(ccModule) {
     // common vars to authenticating/registering in user area
     ccModule.uauth = {}
@@ -30,18 +31,25 @@ cmxClt = (function(ccModule) {
     // str of the form: doors_hostname:doors_port
     ccModule.uauth.doorsConnectParam = document.getElementById('doors_connect').value
 
-    // captchaHash should be appended by itself if normal submit,
-    // but we may need to do it ourselves (TODO test)
+    // captcha
+    // -------
     ccModule.uauth.captcha = document.getElementById('my-captcha')
-    ccModule.uauth.captchaCheck = document.getElementById('my-captchaHash')
 
     // param for generation & validation
     ccModule.uauth.realCaptchaLength = 5
 
-    // initialize pseudo captcha
-    $('#my-captcha').realperson({length: ccModule.uauth.realCaptchaLength});
+    // captcha init
+    $(cmxClt.uauth.captcha).realperson({length: ccModule.uauth.realCaptchaLength})
+
+    // captchaHash should be appended by itself if normal submit,
+    // but otherwise we need to do it ourselves with collectCaptcha()
+    ccModule.uauth.captchaCheck = document.getElementById('my-captchaHash')
+    ccModule.uauth.collectCaptcha = function() {
+        ccModule.uauth.captchaCheck.value = $(cmxClt.uauth.captcha).realperson('getHash')
+    }
 
     // doors-related html elements
+    // ---------------------------
     ccModule.uauth.doorsMessage = document.getElementById('doors_ret_message')
     ccModule.uauth.doorsIconMessage = document.getElementById('doors_ret_icon_msg')
     ccModule.uauth.doorsIcon = document.getElementById('doors_ret_icon')

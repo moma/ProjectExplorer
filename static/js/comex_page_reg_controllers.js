@@ -112,7 +112,7 @@ function testDoorsUserExists(emailValue) {
 
 
 function registerDoorsAndSubmit(){
-    mainMessage.innerHTML = "Registering with ISCPIF Doors..."
+    cmxClt.uform.mainMessage.innerHTML = "Registering with ISCPIF Doors..."
 
     // all values from the form have now been validated
     var emailValue = cmxClt.uauth.email.value
@@ -129,7 +129,7 @@ function registerDoorsAndSubmit(){
 
     // REGISTERING ON THE DOORS -------------------------------------
     // /!\ async
-    callDoors(
+    cmxClt.uauth.callDoors(
         "register",
         [emailValue, passValue, wholenameValue],
 
@@ -152,8 +152,7 @@ function addUidThenSubmit(doorsResp) {
     }
     else {
         // fill in the answer we got
-        // £TODO fix scope uauth and uform ?
-        uidInput.value = doorsUid
+        ccModule.uauth.uidInput.value = doorsUid
 
         console.info("form was validated and registered@doors: submitting now")
 
@@ -187,7 +186,7 @@ function validateAndMsg() {
     if (jobDate.value.length) jobDate.value = (new Date(jobDate.value)).toISOString()
 
     // objectify the form
-    cmxClt.uform.wholeFormData = new FormData(theForm);
+    cmxClt.uform.wholeFormData = new FormData(cmxClt.uform.theForm);
 
     var missingFields = []
     var toolongFields = []
@@ -246,8 +245,8 @@ function validateAndMsg() {
 
     // RESULTS
     if (valid) {
-      // add the captchaCheck inside the form (TODO should be automatic via realperson or uauth submodules)
-      cmxClt.uauth.captchaCheck.value = $(captcha).realperson('getHash')
+      // adds the captchaCheck inside the form
+      ccModule.uauth.collectCaptcha()
 
       cmxClt.uform.mainMessage.innerHTML = "Form is valid... Will register and submit..."
       cmxClt.uform.mainMessage.style.display = 'block'
