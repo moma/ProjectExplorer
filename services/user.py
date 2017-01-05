@@ -85,9 +85,9 @@ class User(object):
     @property
     def is_active(self):
         """
-        TODO use scholars.status
+        uses scholars.status
         """
-        return True
+        return (self.info['record_status'] == "active")
 
     @property
     def is_anonymous(self):

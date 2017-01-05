@@ -200,7 +200,7 @@ def get_full_scholar(uid):
     return urow_dict
 
 
-def save_scholar(uid, date, safe_recs, reg_db):
+def save_scholar(uid, date, safe_recs, reg_db, uactive = True):
     """
     Useful for new registration:
       -> add to *scholars* table
@@ -246,6 +246,10 @@ def save_scholar(uid, date, safe_recs, reg_db):
             # anyways
             db_tgtcols.append(colname)
             db_qstrvals.append(quotedstrval)
+
+    if uactive:
+        db_tgtcols.append('record_status')
+        db_qstrvals.append('"active"')
 
     # expected colnames "(doors_uid, last_modified_date, email, ...)"
     db_tgtcols_str = ','.join(db_tgtcols)
