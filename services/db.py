@@ -5,7 +5,8 @@ __author__    = "CNRS"
 __copyright__ = "Copyright 2016 ISCPIF-CNRS"
 __email__     = "romain.loth@iscpif.fr"
 
-from MySQLdb     import connect
+from MySQLdb          import connect
+from MySQLdb.cursors  import DictCursor
 
 if __package__ == 'services':
     # when we're run via import
@@ -58,6 +59,145 @@ def connect_db(config=REALCONFIG):
         passwd="very-safe-pass",
         db="comex_shared"
     )
+
+def get_full_scholar(uid):
+    """
+    Autonomous function to be used by User class
+       => Retrieves one line from *scholars* table, with joined optional concatenated *affiliations*, *keywords* and *linked_ids*
+       => Parse it all into a structured python user info dict
+    """
+    u_row = None
+    db = connect_db()
+    db_c = db.cursor(DictCursor)
+
+    # one user + all linked infos concatenated in one row
+    #                                   <= 3 LEFT JOINS sequentially GROUPed
+    #                                     (b/c if simultaneous, loses unicity)
+    one_usr_stmt = """
+
+        SELECT
+            sch_n_aff_n_kws.*,
+
+            -- linked_ids info condensed
+            -- (format : "type1:ID1,type2:ID2,...")
+            GROUP_CONCAT(
+                        CONCAT(linked_ids.ext_id_type,":", linked_ids.ext_id)
+                ) AS linked_ids,
+            COUNT(linked_ids.ext_id) AS linked_ids_nb
+
+        FROM (
+                SELECT
+                    sch_n_aff.*,
+
+                    -- kws info condensed
+                    COUNT(keywords.kwid) AS keywords_nb,
+                    -- GROUP_CONCAT(keywords.kwid) AS kwids,
+                    GROUP_CONCAT(keywords.kwstr) AS keywords
+
+                FROM (
+                    SELECT
+                        scholars.*,
+                        -- for debug replace scholars.* by
+                        -- scholars.doors_uid,
+                        -- scholars.email,
+                        -- scholars.last_modified_date,
+                        -- scholars.initials,
+
+                        affiliations.*
+
+                    FROM scholars
+
+                    LEFT JOIN affiliations
+                        ON scholars.affiliation_id = affiliations.affid
+
+                    GROUP BY doors_uid
+
+                    ) AS sch_n_aff
+
+                -- two step JOIN for keywords
+                LEFT JOIN sch_kw
+                    ON sch_n_aff.doors_uid = sch_kw.uid
+                JOIN keywords
+                    ON sch_kw.kwid = keywords.kwid
+                GROUP BY doors_uid
+
+        ) AS sch_n_aff_n_kws
+
+        LEFT JOIN linked_ids
+            ON linked_ids.uid = sch_n_aff_n_kws.doors_uid
+
+        -- WHERE our user UID
+        WHERE  doors_uid = "%s"
+        GROUP BY doors_uid
+    """ % str(uid)
+
+
+    # for dbg
+    # print("DBG get_full_scholar STATEMENT:\n", one_usr_stmt, "\n=======")
+
+    n_rows = db_c.execute(one_usr_stmt)
+
+    if n_rows != 1:
+        raise IndexError("one_usr_stmt returned %i rows instead of 1 for user %s" % (n_rows, uid))
+
+    urow_dict = db_c.fetchone()
+    db.close()
+
+    # Exemple data in urow_dict
+    # --------------------------
+    # {'affid': 1, 'affiliation_id': 1, 'community_hashtags': '#something',
+    #  'country': 'France', 'doors_uid': '5e3adbc1-bcfb-42da-a2c4-4af006fe2b91',
+    #  'email': 'jfk@usa.com', 'first_name': 'John', 'gender': 'M',
+    #  'home_url': 'http://localhost/regcomex/', 'hon_title': 'Student',
+    #  'initials': 'JFK', 'interests_text': 'Blablabla',
+    #  'job_looking_date': '2019_09_28T22:00:00.000Z',
+    #  'keywords': 'complex networks,complex systems,text mining,machine learning',
+    #  'keywords_nb': 4,
+    #  'last_modified_date': '2016-12-07T15:56:09.721Z',
+    #  'last_name': 'Kennedy',
+    #  'linked_ids': 'yoyo:42,foobar:XWING', 'linked_ids_nb': 2,
+    #  'middle_name': 'Fitzgerald',
+    #  'org': 'Centre National de la Recherche Scientifique (CNRS)',
+    #  'org_city': 'Paris', 'org_type': 'public R&D org',
+    #  'pic_file': '', 'pic_url': None, 'position': 'Engineer',
+    #  'record_status': None, 'team_lab': 'ISCPIF'}
+
+
+    # post-treatments
+    # ---------------
+    # 1/ split concatenated kw lists and check correct length
+    if urow_dict['keywords_nb'] == 0:
+        urow_dict['keywords'] = []
+    else:
+        kws_array = urow_dict['keywords'].split(',')
+
+        if len(kws_array) != urow_dict['keywords_nb']:
+            raise ValueError("Can't correctly split keywords for user %s" % uid)
+        else:
+            urow_dict['keywords'] = kws_array
+
+    # 2/ also split and parse all linked_ids
+    if urow_dict['linked_ids_nb'] == 0:
+        urow_dict['linked_ids'] = {}
+    else:
+        lkids_array = urow_dict['linked_ids'].split(',')
+        if len(lkids_array) != urow_dict['linked_ids_nb']:
+            raise ValueError("Can't correctly split linked_ids for user %s" % uid)
+        else:
+            # additionaly reparse dict for linked_ids
+            # exemple ==> {type1:ID1, type2:ID2}
+            urow_dict['linked_ids'] = {}
+            for lkid_str in lkids_array:
+                lkid_couple = lkid_str.split(':')
+                if len(lkid_couple) != 2:
+                    raise ValueError("Can't correctly find type and id value in linked_id string '%s' for user %s" % (lkid_str, uid))
+                else:
+                    lkid_type = lkid_couple[0]
+                    lkid_id   = lkid_couple[1]
+                    urow_dict['linked_ids'][lkid_type] = lkid_id
+
+    # full user info as a dict
+    return urow_dict
 
 
 def save_scholar(uid, date, safe_recs, reg_db):

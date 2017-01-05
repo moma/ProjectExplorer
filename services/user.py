@@ -12,20 +12,32 @@ from requests    import post
 from json        import dumps, loads
 from flask_login import LoginManager
 
-# for fill_in_local
-from MySQLdb     import connect, ProgrammingError
-
+if __package__ == 'services':
+    from services.db    import connect_db, get_full_scholar
+else:
+    from db             import connect_db, get_full_scholar
 
 # will be exported to main for initialization with app
 login_manager = LoginManager()
 
+# user cache
+ucache = {}
+
 @login_manager.user_loader
-def load_user(user_id):
+def load_user(uid):
     """
     Used by flask-login to bring back user object from uid stored in session
     """
-    # TODO retrieve from a cache or lazily from DB
-    return User(user_id)
+    u = None
+    if uid in ucache:
+        u = ucache[uid]
+    else:
+        try:
+            u = User(uid)
+            ucache[uid] = u
+        except Exception as err:
+            print("User(%s) init error:" % str(uid), err)
+    return u
 
 
 def doors_login(email, password, config):
@@ -65,6 +77,7 @@ class User(object):
 
     def __init__(self, uid):
         self.uid = uid
+        self.info = get_full_scholar(uid)
 
     def get_id(self):
         return str(self.uid)

@@ -62,6 +62,8 @@ class MyExtractor:
           - filter_thing is a dict of all the whoswho filters
             ex: {'countries':[France,USA], 'keywords':[blabla]}
           - they are converted to WHERE-clauses in an SQL query
+
+        TODO factorize someday with services.db.get_full_scholar
         """
         scholar_array = {}
         sql_query = None
@@ -193,8 +195,8 @@ class MyExtractor:
                             ON doors_uid = uid
                         JOIN keywords
                             ON sch_kw.kwid = keywords.kwid
-                        LEFT JOIN affiliations
-                            ON affiliation_id = affid
+                        -- LEFT JOIN affiliations
+                            -- ON affiliation_id = affid
 
                         -- our filtering constraints fit here
                         WHERE  %s
