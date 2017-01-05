@@ -19,8 +19,8 @@ var iwantograph = "";
 var bridge={};
 external="";
 //external="http://tina.iscpif.fr/explorerjs/";//Just if you want to use the server-apps from tina.server
-bridge["forFilteredQuery"] = "services/api" //external+"php/bridgeClientServer_filter.php";
-bridge["forNormalQuery"] = "services/api" //external+"php/bridgeClientServer.php";
+bridge["forFilteredQuery"] = "services/api/graph" //external+"php/bridgeClientServer_filter.php";
+bridge["forNormalQuery"] = "services/api/graph" //external+"php/bridgeClientServer.php";
 
 
 

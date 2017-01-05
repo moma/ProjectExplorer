@@ -114,28 +114,28 @@ def services():
     return redirect(url_for('login', _external=True))
 
 
-# /services/api/
-@app.route(config['PREFIX'] + config['API_ROUTE'] + '/')
-def api_main():
+# /services/api/graph
+@app.route(config['PREFIX'] + config['API_ROUTE'] + '/graph')
+def graph_api():
     """
     API to provide json extracts of the DB to tinaweb
     (originally @ moma/legacy_php_comex/tree/master/comex_install)
     (original author S. Castillo)
     """
 
-    db=MySQL(config['SQL_HOST'])
 
     if 'qtype' in request.args:
-        scholars = db.getScholarsList(request.args['qtype'], restparse(request.query_string.decode()))
+        graphdb=MySQL(config['SQL_HOST'])
+        scholars = graphdb.getScholarsList(request.args['qtype'], restparse(request.query_string.decode()))
+        if scholars and len(scholars):
+            # Data Extraction
+            graphdb.extract(scholars)
+
+        graphArray = graphdb.buildJSON_sansfa2(graphdb.Graph)
+        return dumps(graphArray)
+
     else:
-        raise TypeError("API query is missing qtype (should be 'filters' or 'uid')")
-
-    if scholars and len(scholars):
-        # Data Extraction
-        db.extract(scholars)
-
-    graphArray = db.buildJSON_sansfa2(db.Graph)
-    return dumps(graphArray)
+        raise TypeError("graph API query is missing qtype (should be 'filters' or 'uid')")
 
 
 # /services/user/
