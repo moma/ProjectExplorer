@@ -50,17 +50,13 @@ else:
 # ============= read config ============
 config = REALCONFIG
 
-mlog("DEBUG", "conf\n  "+"\n  ".join(["%s=%s"%(k,v) for k,v in config.items()]))
-
 # ============= app creation ============
 app = Flask("services",
              static_folder=path.join(config['HOME'],"static"),
              template_folder=path.join(config['HOME'],"templates"))
 
 app.config['DEBUG'] = (config['LOG_LEVEL'] == "DEBUG")
-
 app.config['SECRET_KEY'] = 'TODO fill secret key for sessions for login'
-
 login_manager.init_app(app)
 
 ########### PARAMS ###########
@@ -115,7 +111,7 @@ MIN_KW = 5
 # /services/
 @app.route(config['PREFIX']+'/', methods=['GET'])
 def services():
-    return redirect(url_for('login'))
+    return redirect(url_for('login', _external=True))
 
 
 # /services/api/
@@ -145,7 +141,7 @@ def api_main():
 # /services/user/
 @app.route(config['PREFIX'] + config['USR_ROUTE']+'/', methods=['GET'])
 def user():
-    return redirect(url_for('login'))
+    return redirect(url_for('login', _external=True))
 
 
 # /services/user/login/
@@ -168,7 +164,7 @@ def login():
             # £TODO usage ?
             login_user(User(uid))
 
-        return redirect(url_for('profile'))
+        return redirect(url_for('profile', _external=True))
 
 
 # /services/user/profile/

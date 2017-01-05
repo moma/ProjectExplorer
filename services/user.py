@@ -77,7 +77,17 @@ class User(object):
 
     def __init__(self, uid):
         self.uid = uid
-        self.info = get_full_scholar(uid)
+
+        user_info = get_full_scholar(uid)
+
+        if user_info is None:
+            # user exists in doors but has nothing in DB yet
+            self.info = {}
+            self.empty = True
+        else:
+            # normal user has a nice info dict
+            self.info = user_info
+            self.empty = False
 
     def get_id(self):
         return str(self.uid)

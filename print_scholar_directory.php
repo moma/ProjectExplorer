@@ -253,7 +253,7 @@ Contributions and ideas are welcome to improve this directory.
 echo $meta.' '.$stats.'</head>';
 if (count($scholars)==0){
 echo  '<h2>Sorry, '.$target_name.' did not mention any keywords ... we cannot process its network.</h2><br/>
-    If you are '.$target_name.', you can  <a href="http://main.csregistry.org/Whoswhodata"  target="_BLANK">modify your profile</a> and see your
+    If you are '.$target_name.', you can  <a href="/services/user/profile"  target="_BLANK">modify your profile</a> and see your
         network in few minutes.';
 }else{
 echo $header;

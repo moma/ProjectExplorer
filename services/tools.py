@@ -21,13 +21,20 @@ REALCONFIG = {}
 
 # the expected and default values
 CONFIGMENU = [
-            {"sec": 'main',       "var":'LOG_LEVEL',    "def": "INFO"       },
-            {"sec": 'main',       "var":'COMEX_HOST',   "def": '0.0.0.0'    },
-            {"sec": 'main',       "var":'COMEX_PORT',   "def": '9090'       },
-            {"sec": 'main',       "var":'LOG_FILE',   "def": 'logs/services.log' },
-            {"sec": 'routes',     "var":'PREFIX',       "def": '/services'  },
-            {"sec": 'routes',     "var":'USR_ROUTE',    "def": '/user'      },
-            {"sec": 'routes',     "var":'API_ROUTE',    "def": '/api'       },
+            # logging
+            {"sec": 'main',   "var":'LOG_LEVEL',  "def": "INFO"             },
+            {"sec": 'main',   "var":'LOG_FILE',   "def": 'logs/services.log'},
+            {"sec": 'main',   "var":'LOG_TEE',    "def": True               },
+
+            # subserver
+            {"sec": 'main',    "var":'COMEX_HOST',   "def": '0.0.0.0'       },
+            {"sec": 'main',    "var":'COMEX_PORT',   "def": '9090'          },
+
+            {"sec": 'routes',  "var":'PREFIX',       "def": '/services'     },
+            {"sec": 'routes',  "var":'USR_ROUTE',    "def": '/user'         },
+            {"sec": 'routes',  "var":'API_ROUTE',    "def": '/api'          },
+
+            # requirements
             {"sec": 'backends',   "var":'SQL_HOST',     "def": '172.17.0.2' },
             {"sec": 'backends',   "var":'SQL_PORT',     "def": '3306'       },
             {"sec": 'backends',   "var":'DOORS_HOST',   "def": '0.0.0.0'    },
@@ -78,7 +85,8 @@ def read_config():
             else:
                 REALCONFIG[varname] = environ[varname]
 
-            print("ini debug: '%10s' ok from env" % varname)
+            # for dbg
+            # print("ini debug: '%10s' ok from env" % varname)
 
         elif section in ini and varname in ini[section]:
             if is_bool:
@@ -86,16 +94,17 @@ def read_config():
             else:
                 REALCONFIG[varname] = ini.get(section, varname)
 
-            print("ini debug: '%10s' ok from file" % varname)
+            # for dbg
+            # print("ini debug: '%10s' ok from file" % varname)
 
         else:
             REALCONFIG[varname] = default
 
-            print("ini debug: '%10s' ok from default" % varname)
+            # for dbg
+            # print("ini debug: '%10s' ok from default" % varname)
 
     # also add our project home since we have it and we'll need it
     REALCONFIG['HOME'] = our_home
-
 
 
 # ----------------------------------------
@@ -177,6 +186,8 @@ def mlog(loglvl, *args):
     prints the logs to the output file specified in config (by default: ./services.log)
 
     loglvl is simply a string in ["DEBUG", "INFO", "WARNING", "ERROR"]
+
+    config['LOG_TEE'] (bool) decides if logs also go to STDOUT
     """
     levels = {"DEBUG":0, "INFO":1, "WARNING":2, "ERROR":3}
 
@@ -186,12 +197,19 @@ def mlog(loglvl, *args):
         if loglvl in levels:
             if levels[loglvl] >= levels[REALCONFIG["LOG_LEVEL"]]:
                 print(loglvl+':', *args, file=logfile)
+                if REALCONFIG["LOG_TEE"]:
+                    print(loglvl+':', *args)
         if loglvl not in levels:
             first_arg = loglvl
             loglvl = "INFO"
             if levels[loglvl] >= levels[REALCONFIG["LOG_LEVEL"]]:
                 print(loglvl+':', first_arg, *args, file=logfile)
+                if REALCONFIG["LOG_TEE"]:
+                    print(loglvl+':', first_arg, *args)
 
         logfile.close()
     else:
         print("WARNING: attempt to use mlog before read_config")
+
+
+mlog("DEBUG", "conf\n  "+"\n  ".join(["%s=%s"%(k['var'],REALCONFIG[k['var']]) for k in CONFIGMENU]))

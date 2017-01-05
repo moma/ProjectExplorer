@@ -7,6 +7,7 @@ COMEX_PORT=9090
 #; that's how much we'll log from services: DEBUG, INFO, WARNING or ERROR
 LOG_LEVEL=DEBUG
 LOG_FILE=logs/services.log
+LOG_TEE=true
 
 [routes]
 PREFIX=/services
@@ -18,10 +19,10 @@ API_ROUTE=/api
 [backends]
 #; local address of mysql subservice for the comex_shared database
 #; used by php and python, can be overidden by env vars with same name
-SQL_HOST=172.18.0.3
+SQL_HOST=172.18.0.2
 SQL_PORT=3306
 
 #; outer address for doors server (doors <=> client authentication)
 #; (used only in ajax context of sending credentials) #; TODO SSL
-DOORS_HOST=172.18.0.2
+DOORS_HOST=172.18.0.3
 DOORS_PORT=8989

@@ -65,6 +65,8 @@ def get_full_scholar(uid):
     Autonomous function to be used by User class
        => Retrieves one line from *scholars* table, with joined optional concatenated *affiliations*, *keywords* and *linked_ids*
        => Parse it all into a structured python user info dict
+
+       => NB: None if user doesn't exist in comex_db (but may exist in doors db)
     """
     u_row = None
     db = connect_db()
@@ -131,15 +133,20 @@ def get_full_scholar(uid):
         GROUP BY doors_uid
     """ % str(uid)
 
-
-    # for dbg
-    # print("DBG get_full_scholar STATEMENT:\n", one_usr_stmt, "\n=======")
+    mlog("DEBUG", "get_full_scholar STATEMENT:\n-- SQL\n%s\n-- /SQL" % one_usr_stmt)
 
     n_rows = db_c.execute(one_usr_stmt)
 
-    if n_rows != 1:
+    if n_rows > 1:
         raise IndexError("one_usr_stmt returned %i rows instead of 1 for user %s" % (n_rows, uid))
 
+    elif n_rows == 0:
+        mlog("WARNING", "get_full_scholar attempt to read non-existing user %s" % uid)
+        db.close()
+        return None
+
+
+    # normal case: we got exactly 1 user
     urow_dict = db_c.fetchone()
     db.close()
 
