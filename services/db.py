@@ -46,6 +46,21 @@ ORG_COLS = [
          ("org_city",              False,        50)
     ]
 
+
+FIELDS_FRONTEND_TO_SQL = {
+    "keywords": "keywords.kwstr",
+    "countries": "scholars.country",
+    "organizations": "affiliations.org",
+    "laboratories": "affiliations.team_lab",
+    "tags": "scholars.community_hashtags",
+
+    # new
+    "gender": "scholars.gender",
+    "cities": "affiliations.org_city",
+    "linked": "linked_ids.ext_id_type"
+}
+
+
 def connect_db(config=REALCONFIG):
     """
     Simple connection
@@ -59,6 +74,109 @@ def connect_db(config=REALCONFIG):
         passwd="very-safe-pass",
         db="comex_shared"
     )
+
+def get_field_aggs(a_field, hapax_threshold=int(REALCONFIG['HAPAX_THRESHOLD'])):
+    """
+    Use case: api/aggs?field=a_field
+       => Retrieves distinct field values and count having it
+
+       => about *n* vs *occs*:
+           - for tables != keywords count is scholar count
+           - for table keywords count is occurrences count
+
+    NB relies on FIELDS_FRONTEND_TO_SQL mapping
+    POSS: allow other fields than those in the mapping
+          if they are already in sql table.col format?
+    """
+
+    agg_rows = []
+
+    if a_field in FIELDS_FRONTEND_TO_SQL:
+
+        sql_col = FIELDS_FRONTEND_TO_SQL[a_field]
+        sql_tab = sql_col.split('.')[0]
+
+        mlog('DEBUG', "AGG API sql_col", sql_col)
+        mlog('DEBUG', "AGG API sql_tab", sql_tab)
+
+        db = connect_db()
+        db_c = db.cursor(DictCursor)
+
+        if type(hapax_threshold) == int and hapax_threshold > 0:
+            count_col = 'occs' if sql_tab == 'keywords' else 'n'
+            where_clause = "WHERE %s > %i" % (count_col, hapax_threshold)
+        else:
+            where_clause = ""
+
+        if sql_tab == 'scholars':
+            stmt = """
+                SELECT * FROM (
+                    SELECT %(col)s AS x, COUNT(*) AS n
+                    FROM scholars
+                    GROUP BY %(col)s
+                ) AS allcounts
+                %(filter)s
+                ORDER BY n DESC
+            """ % {'col': sql_col, 'filter': where_clause}
+
+        elif sql_tab == 'affiliations':
+            stmt = """
+                SELECT * FROM (
+                    SELECT %(col)s AS x, COUNT(*) AS n
+                    FROM scholars
+                    -- 0 or 1
+                    LEFT JOIN affiliations
+                        ON scholars.affiliation_id = affiliations.affid
+                    GROUP BY %(col)s
+                ) AS allcounts
+                %(filter)s
+                ORDER BY n DESC
+            """ % {'col': sql_col, 'filter': where_clause}
+
+        elif sql_tab == 'linked_ids':
+            stmt = """
+                SELECT * FROM (
+                    SELECT %(col)s AS x, COUNT(*) AS n
+                    FROM scholars
+                    -- 0 or 1
+                    LEFT JOIN linked_ids
+                        ON scholars.doors_uid = linked_ids.uid
+                    GROUP BY %(col)s
+                ) AS allcounts
+                %(filter)s
+                ORDER BY n DESC
+            """ % {'col': sql_col, 'filter': where_clause}
+
+        elif sql_tab == 'keywords':
+            stmt = """
+                SELECT * FROM (
+                    SELECT %(col)s AS x, COUNT(*) AS occs
+                    FROM scholars
+                    -- 0 or many
+                    LEFT JOIN sch_kw
+                        ON scholars.doors_uid = sch_kw.uid
+                    JOIN keywords
+                        ON sch_kw.kwid = keywords.kwid
+                    GROUP BY %(col)s
+                ) AS allcounts
+                %(filter)s
+                ORDER BY occs DESC
+            """ % {'col': sql_col, 'filter': where_clause}
+
+
+        mlog("DEBUG", "get_field_aggs STATEMENT:\n-- SQL\n%s\n-- /SQL" % stmt)
+
+        # do it
+        n_rows = db_c.execute(stmt)
+
+        if n_rows > 0:
+            agg_rows = db_c.fetchall()
+
+        db.close()
+
+    mlog('INFO', agg_rows)
+    return agg_rows
+
 
 def get_full_scholar(uid):
     """

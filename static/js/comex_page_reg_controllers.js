@@ -416,10 +416,9 @@ function checkJobDateStatus() {
 
 
 
-// £TODO1 move autocomp data to an autocomplete module
-//          -> local data for countries, jobtitles
-//          -> ajax fetcher for the scholars, kws and labs
-// £TODO2 add a fetcher API on services side
+// £TODO move autocomp data to an autocomplete module
+//         -> local data for countries, jobtitles
+//         -> use ajax aggs api for the scholars, kws and labs
 
 // autocomplete countries
 $(function() {

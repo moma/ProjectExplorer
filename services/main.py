@@ -36,7 +36,7 @@ if __package__ == 'services':
     from services.user  import User, login_manager, doors_login
     from services.text  import keywords
     from services.tools import restparse, mlog, re_hash, REALCONFIG
-    from services.db    import connect_db, get_or_create_keywords, save_pairs_sch_kw, get_or_create_affiliation, save_scholar
+    from services.db    import connect_db, get_or_create_keywords, save_pairs_sch_kw, get_or_create_affiliation, save_scholar, get_field_aggs
     from services.db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 else:
     # when this script is run directly
@@ -44,7 +44,7 @@ else:
     from user           import User, login_manager, doors_login
     from text           import keywords
     from tools          import restparse, mlog, re_hash, REALCONFIG
-    from db             import connect_db, get_or_create_keywords, save_pairs_sch_kw, get_or_create_affiliation, save_scholar
+    from db             import connect_db, get_or_create_keywords, save_pairs_sch_kw, get_or_create_affiliation, save_scholar, get_field_aggs
     from db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 
 # ============= read config ============
@@ -113,6 +113,19 @@ MIN_KW = 5
 def services():
     return redirect(url_for('login', _external=True))
 
+# /services/api/aggs
+@app.route(config['PREFIX'] + config['API_ROUTE'] + '/aggs')
+def aggs_api():
+    """
+    API to read DB aggregation data (ex: for autocompletes)
+    """
+    if 'field' in request.args:
+        # field name itself is tested by db module
+        result = get_field_aggs(request.args['field'])
+        return dumps(result)
+
+    else:
+        raise TypeError("aggs API query is missing 'field' argument")
 
 # /services/api/graph
 @app.route(config['PREFIX'] + config['API_ROUTE'] + '/graph')

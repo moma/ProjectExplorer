@@ -10,17 +10,11 @@ from .converter import CountryConverter
 
 if __package__ == "services.db_to_tina_api":
     from services.tools import mlog
+    from services.db    import FIELDS_FRONTEND_TO_SQL
 else:
     from tools          import mlog
+    from db             import FIELDS_FRONTEND_TO_SQL
 
-
-whoswhofilters_to_sqlnames = {
-    "keywords": "keywords.kwstr",
-    "countries": "scholars.country",
-    "organizations": "affiliations.org",
-    "laboratories": "affiliations.team_lab",
-    "tags": "scholars.community_hashtags"
-}
 
 class MyExtractor:
 
@@ -147,11 +141,11 @@ class MyExtractor:
                         known_filter = None
                         sql_column = None
 
-                        if key not in whoswhofilters_to_sqlnames:
+                        if key not in FIELDS_FRONTEND_TO_SQL:
                             continue
                         else:
                             known_filter = key
-                            sql_column = whoswhofilters_to_sqlnames[key]
+                            sql_column = FIELDS_FRONTEND_TO_SQL[key]
 
                         val = filter_dict[known_filter]
 
