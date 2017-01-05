@@ -11,6 +11,15 @@ from os           import environ, path
 from urllib.parse import unquote
 from ctypes       import c_int32
 
+
+# ========================== FILL REALCONFIG ===================================
+
+# the main config dict (filled and exposed by this module only)
+# --------------------
+REALCONFIG = {}
+
+
+# the expected and default values
 CONFIGMENU = [
             {"sec": 'main',       "var":'LOG_LEVEL',    "def": "INFO"       },
             {"sec": 'main',       "var":'COMEX_HOST',   "def": '0.0.0.0'    },
@@ -24,9 +33,6 @@ CONFIGMENU = [
             {"sec": 'backends',   "var":'DOORS_HOST',   "def": '0.0.0.0'    },
             {"sec": 'backends',   "var":'DOORS_PORT',   "def": '8989'       }
           ]
-
-# a copy of the config dict just for this module
-REALCONFIG = {}
 
 def home_path():
     """
@@ -42,7 +48,8 @@ def read_config():
         2) the config file $HOME/parametres_comex.ini
         3) hard-coded default values
 
-    output is a simple dict (also exposed above as REALCONFIG)
+    Effect: fills the var REALCONFIG
+              (no return value)
     """
     our_home = home_path()
 
@@ -89,8 +96,18 @@ def read_config():
     # also add our project home since we have it and we'll need it
     REALCONFIG['HOME'] = our_home
 
-    return REALCONFIG
 
+
+# ----------------------------------------
+# let's do it now
+read_config()
+
+# ok! (REALCONFIG is now ready to export)
+# ---------------------------------------
+
+
+
+# ============================ other tools =====================================
 
 def re_hash(userinput, salt="verylonverylongverylonverylongverylonverylong"):
     """

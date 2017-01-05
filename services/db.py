@@ -9,10 +9,10 @@ from MySQLdb     import connect
 
 if __package__ == 'services':
     # when we're run via import
-    from services.tools import mlog
+    from services.tools import mlog, REALCONFIG
 else:
     # when this script is run directly
-    from tools          import mlog
+    from tools          import mlog, REALCONFIG
 
 
 # sorted columns as declared in DB, as a tuple
@@ -45,7 +45,7 @@ ORG_COLS = [
          ("org_city",              False,        50)
     ]
 
-def connect_db(config):
+def connect_db(config=REALCONFIG):
     """
     Simple connection
 

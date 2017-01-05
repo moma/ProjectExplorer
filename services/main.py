@@ -35,7 +35,7 @@ if __package__ == 'services':
     print("*** comex services ***")
     from services.user  import User, login_manager, doors_login
     from services.text  import keywords
-    from services.tools import read_config, restparse, mlog, re_hash
+    from services.tools import restparse, mlog, re_hash, REALCONFIG
     from services.db    import connect_db, get_or_create_keywords, save_pairs_sch_kw, get_or_create_affiliation, save_scholar
     from services.db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 else:
@@ -43,12 +43,12 @@ else:
     print("*** comex services (dev server mode) ***")
     from user           import User, login_manager, doors_login
     from text           import keywords
-    from tools          import read_config, restparse, mlog, re_hash
+    from tools          import restparse, mlog, re_hash, REALCONFIG
     from db             import connect_db, get_or_create_keywords, save_pairs_sch_kw, get_or_create_affiliation, save_scholar
     from db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 
 # ============= read config ============
-config = read_config()
+config = REALCONFIG
 
 mlog("DEBUG", "conf\n  "+"\n  ".join(["%s=%s"%(k,v) for k,v in config.items()]))
 
