@@ -73,6 +73,16 @@
   margin: 0;
 }
 
+/* for code blocks or urls */
+.code {
+  font-family: "Fira Mono", "Droid Sans Mono", monospace;
+  font-weight: 500;
+  font-size: 75% ;
+  background-color: #ACA;
+  padding: .2em;
+  border-radius: .2em;
+}
+
 
 /* the picture preview */
 #box_show_pic {

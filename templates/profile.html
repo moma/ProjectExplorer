@@ -13,27 +13,29 @@
       <div class="spacer col-sm-1 col-md-1">&nbsp;</div>
       <div class="my_form_box col-sm-8 col-md-8">
 
-
-
-
         <!-- ##################### ( PROFILE OVERVIEW ) #################### -->
-
 
         <div id="intro">
             <h2 class="oldstyle">Your Profile Info</h2>
                 <p class="mini-hero">
+                    {% if current_user.is_authenticated %}
+                        Welcome to your <strong>Community explorer</strong> profile,
+                        {% if current_user.info.hon_title is not none %}
+                            {{ current_user.info.hon_title }}
+                        {% endif %}
+                        {{ current_user.info.last_name }}!
+                    {% endif %}
                 </p>
         </div>
 
-
         <!-- FORM COMPLETING INTRO TEXT -->
         <div id="intro">
-          <h2 class="oldstyle">Complete your profile</h2>
+          <h2 id="please_complete" class="oldstyle">Please complete your profile</h2>
               <p class="mini-hero">
                   Take the time to complete your <strong>Community Explorer</strong> profile to generate better maps of your own socio-semantic network .
                   <br/>
                   <br/>
-                  The <strong>keywords</strong>, <strong>affilitations</strong> and <strong>hashtags</strong> will all count as similarities to identify network neighbours.
+                  The <strong>keywords</strong>, <strong>affiliations</strong> and <strong>hashtags</strong> will all count as similarities to identify network neighbours.
                   <br/>
                   <br/>
                   The <strong>home page (url)</strong>, <strong>picture (url or file)</strong> and <strong>free description</strong> will allow your neighbours to know you a little better.
@@ -41,7 +43,7 @@
         </div>
 
         <!-- ########################### ( FORM ) ########################## -->
-        <form id="comex_profil_form" enctype="multipart/form-data"
+        <form id="comex_profile_form" enctype="multipart/form-data"
               method="post" onsubmit="console.info('submitted')">
 
         <!-- todo onsubmit also save to cache -->
@@ -55,7 +57,8 @@
             </label>
             <input id="first_name" name="first_name" maxlength="30"
                    type="text" class="form-control" placeholder="prénom"
-                   onblur="makeBold(this)" onfocus="makeNormal(this)">
+                   onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
+                   value="{{ current_user.info.first_name }}">
           </div>
 
           <!-- optionnel -->
@@ -65,7 +68,8 @@
             </label>
             <input id="middle_name" name="middle_name" maxlength="30"
                    type="text" class="form-control" placeholder="autres prénoms"
-                   onblur="makeBold(this)" onfocus="makeNormal(this)">
+                   onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
+                   value="{{ current_user.info.middle_name }}">
           </div>
 
           <div class="question input-group">
@@ -74,7 +78,8 @@
             </label>
             <input id="last_name" name="last_name" maxlength="30"
                    type="text" class="form-control" placeholder="nom de famille"
-                   onblur="makeBold(this)" onfocus="makeNormal(this)">
+                   onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
+                   value="{{ current_user.info.last_name }}">
           </div>
 
           <button class="btn btn-xs btn-default operation"
@@ -87,7 +92,8 @@
           <div class="question input-group">
             <label for="initials" class="smlabel input-group-addon">* Initials</label>
             <input id="initials" name="initials" maxlength="7"
-                   type="text" class="form-control" placeholder="initiales">
+                   type="text" class="form-control" placeholder="initiales"
+                   value="{{ current_user.info.initials }}">
           </div>
 
           <div class="question input-group">
@@ -97,7 +103,8 @@
             <input id="country" name="country" maxlength="60"
                    type="text" class="form-control autocomp"
                    placeholder="pays"
-                   onblur="if(this.value=='France'){teamCityDivStyle.display = 'block'} else {teamCityDivStyle.display='none'}">
+                   onblur="if(this.value=='France'){teamCityDivStyle.display = 'block'} else {teamCityDivStyle.display='none'}"
+                   value="{{ current_user.info.country }}">
           </div>
 
           <!-- EMAIL & PASSWORD -->
@@ -109,7 +116,8 @@
               <!-- email validation onblur/onchange is done by cmxClt.uauth in comex_user_shared_auth.js -->
               <label for="email" class="smlabel input-group-addon">* Email</label>
               <input id="email" name="email" maxlength="255"
-                     type="text" class="form-control" placeholder="email">
+                     type="text" class="form-control" placeholder="email"
+                     value="{{ current_user.info.email }}">
 
               <!-- doors return value icon -->
               <div id="doors_ret_icon_msg" class="input-group-addon"
@@ -123,24 +131,6 @@
             <p id="doors_ret_message" class="legend"></p>
           </div>
 
-          <div class="question">
-            <p class="legend">Please make your password difficult to predict.</p>
-            <div class="input-group">
-              <label for="password" class="smlabel input-group-addon">* Password</label>
-              <input id="password" name="password" maxlength="30"
-                     type="password" class="form-control" placeholder="Create a password">
-            </div>
-          </div>
-
-          <div class="question">
-            <div class="input-group">
-              <label for="password2" class="smlabel input-group-addon">* Password</label>
-              <input id="password2" name="password2" maxlength="30"
-                     type="password" class="form-control" placeholder="Repeat the password">
-            </div>
-            <p id="password_message" class="legend red" style="font-weight:bold"></p>
-          </div>
-
           <!-- JOB & INTERESTS -->
           <h3 class="formcat"> About your job and research </h3>
 
@@ -148,21 +138,24 @@
             <label for="hon_title" class="smlabel input-group-addon"> Title </label>
             <input id="hon_title" name="hon_title" maxlength="30"
                    type="text" class="form-control autocomp" placeholder="titre"
-                   onblur="makeBold(this)" onfocus="makeNormal(this)">
+                   onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
+                   value="{{ current_user.info.hon_title }}">
           </div>
 
           <div class="question input-group">
             <label for="position" class="smlabel input-group-addon">* Job Position</label>
             <input id="position" name="position" maxlength="30"
                    type="text" class="form-control autocomp" placeholder="titre"
-                   onblur="makeBold(this)" onfocus="makeNormal(this)">
+                   onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
+                   value="{{ current_user.info.position }}">
           </div>
 
           <div class="question">
             <div class="input-group">
               <label for="keywords" class="smlabel input-group-addon">* Key subjects</label>
               <input id="keywords" name="keywords" maxlength="350"
-                     type="text" class="form-control autocomp" placeholder="keywords">
+                     type="text" class="form-control autocomp" placeholder="keywords"
+                     value="{{ current_user.info.keywords }}">
             </div>
             <p class="legend">Please enter at least 5 comma-separated keywords</p>
           </div>
@@ -174,7 +167,8 @@
             <div class="input-group">
               <label for="org" class="smlabel input-group-addon">* Parent Institution</label>
               <input id="org" name="org" maxlength="120"
-                     type="text" class="form-control autocomp" placeholder='eg "CNRS" or "University of Oxford"'>
+                     type="text" class="form-control autocomp" placeholder='eg "CNRS" or "University of Oxford"'
+                     value="{{ current_user.info.org }}">
             </div>
           </div>
 
@@ -194,6 +188,7 @@
                         >Other</option>
 
               </select>
+              <!-- £TODO js select the value from current_user.info.org_type -->
             </div>
             <!-- Other institution type <=> only if previous choice == 5 -->
             <div class="question conditional-q" id="other_org_div">
@@ -210,7 +205,8 @@
             <div class="input-group">
               <label for="team_lab" class="smlabel input-group-addon">Lab / Team / Dept</label>
               <input id="team_lab" name="team_lab" maxlength="120"
-                     type="text" class="form-control" placeholder="More detailed affiliation, if relevant">
+                     type="text" class="form-control" placeholder="More detailed affiliation, if relevant"
+                     value="{{ current_user.info.team_lab }}">
             </div>
           </div>
 
@@ -219,7 +215,8 @@
             <div class="input-group">
               <label for="org_city" class="smlabel input-group-addon">Lab city</label>
               <input id="org_city" name="org_city" maxlength="50"
-                     type="text" class="form-control" placeholder="Ville de votre institution">
+                     type="text" class="form-control" placeholder="Ville de votre institution"
+                     value="{{ current_user.info.org_city }}">
             </div>
           </div>
 
@@ -235,6 +232,7 @@
               <option value="F">Woman</option>
               <option value="M">Man</option>
             </select>
+            <!-- £TODO js select current_user.info.gender -->
           </div>
         </div>
 
@@ -242,7 +240,8 @@
           <div class="input-group">
             <label for="home_url" class="smlabel input-group-addon">Homepage</label>
             <input id="home_url" name="home_url" maxlength="120"
-                   type="text" class="form-control autocomp" placeholder='eg "http://www.wittyexample.org/~me"'>
+                   type="text" class="form-control autocomp" placeholder='eg "http://www.wittyexample.org/~me"'
+                   value="{{ current_user.info.home_url }}">
           </div>
         </div>
 
@@ -251,7 +250,8 @@
           <div class="input-group">
             <label for="pic_url" class="smlabel input-group-addon">Picture link</label>
             <input id="pic_url" name="pic_url" maxlength="120"
-                   type="text" class="form-control autocomp" placeholder='eg "http://www.wittyexample.org/~me/my_great_pic.png"'>
+                   type="text" class="form-control autocomp" placeholder='eg "http://www.wittyexample.org/~me/my_great_pic.png"'
+                   value="{{ current_user.info.pic_url }}">
           </div>
         </div>
 
@@ -263,6 +263,7 @@
             <input type="file" id="pic_file" name="pic_file"
                    accept="image/png,image/jpeg" class="form-control"
                    onchange="checkShowPic(this)">
+                   <!-- £TODO retrieve and show db picture if not None -->
           </div>
           <p id="picture_message" class="legend red" style="font-weight:bold"></p>
         </div>
@@ -275,7 +276,8 @@
           <div class="input-group">
             <label for="community_hashtags" class="smlabel input-group-addon">Interest groups</label>
             <input id="community_hashtags" name="community_hashtags" maxlength="350"
-                   type="text" class="form-control" placeholder="eg #dataviz or #networks">
+                   type="text" class="form-control" placeholder="eg #dataviz or #networks"
+                   value="{{ current_user.info.community_hashtags }}">
           </div>
           <p class="legend">Interest groups aka "hashtags" (full suggestion list available shortly)</p>
         </div>
@@ -289,12 +291,14 @@
             <textarea id="interests_text" name="interests_text" maxlength="1200"
                       rows="7" style="resize:none"
                       class="form-control" placeholder="If you wish, you may describe here your personal interests."
-                      onblur="makeBold(this)" onfocus="makeNormal(this)"
-                      ></textarea>
+                      onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
+                      value="{{ current_user.info.interests_text }}"></textarea>
           </div>
           <p class="legend">Optional, ~15 lines max (1200 chars)</p>
         </div>
 
+
+        <!-- £TODO js -->
         <div class="question">
           <div class="input-group">
             <label for="job_bool" class="smlabel input-group-addon">Looking for a job?</label>
@@ -361,11 +365,10 @@
           <p id="main_validation_message" class="legend" style="display:none"></p>
 
 
-          <!-- SUBMIT BTN + INFOS-->
+          <!-- == S U B M I T == -->
           <h3 class="formcat">Save profile</h3>
 
           <!-- button instead of input.submit to validate before real submit action -->
-          <!-- also remember stackoverflow.com/a/3315016/2489184 -->
           <button class="btn btn-lg btn-success" style="float:right"
                   id="formsubmit" type=button
                   onclick="if (validateAndMsg(event)) {registerDoorsAndSubmit()}">
@@ -385,4 +388,11 @@
     <!--  our js  -->
     <script src="{{ url_for('static', filename='js/comex_user_shared.js') }}"></script>
     <script src="{{ url_for('static', filename='js/comex_page_profile_controllers.js') }}"></script>
+
+    <script type="text/javascript">
+        //               ---------
+        // a copy of the user info in json
+        //               ---------
+        var uinfo = {{current_user.json_info|safe}};
+    </script>
 {% endblock %}

@@ -14,14 +14,16 @@ from flask_login import LoginManager
 
 if __package__ == 'services':
     from services.db    import connect_db, get_full_scholar
+    from services.tools import mlog
 else:
     from db             import connect_db, get_full_scholar
+    from tools          import mlog
 
 # will be exported to main for initialization with app
 login_manager = LoginManager()
 
-# user cache
-ucache = {}
+# scholar User objects cache
+UCACHE = {}
 
 @login_manager.user_loader
 def load_user(uid):
@@ -29,12 +31,14 @@ def load_user(uid):
     Used by flask-login to bring back user object from uid stored in session
     """
     u = None
-    if uid in ucache:
-        u = ucache[uid]
+    if uid in UCACHE:
+        u = UCACHE[uid]
+        mlog("DEBUG", "load_user: user re-loaded by cache")
     else:
         try:
             u = User(uid)
-            ucache[uid] = u
+            UCACHE[uid] = u
+            mlog("DEBUG", "load_user: user re-loaded from DB")
         except Exception as err:
             print("User(%s) init error:" % str(uid), err)
     return u
@@ -42,7 +46,7 @@ def load_user(uid):
 
 def doors_login(email, password, config):
     """
-    Query to Doors API to login a user
+    Remote query to Doors API to login a user
 
     Doors responses look like this:
         {'status': 'login ok',
@@ -83,10 +87,12 @@ class User(object):
         if user_info is None:
             # user exists in doors but has nothing in DB yet
             self.info = {}
+            self.json_info = "{}"
             self.empty = True
         else:
             # normal user has a nice info dict
             self.info = user_info
+            self.json_info = dumps(user_info)
             self.empty = False
 
     def get_id(self):
@@ -97,7 +103,7 @@ class User(object):
         """
         uses scholars.status
         """
-        return (self.info['record_status'] == "active")
+        return (not self.empty and self.info['record_status'] == "active")
 
     @property
     def is_anonymous(self):

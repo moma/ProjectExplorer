@@ -65,12 +65,12 @@ def connect_db(config=REALCONFIG):
     """
     Simple connection
 
-    TODO decide if we'll use one or multiple (<= atm yes)
+    TODO decide if we'll use one or multiple (<= atm multiple)
     """
     return connect(
         host=config['SQL_HOST'],
         port=int(config['SQL_PORT']),
-        user="root",   # TODO change db ownership to a comexreg user
+        user="root",   # POSS change db ownership to a comexreg user
         passwd="very-safe-pass",
         db="comex_shared"
     )
@@ -96,8 +96,7 @@ def get_field_aggs(a_field, hapax_threshold=int(REALCONFIG['HAPAX_THRESHOLD'])):
         sql_col = FIELDS_FRONTEND_TO_SQL[a_field]
         sql_tab = sql_col.split('.')[0]
 
-        mlog('DEBUG', "AGG API sql_col", sql_col)
-        mlog('DEBUG', "AGG API sql_tab", sql_tab)
+        mlog('INFO', "AGG API sql_col", sql_col)
 
         db = connect_db()
         db_c = db.cursor(DictCursor)
@@ -321,6 +320,8 @@ def get_full_scholar(uid):
                     lkid_id   = lkid_couple[1]
                     urow_dict['linked_ids'][lkid_type] = lkid_id
 
+    mlog("INFO", "get_full_scholar %s: OK" % uid)
+
     # full user info as a dict
     return urow_dict
 
@@ -394,6 +395,7 @@ def save_scholar(uid, date, safe_recs, reg_db, uactive = True):
     reg_db.commit()
 
 
+
 def save_pairs_sch_kw(pairings_list, comex_db):
     """
     Simply save all pairings (uid, kwid) in the list
@@ -440,7 +442,7 @@ def get_or_create_keywords(kw_list, comex_db):
             db_cursor.execute('INSERT INTO keywords(kwstr) VALUES ("%s")' % kw_str)
             comex_db.commit()
 
-            mlog("DEBUG", "Added keyword '%s'" % kw_str)
+            mlog("INFO", "Added keyword '%s'" % kw_str)
 
             found_ids.append(db_cursor.lastrowid)
 

@@ -23,17 +23,19 @@ __version__   = "1.4"
 __email__     = "romain.loth@iscpif.fr"
 __status__    = "Dev"
 
-from flask       import Flask, render_template, request, redirect, url_for
-from flask_login import login_required, current_user, login_user
+from flask       import Flask, render_template, request, \
+                        redirect, url_for, session
+from flask_login import fresh_login_required, current_user, login_user
 from re          import sub
 from os          import path
 from traceback   import format_tb
 from json        import dumps
+from datetime    import timedelta
 
 if __package__ == 'services':
     # when we're run via import
     print("*** comex services ***")
-    from services.user  import User, login_manager, doors_login
+    from services.user  import User, login_manager, doors_login, UCACHE
     from services.text  import keywords
     from services.tools import restparse, mlog, re_hash, REALCONFIG
     from services.db    import connect_db, get_or_create_keywords, save_pairs_sch_kw, get_or_create_affiliation, save_scholar, get_field_aggs
@@ -41,7 +43,7 @@ if __package__ == 'services':
 else:
     # when this script is run directly
     print("*** comex services (dev server mode) ***")
-    from user           import User, login_manager, doors_login
+    from user           import User, login_manager, doors_login, UCACHE
     from text           import keywords
     from tools          import restparse, mlog, re_hash, REALCONFIG
     from db             import connect_db, get_or_create_keywords, save_pairs_sch_kw, get_or_create_affiliation, save_scholar, get_field_aggs
@@ -57,6 +59,14 @@ app = Flask("services",
 
 app.config['DEBUG'] = (config['LOG_LEVEL'] == "DEBUG")
 app.config['SECRET_KEY'] = 'TODO fill secret key for sessions for login'
+
+# for flask_login
+app.config['REMEMBER_COOKIE_DURATION'] = timedelta(seconds=15)
+app.config['REMEMBER_COOKIE_NAME'] = 'supercookie'
+app.config['MY_VAR'] = 'incredible it works'
+
+login_manager.login_view = "login"
+login_manager.session_protection = "strong"
 login_manager.init_app(app)
 
 ########### PARAMS ###########
@@ -108,10 +118,28 @@ MIN_KW = 5
 # /!\ Routes are not prefixed by nginx in prod so we do it ourselves /!\
 # -----------------------------------------------------------------------
 
+@login_manager.unauthorized_handler
+def unauthorized():
+    return render_template(
+        "message.html",
+        message = """
+            Please <strong><a href="%(login)s">login here</a></strong>.
+            <br/><br/>
+            The page <span class='code'>%(tgt)s</span> is only available after login.
+            """ % {'tgt': request.path,
+                   'login': url_for('login', next=request.path, _external=True)}
+    )
+
 # /services/
 @app.route(config['PREFIX']+'/', methods=['GET'])
 def services():
     return redirect(url_for('login', _external=True))
+
+# /services/test
+@app.route(config['PREFIX'] + '/test', methods=['GET'])
+def test_stuff():
+    print(UCACHE)
+    return render_template("message.html", message="UCACHE="+sub('<|&|>','::',repr(UCACHE)))
 
 # /services/api/aggs
 @app.route(config['PREFIX'] + config['API_ROUTE'] + '/aggs')
@@ -166,6 +194,7 @@ def login():
             doors_connect = config['DOORS_HOST']+':'+config['DOORS_PORT']
         )
     elif request.method == 'POST':
+        # TODO check captcha
         # TODO sanitize
         email = request.form['email']
         pwd = request.form['password']
@@ -174,19 +203,72 @@ def login():
         uid = doors_login(email, pwd, config)
 
         if uid:
-            # £TODO usage ?
-            login_user(User(uid))
 
-        return redirect(url_for('profile', _external=True))
+            login_ok = login_user(User(uid))
+
+            # login_ok = login_user(User(uid), remember=True)
+            #                                  -------------
+            #                           creates REMEMBER_COOKIE_NAME
+            #                       which is itself bound to session cookie
+
+            if login_ok:
+                # normal user
+                return redirect(url_for('profile', _external=True))
+                # POSS "next" request.args (useful when we'll have more pages)
+                #       ---
+
+            else:
+                # user exists in doors but has no comex profile yet
+                #   => TODO
+                #       => we add him
+                #       => status = "fresh_profile"
+                #       => empty profile
+                # return redirect(url_for('fresh_profile', _external=True))
+                return redirect(url_for('register', _external=True))
+
+        else:
+            # user doesn't exist in doors nor comex_db
+            # (shouldn't happen since client-side blocks submit and displays same message, but still possible if user tweaks the js)
+            return render_template(
+                "message.html",
+                message = """
+                    We're sorry but you don't exist in our database yet!
+                    <br/>
+                    However you can easily <strong><a href="%s">register here</a></strong>.
+                    """ % url_for('register', _external=True)
+            )
 
 
 # /services/user/profile/
 @app.route(config['PREFIX'] + config['USR_ROUTE'] + '/profile/', methods=['GET'])
-@login_required
+@fresh_login_required
 def profile():
+    """
+    Entrypoint for users to load/re-save personal data
+
+    @login_required uses flask_login to relay User object current_user
+    """
+
+    # login provides us current_user
+    if current_user.empty:
+        mlog("INFO",  "PROFILE: empty current_user %s" % current_user.uid)
+    else:
+        mlog("INFO",  "PROFILE: current_user %s\n  -" % current_user.uid
+                       + '\n  -'.join([current_user.info['email'],
+                                       current_user.info['initials'],
+                                   str(current_user.info['keywords']),
+                                       current_user.info['country']]
+                                      )
+            )
+
+    # debug session cookies
+    # print("[k for k in session.keys()]",[k for k in session.keys()])
+    mlog("DEBUG", "PROFILE view with flag session.new = ", session.new)
+
     return render_template(
-        "profile.html",
-        logged_in = True
+        "profile.html"
+        # NB we also got user info in {{current_user.info}}
+        #                         and {{current_user.json_info}}
     )
 
 
@@ -247,11 +329,18 @@ def register():
 
                 # C) create record into the primary user table
                 # ---------------------------------------------
+                    # TODO class User method !!
                 save_scholar(duuid, rdate, clean_records, reg_db)
 
                 # D) read/fill each keyword and save the (uid <=> kwid) pairings
                 kwids = get_or_create_keywords(kw_array, reg_db)
+
+                    # TODO class User method !!
                 save_pairs_sch_kw([(duuid, kwid) for kwid in kwids], reg_db)
+
+                # clear cache concerning this scholar
+                    # TODO class User method !!
+                if uid in UCACHE: UCACHE.pop(uid)
 
                 # E) end connection
                 reg_db.close()

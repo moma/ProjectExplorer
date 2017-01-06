@@ -3,7 +3,7 @@
  * Validates the comex (communityexplorer.org) registration form
  *  + adds a timestamp in input#last_modified_date
  *  + adds autocompletes
- *  + prepares DB save into COLS
+ *  + prepares DB save into cmxClt.COLS
  *
  * @todo
  *    - harmonize var names (eg 'cmxClt.uauth.email' vs 'initialsInput' are both input elts)
@@ -49,66 +49,15 @@ function testAsYouGo() {
 }
 
 
-// the target columns in DB: tuple (name, mandatoryBool, maxChars (or nChars))
-var COLS = [ ["doors_uid",              true,        36,   'exact'],
-             ["last_modified_date",     true,        24,   'exact'],
-             ["email",                  true,       255],
-             ["country",                true,        60],
-             ["first_name",             true,        30],
-             ["middle_name",           false,        30],
-             ["last_name",              true,        50],
-             ["initials",               true,         7],
-             ["position",              false,        30],
-             ["hon_title",             false,        30],
-             ["interests_text",        false,      1200],
-             ["community_hashtags",    false,       350],
-             ["gender",                false,         1,   'exact'],
-             ["job_looking_date",      false,        24,   'exact'],
-             ["home_url",              false,       120],
-             ["pic_url",               false,       120],
-             ["pic_file",              false,      null],
-             // ==> *scholars* table
 
-             ["keywords",               true,       350],
-             // ==> *keywords* table
-
-             ["org",                    true,       120],
-             ["org_type",               true,        50],
-             ["team_lab",              false,       120],
-             ["org_city",              false,        50]]
-             // ==> *affiliations* table
 
 var regTimestamp = document.getElementById('last_modified_date')
 
-// dates up to 2049/12/31
-var validDate = new RegExp( /^20[0-4][0-9]\/(?:0?[1-9]|1[0-2])\/(?:0?[1-9]|[1-2][0-9]|3[0-1])$/)
 var subPage1Style = document.getElementById('subpage_1').style
 var subPage2Style = document.getElementById('subpage_2').style
 var teamCityDivStyle = document.getElementById('team_city_div').style
 var otherInstDivStyle = document.getElementById('other_org_div').style
 var jobLookingDivStyle = document.getElementById('job_looking_div').style
-
-
-// NB using new route in doors api/userExists
-// case true => Ok("""{"status":"login exists"}""")
-// case false => Ok("""{"status":"login available"}""")
-function testDoorsUserExists(emailValue) {
-    // /!\ async
-    cmxClt.uauth.callDoors(
-        "userExists",
-        [emailValue],
-        function(doorsResp) {
-            var doorsUid = doorsResp[0]
-            var doorsMsg = doorsResp[1]
-
-            // the global status can be true iff login is available and format ok
-            // £TODO fix scope (use uauth)
-            emailStatus = (doorsMsg == "login available")
-
-            displayDoorsStatusInRegisterBox(emailStatus, emailValue)
-        }
-    )
-}
 
 
 function registerDoorsAndSubmit(){
@@ -176,73 +125,13 @@ function validateAndMsg() {
 
     cmxClt.uform.submitButton.disabled = true
     cmxClt.uform.mainMessage.style.display = 'block'
-
-    var valid = true
-
     cmxClt.uform.mainMessage.innerHTML = "Validating the form..."
 
-    // also reformat the jobDate from "YYYY/MM/DD" to ISO
-
-    if (jobDate.value.length) jobDate.value = (new Date(jobDate.value)).toISOString()
-
-    // objectify the form
-    cmxClt.uform.wholeFormData = new FormData(cmxClt.uform.theForm);
-
+    var valid = true
     var missingFields = []
-    var toolongFields = []
-    for (var i in COLS) {
-      // console.warn("checking COLS["+i+"]", COLS[i])
-      var fieldName = COLS[i][0]
-      var mandatory = COLS[i][1]
-      var nChars    = COLS[i][2]
-      var isExactN = (COLS[i][3] == 'exact')
 
-
-      // skip picture already done
-      if (fieldName == 'pic_file') continue ;
-
-      // skip doors_uid done afterwards if form ok
-      if (fieldName == 'doors_uid') continue ;
-
-      var actualValue = cmxClt.uform.wholeFormData.get(fieldName)
-
-      // console.log("actualValue", actualValue)
-
-      // test mandatory -----------------
-      if (mandatory && (actualValue == null || actualValue == "")) {
-          // todo human-readable fieldName here
-          missingFields.push(fieldName)
-          valid = false
-          console.log("missingField", fieldName)
-      }
-
-      // test length --------------------
-      else if (mandatory || (actualValue != null && actualValue != "")) {
-
-          if (isExactN) {
-              // should never happen => trigger error
-              if (actualValue.length != nChars) {
-                  console.error("invalid value for field " + fieldName
-                                + "("+actualValue+")"
-                                + "should have exactly "+nChars+" chars")
-                  valid = false
-
-                  console.log("wrong value")
-              }
-          }
-          else {
-              if (actualValue.length > nChars) {
-                  toolongFields.push([fieldName, nChars])
-                  valid = false
-
-                  console.log("tooShort")
-              }
-          }
-      }
-      // --------------------------------
-    } // end for val in COLS
-
-
+    [valid, missingFields] = cmxClt.uform.testFillField(cmxClt.uform.theForm)
+    //                                    +++++++++++++
     // RESULTS
     if (valid) {
       // adds the captchaCheck inside the form
@@ -256,18 +145,15 @@ function validateAndMsg() {
     else {
 
       console.warn("form is not valid")
-      // TODO highlight invalid fields
       cmxClt.uform.submitButton.disabled = false
 
       var errorMessage = ''
+      // TODO highlight invalid fields
       if (missingFields.length) {
          errorMessage += "Please fill the missing fields: " + cmxClt.ulListFromLabelsArray(missingFields, ["red"])
       }
 
       // length is handled by each input's maxlength
-
-      // re change the jobDate from ISO to YYYY/MM/DD
-      if (jobDate.value.length) jobDate.value = jobDate.value.slice(0,10).replace(/-/g,"/")
 
       // display (TODO setTimeout and fade)
       cmxClt.uform.mainMessage.innerHTML = errorMessage
@@ -403,7 +289,7 @@ jobDate.onkeyup = checkJobDateStatus
 jobDate.onchange = checkJobDateStatus
 
 function checkJobDateStatus() {
-  jobLookingDateStatus = (jobBool.value == "No" || validDate.test(jobDate.value))
+  jobLookingDateStatus = (jobBool.value == "No" || cmxClt.uform.validDate.test(jobDate.value))
   if (!jobLookingDateStatus) {
       jobDateMsg.style.color = cmxClt.colorRed
       jobDateMsg.innerHTML = 'Date is not yet in the valid format YYYY/MM/DD'

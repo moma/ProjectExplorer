@@ -215,4 +215,4 @@ def mlog(loglvl, *args):
         print("WARNING: attempt to use mlog before read_config")
 
 
-mlog("DEBUG", "conf\n  "+"\n  ".join(["%s=%s"%(k['var'],REALCONFIG[k['var']]) for k in CONFIGMENU]))
+mlog("INFO", "conf\n  "+"\n  ".join(["%s=%s"%(k['var'],REALCONFIG[k['var']]) for k in CONFIGMENU]))
