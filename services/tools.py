@@ -72,8 +72,8 @@ def read_config():
         print("WARNING: the config file at '%s' seems empty, I will use env or default values" % inipath)
 
     for k in ini.keys():
-        if k not in ['DEFAULT', 'backends', 'main', 'routes']:
-            print("WARNING: ignoring section  '%s'")
+        if k not in ['DEFAULT', 'backends', 'main', 'routes', 'content']:
+            print("WARNING: ignoring section  '%s'" % k)
 
     # read ini file and use 2 fallbacks: env or default
     for citem in CONFIGMENU:
