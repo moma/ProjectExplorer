@@ -340,7 +340,7 @@ def register():
 
                 # clear cache concerning this scholar
                     # TODO class User method !!
-                if uid in UCACHE: UCACHE.pop(uid)
+                if duuid in UCACHE: UCACHE.pop(duuid)
 
                 # E) end connection
                 reg_db.close()
