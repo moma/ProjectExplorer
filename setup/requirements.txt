@@ -1,5 +1,6 @@
 gunicorn
 flask
 flask-login
+requests
 mysqlclient  # provides MySQLdb
 networkx     # POSS could be replaced by faster igraph
