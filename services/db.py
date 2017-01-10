@@ -326,10 +326,13 @@ def get_full_scholar(uid):
     return urow_dict
 
 
-def save_scholar(uid, date, safe_recs, reg_db, uactive = True):
+def save_scholar(uid, date, safe_recs, reg_db, uactive=True, update_flag=False):
     """
-    Useful for new registration:
+    For new registration:
       -> add to *scholars* table
+
+    For profile change (just toggle update_flag to True)
+      -> *update* scholars table
 
     see also COLS variable and doc/table_specifications.md
     """
@@ -346,8 +349,8 @@ def save_scholar(uid, date, safe_recs, reg_db, uactive = True):
     # => But currently bug in MySQLdb for binary values)
     #    (see also MySQLdb.converters)
 
-    # => So for now we buid the values string ourselves in db_qstrvals instead
-    #                           -------------              -----------
+    # => So for now we build the values string ourselves in db_qstrvals instead
+    #                            -------------              -----------
     #    and then we execute(full_statmt)         :-)
 
 
@@ -377,19 +380,33 @@ def save_scholar(uid, date, safe_recs, reg_db, uactive = True):
         db_tgtcols.append('record_status')
         db_qstrvals.append('"active"')
 
-    # expected colnames "(doors_uid, last_modified_date, email, ...)"
-    db_tgtcols_str = ','.join(db_tgtcols)
-
-    # fields converted to sql syntax
-    db_vals_str = ','.join(db_qstrvals)
-
     reg_db_c = reg_db.cursor()
 
-    # full_statement with formated values
-    full_statmt = 'INSERT INTO scholars (%s) VALUES (%s)' % (
-                        db_tgtcols_str,
-                        db_vals_str
-                   )
+    if not update_flag:
+        # expected colnames "(doors_uid, last_modified_date, email, ...)"
+        db_tgtcols_str = ','.join(db_tgtcols)
+
+        # fields converted to sql syntax
+        db_vals_str = ','.join(db_qstrvals)
+
+        # INSERT: full_statement with formated values
+        full_statmt = 'INSERT INTO scholars (%s) VALUES (%s)' % (
+                            db_tgtcols_str,
+                            db_vals_str
+                       )
+    else:
+        # we won't change the ID now
+        db_tgtcols.pop(0)
+        db_qstrvals.pop(0)
+        set_full_str = ','.join([db_tgtcols[i] + '=' + db_qstrvals[i] for i in range(len(db_tgtcols))])
+
+        # UPDATE: full_statement with formated values
+        full_statmt = 'UPDATE scholars SET %s WHERE doors_uid = "%s"' % (
+                            set_full_str,
+                            uid
+        )
+        print(full_statmt)
+
 
     reg_db_c.execute(full_statmt)
     reg_db.commit()
@@ -405,6 +422,16 @@ def save_pairs_sch_kw(pairings_list, comex_db):
         db_cursor.execute('INSERT INTO sch_kw VALUES %s' % str(id_pair))
         comex_db.commit()
         mlog("DEBUG", "Keywords: saved %s pair" % str(id_pair))
+
+
+def delete_pairs_sch_kw(uid, comex_db):
+    """
+    Simply deletes all pairings (uid, *) in the table
+    """
+    db_cursor = comex_db.cursor()
+    n = db_cursor.execute('DELETE FROM sch_kw WHERE uid = "%s"' % uid)
+    comex_db.commit()
+    mlog("DEBUG", "Keywords: DELETED %i pairings for %s" % (n, str(uid)))
 
 
 def get_or_create_keywords(kw_list, comex_db):

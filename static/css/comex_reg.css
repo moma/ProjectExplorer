@@ -2,6 +2,7 @@
 .red   { color:#910 ; }
 .green { color:#161 ; }
 .grey  { color:#554 ; }
+.orange  { color:#F96 ; }
 
 /* not used at present but could be useful for autompleted inputs */
 .autocomp {
@@ -44,6 +45,11 @@
 
 .conditional-q {
   display: none;
+}
+
+input.readonly {
+    font-weight: bold;
+    background-color: #CCC !important;
 }
 
 #cnil_warning {
@@ -143,10 +149,15 @@ h3.formcatfirst {
 
 
 /* the main validation message (a special legend) */
-#main_validation_message {
-  font-size: 200%;
+#main_message {
+  color: white ;
+  font-size: 150%;
   text-align:center;
-  /*color: #554 ;*/
+
+  background-color: #988 ;
+  border-radius: 2em;
+  padding: 1em 3em;
+  margin-bottom: 2em;
 }
 
 
@@ -154,6 +165,8 @@ ul.minilabels {
   padding-top: .5em;
   list-style-type: none;
   font-size: 75% ;
+  text-align: left;
+  margin-left: 32%;
 }
 
 li.minilabel {

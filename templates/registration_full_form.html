@@ -186,7 +186,8 @@
                   <select id="org_type" name="org_type"
                           class="custom-select form-control"
                           onchange="if(this.value=='other'){otherInstDivStyle.display = 'block'} else {otherInstDivStyle.display='none'}">
-                    <option selected value="university">University</option>
+                    <option selected disabled value="">Please select</option>
+                    <option value="university">University</option>
                     <option value="public R&amp;D org">Public sector R&amp;D organization</option>
                     <option value="public other org">Other public sector organization</option>
                     <option value="private org">Private sector organization</option>
@@ -268,7 +269,7 @@
                 <label for="pic_file" class="smlabel input-group-addon">Picture</label>
                 <input type="file" id="pic_file" name="pic_file"
                        accept="image/png,image/jpeg" class="form-control"
-                       onchange="checkShowPic(this)">
+                       onchange="cmxClt.uform.checkShowPic(this)">
               </div>
               <p id="picture_message" class="legend red" style="font-weight:bold"></p>
             </div>
@@ -305,8 +306,7 @@
               <div class="input-group">
                 <label for="job_bool" class="smlabel input-group-addon">Looking for a job?</label>
                 <select id="job_bool" name="job_bool"
-                        class="custom-select form-control"
-                        onchange="if(this.value=='Yes'){jobLookingDivStyle.display = 'block'} else {jobLookingDivStyle.display='none';jobDate.value=''}">
+                        class="custom-select form-control">
                   <option selected value="No" onclick="jobDate.value=''">No</option>
                   <option value="Yes" onclick="jobLookingDivStyle.display = 'block'">Yes</option>
                 </select>
@@ -382,7 +382,7 @@
 
 
               <!-- main validation message -->
-              <p id="main_validation_message" class="legend" style="display:none"></p>
+              <p id="main_message" class="legend" style="display:none"></p>
 
 
               <!-- CAPTCHA & SUBMIT BTN + INFOS-->
@@ -402,7 +402,7 @@
               <!-- button instead of input.submit to validate before real submit action -->
               <!-- also remember stackoverflow.com/a/3315016/2489184 -->
               <button class="btn btn-lg btn-success" style="float:right"
-                      id="formsubmit" type=button disabled
+                      id="form_submit" type=button disabled
                       onclick="if (validateAndMsg(event)) {registerDoorsAndSubmit()}">
                       Submit your form
               </button>

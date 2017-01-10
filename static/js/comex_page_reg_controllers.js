@@ -6,7 +6,6 @@
  *  + prepares DB save into cmxClt.COLS
  *
  * @todo
- *    - harmonize var names (eg 'cmxClt.uauth.email' vs 'initialsInput' are both input elts)
  *    - package.json
  *
  * @version 1
@@ -18,14 +17,11 @@
  */
 
 // initialize form controllers
-cmxClt.uform.initialize("comex_reg_form", testAsYouGo)   // our form is now in cmxClt.uform.theForm
+cmxClt.uform.initialize("comex_reg_form", testAsYouGo)
+// our form is now in cmxClt.uform.theForm
 
 // initialize auth with doors
 cmxClt.uauth.emailIdSupposedToExist = false
-
-var jobLookingDateStatus = false
-
-
 
 // done when anything in the form changes
 function testAsYouGo() {
@@ -33,12 +29,14 @@ function testAsYouGo() {
 
   cmxClt.uauth.earlyValidate()
 
-  checkJobDateStatus()
+  // TODO add uform.testFillField (start checking after 3-4 filled fields)
+
+  cmxClt.uform.checkJobDateStatus()
 
   if (cmxClt.uauth.passStatus
         && cmxClt.uauth.emailStatus
         && cmxClt.uauth.captchaStatus
-        && jobLookingDateStatus) {
+        && cmxClt.uform.jobLookingDateStatus) {
       cmxClt.uform.submitButton.disabled = false
   }
   else {
@@ -50,14 +48,13 @@ function testAsYouGo() {
 
 
 
-
 var regTimestamp = document.getElementById('last_modified_date')
 
 var subPage1Style = document.getElementById('subpage_1').style
 var subPage2Style = document.getElementById('subpage_2').style
+
 var teamCityDivStyle = document.getElementById('team_city_div').style
 var otherInstDivStyle = document.getElementById('other_org_div').style
-var jobLookingDivStyle = document.getElementById('job_looking_div').style
 
 
 function registerDoorsAndSubmit(){
@@ -68,11 +65,11 @@ function registerDoorsAndSubmit(){
     var passValue = cmxClt.uauth.pass1.value
     var wholenameValue = ""
 
-    if (mName.value != "") {
-        wholenameValue = lName.value + ', ' + fName.value + ' ' + mName.value
+    if (cmxClt.uform.mName.value != "") {
+        wholenameValue = cmxClt.uform.lName.value + ', ' + cmxClt.uform.fName.value + ' ' + cmxClt.uform.mName.value
     }
     else {
-        wholenameValue = lName.value + ', ' + fName.value
+        wholenameValue = cmxClt.uform.lName.value + ', ' + cmxClt.uform.fName.value
     }
 
 
@@ -127,12 +124,14 @@ function validateAndMsg() {
     cmxClt.uform.mainMessage.style.display = 'block'
     cmxClt.uform.mainMessage.innerHTML = "Validating the form..."
 
-    var valid = true
-    var missingFields = []
+    // runs field-by-field validation and highlights mandatory missing fields
+    var diagnostic = cmxClt.uform.testFillField(cmxClt.uform.theForm)
+    //                            +++++++++++++
 
-    [valid, missingFields] = cmxClt.uform.testFillField(cmxClt.uform.theForm)
-    //                                    +++++++++++++
     // RESULTS
+    var valid = diagnostic[0]
+    var missingFields = diagnostic[1]
+
     if (valid) {
       // adds the captchaCheck inside the form
       ccModule.uauth.collectCaptcha()
@@ -143,14 +142,11 @@ function validateAndMsg() {
       return true
     }
     else {
-
       console.warn("form is not valid")
       cmxClt.uform.submitButton.disabled = false
 
-      var errorMessage = ''
-      // TODO highlight invalid fields
       if (missingFields.length) {
-         errorMessage += "Please fill the missing fields: " + cmxClt.ulListFromLabelsArray(missingFields, ["red"])
+         errorMessage = cmxClt.ulListFromLabelsArray(missingFields, ["red"], "Please fill the missing fields: ")
       }
 
       // length is handled by each input's maxlength
@@ -160,146 +156,6 @@ function validateAndMsg() {
       return false
     }
 }
-
-
-var fileInput = document.getElementById('pic_file')
-var showPicImg = document.getElementById('show_pic')
-var boxShowPicImg = document.getElementById('box_show_pic')
-var picMsg = document.getElementById('picture_message')
-
-var imgReader = new FileReader();
-
-function checkShowPic() {
-    // TEMPORARY initial size already 200 kB, user has to do it himself
-    var max_size = 204800
-
-    // TODO  max source image size before resizing
-    //       see libs or stackoverflow.com/a/24015367
-    // 4 MB
-
-
-    // always reset style and width/height calculations
-    boxShowPicImg.style.display = 'none'
-    showPicImg.style.display  = ""
-    showPicImg.style.width  = ""
-    showPicImg.style.height = ""
-
-    // var max_size = 4194304
-    if (fileInput.files) {
-        var theFile = fileInput.files[0]
-
-        // debug
-        console.log(theFile.name, "size", theFile.size, theFile.lastModifiedDate)
-
-        if (theFile.size > max_size) {
-          // msg pb
-          picMsg.innerHTML = "The picture is too big (200kB max)!"
-          picMsg.style.color = cmxClt.colorRed
-        }
-        else {
-          // msg ok
-          picMsg.innerHTML = "Picture ok"
-          picMsg.style.color = cmxClt.colorGreen
-
-          // to show the pic when readAsDataURL
-          imgReader.onload = function () {
-              showPicImg.src = imgReader.result;
-
-              // prepare max size while preserving ratio
-              var imgW = window.getComputedStyle(showPicImg).getPropertyValue("width")
-              var imgH = window.getComputedStyle(showPicImg).getPropertyValue("height")
-              console.log("img wid", imgW)
-              console.log("img hei", imgH)
-
-              if (imgW > imgH) {
-                  showPicImg.style.width  = "100%"
-                  showPicImg.style.height  = "auto"
-              }
-              else {
-                  showPicImg.style.width  = "auto"
-                  showPicImg.style.height = "100%"
-              }
-
-              // now reaadjust outer box and show
-              boxShowPicImg.style.display = 'block'
-              // possible re-adjust outerbox ?
-
-            //   showPicImg.style.border = "2px dashed " + cmxClient.colorGrey
-
-          }
-
-          // create fake src url & trigger the onload
-          imgReader.readAsDataURL(theFile);
-        }
-    }
-    else {
-        console.warn("skipping testPictureBlob called w/o picture in fileInput")
-    }
-}
-
-// show middlename button binding
-var mnBtn = document.getElementById('btn-midname')
-mnBtn.onclick= function() {
-  var mnDiv = document.getElementById('group-midname')
-  if (mnDiv.style.display == 'none') {
-    mnDiv.style.display = 'table'
-  }
-  else {
-    mnDiv.style.display = 'none'
-  }
-}
-
-// first, middle & last name ~~~> initials
-var fName = document.getElementById('first_name')
-var mName = document.getElementById('middle_name')
-var lName = document.getElementById('last_name')
-var initialsInput = document.getElementById('initials')
-
-var nameInputs = [fName, mName, lName]
-nameInputs.forEach ( function(nameInput) {
-  nameInput.onchange = function () {
-    var apparentInitials = ""
-      nameInputs.forEach ( function(nameInput) {
-        var txt = nameInput.value
-        if (txt.length) {
-          if(/[A-Z]/.test(txt)) {
-            var capsArr = txt.match(/[A-Z]/g)
-            for (var i in capsArr) {
-              apparentInitials += capsArr[i]
-            }
-          }
-          else {
-            apparentInitials += txt.charAt(0)
-          }
-        }
-      }) ;
-    // update the displayed value
-    initialsInput.value = apparentInitials
-  }
-})
-
-
-
-// jobLookingDateStatus ~~~> is job date a valid date?
-var jobBool = document.getElementById('job_bool')
-var jobDate = document.getElementById('job_looking_date')
-var jobDateMsg = document.getElementById('job_date_message')
-
-jobDate.onkeyup = checkJobDateStatus
-jobDate.onchange = checkJobDateStatus
-
-function checkJobDateStatus() {
-  jobLookingDateStatus = (jobBool.value == "No" || cmxClt.uform.validDate.test(jobDate.value))
-  if (!jobLookingDateStatus) {
-      jobDateMsg.style.color = cmxClt.colorRed
-      jobDateMsg.innerHTML = 'Date is not yet in the valid format YYYY/MM/DD'
-  }
-  else {
-      jobDateMsg.style.color = cmxClt.colorGreen
-      jobDateMsg.innerHTML = 'Ok valid date!'
-  }
-}
-
 
 
 // £TODO move autocomp data to an autocomplete module
@@ -912,14 +768,14 @@ $(function() {
 console.log("reg controllers load OK")
 
 // £DEBUG autofill ----------->8------
-// fName.value = "Jean"
-// lName.value = "Tartampion"
-// initialsInput.value="JPP"
+// cmxClt.uform.fName.value = "Jean"
+// cmxClt.uform.lName.value = "Tartampion"
+// document.getElementById('initials').value="JPP"
 // document.getElementById('country').value = "France"
 // document.getElementById('position').value = "atitle"
 // document.getElementById('keywords').value = "Blabla"
 // document.getElementById('org').value = "CNRS"
-
+//
 // cmxClt.uauth.email.value= cmxClt.makeRandomString(7)+"@om.fr"
 // cmxClt.uauth.pass1.value="123456+789"
 // cmxClt.uauth.pass2.value="123456+789"

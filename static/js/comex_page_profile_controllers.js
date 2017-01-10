@@ -14,22 +14,37 @@
  */
 
 
-
 // initialize form controllers
 cmxClt.uform.initialize("comex_profile_form", completionAsYouGo)
 
-var isProfileComplete = false
-var pleaseCompleteMessage = document.selectById("please_complete")
-
-var missingColumns = []
-
+// main validation function
+// ------------------------
 function completionAsYouGo() {
-    var valid = true
-    var mandatoryMissingFields = []
-    var optionalMissingFields = []
+    cmxClt.uform.mainMessage.style.display = 'block'
+    cmxClt.uform.mainMessage.innerHTML = "Checking the answers..."
 
-    [   valid,
-        mandatoryMissingFields,
-        optionalMissingFields
-    ] = cmxClt.uform.testFillField(cmxClt.uform.theForm)
+    var diagnostic = cmxClt.uform.testFillField(cmxClt.uform.theForm,
+                                                {'fixResidue': true})
+
+    var valid = diagnostic[0]
+    var mandatoryMissingFields = diagnostic[1]
+    var optionalMissingFields = diagnostic[2]
+
+    if (valid) {
+        cmxClt.uform.mainMessage.innerHTML = "<span class='green glyphicon glyphicon-check' style='float:left;'></span>&nbsp;&nbsp;OK we have all the important fields!<br/>"
+    }
+    else {
+        cmxClt.uform.mainMessage.innerHTML = "<span class='red glyphicon glyphicon-warning-sign'></span>&nbsp;&nbsp;Sorry, there are some important missing fields<br/>"
+    }
+
+    // list of missing fields
+    cmxClt.uform.mainMessage.innerHTML += cmxClt.ulListFromLabelsArray(mandatoryMissingFields, ['red']) + cmxClt.ulListFromLabelsArray(optionalMissingFields, ['white'], "You may also want to fill:")
 }
+
+
+
+
+// run first check on existing profile data pre-filled by the template
+completionAsYouGo()
+
+console.log("profile controllers load OK")

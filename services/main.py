@@ -38,7 +38,7 @@ if __package__ == 'services':
     from services.user  import User, login_manager, doors_login, UCACHE
     from services.text  import keywords
     from services.tools import restparse, mlog, re_hash, REALCONFIG
-    from services.db    import connect_db, get_or_create_keywords, save_pairs_sch_kw, get_or_create_affiliation, save_scholar, get_field_aggs
+    from services.db    import connect_db, get_or_create_keywords, save_pairs_sch_kw, delete_pairs_sch_kw, get_or_create_affiliation, save_scholar, get_field_aggs
     from services.db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 else:
     # when this script is run directly
@@ -46,7 +46,7 @@ else:
     from user           import User, login_manager, doors_login, UCACHE
     from text           import keywords
     from tools          import restparse, mlog, re_hash, REALCONFIG
-    from db             import connect_db, get_or_create_keywords, save_pairs_sch_kw, get_or_create_affiliation, save_scholar, get_field_aggs
+    from db             import connect_db, get_or_create_keywords, save_pairs_sch_kw, delete_pairs_sch_kw, get_or_create_affiliation, save_scholar, get_field_aggs
     from db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 
 # ============= read config ============
@@ -194,53 +194,72 @@ def login():
             doors_connect = config['DOORS_HOST']+':'+config['DOORS_PORT']
         )
     elif request.method == 'POST':
-        # TODO check captcha
-        # TODO sanitize
-        email = request.form['email']
-        pwd = request.form['password']
+        # testing the captcha answer
+        captcha_userinput = request.form['my-captcha']
+        captcha_userhash = re_hash(captcha_userinput)
+        captcha_verifhash = int(request.form['my-captchaHash'])
 
-        # we do our doors request here server-side to avoid MiM attack on result
-        uid = doors_login(email, pwd, config)
+        # dbg
+        mlog("DEBUG", "login captcha verif", str(captcha_verifhash))
+        mlog("DEBUG", "login captcha user", str(captcha_userhash))
 
-        if uid:
-
-            login_ok = login_user(User(uid))
-
-            # login_ok = login_user(User(uid), remember=True)
-            #                                  -------------
-            #                           creates REMEMBER_COOKIE_NAME
-            #                       which is itself bound to session cookie
-
-            if login_ok:
-                # normal user
-                return redirect(url_for('profile', _external=True))
-                # POSS "next" request.args (useful when we'll have more pages)
-                #       ---
-
-            else:
-                # user exists in doors but has no comex profile yet
-                #   => TODO
-                #       => we add him
-                #       => status = "fresh_profile"
-                #       => empty profile
-                # return redirect(url_for('fresh_profile', _external=True))
-                return redirect(url_for('register', _external=True))
-
-        else:
-            # user doesn't exist in doors nor comex_db
-            # (shouldn't happen since client-side blocks submit and displays same message, but still possible if user tweaks the js)
+        if captcha_userhash != captcha_verifhash:
+            mlog("WARNING", "pb captcha rejected")
             return render_template(
                 "message.html",
                 message = """
-                    We're sorry but you don't exist in our database yet!
+                    We're sorry the "captcha" information you entered was wrong!
                     <br/>
-                    However you can easily <strong><a href="%s">register here</a></strong>.
-                    """ % url_for('register', _external=True)
-            )
+                    <strong><a href="%s">Retry login here</a></strong>.
+                    """ % url_for('login', _external=True)
+                )
+        else:
+            # OK captcha accepted
+            email = request.form['email']
+            pwd = request.form['password']
+
+            # we do our doors request here server-side to avoid MiM attack on result
+            uid = doors_login(email, pwd, config)
+
+            if uid:
+                login_ok = login_user(User(uid))
+
+                # TODO check cookie
+                # login_ok = login_user(User(uid), remember=True)
+                #                                  -------------
+                #                           creates REMEMBER_COOKIE_NAME
+                #                       which is itself bound to session cookie
+
+                if login_ok:
+                    # normal user
+                    return redirect(url_for('profile', _external=True))
+                    # POSS "next" request.args (useful when we'll have more pages)
+                    #       ---
+
+                else:
+                    # user exists in doors but has no comex profile yet
+                    #   => TODO
+                    #       => we add him
+                    #       => status = "fresh_profile"
+                    #       => empty profile
+                    # return redirect(url_for('fresh_profile', _external=True))
+                    return redirect(url_for('register', _external=True))
+
+            else:
+                # user doesn't exist in doors nor comex_db
+                # (shouldn't happen since client-side blocks submit and displays same message, but still possible if user tweaks the js)
+                return render_template(
+                    "message.html",
+                    message = """
+                        We're sorry but you don't exist in our database yet!
+                        <br/>
+                        However you can easily <strong><a href="%s">register here</a></strong>.
+                        """ % url_for('register', _external=True)
+                )
 
 
 # /services/user/profile/
-@app.route(config['PREFIX'] + config['USR_ROUTE'] + '/profile/', methods=['GET'])
+@app.route(config['PREFIX'] + config['USR_ROUTE'] + '/profile/', methods=['GET', 'POST'])
 @fresh_login_required
 def profile():
     """
@@ -248,28 +267,54 @@ def profile():
 
     @login_required uses flask_login to relay User object current_user
     """
+    if request.method == 'GET':
+        # login provides us current_user
+        if current_user.empty:
+            mlog("INFO",  "PROFILE: empty current_user %s" % current_user.uid)
+        else:
+            mlog("INFO",  "PROFILE: current_user %s\n  -" % current_user.uid
+                           + '\n  -'.join([current_user.info['email'],
+                                           current_user.info['initials'],
+                                       str(current_user.info['keywords']),
+                                           current_user.info['country']]
+                                          )
+                )
 
-    # login provides us current_user
-    if current_user.empty:
-        mlog("INFO",  "PROFILE: empty current_user %s" % current_user.uid)
-    else:
-        mlog("INFO",  "PROFILE: current_user %s\n  -" % current_user.uid
-                       + '\n  -'.join([current_user.info['email'],
-                                       current_user.info['initials'],
-                                   str(current_user.info['keywords']),
-                                       current_user.info['country']]
-                                      )
-            )
+        # debug session cookies
+        # print("[k for k in session.keys()]",[k for k in session.keys()])
+        mlog("DEBUG", "PROFILE view with flag session.new = ", session.new)
 
-    # debug session cookies
-    # print("[k for k in session.keys()]",[k for k in session.keys()])
-    mlog("DEBUG", "PROFILE view with flag session.new = ", session.new)
+        return render_template(
+            "profile.html",
 
-    return render_template(
-        "profile.html"
-        # NB we also got user info in {{current_user.info}}
-        #                         and {{current_user.json_info}}
-    )
+            # doors info only for link
+            doors_connect=config['DOORS_HOST']+':'+config['DOORS_PORT']
+
+            # NB we also got user info in {{current_user.info}}
+            #                         and {{current_user.json_info}}
+        )
+    elif request.method == 'POST':
+        try:
+            save_form(
+                      request.form,
+                      request.files if hasattr(request, "files") else {},
+                      update_flag = True
+                     )
+
+        except Exception as perr:
+            return render_template("thank_you.html",
+                                    form_accepted = False,
+                                    backend_error = True,
+                                    message = ("ERROR ("+str(perr.__doc__)+"):<br/>"
+                                                + ("<br/>".join(format_tb(perr.__traceback__)+[repr(perr)]))
+                                                )
+                                   )
+
+        return render_template("thank_you.html",
+                                debug_records = (clean_records if app.config['DEBUG'] else {}),
+                                form_accepted = True,
+                                backend_error = False,
+                                message = "")
 
 
 # /services/user/register/
@@ -305,49 +350,14 @@ def register():
             mlog("INFO", "ok form accepted")
             form_accepted = True
 
-            # only safe values
-            clean_records = {}
-            kw_array = []
-
-            # 1) handles all the inputs from form, no matter what target table
-            (duuid, rdate, kw_array, clean_records) = read_record(request.form)
-
-            # 2) handles the pic_file if present
-            if hasattr(request, "files") and 'pic_file' in request.files:
-                # type: werkzeug.datastructures.FileStorage.stream
-                pic_blob = request.files['pic_file'].stream.read()
-                if len(pic_blob) != 0:
-                    clean_records['pic_file'] = pic_blob
-
-            # 3) save to DB
             try:
-                # A) a new DB connection
-                reg_db = connect_db(config)
-
-                # B) read/fill the affiliation table to get associated id
-                clean_records['affiliation_id'] = get_or_create_affiliation(clean_records, reg_db)
-
-                # C) create record into the primary user table
-                # ---------------------------------------------
-                    # TODO class User method !!
-                save_scholar(duuid, rdate, clean_records, reg_db)
-
-                # D) read/fill each keyword and save the (uid <=> kwid) pairings
-                kwids = get_or_create_keywords(kw_array, reg_db)
-
-                    # TODO class User method !!
-                save_pairs_sch_kw([(duuid, kwid) for kwid in kwids], reg_db)
-
-                # clear cache concerning this scholar
-                    # TODO class User method !!
-                if duuid in UCACHE: UCACHE.pop(duuid)
-
-                # E) end connection
-                reg_db.close()
+                clean_records = save_form(
+                                          request.form,
+                                          request.files if hasattr(request, "files") else {}
+                                         )
 
             except Exception as perr:
                 return render_template("thank_you.html",
-                                        debug_records = clean_records,
                                         form_accepted = False,
                                         backend_error = True,
                                         message = ("ERROR ("+str(perr.__doc__)+"):<br/>"
@@ -363,6 +373,55 @@ def register():
 
 
 ########### SUBS ###########
+def save_form(request_form, request_files, update_flag=False):
+    """
+    wrapper function for save profile/register form actions
+    """
+    # only safe values
+    clean_records = {}
+    kw_array = []
+
+    # 1) handles all the inputs from form, no matter what target table
+    (duuid, rdate, kw_array, clean_records) = read_record(request_form)
+
+    # 2) handles the pic_file if present
+    if 'pic_file' in request_files:
+        # type: werkzeug.datastructures.FileStorage.stream
+        pic_blob = request_files['pic_file'].stream.read()
+        if len(pic_blob) != 0:
+            clean_records['pic_file'] = pic_blob
+
+    # 3) save to DB
+    # A) a new DB connection
+    reg_db = connect_db(config)
+
+    # B) read/fill the affiliation table to get associated id
+    clean_records['affiliation_id'] = get_or_create_affiliation(clean_records, reg_db)
+
+    # C) create record into the primary user table
+    # ---------------------------------------------
+        # TODO class User method !!
+    save_scholar(duuid, rdate, clean_records, reg_db, update_flag=update_flag)
+
+    # D) read/fill each keyword and save the (uid <=> kwid) pairings
+    kwids = get_or_create_keywords(kw_array, reg_db)
+
+        # TODO class User method !!
+        # POSS selective delete ?
+    if update_flag:
+        delete_pairs_sch_kw(duuid, reg_db)
+
+    save_pairs_sch_kw([(duuid, kwid) for kwid in kwids], reg_db)
+
+    # clear cache concerning this scholar
+        # TODO class User method !!
+    if duuid in UCACHE: UCACHE.pop(duuid)
+
+    # E) end connection
+    reg_db.close()
+
+    return clean_records
+
 
 def read_record(incoming_data):
     """

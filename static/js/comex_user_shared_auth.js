@@ -96,7 +96,7 @@ cmxClt = (function(ccModule) {
 
           // tests if email is well-formed
           // TODO: better extension and allowed chars set
-          var emailFormatOk = /^[-A-z0-9_=.+]+@[-A-z0-9_=.+]+\.[-A-z0-9_=.+]{1,4}$/.test(emailValue)
+          var emailFormatOk = /^[-A-z0-9_=.+]+@[-A-z0-9_=.+]+\.[-A-z0-9_=.+]{2,4}$/.test(emailValue)
 
           if (! emailFormatOk) {
               // restore original lack of message
@@ -149,7 +149,7 @@ cmxClt = (function(ccModule) {
                           ccModule.uauth.doorsMessage.style.color = ccModule.colorGreen
 
                           // label
-                          ccModule.uauth.emailLbl.style.color = ccModule.colorGreen
+                          ccModule.uauth.emailLbl.style.backgroundColor = ""
                       }
                       else {
                           var errMsg = expectExists ? "your ID isn't recognized" : "this ID is already taken"
@@ -165,7 +165,7 @@ cmxClt = (function(ccModule) {
                           ccModule.uauth.doorsMessage.style.color = ccModule.colorRed
 
                           // label
-                          ccModule.uauth.emailLbl.style.backgroundColor = ccModule.colorRed
+                          ccModule.uauth.emailLbl.style.backgroundColor = ccModule.colorOrange
                       }
 
                       // to debounce re-invocations

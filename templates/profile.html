@@ -18,27 +18,15 @@
         <div id="intro">
             <h2 class="oldstyle">Your Profile Info</h2>
                 <p class="mini-hero">
-                    {% if current_user.is_authenticated %}
-                        Welcome to your <strong>Community explorer</strong> profile,
-                        {% if current_user.info.hon_title is not none %}
-                            {{ current_user.info.hon_title }}
-                        {% endif %}
-                        {{ current_user.info.last_name }}!
-                    {% endif %}
-                </p>
-        </div>
-
-        <!-- FORM COMPLETING INTRO TEXT -->
-        <div id="intro">
-          <h2 id="please_complete" class="oldstyle">Please complete your profile</h2>
-              <p class="mini-hero">
-                  Take the time to complete your <strong>Community Explorer</strong> profile to generate better maps of your own socio-semantic network .
+                    Welcome to your profile page,
+                    <strong>
+                      {% if current_user.info.hon_title is not none %}
+                          {{ current_user.info.hon_title }}
+                      {% endif %}
+                      {{ current_user.info.last_name }}
+                  </strong> !
                   <br/>
-                  <br/>
-                  The <strong>keywords</strong>, <strong>affiliations</strong> and <strong>hashtags</strong> will all count as similarities to identify network neighbours.
-                  <br/>
-                  <br/>
-                  The <strong>home page (url)</strong>, <strong>picture (url or file)</strong> and <strong>free description</strong> will allow your neighbours to know you a little better.
+                  Take the time to complete it to generate better maps of your socio-semantic network .
               </p>
         </div>
 
@@ -47,6 +35,21 @@
               method="post" onsubmit="console.info('submitted')">
 
         <!-- todo onsubmit also save to cache -->
+
+        <!-- EMAIL & PASSWORD -->
+        <h3 class="formcat"> Login infos </h3>
+        <p class="mini-hero">
+            This email is your main ID. You may only change it via the <a href="http://{{ doors_connect }}/">Doors portal</a>.
+        </p>
+
+          <!-- readonly version for current profile -->
+          <div class="question input-group">
+            <label for="email" class="smlabel input-group-addon">* Email</label>
+            <input id="email" name="email" maxlength="255" readonly
+                   type="text" class="form-control readonly" placeholder="email"
+                   value="{{ current_user.info.email }}">
+          </div>
+
 
           <!-- NAME & COUNTRY -->
           <h3 class="formcatfirst"> Basic infos </h3>
@@ -107,32 +110,12 @@
                    value="{{ current_user.info.country }}">
           </div>
 
-          <!-- EMAIL & PASSWORD -->
-          <h3 class="formcat"> Login infos </h3>
-
-          <div class="question">
-            <p class="legend">Your email will also be your login for the ISC services.</p>
-            <div class="input-group">
-              <!-- email validation onblur/onchange is done by cmxClt.uauth in comex_user_shared_auth.js -->
-              <label for="email" class="smlabel input-group-addon">* Email</label>
-              <input id="email" name="email" maxlength="255"
-                     type="text" class="form-control" placeholder="email"
-                     value="{{ current_user.info.email }}">
-
-              <!-- doors return value icon -->
-              <div id="doors_ret_icon_msg" class="input-group-addon"
-                   title="The email will be checked in our DB after you type and leave the box.">
-                <span id="doors_ret_icon"
-                      class="glyphicon glyphicon-question-sign grey"
-                      ></span>
-              </div>
-            </div>
-            <!-- doors return value message -->
-            <p id="doors_ret_message" class="legend"></p>
-          </div>
-
-          <!-- JOB & INTERESTS -->
+          <!-- JOB, INTERESTS AND ORGANIZATION -->
           <h3 class="formcat"> About your job and research </h3>
+
+          <p class="mini-hero">
+              The <strong>keywords</strong> and <strong>affiliation</strong> will count as similarities to identify your network neighbours.
+          </p>
 
           <div class="question input-group">
             <label for="hon_title" class="smlabel input-group-addon"> Title </label>
@@ -159,9 +142,6 @@
             </div>
             <p class="legend">Please enter at least 5 comma-separated keywords</p>
           </div>
-
-          <!-- ORGANIZATION -->
-          <h3 class="formcat"> About your current organization </h3>
 
           <div class="question">
             <div class="input-group">
@@ -222,6 +202,11 @@
 
         <!-- OTHER PERSONAL INFO -->
         <h3 class="formcatfirst"> Complementary information </h3>
+
+        <p class="mini-hero">
+            The <strong>home page (url)</strong>, <strong>picture (url or file)</strong> and <strong>free description</strong> will allow your neighbours to know you a little better.
+            Also, our <strong>interest groups</strong> are each linked to an ISCPIF mailing list that you can subscribe to.
+        </p>
 
         <div class="question">
           <div class="input-group">
@@ -321,8 +306,43 @@
           </div>
         </div>
 
-        <!-- CNIL WARNING -->
+          <!-- hidden input for modification date -->
+          <input id="last_modified_date" name="last_modified_date" type="text" hidden>
+          </input>
 
+          <!-- hidden input for doors user id -->
+          <input id="doors_uid" name="doors_uid" type="text" hidden
+                 value="{{ current_user.uid | safe }}">
+          </input>
+
+
+          <p> TEST UID {{ current_user.uid | safe }} </p>
+
+          <div class="row spacerrow">&nbsp;</div>
+
+          <!-- main validation message -->
+          <p id="main_message" class="cartouche legend" style="display:none"></p>
+
+          <!-- == S U B M I T == -->
+          <div style="text-align:center">
+            <!-- no @type => implicit @type=submit -->
+            <button class="btn btn-lg btn-success" id="form_submit">
+                  Save profile
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+      <div class="spacer col-sm-2 col-md-2">&nbsp;</div>
+    </div>
+
+    <!-- CNIL WARNING -->
+    <div class="row spacerrow">&nbsp;</div>
+    <div class="row spacerrow">&nbsp;</div>
+    <div class="row">
+      <div class="spacer col-sm-1 col-md-1">&nbsp;</div>
+      <div class="col-sm-8 col-md-8">
         <h3 class="formcat"> About your data </h3>
         <div class="cartouche" id="cnil_warning">
           <p>Les informations recueillies à partir de ce formulaire font l’objet d’un traitement
@@ -348,34 +368,6 @@
             consultez vos droits sur le site de la CNIL</a>.
           </p>
         </div>
-
-          <!-- hidden input for modification date -->
-          <input id="last_modified_date" name="last_modified_date" type="text" hidden>
-          </input>
-
-          <!-- hidden input for doors user id -->
-          <input id="doors_uid" name="doors_uid" type="text" hidden>
-          </input>
-
-
-          <div class="row spacerrow">&nbsp;</div>
-
-
-          <!-- main validation message -->
-          <p id="main_validation_message" class="legend" style="display:none"></p>
-
-
-          <!-- == S U B M I T == -->
-          <h3 class="formcat">Save profile</h3>
-
-          <!-- button instead of input.submit to validate before real submit action -->
-          <button class="btn btn-lg btn-success" style="float:right"
-                  id="formsubmit" type=button
-                  onclick="if (validateAndMsg(event)) {registerDoorsAndSubmit()}">
-                  Save profile
-          </button>
-
-        </form>
       </div>
       <div class="spacer col-sm-2 col-md-2">&nbsp;</div>
     </div>
