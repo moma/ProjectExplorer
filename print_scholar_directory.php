@@ -103,7 +103,8 @@ if ($login) {
             AS second_level
             ON sch_kw.kwid = second_level.kwid
         WHERE sch_kw.uid = "{$login}"
-            AND second_level.uid != sch_kw.uid
+            -- (uncomment if ego not self-neighboor)
+            -- AND second_level.uid != sch_kw.uid
         GROUP BY second_level.uid ;
 HERE_QUERY;
 
