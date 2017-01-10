@@ -405,12 +405,11 @@ def save_scholar(uid, date, safe_recs, reg_db, uactive=True, update_flag=False):
                             set_full_str,
                             uid
         )
-        print(full_statmt)
 
+    mlog("DEBUG", "UPDATE" if update_flag else "INSERT",  "SQL statement:", full_statmt)
 
     reg_db_c.execute(full_statmt)
     reg_db.commit()
-
 
 
 def save_pairs_sch_kw(pairings_list, comex_db):

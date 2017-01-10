@@ -136,10 +136,9 @@ def services():
     return redirect(url_for('login', _external=True))
 
 # /services/test
-@app.route(config['PREFIX'] + '/test', methods=['GET'])
-def test_stuff():
-    print(UCACHE)
-    return render_template("message.html", message="UCACHE="+sub('<|&|>','::',repr(UCACHE)))
+# @app.route(config['PREFIX'] + '/test', methods=['GET'])
+# def test_stuff():
+#     return render_template("message.html", message="UCACHE="+sub('<|&|>','::',repr(UCACHE)))
 
 # /services/api/aggs
 @app.route(config['PREFIX'] + config['API_ROUTE'] + '/aggs')

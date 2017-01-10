@@ -40,7 +40,7 @@ def load_user(uid):
             UCACHE[uid] = u
             mlog("DEBUG", "load_user: user re-loaded from DB")
         except Exception as err:
-            print("User(%s) init error:" % str(uid), err)
+            mlog("ERROR", "User(%s) init error:" % str(uid), err)
     return u
 
 
