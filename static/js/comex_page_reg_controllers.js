@@ -42,13 +42,9 @@ function testAsYouGo() {
   else {
       cmxClt.uform.submitButton.disabled = true
   }
-  var now = new Date()
-  regTimestamp.value = now.toISOString()
+  // stamp => #last_modified_date
+  cmxClt.uform.stampTime()
 }
-
-
-
-var regTimestamp = document.getElementById('last_modified_date')
 
 var subPage1Style = document.getElementById('subpage_1').style
 var subPage2Style = document.getElementById('subpage_2').style

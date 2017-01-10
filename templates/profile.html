@@ -377,14 +377,14 @@
 <!-- ======================================================================= -->
 
 {% block last_imports %}
-    <!--  our js  -->
-    <script src="{{ url_for('static', filename='js/comex_user_shared.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/comex_page_profile_controllers.js') }}"></script>
-
     <script type="text/javascript">
         //               ---------
         // a copy of the user info in json
         //               ---------
         var uinfo = {{current_user.json_info|safe}};
     </script>
+
+    <!--  our js  -->
+    <script src="{{ url_for('static', filename='js/comex_user_shared.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/comex_page_profile_controllers.js') }}"></script>
 {% endblock %}

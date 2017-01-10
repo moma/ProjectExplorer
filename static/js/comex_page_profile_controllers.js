@@ -13,6 +13,21 @@
  * NB The uinfo variable should be set to template's user.json_info value.
  */
 
+// first menu setup from DB values
+function selectSavedMenus(uinfo) {
+    for (var i in cmxClt.COLS) {
+        var colType = cmxClt.COLS[i][3]
+        // m <=> menu
+        if (colType == 'm') {
+            var colName = cmxClt.COLS[i][0]
+            var chosenV = uinfo[colName]
+            var selectElt = document.getElementById(colName)
+            selectElt.selectedIndex = selectElt.querySelector(`option[value="${chosenV}"]`).index
+        }
+    }
+}
+
+selectSavedMenus(uinfo)
 
 // initialize form controllers
 cmxClt.uform.initialize("comex_profile_form", completionAsYouGo)
@@ -39,12 +54,17 @@ function completionAsYouGo() {
 
     // list of missing fields
     cmxClt.uform.mainMessage.innerHTML += cmxClt.ulListFromLabelsArray(mandatoryMissingFields, ['red']) + cmxClt.ulListFromLabelsArray(optionalMissingFields, ['white'], "You may also want to fill:")
+
+    // stamp => #last_modified_date
+    cmxClt.uform.stampTime()
+    console.log("timestamp", cmxClt.uform.timestamp.value)
 }
-
-
-
 
 // run first check on existing profile data pre-filled by the template
 completionAsYouGo()
+
+// 2 exposed vars for inline js controls
+var teamCityDivStyle = document.getElementById('team_city_div').style
+var otherInstDivStyle = document.getElementById('other_org_div').style
 
 console.log("profile controllers load OK")

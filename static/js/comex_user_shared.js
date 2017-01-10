@@ -110,8 +110,10 @@ var cmxClt = (function() {
 
     ccModule.uform.initialize
     ccModule.uform.testFillField
+    ccModule.uform.stampTime
     ccModule.uform.mainMessage = document.getElementById('main_message')
     ccModule.uform.submitButton = document.getElementById('form_submit')
+    ccModule.uform.timestamp = document.getElementById('last_modified_date')
 
     // dates up to 2049/12/31
     ccModule.uform.validDate = new RegExp( /^20[0-4][0-9]\/(?:0?[1-9]|1[0-2])\/(?:0?[1-9]|[1-2][0-9]|3[0-1])$/)
@@ -159,10 +161,30 @@ var cmxClt = (function() {
           var fieldGroup = ccModule.COLS[i][2]
           var fieldType = ccModule.COLS[i][3]
 
+          var actualValue = wholeFormData.get(fieldName)
+
+          // python residue ~~~> can correct on the fly
+          // --------------
+          // POSS better strategy ?
+          if (params.fixResidue) {
+            // "None" as a string
+            if (actualValue == "None") {
+                actualValue = null
+                document.getElementById(fieldName).value = ""
+            }
+            // arrays of text
+            if (fieldType == "at" && actualValue
+                  && actualValue.charAt(0) == '['
+                  && actualValue.charAt(1) == "'") {
+                actualValue = actualValue.replace(/[\[\]']/g,'')
+                document.getElementById(fieldName).value = actualValue
+            }
+          }
+
+          // filled/not filled validation
+          // ----------------------------
           // skip non-plsfill elements
           if (fieldGroup != 'plsfill') continue ;
-
-          var actualValue = wholeFormData.get(fieldName)
 
           // get a human-readable label
           var labelElt = document.querySelector('label[for='+fieldName+']')
@@ -171,23 +193,6 @@ var cmxClt = (function() {
           // alternative null values
           if (actualValue == "") {
               actualValue = null
-          }
-
-          // python residue ~~~> can correct on the fly
-          // POSS better strategy ?
-          if (params.fixResidue) {
-              // "None" as a string
-              if (actualValue == "None") {
-                  actualValue = null
-                  document.getElementById(fieldName).value = ""
-              }
-              // arrays of text
-              if (fieldType == "at" && actualValue
-                    && actualValue.charAt(0) == '['
-                    && actualValue.charAt(1) == "'") {
-                  actualValue = actualValue.replace(/[\[\]']/g,'')
-                  document.getElementById(fieldName).value = actualValue
-              }
           }
 
           // debug
@@ -226,6 +231,12 @@ var cmxClt = (function() {
                   otherMissingFields         ]
     }
 
+    // simple timestamp on #last_modified_date element
+    //                      ------------------
+    ccModule.uform.stampTime = function () {
+        var now = new Date()
+        ccModule.uform.timestamp.value = now.toISOString()
+    }
 
     // ===================================================================
     // additional controllers for detailed forms like /register, /profile
