@@ -284,8 +284,8 @@ def login():
                         if safe_flag:
                             # if relative
                             if next_url[0] == '/':
-                                next_url = url_for('rootstub', _external=True) + next_url
-                                mlog("INFO", "reabsoluted next_url:", next_url[1:])
+                                next_url = url_for('rootstub', _external=True) + next_url[1:]
+                                mlog("DEBUG", "reabsoluted next_url:", next_url)
 
                             return(redirect(next_url))
                         else:
