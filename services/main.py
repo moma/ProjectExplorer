@@ -61,6 +61,9 @@ app = Flask("services",
              static_folder=path.join(config['HOME'],"static"),
              template_folder=path.join(config['HOME'],"templates"))
 
+if not app.config['SERVER_NAME']:
+    app.config['SERVER_NAME'] = "localhost"
+
 app.config['DEBUG'] = (config['LOG_LEVEL'] == "DEBUG")
 app.config['SECRET_KEY'] = 'TODO fill secret key for sessions for login'
 
@@ -153,7 +156,7 @@ def rootstub():
     """
     pass
 
-# /services/index/
+# /services/demo/
 @app.route(config['PREFIX']+'/demo/')
 def demo():
     """
@@ -165,7 +168,6 @@ def demo():
                             # current_user=current_user
                           )
 
-
 # /services/
 @app.route(config['PREFIX']+'/')
 def services():
@@ -174,7 +176,17 @@ def services():
 # /services/test
 @app.route(config['PREFIX'] + '/test', methods=['GET'])
 def test_stuff():
-    return render_template("message.html", message=url_for('rootstub', _external=True))
+    return render_template("message.html",
+                           message = "<br/>".join([
+                               "dir(req)"        +  str(dir(request)),
+                               "requrl:"        +  request.url,
+                               "req.host:"      +  request.host,
+                               "req.url_root:"   +  request.url_root,
+                               "req.base_url:"    +  request.base_url,
+                               "req.full_path:"    +  request.full_path,
+                               "req.access_route:" + str(request.access_route)
+                               ])
+                           )
 
 # /services/api/aggs
 @app.route(config['PREFIX'] + config['API_ROUTE'] + '/aggs')
@@ -268,6 +280,8 @@ def login():
                     next_url = request.args.get('next', None)
 
                     if next_url:
+                        print("next_url", next_url)
+                        print("app.config.servername", app.config['SERVER_NAME'])
                         safe_flag = is_safe_url(next_url, request.host_url)
                         if safe_flag:
                             # normal next_url
@@ -275,7 +289,7 @@ def login():
                         else:
                             # server name is different than ours
                             # in next_url so we won't go there
-                            return(redirect(url_for('rootstub', _external=True)))
+                            return(redirect('/'))
                     else:
                         # no specified next_url => profile
                         return redirect(url_for('profile', _external=True))
@@ -306,7 +320,7 @@ def login():
 @app.route(config['PREFIX'] + config['USR_ROUTE'] + '/logout/')
 def logout():
     logout_user()
-    return redirect(url_for('rootstub', _external=True))
+    return redirect(url_for('demo', _external=True))
 
 
 # /services/user/profile/

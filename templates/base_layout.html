@@ -45,15 +45,43 @@
 
 
 <body>
-  <div class="topbar" style="opacity: 0.93;">
+  <div class="topbar" style="opacity: 0.9;">
       <div class="topbar-inner">
           <div class="container-fluid">
-              <a class="brand" href="http://www.iscpif.fr">
-                <span class="glyphicon glyphicon-home white"></i></a>
-              <ul class="white nav navbar-nav">
+              <ul class="white nav navbar-nav navbar-left">
                   <li>
-                      <a id="mainpagelink" href="/"> <strong>Complex systems community explorer</strong></a>
+                      <a class="brand" href="https://iscpif.fr/">
+                        <img height="25px" src="{{ url_for('static', filename='img/logo_m_bleu-header.png') }}"</a>
                   </li>
+                  <li>
+                      <a class="brand" href="/">
+                        <span class="glyphicon glyphicon-home white"></span>&nbsp;&nbsp;
+                        Community Explorer
+                      </a>
+                  </li>
+              </ul>
+              <ul class="white nav navbar-nav navbar-right">
+                  {% if current_user and current_user.info %}
+                      <li>
+                          <a class="navlink" href="/services/user/profile"> Your Profile </a>
+                      </li>
+                      <li>
+                          <a class="navlink" href='/explorerjs.html?type="uid"&nodeidparam="{{ current_user.uid }}"'> Your Map </a>
+                      </li>
+                      <li>
+                          <a class="navlink" href='/print_scholar_directory.php?query={{ current_user.uid }}'> Your Neighboor Stats </a>
+                      </li>
+                      <li>
+                          <a class="navlink" href='/services/user/logout/'> Logout </a>
+                      </li>
+                  {% else %}
+                      <li>
+                          <a class="navlink" href="/services/user/register"> Register </a>
+                      </li>
+                      <li>
+                          <a class="navlink" href="/services/user/login"> Login </a>
+                      </li>
+                  {% endif %}
               </ul>
           </div>
       </div>

@@ -73,7 +73,14 @@ input.readonly {
   color: #554 ;
 }
 
-#mainpagelink:hover {
+
+.navlink {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin: .2em 0 0 .4em;
+}
+
+.navlink:hover {
   background-color: transparent !important;
 }
 
