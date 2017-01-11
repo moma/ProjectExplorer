@@ -29,7 +29,7 @@ from re           import sub
 from os           import path
 from json         import dumps
 from datetime     import timedelta
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urlparse, urljoin, unquote
 from traceback    import format_tb
 from flask        import Flask, render_template, request, \
                          redirect, url_for, session
@@ -60,9 +60,6 @@ config = REALCONFIG
 app = Flask("services",
              static_folder=path.join(config['HOME'],"static"),
              template_folder=path.join(config['HOME'],"templates"))
-
-if not app.config['SERVER_NAME']:
-    app.config['SERVER_NAME'] = "localhost"
 
 app.config['DEBUG'] = (config['LOG_LEVEL'] == "DEBUG")
 app.config['SECRET_KEY'] = 'TODO fill secret key for sessions for login'
@@ -280,16 +277,21 @@ def login():
                     next_url = request.args.get('next', None)
 
                     if next_url:
-                        print("next_url", next_url)
-                        print("app.config.servername", app.config['SERVER_NAME'])
+                        next_url = unquote(next_url)
+                        mlog("DEBUG", "login with next_url:", next_url)
                         safe_flag = is_safe_url(next_url, request.host_url)
+                        # normal next_url
                         if safe_flag:
-                            # normal next_url
+                            # if relative
+                            if next_url[0] == '/':
+                                next_url = url_for('rootstub', _external=True) + next_url
+                                mlog("INFO", "reabsoluted next_url:", next_url[1:])
+
                             return(redirect(next_url))
                         else:
                             # server name is different than ours
                             # in next_url so we won't go there
-                            return(redirect('/'))
+                            return(redirect(url_for('rootstub', _external=True)))
                     else:
                         # no specified next_url => profile
                         return redirect(url_for('profile', _external=True))
