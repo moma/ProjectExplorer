@@ -11,7 +11,6 @@ from os           import environ, path
 from urllib.parse import unquote
 from ctypes       import c_int32
 
-
 # ========================== FILL REALCONFIG ===================================
 
 # the main config dict (filled and exposed by this module only)

@@ -4,6 +4,17 @@
 .grey  { color:#554 ; }
 .orange  { color:#F96 ; }
 
+
+
+
+/* classic look */
+body {
+  margin: 0;
+  font-family: Calibri, "Helvetica Neue", Helvetica, sans-serif;
+  color: #333;
+  background-color:   #fff;
+}
+
 /* not used at present but could be useful for autompleted inputs */
 .autocomp {
 }
@@ -16,15 +27,16 @@
 /* for intro text */
 .mini-hero {
   margin-top: 1.5em;
-  font-size: 18px;
+  font-size: 24px;
   line-height: 27px;
+  font-family: Calibri, "Helvetica Neue", Helvetica, "Droid Sans", sans-serif;
 }
 
 
 /* a "subpage" container */
 .subpage {
   width: 100%;
-  max-width: 55em;
+  max-width: 65em;
   display: none ;  /*switching page <=> displaying it */
 }
 
@@ -41,6 +53,7 @@
 .question {
   padding: 0 1em;
   margin-bottom: 2em;
+  max-width: 52em;
 }
 
 .conditional-q {

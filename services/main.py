@@ -19,18 +19,23 @@ Context:
 """
 __author__    = "CNRS"
 __copyright__ = "Copyright 2016 ISCPIF-CNRS"
-__version__   = "1.4"
+__version__   = "1.5"
 __email__     = "romain.loth@iscpif.fr"
 __status__    = "Dev"
 
-from flask       import Flask, render_template, request, \
-                        redirect, url_for, session
-from flask_login import fresh_login_required, current_user, login_user
-from re          import sub
-from os          import path
-from traceback   import format_tb
-from json        import dumps
-from datetime    import timedelta
+
+# ============== imports ==============
+from re           import sub
+from os           import path
+from json         import dumps
+from datetime     import timedelta
+from urllib.parse import urlparse, urljoin
+from traceback    import format_tb
+from flask        import Flask, render_template, request, \
+                         redirect, url_for, session
+from flask_login  import fresh_login_required, login_required, \
+                         current_user, login_user, logout_user
+
 
 if __package__ == 'services':
     # when we're run via import
@@ -49,10 +54,9 @@ else:
     from db             import connect_db, get_or_create_keywords, save_pairs_sch_kw, delete_pairs_sch_kw, get_or_create_affiliation, save_scholar, get_field_aggs
     from db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 
-# ============= read config ============
+# ============= app creation ============
 config = REALCONFIG
 
-# ============= app creation ============
 app = Flask("services",
              static_folder=path.join(config['HOME'],"static"),
              template_folder=path.join(config['HOME'],"templates"))
@@ -60,10 +64,14 @@ app = Flask("services",
 app.config['DEBUG'] = (config['LOG_LEVEL'] == "DEBUG")
 app.config['SECRET_KEY'] = 'TODO fill secret key for sessions for login'
 
+# for SSL
+app.config['PREFERRED_URL_SCHEME'] = 'https'
+
 # for flask_login
-app.config['REMEMBER_COOKIE_DURATION'] = timedelta(seconds=15)
-app.config['REMEMBER_COOKIE_NAME'] = 'supercookie'
-app.config['MY_VAR'] = 'incredible it works'
+cookie_timer = timedelta(hours=2)
+app.config['PERMANENT_SESSION_LIFETIME'] = cookie_timer
+app.config['REMEMBER_COOKIE_DURATION'] = cookie_timer
+app.config['REMEMBER_COOKIE_NAME'] = 'communityexplorer.org cookie'
 
 login_manager.login_view = "login"
 login_manager.session_protection = "strong"
@@ -111,7 +119,6 @@ SOURCE_FIELDS = [
 # mandatory minimum of keywords # TODO use
 MIN_KW = 5
 
-
 # ============= views =============
 
 # -----------------------------------------------------------------------
@@ -120,6 +127,12 @@ MIN_KW = 5
 
 @login_manager.unauthorized_handler
 def unauthorized():
+    """
+    Generic handler for all unauthorized
+    (pages requires login)
+
+    NB: Redirecting here is done by @login_required decorators
+    """
     return render_template(
         "message.html",
         message = """
@@ -130,15 +143,38 @@ def unauthorized():
                    'login': url_for('login', next=request.path, _external=True)}
     )
 
+
+@app.route("/")
+def rootstub():
+    """
+    Root of the comex2 app is served by php,
+    but having this empty stub allows us to use
+    url_for('rootstub') when redirecting to said php
+    """
+    pass
+
+# /services/index/
+@app.route(config['PREFIX']+'/demo/')
+def demo():
+    """
+    Demo CSS with alternative index (layout à la notebook)
+    """
+    return render_template(
+                            "alt_index.html",
+                            foo="bar",
+                            # current_user=current_user
+                          )
+
+
 # /services/
-@app.route(config['PREFIX']+'/', methods=['GET'])
+@app.route(config['PREFIX']+'/')
 def services():
     return redirect(url_for('login', _external=True))
 
 # /services/test
-# @app.route(config['PREFIX'] + '/test', methods=['GET'])
-# def test_stuff():
-#     return render_template("message.html", message="UCACHE="+sub('<|&|>','::',repr(UCACHE)))
+@app.route(config['PREFIX'] + '/test', methods=['GET'])
+def test_stuff():
+    return render_template("message.html", message=url_for('rootstub', _external=True))
 
 # /services/api/aggs
 @app.route(config['PREFIX'] + config['API_ROUTE'] + '/aggs')
@@ -162,8 +198,6 @@ def graph_api():
     (originally @ moma/legacy_php_comex/tree/master/comex_install)
     (original author S. Castillo)
     """
-
-
     if 'qtype' in request.args:
         graphdb=MySQL(config['SQL_HOST'])
         scholars = graphdb.getScholarsList(request.args['qtype'], restparse(request.query_string.decode()))
@@ -231,9 +265,20 @@ def login():
 
                 if login_ok:
                     # normal user
-                    return redirect(url_for('profile', _external=True))
-                    # POSS "next" request.args (useful when we'll have more pages)
-                    #       ---
+                    next_url = request.args.get('next', None)
+
+                    if next_url:
+                        safe_flag = is_safe_url(next_url, request.host_url)
+                        if safe_flag:
+                            # normal next_url
+                            return(redirect(next_url))
+                        else:
+                            # server name is different than ours
+                            # in next_url so we won't go there
+                            return(redirect(url_for('rootstub', _external=True)))
+                    else:
+                        # no specified next_url => profile
+                        return redirect(url_for('profile', _external=True))
 
                 else:
                     # user exists in doors but has no comex profile yet
@@ -257,6 +302,13 @@ def login():
                 )
 
 
+# /services/user/logout/
+@app.route(config['PREFIX'] + config['USR_ROUTE'] + '/logout/')
+def logout():
+    logout_user()
+    return redirect(url_for('rootstub', _external=True))
+
+
 # /services/user/profile/
 @app.route(config['PREFIX'] + config['USR_ROUTE'] + '/profile/', methods=['GET', 'POST'])
 @fresh_login_required
@@ -271,11 +323,11 @@ def profile():
         if current_user.empty:
             mlog("INFO",  "PROFILE: empty current_user %s" % current_user.uid)
         else:
-            mlog("INFO",  "PROFILE: current_user %s\n  -" % current_user.uid
-                           + '\n  -'.join([current_user.info['email'],
-                                           current_user.info['initials'],
-                                       str(current_user.info['keywords']),
-                                           current_user.info['country']]
+            mlog("DEBUG",  "PROFILE: current_user %s\n  -" % current_user.uid
+                           + '\n  - '.join([current_user.info['email'],
+                                            current_user.info['initials'],
+                                        str(current_user.info['keywords']),
+                                            current_user.info['country']]
                                           )
                 )
 
@@ -464,7 +516,6 @@ def read_record(incoming_data):
     if clean_records['org_type'] == 'other' and 'other_org_type' in clean_records:
         clean_records['org_type'] = clean_records['other_org_type']
 
-
     # split for kw_array
     kw_array = []
     if 'keywords' in clean_records:
@@ -495,6 +546,16 @@ def sanitize(value):
         # cast back to orginal type
         san_typed_val = vtype(san_val)
         return san_typed_val
+
+
+def is_safe_url(target, host_url):
+    """
+    Checks if url is ok for redirects
+    cf. http://flask.pocoo.org/snippets/62/
+    """
+    ref_url = urlparse(host_url)
+    test_url = urlparse(urljoin(host_url, target))
+    return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
 
 
 ########### MAIN ###########

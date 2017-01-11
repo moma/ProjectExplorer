@@ -1,0 +1,219 @@
+{% extends "base_layout.html" %}
+
+{% block headers %}
+  <title>Community Explorer Profile</title>
+  <meta name="description" content="Community Explorer Wall">
+  <meta name="keywords" content="community, user profiles, data exploration">
+
+  <link type=text/css rel=stylesheet href="{{ url_for('static', filename='css/comex_alt.css') }}">
+
+{% endblock %}
+
+<!-- ======================================================================= -->
+
+{% block main_content %}
+
+    <!-- classic intro -->
+    <div class="row spacerrow">&nbsp;</div>
+    <div class="row">
+      <div class="spacer col-lg-2 col-md-1 hidden-sm-down">&nbsp;</div>
+      <div class="my_form_box col-lg-7 col-md-9 col-sm-12">
+
+        <!-- ##################### ( WELCOME ) #################### -->
+        <div id="welcome">
+            <h2 class="oldstyle">Welcome to the complex systems community explorer</h2>
+            <p class="mini-hero">
+                Map your own socio-semantic network or explore sub-communities.
+            </p>
+        </div>
+      </div>
+      <div class="spacer col-lg-2 col-md-1 hidden-sm-down">&nbsp;</div>
+    </div>
+
+    <!-- colored notebook section: EXPLORE -->
+    <div class="row spacerrow">&nbsp;</div>
+    <div class="row banner-row" style="background-color:#00B4E6">
+        <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
+        <div class="col-lg-3 col-md-3 col-sm-10">
+            <div class="panel panel-primary action-announce">
+                <div class="panel-body">
+                    <div class="cmx-action-wrap">
+                        <img src="{{ url_for('static', filename='img/action_explore.png') }}"
+                            class="cmx-action">
+                    </div>
+                    <h2 class="oldstyle">Graph Explorer</h2>
+                    <p class="mini-hero">
+                        Use our explorer view to browse the map of the community.
+                        <br/>
+                        <br/>
+                        (It's a <strong> network of scholars </strong> connected by their research subjects.)
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7 col-md-7 col-sm-10 wwwpanel">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <p style="float:right">
+                        <a target="_blank" href="http://localhost/explorerjs.html?type=%22filter%22&nodeidparam=%22%257B%257D%22">
+                            <span class="glyphicon glyphicon-new-window"></span>
+                            Open in another window
+                        </a>
+                    </p>
+                </div>
+                <div class="panel-body wwwthumb">
+                    <iframe src="http://localhost/explorerjs.html?type=%22filter%22&nodeidparam=%22%257B%257D%22" class="wwwthumbsmall" frameborder="0" scrolling="yes">
+                        <p>Your web browser doesn't support iframes. :(</p>
+                   </iframe>
+                </div>
+            </div>
+        </div>
+        <div class="spacer col-lg-1 col-md-2 hidden-sm-down">&nbsp;</div>
+    </div>
+
+
+    <!-- white notebook section: PROFILE -->
+    <div class="row spacerrow">&nbsp;</div>
+    <div class="row banner-row" style="background-color:#fff">
+        <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
+        <div class="col-lg-3 col-md-3 col-sm-10">
+            <div class="panel panel-primary action-announce">
+                <div class="panel-body">
+                    <div class="cmx-action-wrap">
+                        <img src="{{ url_for('static', filename='img/action_profile.png') }}"
+                            class="cmx-action">
+                    </div>
+                    <h2 class="oldstyle">Sharing your "carte de visite"</h2>
+                    <p class="mini-hero">
+                        Add your keywords and you will be plotted in the map
+
+                        <br/>Selecting you will flash a visit card like this:
+                        <div id="information-example">
+                            <br><h4>Information:</h4><ul><li><b>Dr. Jacques Monod</b></li><li><img src="https://upload.wikimedia.org/wikipedia/commons/7/70/Jacques_Monod_nobel.jpg" width="80px" style="float:left;margin:5px"><b>Country: </b>France<br><b>Position: </b>Research Director<br><b>Keywords: </b>emergence, biology, systems biology, autopoiesis, biochemistry.<br>[ <a href="https://fr.wikipedia.org/wiki/Jacques_Monod" target="blank"> View homepage </a>]<br></li></ul><br>
+                        </div>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7 col-md-7 col-sm-10">
+            <div class="panel panel-default wwwpanel">
+                <div class="panel-heading">
+                    <p style="float:right">
+                        <a target="_blank" href="http://localhost/services/user/{% if current_user.info %}profile{% else %}register{% endif %}">
+                            <span class="glyphicon glyphicon-new-window"></span>
+                            Open in another window
+                        </a>
+                    </p>
+                </div>
+                <div class="panel-body wwwthumb">
+                    <iframe src="http://localhost/services/user/{% if current_user.info %}profile{% else %}register{% endif %}" class="wwwthumb" frameborder="0" scrolling="yes">
+                        <p>Your web browser doesn't support iframes. :(</p>
+                   </iframe>
+                </div>
+            </div>
+        </div>
+        <div class="spacer col-lg-1 col-md-2 hidden-sm-down">&nbsp;</div>
+    </div>
+
+
+    <!-- coloured notebook section: QUERY -->
+    <div class="row spacerrow">&nbsp;</div>
+    <div class="row banner-row" style="background-color:#FAB612">
+        <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
+        <div class="col-lg-3 col-md-3 col-sm-10">
+            <div class="panel panel-primary action-announce">
+                <div class="panel-body">
+                    <div class="cmx-action-wrap">
+                        <img src="{{ url_for('static', filename='img/action_query.png') }}"
+                            class="cmx-action">
+                    </div>
+                    <h2 class="oldstyle">Refine your search</h2>
+                    <p class="mini-hero">
+                        Use filters to select keywords and scholars matching your subjects of interests.
+                        <ul>
+                            <li>countries</li>
+                            <li>keywords</li>
+                            <li>organizations</li>
+                            <li>labs</li>
+                            <li>community hashtags</li>
+                        </ul>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7 col-md-7 col-sm-10">
+            <div class="panel panel-default wwwpanel">
+                <div class="panel-heading">
+                    <p style="float:right">
+                        <a target="_blank" href="http://localhost/index.html">
+                            <span class="glyphicon glyphicon-new-window"></span>
+                            Open in another window
+                        </a>
+                    </p>
+                </div>
+                <div class="panel-body wwwthumb">
+                    <iframe src="http://localhost/queries.html" class="wwwthumb" frameborder="0" scrolling="yes">
+                        <p>Your web browser doesn't support iframes. :(</p>
+                   </iframe>
+                </div>
+            </div>
+        </div>
+        <div class="spacer col-lg-1 col-md-2 hidden-sm-down">&nbsp;</div>
+    </div>
+
+
+    <!-- white notebook section: STATS -->
+    <div class="row spacerrow">&nbsp;</div>
+    <div class="row banner-row" style="background-color:#fff">
+        <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
+        <div class="col-lg-3 col-md-3 col-sm-10">
+            <div class="panel panel-primary action-announce">
+                <div class="panel-body">
+                    <div class="cmx-action-wrap">
+                        <img src="{{ url_for('static', filename='img/action_stats.png') }}"
+                            class="cmx-action">
+                    </div>
+                    <h2 class="oldstyle">Analyze the community structure and trends</h2>
+                    <p class="mini-hero">
+                        Our pie-chart directories allow you to explore <strong>scholars</strong>, <strong>keywords</strong> and <strong>affiliations</strong> statistics for any query.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7 col-md-7 col-sm-10">
+            <div class="panel panel-default wwwpanel">
+                <div class="panel-heading">
+                    <p style="float:right">
+                        <a target="_blank" href="http://localhost/print_directory.php?query=%7B%7D">
+                            <span class="glyphicon glyphicon-new-window"></span>
+                            Open in another window
+                        </a>
+                    </p>
+                </div>
+                <div class="panel-body wwwthumb">
+                    <iframe src="http://localhost/print_directory.php?query=%7B%7D" class="wwwthumb" frameborder="0" scrolling="yes">
+                        <p>Your web browser doesn't support iframes. :(</p>
+                   </iframe>
+                </div>
+            </div>
+        </div>
+        <div class="spacer col-lg-1 col-md-2 hidden-sm-down">&nbsp;</div>
+    </div>
+
+
+
+{% endblock %}
+
+<!-- ======================================================================= -->
+
+{% block last_imports %}
+    <script type="text/javascript">
+        //               ---------
+        // a copy of the user info in json
+        //               ---------
+        var uinfo = {{current_user.json_info|safe}};
+    </script>
+
+    <!--  our js  -->
+    <script src="{{ url_for('static', filename='js/comex_user_shared.js') }}"></script>
+{% endblock %}

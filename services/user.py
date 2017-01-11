@@ -8,16 +8,18 @@ __author__    = "CNRS"
 __copyright__ = "Copyright 2016 ISCPIF-CNRS"
 __email__     = "romain.loth@iscpif.fr"
 
+from re          import match
 from requests    import post
 from json        import dumps, loads
+from datetime    import time, timedelta
 from flask_login import LoginManager
 
 if __package__ == 'services':
     from services.db    import connect_db, get_full_scholar
-    from services.tools import mlog
+    from services.tools import mlog, REALCONFIG
 else:
     from db             import connect_db, get_full_scholar
-    from tools          import mlog
+    from tools          import mlog, REALCONFIG
 
 # will be exported to main for initialization with app
 login_manager = LoginManager()
@@ -99,11 +101,46 @@ class User(object):
         return str(self.uid)
 
     @property
-    def is_active(self):
+    def is_active(self,
+                  # 3 months ~ 91 days
+                  legacy_time_active = timedelta(days=91.3125)):
         """
+        :boolean flag:
+
         uses scholars.status
+        and self.empty <=> is also active a user who exists
+                           in doors db but not in comex_db
+
+
+              STATUS STR           RESULT
+               "active"          flag active
+                "test"           flag active if DEBUG
+    "legacy:sent_2017-01-01"     flag active until 2017/04/01
+                                                   (ie 2017/01/01 + 3 months)
         """
-        return (not self.empty and self.info['record_status'] == "active")
+        if self.empty:
+            # the user has a doors uid so he's entitled to a login
+            return True
+        else:
+            # ... or has a record_status in comex_db
+            sirstatus = self.info['record_status']
+
+            # maybe occasionaly legacy user
+            legacystatus = match("legacy:sent_([\d-]{10})",sirstatus)
+
+            # boolean result
+            return (sirstatus == "active"
+                        or (
+                            legacystatus
+                            and
+                            date(*[int(tc) for tc in legacystatus.groups()[0].split('-')]) + legacy_time_active < date.today()
+                        )
+                        or (
+                            sirstatus == "test"
+                            and
+                            REALCONFIG['LOG_LEVEL'] == "DEBUG"
+                        )
+                    )
 
     @property
     def is_anonymous(self):

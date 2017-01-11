@@ -53,11 +53,21 @@ function completionAsYouGo() {
     }
 
     // list of missing fields
-    cmxClt.uform.mainMessage.innerHTML += cmxClt.ulListFromLabelsArray(mandatoryMissingFields, ['red']) + cmxClt.ulListFromLabelsArray(optionalMissingFields, ['white'], "You may also want to fill:")
+    cmxClt.uform.mainMessage.innerHTML += cmxClt.ulListFromLabelsArray(mandatoryMissingFields, ['red'])
+
+    if (optionalMissingFields.length) {
+        cmxClt.uform.mainMessage.innerHTML += cmxClt.ulListFromLabelsArray(
+                optionalMissingFields,
+                ['white'],
+                "You may also want to fill:"
+            )
+    }
 
     // stamp => #last_modified_date
     cmxClt.uform.stampTime()
-    console.log("timestamp", cmxClt.uform.timestamp.value)
+
+    // debug
+    // console.log("timestamp:", cmxClt.uform.timestamp.value)
 }
 
 // run first check on existing profile data pre-filled by the template
