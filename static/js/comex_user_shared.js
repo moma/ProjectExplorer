@@ -115,23 +115,24 @@ var cmxClt = (function() {
         )
     }
 
-    // ===============================
-    // common vars to all user forms
-    // ===============================
+    // ============================================
+    // cmxClt.uform: common vars to all user forms
+    // ============================================
 
-    // exposed functions and vars that will be used during the interaction
+    // exposed vars that may be used during the interaction
     cC.uform = {}
     cC.uform.theFormId = null
     cC.uform.theForm = null
+    cC.uform.submitButton = document.getElementById('form_submit')
+    cC.uform.timestamp = document.getElementById('last_modified_date')
+    cC.uform.mainMessage = document.getElementById('main_message')
 
+    // functions
     cC.uform.initialize
     cC.uform.testFillField
     cC.uform.stampTime
     cC.uform.anchorLabels
-    cC.uform.multiSelect
-    cC.uform.mainMessage = document.getElementById('main_message')
-    cC.uform.submitButton = document.getElementById('form_submit')
-    cC.uform.timestamp = document.getElementById('last_modified_date')
+    cC.uform.multiTextinput
 
     // dates up to 2049/12/31
     cC.uform.validDate = new RegExp( /^20[0-4][0-9]\/(?:0?[1-9]|1[0-2])\/(?:0?[1-9]|[1-2][0-9]|3[0-1])$/)
@@ -141,6 +142,8 @@ var cmxClt = (function() {
     // =====================
 
 
+    // multiTextinput
+    //
     // stub for multiple textinput like keywords
     //   => UX shows newInput where user enters words one by one
     //   => validate words become removable "pills"
@@ -156,6 +159,8 @@ var cmxClt = (function() {
     }
 
 
+    // anchorLabels
+    //
     // replace(fname =~ /<label for="([^"]+)"/,
     //                  `<label for="${fname}" id="${fname}_lbl"`)
     // use at init
@@ -192,10 +197,12 @@ var cmxClt = (function() {
 
     // testFillField
     // --------------
+    // diagnostic over COLS, good to use in validation funs
+    //
     // checks if mandatory fields are filled
     // checks if other plsfill ones are filled
     // highlights labels of missing mandatory fields
-    cC.uform.testFillField = function (aForm, params) {
+    cC.uform.testFillField = function (aForm, params, cols) {
         // "private" copy
         var wholeFormData = new FormData(aForm)
 
@@ -206,18 +213,23 @@ var cmxClt = (function() {
 
         // default params
         if (!params)                           params = {}
+        // bool
         if (params.doHighlight == undefined)   params.doHighlight = true
         if (params.fixResidue == undefined)    params.fixResidue = false
-        if (params.ignore == undefined)        params.ignore = []
+        // $
+        if (!params.filterGroup)               params.filterGroup = "plsfill"
+        // @
+        if (!params.ignore)                    params.ignore = []
+        if (!params.cols)                      params.cols = cC.COLS
 
         // let's go
-        for (var i in cC.COLS) {
+        for (var i in params.cols) {
           //   console.info("testFillField COLS["+i+"]", cC.COLS[i])
 
-          var fieldName = cC.COLS[i][0]
-          var mandatory = cC.COLS[i][1]
-          var fieldGroup = cC.COLS[i][2]
-          var fieldType = cC.COLS[i][3]
+          var fieldName = params.cols[i][0]
+          var mandatory = params.cols[i][1]
+          var fieldGroup = params.cols[i][2]
+          var fieldType = params.cols[i][3]
 
           var actualValue = wholeFormData.get(fieldName)
 
@@ -239,20 +251,21 @@ var cmxClt = (function() {
             }
           }
 
-          // filled/not filled validation
-          // ----------------------------
+          // filled or not filled
+          // --------------------
 
-          // skipping params.ignore and non-plsfill elements
+          // skipping params.ignore and non-filterGroup elements
           var ignoreFlag = false
           for (var j in params.ignore) {
-            if (params.ignore[j] == fieldName) {
+            if (fieldName == params.ignore[j]) {
                 ignoreFlag = true
                 break
             }
           }
-          if (ignoreFlag || fieldGroup != 'plsfill') continue ;
+          if (ignoreFlag || fieldGroup != params.filterGroup) continue ;
+          //                                                    skip
 
-          // get a human-readable label
+          // otherwise get a human-readable label
           var labelElt = document.querySelector('label[for='+fieldName+']')
           var fieldLabel = labelElt ? labelElt.innerText : fieldName
 
@@ -289,7 +302,7 @@ var cmxClt = (function() {
           else if (params.doHighlight && labelElt) {
               labelElt.style.backgroundColor = ""
           }
-        } // end for val in cC.COLS
+      } // end for val in params.cols
 
         // return full form diagnostic and field census
         return [  valid,
