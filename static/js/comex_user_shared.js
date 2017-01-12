@@ -107,6 +107,13 @@ var cmxClt = (function() {
       if (elt.value != "")   elt.style.fontWeight = "bold"
     }
 
+    // insert after
+    // cf. stackoverflow.com/questions/4793604
+    function insertAfter(referenceNode, newNode) {
+        referenceNode.parentNode.insertBefore(
+            newNode, referenceNode.nextSibling
+        )
+    }
 
     // ===============================
     // common vars to all user forms
@@ -120,6 +127,8 @@ var cmxClt = (function() {
     cC.uform.initialize
     cC.uform.testFillField
     cC.uform.stampTime
+    cC.uform.anchorLabels
+    cC.uform.multiSelect
     cC.uform.mainMessage = document.getElementById('main_message')
     cC.uform.submitButton = document.getElementById('form_submit')
     cC.uform.timestamp = document.getElementById('last_modified_date')
@@ -130,6 +139,22 @@ var cmxClt = (function() {
 
     // function definitions
     // =====================
+
+
+    // stub for multiple textinput like keywords
+    //   => UX shows newInput where user enters words one by one
+    //   => validate words become removable "pills"
+    //   => result is concatenated texts in hidden input.#fName
+    // TODO finalize and add to initialize
+    cC.uform.multiTextinput = function (fName) {
+        var normalInput = document.getElementById(fName)
+        normalInput.hidden = true
+
+        var newTextArrayInput = document.createElement('input');
+        newTextArrayInput.class = "form-control autocomp"  // TODO use autocomp
+        cC.insertAfter(normalInput, newTextArrayInput)
+    }
+
 
     // replace(fname =~ /<label for="([^"]+)"/,
     //                  `<label for="${fname}" id="${fname}_lbl"`)
@@ -183,6 +208,7 @@ var cmxClt = (function() {
         if (!params)                           params = {}
         if (params.doHighlight == undefined)   params.doHighlight = true
         if (params.fixResidue == undefined)    params.fixResidue = false
+        if (params.ignore == undefined)        params.ignore = []
 
         // let's go
         for (var i in cC.COLS) {
@@ -215,8 +241,16 @@ var cmxClt = (function() {
 
           // filled/not filled validation
           // ----------------------------
-          // skip non-plsfill elements
-          if (fieldGroup != 'plsfill') continue ;
+
+          // skipping params.ignore and non-plsfill elements
+          var ignoreFlag = false
+          for (var j in params.ignore) {
+            if (params.ignore[j] == fieldName) {
+                ignoreFlag = true
+                break
+            }
+          }
+          if (ignoreFlag || fieldGroup != 'plsfill') continue ;
 
           // get a human-readable label
           var labelElt = document.querySelector('label[for='+fieldName+']')
@@ -252,7 +286,7 @@ var cmxClt = (function() {
             //   console.log("otherMissingField", fieldName)
           }
 
-          else if (params.doHighlight) {
+          else if (params.doHighlight && labelElt) {
               labelElt.style.backgroundColor = ""
           }
         } // end for val in cC.COLS

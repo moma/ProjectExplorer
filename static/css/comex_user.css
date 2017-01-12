@@ -19,11 +19,20 @@ body {
 }
 
 
-/* reg, profile, login, etc.... */
+/* main content for all new pages */
+div.my-box {
+}
+
+/* form content for reg, profile, login, etc.... */
 div.uform {
+  padding: 15px 30px 53px 30px;
+  margin: 38px 38px 8px 38px;
   background-color: #ddd;
-  padding: 20px 40px 70px 40px;
-  margin: 50px 50px 10px 50px;
+}
+
+/* same but to put a panel-body inside */
+div.uform-nobg {
+  margin: 38px 38px 8px 38px;
 }
 
 p#doors_ret_msg {
@@ -144,8 +153,14 @@ input#my-captcha{
 /* like a dialog icon */
 .glyphicon-float-left {
   float: left ;
+  display: block;
   font-size: 150% ;
-  vertical-align:text-top;
+  margin-top: -.2em;
+}
+.glyphicon-float-right {
+  float: right ;
+  font-size: 80% ;
+  margin-top: -.5em;
 }
 
 /* page sections: style snippets from old bootstrap h2 */
@@ -154,6 +169,13 @@ h2.oldstyle {
   font-weight: bold;
   /*font-size: 2.5em;*/
 }
+/* collapsible sections */
+h2.ccsection {
+  padding-top: 1em;
+  font-size: 1.5em;
+  font-family: "Droid Sans", Calibri, Ubuntu, sans-serif;
+  font-weight: bold;
+}
 
 /* big categories: like form sections etc. */
 h3.formcat {
@@ -161,7 +183,6 @@ h3.formcat {
   padding-top: 1em;
   font-weight: bold;
   color: #910;
-  /*TODO accordeon*/
 }
 
 h3.formcatfirst {
@@ -180,6 +201,48 @@ h3.formcatfirst {
   padding-bottom: 3em
 }
 
+
+/* "accordeon": collapsible formcats */
+div.ccsection-wrap {
+    margin: 0 ;
+    padding: 0 ;
+    background-color: transparent;
+}
+a.ccsection-toggle  {
+    margin: 0 ;
+    padding: 0 ;
+}
+a.ccsection-toggle:hover, a.ccsection-toggle:focus {
+    text-decoration: none;
+}
+.ccsection-toggle h2.ccsection, .ccsection-toggle:focus h2.ccsection {
+    color: #333 ; /* passive: like normal body color */
+}
+.ccsection-heading:hover h2.ccsection {
+    color: #23A ; /* active: like heading color */
+    text-decoration: none;
+}
+div.ccsection-heading {
+    padding: 0 1.5em .3em 1.5em ;
+    /*width: 25em;*/
+    text-align: left;
+
+    /*background-color: transparent;*/
+    background-color: #ddd;
+    border-radius: .8em .8em 0 0;
+}
+
+div.ccsection-uform-body {
+    background-color: #ddd;
+    border-radius: 0 ;
+    padding: 15px 30px 53px 30px;
+}
+
+div.ccsection-footer {
+    background-color: #ddd;
+    border-radius: 0 0 .8em .8em ;
+    padding: 0 ;
+}
 
 /**/
 ul.minilabels {
@@ -208,6 +271,12 @@ li.minilabel {
 
 
 /**/
+.our-vcard {
+    line-height: 110%;
+}
+
+
+/**/
 .smallspacerrow {
   height: 2em;
 }
@@ -223,15 +292,16 @@ li.minilabel {
 
 /* the main validation message (a special legend) */
 #main_message {
-  color: white ;
+  /*color: white ;*/
   font-size: 140%;
   text-align:center;
   line-height: 1.5em;
 
-  background-color: #988 ;
-  border-radius: 2em;
-  padding: 1em 3em;
+  /*background-color: #988 ;
+  border-radius: 2em;*/
+  padding: 3em 3em 1em 3em;
   margin-bottom: 2em;
+  border: none;
 }
 
 

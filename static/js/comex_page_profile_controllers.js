@@ -38,8 +38,11 @@ function completionAsYouGo() {
     cmxClt.uform.mainMessage.style.display = 'block'
     cmxClt.uform.mainMessage.innerHTML = "Checking the answers..."
 
+    var diagnosticParams = {'fixResidue': true,
+                            'ignore': ['email']}
+
     var diagnostic = cmxClt.uform.testFillField(cmxClt.uform.theForm,
-                                                {'fixResidue': true})
+                                                diagnosticParams)
 
     var valid = diagnostic[0]
     var mandatoryMissingFields = diagnostic[1]

@@ -11,12 +11,16 @@
 {% block main_content %}
     <div class="row">
       <div class="spacer col-sm-1 col-md-1">&nbsp;</div>
-      <div class="my-box col-sm-8 col-md-8">
+      <div class="my-box col-sm-8 col-md-8 panel-group"
+           id="profile_box"
+           role="tablist"
+           aria-multiselectable="true">
+
 
         <!-- ##################### ( PROFILE OVERVIEW ) #################### -->
 
         <div id="intro">
-            <h2 class="oldstyle">Your Profile Info</h2>
+            <!-- <h2 class="oldstyle">Your Profile Info</h2> -->
                 <p class="mini-hero">
                     Welcome to your profile page,
                     <strong>
@@ -25,293 +29,451 @@
                       {% endif %}
                       {{ current_user.info.last_name }}
                   </strong> !
-                  <br/>
-                  Take the time to complete it to generate better maps of your socio-semantic network .
               </p>
         </div>
 
+        <!-- overview -->
+
+        <div class="panel ccsection-wrap">
+          <a class="ccsection-toggle"
+             data-parent="#profile_box"
+             data-toggle="collapse"
+                      href="overview"
+             aria-controls="overview">
+
+              <div class="panel-heading ccsection-heading" role="tab">
+                <h2 class="ccsection">
+                  <span class="glyphicon glyphicon-collapse-down glyphicon-float-right"></span>
+                  Overview
+              </h2>
+              </div>
+
+          </a>
+
+          <div id="overview"
+               class="panel-body panel-collapse collapse out"
+               role="tabpanel" aria-expanded="false">
+
+               <!-- CARTE DE VISITE -->
+               <h3 class="formcatfirst"> Carte de visite </h3>
+               <div id="information-example" class="our-vcard">
+                   <ul>
+                       <img src="{{ current_user.info.pic_url }}" width="80px" style="float:left;margin:5px">
+                       <li>
+                           <b>{{ current_user.info.hon_title }}
+                               {{ current_user.info.first_name }}
+                               <!-- TODO mid initials -->
+                               {{ current_user.info.last_name }}</b>
+                       </li>
+                       <li>
+                           <b>Country: </b>{{ current_user.info.country }}<br>
+                           <b>Position: </b>{{ current_user.info.position }}<br>
+                           <b>Keywords: </b>{{ current_user.info.keywords }}<br>
+                           [ <a href="{{ current_user.info.home_url }}" target="blank">
+                               View homepage
+                           </a>]
+                           <br>
+                       </li>
+                   </ul>
+                   <br>
+               </div>
+
+               <!-- EMAIL & PASSWORD -->
+               <h3 class="formcat"> Login infos </h3>
+               <p class="mini-hero">
+                  This email is your main ID. You may only change it via the <a href="http://{{ doors_connect }}/">Doors portal</a>.
+               </p>
+
+               <!-- readonly version for current profile -->
+               <div class="question input-group">
+                 <label for="email" class="smlabel input-group-addon">
+                   Email
+                 </label>
+                 <input id="email" name="email" maxlength="255" readonly
+                        type="text" class="form-control readonly"
+                        value="{{ current_user.info.email }}">
+               </div>
+          </div>
+          <div class="panel-footer ccsection-footer">&nbsp</div>
+
+        </div>
+
         <!-- ########################### ( FORM ) ########################## -->
-        <div class="uform">
+        <!-- todo onsubmit also save to cache -->
+
+        <div class="uform-nobg">
+
+            <h2 class="oldstyle">Edit your profile</h2>
+                <p class="mini-hero">
+                  Take the time to complete the forms below to generate better maps of your socio-semantic network .
+              </p>
+
+
         <form id="comex_profile_form" enctype="multipart/form-data"
               method="post" onsubmit="console.info('submitted')">
 
-        <!-- todo onsubmit also save to cache -->
 
-        <!-- EMAIL & PASSWORD -->
-        <h3 class="formcat"> Login infos </h3>
-        <p class="mini-hero">
-            This email is your main ID. You may only change it via the <a href="http://{{ doors_connect }}/">Doors portal</a>.
-        </p>
+            <!-- basic name infos -->
+            <div class="panel ccsection-wrap">
+              <a class="ccsection-toggle"
+                 data-parent="#profile_uform"
+                 data-toggle="collapse"
+                          href="basic_infos_usection"
+                 aria-controls="basic_infos_usection">
 
-          <!-- readonly version for current profile -->
-          <div class="question input-group">
-            <label for="email" class="smlabel input-group-addon">* Email</label>
-            <input id="email" name="email" maxlength="255" readonly
-                   type="text" class="form-control readonly" placeholder="email"
-                   value="{{ current_user.info.email }}">
-          </div>
+                  <div class="panel-heading ccsection-heading" role="tab">
+                    <h2 class="ccsection"
+                        title="This is your name and country data">
+                      <span class="glyphicon glyphicon-collapse-down glyphicon-float-right"></span>
+                      Basic info
+                  </h2>
+                  </div>
+
+              </a>
+
+              <div id="basic_infos_usection"
+                   class="panel-body ccsection-uform-body panel-collapse collapse out"
+                   role="tabpanel" aria-expanded="false">
+
+                 <!-- NAME & COUNTRY -->
+                <div class="question input-group">
+                  <label for="hon_title" class="smlabel input-group-addon"> Title </label>
+                  <input id="hon_title" name="hon_title" maxlength="30"
+                         type="text" class="form-control autocomp" placeholder="eg. Mr or Prof. Dr."
+                         onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
+                         value="{{ current_user.info.hon_title }}">
+                </div>
+
+                 <div class="question input-group">
+                   <label for="first_name" class="smlabel input-group-addon">
+                     * First name
+                   </label>
+                   <input id="first_name" name="first_name" maxlength="30"
+                          type="text" class="form-control" placeholder="prénom"
+                          onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
+                          value="{{ current_user.info.first_name }}">
+
+                   <div class="input-group-addon"
+                        title="Add middle name(s)">
+                        <button class="btn btn-xs btn-default operation"
+                                title="Opens the input for middle name(s)" id="btn-midname"
+                                type="button">
+                          <span id="btn-midname-icon"
+                                class="glyphicon glyphicon-plus"></span>
+                          Add name
+                        </button>
+                   </div>
+                 </div>
+
+                 <!-- optionnel -->
+                 <div id="group-midname" class="question input-group" style='display:none'>
+                   <label for="middle_name" class="smlabel input-group-addon">
+                     Middle name
+                   </label>
+                   <input id="middle_name" name="middle_name" maxlength="30"
+                          type="text" class="form-control" placeholder="autres prénoms"
+                          onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
+                          value="{{ current_user.info.middle_name }}">
+                 </div>
+
+                 <div class="question input-group">
+                   <label for="last_name" class="smlabel input-group-addon">
+                     * Last name
+                   </label>
+                   <input id="last_name" name="last_name" maxlength="30"
+                          type="text" class="form-control" placeholder="nom de famille"
+                          onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
+                          value="{{ current_user.info.last_name }}">
+                 </div>
+
+                 <input id="initials" name="initials" maxlength="7"
+                        type="text"  hidden
+                         value="{{ current_user.info.initials }}">
+
+                 <div class="question input-group">
+                   <label for="country" class="smlabel input-group-addon">
+                     * Country
+                   </label>
+                   <input id="country" name="country" maxlength="60"
+                          type="text" class="form-control autocomp"
+                          placeholder="pays"
+                          onblur="if(this.value=='France'){teamCityDivStyle.display = 'block'} else {teamCityDivStyle.display='none'}"
+                          value="{{ current_user.info.country }}">
+                 </div>
 
 
-          <!-- NAME & COUNTRY -->
-          <h3 class="formcat"> Basic infos </h3>
+               </div> <!-- /panel-body -->
+              <div class="panel-footer ccsection-footer">&nbsp</div>
 
-
-          <div class="question input-group">
-            <label for="first_name" class="smlabel input-group-addon">
-              * First name
-            </label>
-            <input id="first_name" name="first_name" maxlength="30"
-                   type="text" class="form-control" placeholder="prénom"
-                   onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
-                   value="{{ current_user.info.first_name }}">
-
-            <div class="input-group-addon"
-                 title="Add middle name(s)">
-                 <button class="btn btn-xs btn-default operation"
-                         title="Opens the input for middle name(s)" id="btn-midname"
-                         type="button">
-                   <span id="btn-midname-icon"
-                         class="glyphicon glyphicon-plus"></span>
-                   Add name
-                 </button>
             </div>
+
+
+
+
+
+
+
+
+          <!-- essential mapping infos -->
+
+          <div class="panel ccsection-wrap">
+            <a class="ccsection-toggle"
+               data-parent="#profile_uform"
+               data-toggle="collapse"
+                        href="map_infos_usection"
+               aria-controls="map_infos_usection">
+
+                <div class="panel-heading ccsection-heading" role="tab">
+                  <h2 class="ccsection"
+                      title="This is the main data that allows us to plot you in the exploration graph and render the 'carte de visite'">
+                    <span class="glyphicon glyphicon-collapse-down glyphicon-float-right"></span>
+                    Mapping data
+                </h2>
+                </div>
+
+            </a>
+
+            <div id="map_infos_usection"
+                 class="panel-body ccsection-uform-body panel-collapse collapse in"
+                 role="tabpanel" aria-expanded="true">
+
+               <!-- JOB, INTERESTS AND ORGANIZATION -->
+               <h3 class="formcatfirst"> About your job and research </h3>
+
+               <p class="mini-hero">
+                   The <strong>keywords</strong> and <strong>affiliation</strong> will count as similarities to identify your network neighbours. Just start typing... we have autocomplete!
+               </p>
+
+               <div class="question">
+                 <div class="input-group">
+                   <label for="keywords" class="smlabel input-group-addon">* Key subjects</label>
+                   <input id="keywords" name="keywords" maxlength="350"
+                          type="text" class="form-control autocomp" placeholder="keywords"
+                          value="{{ current_user.info.keywords }}">
+                 </div>
+                 <p class="legend">Please enter at least 5 comma-separated keywords</p>
+               </div>
+
+               <div class="question input-group">
+                 <label for="position" class="smlabel input-group-addon">* Job Position</label>
+                 <input id="position" name="position" maxlength="30"
+                        type="text" class="form-control autocomp" placeholder="titre"
+                        onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
+                        value="{{ current_user.info.position }}">
+               </div>
+
+               <div class="question">
+                 <div class="input-group">
+                   <label for="org" class="smlabel input-group-addon">* Parent Institution</label>
+                   <input id="org" name="org" maxlength="120"
+                          type="text" class="form-control autocomp" placeholder='eg "CNRS" or "University of Oxford"'
+                          value="{{ current_user.info.org }}">
+                 </div>
+               </div>
+
+               <div class="question">
+                 <div class="input-group">
+                   <label for="org_type" class="smlabel input-group-addon">* Institution Type</label>
+                   <select id="org_type" name="org_type"
+                           class="custom-select form-control"
+                           onchange="if(this.value=='other'){otherInstDivStyle.display = 'block'} else {otherInstDivStyle.display='none'}">
+                     <option selected value="university">University</option>
+                     <option value="public R&amp;D org">Public sector R&amp;D organization</option>
+                     <option value="public other org">Other public sector organization</option>
+                     <option value="private org">Private sector organization</option>
+                     <option value="none">None at the moment</option>
+                     <option value="other"
+                             onclick="otherInstDivStyle.display = 'block'"
+                             >Other</option>
+
+                   </select>
+                   <!-- £TODO js select the value from current_user.info.org_type -->
+                 </div>
+                 <!-- Other institution type <=> only if previous choice == 5 -->
+                 <div class="question conditional-q" id="other_org_div">
+                   <div class="input-group">
+                     <label for="other_org_type" class="smlabel input-group-addon">Other type</label>
+                     <input id="other_org_type" name="other_org_type" maxlength="120"
+                            type="text" class="form-control" placeholder="Clarify here the type of your parent institution">
+                   </div>
+                 </div>
+               </div>
+
+
+               <div class="question">
+                 <div class="input-group">
+                   <label for="team_lab" class="smlabel input-group-addon">Lab / Team / Dept</label>
+                   <input id="team_lab" name="team_lab" maxlength="120"
+                          type="text" class="form-control" placeholder="More detailed affiliation, if relevant"
+                          value="{{ current_user.info.team_lab }}">
+                 </div>
+               </div>
+
+               <!-- Lab city <=> only for France -->
+               <div class="question conditional-q" id="team_city_div">
+                 <div class="input-group">
+                   <label for="org_city" class="smlabel input-group-addon">Lab city</label>
+                   <input id="org_city" name="org_city" maxlength="50"
+                          type="text" class="form-control" placeholder="Ville de votre institution"
+                          value="{{ current_user.info.org_city }}">
+                 </div>
+               </div>
+
+
+               <h3 class="formcat"> About your future activities </h3>
+
+               <div class="question">
+                 <div class="input-group">
+                   <label for="job_bool" class="smlabel input-group-addon">Can you be contacted for jobs?</label>
+                   <select id="job_bool" name="job_bool"
+                           class="custom-select form-control"
+                           onchange="if(this.value=='Yes'){jobLookingDivStyle.display = 'block'} else {jobLookingDivStyle.display='none';jobDate.value=''}">
+                     <option selected value="No" onclick="jobDate.value=''">No</option>
+                     <option value="Yes" onclick="jobLookingDivStyle.display = 'block'">Yes</option>
+                   </select>
+                 </div>
+                 <!-- job_looking_date_div <=> only if previous choice == Yes -->
+                 <div class="question conditional-q" id="job_looking_div">
+                   <p class="legend">Until when are you interested in job offers like post-doc positions, etc. ? (YYYY/MM/DD)</p>
+                   <div class="input-group">
+                     <label for="job_looking_date" class="smlabel input-group-addon">Until when ?</label>
+                     <input id="job_looking_date" name="job_looking_date" maxlength="10"
+                            type="text" class="form-control" placeholder="ex: 2019/09/30">
+                   </div>
+                   <p id="job_date_message" class="legend red" style="font-weight:bold"></p>
+                 </div>
+               </div>
+
+               <div class="question">
+                 <div class="input-group">
+                   <label for="community_hashtags" class="smlabel input-group-addon">Interest groups</label>
+                   <input id="community_hashtags" name="community_hashtags" maxlength="350"
+                          type="text" class="form-control" placeholder="eg #dataviz or #networks"
+                          value="{{ current_user.info.community_hashtags }}">
+                 </div>
+                 <p class="legend">Interest groups aka "seminar hashtags" (full suggestion list available shortly)</p>
+               </div>
+
+
+           </div> <!-- /panel-body -->
+            <div class="panel-footer ccsection-footer">&nbsp</div>
+
           </div>
 
-          <!-- optionnel -->
-          <div id="group-midname" class="question input-group" style='display:none'>
-            <label for="middle_name" class="smlabel input-group-addon">
-              Middle name
-            </label>
-            <input id="middle_name" name="middle_name" maxlength="30"
-                   type="text" class="form-control" placeholder="autres prénoms"
-                   onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
-                   value="{{ current_user.info.middle_name }}">
+
+
+
+
+
+          <!-- additional mapping infos -->
+
+          <div class="panel ccsection-wrap">
+            <a class="ccsection-toggle"
+               data-parent="#profile_uform"
+               data-toggle="collapse"
+                        href="other_infos_usection"
+               aria-controls="other_infos_usection">
+
+                <div class="panel-heading ccsection-heading" role="tab">
+                  <h2 class="ccsection"
+                      title="This is additional data like picture, home page, etc.">
+                    <span class="glyphicon glyphicon-collapse-down glyphicon-float-right"></span>
+                    Additional Personal data
+                </h2>
+                </div>
+
+            </a>
+
+            <div id="other_infos_usection"
+                 class="panel-body ccsection-uform-body panel-collapse collapse out"
+                 role="tabpanel" aria-expanded="false">
+
+             <p class="mini-hero">
+                 The <strong>home page (url)</strong>, <strong>picture (url or file)</strong> and <strong>free description</strong> will allow your neighbours to know you a little better.
+             </p>
+
+
+             <h3 class="formcat"> Homepage and other IDS </h3>
+
+             <div class="question">
+               <div class="input-group">
+                 <label for="home_url" class="smlabel input-group-addon">Homepage</label>
+                 <input id="home_url" name="home_url" maxlength="120"
+                        type="text" class="form-control autocomp" placeholder='eg "http://www.wittyexample.org/~me"'
+                        value="{{ current_user.info.home_url }}">
+               </div>
+             </div>
+             <div class="question">
+               <div class="input-group">
+                 <label for="linked_ids" class="smlabel input-group-addon">Linked IDs</label>
+                 <input id="linked_ids" name="linked_ids" maxlength="120"
+                        type="text" readonly placeholder="available shortly">
+               </div>
+             </div>
+
+             <h3 class="formcat"> Picture </h3>
+             <div class="question">
+               <p class="legend">Link to a picture of yours...</p>
+               <div class="input-group">
+                 <label for="pic_url" class="smlabel input-group-addon">Picture link</label>
+                 <input id="pic_url" name="pic_url" maxlength="120"
+                        type="text" class="form-control autocomp" placeholder='eg "http://www.wittyexample.org/~me/my_great_pic.png"'
+                        value="{{ current_user.info.pic_url }}">
+               </div>
+             </div>
+
+             <div class="question" style="margin-bottom:.5em" >
+               <p class="legend">... or upload a picture (png, jpg or gif, max source size: 200kB)</p>
+               <!-- <p class="legend">Upload a picture of yours (max source size: 4MB, then the image will be reduced to 200kB)</p> -->
+               <div class="input-group">
+                 <label for="pic_file" class="smlabel input-group-addon">Picture</label>
+                 <input type="file" id="pic_file" name="pic_file"
+                        accept="image/png,image/jpeg" class="form-control"
+                        onchange="cmxClt.uform.checkShowPic(this)">
+                        <!-- £TODO retrieve and show db picture if not None -->
+               </div>
+               <p id="picture_message" class="legend red" style="font-weight:bold"></p>
+             </div>
+
+             <div id="box_show_pic">
+                 <img id="show_pic" src=""></img>
+             </div>
+
+             <!-- OTHER PERSONAL INFO -->
+             <h3 class="formcat"> Complementary information </h3>
+             <div class="question">
+               <div class="input-group">
+                 <label for="gender" class="smlabel input-group-addon">Gender</label>
+                 <select id="gender" name="gender"
+                         class="custom-select form-control">
+                   <option selected value="0">Select your gender</option>
+                   <option value="F">Woman</option>
+                   <option value="M">Man</option>
+                 </select>
+                 <!-- £TODO js select current_user.info.gender -->
+               </div>
+             </div>
+
+             <div class="question">
+               <div class="input-group">
+                 <label for="interests_text" class="input-group-addon">
+                   Personal interests
+                 </label>
+
+                 <textarea id="interests_text" name="interests_text" maxlength="1200"
+                           rows="7" style="resize:none"
+                           class="form-control" placeholder="If you wish, you may describe here your personal scientific interests."
+                           onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
+                           value="{{ current_user.info.interests_text }}"></textarea>
+               </div>
+               <p class="legend">Optional, ~15 lines max (1200 chars)</p>
+             </div>
+
+            </div>  <!-- /panel-body -->
+            <div class="panel-footer ccsection-footer">&nbsp</div>
+
           </div>
 
-          <div class="question input-group">
-            <label for="last_name" class="smlabel input-group-addon">
-              * Last name
-            </label>
-            <input id="last_name" name="last_name" maxlength="30"
-                   type="text" class="form-control" placeholder="nom de famille"
-                   onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
-                   value="{{ current_user.info.last_name }}">
-          </div>
-
-
-          <div class="question input-group">
-            <label for="initials" class="smlabel input-group-addon">* Initials</label>
-            <input id="initials" name="initials" maxlength="7"
-                   type="text" class="form-control" placeholder="initiales"
-                   value="{{ current_user.info.initials }}">
-          </div>
-
-          <div class="question input-group">
-            <label for="country" class="smlabel input-group-addon">
-              * Country
-            </label>
-            <input id="country" name="country" maxlength="60"
-                   type="text" class="form-control autocomp"
-                   placeholder="pays"
-                   onblur="if(this.value=='France'){teamCityDivStyle.display = 'block'} else {teamCityDivStyle.display='none'}"
-                   value="{{ current_user.info.country }}">
-          </div>
-
-          <!-- JOB, INTERESTS AND ORGANIZATION -->
-          <h3 class="formcat"> About your job and research </h3>
-
-          <p class="mini-hero">
-              The <strong>keywords</strong> and <strong>affiliation</strong> will count as similarities to identify your network neighbours.
-          </p>
-
-          <div class="question input-group">
-            <label for="hon_title" class="smlabel input-group-addon"> Title </label>
-            <input id="hon_title" name="hon_title" maxlength="30"
-                   type="text" class="form-control autocomp" placeholder="titre"
-                   onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
-                   value="{{ current_user.info.hon_title }}">
-          </div>
-
-          <div class="question input-group">
-            <label for="position" class="smlabel input-group-addon">* Job Position</label>
-            <input id="position" name="position" maxlength="30"
-                   type="text" class="form-control autocomp" placeholder="titre"
-                   onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
-                   value="{{ current_user.info.position }}">
-          </div>
-
-          <div class="question">
-            <div class="input-group">
-              <label for="keywords" class="smlabel input-group-addon">* Key subjects</label>
-              <input id="keywords" name="keywords" maxlength="350"
-                     type="text" class="form-control autocomp" placeholder="keywords"
-                     value="{{ current_user.info.keywords }}">
-            </div>
-            <p class="legend">Please enter at least 5 comma-separated keywords</p>
-          </div>
-
-          <div class="question">
-            <div class="input-group">
-              <label for="org" class="smlabel input-group-addon">* Parent Institution</label>
-              <input id="org" name="org" maxlength="120"
-                     type="text" class="form-control autocomp" placeholder='eg "CNRS" or "University of Oxford"'
-                     value="{{ current_user.info.org }}">
-            </div>
-          </div>
-
-          <div class="question">
-            <div class="input-group">
-              <label for="org_type" class="smlabel input-group-addon">* Institution Type</label>
-              <select id="org_type" name="org_type"
-                      class="custom-select form-control"
-                      onchange="if(this.value=='other'){otherInstDivStyle.display = 'block'} else {otherInstDivStyle.display='none'}">
-                <option selected value="university">University</option>
-                <option value="public R&amp;D org">Public sector R&amp;D organization</option>
-                <option value="public other org">Other public sector organization</option>
-                <option value="private org">Private sector organization</option>
-                <option value="none">None at the moment</option>
-                <option value="other"
-                        onclick="otherInstDivStyle.display = 'block'"
-                        >Other</option>
-
-              </select>
-              <!-- £TODO js select the value from current_user.info.org_type -->
-            </div>
-            <!-- Other institution type <=> only if previous choice == 5 -->
-            <div class="question conditional-q" id="other_org_div">
-              <div class="input-group">
-                <label for="other_org_type" class="smlabel input-group-addon">Other type</label>
-                <input id="other_org_type" name="other_org_type" maxlength="120"
-                       type="text" class="form-control" placeholder="Clarify here the type of your parent institution">
-              </div>
-            </div>
-          </div>
-
-
-          <div class="question">
-            <div class="input-group">
-              <label for="team_lab" class="smlabel input-group-addon">Lab / Team / Dept</label>
-              <input id="team_lab" name="team_lab" maxlength="120"
-                     type="text" class="form-control" placeholder="More detailed affiliation, if relevant"
-                     value="{{ current_user.info.team_lab }}">
-            </div>
-          </div>
-
-          <!-- Lab city <=> only for France -->
-          <div class="question conditional-q" id="team_city_div">
-            <div class="input-group">
-              <label for="org_city" class="smlabel input-group-addon">Lab city</label>
-              <input id="org_city" name="org_city" maxlength="50"
-                     type="text" class="form-control" placeholder="Ville de votre institution"
-                     value="{{ current_user.info.org_city }}">
-            </div>
-          </div>
-
-        <!-- OTHER PERSONAL INFO -->
-        <h3 class="formcat"> Complementary information </h3>
-
-        <p class="mini-hero">
-            The <strong>home page (url)</strong>, <strong>picture (url or file)</strong> and <strong>free description</strong> will allow your neighbours to know you a little better.
-            Also, our <strong>interest groups</strong> are each linked to an ISCPIF mailing list that you can subscribe to.
-        </p>
-
-        <div class="question">
-          <div class="input-group">
-            <label for="gender" class="smlabel input-group-addon">Gender</label>
-            <select id="gender" name="gender"
-                    class="custom-select form-control">
-              <option selected value="0">Select your gender</option>
-              <option value="F">Woman</option>
-              <option value="M">Man</option>
-            </select>
-            <!-- £TODO js select current_user.info.gender -->
-          </div>
-        </div>
-
-        <div class="question">
-          <div class="input-group">
-            <label for="home_url" class="smlabel input-group-addon">Homepage</label>
-            <input id="home_url" name="home_url" maxlength="120"
-                   type="text" class="form-control autocomp" placeholder='eg "http://www.wittyexample.org/~me"'
-                   value="{{ current_user.info.home_url }}">
-          </div>
-        </div>
-
-        <div class="question">
-          <p class="legend">Link to a picture of yours...</p>
-          <div class="input-group">
-            <label for="pic_url" class="smlabel input-group-addon">Picture link</label>
-            <input id="pic_url" name="pic_url" maxlength="120"
-                   type="text" class="form-control autocomp" placeholder='eg "http://www.wittyexample.org/~me/my_great_pic.png"'
-                   value="{{ current_user.info.pic_url }}">
-          </div>
-        </div>
-
-        <div class="question" style="margin-bottom:.5em" >
-          <p class="legend">... or upload a picture (png, jpg or gif, max source size: 200kB)</p>
-          <!-- <p class="legend">Upload a picture of yours (max source size: 4MB, then the image will be reduced to 200kB)</p> -->
-          <div class="input-group">
-            <label for="pic_file" class="smlabel input-group-addon">Picture</label>
-            <input type="file" id="pic_file" name="pic_file"
-                   accept="image/png,image/jpeg" class="form-control"
-                   onchange="checkShowPic(this)">
-                   <!-- £TODO retrieve and show db picture if not None -->
-          </div>
-          <p id="picture_message" class="legend red" style="font-weight:bold"></p>
-        </div>
-
-        <div id="box_show_pic">
-            <img id="show_pic" src=""></img>
-        </div>
-
-        <div class="question">
-          <div class="input-group">
-            <label for="community_hashtags" class="smlabel input-group-addon">Interest groups</label>
-            <input id="community_hashtags" name="community_hashtags" maxlength="350"
-                   type="text" class="form-control" placeholder="eg #dataviz or #networks"
-                   value="{{ current_user.info.community_hashtags }}">
-          </div>
-          <p class="legend">Interest groups aka "hashtags" (full suggestion list available shortly)</p>
-        </div>
-
-        <div class="question">
-          <div class="input-group">
-            <label for="interests_text" class="input-group-addon">
-              Personal interests
-            </label>
-
-            <textarea id="interests_text" name="interests_text" maxlength="1200"
-                      rows="7" style="resize:none"
-                      class="form-control" placeholder="If you wish, you may describe here your personal interests."
-                      onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
-                      value="{{ current_user.info.interests_text }}"></textarea>
-          </div>
-          <p class="legend">Optional, ~15 lines max (1200 chars)</p>
-        </div>
-
-
-        <!-- £TODO js -->
-        <div class="question">
-          <div class="input-group">
-            <label for="job_bool" class="smlabel input-group-addon">Looking for a job?</label>
-            <select id="job_bool" name="job_bool"
-                    class="custom-select form-control"
-                    onchange="if(this.value=='Yes'){jobLookingDivStyle.display = 'block'} else {jobLookingDivStyle.display='none';jobDate.value=''}">
-              <option selected value="No" onclick="jobDate.value=''">No</option>
-              <option value="Yes" onclick="jobLookingDivStyle.display = 'block'">Yes</option>
-            </select>
-          </div>
-          <!-- job_looking_date_div <=> only if previous choice == Yes -->
-          <div class="question conditional-q" id="job_looking_div">
-            <p class="legend">Until when are you interested in job offers like post-doc positions, etc. ? (YYYY/MM/DD)</p>
-            <div class="input-group">
-              <label for="job_looking_date" class="smlabel input-group-addon">Job search limit</label>
-              <input id="job_looking_date" name="job_looking_date" maxlength="10"
-                     type="text" class="form-control" placeholder="ex: 2019/09/30">
-            </div>
-            <p id="job_date_message" class="legend red" style="font-weight:bold"></p>
-          </div>
-        </div>
 
           <!-- hidden input for modification date -->
           <input id="last_modified_date" name="last_modified_date" type="text" hidden>
@@ -324,8 +486,6 @@
 
 
           <!-- <p> TEST UID {{ current_user.uid | safe }} </p> -->
-
-          <div class="row spacerrow">&nbsp;</div>
 
           <!-- main validation message -->
           <p id="main_message" class="cartouche legend" style="display:none"></p>
@@ -346,7 +506,6 @@
     </div>
 
     <!-- CNIL WARNING -->
-    <div class="row spacerrow">&nbsp;</div>
     <div class="row spacerrow">&nbsp;</div>
     <div class="row">
       <div class="spacer col-sm-1 col-md-1">&nbsp;</div>
@@ -395,4 +554,5 @@
     <!--  our js  -->
     <script src="{{ url_for('static', filename='js/comex_user_shared.js') }}"></script>
     <script src="{{ url_for('static', filename='js/comex_page_profile_controllers.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap-native-1.0.51.min.js') }}"></script>
 {% endblock %}
