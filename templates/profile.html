@@ -125,6 +125,7 @@
                     <h2 class="ccsection"
                         title="This is your name and country data">
                       <span class="glyphicon glyphicon-collapse-down glyphicon-float-right"></span>
+                      <span class="glyphicon glyphicon-user"></span>
                       Basic info
                   </h2>
                   </div>
@@ -227,6 +228,7 @@
                   <h2 class="ccsection"
                       title="This is the main data that allows us to plot you in the exploration graph and render the 'carte de visite'">
                     <span class="glyphicon glyphicon-collapse-down glyphicon-float-right"></span>
+                    <span class="glyphicon glyphicon-tags"></span>
                     Mapping data
                 </h2>
                 </div>
@@ -261,44 +263,6 @@
                         onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
                         value="{{ current_user.info.position }}">
                </div>
-
-               <div class="question">
-                 <div class="input-group">
-                   <label for="org" class="smlabel input-group-addon">* Parent Institution</label>
-                   <input id="org" name="org" maxlength="120"
-                          type="text" class="form-control autocomp" placeholder='eg "CNRS" or "University of Oxford"'
-                          value="{{ current_user.info.org }}">
-                 </div>
-               </div>
-
-               <div class="question">
-                 <div class="input-group">
-                   <label for="org_type" class="smlabel input-group-addon">* Institution Type</label>
-                   <select id="org_type" name="org_type"
-                           class="custom-select form-control"
-                           onchange="if(this.value=='other'){otherInstDivStyle.display = 'block'} else {otherInstDivStyle.display='none'}">
-                     <option selected value="university">University</option>
-                     <option value="public R&amp;D org">Public sector R&amp;D organization</option>
-                     <option value="public other org">Other public sector organization</option>
-                     <option value="private org">Private sector organization</option>
-                     <option value="none">None at the moment</option>
-                     <option value="other"
-                             onclick="otherInstDivStyle.display = 'block'"
-                             >Other</option>
-
-                   </select>
-                   <!-- £TODO js select the value from current_user.info.org_type -->
-                 </div>
-                 <!-- Other institution type <=> only if previous choice == 5 -->
-                 <div class="question conditional-q" id="other_org_div">
-                   <div class="input-group">
-                     <label for="other_org_type" class="smlabel input-group-addon">Other type</label>
-                     <input id="other_org_type" name="other_org_type" maxlength="120"
-                            type="text" class="form-control" placeholder="Clarify here the type of your parent institution">
-                   </div>
-                 </div>
-               </div>
-
 
                <div class="question">
                  <div class="input-group">
@@ -365,6 +329,79 @@
 
 
 
+
+
+
+          <!-- Affiliation -->
+          <div class="panel ccsection-wrap">
+            <a class="ccsection-toggle"
+               data-parent="#profile_uform"
+               data-toggle="collapse"
+                        href="#org_infos_usection"
+               aria-controls="org_infos_usection">
+
+                <div class="panel-heading ccsection-heading" role="tab">
+                  <h2 class="ccsection"
+                      title="This is your affiliation data, if you want to fill it it'll be available in stats.">
+                    <span class="glyphicon glyphicon-collapse-down glyphicon-float-right"></span>
+                    <span class="glyphicon glyphicon-briefcase"></span>
+                    Affiliation details
+                </h2>
+                </div>
+
+            </a>
+
+            <div id="org_infos_usection"
+                 class="panel-body ccsection-uform-body panel-collapse collapse out"
+                 role="tabpanel" aria-expanded="false">
+
+
+                 <!-- ORG QUESTIONS -->
+                 <div class="question">
+                   <div class="input-group">
+                     <label for="org" class="smlabel input-group-addon">* Parent Institution</label>
+                     <input id="org" name="org" maxlength="120"
+                            type="text" class="form-control autocomp" placeholder='eg "CNRS" or "University of Oxford"'
+                            value="{{ current_user.info.org }}">
+                   </div>
+                 </div>
+
+                 <div class="question">
+                   <div class="input-group">
+                     <label for="org_type" class="smlabel input-group-addon">* Institution Type</label>
+                     <select id="org_type" name="org_type"
+                             class="custom-select form-control"
+                             onchange="if(this.value=='other'){otherInstDivStyle.display = 'block'} else {otherInstDivStyle.display='none'}">
+                       <option selected value="university">University</option>
+                       <option value="public R&amp;D org">Public sector R&amp;D organization</option>
+                       <option value="public other org">Other public sector organization</option>
+                       <option value="private org">Private sector organization</option>
+                       <option value="none">None at the moment</option>
+                       <option value="other"
+                               onclick="otherInstDivStyle.display = 'block'"
+                               >Other</option>
+
+                     </select>
+                   </div>
+                   <!-- Other institution type <=> only if previous choice == 5 -->
+                   <div class="question conditional-q" id="other_org_div">
+                     <div class="input-group">
+                       <label for="other_org_type" class="smlabel input-group-addon">Other type</label>
+                       <input id="other_org_type" name="other_org_type" maxlength="120"
+                              type="text" class="form-control" placeholder="Clarify here the type of your parent institution">
+                     </div>
+                   </div>
+                 </div>
+
+
+             </div> <!-- /panel-body -->
+            <div class="panel-footer ccsection-footer">&nbsp</div>
+
+          </div>
+
+
+
+
           <!-- additional mapping infos -->
 
           <div class="panel ccsection-wrap">
@@ -378,6 +415,7 @@
                   <h2 class="ccsection"
                       title="This is additional data like picture, home page, etc.">
                     <span class="glyphicon glyphicon-collapse-down glyphicon-float-right"></span>
+                    <span class="glyphicon glyphicon-picture"></span>
                     Additional Personal data
                 </h2>
                 </div>
