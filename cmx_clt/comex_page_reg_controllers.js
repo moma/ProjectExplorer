@@ -1,0 +1,1 @@
+../static/js/comex_page_reg_controllers.js
