@@ -18,7 +18,7 @@
 {% block main_content %}
     <div class="row">
       <div class="spacer col-sm-1 col-md-1">&nbsp;</div>
-      <div class="my_form_box col-sm-8 col-md-8">
+      <div class="my-box col-sm-8 col-md-8">
 
         <!-- INTRODUCTION TEXT -->
         <div id="intro">
@@ -30,6 +30,7 @@
 
 
         <!-- ########################### ( FORM ) ########################## -->
+        <div class="uform">
         <form id="comex_login_form" enctype="multipart/form-data"
               method="post" onsubmit="console.info('login submitted')">
 
@@ -80,14 +81,15 @@
           <p id="main_message" class="legend" style="display:none"></p>
 
           <!--pseudo captcha using realperson from http://keith-wood.name/realPerson.html -->
-
-          <p class="legend">(A challenge for spam bots)</p>
           <div class="question input-group">
             <label for="my-captcha" class="smlabel input-group-addon">Code</label>
             <input id="my-captcha" name="my-captcha" style="max-width:60%"
                    type="text" class="form-control input-lg" placeholder="Enter the 5 letters you see beside =>"
                    onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)">
+            <p class="legend legend-float">(A challenge for spam bots)</p>
           </div>
+
+
 
           <!-- == S U B M I T == -->
           <!-- normal submit button
@@ -98,6 +100,7 @@
           </button>
 
         </form>
+        </div>
       </div>
 
         <!-- FOR DEBUG: test go-between with Doors -->

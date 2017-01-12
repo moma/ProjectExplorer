@@ -16,54 +16,61 @@
 // initialize and export cmxClt module
 var cmxClt = (function() {
 
-    ccModule = {}
+    cC = {}
 
     // cf corresponding css classes
-    ccModule.colorWhite = '#fff'
-    ccModule.colorRed = '#910'
-    ccModule.colorGreen = '#161'
-    ccModule.colorGrey = '#554'
-    ccModule.colorOrange = '#F96'
+    cC.colorWhite = '#fff'
+    cC.colorRed = '#910'
+    cC.colorGreen = '#161'
+    cC.colorGrey = '#554'
+    cC.colorOrange = '#F96'
+    cC.colorBlue = '#23A'
+
+
+    cC.strokeWhite = ".8px .8px #fff, -.8px -.8px #fff, -.8px .8px #fff, .8px -.8px #fff"
+    cC.strokeGrey = ".8px .8px #333, -.5px -.8px #333, -.8px .8px #333, .8px -.8px #333"
+    cC.strokeBlack = ".5px .5px #000, -.5px -.5px #000, -.5px .5px #000, .5px -.5px #000"
+    cC.strokeDeepGrey = "3px 3px 4px #333,-3px 3px 4px #333,-3px -3px 4px #333,3px -3px 4px #333"
+
 
     // the target columns in DB: tuple (name, mandatoryBool, group, type)
-    ccModule.COLS = [ ["doors_uid",              true,       "auto"   , "t"],
-                      ["last_modified_date",     true,       "auto"   , "d"],
-                      ["email",                  true,       "plsfill", "t"],
-                      ["country",                true,       "plsfill", "t"],
-                      ["first_name",             true,       "plsfill", "t"],
-                      ["middle_name",           false,       "pref",    "t"],
-                      ["last_name",              true,       "plsfill", "t"],
-                      ["initials",               true,       "plsfill", "t"],
-                      ["position",               true,       "plsfill", "t"],
-                      ["hon_title",             false,       "plsfill", "t"],
-                      ["interests_text",        false,       "plsfill", "t"],
-                      ["community_hashtags",    false,       "plsfill", "at"],
-                      ["gender",                false,       "plsfill", "m"],
-                      ["job_looking_date",      false,       "pref"   , "d"],
-                      ["home_url",              false,       "plsfill", "t"],
-                      ["pic_url",               false,       "pref"   , "t"],
-                      ["pic_file",              false,       "pref"   , "f"],
-                      // ==> *scholars* table
+    cC.COLS = [ ["doors_uid",              true,       "auto"   , "t"],
+                ["last_modified_date",     true,       "auto"   , "d"],
+                ["email",                  true,       "plsfill", "t"],
+                ["country",                true,       "plsfill", "t"],
+                ["first_name",             true,       "plsfill", "t"],
+                ["middle_name",           false,       "pref",    "t"],
+                ["last_name",              true,       "plsfill", "t"],
+                ["initials",               true,       "plsfill", "t"],
+                ["position",               true,       "plsfill", "t"],
+                ["hon_title",             false,       "plsfill", "t"],
+                ["interests_text",        false,       "plsfill", "t"],
+                ["community_hashtags",    false,       "plsfill", "at"],
+                ["gender",                false,       "plsfill", "m"],
+                ["job_looking_date",      false,       "pref"   , "d"],
+                ["home_url",              false,       "plsfill", "t"],
+                ["pic_url",               false,       "pref"   , "t"],
+                ["pic_file",              false,       "pref"   , "f"],
+                // ==> *scholars* table
 
-                      ["keywords",               true,       "plsfill", "at"],
-                      // ==> *keywords* table
+                ["keywords",               true,       "plsfill", "at"],
+                // ==> *keywords* table
 
-                      ["org",                    true,       "plsfill", "t"],
-                      ["org_type",               true,       "plsfill", "m"],
-                      ["team_lab",              false,       "pref"   , "t"],
-                      ["org_city",              false,       "pref"   , "t"]]
-                      // ==> *affiliations* table
-
+                ["org",                    true,       "plsfill", "t"],
+                ["org_type",               true,       "plsfill", "m"],
+                ["team_lab",              false,       "pref"   , "t"],
+                ["org_city",              false,       "pref"   , "t"]]
+                // ==> *affiliations* table
 
     // group "auto"    === filled by controllers
     // group "plsfill" === filled by user, ideally needed for a complete profile
     // group "pref"    === filled by user but not needed at all
 
-    ccModule.miniSanitize = function(aString) {
+    cC.miniSanitize = function(aString) {
         return aString.replace(/[^A-z0-9, :\(\)-]/, ' ').replace(/^ +| +$/, '')
     }
 
-    ccModule.makeRandomString = function (nChars) {
+    cC.makeRandomString = function (nChars) {
       var rando = ""
       var possible = "abcdefghijklmnopqrstuvwxyz0123456789";
       var len = possible.length
@@ -72,29 +79,31 @@ var cmxClt = (function() {
       return rando
     }
 
-    ccModule.ulListFromLabelsArray = function (cplArray, ulClassList, message) {
+    cC.ulListFromLabelsArray = function (cplArray, ulClassList, message) {
         ulClasses=["minilabels"].concat(ulClassList).join(" ")
         var resultHtml = ""
         if (message) {
-            resultHtml = ccModule.miniSanitize(message)
+            resultHtml = cC.miniSanitize(message)
         }
         resultHtml += '<ul class="'+ulClasses+'">'
         for (var i in cplArray) {
             var fname = cplArray[i][0]
             var flabel = cplArray[i][1]
-            resultHtml += '<li class="minilabel">'+flabel+'</li>'
+
+            // link works if anchorLabels was run
+            resultHtml += '<li class="minilabel"><a href="#'+fname+'_lbl'+'">'+flabel+'</a></li>'
         }
         resultHtml += '</ul>'
         return resultHtml
     }
 
     // basic inputs get normal on focus
-    ccModule.makeNormal = function (elt) {
+    cC.makeNormal = function (elt) {
         elt.style.fontWeight = "normal"
     }
 
     // basic inputs get bold on blur
-    ccModule.makeBold = function (elt){
+    cC.makeBold = function (elt){
       if (elt.value != "")   elt.style.fontWeight = "bold"
     }
 
@@ -104,33 +113,56 @@ var cmxClt = (function() {
     // ===============================
 
     // exposed functions and vars that will be used during the interaction
-    ccModule.uform = {}
-    ccModule.uform.theFormId = null
-    ccModule.uform.theForm = null
+    cC.uform = {}
+    cC.uform.theFormId = null
+    cC.uform.theForm = null
 
-    ccModule.uform.initialize
-    ccModule.uform.testFillField
-    ccModule.uform.stampTime
-    ccModule.uform.mainMessage = document.getElementById('main_message')
-    ccModule.uform.submitButton = document.getElementById('form_submit')
-    ccModule.uform.timestamp = document.getElementById('last_modified_date')
+    cC.uform.initialize
+    cC.uform.testFillField
+    cC.uform.stampTime
+    cC.uform.mainMessage = document.getElementById('main_message')
+    cC.uform.submitButton = document.getElementById('form_submit')
+    cC.uform.timestamp = document.getElementById('last_modified_date')
 
     // dates up to 2049/12/31
-    ccModule.uform.validDate = new RegExp( /^20[0-4][0-9]\/(?:0?[1-9]|1[0-2])\/(?:0?[1-9]|[1-2][0-9]|3[0-1])$/)
+    cC.uform.validDate = new RegExp( /^20[0-4][0-9]\/(?:0?[1-9]|1[0-2])\/(?:0?[1-9]|[1-2][0-9]|3[0-1])$/)
 
 
     // function definitions
     // =====================
 
+    // replace(fname =~ /<label for="([^"]+)"/,
+    //                  `<label for="${fname}" id="${fname}_lbl"`)
+    // use at init
+    cC.uform.anchorLabels = function (cols) {
+        for (var i in cols) {
+            var fName = cols[i][0] // (-:)
+            var itsLabel = document.querySelector(`label[for=${fName}]`)
+
+            // set id
+            if (itsLabel)  itsLabel.id = fName + '_lbl'
+        }
+
+        // also set the window to go 50px above label anchors
+        window.addEventListener("hashchange", function () {
+            window.scrollTo(window.scrollX, window.scrollY - 50);
+        });
+    }
+
+
     // initialize
     // -----------
-    ccModule.uform.initialize = function(aFormId, aValidationFun) {
-        ccModule.uform.theFormId = aFormId
-        ccModule.uform.theForm = document.getElementById(aFormId)
+    cC.uform.initialize = function(aFormId, aValidationFun) {
+        cC.uform.theFormId = aFormId
+        cC.uform.theForm = document.getElementById(aFormId)
 
-        ccModule.uform.theForm.onkeyup = aValidationFun
-        ccModule.uform.theForm.onchange = aValidationFun
-        ccModule.uform.theForm.onblur = aValidationFun
+        // todo pass formId and have a COLS by forms
+        cC.uform.anchorLabels(cC.COLS)
+
+        // events
+        cC.uform.theForm.onkeyup = aValidationFun
+        cC.uform.theForm.onchange = aValidationFun
+        cC.uform.theForm.onblur = aValidationFun
     }
 
     // testFillField
@@ -138,7 +170,7 @@ var cmxClt = (function() {
     // checks if mandatory fields are filled
     // checks if other plsfill ones are filled
     // highlights labels of missing mandatory fields
-    ccModule.uform.testFillField = function (aForm, params) {
+    cC.uform.testFillField = function (aForm, params) {
         // "private" copy
         var wholeFormData = new FormData(aForm)
 
@@ -153,13 +185,13 @@ var cmxClt = (function() {
         if (params.fixResidue == undefined)    params.fixResidue = false
 
         // let's go
-        for (var i in ccModule.COLS) {
-          //   console.info("testFillField COLS["+i+"]", ccModule.COLS[i])
+        for (var i in cC.COLS) {
+          //   console.info("testFillField COLS["+i+"]", cC.COLS[i])
 
-          var fieldName = ccModule.COLS[i][0]
-          var mandatory = ccModule.COLS[i][1]
-          var fieldGroup = ccModule.COLS[i][2]
-          var fieldType = ccModule.COLS[i][3]
+          var fieldName = cC.COLS[i][0]
+          var mandatory = cC.COLS[i][1]
+          var fieldGroup = cC.COLS[i][2]
+          var fieldType = cC.COLS[i][3]
 
           var actualValue = wholeFormData.get(fieldName)
 
@@ -209,7 +241,7 @@ var cmxClt = (function() {
             //   console.log("mandatoryMissingFields", fieldName)
 
               if (params.doHighlight) {
-                  labelElt.style.backgroundColor = ccModule.colorOrange
+                  labelElt.style.backgroundColor = cC.colorOrange
               }
           }
 
@@ -223,7 +255,7 @@ var cmxClt = (function() {
           else if (params.doHighlight) {
               labelElt.style.backgroundColor = ""
           }
-        } // end for val in ccModule.COLS
+        } // end for val in cC.COLS
 
         // return full form diagnostic and field census
         return [  valid,
@@ -233,9 +265,9 @@ var cmxClt = (function() {
 
     // simple timestamp on #last_modified_date element
     //                      ------------------
-    ccModule.uform.stampTime = function () {
+    cC.uform.stampTime = function () {
         var now = new Date()
-        ccModule.uform.timestamp.value = now.toISOString()
+        cC.uform.timestamp.value = now.toISOString()
     }
 
     // ===================================================================
@@ -243,13 +275,13 @@ var cmxClt = (function() {
     // ===================================================================
 
     // exposed functions and vars
-    ccModule.uform.checkShowPic
-    ccModule.uform.createInitials
-    ccModule.uform.checkJobDateStatus
-    ccModule.uform.fName = document.getElementById('first_name')
-    ccModule.uform.mName = document.getElementById('middle_name')
-    ccModule.uform.lName = document.getElementById('last_name')
-    ccModule.uform.jobLookingDateStatus = false
+    cC.uform.checkShowPic
+    cC.uform.createInitials
+    cC.uform.checkJobDateStatus
+    cC.uform.fName = document.getElementById('first_name')
+    cC.uform.mName = document.getElementById('middle_name')
+    cC.uform.lName = document.getElementById('last_name')
+    cC.uform.jobLookingDateStatus = false
 
 
     // function definitions, private vars and event handlers
@@ -264,7 +296,7 @@ var cmxClt = (function() {
     var picMsg = document.getElementById('picture_message')
     var imgReader = new FileReader();
 
-    ccModule.uform.checkShowPic = function (aForm, doHighlight) {
+    cC.uform.checkShowPic = function (aForm, doHighlight) {
         // TEMPORARY initial size already 200 kB, user has to do it himself
         var max_size = 204800
 
@@ -332,13 +364,13 @@ var cmxClt = (function() {
 
     // first, middle & last name ~~~> initials
     // ----------------------------------------
-    var nameInputs = [ccModule.uform.fName,
-                      ccModule.uform.mName,
-                      ccModule.uform.lName]
+    var nameInputs = [cC.uform.fName,
+                      cC.uform.mName,
+                      cC.uform.lName]
 
     var initialsInput = document.getElementById('initials')
 
-    ccModule.uform.createInitials = function() {
+    cC.uform.createInitials = function() {
       var apparentInitials = ""
         nameInputs.forEach ( function(nameInput) {
           var txt = nameInput.value
@@ -361,23 +393,68 @@ var cmxClt = (function() {
     // handlers: names to initials
     nameInputs.forEach ( function(nameInput) {
       if (nameInput) {
-        nameInput.onkeyup = ccModule.uform.createInitials
-        nameInput.onchange = ccModule.uform.createInitials
+        nameInput.onkeyup = cC.uform.createInitials
+        nameInput.onchange = cC.uform.createInitials
       }
     })
 
     // handler: show middlename button
-    var mnBtn = document.getElementById('btn-midname')
-    if(mnBtn) {
-        mnBtn.onclick= function() {
-          var mnDiv = document.getElementById('group-midname')
-          if (mnDiv.style.display == 'none') {
-            mnDiv.style.display = 'table'
-          }
-          else {
-            mnDiv.style.display = 'none'
-          }
+    var mnDiv = document.getElementById('group-midname')
+
+    if (mnDiv) {
+        var mnLabel = mnDiv.querySelector('label')
+
+        var mnBtn = document.getElementById('btn-midname')
+        var mnBtnIcon = document.getElementById('btn-midname-icon')
+
+        if(!mnBtn) {
+            console.warn('group-midname without btn-midname')
+            mnDiv.style.display = 'block'
         }
+        else {
+            mnBtn.onclick= function() {
+
+              if (mnDiv.style.display == 'none') {
+                mnDiv.style.display = 'table'
+                mnLabel.style.color="#23A"
+                setTimeout(function(){mnLabel.style.color=""}, 2000)
+
+                mnBtnIcon.classList.remove("glyphicon-plus")
+                mnBtnIcon.classList.add("glyphicon-arrow-down")
+                mnBtnIcon.style.color="#23A"
+                mnBtnIcon.style.textShadow = cC.strokeBlack
+              }
+
+              else {
+                mnDiv.style.display = 'none'
+
+                mnBtnIcon.classList.remove("glyphicon-arrow-down")
+                mnBtnIcon.classList.add("glyphicon-plus")
+                mnBtnIcon.style.color=""
+                mnBtnIcon.style.textShadow = ""
+              }
+            }
+        }
+    }
+
+    cC.uform.displayMidName = function() {
+        mnDiv.style.display = 'table'
+        mnLabel.style.color="#23A"
+        setTimeout(function(){mnLabel.style.color=""}, 2000)
+
+        mnBtnIcon.classList.remove("glyphicon-plus")
+        mnBtnIcon.classList.add("glyphicon-arrow-down")
+        mnBtnIcon.style.color="#23A"
+        mnBtnIcon.style.textShadow = cC.strokeBlack
+    }
+
+    cC.uform.hideMidName = function() {
+        mnDiv.style.display = 'none'
+
+        mnBtnIcon.classList.remove("glyphicon-arrow-down")
+        mnBtnIcon.classList.add("glyphicon-plus")
+        mnBtnIcon.style.color=""
+        mnBtnIcon.style.textShadow = ""
     }
 
 
@@ -388,9 +465,9 @@ var cmxClt = (function() {
     var jobDateMsg = document.getElementById('job_date_message')
     var jobLookingDiv = document.getElementById('job_looking_div')
 
-    ccModule.uform.checkJobDateStatus = function () {
-      ccModule.uform.jobLookingDateStatus = (jobBool.value == "No" || ccModule.uform.validDate.test(jobDate.value))
-      if (!ccModule.uform.jobLookingDateStatus) {
+    cC.uform.checkJobDateStatus = function () {
+      cC.uform.jobLookingDateStatus = (jobBool.value == "No" || cC.uform.validDate.test(jobDate.value))
+      if (!cC.uform.jobLookingDateStatus) {
           jobDateMsg.style.color = cmxClt.colorRed
           jobDateMsg.innerHTML = 'Date is not yet in the valid format YYYY/MM/DD'
       }
@@ -411,14 +488,14 @@ var cmxClt = (function() {
                 jobDate.value=''
             }
         }
-        jobDate.onkeyup = ccModule.uform.checkJobDateStatus
-        jobDate.onchange = ccModule.uform.checkJobDateStatus
+        jobDate.onkeyup = cC.uform.checkJobDateStatus
+        jobDate.onchange = cC.uform.checkJobDateStatus
     }
 
 
     // ========= end of advanced form controls ===========
 
-    return ccModule
+    return cC
 }()) ;
 
 console.log("user shared load OK")

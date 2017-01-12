@@ -7,6 +7,17 @@
 
   <link type=text/css rel=stylesheet href="{{ url_for('static', filename='css/comex_alt.css') }}">
 
+
+  <!-- for #mini-explorer -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='explorerlibs/jquery/jquery-ui.css') }}" media="screen">
+  <link rel="stylesheet" href="{{ url_for('static', filename='explorerlibs/bootstrap/css/bootstrap.css') }}" media="screen">
+  <link rel="stylesheet" href="{{ url_for('static', filename='explorerlibs/css2/freshslider.css') }}" media="screen">
+  <link rel="stylesheet" href="{{ url_for('static', filename='explorerlibs/css2/custom.css') }}" media="screen">
+  <link rel="stylesheet" href="{{ url_for('static', filename='explorerlibs/css2/sidebar.css') }}" media="screen">
+  <link rel="stylesheet" href="{{ url_for('static', filename='explorerlibs/bootswatch/css/bootswatch.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='explorerlibs/css2/font.css') }}" type="text/css">
+
+
 {% endblock %}
 
 <!-- ======================================================================= -->
@@ -17,7 +28,7 @@
     <div class="row spacerrow">&nbsp;</div>
     <div class="row">
       <div class="spacer col-lg-2 col-md-1 hidden-sm-down">&nbsp;</div>
-      <div class="my_form_box col-lg-7 col-md-9 col-sm-12">
+      <div class="my-box col-lg-7 col-md-9 col-sm-12">
 
         <!-- ##################### ( WELCOME ) #################### -->
         <div id="welcome">
@@ -202,6 +213,260 @@
 
 
 
+
+
+        <!-- colored notebook section: EXPLORE -->
+        <div class="row spacerrow">&nbsp;</div>
+        <div class="row banner-row" style="background-color:#00B4E6">
+            <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
+            <div class="col-lg-3 col-md-3 col-sm-10">
+                <div class="panel panel-primary action-announce">
+                    <div class="panel-body">
+                        <div class="cmx-action-wrap">
+                            <img src="{{ url_for('static', filename='img/action_explore.png') }}"
+                                class="cmx-action">
+                        </div>
+                        <h2 class="oldstyle">Graph Explorer</h2>
+                        <p class="mini-hero">
+                            Use our explorer view to browse the map of the community.
+                            <br/>
+                            <br/>
+                            (It's a <strong> network of scholars </strong> connected by their research subjects.)
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-7 col-md-7 col-sm-10 wwwpanel">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <p style="float:right">
+                            <a target="_blank" href="/explorerjs.html?type=%22filter%22&nodeidparam=%22%257B%257D%22">
+                                <span class="glyphicon glyphicon-new-window"></span>
+                                Open in another window
+                            </a>
+                        </p>
+                    </div>
+                    <div class="panel-body wwwthumb">
+
+
+
+
+
+
+
+
+
+
+                        <div class="container container-fluid" id="mini-explorer">
+                            <!-- this is the tweakbar -->
+                            <div id="defaultop" class="navbar navbar-default">
+                                <div class="navbar-collapse collapse navbar-responsive-collapse">
+                                  <div id="left" style="margin:0em 2em;">
+                                          <ul class="nav navbar-nav">
+                                              <li>
+                                                 <a>
+                                                   <button type="button" id="changetype" class="btn btn-success btn-sm">Change Type</button>
+                                                 </a>
+                                              </li>
+
+
+                                              <li>
+                                                 <a>
+                                                   <button type="button" id="changelevel" class="btn btn-info btn-sm" disabled>Change Level</button>
+                                                 </a>
+                                              </li>
+
+
+                                               <li>
+                                                 <a>
+                                                  <div style="margin:0em 2em;" id="unranged-value"></div>
+                                                  <label style="margin:0em 2em;" for="unranged-value">selector size</label>
+                                                 </a>
+                                               </li>
+                                          </ul>
+
+
+                                          <ul id="category-A" class="nav navbar-nav navbar-right">
+                                                <li>
+                                                    <ul style="list-style-type: none; margin:0em 1em;">
+                                                        <li><div id="sliderANodeWeight"></div></li>
+                                                        <li><div id="sliderAEdgeWeight"></div></li>
+                                                        <li><div id="sliderANodeSize"></div></li>
+                                                    </ul>
+                                                </li>
+                                          </ul>
+
+                                          <ul id="filterslegend" class="nav navbar-nav navbar-right">
+                                                <li>
+                                                    <ul style="list-style-type: none;">
+                                                        <li>Nodes</li>
+                                                        <li>Edges</li>
+                                                        <li>Size</li>
+                                                    </ul>
+                                                </li>
+                                          </ul>
+
+                                          <ul id="category-B" class="nav navbar-nav navbar-right">
+                                                <li>
+                                                    <ul style="list-style-type: none; margin:0em 1em;">
+                                                        <li><div id="sliderBNodeWeight"></div></li>
+                                                        <li><div id="sliderBEdgeWeight"></div></li>
+                                                        <li><div id="sliderBNodeSize"></div></li>
+                                                    </ul>
+                                                </li>
+                                          </ul>
+
+                                          <ul class="nav navbar-nav navbar-right">
+                                             <li><a>
+                                                      <input type="checkbox" id="checkboxdiv" onclick="alertCheckBox(this);">Add</input>
+                                             </a></li>
+                                          </ul>
+                                          <ul class="nav navbar-nav navbar-right">
+                                             <li><a>
+                                                      <input id="searchinput"  autocomplete="off" class="form-control input-sm col-lg-8" placeholder="Search" type="text">
+                                             </a></li>
+                                          </ul>
+
+                                          <ul id="colorGraph" class="nav navbar-nav navbar-right">
+                                             <li class="dropdown">
+                                               <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                                      <img title="Set Colors" src="{{ url_for('static', filename='explorerlibs/img2/colors.png') }}" width="20px"><b class="caret"></b></img>
+                                               </a>
+                                              <ul class="dropdown-menu">
+                                                <li><a href="#" onclick='clustersBy("country")'>By Country</a></li>
+                                                <li><a href="#" onclick='clustersBy("acronym")'>By Acronym</a></li>
+                                                <li><a href="#" onclick='clustersBy("default")'>By Default</a></li>
+                                                <li class="divider"></li>
+                                                <li><a href="#"> <span class="glyphicon glyphicon-repeat"></span> <strike>Properties</strike></a></li>
+                                              </ul>
+                                             </li>
+                                          </ul>
+
+
+
+                                        </div>
+                                </div><!-- /.nav-collapse -->
+                            </div><!-- /.navbar -->
+
+
+                            <div id="wrapper">
+
+
+                              <div id="zonecentre">
+
+
+                                  <!-- Page content -->
+                                  <div id="sigma-example"></div>
+
+                                  <div style="visibility: hidden;" id="sigma-othergraph"></div>
+
+                                  <div id="semLoader" style="position:absolute; top:50%; left:40%; width:80px; visibility: hidden;">
+                                    <img src="{{ url_for('static', filename='explorerlibs/img2/loading-bar.gif') }}"></img>
+                                  </div>
+
+                                  <ul id="ctlzoom">
+
+                                           <li>
+                                              <div id="unfold">
+                                                  <a href="#" id="aUnfold" class="rightarrow"></a>
+                                              </div>
+                                          </li>
+
+                                           <li>
+                                              <a href="#" id="geomapicon" onclick="$('#geomapmodal').modal('show'); callGeomap();">
+                                                <img title="World Map Distribution" width="34px" src="{{ url_for('static', filename='explorerlibs/img2/world.png') }}"></img>
+                                              </a>
+                                          </li>
+
+
+                                           <li>
+                                              <a href="#" id="snapicon" onclick="saveGraphIMG();" >
+                                                <img title="Take a photo!" width="34px" src="{{ url_for('static', filename='explorerlibs/img2/camera.png') }}"></img>
+                                              </a>
+                                          </li>
+
+                                           <li>
+                                              <a href="#" id="saveAs">
+                                                <img width="30px" title="Save As..." src="{{ url_for('static', filename='explorerlibs/img2/save.png') }}"></img>
+                                              </a>
+                                          </li>
+
+                                          <li>
+                                              <a href="#" id="zoomPlusButton" title="S'approcher"> </a>
+                                          </li>
+
+                                          <li id="zoomSliderzone">
+                                              <div id="zoomSlider"></div>
+                                          </li>
+
+                                          <li>
+                                              <a href="#" id="zoomMinusButton" title="S'éloigner"> </a>
+                                          </li>
+
+
+                                          <li>
+                                              <a href="#" id="lensButton"> </a>
+                                          </li>
+
+                                          <li>
+                                              <a href="#" id="edgesButton"> </a>
+                                          </li>
+                                  </ul>
+                              </div>
+
+
+                              <!-- Sidebar -->
+                              <div id="leftcolumn">
+                                <div id="tips"></div>
+                                <div id="names"></div>
+
+                                <br>
+                                <div id="tab-container" class='tab-container' style="display: none;">
+
+                                   <ul class='etabs'>
+                                     <li id="taboppos" class='tab'><a href="#tabs1">Opposite-Neighbors</a></li>
+                                     <li id="tabneigh" class='tab'><a href="#tabs2">Neighbors</a></li>
+                                   </ul>
+
+                                   <div class='panel-container'>
+                                      <div id="tabs1">
+                                        <div id="opossiteNodes"></div>
+                                      </div>
+                                      <div id="tabs2">
+                                        <div id="sameNodes"></div>
+                                      </div>
+                                   </div>
+
+                                </div>
+
+                                <div id="information"></div>
+                              </div>
+
+                            </div>
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+                </div>
+            </div>
+            <div class="spacer col-lg-1 col-md-2 hidden-sm-down">&nbsp;</div>
+        </div>
+
+
+
+
+
 {% endblock %}
 
 <!-- ======================================================================= -->
@@ -211,9 +476,55 @@
         //               ---------
         // a copy of the user info in json
         //               ---------
-        var uinfo = {{current_user.json_info|safe}};
+        var uinfo = {{ current_user.json_info if current_user.info else "null" | safe }};
     </script>
 
     <!--  our js  -->
     <script src="{{ url_for('static', filename='js/comex_user_shared.js') }}"></script>
+
+
+
+
+      <!-- for #mini-explorer -->
+
+          <script src="{{ url_for('static', filename='explorerlibs/jquery/jquery-1.10.2.js') }}" type="text/javascript"></script>
+          <script src="{{ url_for('static', filename='explorerlibs/jquery/jquery-ui.js') }}" type="text/javascript"></script>
+          <script src="{{ url_for('static', filename='explorerlibs/jquery/jquery.ba-dotimeout.min.js') }}" type="text/javascript"></script>
+          <script src="{{ url_for('static', filename='explorerlibs/jquery/jquery.mousewheel.min.js') }}" type="text/javascript"></script>
+
+          <script type="text/javascript" src="{{ url_for('static', filename='explorerlibs/freshslider.1.0.js') }}"></script>
+          <script src="{{ url_for('static', filename='explorerlibs/readmore.js') }}" type="text/javascript"></script>
+          <script src="{{ url_for('static', filename='explorerlibs/jquery/jquery.easytabs.min.js') }}" type="text/javascript"></script>
+
+          <script src="{{ url_for('static', filename='explorerlibs/bootstrap/js/bootstrap.min.js') }}"></script>
+          <script src="{{ url_for('static', filename='explorerlibs/bootswatch/js/bootswatch.js') }}"></script>
+          <script src="{{ url_for('static', filename='explorerlibs/bootstrap/js/bootstrap-modal.js') }}" type="text/javascript"></script>
+          <script src="{{ url_for('static', filename='explorerlibs/bootstrap/js/bootstrap-hover-dropdown.min.js') }}" type="text/javascript"></script>
+
+          <script src="{{ url_for('static', filename='tinawebJS/globalUtils.js') }}" type="text/javascript"></script>
+
+          <script src="{{ url_for('static', filename='explorerlibs/geomap2/js/raphael/raphael-min.js') }}" charset="utf-8" ></script>
+          <script src="{{ url_for('static', filename='explorerlibs/geomap2/js/jquery.mapael.js') }}" charset="utf-8" ></script>
+          <script src="{{ url_for('static', filename='explorerlibs/geomap2/js/maps/world_countries.js') }}" charset="utf-8" ></script>
+          <script src="{{ url_for('static', filename='explorerlibs/geomap2/examples.js') }}" charset="utf-8" ></script>
+          <script src="{{ url_for('static', filename='explorerlibs/geomap2/js/countries_iso3166.js') }}" charset="utf-8" ></script>
+          <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='explorerlibs/geomap2/css/geo.css') }}" />
+
+
+          <script src="{{ url_for('static', filename='tinawebJS/sigma.min.js') }}" type="text/javascript" language="javascript"></script>
+          <script src="{{ url_for('static', filename='tinawebJS/sigma.forceatlas2.js') }}" type="text/javascript" language="javascript"></script>
+          <script src="{{ url_for('static', filename='tinawebJS/settings_explorerjs.js') }}" type="text/javascript" language="javascript"></script>
+          <script src="{{ url_for('static', filename='tinawebJS/sigma.parseCustom.js') }}" type="text/javascript" language="javascript"></script>
+          <script src="{{ url_for('static', filename='tinawebJS/extras_explorerjs.js') }}" type="text/javascript" language="javascript"></script>
+          <script src="{{ url_for('static', filename='tinawebJS/sigmaUtils.js') }}" type="text/javascript" language="javascript"></script>
+          <script src="{{ url_for('static', filename='tinawebJS/methods.js') }}" type="text/javascript" language="javascript"></script>
+          <script src="{{ url_for('static', filename='tinawebJS/minimap.js') }}" type="text/javascript" language="javascript"></script>
+          <script src="{{ url_for('static', filename='tinawebJS/enviroment.js') }}" type="text/javascript" language="javascript"></script>
+          <script src="{{ url_for('static', filename='tinawebJS/asyncFA2.js') }}" type="text/javascript" language="javascript"></script>
+          <script src="{{ url_for('static', filename='tinawebJS/DataScanner.js') }}" type="text/javascript" language="javascript"></script>
+          <script src="{{ url_for('static', filename='tinawebJS/main.js') }}" type="text/javascript" language="javascript"></script>
+
+        <script type="text/javascript">
+            $('#tab-container').easytabs({updateHash:false});
+        </script>
 {% endblock %}

@@ -18,7 +18,7 @@
 {% block main_content %}
     <div class="row">
       <div class="spacer col-sm-1 col-md-1">&nbsp;</div>
-      <div class="my_form_box col-sm-8 col-md-8">
+      <div class="my-box col-sm-8 col-md-8">
 
         <!-- INTRODUCTION TEXT -->
         <div id="intro">
@@ -33,6 +33,7 @@
 
 
         <!-- ########################### ( FORM ) ########################## -->
+      <div class="uform">
         <form id="comex_reg_form" enctype="multipart/form-data"
               method="post" onsubmit="console.info('submitted')">
 
@@ -51,6 +52,7 @@
               <!-- NAME & COUNTRY -->
               <h3 class="formcatfirst"> Basic infos </h3>
 
+
               <div class="question input-group">
                 <label for="first_name" class="smlabel input-group-addon">
                   * First name
@@ -58,11 +60,22 @@
                 <input id="first_name" name="first_name" maxlength="30"
                        type="text" class="form-control" placeholder="prénom"
                        onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)">
+               <div class="input-group-addon"
+                    title="Add middle name(s)">
+                    <button class="btn btn-xs btn-default operation"
+                            title="Opens the input for middle name(s)" id="btn-midname"
+                            type="button">
+                      <span id="btn-midname-icon"
+                            class="glyphicon glyphicon-plus"></span>
+                      Add name
+                    </button>
+               </div>
               </div>
 
               <!-- optionnel -->
-              <div id="group-midname" class="question input-group" style='display:none'>
-                <label for="middle_name" class="smlabel input-group-addon">
+              <div id="group-midname" class="question input-group" style='display:none; opacity: .8;'>
+                <label for="middle_name" style="color:#23A;"
+                       class="smlabel input-group-addon">
                   Middle name
                 </label>
                 <input id="middle_name" name="middle_name" maxlength="30"
@@ -79,18 +92,9 @@
                        onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)">
               </div>
 
-              <button class="btn btn-xs btn-default operation"
-                      title="Add a middle name" id="btn-midname"
-                      type="button" style="margin:1em; float:right">
-                <span class="glyphicon glyphicon-plus"></span>
-                Add middle name
-              </button>
-
-              <div class="question input-group">
-                <label for="initials" class="smlabel input-group-addon">* Initials</label>
                 <input id="initials" name="initials" maxlength="7"
-                       type="text" class="form-control" placeholder="initiales">
-              </div>
+                       type="text"  hidden
+                        placeholder="initiales">
 
               <div class="question input-group">
                 <label for="country" class="smlabel input-group-addon">
@@ -389,14 +393,14 @@
               <h3 class="formcat">Verify and submit</h3>
 
               <!--pseudo captcha using realperson from http://keith-wood.name/realPerson.html -->
-
-              <p class="legend">(A challenge for spam bots)</p>
               <div class="question input-group">
                 <label for="my-captcha" class="smlabel input-group-addon">Code</label>
                 <input id="my-captcha" name="my-captcha" style="max-width:60%"
                        type="text" class="form-control input-lg" placeholder="Enter the 5 letters you see beside =>"
                        onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)">
+                <p class="legend legend-float">(A challenge for spam bots)</p>
               </div>
+
 
               <!-- == S U B M I T == -->
               <!-- button instead of input.submit to validate before real submit action -->
@@ -408,8 +412,8 @@
               </button>
 
 
-            </form>
-        </div>
+          </div>
+        </form>
 
         <!-- FOR DEBUG: test go-between with Doors -->
         <!-- <p>
@@ -423,8 +427,9 @@
                 test doors userExists
             </button>
         </p> -->
-
       </div>
+      </div>
+
       <div class="spacer col-sm-2 col-md-2">&nbsp;</div>
     </div>
 

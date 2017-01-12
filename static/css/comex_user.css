@@ -3,6 +3,7 @@
 .green { color:#161 ; }
 .grey  { color:#554 ; }
 .orange  { color:#F96 ; }
+.blue  { color:#23A ; }
 
 
 
@@ -10,9 +11,24 @@
 /* classic look */
 body {
   margin: 0;
-  font-family: Calibri, "Helvetica Neue", Helvetica, sans-serif;
+  font-family: "Droid Sans", Calibri, "Helvetica Neue", Helvetica, sans-serif;
+  letter-spacing: -0.03em;
   color: #333;
-  background-color:   #fff;
+  background-color: #fff;
+  line-height: .85em;
+}
+
+
+/* reg, profile, login, etc.... */
+div.uform {
+  background-color: #ddd;
+  padding: 20px 40px 70px 40px;
+  margin: 50px 50px 10px 50px;
+}
+
+p#doors_ret_msg {
+    font-weight: bold;
+    text-shadow: 2px;
 }
 
 /* not used at present but could be useful for autompleted inputs */
@@ -26,10 +42,11 @@ body {
 
 /* for intro text */
 .mini-hero {
-  margin-top: 1.5em;
-  font-size: 24px;
+  margin-top: 7px;
+  font-size: 20px;
   line-height: 27px;
-  font-family: Calibri, "Helvetica Neue", Helvetica, "Droid Sans", sans-serif;
+  font-family: "Droid Sans", Calibri, "Helvetica Neue", Helvetica, sans-serif;
+  padding-bottom: .3em;
 }
 
 
@@ -53,7 +70,7 @@ body {
 .question {
   padding: 0 1em;
   margin-bottom: 2em;
-  max-width: 52em;
+  max-width: 52em;           /* FORMWIDTH */
 }
 
 .conditional-q {
@@ -61,14 +78,16 @@ body {
 }
 
 input.readonly {
+    color: #fff;
     font-weight: bold;
-    background-color: #CCC !important;
+    background-color: #303030 !important;
 }
 
 #cnil_warning {
   /*text-align: center;*/
 }
 
+/* form operation buttons for instance add middle name */
 .operation {
   color: #554 ;
 }
@@ -77,7 +96,7 @@ input.readonly {
 .navlink {
   font-size: 1.2em;
   font-weight: bold;
-  margin: .2em 0 0 .4em;
+  margin: 3px 0 0 6px;
 }
 
 .navlink:hover {
@@ -99,6 +118,19 @@ input.readonly {
   margin: 0;
 }
 
+/* floats on the right of the question if set after it */
+.legend-float {
+  float:right;
+  text-align:center;
+  font-size: 70%;
+  padding-right: 2.1em;
+}
+
+input#my-captcha{
+    height: 5em;
+    font-size: .8em;
+}
+
 /* for code blocks or urls */
 .code {
   font-family: "Fira Mono", "Droid Sans Mono", monospace;
@@ -109,53 +141,34 @@ input.readonly {
   border-radius: .2em;
 }
 
-
-/* the picture preview */
-#box_show_pic {
-    background-color: #554;
-    border: none ;
-    width:250px;
-    height:250px;
-    margin-bottom: 2em;
-    display: none;
-}
-#show_pic {
-    /* styled via js in static/js/comex_reg_form_controllers.js */
+/* like a dialog icon */
+.glyphicon-float-left {
+  float: left ;
+  font-size: 150% ;
+  vertical-align:text-top;
 }
 
 /* page sections: style snippets from old bootstrap h2 */
 h2.oldstyle {
-  font-family: Ubuntu, sans-serif;
-  font-size: 24px;
+  font-family: "Droid Sans", Calibri, Ubuntu, sans-serif;
   font-weight: bold;
-  line-height: 18px ;
+  /*font-size: 2.5em;*/
 }
 
 /* big categories: like form sections etc. */
 h3.formcat {
-  margin-top: 2em;
+  font-size: 20px;
+  padding-top: 1em;
+  font-weight: bold;
+  color: #910;
+  /*TODO accordeon*/
 }
 
 h3.formcatfirst {
-  margin-top: .5em;
-}
-
-.spacerrow {
-  height: 2em;
-}
-
-.bigspacerrow {
-  height: 15em;
-}
-
-.realperson-challenge {
-  float:right;
-}
-.realperson-text {
-  padding: 0 2em;
-}
-.realperson-regen {
-  color: #554 ;
+  font-size: 20px;
+  margin-top: .2em;
+  font-weight: bold;
+  color: #910;
 }
 
 .raw-responses {
@@ -168,19 +181,7 @@ h3.formcatfirst {
 }
 
 
-/* the main validation message (a special legend) */
-#main_message {
-  color: white ;
-  font-size: 150%;
-  text-align:center;
-
-  background-color: #988 ;
-  border-radius: 2em;
-  padding: 1em 3em;
-  margin-bottom: 2em;
-}
-
-
+/**/
 ul.minilabels {
   padding-top: .5em;
   list-style-type: none;
@@ -191,4 +192,65 @@ ul.minilabels {
 
 li.minilabel {
     font-weight: bold ;
+}
+
+
+/**/
+.realperson-challenge {
+  float:right;
+}
+.realperson-text {
+  padding: 0 2em;
+}
+.realperson-regen {
+  color: #554 ;
+}
+
+
+/**/
+.smallspacerrow {
+  height: 2em;
+}
+
+.spacerrow {
+  height: 8em;
+}
+
+.bigspacerrow {
+  height: 15em;
+}
+
+
+/* the main validation message (a special legend) */
+#main_message {
+  color: white ;
+  font-size: 140%;
+  text-align:center;
+  line-height: 1.5em;
+
+  background-color: #988 ;
+  border-radius: 2em;
+  padding: 1em 3em;
+  margin-bottom: 2em;
+}
+
+
+/* the picture preview */
+#box_show_pic {
+    background-color: #554;
+    border: none ;
+    width:250px;
+    height:250px;
+    margin-bottom: 2em;
+    display: none;
+}
+
+/* styled via cmxClt.uform.checkShowPic js in static/js/comex_user_shared.js */
+#show_pic {
+}
+
+
+/*Show middlename button*/
+#btn-midname {
+    opacity: .8;
 }

@@ -11,7 +11,7 @@
 {% block main_content %}
     <div class="row">
       <div class="spacer col-sm-1 col-md-1">&nbsp;</div>
-      <div class="my_form_box col-sm-8 col-md-8">
+      <div class="my-box col-sm-8 col-md-8">
 
         <!-- ##################### ( PROFILE OVERVIEW ) #################### -->
 
@@ -31,6 +31,7 @@
         </div>
 
         <!-- ########################### ( FORM ) ########################## -->
+        <div class="uform">
         <form id="comex_profile_form" enctype="multipart/form-data"
               method="post" onsubmit="console.info('submitted')">
 
@@ -52,7 +53,8 @@
 
 
           <!-- NAME & COUNTRY -->
-          <h3 class="formcatfirst"> Basic infos </h3>
+          <h3 class="formcat"> Basic infos </h3>
+
 
           <div class="question input-group">
             <label for="first_name" class="smlabel input-group-addon">
@@ -62,6 +64,17 @@
                    type="text" class="form-control" placeholder="prénom"
                    onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
                    value="{{ current_user.info.first_name }}">
+
+            <div class="input-group-addon"
+                 title="Add middle name(s)">
+                 <button class="btn btn-xs btn-default operation"
+                         title="Opens the input for middle name(s)" id="btn-midname"
+                         type="button">
+                   <span id="btn-midname-icon"
+                         class="glyphicon glyphicon-plus"></span>
+                   Add name
+                 </button>
+            </div>
           </div>
 
           <!-- optionnel -->
@@ -85,12 +98,6 @@
                    value="{{ current_user.info.last_name }}">
           </div>
 
-          <button class="btn btn-xs btn-default operation"
-                  title="Add a middle name" id="btn-midname"
-                  type="button" style="margin:1em; float:right">
-            <span class="glyphicon glyphicon-plus"></span>
-            Add middle name
-          </button>
 
           <div class="question input-group">
             <label for="initials" class="smlabel input-group-addon">* Initials</label>
@@ -201,7 +208,7 @@
           </div>
 
         <!-- OTHER PERSONAL INFO -->
-        <h3 class="formcatfirst"> Complementary information </h3>
+        <h3 class="formcat"> Complementary information </h3>
 
         <p class="mini-hero">
             The <strong>home page (url)</strong>, <strong>picture (url or file)</strong> and <strong>free description</strong> will allow your neighbours to know you a little better.
@@ -316,7 +323,7 @@
           </input>
 
 
-          <p> TEST UID {{ current_user.uid | safe }} </p>
+          <!-- <p> TEST UID {{ current_user.uid | safe }} </p> -->
 
           <div class="row spacerrow">&nbsp;</div>
 
@@ -332,6 +339,7 @@
           </div>
 
         </form>
+        </div>
 
       </div>
       <div class="spacer col-sm-2 col-md-2">&nbsp;</div>

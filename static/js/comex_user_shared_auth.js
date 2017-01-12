@@ -17,68 +17,69 @@
 
 
 // cmxClt module augmentation
-// POSS remove ccModule.auth. namespace prefix from local scope vars
-cmxClt = (function(ccModule) {
+// POSS remove cC.auth. namespace prefix from local scope vars
+cmxClt = (function(cC) {
     // common vars to authenticating/registering in user area
-    ccModule.uauth = {}
+    cC.uauth = {}
 
-    ccModule.uauth.emailIdSupposedToExist = null
+    cC.uauth.emailIdSupposedToExist = null
 
-    ccModule.uauth.uidInput = document.getElementById('doors_uid')
-    ccModule.uauth.email    = document.getElementById('email')
-    ccModule.uauth.emailLbl = document.querySelector('label[for=email]')
+    cC.uauth.uidInput = document.getElementById('doors_uid')
+    cC.uauth.email    = document.getElementById('email')
+    cC.uauth.emailLbl = document.querySelector('label[for=email]')
 
     // str of the form: doors_hostname:doors_port
-    ccModule.uauth.doorsConnectParam = document.getElementById('doors_connect').value
+    cC.uauth.doorsConnectParam = document.getElementById('doors_connect').value
 
     // captcha
     // -------
-    ccModule.uauth.captcha = document.getElementById('my-captcha')
+    // div
+    cC.uauth.captcha = document.getElementById('my-captcha')
 
     // param for generation & validation
-    ccModule.uauth.realCaptchaLength = 5
+    cC.uauth.realCaptchaLength = 5
 
     // captcha init
-    $(cmxClt.uauth.captcha).realperson({length: ccModule.uauth.realCaptchaLength})
+    $(cmxClt.uauth.captcha).realperson({length: cC.uauth.realCaptchaLength})
 
     // captchaHash should be appended by itself if normal submit,
     // but otherwise we need to do it ourselves with collectCaptcha()
-    ccModule.uauth.captchaCheck = document.getElementById('my-captchaHash')
-    ccModule.uauth.collectCaptcha = function() {
-        ccModule.uauth.captchaCheck.value = $(cmxClt.uauth.captcha).realperson('getHash')
+    cC.uauth.captchaCheck = document.getElementById('my-captchaHash')
+    cC.uauth.collectCaptcha = function() {
+        cC.uauth.captchaCheck.value = $(cmxClt.uauth.captcha).realperson('getHash')
     }
 
     // doors-related html elements
     // ---------------------------
-    ccModule.uauth.doorsMessage = document.getElementById('doors_ret_message')
-    ccModule.uauth.doorsIconMessage = document.getElementById('doors_ret_icon_msg')
-    ccModule.uauth.doorsIcon = document.getElementById('doors_ret_icon')
+    cC.uauth.doorsMessage = document.getElementById('doors_ret_message')
+    cC.uauth.doorsIconMessage = document.getElementById('doors_ret_icon_msg')
+    cC.uauth.doorsIcon = document.getElementById('doors_ret_icon')
 
     // cmxClt.uauth flags (usually needed to even get the submitButton)
-    ccModule.uauth.emailStatus = false
-    ccModule.uauth.passStatus = false
-    ccModule.uauth.captchaStatus = false
+    cC.uauth.emailStatus = false
+    cC.uauth.passStatus = false
+    cC.uauth.captchaStatus = false
 
-    ccModule.uauth.earlyValidate = function() {
-        // will update the ccModule.uauth.emailStatus boolean
-        ccModule.uauth.testMailFormatAndExistence(ccModule.uauth.email.value, ccModule.uauth.emailIdSupposedToExist)
+    cC.uauth.earlyValidate = function() {
+        // will update the cC.uauth.emailStatus boolean
+        cC.uauth.testMailFormatAndExistence(cC.uauth.email.value, cC.uauth.emailIdSupposedToExist)
 
-        // will update ccModule.uauth.passStatus
-        if (ccModule.uauth.pass2) {
-            ccModule.uauth.doubleCheck()
+        // will update cC.uauth.passStatus
+        if (cC.uauth.pass2) {
+            cC.uauth.doubleCheck()
         }
         else {
-            ccModule.uauth.checkPassFormat()
+            cC.uauth.checkPassFormat()
         }
 
-        // finally also update ccModule.uauth.captchaStatus
-        ccModule.uauth.captchaStatus = (ccModule.uauth.captcha.value.length == ccModule.uauth.realCaptchaLength)
+        // finally also update cC.uauth.captchaStatus
+        cC.uauth.captchaStatus = (cC.uauth.captcha.value.length == cC.uauth.realCaptchaLength)
     }
 
 
     // email validation and side-effects
     // =================================
-    ccModule.uauth.lastEmailValueCheckedDisplayed = null
+    cC.uauth.lastEmailValueCheckedDisplayed = null
 
     // function testMailFormatAndExistence
     // ------------------------------------
@@ -90,9 +91,9 @@ cmxClt = (function(ccModule) {
     //    format ok, doorsStatus != expectExists => red
     //    format ok, doorsStatus == expectExists => green
 
-    ccModule.uauth.testMailFormatAndExistence = function (emailValue, expectExists) {
+    cC.uauth.testMailFormatAndExistence = function (emailValue, expectExists) {
 
-      if (ccModule.uauth.email.value != ccModule.uauth.lastEmailValueCheckedDisplayed) {
+      if (cC.uauth.email.value != cC.uauth.lastEmailValueCheckedDisplayed) {
 
           // tests if email is well-formed
           // TODO: better extension and allowed chars set
@@ -100,17 +101,18 @@ cmxClt = (function(ccModule) {
 
           if (! emailFormatOk) {
               // restore original lack of message
-              ccModule.uauth.doorsMessage.title = 'The email will be checked in our DB after you finish typing'
-              ccModule.uauth.doorsIcon.classList.remove('glyphicon-remove')
-              ccModule.uauth.doorsIcon.classList.remove('glyphicon-ok')
-              ccModule.uauth.doorsIcon.classList.add('glyphicon-question-sign')
-              ccModule.uauth.doorsIcon.style.color = ccModule.colorGrey
-              ccModule.uauth.doorsMessage.innerHTML = ""
+              cC.uauth.doorsMessage.title = 'The email will be checked in our DB after you finish typing'
+              cC.uauth.doorsIcon.classList.remove('glyphicon-remove')
+              cC.uauth.doorsIcon.classList.remove('glyphicon-ok')
+              cC.uauth.doorsIcon.classList.add('glyphicon-question-sign')
+              cC.uauth.doorsIcon.style.color = cC.colorGrey
+              cC.uauth.doorsMessage.innerHTML = ""
+              cC.uauth.doorsMessage.style.fontWeight = "normal"
 
-              ccModule.uauth.emailLbl.style.color = ""
+              cC.uauth.emailLbl.style.color = ""
 
               // module-wide flag
-              ccModule.uauth.emailStatus = false
+              cC.uauth.emailStatus = false
           }
           else {
               // additional ajax to check login availability
@@ -121,7 +123,7 @@ cmxClt = (function(ccModule) {
               // case true => Ok("""{"status":"login exists"}""")
               // case false => Ok("""{"status":"login available"}""")
               // /!\ async
-              ccModule.uauth.callDoors(
+              cC.uauth.callDoors(
                   "userExists",
                   [emailValue],
                   function(doorsResp) {
@@ -130,46 +132,50 @@ cmxClt = (function(ccModule) {
 
                       // the global status can be true iff login is as expected and format ok
                       if (expectExists) {
-                          ccModule.uauth.emailStatus = (doorsMsg == "login exists")
+                          cC.uauth.emailStatus = (doorsMsg == "login exists")
                       }
                       else {
-                          ccModule.uauth.emailStatus = (doorsMsg == "login available")
+                          cC.uauth.emailStatus = (doorsMsg == "login available")
                       }
 
-                      if (ccModule.uauth.emailStatus) {
+                      if (cC.uauth.emailStatus) {
                           // icon
-                          ccModule.uauth.doorsIconMessage.title = "OK: "+doorsMsg+" on Doors"
-                          ccModule.uauth.doorsIcon.style.color = ccModule.colorGreen
-                          ccModule.uauth.doorsIcon.classList.remove('glyphicon-remove')
-                          ccModule.uauth.doorsIcon.classList.remove('glyphicon-question-sign')
-                          ccModule.uauth.doorsIcon.classList.add('glyphicon-ok')
+                          cC.uauth.doorsIconMessage.title = "OK: "+doorsMsg
+                          cC.uauth.doorsIcon.style.color = cC.colorGreen
+                          cC.uauth.doorsIcon.classList.remove('glyphicon-remove')
+                          cC.uauth.doorsIcon.classList.remove('glyphicon-question-sign')
+                          cC.uauth.doorsIcon.classList.add('glyphicon-ok')
 
                           // message in legend
-                          ccModule.uauth.doorsMessage.innerHTML = "OK: "+doorsMsg+" on Doors"
-                          ccModule.uauth.doorsMessage.style.color = ccModule.colorGreen
+                          cC.uauth.doorsMessage.innerHTML = "OK: "+doorsMsg
+                          cC.uauth.doorsMessage.style.color = cC.colorGreen
+                          cC.uauth.doorsMessage.style.fontWeight = "bold"
+                          cC.uauth.doorsMessage.style.textShadow = cC.strokeWhite
 
                           // label
-                          ccModule.uauth.emailLbl.style.backgroundColor = ""
+                          cC.uauth.emailLbl.style.backgroundColor = ""
                       }
                       else {
                           var errMsg = expectExists ? "your ID isn't recognized" : "this ID is already taken"
                           // icon
-                          ccModule.uauth.doorsIconMessage.title = "Sorry "+errMsg+" on Doors!"
-                          ccModule.uauth.doorsIcon.style.color = ccModule.colorRed
-                          ccModule.uauth.doorsIcon.classList.remove('glyphicon-ok')
-                          ccModule.uauth.doorsIcon.classList.remove('glyphicon-question-sign')
-                          ccModule.uauth.doorsIcon.classList.add('glyphicon-remove')
+                          cC.uauth.doorsIconMessage.title= "Sorry: "+errMsg+" !"
+                          cC.uauth.doorsIcon.style.color = cC.colorOrange
+                          cC.uauth.doorsIcon.classList.remove('glyphicon-ok')
+                          cC.uauth.doorsIcon.classList.remove('glyphicon-question-sign')
+                          cC.uauth.doorsIcon.classList.add('glyphicon-remove')
 
                           // message in legend
-                          ccModule.uauth.doorsMessage.innerHTML = "Sorry "+errMsg+" on Doors!"
-                          ccModule.uauth.doorsMessage.style.color = ccModule.colorRed
+                          cC.uauth.doorsMessage.innerHTML = "Sorry: "+errMsg+" !"
+                          cC.uauth.doorsMessage.style.color = cC.colorOrange
+                          cC.uauth.doorsMessage.style.fontWeight = "bold"
+                          cC.uauth.doorsMessage.style.textShadow = cC.strokeDeepGrey
 
                           // label
-                          ccModule.uauth.emailLbl.style.backgroundColor = ccModule.colorOrange
+                          cC.uauth.emailLbl.style.backgroundColor = cC.colorOrange
                       }
 
                       // to debounce re-invocations
-                      ccModule.uauth.lastEmailValueCheckedDisplayed = emailValue
+                      cC.uauth.lastEmailValueCheckedDisplayed = emailValue
                   }
               )
           }
@@ -179,59 +185,59 @@ cmxClt = (function(ccModule) {
     // -----------------------------------------------------------------------
     // Password validations
     // TODO use a most common passwords lists
-    ccModule.uauth.pass1 = document.getElementById('password')
-    ccModule.uauth.pass2 = document.getElementById('password2')
-    ccModule.uauth.passMsg = document.getElementById('password_message')
+    cC.uauth.pass1 = document.getElementById('password')
+    cC.uauth.pass2 = document.getElementById('password2')
+    cC.uauth.passMsg = document.getElementById('password_message')
 
     // register <=> do pass 1 and pass 2 match?
-    if (ccModule.uauth.pass2) {
-      ccModule.uauth.pass1.onkeyup = ccModule.uauth.doubleCheck
-      ccModule.uauth.pass1.onchange = ccModule.uauth.doubleCheck
-      ccModule.uauth.pass2.onkeyup = ccModule.uauth.doubleCheck
-      ccModule.uauth.pass2.onchange = ccModule.uauth.doubleCheck
+    if (cC.uauth.pass2) {
+      cC.uauth.pass1.onkeyup = cC.uauth.doubleCheck
+      cC.uauth.pass1.onchange = cC.uauth.doubleCheck
+      cC.uauth.pass2.onkeyup = cC.uauth.doubleCheck
+      cC.uauth.pass2.onchange = cC.uauth.doubleCheck
     }
     // login <=> just one password
     else {
-        ccModule.uauth.pass1.onkeyup = ccModule.uauth.checkPassFormat
-        ccModule.uauth.pass1.onchange = ccModule.uauth.checkPassFormat
+        cC.uauth.pass1.onkeyup = cC.uauth.checkPassFormat
+        cC.uauth.pass1.onchange = cC.uauth.checkPassFormat
     }
 
     // used only for logins
-    ccModule.uauth.checkPassFormat = function () {
-        ccModule.uauth.passStatus = (ccModule.uauth.pass1.value.length > 7)
+    cC.uauth.checkPassFormat = function () {
+        cC.uauth.passStatus = (cC.uauth.pass1.value.length > 7)
     }
 
     // 2 in 1: used only for registration
-    ccModule.uauth.doubleCheck = function () {
-      if (ccModule.uauth.pass1.value || ccModule.uauth.pass2.value) {
-        var pass1v = ccModule.uauth.pass1.value
-        var pass2v = ccModule.uauth.pass2.value
+    cC.uauth.doubleCheck = function () {
+      if (cC.uauth.pass1.value || cC.uauth.pass2.value) {
+        var pass1v = cC.uauth.pass1.value
+        var pass2v = cC.uauth.pass2.value
 
         if ((pass1v && pass1v.length > 7)
             || (pass2v && pass2v.length > 7)) {
           // test values
           if (pass1v == pass2v) {
               if (pass1v.match('[^A-z0-9]')) {
-                  ccModule.uauth.passMsg.innerHTML = 'Ok valid passwords!'
-                  ccModule.uauth.passStatus = true
+                  cC.uauth.passMsg.innerHTML = 'Ok valid passwords!'
+                  cC.uauth.passStatus = true
               }
               else {
-                  ccModule.uauth.passMsg.innerHTML = "Passwords match but don't contain any special characters, please complexify!"
-                  ccModule.uauth.passStatus = false
+                  cC.uauth.passMsg.innerHTML = "Passwords match but don't contain any special characters, please complexify!"
+                  cC.uauth.passStatus = false
               }
           }
           else {
-            ccModule.uauth.passMsg.innerHTML = "The passwords don't match yet."
-            ccModule.uauth.passStatus = false
+            cC.uauth.passMsg.innerHTML = "The passwords don't match yet."
+            cC.uauth.passStatus = false
         }
         }
         else {
-          ccModule.uauth.passMsg.innerHTML = "The password is too short (8 chars min)."
-          ccModule.uauth.passStatus = false
+          cC.uauth.passMsg.innerHTML = "The password is too short (8 chars min)."
+          cC.uauth.passStatus = false
         }
       }
-      if (!ccModule.uauth.passStatus) ccModule.uauth.passMsg.style.color = ccModule.colorRed
-      else                            ccModule.uauth.passMsg.style.color = ccModule.colorGreen
+      if (!cC.uauth.passStatus) cC.uauth.passMsg.style.color = cC.colorRed
+      else                            cC.uauth.passMsg.style.color = cC.colorGreen
     }
 
 
@@ -265,7 +271,7 @@ cmxClt = (function(ccModule) {
     *       }
     *     }
     */
-    ccModule.uauth.callDoors = function(apiAction, data, callback) {
+    cC.uauth.callDoors = function(apiAction, data, callback) {
 
         console.warn("=====> CORS  <=====")
         console.log("data",data)
@@ -311,7 +317,7 @@ cmxClt = (function(ccModule) {
             $.ajax({
                 contentType: "application/json",
                 dataType: 'json',
-                url: "http://"+ccModule.uauth.doorsConnectParam+"/api/" + apiAction,
+                url: "http://"+cC.uauth.doorsConnectParam+"/api/" + apiAction,
                 data: JSON.stringify({
                     "login":    mailStr,
                     "password": passStr,
@@ -381,7 +387,7 @@ cmxClt = (function(ccModule) {
     }
 
     // we return our augmented comex client module
-    return ccModule
+    return cC
 
 })(cmxClt) ;
 

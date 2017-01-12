@@ -46,14 +46,14 @@ function completionAsYouGo() {
     var optionalMissingFields = diagnostic[2]
 
     if (valid) {
-        cmxClt.uform.mainMessage.innerHTML = "<span class='green glyphicon glyphicon-check' style='float:left;'></span>&nbsp;&nbsp;OK we have all the important fields!<br/>"
+        cmxClt.uform.mainMessage.innerHTML = "<span class='green glyphicon glyphicon-check glyphicon-float-left' style='float:left;'></span><p>OK thank you! we have all the fields needed for the mapping!</p>"
     }
     else {
-        cmxClt.uform.mainMessage.innerHTML = "<span class='red glyphicon glyphicon-warning-sign'></span>&nbsp;&nbsp;Sorry, there are some important missing fields<br/>"
+        cmxClt.uform.mainMessage.innerHTML = "<span class='orange glyphicon glyphicon-exclamation-sign glyphicon-float-left'></span><p>Sorry, there are some important missing fields</p>"
     }
 
     // list of missing fields
-    cmxClt.uform.mainMessage.innerHTML += cmxClt.ulListFromLabelsArray(mandatoryMissingFields, ['red'])
+    cmxClt.uform.mainMessage.innerHTML += cmxClt.ulListFromLabelsArray(mandatoryMissingFields, ['orange'])
 
     if (optionalMissingFields.length) {
         cmxClt.uform.mainMessage.innerHTML += cmxClt.ulListFromLabelsArray(
@@ -76,5 +76,12 @@ completionAsYouGo()
 // 2 exposed vars for inline js controls
 var teamCityDivStyle = document.getElementById('team_city_div').style
 var otherInstDivStyle = document.getElementById('other_org_div').style
+
+
+// open middlename if there is one
+
+if (uinfo.middle_name != "" && uinfo.middle_name != "None") {
+    cmxClt.uform.displayMidName()
+}
 
 console.log("profile controllers load OK")
