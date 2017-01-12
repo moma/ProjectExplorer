@@ -94,7 +94,7 @@ class User(object):
         else:
             # normal user has a nice info dict
             self.info = user_info
-            self.json_info = dumps(user_info)
+            self.json_info = dumps({k:v for k,v in user_info.items() if k != 'pic_file'})
             self.empty = False
 
     def get_id(self):
