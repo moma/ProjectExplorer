@@ -23,6 +23,10 @@ RUN sed 's/;clear_env = no/clear_env = no/' /etc/php/7.0/fpm/pool.d/www.conf.bak
 RUN pip3 install --upgrade pip
 
 # for comex2 itself ----------------------------------------------------------
+# add and install the project dependencies
+ADD requirements.txt /requirements.txt
+RUN pip3 install -r requirements.txt
+
 # copy and symlink the nginx conf
 ADD comex2_php_and_services.nginx.conf /etc/nginx/sites-available
 WORKDIR /etc/nginx/sites-enabled
@@ -34,11 +38,7 @@ WORKDIR /
 RUN git clone https://github.com/moma/comex2.git
 
 # ...or copy it locally
-# RUN echo updating
 # ADD comex2 /comex2
-
-# Install project dependencies
-RUN pip3 install -r comex2/setup/requirements.txt
 
 # main CMD to start the app
 WORKDIR /comex2
@@ -55,4 +55,4 @@ CMD bash run.sh
 EXPOSE 80
 
 # TODO SSL configuration
-# EXPOSE 443
+EXPOSE 443
