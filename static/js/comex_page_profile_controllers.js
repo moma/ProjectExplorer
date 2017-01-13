@@ -23,7 +23,10 @@ function selectSavedMenus(uinfo) {
             var chosenV = uinfo[colName]
             var selectElt = document.getElementById(colName)
             if (selectElt) {
-                selectElt.selectedIndex = selectElt.querySelector(`option[value="${chosenV}"]`).index
+                var myOption = selectElt.querySelector(`option[value="${chosenV}"]`)
+                if (myOption) {
+                    selectElt.selectedIndex = myOption.index
+                }
             }
             else {
                 console.warn("selectSavedMenus: couldn't find element: "+colName)
