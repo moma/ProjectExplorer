@@ -34,17 +34,21 @@ var cmxClt = (function() {
 
 
     // the target columns in DB: tuple (name, mandatory, group, type, section)
-    cC.COLS = [ ["doors_uid",              true,       "auto"   , "t",  null],
+    cC.COLS = [
+                ["keywords",               true,       "plsfill", "at", "map_infos"],
+                    // ==> *keywords* table
+
+                ["doors_uid",              true,       "auto"   , "t",  null],
                 ["last_modified_date",     true,       "auto"   , "d",  null],
-                ["email",                  true,       "plsfill", "t",  "basic_infos"],
-                ["country",                true,       "plsfill", "t",  "basic_infos"],
+                ["hon_title",             false,       "plsfill", "t",  "basic_infos"],
+                ["email",                  true,       "plsfill", "t",  "login_infos"],
                 ["first_name",             true,       "plsfill", "t",  "basic_infos"],
                 ["middle_name",           false,       "pref",    "t",  "basic_infos"],
                 ["last_name",              true,       "plsfill", "t",  "basic_infos"],
-                ["initials",               true,       "plsfill", "t",  null],
+                ["country",                true,       "plsfill", "t",  "basic_infos"],
+                ["initials",               true,       "pref",    "t",  null],
                 ["position",               true,       "plsfill", "t",  "map_infos"],
-                ["hon_title",             false,       "plsfill", "t",  "basic_infos"],
-                ["interests_text",        false,       "plsfill", "t",  "other_infos"],
+                ["interests_text",        false,       "pref",    "t",  "other_infos"],
                 ["community_hashtags",    false,       "plsfill", "at", "map_infos"],
                 ["gender",                false,       "plsfill", "m",  "other_infos"],
                 ["job_looking_date",      false,       "pref"   , "d",  "map_infos"],
@@ -53,12 +57,9 @@ var cmxClt = (function() {
                 ["pic_file",              false,       "pref"   , "f",  "other_infos"],
                 // ==> *scholars* table
 
-                ["keywords",               true,       "plsfill", "at", "map_infos"],
-                // ==> *keywords* table
-
-                ["org",                    true,       "plsfill", "t", "org_infos"],
-                ["org_type",               true,       "plsfill", "m", "org_infos"],
-                ["team_lab",              false,       "pref"   , "t", "map_infos"],
+                ["org",                   false,       "plsfill", "t", "org_infos"],
+                ["org_type",              false,       "plsfill", "m", "org_infos"],
+                ["team_lab",               true,       "plsfill", "t", "map_infos"],
                 ["org_city",              false,       "pref"   , "t", "org_infos"]]
                 // ==> *affiliations* table
 
@@ -91,12 +92,13 @@ var cmxClt = (function() {
             var flabel = cplArray[i][1]
 
             // to open any collapsible containing the label and input
-            var openFun = 'return cC.uform.openPanelForField(\''+fname+'\')'
+            var openFun = 'return cC.uform.gotoField(\''+fname+'\')'
 
-            console.log("openFun", openFun)
+            // debug onclick fun
+            // console.log("openFun", openFun)
 
             // link works if anchorLabels was run
-            resultHtml += '<li class="minilabel"><a onclick="'+openFun+'" href="#'+fname+'_lbl'+'">'+flabel+'</a></li>'
+            resultHtml += '<li class="minilabel"><div onclick="'+openFun+'">'+flabel+'</div></li>'
         }
         resultHtml += '</ul>'
         return resultHtml
@@ -142,10 +144,10 @@ var cmxClt = (function() {
     // functions
     cC.uform.initialize
     cC.uform.testFillField
+    cC.uform.simpleValidateAndMessage
     cC.uform.stampTime
-    cC.uform.anchorLabels
+    cC.uform.gotoField
     cC.uform.multiTextinput
-    cC.uform.openPanelForField
 
     // dates up to 2049/12/31
     cC.uform.validDate = new RegExp( /^20[0-4][0-9]\/(?:0?[1-9]|1[0-2])\/(?:0?[1-9]|[1-2][0-9]|3[0-1])$/)
@@ -171,66 +173,11 @@ var cmxClt = (function() {
         cC.insertAfter(normalInput, newTextArrayInput)
     }
 
-
-    // anchorLabels
-    //
-    // replace(fname =~ /<label for="([^"]+)"/,
-    //                  `<label for="${fname}" id="${fname}_lbl"`)
-    // use at init
-    cC.uform.anchorLabels = function (cols) {
-        for (var i in cols) {
-            var fName = cols[i][0] // (-:)
-            var itsLabel = document.querySelector(`label[for=${fName}]`)
-
-            // set id
-            if (itsLabel)  itsLabel.id = fName + '_lbl'
-        }
-
-        // also set the window to go 50px above label anchors
-        window.addEventListener("hashchange", function () {
-            window.scrollTo(window.scrollX, window.scrollY - 50);
-        });
-    }
-
-
-    // openPanelForField
-    cC.uform.openPanelForField = function (fName) {
-        console.log('fName', fName)
-
-        var labelElt = document.getElementById(fName+'_lbl')
-        var ourPanel = cC.findAncestor(labelElt, "panel-collapse")
-
-        console.log('ourPanel.classList.contains("in")', ourPanel.classList.contains('in'))
-
-        // if panel is not open
-        if (! ourPanel.classList.contains('in')) {
-            // POSS use cols with key/value structure to use cols[fName] instead of looking for i
-            var theCol = -1
-            for (var i in cC.COLS) {
-                if (fName == cC.COLS[i][0]) {
-                    theCol = i
-                    break
-                }
-            }
-            var ccSection = cC.COLS[i][4]
-            console.log('ccSection', ccSection)
-
-            if (ccSection) {
-                // click the corresponding toggler
-                document.getElementById('ccsection_toggle_'+ccSection).click()
-            }
-        }
-    }
-
-
     // initialize
     // -----------
     cC.uform.initialize = function(aFormId, aValidationFun) {
         cC.uform.theFormId = aFormId
         cC.uform.theForm = document.getElementById(aFormId)
-
-        // todo pass formId and have a COLS by forms
-        cC.uform.anchorLabels(cC.COLS)
 
         // events
         cC.uform.theForm.onkeyup = aValidationFun
@@ -330,7 +277,7 @@ var cmxClt = (function() {
               valid = false
             //   console.log("mandatoryMissingFields", fieldName)
 
-              if (params.doHighlight) {
+              if (params.doHighlight && labelElt) {
                   labelElt.style.backgroundColor = cC.colorOrange
               }
           }
@@ -358,6 +305,79 @@ var cmxClt = (function() {
     cC.uform.stampTime = function () {
         var now = new Date()
         cC.uform.timestamp.value = now.toISOString()
+    }
+
+
+
+    // diagnosticParams are optional
+    //
+    cC.uform.simpleValidateAndMessage = function (diagnosticParams) {
+        var diagnostic = cmxClt.uform.testFillField(cmxClt.uform.theForm,
+                                                    diagnosticParams)
+        var isValid = diagnostic[0]
+        var mandatoryMissingFields = diagnostic[1]
+        var optionalMissingFields = diagnostic[2]
+
+        if (isValid) {
+            cmxClt.uform.mainMessage.innerHTML = "<span class='green glyphicon glyphicon-check glyphicon-float-left' style='float:left;'></span><p>OK thank you! <br/>(we have all the fields needed for the mapping!)<br/>(don't forget to SAVE!)</p>"
+
+
+            cmxClt.uform.mainMessage.classList.add('faded')
+        }
+        else {
+            cmxClt.uform.mainMessage.innerHTML = "<span class='orange glyphicon glyphicon-exclamation-sign glyphicon-float-left'></span><p>Sorry, there are some<br/> important missing fields</p>"
+
+            cmxClt.uform.mainMessage.classList.remove('faded')
+        }
+
+        // list of missing fields
+        cmxClt.uform.mainMessage.innerHTML += cmxClt.ulListFromLabelsArray(mandatoryMissingFields, ['orange'])
+
+        if (optionalMissingFields.length) {
+            cmxClt.uform.mainMessage.innerHTML += cmxClt.ulListFromLabelsArray(
+                    optionalMissingFields,
+                    ['white'],
+                    "You may also want to fill:"
+                )
+        }
+    }
+
+
+
+    // gotoField
+    // (assumes nothing)
+    // (side-effect: opens the corresponding panel)
+    cC.uform.gotoField = function (fName) {
+        // debug
+        // console.log('goto fName', fName)
+
+        var fieldElt = document.getElementById(fName)
+
+        // open panel if it is closed
+        var ourPanel = cC.findAncestor(fieldElt, "panel-collapse")
+        if (ourPanel && ! ourPanel.classList.contains('in')) {
+            // POSS use cols with key/value structure to use cols[fName] instead of looking for i
+            var theCol = -1
+            for (var i in cC.COLS) {
+                if (fName == cC.COLS[i][0]) {
+                    theCol = i
+                    break
+                }
+            }
+            var ccSection = cC.COLS[i][4]
+
+            // debug
+            // console.log('ccSection', ccSection)
+
+            if (ccSection) {
+                // click the corresponding toggler
+                document.getElementById('ccsection_toggle_'+ccSection).click()
+            }
+        }
+        // now go to the field itself (actually, 120px above)
+        // --------------------------------------------------
+        fieldElt.scrollIntoView(true)
+        window.scrollTo(window.scrollX, window.scrollY - 120)
     }
 
     // ===================================================================

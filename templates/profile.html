@@ -102,7 +102,7 @@
         <!-- ########################### ( FORM ) ########################## -->
         <!-- todo onsubmit also save to cache -->
 
-        <div class="uform-nobg">
+        <div class="uform-nobg accordion" id="profile_uform">
 
             <h2 class="oldstyle">Edit your profile</h2>
                 <p class="mini-hero">
@@ -231,7 +231,7 @@
                   <h2 class="ccsection"
                       title="This is the main data that allows us to plot you in the exploration graph and render the 'carte de visite'">
                     <span class="glyphicon glyphicon-collapse-down glyphicon-float-right"></span>
-                    <span class="glyphicon glyphicon-tags"></span>
+                    <span class="glyphicon glyphicon-tags"></span>&nbsp;
                     Mapping data
                 </h2>
                 </div>
@@ -269,7 +269,7 @@
 
                <div class="question">
                  <div class="input-group">
-                   <label for="team_lab" class="smlabel input-group-addon">Lab / Team / Dept</label>
+                   <label for="team_lab" class="smlabel input-group-addon">* Lab / Team / Dept</label>
                    <input id="team_lab" name="team_lab" maxlength="120"
                           type="text" class="form-control" placeholder="More detailed affiliation, if relevant"
                           value="{{ current_user.info.team_lab }}">
@@ -531,13 +531,10 @@
 
           <!-- <p> TEST UID {{ current_user.uid | safe }} </p> -->
 
-          <!-- main validation message -->
-          <p id="main_message" class="cartouche legend" style="display:none"></p>
-
           <!-- == S U B M I T == -->
           <div style="text-align:center">
-            <!-- no @type => implicit @type=submit -->
-            <button class="btn btn-lg btn-success" id="form_submit">
+            <!-- @type button to avoid ENTER submit  -->
+            <button class="btn btn-lg btn-success" id="form_submit" type="button" onclick="cmxClt.uform.theForm.submit()">
                   Save profile
             </button>
           </div>
@@ -548,6 +545,14 @@
       </div>
       <div class="spacer col-sm-2 col-md-2">&nbsp;</div>
     </div>
+
+    <div class="menu-right-fixed">
+      <!-- main validation message -->
+      <p id="main_message" class="legend"></p>
+    </div>
+
+
+
 
     <!-- CNIL WARNING -->
     <div class="row spacerrow">&nbsp;</div>

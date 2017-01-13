@@ -86,7 +86,7 @@
 
  // autocomplete institution
  $(function() {
-   var $orgInput = $('#org')
+   var $orgInput = $('#team_lab')
 
    var orgList = [
      "Centre National de la Recherche Scientifique (CNRS)",

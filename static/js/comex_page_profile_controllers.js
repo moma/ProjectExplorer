@@ -1,4 +1,4 @@
-/**
+/**we have all
  * @fileoverview
  * Profile 1/overview and 2/completing
  * @todo
@@ -32,6 +32,10 @@ selectSavedMenus(uinfo)
 // initialize form controllers
 cmxClt.uform.initialize("comex_profile_form", completionAsYouGo)
 
+
+// memory
+var formValid = false
+
 // main validation function
 // ------------------------
 function completionAsYouGo() {
@@ -41,30 +45,7 @@ function completionAsYouGo() {
     var diagnosticParams = {'fixResidue': true,
                             'ignore': ['email']}
 
-    var diagnostic = cmxClt.uform.testFillField(cmxClt.uform.theForm,
-                                                diagnosticParams)
-
-    var valid = diagnostic[0]
-    var mandatoryMissingFields = diagnostic[1]
-    var optionalMissingFields = diagnostic[2]
-
-    if (valid) {
-        cmxClt.uform.mainMessage.innerHTML = "<span class='green glyphicon glyphicon-check glyphicon-float-left' style='float:left;'></span><p>OK thank you! we have all the fields needed for the mapping!</p>"
-    }
-    else {
-        cmxClt.uform.mainMessage.innerHTML = "<span class='orange glyphicon glyphicon-exclamation-sign glyphicon-float-left'></span><p>Sorry, there are some important missing fields</p>"
-    }
-
-    // list of missing fields
-    cmxClt.uform.mainMessage.innerHTML += cmxClt.ulListFromLabelsArray(mandatoryMissingFields, ['orange'])
-
-    if (optionalMissingFields.length) {
-        cmxClt.uform.mainMessage.innerHTML += cmxClt.ulListFromLabelsArray(
-                optionalMissingFields,
-                ['white'],
-                "You may also want to fill:"
-            )
-    }
+    cmxClt.uform.simpleValidateAndMessage(diagnosticParams)
 
     // stamp => #last_modified_date
     cmxClt.uform.stampTime()

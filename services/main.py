@@ -393,7 +393,7 @@ def register():
 
     if request.method == 'GET':
         return render_template(
-            "registration_full_form.html",
+            "registration_short_form.html",
             doors_connect=config['DOORS_HOST']+':'+config['DOORS_PORT']
         )
     elif request.method == 'POST':
@@ -529,8 +529,9 @@ def read_record(incoming_data):
                 clean_records[field] = incoming_data[field]
 
     # special treatment for "other" subquestions
-    if clean_records['org_type'] == 'other' and 'other_org_type' in clean_records:
-        clean_records['org_type'] = clean_records['other_org_type']
+    if 'org_type' in clean_records:
+        if clean_records['org_type'] == 'other' and 'other_org_type' in clean_records:
+            clean_records['org_type'] = clean_records['other_org_type']
 
     # split for kw_array
     kw_array = []

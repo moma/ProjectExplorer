@@ -1,18 +1,18 @@
-.white { color:#fff ; }
-.red   { color:#910 ; }
-.green { color:#161 ; }
-.grey  { color:#554 ; }
-.orange  { color:#F96 ; }
-.blue  { color:#23A ; }
+/* =============================== MAIN COMEX SERVICES STYLESHEET =============================== */
 
-
+.white { color:#fff ;}
+.red   { color:#910 ;}
+.green { color:#161 ;}
+.grey  { color:#554 ;}
+.orange{ color:#F96 ;}
+.blue  { color:#23A ;}
 
 
 /* classic look */
 body {
   margin: 0;
   font-family: "Droid Sans", Calibri, "Helvetica Neue", Helvetica, sans-serif;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
   color: #333;
   background-color: #fff;
   line-height: .85em;
@@ -21,6 +21,13 @@ body {
 
 /* main content for all new pages */
 div.my-box {
+    padding:0 15px;
+}
+@media(max-width:991px){
+    /* sm and md */
+    div.my-box {
+        padding:0;
+    }
 }
 
 /* form content for reg, profile, login, etc.... */
@@ -30,10 +37,28 @@ div.uform {
   background-color: #ddd;
 }
 
+/*div.uform::before {
+    content: "F O R M";
+    font-family: monospace;
+    font-size: 1em;
+    float: right;
+    color: #000;
+}*/
+
 /* same but to put a panel-body inside */
 div.uform-nobg {
   margin: 38px 38px 8px 38px;
 }
+
+@media(max-width:991px){
+    /* sm and md */
+    div.uform, div.uform-nobg {
+        padding: 0;
+        margin: 12px 12px 2px 12px;
+    }
+}
+
+button.clean-btn
 
 p#doors_ret_msg {
     font-weight: bold;
@@ -43,7 +68,6 @@ p#doors_ret_msg {
 /* not used at present but could be useful for autompleted inputs */
 .autocomp {
 }
-
 
 .page {
   margin-top: 45px;   /* topbar height is 40px */
@@ -59,7 +83,7 @@ p#doors_ret_msg {
 }
 
 
-/* a "subpage" container */
+/* a "subpage" container UNUSED */
 .subpage {
   width: 100%;
   max-width: 65em;
@@ -74,6 +98,23 @@ p#doors_ret_msg {
   text-align: center;
 }
 
+
+/* a fixed div for validation messsages */
+.menu-right-fixed {
+    position: fixed;
+    top: 4em;
+    right: 0;
+    display:block;
+    z-index: 4;
+    opacity: .8;
+}
+
+@media(max-width:991px){
+    /* sm and md */
+    .menu-right-fixed {
+        top: 11em;
+    }
+}
 
 /* ==> a question + input block <== */
 .question {
@@ -148,6 +189,12 @@ input#my-captcha{
   background-color: #ACA;
   padding: .2em;
   border-radius: .2em;
+}
+
+/* like a close window element */
+.pull-up-right {
+    margin-top: -.5em;
+    float: right;
 }
 
 /* like a dialog icon */
@@ -250,7 +297,7 @@ ul.minilabels {
   list-style-type: none;
   font-size: 75% ;
   text-align: left;
-  margin-left: 32%;
+  cursor: pointer;
 }
 
 li.minilabel {
@@ -292,16 +339,33 @@ li.minilabel {
 
 /* the main validation message (a special legend) */
 #main_message {
-  /*color: white ;*/
+  color: white ;
   font-size: 140%;
   text-align:center;
   line-height: 1.5em;
 
-  /*background-color: #988 ;
-  border-radius: 2em;*/
-  padding: 3em 3em 1em 3em;
-  margin-bottom: 2em;
-  border: none;
+  background-color: #333 ;
+  border-radius: .2em;
+  padding: 1em;
+  margin-bottom: 1em;
+  border: 2px solid #ddd;
+
+  -webkit-transition: opacity 5s ease;
+}
+
+#main_message.faded {
+    opacity: 0;
+}
+
+
+@media(max-width:991px){
+    /* sm and md */
+    #main_message {
+      font-size: 110%;
+      line-height: 1em;
+      padding: .1em .3em ;
+      margin: 0;
+    }
 }
 
 
