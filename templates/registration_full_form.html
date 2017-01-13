@@ -110,7 +110,8 @@
               <h3 class="formcat"> Login infos </h3>
 
               <div class="question">
-                <p class="legend">Your email will also be your login for the ISC services.</p>
+                <!-- TODO separate modal -->
+                <p class="legend">Your email will also be your login for the ISC services. </p>
                 <div class="input-group">
                   <!-- email validation onblur/onchange is done by cmxClt.uauth in comex_user_shared_auth.js -->
                   <label for="email" class="smlabel input-group-addon">* Email</label>
@@ -442,4 +443,6 @@
     <script src="{{ url_for('static', filename='js/comex_user_shared.js') }}"></script>
     <script src="{{ url_for('static', filename='js/comex_user_shared_auth.js') }}"></script>
     <script src="{{ url_for('static', filename='js/comex_page_reg_controllers.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/comex_user_autocompletes.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap-native-1.1.min.js') }}"></script>
 {% endblock %}
