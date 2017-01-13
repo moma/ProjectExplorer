@@ -362,7 +362,7 @@ def profile():
         )
     elif request.method == 'POST':
         try:
-            save_form(
+            clean_records = save_form(
                       request.form,
                       request.files if hasattr(request, "files") else {},
                       update_flag = True
