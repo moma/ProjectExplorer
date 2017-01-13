@@ -22,7 +22,12 @@ function selectSavedMenus(uinfo) {
             var colName = cmxClt.COLS[i][0]
             var chosenV = uinfo[colName]
             var selectElt = document.getElementById(colName)
-            selectElt.selectedIndex = selectElt.querySelector(`option[value="${chosenV}"]`).index
+            if (selectElt) {
+                selectElt.selectedIndex = selectElt.querySelector(`option[value="${chosenV}"]`).index
+            }
+            else {
+                console.warn("selectSavedMenus: couldn't find element: "+colName)
+            }
         }
     }
 }
