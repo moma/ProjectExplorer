@@ -33,33 +33,33 @@ var cmxClt = (function() {
     cC.strokeDeepGrey = "3px 3px 4px #333,-3px 3px 4px #333,-3px -3px 4px #333,3px -3px 4px #333"
 
 
-    // the target columns in DB: tuple (name, mandatoryBool, group, type)
-    cC.COLS = [ ["doors_uid",              true,       "auto"   , "t"],
-                ["last_modified_date",     true,       "auto"   , "d"],
-                ["email",                  true,       "plsfill", "t"],
-                ["country",                true,       "plsfill", "t"],
-                ["first_name",             true,       "plsfill", "t"],
-                ["middle_name",           false,       "pref",    "t"],
-                ["last_name",              true,       "plsfill", "t"],
-                ["initials",               true,       "plsfill", "t"],
-                ["position",               true,       "plsfill", "t"],
-                ["hon_title",             false,       "plsfill", "t"],
-                ["interests_text",        false,       "plsfill", "t"],
-                ["community_hashtags",    false,       "plsfill", "at"],
-                ["gender",                false,       "plsfill", "m"],
-                ["job_looking_date",      false,       "pref"   , "d"],
-                ["home_url",              false,       "plsfill", "t"],
-                ["pic_url",               false,       "pref"   , "t"],
-                ["pic_file",              false,       "pref"   , "f"],
+    // the target columns in DB: tuple (name, mandatory, group, type, section)
+    cC.COLS = [ ["doors_uid",              true,       "auto"   , "t",  null],
+                ["last_modified_date",     true,       "auto"   , "d",  null],
+                ["email",                  true,       "plsfill", "t",  "basic_infos"],
+                ["country",                true,       "plsfill", "t",  "basic_infos"],
+                ["first_name",             true,       "plsfill", "t",  "basic_infos"],
+                ["middle_name",           false,       "pref",    "t",  "basic_infos"],
+                ["last_name",              true,       "plsfill", "t",  "basic_infos"],
+                ["initials",               true,       "plsfill", "t",  null],
+                ["position",               true,       "plsfill", "t",  "map_infos"],
+                ["hon_title",             false,       "plsfill", "t",  "basic_infos"],
+                ["interests_text",        false,       "plsfill", "t",  "other_infos"],
+                ["community_hashtags",    false,       "plsfill", "at", "map_infos"],
+                ["gender",                false,       "plsfill", "m",  "other_infos"],
+                ["job_looking_date",      false,       "pref"   , "d",  "map_infos"],
+                ["home_url",              false,       "plsfill", "t",  "other_infos"],
+                ["pic_url",               false,       "pref"   , "t",  "other_infos"],
+                ["pic_file",              false,       "pref"   , "f",  "other_infos"],
                 // ==> *scholars* table
 
-                ["keywords",               true,       "plsfill", "at"],
+                ["keywords",               true,       "plsfill", "at", "map_infos"],
                 // ==> *keywords* table
 
-                ["org",                    true,       "plsfill", "t"],
-                ["org_type",               true,       "plsfill", "m"],
-                ["team_lab",              false,       "pref"   , "t"],
-                ["org_city",              false,       "pref"   , "t"]]
+                ["org",                    true,       "plsfill", "t", "org_infos"],
+                ["org_type",               true,       "plsfill", "m", "org_infos"],
+                ["team_lab",              false,       "pref"   , "t", "map_infos"],
+                ["org_city",              false,       "pref"   , "t", "org_infos"]]
                 // ==> *affiliations* table
 
     // group "auto"    === filled by controllers
@@ -90,8 +90,13 @@ var cmxClt = (function() {
             var fname = cplArray[i][0]
             var flabel = cplArray[i][1]
 
+            // to open any collapsible containing the label and input
+            var openFun = 'return cC.uform.openPanelForField(\''+fname+'\')'
+
+            console.log("openFun", openFun)
+
             // link works if anchorLabels was run
-            resultHtml += '<li class="minilabel"><a href="#'+fname+'_lbl'+'">'+flabel+'</a></li>'
+            resultHtml += '<li class="minilabel"><a onclick="'+openFun+'" href="#'+fname+'_lbl'+'">'+flabel+'</a></li>'
         }
         resultHtml += '</ul>'
         return resultHtml
@@ -109,10 +114,17 @@ var cmxClt = (function() {
 
     // insert after
     // cf. stackoverflow.com/questions/4793604
-    function insertAfter(referenceNode, newNode) {
+    cC.insertAfter = function(referenceNode, newNode) {
         referenceNode.parentNode.insertBefore(
             newNode, referenceNode.nextSibling
         )
+    }
+
+    // find ancestor
+    // cf. stackoverflow.com/questions/22119673
+    cC.findAncestor = function(elt, cls) {
+        while ((elt = elt.parentElement) && !elt.classList.contains(cls));
+        return elt
     }
 
     // ============================================
@@ -133,6 +145,7 @@ var cmxClt = (function() {
     cC.uform.stampTime
     cC.uform.anchorLabels
     cC.uform.multiTextinput
+    cC.uform.openPanelForField
 
     // dates up to 2049/12/31
     cC.uform.validDate = new RegExp( /^20[0-4][0-9]\/(?:0?[1-9]|1[0-2])\/(?:0?[1-9]|[1-2][0-9]|3[0-1])$/)
@@ -177,6 +190,36 @@ var cmxClt = (function() {
         window.addEventListener("hashchange", function () {
             window.scrollTo(window.scrollX, window.scrollY - 50);
         });
+    }
+
+
+    // openPanelForField
+    cC.uform.openPanelForField = function (fName) {
+        console.log('fName', fName)
+
+        var labelElt = document.getElementById(fName+'_lbl')
+        var ourPanel = cC.findAncestor(labelElt, "panel-collapse")
+
+        console.log('ourPanel.classList.contains("in")', ourPanel.classList.contains('in'))
+
+        // if panel is not open
+        if (! ourPanel.classList.contains('in')) {
+            // POSS use cols with key/value structure to use cols[fName] instead of looking for i
+            var theCol = -1
+            for (var i in cC.COLS) {
+                if (fName == cC.COLS[i][0]) {
+                    theCol = i
+                    break
+                }
+            }
+            var ccSection = cC.COLS[i][4]
+            console.log('ccSection', ccSection)
+
+            if (ccSection) {
+                // click the corresponding toggler
+                document.getElementById('ccsection_toggle_'+ccSection).click()
+            }
+        }
     }
 
 
