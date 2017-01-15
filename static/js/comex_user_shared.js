@@ -23,6 +23,7 @@ var cmxClt = (function() {
     cC.colorRed = '#910'
     cC.colorGreen = '#161'
     cC.colorGrey = '#554'
+    cC.colorLGrey = '#ddd'
     cC.colorOrange = '#F96'
     cC.colorBlue = '#23A'
 
@@ -714,18 +715,19 @@ var cmxClt = (function() {
     cC.uform.checkJobDateStatus = function () {
       cC.uform.jobLookingDateStatus = (jobBool.value == "No" || cC.uform.validDate.test(jobDate.value))
       if (!cC.uform.jobLookingDateStatus) {
-          jobDateMsg.style.color = cmxClt.colorRed
-          jobDateMsg.innerHTML = 'Date is not yet in the valid format YYYY/MM/DD'
+          jobDateMsg.style.color = "#888"
+          jobDateMsg.innerHTML = '<small>format is YYYY/MM/DD</small>'
       }
       else {
           jobDateMsg.style.color = cmxClt.colorGreen
-          jobDateMsg.innerHTML = 'Ok valid date!'
+          jobDateMsg.innerHTML = '<small>Ok valid date!</small>'
       }
     }
 
     // handler: show jobLookingDiv
     if (jobBool && jobDate) {
         jobBool.onchange = function() {
+            // shows "Until when"
             if(this.value=='Yes'){
                 jobLookingDiv.style.display = 'block'
             }

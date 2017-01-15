@@ -294,19 +294,20 @@
 
                <div class="question">
                  <div class="input-group">
-                   <label for="job_bool" class="smlabel input-group-addon">Can you be contacted for jobs?</label>
+                   <label for="job_bool" class="smlabel input-group-addon">Soon on the job market? <br/><small>and do you want our job contacts?</small></label>
                    <select id="job_bool" name="job_bool"
-                           class="custom-select form-control"
-                           onchange="if(this.value=='Yes'){jobLookingDivStyle.display = 'block'} else {jobLookingDivStyle.display='none';jobDate.value=''}">
-                     <option selected value="No" onclick="jobDate.value=''">No</option>
-                     <option value="Yes" onclick="jobLookingDivStyle.display = 'block'">Yes</option>
+                           class="custom-select form-control">
+                     <option selected value="No">No</option>
+                     <option value="Yes">Yes</option>
                    </select>
                  </div>
                  <!-- job_looking_date_div <=> only if previous choice == Yes -->
                  <div class="question conditional-q" id="job_looking_div">
-                   <p class="legend">Until when are you interested in job offers like post-doc positions, etc. ? (YYYY/MM/DD)</p>
+                   <p class="legend">
+                       We'll show you're available for job offers...
+                       <br/>(it can be until a given date)</p>
                    <div class="input-group">
-                     <label for="job_looking_date" class="smlabel input-group-addon">Until when ?</label>
+                     <label for="job_looking_date" class="smlabel input-group-addon"><small>Subscribe until ?</small></label>
                      <input id="job_looking_date" name="job_looking_date" maxlength="10"
                             type="text" class="form-control" placeholder="ex: 2019/09/30">
                    </div>
