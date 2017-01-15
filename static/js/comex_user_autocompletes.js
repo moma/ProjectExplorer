@@ -599,20 +599,6 @@
            return false;
        },
        select: function (event, ui) {
-           var terms = this.value.split(/\s*,\s*/) ;
-
-           // console.log("currently autocompleting segment:",terms)
-
-           // remove the current input
-           terms.pop();
-           // add the selected item
-           terms.push(ui.item.value);
-           // add placeholder to get the comma-and-space at the end
-           terms.push("");
-           this.value = terms.join(", ");
-
-           // $kwInput[0].style.fontWeight = "bold"
-           return false;
        }
    });
  });

@@ -4,6 +4,7 @@
 .red   { color:#910 ;}
 .green { color:#161 ;}
 .grey  { color:#554 ;}
+.lgrey { color:#ddd ;}
 .orange{ color:#F96 ;}
 .blue  { color:#23A ;}
 
@@ -62,7 +63,7 @@ button.clean-btn
 
 p#doors_ret_msg {
     font-weight: bold;
-    text-shadow: 2px;
+    text-shadow: .8px .8px #333, -.8px -.8px #333, -.8px .8px #333, .8px -.8px #333;
 }
 
 /* not used at present but could be useful for autompleted inputs */
@@ -158,6 +159,18 @@ input.readonly {
   min-width: 7.5em;
 }
 
+@media(max-width:400px){
+    /* ~ xs and sm */
+    .smlabel {
+      padding: 0;
+      font-size: 65%;
+      letter-spacing: -.1em;
+      max-width: 6em;
+      width: 5em;
+      min-width: 5em;
+    }
+}
+
 /* the question's additional legend or caption */
 .legend {
   font-family: Cambria, serif;
@@ -190,6 +203,43 @@ input#my-captcha{
   padding: .2em;
   border-radius: .2em;
 }
+
+/* mini box for each keyword or tag */
+.box-highlight {
+    max-width: 9em;
+    background-color: #161;
+    border: 2px solid #ACA;
+    padding: .5em .4em .6em .8em;
+    margin: .4em .2em .4em .5em;
+    border-radius: .3em;
+    color: #ddd;
+    display: inline-block;
+    -webkit-transition: opacity .3s ease-in;
+    letter-spacing: normal;
+    font-weight: 500;
+}
+.box-highlight-close {
+  font-size: .5em;
+  position: relative;
+  margin-top: -1em;
+  margin-right: -0.2em;
+  float: right;
+  right: 0px;
+  color: #ddd;
+  /*background-color: #333;*/
+  padding: .5em;
+}
+
+.operation:hover {
+  color: #23A;
+  text-shadow: .5px .5px #333, -.5px -.5px #333, -.5px .5px #333, .5px -.5px #333;
+}
+
+.tagbox-container {
+    background-color:#eee ;
+    border-bottom: 3px solid #ccc;
+}
+
 
 /* like a close window element */
 .pull-up-right {
@@ -350,7 +400,9 @@ li.minilabel {
   margin-bottom: 1em;
   border: 2px solid #ddd;
 
-  -webkit-transition: opacity 5s ease;
+  display: none;
+
+  -webkit-transition: opacity 1s ease;
 }
 
 #main_message.faded {

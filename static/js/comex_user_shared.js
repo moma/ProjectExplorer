@@ -28,7 +28,7 @@ var cmxClt = (function() {
 
 
     cC.strokeWhite = ".8px .8px #fff, -.8px -.8px #fff, -.8px .8px #fff, .8px -.8px #fff"
-    cC.strokeGrey = ".8px .8px #333, -.5px -.8px #333, -.8px .8px #333, .8px -.8px #333"
+    cC.strokeGrey = ".8px .8px #333, -.8px -.8px #333, -.8px .8px #333, .8px -.8px #333"
     cC.strokeBlack = ".5px .5px #000, -.5px -.5px #000, -.5px .5px #000, .5px -.5px #000"
     cC.strokeDeepGrey = "3px 3px 4px #333,-3px 3px 4px #333,-3px -3px 4px #333,3px -3px 4px #333"
 
@@ -140,6 +140,7 @@ var cmxClt = (function() {
     cC.uform.submitButton = document.getElementById('form_submit')
     cC.uform.timestamp = document.getElementById('last_modified_date')
     cC.uform.mainMessage = document.getElementById('main_message')
+    cC.uform.mtiStock = {}  // arrays of inputs per fieldName
 
     // functions
     cC.uform.initialize
@@ -156,7 +157,6 @@ var cmxClt = (function() {
     // function definitions
     // =====================
 
-
     // multiTextinput
     //
     // stub for multiple textinput like keywords
@@ -164,13 +164,124 @@ var cmxClt = (function() {
     //   => validate words become removable "pills"
     //   => result is concatenated texts in hidden input.#fName
     // TODO finalize and add to initialize
-    cC.uform.multiTextinput = function (fName) {
-        var normalInput = document.getElementById(fName)
-        normalInput.hidden = true
+    cC.uform.multiTextinput = function (fName, perhapsPreviousValues) {
+        // HTML elt to insert tag boxes around
+        var refElt = null
 
-        var newTextArrayInput = document.createElement('input');
-        newTextArrayInput.class = "form-control autocomp"  // TODO use autocomp
-        cC.insertAfter(normalInput, newTextArrayInput)
+        // new array for full results
+        cC.uform.mtiStock[fName] = []
+
+        // there must be a normal text input
+        var normalInput = document.getElementById(fName)
+        // POSS use autocomp
+
+        // perhaps surrounding input group
+        var inputWrap = cC.findAncestor(normalInput, 'question')
+
+        // if (inputWrap) {
+        //     refElt = inputWrap
+        // }
+        // else {
+            refElt = normalInput
+        // }
+        // refElt.style.marginBottom = 0
+
+        // shows a box and saves the input value in mtiStock
+        var popTagbox = function(event) {
+            // debug
+            // console.log ('poptagbox from event' + event.type)
+
+            var newValue = normalInput.value
+
+            if (newValue != '') {
+                var newBox = document.createElement('div')
+
+                // move the value
+                normalInput.value = ''
+                newBox.textContent = newValue
+
+                // and save it
+                var nSaved = cC.uform.mtiStock[fName].push(newValue)
+
+
+                // create a close elt for the box
+                var newBoxClose = document.createElement('div')
+                newBoxClose.classList.add('box-highlight-close')
+                newBoxClose.classList.add('operation')
+                newBoxClose.innerHTML = '<span class="glyphicon glyphicon-remove"></span>'
+
+                var closeBox = function() {
+                    // start transition
+                    newBox.style.opacity = 0
+
+                    // remove value from stock
+                    var i = 0
+                    for (i in cC.uform.mtiStock[fName]){
+                        if (cC.uform.mtiStock[fName][i] == newValue) {
+                            break ;
+                        }
+                    }
+                    cC.uform.mtiStock[fName].splice(i, 1)
+
+                    // signal form change
+                    cC.uform.theForm.dispatchEvent(new CustomEvent('change'))
+
+                    // remove box
+                    setTimeout(function(){newBox.style.display = 'none'}, 300)
+
+                    console.log("droptagbox", cC.uform.mtiStock[fName].length, cC.uform.mtiStock[fName])
+                }
+
+                newBoxClose.onclick = closeBox
+                newBox.insertBefore(newBoxClose, newBox.firstChild)
+
+
+                // show the box
+                newBox.classList.add("box-highlight")
+                cC.insertAfter(refElt, newBox)
+
+                console.log("poptagbox", cC.uform.mtiStock[fName].length, cC.uform.mtiStock[fName])
+            }
+        }
+
+        // when re-entering previously saved values at init
+        if (   perhapsPreviousValues
+            && perhapsPreviousValues.length) {
+            for (var i in perhapsPreviousValues) {
+                normalInput.value = perhapsPreviousValues[i]
+                popTagbox()
+            }
+        }
+
+        // bind it to 'blur', 'change' and ENTER
+        normalInput.onblur = popTagbox
+        normalInput.onchange = popTagbox
+        normalInput.onkeydown = function (ev) {
+
+            // perhaps now there's a jquery-ui autocomplete
+            var hasAutocomplete = $(normalInput).data('ui-autocomplete')
+
+            if (ev.keyCode == 13) {
+                // ENTER
+                if ( !hasAutocomplete
+                     ||
+                     !hasAutocomplete.menu.active) {
+
+                    popTagbox()
+                }
+            }
+            else if (ev.which == 27) {
+                // ESC
+                normalInput.value = ""
+            }
+        }
+
+        // expose
+        if (! cC.uform.mtiPopOneTag) {
+            cC.uform.mtiPopOneTag = {}
+        }
+        cC.uform.mtiPopOneTag[fName] = popTagbox()
+
     }
 
     // initialize
@@ -183,6 +294,19 @@ var cmxClt = (function() {
         cC.uform.theForm.onkeyup = aValidationFun
         cC.uform.theForm.onchange = aValidationFun
         cC.uform.theForm.onblur = aValidationFun
+
+        cC.uform.theForm.classicSubmit = cC.uform.theForm.submit
+        cC.uform.theForm.submit = function() {
+
+            // collect multiTextinput values
+            for (var field in cC.uform.mtiStock) {
+                console.log('collecting', field)
+                document.getElementById(field).value = cC.uform.mtiStock[field].join(',')
+                console.log("new value is", document.getElementById(field).value)
+            }
+
+            cC.uform.theForm = cC.uform.theForm.classicSubmit()
+        }
     }
 
     // testFillField
@@ -232,10 +356,10 @@ var cmxClt = (function() {
                 actualValue = null
                 document.getElementById(fieldName).value = ""
             }
-            // arrays of text
+            // arrays of text: rm brackets and any squotes
             if (fieldType == "at" && actualValue
                   && actualValue.charAt(0) == '['
-                  && actualValue.charAt(1) == "'") {
+                  && actualValue.charAt(actualValue.length-1) == "]") {
                 actualValue = actualValue.replace(/[\[\]']/g,'')
                 document.getElementById(fieldName).value = actualValue
             }
@@ -259,10 +383,22 @@ var cmxClt = (function() {
           var labelElt = document.querySelector('label[for='+fieldName+']')
           var fieldLabel = labelElt ? labelElt.innerText : fieldName
 
+          // alternative filled values from storage lists
+          if (  (actualValue == null  || actualValue == "" )
+                    && cC.uform.mtiStock[fieldName]
+                    && cC.uform.mtiStock[fieldName].length) {
+              actualValue = cC.uform.mtiStock[fieldName].join(',')
+
+              // debug
+              console.log('recreated multiTextinput value', actualValue)
+          }
+
+
           // alternative null values
           if (actualValue == "") {
               actualValue = null
           }
+
 
           // debug
           // console.log(

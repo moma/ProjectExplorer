@@ -250,13 +250,16 @@
                </p>
 
                <div class="question">
-                 <div class="input-group">
+                 <div class="input-group tagbox-container">
                    <label for="keywords" class="smlabel input-group-addon">* Key subjects</label>
                    <input id="keywords" name="keywords" maxlength="350"
-                          type="text" class="form-control autocomp" placeholder="keywords"
+                          type="text" class="form-control autocomp" placeholder="Add a keyword here"
                           value="{{ current_user.info.keywords }}">
+                    <div class="input-group-addon">
+                        <span class="glyphicon glyphicon-plus operation" onclick="cmxClt.uform.mtiPopOneTag['keywords']"></span>
+                    </div>
                  </div>
-                 <p class="legend">Please enter at least 5 comma-separated keywords</p>
+                 <p class="legend">Please enter at least 5 keywords</p>
                </div>
 
                <div class="question input-group">
@@ -534,7 +537,8 @@
           <!-- == S U B M I T == -->
           <div style="text-align:center">
             <!-- @type button to avoid ENTER submit  -->
-            <button class="btn btn-lg btn-success" id="form_submit" type="button" onclick="cmxClt.uform.theForm.submit()">
+            <button class="btn btn-lg btn-success" id="form_submit"
+                    type="button" onclick="cmxClt.uform.theForm.submit()">
                   Save profile
             </button>
           </div>
@@ -604,5 +608,6 @@
     <script src="{{ url_for('static', filename='js/comex_user_shared.js') }}"></script>
     <script src="{{ url_for('static', filename='js/comex_page_profile_controllers.js') }}"></script>
     <script src="{{ url_for('static', filename='js/comex_user_autocompletes.js') }}"></script>
+    <!-- <script src="{{ url_for('static', filename='js/bootstrap-native.js') }}"></script> -->
     <script src="{{ url_for('static', filename='js/bootstrap-native-1.1.min.js') }}"></script>
 {% endblock %}

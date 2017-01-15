@@ -41,6 +41,10 @@ selectSavedMenus(uinfo)
 cmxClt.uform.initialize("comex_profile_form", completionAsYouGo)
 
 
+// activate multiTextinput
+cmxClt.uform.multiTextinput('keywords', uinfo.keywords)
+
+
 // memory
 var formValid = false
 

@@ -28,6 +28,10 @@ cmxClt.uauth.emailIdSupposedToExist = false
 var validateWithMessage = false
 
 
+// activate multiTextinput
+cmxClt.uform.multiTextinput('keywords')
+
+
 var shortRegVersion = true
 var ignoredFields = []
 if (shortRegVersion) {

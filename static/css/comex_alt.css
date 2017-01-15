@@ -56,18 +56,6 @@ iframe.wwwthumbsmall {
   background-color: #555;
   border-radius: 5em;
 }
-
-.box-highlight {
-  background-color: #AAA ;
-  padding: .2em .5em ;
-  background-color: #B00 ;
-}
-.box-highlight::after {
-  content: "x (close)" ;
-  font-size: .4em;
-  margin-bottom: .7em;
-}
-
 #information-example {
     background-color:#AAA;
     border-radius: 1em;
