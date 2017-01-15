@@ -367,7 +367,7 @@ def profile():
     elif request.method == 'POST':
         mlog("DEBUG", "saving profile with request.form=", request.form)
         try:
-            save_form(
+            clean_records = save_form(
                       request.form,
                       request.files if hasattr(request, "files") else {},
                       update_flag = True
