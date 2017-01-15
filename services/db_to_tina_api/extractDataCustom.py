@@ -94,7 +94,7 @@ class MyExtractor:
                 results=self.cursor.fetchall()
 
                 # debug
-                # mlog("DEBUG", "getScholarsList<== len(all 2-step neighbors) =", len(results))
+                mlog("DEBUG", "getScholarsList<== len(all 2-step neighbors) =", len(results))
 
                 if len(results) == 0:
                     # should never happen if input unique_id is valid
@@ -293,10 +293,13 @@ class MyExtractor:
         scholarsIncluded = 0;
 
         for i in self.scholars:
+            mlog('INFO', 'extractDataCustom:'+self.scholars[i]['email'])
             self.scholars_colors[self.scholars[i]['email'].strip()]=0;
             scholar_keywords = self.scholars[i]['keywords_ids'];
             for k in range(len(scholar_keywords)):
                 kw_k = scholar_keywords[k]
+                mlog('INFO', 'extractDataCustom:keyword'+kw_k)
+
                 if kw_k != None and kw_k!="":
                     # mlog("DEBUG", kw_k)
                     if kw_k in termsMatrix:

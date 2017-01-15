@@ -8,7 +8,7 @@ var ForceAtlas2 = function(graph) {
     linLogMode: false,
     outboundAttractionDistribution: false,
     adjustSizes: false,
-    edgeWeightInfluence: 0,
+    edgeWeightInfluence: 1,
     scalingRatio: 1,
     strongGravityMode: false,
     gravity: 1,
@@ -233,7 +233,7 @@ var ForceAtlas2 = function(graph) {
             totalSwinging += n.fa2.mass * swinging;
             swingingSum += swinging;
             promdxdy += (Math.abs(n.fa2.dx)+Math.abs(n.fa2.dy))/2; /**/
-            
+
             totalEffectiveTraction += n.fa2.mass *
                                       0.5 *
                                       Math.sqrt(
@@ -242,15 +242,15 @@ var ForceAtlas2 = function(graph) {
                                       );
           }
         });
-        
+
         self.p.totalSwinging = totalSwinging;
-        
+
         var convg= ((Math.pow(nodes.length,2))/promdxdy);    /**/
         var swingingVSnodes_length = swingingSum/nodes.length;     /**/
-        // if(convg > swingingVSnodes_length){ 
+        // if(convg > swingingVSnodes_length){
         //     self.p.banderita=true;
         // }
-        
+
         self.p.totalEffectiveTraction = totalEffectiveTraction;
 
         // We want that swingingMovement < tolerance * convergenceMovement
@@ -367,7 +367,7 @@ var ForceAtlas2 = function(graph) {
     // Behavior
     this.p.outboundAttractionDistribution = false;
     this.p.linLogMode = false;
-    this.p.adjustSizes = false;
+    this.p.adjustSizes = true;
     this.p.edgeWeightInfluence = 1;
 
     // Performance
@@ -878,7 +878,7 @@ var Region = function(nodes, depth) {
     massCenterX: 0,
     massCenterY: 0
   };
-  
+
   console.log("updating mass and geometry");
   this.updateMassAndGeometry();
 }
@@ -981,7 +981,7 @@ var startForceAtlas2 = function(graph,limit_it) {
     forceatlas2 = new ForceAtlas2(graph);
     forceatlas2.setAutoSettings();
     forceatlas2.init();
-    
+
     count=0;
     flag=false;
     while(true){
@@ -994,13 +994,13 @@ var startForceAtlas2 = function(graph,limit_it) {
         }
         count++;
         if(flag||count>limit_it) break;
-    }    
+    }
 //    pr(forceatlas2.graph.nodes[0].x)
 //    pr(forceatlas2.graph.nodes[0].y)
 //    console.log("\titerations: "+count)
     result={
         "nodes":forceatlas2.graph.nodes,
-        "it":count        
+        "it":count
     }
     return result;
 };
@@ -1016,5 +1016,5 @@ self.addEventListener("message", function(e) {
         "nodes":result.nodes,
         "it":result.it
     });
-    
+
 }, false);

@@ -259,7 +259,7 @@ function bringTheNoise(sourceinfo,type){
 
         $('#modalloader').modal('show');
 
-        // console.warn("===> PASSING ON QUERY (type "+type+") TO BRIDGE <===")
+        console.warn("===> PASSING ON QUERY (type "+type+") TO BRIDGE <===")
         if(type=="uid") {
             // pr("bring the noise, case: unique_id");
             // pr(getClientTime()+" : DataExt Ini");
@@ -726,15 +726,17 @@ function SigmaLayouting( URL, DATA, NAME) {
         	        pr(data)
                     if(!isUndef(ourGetUrlParam.seed))seed=ourGetUrlParam.seed;
                     extractFromJson(data,seed);
-
-                    // changeToMacro("social");
                     pr(getClientTime()+" : DataExt Fin");
                     // < === DATA EXTRACTED!! === >
 
-                    if(fa2enabled==="off") $("#edgesButton").hide();
+                    // changeToMacro("social");
                     pushSWClick("social");
+
+                    if(fa2enabled==="off") $("#edgesButton").hide();
+
                     pr(partialGraph._core.graph.nodes.length)
                     pr(partialGraph._core.graph.edges.length)
+
                     nbnodes = partialGraph._core.graph.nodes.length
                     if(nbnodes>=400 && nbnodes<1000) {
                         snbnodes = nbnodes+"";
