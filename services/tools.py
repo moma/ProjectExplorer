@@ -191,7 +191,7 @@ def mlog(loglvl, *args):
 
     config['LOG_TEE'] (bool) decides if logs also go to STDOUT
     """
-    levels = {"DEBUG":0, "INFO":1, "WARNING":2, "ERROR":3}
+    levels = {"DEBUGSQL":-1, "DEBUG":0, "INFO":1, "WARNING":2, "ERROR":3}
 
     if 'LOG_FILE' in REALCONFIG:
         logfile = open(REALCONFIG["LOG_FILE"], "a")    # a <=> append

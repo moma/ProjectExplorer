@@ -70,6 +70,9 @@ def doors_login(email, password, config):
     doors_base_url = 'http://'+config['DOORS_HOST']+':'+config['DOORS_PORT']
     doors_response = post(doors_base_url+'/api/user', data=dumps({'login':email, 'password':password}))
 
+
+    print("doors_response",doors_response)
+    mlog("INFO", "doors_response",doors_response)
     if doors_response.ok:
         login_info = loads(doors_response.content.decode())
 

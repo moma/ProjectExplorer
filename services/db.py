@@ -163,7 +163,7 @@ def get_field_aggs(a_field, hapax_threshold=int(REALCONFIG['HAPAX_THRESHOLD'])):
             """ % {'col': sql_col, 'filter': where_clause}
 
 
-        mlog("DEBUG", "get_field_aggs STATEMENT:\n-- SQL\n%s\n-- /SQL" % stmt)
+        mlog("DEBUGSQL", "get_field_aggs STATEMENT:\n-- SQL\n%s\n-- /SQL" % stmt)
 
         # do it
         n_rows = db_c.execute(stmt)
@@ -236,7 +236,7 @@ def get_full_scholar(uid):
                 -- two step JOIN for keywords
                 LEFT JOIN sch_kw
                     ON sch_n_aff.doors_uid = sch_kw.uid
-                JOIN keywords
+                LEFT JOIN keywords
                     ON sch_kw.kwid = keywords.kwid
                 GROUP BY doors_uid
 
@@ -250,15 +250,15 @@ def get_full_scholar(uid):
         GROUP BY doors_uid
     """ % str(uid)
 
-    mlog("DEBUG", "get_full_scholar STATEMENT:\n-- SQL\n%s\n-- /SQL" % one_usr_stmt)
+    mlog("DEBUGSQL", "DB get_full_scholar STATEMENT:\n-- SQL\n%s\n-- /SQL" % one_usr_stmt)
 
     n_rows = db_c.execute(one_usr_stmt)
 
     if n_rows > 1:
-        raise IndexError("one_usr_stmt returned %i rows instead of 1 for user %s" % (n_rows, uid))
+        raise IndexError("DB one_usr_stmt returned %i rows instead of 1 for user %s" % (n_rows, uid))
 
     elif n_rows == 0:
-        mlog("WARNING", "get_full_scholar attempt to read non-existing user %s" % uid)
+        mlog("WARNING", "DB get_full_scholar attempt got no rows for: %s" % uid)
         db.close()
         return None
 
@@ -365,12 +365,15 @@ def save_scholar(uid, date, safe_recs, reg_db, uactive=True, update_flag=False):
             quotedstrval = ""
             if colname != 'pic_file':
                 quotedstrval = "'"+str(val)+"'"
+
+                mlog("DEBUG", "DB saving" + quotedstrval)
+
             else:
-                mlog("DEBUG", "picture file is len0?", len(val) == 0 )
+                mlog("DEBUG", "DB picture file is len0?", len(val) == 0 )
                 # str(val) for a bin is already quoted but has the 'b' prefix
                 quotedstrval = '_binary'+str(val)[1:]  # TODO check if \x needs to land in target sql ?
 
-                mlog("DEBUG", "added pic blob: " + quotedstrval[:25] + '...' + quotedstrval[-10:])
+                mlog("DEBUG", "DB added pic blob: " + quotedstrval[:25] + '...' + quotedstrval[-10:])
 
             # anyways
             db_tgtcols.append(colname)

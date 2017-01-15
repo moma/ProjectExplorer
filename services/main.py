@@ -266,6 +266,8 @@ def login():
             if uid:
                 login_ok = login_user(User(uid))
 
+                mlog('INFO', 'login of %s was %s' % (uid, str(login_ok)))
+
                 # TODO check cookie
                 # login_ok = login_user(User(uid), remember=True)
                 #                                  -------------
@@ -339,12 +341,14 @@ def profile():
         if current_user.empty:
             mlog("INFO",  "PROFILE: empty current_user %s" % current_user.uid)
         else:
-            mlog("DEBUG",  "PROFILE: current_user %s\n  -" % current_user.uid
-                           + '\n  - '.join([current_user.info['email'],
+            mlog("INFO",  "PROFILE: current_user %s" % current_user.uid)
+            mlog("DEBUG",  "PROFILE: current_user details: \n  - %s" % (
+                                '\n  - '.join([current_user.info['email'],
                                             current_user.info['initials'],
                                         str(current_user.info['keywords']),
                                             current_user.info['country']]
                                           )
+                              )
                 )
 
         # debug session cookies
@@ -361,6 +365,7 @@ def profile():
             #                         and {{current_user.json_info}}
         )
     elif request.method == 'POST':
+        mlog("DEBUG", "saving profile with request.form=", request.form)
         try:
             save_form(
                       request.form,

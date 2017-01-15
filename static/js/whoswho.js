@@ -197,14 +197,19 @@ $(document).ready(function() {
       return "" + ui.item.firstname + " " + ui.item.lastname;
     }
   });
+
+  // main form collect function
   collectFilters = function(cb) {
     var collect, query;
     collect = function(k) {
       var t;
       t = [];
-      log("collecting .filter" + k);
+      log("collecting .filter:" + k);
       $(".filter" + k).each(function(i, e) {
         var value;
+
+        console.log('collecting (filter '+k+') from elt:' + e)
+
         value = $(e).val();
         if (value != null) {
           log("got: " + value);
@@ -249,6 +254,10 @@ $(document).ready(function() {
     console.log("calling callback with encoded query:", query)
     return cb(query);
   };
+
+
+
+  // refine filters => tinawebjs graphexplorer
   $("#generate").click(function() {
     hide(".hero-unit");
     return $("#welcome").fadeOut("slow", function() {
