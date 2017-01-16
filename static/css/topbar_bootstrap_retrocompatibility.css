@@ -1,4 +1,13 @@
 /*!
+ * Ensure jq-ui.autocomplete menus are over the topbar
+ */
+
+.topbar .ui-menu {
+    z-index:11 !important;
+}
+
+
+/*!
  * Excerpt from Bootstrap v1.4.0 Copyright 2011 Twitter, Inc
  * with all top toolbar elements' css as they were back then...
  */
@@ -9,7 +18,7 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 10000;
+  z-index: 10;
   overflow: visible;
 }
 .topbar a {

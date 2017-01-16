@@ -37,6 +37,8 @@ $(document).ready(function() {
       return log("applet already exists");
     }
   };
+
+  // autocomplete
   popfilter = function(label, type, options) {
     var footer, header, id, id1, id2, input, labelization;
     id = ids++;
@@ -47,17 +49,30 @@ $(document).ready(function() {
     input = "<input type=\"text\" id=\"" + id2 + "\" class=\"medium filter" + type + "\" placeholder=\"" + type + "\" />";
     footer = "</li>;";
     $(header + labelization + input + footer).insertBefore("#refine");
-    $("#" + id2).filtercomplete({
-      minLength: 2,
-      source: function(request, response) {
-        return $.getJSON("search_filter.php", {
-          category: type,
-          term: request.term
-        }, function(data, status, xhr) {
-          return response(data.results);
-        });
-      }
-    });
+
+    console.log("whoswho.popfilter: adding autocomplete menu", $("#" + id1))
+
+    $("#" + id2).autocomplete({
+        source: function (req, resp) {
+            $.ajax({
+                dataType: "json",
+                type: "GET",
+                url: "/search_filter.php",
+                data: {
+                    "category": type,
+                    "term": req.term,
+                },
+                success: function(data){
+                    resp(data.results)
+                },
+                error: function(response) {
+                    console.log("ERROR from search_filter AJAX", response)
+                }
+            }) ;
+        },
+        minLength: 2
+    })
+
     $("" + id1).hide();
     show("#" + id1);
     $("#" + id2).focus();
@@ -80,34 +95,8 @@ $(document).ready(function() {
       opacity: 0.93
     }, "fast");
   });
-  $.widget("custom.filtercomplete", $.ui.autocomplete, {
-    _renderMenu: function(ul, items) {
-      var categories, self;
-      self = this;
-      categories = _.groupBy(items, function(o) {
-        return o.category;
-      });
-      return _.each(categories, function(data, category) {
-        var size, term, total;
-        size = 0;
-        total = 0;
-        term = "";
-        _.each(data, function(item) {
-          var myRender;
-          size = item.size;
-          total = item.total;
-          term = item.term;
-          myRender = function(a, b) {
-            return $("<li></li>").data("item.autocomplete", b).append($("<a></a>").text(b.label)).appendTo(a);
-          };
-          return myRender(ul, item);
-        });
-        ul.append("<li class='ui-autocomplete-category'>" + size + "/" + total + " results</li>");
-        log(term);
-        return ul.highlight(term);
-      });
-    }
-  });
+
+
   $.widget("custom.scholarcomplete", $.ui.autocomplete, {
     _renderMenu: function(ul, items) {
       var categories, self;
@@ -183,13 +172,13 @@ $(document).ready(function() {
         $("#searchname").attr("placeholder", "");
         $("#print2").click(function() {
           console.log("clicked on print");
-          return window.open("print_scholar_directory.php?query=" + ui.item.id, "Scholar's list");
+          return window.open("/print_scholar_directory.php?query=" + ui.item.id, "Scholar's list");
         });
         $("#generate2").click(function() {
           hide(".hero-unit");
           return $("#welcome").fadeOut("slow", function() {
             show("#loading", "fast");
-            return window.location.href='explorerjs.html?type="uid"&nodeidparam="' + ui.item.id + '"';
+            return window.location.href='/explorerjs.html?type="uid"&nodeidparam="' + ui.item.id + '"';
             //return loadGraph("get_scholar_graph.php?login=" + ui.item.id);
           });
         });
@@ -256,23 +245,23 @@ $(document).ready(function() {
   };
 
 
-
   // refine filters => tinawebjs graphexplorer
   $("#generate").click(function() {
+    console.log("clicked on generate")
     hide(".hero-unit");
-    return $("#welcome").fadeOut("slow", function() {
-      show("#loading", "fast");
-      return collectFilters(function(query) {
-        return window.location.href='explorerjs.html?type="filter"&nodeidparam="' + escape(query) +'"';
-        //return loadGraph("getgraph.php?query=" + query);
-      });
+    $("#welcome").fadeOut("slow");
+    console.log("initiating graphexplorer")
+    show("#loading", "fast");
+    return collectFilters(function(query) {
+      return window.location.href='/explorerjs.html?type="filter"&nodeidparam="' + escape(query) +'"';
+      //return loadGraph("getgraph.php?query=" + query);
     });
   });
   $("#print").click(function() {
     console.log("clicked on print");
     return collectFilters(function(query) {
       console.log("collected filters: " + query);
-      return window.open("print_directory.php?query=" + query, "Scholar's list");
+      return window.open("/print_directory.php?query=" + query, "Scholar's list");
     });
   });
   hide("#loading");
