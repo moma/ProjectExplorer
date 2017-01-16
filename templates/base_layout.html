@@ -10,6 +10,9 @@
   <link type=text/css rel=stylesheet href="{{ url_for('static', filename='js/realperson/jquery.realperson.css') }}">
   <link type=text/css rel=stylesheet href="{{ url_for('static', filename='css/comex_user.css') }}">
 
+  <!--   for topbar search/refine   -->
+  <link type=text/css rel=stylesheet href="{{ url_for('static', filename='css/whoswho.css') }}">
+
   <!-- ## fonts ## -->
   <link type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
   <link type="text/css" href="http://fonts.googleapis.com/css?family=Droid%20Sans" rel="stylesheet">
@@ -21,7 +24,11 @@
   <!--   libs   -->
   <script type="text/javascript" src="{{ url_for('static', filename='js/jquery/jquery-3.1.1.min.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-ui-1.12.1/jquery-ui.min.js') }}"></script>
-
+  <!--   for topbar search/refine   -->
+  <script type="text/javascript" src="{{ url_for('static', filename='js/utils.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/misc/underscore.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/jquery/jquery.highlight-3.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/whoswho.js') }}"></script>
   <!--  NB our js will be at the end -->
 
   <!-- ## Piwik ## -->
@@ -62,29 +69,92 @@
                         Community Explorer
                       </a>
                   </li>
+
+
+                <!-- MAIN SEARCH/REFINE NAVBAR -->
+                <li id="mapping" class="comex-nav-item">
+                    <p class='topbarlink'>
+                        <strong>SELECT Keywords AND Scholars</strong>
+                    </p>
+                </li>
+                <li id="refine" class="dropdown comex-nav-item">
+                    <a class="btn-default nav-inline-selectable"
+                       style="padding-top: 1em"
+                       onclick='$(this).next(".dropdown-menu").toggle();'
+                       >refine<i class="caret"></i></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a id="addfiltercountry" href="#"
+                                onclick='$(this).parents(".dropdown-menu").toggle();'>
+                                Filter by country</a>
+                        </li>
+                        <li>
+                            <a id="addfilterkeyword" href="#"
+                               onclick='$(this).parents(".dropdown-menu").toggle();'>
+                               Filter by keyword</a>
+                        </li>
+                        <li>
+                            <a id="addfiltertag" href="#"
+                               onclick='$(this).parents(".dropdown-menu").toggle();'>
+                               Filter by community tags</a>
+                        </li>
+                        <li>
+                            <a id="addfilterlaboratory" href="#"
+                               onclick='$(this).parents(".dropdown-menu").toggle();'>
+                               Filter by laboratory</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="comex-nav-item">
+                    <a class="topbarlink" id="print" href="#"> <i class="icon-arrow-right icon-white"></i> <strong>CREATE DIRECTORY</strong></a>
+                </li>
+                <li class="comex-nav-item">
+                    <p class="topbarlink">
+                        <strong>&nbsp;OR&nbsp;</strong>
+                    </p>
+                </li>
+                <li class="comex-nav-item">
+                    <a class="topbarlink" id="generate" href="#"> <i class="icon-arrow-right icon-white"></i> <strong>MAP</strong></a>
+                </li>
+
               </ul>
+
+
+
               <ul class="white nav navbar-nav navbar-right">
-                  {% if current_user and current_user.info %}
+                <!-- USER TOOLBARS (LOGIN/REGISTER/PROFILE/ETC) -->
+                <li class="dropdown">
+                  <a href="#" class="navlink dropdown-toggle"
+                     data-toggle="dropdown" role="button"
+                     aria-haspopup="true" aria-expanded="false">
+                     <span class="glyphicon glyphicon-user"></span>
+                     User
+                     <span class="caret"></span>
+                 </a>
+                  <ul class="dropdown-menu">
+                      {% if current_user.info %}
                       <li>
-                          <a class="navlink" href="/services/user/profile"> Your Profile </a>
+                          <a href="/services/user/profile"> Your Profile </a>
                       </li>
                       <li>
-                          <a class="navlink" href='/explorerjs.html?type="uid"&nodeidparam="{{ current_user.uid }}"'> Your Map </a>
+                          <a href='/explorerjs.html?type="uid"&nodeidparam="{{ current_user.uid }}"'> Your Map </a>
                       </li>
                       <li>
-                          <a class="navlink" href='/print_scholar_directory.php?query={{ current_user.uid }}'> Your Neighboor Stats </a>
+                          <a href='/print_scholar_directory.php?query={{ current_user.uid }}'> Your Neighboor Stats </a>
                       </li>
                       <li>
-                          <a class="navlink" href='/services/user/logout/'> Logout </a>
+                          <a href='/services/user/logout/'> Logout </a>
                       </li>
-                  {% else %}
+                      {% else %}
                       <li>
-                          <a class="navlink" href="/services/user/register"> Register </a>
+                          <a href="/services/user/register"> Register </a>
                       </li>
                       <li>
-                          <a class="navlink" href="/services/user/login"> Login </a>
+                          <a href="/services/user/login"> Login </a>
                       </li>
-                  {% endif %}
+                      {% endif %}
+                  </ul>
+                </li>
               </ul>
           </div>
       </div>
@@ -137,6 +207,7 @@
   </div>
 
 
+  <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap-native-1.1.min.js') }}"></script>
   <!--  for our js: end-of-page javascript imports -->
   {% block last_imports %}
   {% endblock %}

@@ -63,10 +63,10 @@ $(document).ready(function() {
     id1 = "filter" + id;
     id2 = "combo" + id;
     id3 = "close" + id;
-    header = "<li id=\"" + id1 + "\" class=\"filter\" style=\"padding-top: 5px;\">";
+    header = "<li id=\"" + id1 + "\" class=\"comex-nav-item filter\" style=\"padding-top: 5px;\">";
     labelization = "<span style=\"color: #fff;\">&nbsp; " + label + " </span>";
     input = "<input type=\"text\" id=\"" + id2 + "\" class=\"medium filter" + type + "\" placeholder=\"" + type + "\" />";
-    closebox = "<div id=\""+id3+"\" for=\""+id1+"\" class=\"filter-close operation\">x</div>"
+    closebox = "<div id=\""+id3+"\" for=\""+id1+"\" class=\"filter-close operation-light\">x</div>"
     footer = "</li>;";
     $(header + labelization + input + closebox + footer).insertBefore("#refine");
     $('#' + id3).click(closeThisBox)

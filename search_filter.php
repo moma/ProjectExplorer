@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Génère le gexf des scholars à partir de la base mysql
+ * Génère le json des scholars à partir de la base mysql
  */
 include("php_library/parametres.php");
 include("php_library/normalize.php");

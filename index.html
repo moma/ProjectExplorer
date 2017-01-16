@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html5>
 <html lang="en">
     <head>
         <meta charset="utf-8">
@@ -81,14 +81,25 @@
         </script>
         <script type="text/javascript" src="static/js/whoswho.js"/></script>
         <div class="topbar">
-            <div class="topbar-inner">
-                <div class="container-fluid">
-                    <ul class="nav" style="margin-top:5px;">
-                        <li>
-                            <a class="topbarlink" href="index.html"><span class="icon-home icon-white"></i></a>
-                        </li>
-                        <!-- MAIN SEARCH/REFINE NAVBAR -->
-                        <li id="mapping" class="nav-legend">
+      <div class="topbar-inner">
+          <div class="container-fluid">
+              <ul class="white nav navbar-nav navbar-left">
+                  <li>
+                      <a class="brand" href="https://iscpif.fr/">
+                        <img style="height:24px;" src="static/img/logo_m_bleu-header.png"</a>
+                  </li>
+                  <li>
+                      <a class="brand" href="/">
+                        <span class="icon-home icon-white icon-large"></span>&nbsp;&nbsp;
+                        Community Explorer
+                      </a>
+                  </li>
+
+
+                <!-- MAIN SEARCH/REFINE NAVBAR -->
+                <li id="mapping" class="comex-nav-item">
+                    <p class='topbarlink'>
+
                             <span> <strong>SELECT Keywords</strong> </span>
                             <!-- <select id="categorya" class="small" style="background: rgb(220,255,220, 0.8);">
                                 <option selected="true">Keywords</option>
@@ -104,7 +115,8 @@
                                 <option>Organizations</option>
                                 <option>Countries</option>
                             </select> -->
-                        </li>
+                    </p>
+                </li>
                         <!--
                         <li class="dropdown">
                         <a class="dropdown-toggle"><strong>working on</strong> Optics, Econometrics</a>
@@ -118,54 +130,57 @@
                         </ul>
                         </li>
                         -->
-                        <li id="refine" class="dropdown">
-                            <a class="btn-default nav-inline-selectable"
-                               onclick='$(this).next(".dropdown-menu").toggle();'
-                               >refine<i class="caret"></i></a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a id="addfiltercountry" href="#"
-                                        onclick='$(this).parents(".dropdown-menu").toggle();'>
-                                        Filter by country</a>
-                                </li>
-                                <li>
-                                    <a id="addfilterkeyword" href="#"
-                                       onclick='$(this).parents(".dropdown-menu").toggle();'>
-                                       Filter by keyword</a>
-                                </li>
-                                <li>
-                                    <a id="addfiltertag" href="#"
-                                       onclick='$(this).parents(".dropdown-menu").toggle();'>
-                                       Filter by community tags</a>
-                                </li>
+                <li id="refine" class="dropdown comex-nav-item">
+                    <a class="btn-default nav-inline-selectable"
+                       style="padding-top: 1em"
+                       onclick='$(this).next(".dropdown-menu").toggle();'
+                       >refine<i class="caret"></i></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a id="addfiltercountry" href="#"
+                                onclick='$(this).parents(".dropdown-menu").toggle();'>
+                                Filter by country</a>
+                        </li>
+                        <li>
+                            <a id="addfilterkeyword" href="#"
+                               onclick='$(this).parents(".dropdown-menu").toggle();'>
+                               Filter by keyword</a>
+                        </li>
+                        <li>
+                            <a id="addfiltertag" href="#"
+                               onclick='$(this).parents(".dropdown-menu").toggle();'>
+                               Filter by community tags</a>
+                        </li>
                                 <!-- <li>
                                     <a id="addfilterorganization" href="#"
                                        onclick='$(this).parents(".dropdown-menu").toggle();'>
                                        Filter by organization</a>
                                 </li> -->
-                                <li>
-                                    <a id="addfilterlaboratory" href="#"
-                                       onclick='$(this).parents(".dropdown-menu").toggle();'>
-                                       Filter by laboratory</a>
-                                </li>
+                        <li>
+                            <a id="addfilterlaboratory" href="#"
+                               onclick='$(this).parents(".dropdown-menu").toggle();'>
+                               Filter by laboratory</a>
+                        </li>
 
                                 <!--<li>
                                     <a id="addcolor" href="#">Color by</a>
                                 </li>-->
 
-                            </ul>
-                        </li>
-                        <li>
-                            <a class="topbarlink" id="print" href="#"> <i class="icon-arrow-right icon-white"></i> <strong>CREATE DIRECTORY</strong></a>
-                        </li>
-                        <li style="margin-top: 10px;">
-                            <span style="color: #fff;"> <strong>&nbsp;OR&nbsp;</strong> </span>
-                        </li>
-                        <li>
-                            <a class="topbarlink" id="generate" href="#"> <i class="icon-arrow-right icon-white"></i> <strong>MAP</strong></a>
-                        </li>
-
                     </ul>
+                </li>
+                <li class="comex-nav-item">
+                    <a class="topbarlink" id="print" href="#"> <i class="icon-arrow-right icon-white"></i> <strong>CREATE DIRECTORY</strong></a>
+                </li>
+                <li class="comex-nav-item">
+                    <p class="topbarlink">
+                        <strong>&nbsp;OR&nbsp;</strong>
+                    </p>
+                </li>
+                <li class="comex-nav-item">
+                    <a class="topbarlink" id="generate" href="#"> <i class="icon-arrow-right icon-white"></i> <strong>MAP</strong></a>
+                </li>
+
+              </ul>
                     <form id="search-form" class="js-search-form pull-right">
                         <span class="glass js-search-action"><i></i></span>
                         <input id="search" class="input-small" type="text" name="q" placeholder="Search">

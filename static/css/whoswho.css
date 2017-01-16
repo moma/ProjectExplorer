@@ -182,12 +182,12 @@ input.name {
     color: #000 !important;
     background-color: #fff;
 
-    /*font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;*/
+    font-family: "Droid Sans", Ubuntu, Calibri, "Helvetica Neue", Helvetica, Arial, sans-serif;
     text-shadow: none !important ;
     font-weight: normal;
 
-    padding: 4px !important ;
-    margin: .4em 1em .3em 1em;
+    padding: 2px 4px !important ;
+    margin: .4em 1em;
 
     box-sizing: border-box;
 
@@ -212,13 +212,8 @@ input.name {
 }
 
 .filter {
-    line-height: 18px;
-    vertical-align: middle;
-    font-size: 13px;
-    padding: 0 !important ;
-    padding: 0 !important;
-    margin: .25em 0 0 0 !important;
-
+    font-size: 1em;
+    margin: .22em 0 0 .5em ;
     -webkit-transition: opacity .5s ease-in;
 }
 .filter > span {
@@ -232,12 +227,13 @@ input.name {
   font-size: 1em;
   position: relative;
   margin-top: -.3em;
-  margin-right: 1em;
-  float: right;
-  color: #23A ;
+  margin-right: .5em;
+  right: .2em;
+  display: inline;
+  color: #333 !important ;
   background-color: #979797;
-  border-radius: 1em;
-  padding: 0 .4em;
+  border-radius: 0 1.2em 1.2em 0;
+  padding: .32em .4em .37em .2em;
   cursor: pointer;
   opacity: 1;
 }

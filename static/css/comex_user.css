@@ -19,6 +19,16 @@ body {
   line-height: .85em;
 }
 
+.comex-nav-item {
+    vertical-align: middle;
+    line-height: 2em;
+    height: 2em;
+    margin-top: .2em;
+
+    /* good for scaffolding
+    border: 2px solid white;
+    */
+}
 
 /* main content for all new pages */
 div.my-box {
@@ -138,19 +148,36 @@ input.readonly {
   /*text-align: center;*/
 }
 
-/* form operation buttons for instance add middle name */
+/* form operation buttons for instance add middle name, remove box, etc */
 .operation {
   color: #554 ;
+  cursor: pointer;
+}
+.operation:hover {
+  color: #23A;
+  text-shadow: .2px .3px #333;
+}
+
+/* same on dark background */
+.operation-light {
+  color: #979797 ;
+  cursor: pointer;
+}
+.operation-light:hover {
+  color: rgb(170,255,120);
+  text-shadow: .2px .3px #eee;
 }
 
 
-.navlink {
+.navlink, .navlink:focus {
   font-size: 1.2em;
   font-weight: bold;
   margin: 3px 0 0 6px;
+  background-color: transparent !important;
 }
 
 .navlink:hover {
+  color: white;
   background-color: transparent !important;
 }
 
@@ -191,7 +218,7 @@ input.readonly {
 
 input#my-captcha{
     height: 5em;
-    font-size: .8em;
+    font-size: 1em;
 }
 
 /* for code blocks or urls */
@@ -228,11 +255,6 @@ input#my-captcha{
   color: #ddd;
   /*background-color: #333;*/
   padding: .5em;
-}
-
-.operation:hover {
-  color: #23A;
-  text-shadow: .5px .5px #333, -.5px -.5px #333, -.5px .5px #333, .5px -.5px #333;
 }
 
 .tagbox-container {
