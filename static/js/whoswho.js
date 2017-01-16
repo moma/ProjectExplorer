@@ -25,7 +25,7 @@ completion = {};
 gexf = "";
 
 $(document).ready(function() {
-  var cache, collectFilters, loadGraph, popfilter, xhrs;
+  var cache, closeBox, collectFilters, loadGraph, popfilter, xhrs;
   log("document ready.. installing whoswho");
   loadGraph = function(g) {
     gexf = g;
@@ -38,17 +38,38 @@ $(document).ready(function() {
     }
   };
 
+
+  // small filter closing function
+  closeThisBox = function() {
+    var targetId = this.getAttribute("for")
+    if (targetId) {
+        var tgtBox = document.getElementById(targetId)
+        // start transition
+        tgtBox.style.opacity = 0
+        // remove box
+        setTimeout(function(){tgtBox.remove()}, 500)
+        return true
+    }
+    else {
+        console.warn('closeThisBox: no @for attribute!')
+        return false
+    }
+  }
+
   // autocomplete
   popfilter = function(label, type, options) {
-    var footer, header, id, id1, id2, input, labelization;
+    var footer, header, id, id1, id2, input, closebox, labelization;
     id = ids++;
     id1 = "filter" + id;
     id2 = "combo" + id;
+    id3 = "close" + id;
     header = "<li id=\"" + id1 + "\" class=\"filter\" style=\"padding-top: 5px;\">";
     labelization = "<span style=\"color: #fff;\">&nbsp; " + label + " </span>";
     input = "<input type=\"text\" id=\"" + id2 + "\" class=\"medium filter" + type + "\" placeholder=\"" + type + "\" />";
+    closebox = "<div id=\""+id3+"\" for=\""+id1+"\" class=\"filter-close operation\">x</div>"
     footer = "</li>;";
-    $(header + labelization + input + footer).insertBefore("#refine");
+    $(header + labelization + input + closebox + footer).insertBefore("#refine");
+    $('#' + id3).click(closeThisBox)
 
     console.log("whoswho.popfilter: adding autocomplete menu", $("#" + id1))
 
@@ -187,6 +208,7 @@ $(document).ready(function() {
     }
   });
 
+
   // main form collect function
   collectFilters = function(cb) {
     var collect, query;
@@ -200,7 +222,7 @@ $(document).ready(function() {
         console.log('collecting (filter '+k+') from elt:' + e)
 
         value = $(e).val();
-        if (value != null) {
+        if (value != null && value != "") {
           log("got: " + value);
           value = $.trim(value);
           log("sanitized: " + value);

@@ -218,8 +218,26 @@ input.name {
     padding: 0 !important ;
     padding: 0 !important;
     margin: .25em 0 0 0 !important;
+
+    -webkit-transition: opacity .5s ease-in;
 }
 .filter > span {
     padding 0 0 1em 0 !important ;
     /*margin: 0 0 1em 0 !important;*/
+}
+
+.filter-close {
+  font-family: sans-serif;
+  font-weight: bolder;
+  font-size: 1em;
+  position: relative;
+  margin-top: -.3em;
+  margin-right: 1em;
+  float: right;
+  color: #23A ;
+  background-color: #979797;
+  border-radius: 1em;
+  padding: 0 .4em;
+  cursor: pointer;
+  opacity: 1;
 }
