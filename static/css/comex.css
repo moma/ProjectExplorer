@@ -1,0 +1,211 @@
+/* =============================== MAIN COMEX STYLESHEET =============================== */
+
+.white { color:#fff ;}
+.red   { color:#910 ;}
+.green { color:#161 ;}
+.grey  { color:#554 ;}
+.lgrey { color:#ddd ;}
+.orange{ color:#F96 ;}
+.blue  { color:#23A ;}
+
+
+/* classic look */
+body {
+  margin: 0;
+  font-family: "Droid Sans", Calibri, "Helvetica Neue", Helvetica, sans-serif;
+  letter-spacing: -0.04em;
+  color: #333;
+  background-color: #fff;
+  line-height: .85em;
+  font-size: 14px;
+}
+
+.comex-nav-item {
+    vertical-align: middle;
+    line-height: 2em;
+    height: 2em;
+    margin-top: .2em;
+
+    /* good for scaffolding
+    border: 2px solid white;
+    */
+}
+
+/* main content for all new pages */
+div.my-box {
+    padding:0 20px;
+    line-height: 1.1em;
+}
+@media(max-width:768px){
+    /* xs */
+    div.my-box {
+        padding:0 7px;
+        line-height: .85em;
+    }
+}
+
+.page {
+  margin-top: 45px;   /* topbar height is 40px */
+}
+
+/* for intro text */
+.mini-hero {
+  margin-top: 5px;
+  font-size: 15px;
+  line-height: 20px;
+  font-family: "Droid Sans", Calibri, "Helvetica Neue", Helvetica, sans-serif;
+  padding-bottom: .3em;
+}
+
+.sub-hero {
+  margin-top: 2em;
+  line-height: 110%;
+}
+
+#cnil_warning {
+  /*text-align: center;*/
+}
+
+/* operation buttons for instance add middle name, remove box, etc */
+.operation {
+  color: #ffc ;
+  cursor: pointer;
+}
+.operation:hover {
+  color: #23A;
+  text-shadow: .2px .3px #333;
+}
+
+/* same on dark background */
+.operation-light {
+  color: #979797 ;
+  cursor: pointer;
+}
+.operation-light:hover {
+  color: rgb(170,255,120);
+  text-shadow: .2px .3px #eee;
+}
+
+/* same on white background */
+.operation-dark {
+  color: #333 ;
+  cursor: pointer;
+}
+.operation-dark:hover {
+  color: #23A;
+  text-shadow: .2px .3px #333;
+}
+
+
+.navlink, .navlink:focus {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin: 3px 0 0 6px;
+  background-color: transparent !important;
+}
+
+.navlink:hover {
+  color: white;
+  background-color: transparent !important;
+}
+
+/* for code blocks or urls */
+.code {
+  font-family: "Fira Mono", "Droid Sans Mono", monospace;
+  font-weight: 500;
+  font-size: 75% ;
+  background-color: #ACA;
+  padding: .2em;
+  border-radius: .2em;
+}
+
+
+/* like a close window element */
+.pull-up-right {
+    margin-top: -.5em;
+    float: right;
+}
+
+/* like a dialog icon */
+.glyphicon-float-left {
+  float: left ;
+  display: block;
+  font-size: 150% ;
+  margin-top: -.2em;
+}
+.glyphicon-float-right {
+  float: right ;
+  font-size: 80% ;
+  margin-top: -.5em;
+}
+
+/* page sections: style snippets from old bootstrap h2 */
+h2.oldstyle {
+  font-family: "Droid Sans", Calibri, Ubuntu, sans-serif;
+  font-weight: bold;
+  /*font-size: 2.5em;*/
+}
+
+
+/* "accordeon": collapsible formcats */
+div.ccsection-wrap {
+    margin: 0 ;
+    padding: 0 ;
+    background-color: transparent;
+}
+a.ccsection-toggle  {
+    margin: 0 ;
+    padding: 0 ;
+}
+a.ccsection-toggle:hover, a.ccsection-toggle:focus {
+    text-decoration: none;
+}
+.ccsection-toggle h2.ccsection, .ccsection-toggle:focus h2.ccsection {
+    color: #333 ; /* passive: like normal body color */
+}
+.ccsection-heading:hover h2.ccsection {
+    color: #23A ; /* active: like heading color */
+    text-decoration: none;
+}
+div.ccsection-heading {
+    padding: 0 1.5em .3em 1.5em ;
+    /*width: 25em;*/
+    text-align: left;
+
+    /*background-color: transparent;*/
+    background-color: #ddd;
+    border-radius: .8em .8em 0 0;
+}
+
+div.ccsection-uform-body {
+    background-color: #ddd;
+    border-radius: 0 ;
+    padding: 15px 30px 53px 30px;
+}
+
+div.ccsection-footer {
+    background-color: #ddd;
+    border-radius: 0 0 .8em .8em ;
+    padding: 0 ;
+}
+
+
+
+/**/
+.our-vcard {
+    line-height: 110%;
+}
+
+
+/**/
+.smallspacerrow {
+  height: 2em;
+}
+
+.spacerrow {
+  height: 8em;
+}
+
+.bigspacerrow {
+  height: 15em;
+}

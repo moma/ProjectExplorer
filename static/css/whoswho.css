@@ -151,10 +151,9 @@ border: 0px solid #ffffff;
 }
 
 input.name {
-	height: 28px;
-	font-size: 29px;
-	width: 250px;
-
+  height: 35px;
+  font-size: 29px;
+  width: 320px;
 }
 
 .nav > li > a.topbarlink:hover {
@@ -233,7 +232,7 @@ input.name {
   color: #333 !important ;
   background-color: #979797;
   border-radius: 0 1.2em 1.2em 0;
-  padding: .32em .4em .37em .2em;
+  padding: .3em .4em .33em .2em;
   cursor: pointer;
   opacity: 1;
 }

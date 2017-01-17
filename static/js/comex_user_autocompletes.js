@@ -574,26 +574,8 @@
 
 
    $kwInput.autocomplete({
-       // source: kwArray,
-       source: function( request, response ) {
-           // "crf, adn, swarm robotics, anticonstitu" <= extract the last term being typed
-           var terms = request.term.split(/\s*,\s*/)
-           var currentQuery = terms[terms.length-1]
-           response(
-             // recurse on same autocomplete but only on last term
-             $.ui.autocomplete.filter(kwArray, currentQuery )
-           );
-       },
+       source: kwArray,
        autoFocus: true,
-
-     //   search: function () {
-     //     var terms = this.value.split(/\s*,\s*/)
-     //     var term = terms[terms.length-1];
-     //     // custom minLength
-     //     if (term.length < 1) {
-     //         return false;
-     //     }
-     // },
        focus: function () {
            // prevent value inserted on focus
            return false;

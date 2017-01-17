@@ -16,29 +16,152 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='explorerlibs/bootswatch/css/bootswatch.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='explorerlibs/css2/font.css') }}" type="text/css"> -->
 
+  <!-- for news vertical marquee -->
+  <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.vticker-min.js') }}"></script>
+
+  <script type="text/javascript">
+  $(function(){
+      $('#news-container').vTicker({
+          speed: 700,
+          pause: 6000,
+          animation: 'fade',
+          mousePause: false,
+          showItems: 1
+      });
+  });
+  </script>
+
 
 {% endblock %}
 
 <!-- ======================================================================= -->
 
+{% block incipit %}
+<!-- for facebook like -->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.8";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+{% endblock %}
+
+
 {% block main_content %}
+    <!-- <div class="row spacerrow">&nbsp;</div> -->
 
-    <!-- classic intro -->
-    <div class="row spacerrow">&nbsp;</div>
+    <!-- INTRO 1 -->
     <div class="row">
-      <div class="spacer col-lg-2 col-md-1 hidden-sm-down">&nbsp;</div>
-      <div class="my-box col-lg-7 col-md-9 col-sm-12">
+      <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
 
-        <!-- ##################### ( WELCOME ) #################### -->
-        <div id="welcome">
-            <h2 class="oldstyle">Welcome to the complex systems community explorer</h2>
-            <p class="mini-hero">
-                Map your own socio-semantic network or explore sub-communities.
-            </p>
+      <!-- ##################### ( WELCOME ) #################### -->
+      <div class="my-box col-lg-9 col-md-9 col-sm-12">
+        <div id="loading" style="padding-left:-175px; margin-left: 27%;">
+            <img src="/static/css/loading.gif" style="border: 0px; opacity: 0.05; " />
         </div>
+        <h2 class="oldstyle">Welcome to the complex systems community explorer</h2>
+
       </div>
-      <div class="spacer col-lg-2 col-md-1 hidden-sm-down">&nbsp;</div>
+      <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
     </div>
+
+    <!-- INTRO 2 -->
+    <div class="row">
+      <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
+
+      <!-- ### ( 1 big column for directory search ) ### -->
+      <div class="my-box col-lg-6 col-md-6 col-sm-12">
+
+          <p class="mini-hero">
+            Map your own socio-semantic network or explore sub-communities using the <strong> interactive menu</strong> on the top of the webpage. Use the "refine" filters to select keywords and scholars matching your subjects of interests.
+            <br/>
+            <br/>
+            The integration of <a href="/print_jobs_directory.php" target="blank">job openings</a> in maps aims at increasing the visibility of new positions or new candidates. <small>[ <a href="/jobmarket.html">more</a> ]</small>
+          </p>
+
+          <p class="sub-hero">
+              <!--<form>-->
+              <input type="text" id="searchname" class="input-lg name" style="display:inline-block;" placeholder="Your last name">
+              <input type="hidden" id="searchlogin" value="">
+              <img src="/static/css/branding/big_arrow.png" alt="" style="border: none; margin: 0 2px 5px 0;" title="" />
+              <button id="print2" class="btn btn-small btn-primary">
+                  DIRECTORY
+              </button>
+              &nbsp;OR&nbsp;
+              <button id="generate2" class="btn btn-small btn-primary">
+                  MAP
+              </button>
+              <!--<a id="printname" href="#"> <strong>PRINT</strong></a>-->
+          </p>
+          <p class="sub-hero">
+              <span class="glyphicon glyphicon-user"></span>
+              <strong>You cannot find yourself</strong> in the database ?
+              <button id="register" class="btn btn-mini btn-success">
+                  Register
+              </button>
+          </p>
+
+          <p class="sub-hero">
+              <span class="glyphicon glyphicon-user"></span>
+              <strong>You to want update your data or keywords ?</strong>
+                  <a href="/services/user/profile/">Edit your profile</a>, the database is updated instantly.
+          </p>
+          <p class="sub-hero">
+              <span class="glyphicon glyphicon-info-sign"></span>
+              View our <a href="/tips.html">tips</a> for best experience. This directory is <strong>open</strong> to everybody working in the field of Complex Systems science and Complexity science. Map and explore communities or generate a printable version of their directory.
+               Updated every few minutes.
+
+               <br/>
+               <!--    <span class="glyphicon glyphicon-th-list"></span> Personal data are given on a voluntary basis and people are responsible for the validity and integrity of their data. <br/>
+
+               <span class="glyphicon glyphicon-repeat"></span> Suggestions or comments ? <a href="http://moma.csregistry.org/feedback"  target="BLANK">Please feedback.</a> <br/> -->
+           </p>
+      </div>
+      <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
+      <!-- ### ( 1 small column for news and announcements ) ### -->
+      <div class="my-box col-lg-3 col-md-3 col-sm-12">
+          <h2 class="oldstyle" style="font-size:1.5em;margin-top:1.5em;text-align:center;">
+              Special features
+          </h2>
+           <div id="news-container">
+               <ul>
+                   <li><a href="/jobmarket.html">Soon a better job market integration: </a> announce new jobs and find people looking for a job</li>
+                   <li><a href="/community_tags.html">Community tags:</a> Map any workgroup or event audience and get the associated directory.</li>
+                   <li>This beta version of Community Explorer 2 is open source!</a> For sysadmins, it's easy to deploy a new server like this one using docker (<a href="https://github.com/moma/comex2/tree/master/setup/dockers">more info</a>).</li>
+               </ul>
+           </div>
+             <br/>
+             <center>
+                 <iframe src="http://player.vimeo.com/video/38383946" width="300" height="170" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+             </center>
+
+           <br/><br/>
+      </div>
+      <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
+    </div>
+
+    <div class="row smallspacerrow">&nbsp;</div>
+
+    <!-- INTRO foot (social media likes etc) -->
+    <div class="row">
+      <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
+      <div class="my-box col-lg-9 col-md-9 col-sm-12">
+          <a href="https://twitter.com/intent/tweet?button_hashtag=communityexplorer&text=Map%20your%20%23network%2C%20explore%20the%20worldwide%20%23complexsystems%20%23community%20at%20all%20scales.%20%23dataviz" class="twitter-hashtag-button" data-url="http://communityexplorer.org">Tweet #communityexplorer</a>
+
+          &nbsp;
+
+          <div class="fb-like" data-href="http://www.communityexplorer.org" data-width="300" data-layout="standard" data-action="like" data-show-faces="false" data-share="false">
+          </div>
+
+      <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
+    </div>
+
+
+
+    <!-- ##################### ( notebook banners ) #################### -->
+
 
     <!-- colored notebook section: EXPLORE -->
     <div class="row spacerrow">&nbsp;</div>
@@ -126,55 +249,9 @@
     </div>
 
 
-    <!-- coloured notebook section: QUERY -->
+    <!-- coloured notebook section: STATS -->
     <div class="row spacerrow">&nbsp;</div>
     <div class="row banner-row" style="background-color:#FAB612">
-        <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
-        <div class="col-lg-3 col-md-3 col-sm-10">
-            <div class="panel panel-primary action-announce">
-                <div class="panel-body">
-                    <div class="cmx-action-wrap">
-                        <img src="{{ url_for('static', filename='img/action_query.png') }}"
-                            class="cmx-action">
-                    </div>
-                    <h2 class="oldstyle">Refine your search</h2>
-                    <p class="mini-hero">
-                        Use filters to select keywords and scholars matching your subjects of interests.
-                        <ul>
-                            <li>countries</li>
-                            <li>keywords</li>
-                            <li>organizations</li>
-                            <li>labs</li>
-                            <li>community hashtags</li>
-                        </ul>
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-7 col-md-7 col-sm-10">
-            <div class="panel panel-default wwwpanel">
-                <div class="panel-heading">
-                    <p class="pull-up-right">
-                        <a target="_blank" href="/index.html">
-                            <span class="glyphicon glyphicon-new-window"></span>
-                            Open in another tab
-                        </a>
-                    </p>
-                </div>
-                <div class="panel-body wwwthumb">
-                    <iframe src="/queries.html" class="wwwthumb" frameborder="0" scrolling="yes">
-                        <p>Your web browser doesn't support iframes. :(</p>
-                   </iframe>
-                </div>
-            </div>
-        </div>
-        <div class="spacer col-lg-1 col-md-2 hidden-sm-down">&nbsp;</div>
-    </div>
-
-
-    <!-- white notebook section: STATS -->
-    <div class="row spacerrow">&nbsp;</div>
-    <div class="row banner-row" style="background-color:#fff">
         <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
         <div class="col-lg-3 col-md-3 col-sm-10">
             <div class="panel panel-primary action-announce">
@@ -209,6 +286,53 @@
         </div>
         <div class="spacer col-lg-1 col-md-2 hidden-sm-down">&nbsp;</div>
     </div>
+
+
+
+        <!-- white notebook section: QUERY -->
+        <!-- <div class="row spacerrow">&nbsp;</div>
+        <div class="row banner-row" style="background-color:#fff">
+            <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
+            <div class="col-lg-3 col-md-3 col-sm-10">
+                <div class="panel panel-primary action-announce">
+                    <div class="panel-body">
+                        <div class="cmx-action-wrap">
+                            <img src="{{ url_for('static', filename='img/action_query.png') }}"
+                                class="cmx-action">
+                        </div>
+                        <h2 class="oldstyle">Refine your search</h2>
+                        <p class="mini-hero">
+                            Use filters to select keywords and scholars matching your subjects of interests.
+                            <ul>
+                                <li>countries</li>
+                                <li>keywords</li>
+                                <li>organizations</li>
+                                <li>labs</li>
+                                <li>community hashtags</li>
+                            </ul>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-7 col-md-7 col-sm-10">
+                <div class="panel panel-default wwwpanel">
+                    <div class="panel-heading">
+                        <p class="pull-up-right">
+                            <a target="_blank" href="/index.html">
+                                <span class="glyphicon glyphicon-new-window"></span>
+                                Open in another tab
+                            </a>
+                        </p>
+                    </div>
+                    <div class="panel-body wwwthumb">
+                        <iframe src="/queries.html" class="wwwthumb" frameborder="0" scrolling="yes">
+                            <p>Your web browser doesn't support iframes. :(</p>
+                       </iframe>
+                    </div>
+                </div>
+            </div>
+            <div class="spacer col-lg-1 col-md-2 hidden-sm-down">&nbsp;</div>
+        </div> -->
 
 
 

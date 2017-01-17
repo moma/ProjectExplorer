@@ -147,22 +147,13 @@ def unauthorized():
 @app.route("/")
 def rootstub():
     """
-    Root of the comex2 app is served by php,
-    but having this empty stub allows us to use
-    url_for('rootstub') when redirecting to said php
-    """
-    pass
+    Root of the comex2 app (new index)
+    Demo CSS with alternative index (top like old index, then underneath some layout à la notebook)
 
-# /services/demo/
-@app.route(config['PREFIX']+'/demo/')
-def demo():
-    """
-    Demo CSS with alternative index (layout à la notebook)
+    also useful to be able to url_for('rootstub') when redirecting to php
     """
     return render_template(
-                            "alt_index.html",
-                            foo="bar",
-                            # current_user=current_user
+                            "alt_index.html"
                           )
 
 # /services/

@@ -1,46 +1,5 @@
 /* =============================== MAIN COMEX SERVICES STYLESHEET =============================== */
 
-.white { color:#fff ;}
-.red   { color:#910 ;}
-.green { color:#161 ;}
-.grey  { color:#554 ;}
-.lgrey { color:#ddd ;}
-.orange{ color:#F96 ;}
-.blue  { color:#23A ;}
-
-
-/* classic look */
-body {
-  margin: 0;
-  font-family: "Droid Sans", Calibri, "Helvetica Neue", Helvetica, sans-serif;
-  letter-spacing: -0.04em;
-  color: #333;
-  background-color: #fff;
-  line-height: .85em;
-}
-
-.comex-nav-item {
-    vertical-align: middle;
-    line-height: 2em;
-    height: 2em;
-    margin-top: .2em;
-
-    /* good for scaffolding
-    border: 2px solid white;
-    */
-}
-
-/* main content for all new pages */
-div.my-box {
-    padding:0 15px;
-}
-@media(max-width:991px){
-    /* sm and md */
-    div.my-box {
-        padding:0;
-    }
-}
-
 /* form content for reg, profile, login, etc.... */
 div.uform {
   padding: 15px 30px 53px 30px;
@@ -79,20 +38,6 @@ p#doors_ret_msg {
 /* not used at present but could be useful for autompleted inputs */
 .autocomp {
 }
-
-.page {
-  margin-top: 45px;   /* topbar height is 40px */
-}
-
-/* for intro text */
-.mini-hero {
-  margin-top: 7px;
-  font-size: 20px;
-  line-height: 27px;
-  font-family: "Droid Sans", Calibri, "Helvetica Neue", Helvetica, sans-serif;
-  padding-bottom: .3em;
-}
-
 
 /* a "subpage" container UNUSED */
 .subpage {
@@ -142,43 +87,6 @@ input.readonly {
     color: #fff;
     font-weight: bold;
     background-color: #303030 !important;
-}
-
-#cnil_warning {
-  /*text-align: center;*/
-}
-
-/* form operation buttons for instance add middle name, remove box, etc */
-.operation {
-  color: #554 ;
-  cursor: pointer;
-}
-.operation:hover {
-  color: #23A;
-  text-shadow: .2px .3px #333;
-}
-
-/* same on dark background */
-.operation-light {
-  color: #979797 ;
-  cursor: pointer;
-}
-.operation-light:hover {
-  color: rgb(170,255,120);
-  text-shadow: .2px .3px #eee;
-}
-
-
-.navlink, .navlink:focus {
-  font-size: 1.2em;
-  font-weight: bold;
-  margin: 3px 0 0 6px;
-  background-color: transparent !important;
-}
-
-.navlink:hover {
-  color: white;
-  background-color: transparent !important;
 }
 
 /* small label inside addon group*/
@@ -236,23 +144,24 @@ input#my-captcha{
     max-width: 9em;
     background-color: #161;
     border: 2px solid #ACA;
-    padding: .5em .4em .6em .8em;
+    padding: 1em .4em .6em .8em;
     margin: .4em .2em .4em .5em;
-    border-radius: .3em;
-    color: #ddd;
+    border-radius: .4em;
+    color: #eed;
     display: inline-block;
     -webkit-transition: opacity .3s ease-in;
-    letter-spacing: normal;
-    font-weight: 500;
+    letter-spacing: .02em;
+    font-weight: bold;
+    font-size: .8em;
 }
 .box-highlight-close {
-  font-size: .5em;
+  font-size: .7em;
   position: relative;
   margin-top: -1em;
   margin-right: -0.2em;
   float: right;
   right: 0px;
-  color: #ddd;
+  color: #eed;
   /*background-color: #333;*/
   padding: .5em;
 }
@@ -262,32 +171,6 @@ input#my-captcha{
     border-bottom: 3px solid #ccc;
 }
 
-
-/* like a close window element */
-.pull-up-right {
-    margin-top: -.5em;
-    float: right;
-}
-
-/* like a dialog icon */
-.glyphicon-float-left {
-  float: left ;
-  display: block;
-  font-size: 150% ;
-  margin-top: -.2em;
-}
-.glyphicon-float-right {
-  float: right ;
-  font-size: 80% ;
-  margin-top: -.5em;
-}
-
-/* page sections: style snippets from old bootstrap h2 */
-h2.oldstyle {
-  font-family: "Droid Sans", Calibri, Ubuntu, sans-serif;
-  font-weight: bold;
-  /*font-size: 2.5em;*/
-}
 /* collapsible sections */
 h2.ccsection {
   padding-top: 1em;
@@ -319,50 +202,6 @@ h3.formcatfirst {
   color: white;
   padding-bottom: 3em
 }
-
-
-/* "accordeon": collapsible formcats */
-div.ccsection-wrap {
-    margin: 0 ;
-    padding: 0 ;
-    background-color: transparent;
-}
-a.ccsection-toggle  {
-    margin: 0 ;
-    padding: 0 ;
-}
-a.ccsection-toggle:hover, a.ccsection-toggle:focus {
-    text-decoration: none;
-}
-.ccsection-toggle h2.ccsection, .ccsection-toggle:focus h2.ccsection {
-    color: #333 ; /* passive: like normal body color */
-}
-.ccsection-heading:hover h2.ccsection {
-    color: #23A ; /* active: like heading color */
-    text-decoration: none;
-}
-div.ccsection-heading {
-    padding: 0 1.5em .3em 1.5em ;
-    /*width: 25em;*/
-    text-align: left;
-
-    /*background-color: transparent;*/
-    background-color: #ddd;
-    border-radius: .8em .8em 0 0;
-}
-
-div.ccsection-uform-body {
-    background-color: #ddd;
-    border-radius: 0 ;
-    padding: 15px 30px 53px 30px;
-}
-
-div.ccsection-footer {
-    background-color: #ddd;
-    border-radius: 0 0 .8em .8em ;
-    padding: 0 ;
-}
-
 /**/
 ul.minilabels {
   padding-top: .5em;
@@ -387,27 +226,6 @@ li.minilabel {
 .realperson-regen {
   color: #554 ;
 }
-
-
-/**/
-.our-vcard {
-    line-height: 110%;
-}
-
-
-/**/
-.smallspacerrow {
-  height: 2em;
-}
-
-.spacerrow {
-  height: 8em;
-}
-
-.bigspacerrow {
-  height: 15em;
-}
-
 
 /* the main validation message (a special legend) */
 #main_message {

@@ -8,10 +8,11 @@
   <link type=text/css rel=stylesheet href="{{ url_for('static', filename='css/topbar_bootstrap_retrocompatibility.css') }}">
   <link type=text/css rel=stylesheet href="{{ url_for('static', filename='js/jquery-ui-1.12.1/jquery-ui.min.css') }}">
   <link type=text/css rel=stylesheet href="{{ url_for('static', filename='js/realperson/jquery.realperson.css') }}">
+  <link type=text/css rel=stylesheet href="{{ url_for('static', filename='css/whoswho.css') }}">
   <link type=text/css rel=stylesheet href="{{ url_for('static', filename='css/comex_user.css') }}">
+  <link type=text/css rel=stylesheet href="{{ url_for('static', filename='css/comex.css') }}">
 
   <!--   for topbar search/refine   -->
-  <link type=text/css rel=stylesheet href="{{ url_for('static', filename='css/whoswho.css') }}">
 
   <!-- ## fonts ## -->
   <link type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
@@ -55,6 +56,8 @@
 
 
 <body>
+  {% block incipit %}
+  {% endblock %}
   <div class="topbar" style="opacity: 0.9;">
       <div class="topbar-inner">
           <div class="container-fluid">
@@ -167,7 +170,7 @@
     {% block main_content %}
     {% endblock %}
 
-    <div class="row bigspacerrow">&nbsp;</div>
+    <div class="row spacerrow">&nbsp;</div>
 
     <!-- FOOTER TEXT AND LINKS -->
     <footer>

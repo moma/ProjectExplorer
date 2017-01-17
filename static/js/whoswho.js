@@ -71,7 +71,8 @@ $(document).ready(function() {
     $(header + labelization + input + closebox + footer).insertBefore("#refine");
     $('#' + id3).click(closeThisBox)
 
-    console.log("whoswho.popfilter: adding autocomplete menu", $("#" + id1))
+    // debug
+    // console.log("whoswho.popfilter: adding autocomplete menu", $("#" + id1))
 
     $("#" + id2).autocomplete({
         source: function (req, resp) {
@@ -117,38 +118,6 @@ $(document).ready(function() {
     }, "fast");
   });
 
-
-  $.widget("custom.scholarcomplete", $.ui.autocomplete, {
-    _renderMenu: function(ul, items) {
-      var categories, self;
-      self = this;
-      categories = _.groupBy(items, function(o) {
-        return o.category;
-      });
-      return _.each(categories, function(data, category) {
-        var fullname, size, term, total;
-        size = 0;
-        total = 0;
-        term = "";
-        fullname = "";
-        _.each(data, function(item) {
-          var firstname, lastname, myRender;
-          size = item.size;
-          total = item.total;
-          term = item.term;
-          firstname = $.trim(item.firstname);
-          lastname = $.trim(item.lastname);
-          fullname = $.trim("" + firstname + " " + lastname);
-          myRender = function(a, b) {
-            return $("<li></li>").data("item.autocomplete", b).append($("<a></a>").text(fullname)).appendTo(a);
-          };
-          return myRender(ul, item);
-        });
-        ul.append("<li class='ui-autocomplete-category'>" + size + "/" + total + " people</li>");
-        return ul.highlight(term);
-      });
-    }
-  });
   $("#addfiltercountry").click(function() {
     return popfilter("in", "countries", []);
   });
@@ -171,43 +140,55 @@ $(document).ready(function() {
   $("#register").click(function() {
     return window.open("/services/user/register/");
   });
-  $("#searchname").scholarcomplete({
-    minLength: 2,
-    source: function(request, response) {
-      log("searchname: " + request.term);
-      return $.getJSON("search_scholar.php", {
-        category: "login",
-        login: request.term
-      }, function(data, status, xhr) {
-        log("results: " + data.results);
-        return response(data.results);
-      });
+
+  $("#searchname").autocomplete({
+    source: function (req, resp) {
+        $.ajax({
+            dataType: "json",
+            type: "GET",
+            url: "/search_scholar.php",
+            data: {
+                "category": "login",
+                "login": req.term,
+                // TODO rename s/login/uid/ in search_scholar.php
+            },
+            success: function(data){
+                var compList = [] ;
+                if (data.results) {
+                    for (var i in data.results) {
+                        var item = data.results[i]
+                        compList.push({
+                            // TODO middle initials here and in search_scholar
+                            'label': item.firstname + ' ' + item.lastname,
+                            'id': item.id
+                        })
+                    }
+                }
+                resp(compList)
+            },
+            error: function(response) {
+                console.log("ERROR from search_scholar AJAX", response)
+            }
+        }) ;
     },
+    minLength: 2,
     select: function(event, ui) {
-      console.log(ui.item);
       if (ui.item != null) {
-        console.log("Selected: " + ui.item.firstname + " aka " + ui.item.id);
-        delay(100, function() {
-          return $("#searchname").attr("value", ui.item.firstname + " " + ui.item.lastname);
-        });
-        $("#searchname").attr("placeholder", "");
+        console.log("Selected: " + ui.item.label + " aka " + ui.item.id);
+
+        // NB #searchname's value <= ui.label
+        //     (by default widget behavior)
+
+        // change the 2 onclick events
         $("#print2").click(function() {
-          console.log("clicked on print");
           return window.open("/print_scholar_directory.php?query=" + ui.item.id, "Scholar's list");
         });
         $("#generate2").click(function() {
-          hide(".hero-unit");
-          return $("#welcome").fadeOut("slow", function() {
-            show("#loading", "fast");
-            return window.location.href='/explorerjs.html?type="uid"&nodeidparam="' + ui.item.id + '"';
-            //return loadGraph("get_scholar_graph.php?login=" + ui.item.id);
-          });
+          return window.open('/explorerjs.html?type="uid"&nodeidparam="' + ui.item.id + '"');
         });
       }
-      return "" + ui.item.firstname + " " + ui.item.lastname;
     }
-  });
-
+  })
 
   // main form collect function
   collectFilters = function(cb) {
@@ -219,7 +200,8 @@ $(document).ready(function() {
       $(".filter" + k).each(function(i, e) {
         var value;
 
-        console.log('collecting (filter '+k+') from elt:' + e)
+        // debug
+        // console.log('collecting (filter '+k+') from elt:' + e)
 
         value = $(e).val();
         if (value != null && value != "") {
@@ -262,7 +244,9 @@ $(document).ready(function() {
 
     query = encodeURIComponent(JSON.stringify(query));
 
-    console.log("calling callback with encoded query:", query)
+    // debug
+    // console.log("calling callback with encoded query:", query)
+
     return cb(query);
   };
 
@@ -272,9 +256,11 @@ $(document).ready(function() {
     console.log("clicked on generate")
     hide(".hero-unit");
     $("#welcome").fadeOut("slow");
-    console.log("initiating graphexplorer")
+    // console.log("initiating graphexplorer")
     show("#loading", "fast");
     return collectFilters(function(query) {
+      // debug
+      // console.log("collected filters: " + query);
       return window.location.href='/explorerjs.html?type="filter"&nodeidparam="' + escape(query) +'"';
       //return loadGraph("getgraph.php?query=" + query);
     });
@@ -282,7 +268,8 @@ $(document).ready(function() {
   $("#print").click(function() {
     console.log("clicked on print");
     return collectFilters(function(query) {
-      console.log("collected filters: " + query);
+      // debug
+      // console.log("collected filters: " + query);
       return window.open("/print_directory.php?query=" + query, "Scholar's list");
     });
   });

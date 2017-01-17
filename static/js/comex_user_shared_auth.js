@@ -356,11 +356,10 @@ cmxClt = (function(cC) {
                                 doorsMsg = result.responseText.replace(/^"/g, '').replace(/"$/g, '')
                             }
                             else {
-                                // POSS: user message
                                 console.warn("Unhandled error doors login (" + result.responseText +")")
                             }
                         }
-                        else if (apiAction == 'register'){
+                        else if (apiAction == 'register' || apiAction == 'userExists'){
                             if (typeof result.responseJSON != 'undefined'
                                 && typeof result.responseJSON.status == 'string') {
 
@@ -369,8 +368,7 @@ cmxClt = (function(cC) {
                                 // if doorsMsg == ''
                             }
                             else {
-                                // POSS: user message
-                                doorsMsg = "Unhandled error doors register (" + result.responseText +")"
+                                doorsMsg = "Unrecognized response from doors /api/"+apiAction+" (response=" + result.responseText + '[' + result.statusText +"])"
                                 console.warn(doorsMsg)
                             }
                         }
