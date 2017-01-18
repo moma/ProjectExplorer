@@ -64,7 +64,7 @@
               <ul class="white nav navbar-nav navbar-left">
                   <li>
                       <a class="brand" href="https://iscpif.fr/">
-                        <img height="25px" src="{{ url_for('static', filename='img/logo_m_bleu-header.png') }}"</a>
+                        <img height="25px" src="{{ url_for('static', filename='img/logo_m_bleu-header.png') }}"></a>
                   </li>
                   <li>
                       <a class="brand" href="/">
@@ -177,32 +177,31 @@
         <!-- This directory is maintained by the <a href="http://cssociety.org" target="blank">Complex Systems Society</a>
              and the <a href="http://iscpif.fr" target="blank">Complex Systems Institute of Paris Ile-de-France</a>.<br/>-->
         <center>
-            <a href="http://communityexplorer.org/about.html"><span class="glyphicon glyphicon-question-sign"></span> About</a> -
-            <a href="http://moma.csregistry.org/feedback" target="BLANK"><span class="glyphicon glyphicon-repeat"></span> Feedback</a> -
-            <a href="http://communityexplorer.org/privacy.html"> <span class="glyphicon glyphicon-list-alt"></span> Privacy</a>
+            <a href="/about.html"><span class="glyphicon glyphicon-question-sign"></span> About</a> -
+            <!-- <a href="http://moma.csregistry.org/feedback" target="BLANK"><span class="glyphicon glyphicon-repeat"></span> Feedback</a> - -->
+            <a href="/privacy.html"> <span class="glyphicon glyphicon-list-alt"></span> Privacy</a>
             <br>
-              Directory maintained by the
-                <a href="http://cssociety.org/" target="blank"> Complex Systems Society</a> and the
-                <a href="http://iscpif.fr/" target="blank">Complex Systems Institute of Paris Ile-de-France</a>.
+              Directory maintained by the <a href="http://iscpif.fr/" target="blank">Complex Systems Institute of Paris Ile-de-France</a> (<a href="http://www.cnrs.fr/fr/recherche/index.htm" target="_BLANK">CNRS</a> UPS 3611) in partnership with the <a href="http://cssociety.org/" target="blank"> Complex Systems Society</a>.
             <br>
-            <a href="http://cssociety.org/" target="_BLANK">
-              <img src="{{ url_for('static', filename='images/css.png') }}" alt="http://cssociety.org"
-                   style="border: none; margin-bottom : -6px;"
-                   title="isc-pif" height="25px">
-            </a>
 
             <a href="http://iscpif.fr/">
-              <img src="{{ url_for('static', filename='images/iscpif_short.png') }}" alt="iscpif.fr"
-              style="border: none; margin-bottom : -6px;"
-              title="isc-pif">
+              <img height="25px" src="{{ url_for('static', filename='img/logo_m_bleu-header.png') }}" title="Institut des Systèmes Complexes de Paris Ile-de-France"               style="border: none; margin: 3px 0 -6px 0;">
             </a>
-
+            &nbsp;&nbsp;
+            <a href="http://cssociety.org/" target="_BLANK">
+              <img src="{{ url_for('static', filename='img/logo_cssociety_no_legend.png') }}" alt="http://cssociety.org"
+                   style="border: none; margin: 3px 0 -6px 0;"
+                   title="Complex systems society" height="25px">
+            </a>
+            &nbsp;&nbsp;
             <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="blank">
-              <img alt="Creative Commons License" style="border: none; margin-bottom : -6px;" src="{{ url_for('static', filename='images/cc.png') }}" height="20px">
-            </a> -
+              <img alt="Creative Commons License" style="border: none; margin: 3px 0 -6px 0;" src="{{ url_for('static', filename='img/cc.png') }}" height="25px">
+            </a>
+            &nbsp;&nbsp;
+            <a href="http://www.cnrs.fr/" target="blank">
+              <img alt="CNRS" style="border: none; margin: 3px 0 -6px 0;" src="{{ url_for('static', filename='img/logo_cnrs.png') }}" height="30px">
+            </a>
             <!-- <a href="http://moma.csregistry.org/" target="_BLANK"> MOMA</a> -  -->
-            <a href="http://iscpif.fr/" target="_BLANK">ISC-PIF</a> -
-            <a href="http://www.cnrs.fr/fr/recherche/index.htm" target="_BLANK">CNRS</a>.
         </center>
         <p>&nbsp;</p>
     </footer>
