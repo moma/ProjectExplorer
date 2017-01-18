@@ -22,6 +22,12 @@ cmxClt = (function(cC) {
     // common vars to authenticating/registering in user area
     cC.uauth = {}
 
+    // temporary parameter (TODO remove after doors deployment)
+    // -------------------
+    // true if we are using first minidoors prototype (commit fca0f79)
+    // otherwise assume normal doors (commit >= a0ce580)
+    cC.uauth.protoDoors = true
+
     cC.uauth.emailIdSupposedToExist = null
 
     cC.uauth.uidInput = document.getElementById('doors_uid')
@@ -314,16 +320,19 @@ cmxClt = (function(cC) {
             console.warn('DEBUG callDoors() internal validation failed before ajax')
         }
         else {
-            $.ajax({
-                contentType: "application/json",
-                dataType: 'json',
-                url: "http://"+cC.uauth.doorsConnectParam+"/api/" + apiAction,
-                data: JSON.stringify({
+            var sendData = {
                     "login":    mailStr,
                     "password": passStr,
                     "name":     nameStr
-                }),
+                }
+
+            $.ajax({
+                contentType: cC.uauth.protoDoors ? "application/json" : "application/x-www-form-urlencoded; charset=UTF-8",
+                dataType: 'json',
+                url: "http://"+cC.uauth.doorsConnectParam+"/api/" + apiAction,
+                data: cC.uauth.protoDoors ? JSON.stringify(sendData) : sendData,
                 type: 'POST',
+                // traditional: !cC.uauth.protoDoors,
                 success: function(data) {
                         if (typeof data != 'undefined'
                              && apiAction == 'userExists') {

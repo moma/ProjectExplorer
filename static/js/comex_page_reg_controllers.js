@@ -85,6 +85,7 @@ function registerDoorsAndSubmit(){
 
     // REGISTERING ON THE DOORS -------------------------------------
     // /!\ async
+    console.warn ("TODO wait for return of '[DOORS] Email confirmation'")
     cmxClt.uauth.callDoors(
         "register",
         [emailValue, passValue, wholenameValue],
@@ -166,16 +167,16 @@ function validateAndMsg() {
 console.log("reg controllers load OK")
 
 // £DEBUG autofill ----------->8------
-// cmxClt.uform.fName.value = "Jean"
-// cmxClt.uform.lName.value = "Tartampion"
-// document.getElementById('initials').value="JPP"
-// document.getElementById('country').value = "France"
-// document.getElementById('position').value = "atitle"
-// document.getElementById('keywords').value = "Blabla"
-// document.getElementById('org').value = "CNRS"
-//
-// cmxClt.uauth.email.value= cmxClt.makeRandomString(7)+"@om.fr"
-// cmxClt.uauth.pass1.value="123456+789"
-// cmxClt.uauth.pass2.value="123456+789"
-// cmxClt.uauth.testMailFormatAndExistence(email.value, false)
+cmxClt.uform.fName.value = "Jean"
+cmxClt.uform.lName.value = "Tartampion"
+document.getElementById('initials').value="JPP"
+document.getElementById('country').value = "France"
+document.getElementById('position').value = "atitle"
+document.getElementById('keywords').value = "Blabla"
+document.getElementById('team_lab').value = "CNRS"
+
+cmxClt.uauth.email.value= cmxClt.makeRandomString(7)+"@om.fr"
+cmxClt.uauth.pass1.value="123456+789"
+cmxClt.uauth.pass2.value="123456+789"
+cmxClt.uauth.testMailFormatAndExistence(email.value, false)
 // --------------------------->8------
