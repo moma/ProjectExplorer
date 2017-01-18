@@ -109,6 +109,10 @@ div.my-box {
   background-color: transparent !important;
 }
 
+.nav>li>a:focus {
+  background-color: transparent !important;
+}
+
 /* for code blocks or urls */
 .code {
   font-family: "Fira Mono", "Droid Sans Mono", monospace;
