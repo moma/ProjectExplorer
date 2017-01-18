@@ -315,7 +315,7 @@ def login():
 @app.route(config['PREFIX'] + config['USR_ROUTE'] + '/logout/')
 def logout():
     logout_user()
-    return redirect(url_for('demo', _external=True))
+    return redirect(url_for('rootstub', _external=True))
 
 
 # /services/user/profile/
