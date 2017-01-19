@@ -1,8 +1,9 @@
     version: '2'
     services:
 
-      comex_db_test:
-        image: mysql
+      comex_db:
+        image: comex2_mysql_server:latest
+        build: ./comex2_mysql_server
         environment:
          - MYSQL_ROOT_PASSWORD=very-safe-pass
         volumes:
@@ -28,7 +29,7 @@
          # we expose the entire contained nginx
          - "8080:80"
         links:
-         - comex_db_test
+         - comex_db
         volumes:
          # /!\ this uses outside conf to replace :contained conf
          - ../../config:/comex2/config
@@ -38,6 +39,6 @@
             # override values from parametres_comex.ini
             # for a double reason:
             #   - both apps have ENV vals preempt INI vals
-            #   - if we're here (in docker-compose) then by definition the mysql must be coming from comex_db_test container
-            - SQL_HOST=comex_db_test
+            #   - if we're here (in docker-compose) then by definition the mysql must be coming from comex_db container
+            - SQL_HOST=comex_db
             - SQL_PORT=3306

@@ -40,9 +40,9 @@ USER_COLS = [
       ]
 
 ORG_COLS = [
-         ("org",                    True,       120),
-         ("org_type",               True,        50),
-         ("team_lab",              False,       120),
+         ("org",                   False,       120),
+         ("org_type",              False,        50),
+         ("team_lab",               True,       120),
          ("org_city",              False,        50)
     ]
 

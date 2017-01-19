@@ -1,10 +1,10 @@
-### Set up the tables
+/******************************
+** File: init_comex_shared.sql
+** Desc: Creates comex tables
+         => docker-entrypoint-initdb.d
+** Date: 2017-01-19
+*******************************/
 
-```
-# connect to your sql host or container
-mysql -uroot -pvery-safe-pass -h $SQL_HOST -P 3306
-
-# --- after connection to mysql
 CREATE DATABASE comex_shared CHARACTER SET utf8 COLLATE utf8_general_ci ;
 USE comex_shared ;
 CREATE TABLE scholars (
@@ -103,4 +103,3 @@ CREATE TABLE linked_ids(
     PRIMARY KEY (linkid),
     FOREIGN KEY (uid) REFERENCES scholars(luid) ON DELETE CASCADE
 );
-```
