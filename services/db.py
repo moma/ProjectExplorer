@@ -19,7 +19,8 @@ else:
 # sorted columns as declared in DB, as a tuple
 USER_COLS = [
 #          NAME,               NOT NULL,  N or MAXCHARS (if applicable)
-         ("doors_uid",              True,        36),
+         ("luid",                   True,        15),
+         ("doors_uid",             False,        36),
          ("last_modified_date",     True,        24),
          ("email",                  True,       255),
          ("country",                True,        60),
@@ -31,7 +32,6 @@ USER_COLS = [
          ("position",              False,        30),
          ("hon_title",             False,        30),
          ("interests_text",        False,      1200),
-         ("community_hashtags",    False,       350),
          ("gender",                False,         1),
          ("job_looking_date",      False,        24),
          ("home_url",              False,       120),
@@ -49,14 +49,15 @@ ORG_COLS = [
 
 FIELDS_FRONTEND_TO_SQL = {
     "keywords": "keywords.kwstr",
+    "tags": "hashtags.htstr",
+
     "countries": "scholars.country",
+    "gender": "scholars.gender",
+
     "organizations": "affiliations.org",
     "laboratories": "affiliations.team_lab",
-    "tags": "scholars.community_hashtags",
-
-    # new
-    "gender": "scholars.gender",
     "cities": "affiliations.org_city",
+
     "linked": "linked_ids.ext_id_type"
 }
 
@@ -139,7 +140,7 @@ def get_field_aggs(a_field, hapax_threshold=int(REALCONFIG['HAPAX_THRESHOLD'])):
                     FROM scholars
                     -- 0 or 1
                     LEFT JOIN linked_ids
-                        ON scholars.doors_uid = linked_ids.uid
+                        ON scholars.luid = linked_ids.uid
                     GROUP BY %(col)s
                 ) AS allcounts
                 %(filter)s
@@ -153,8 +154,8 @@ def get_field_aggs(a_field, hapax_threshold=int(REALCONFIG['HAPAX_THRESHOLD'])):
                     FROM scholars
                     -- 0 or many
                     LEFT JOIN sch_kw
-                        ON scholars.doors_uid = sch_kw.uid
-                    JOIN keywords
+                        ON scholars.luid = sch_kw.uid
+                    LEFT JOIN keywords
                         ON sch_kw.kwid = keywords.kwid
                     GROUP BY %(col)s
                 ) AS allcounts
@@ -162,6 +163,21 @@ def get_field_aggs(a_field, hapax_threshold=int(REALCONFIG['HAPAX_THRESHOLD'])):
                 ORDER BY occs DESC
             """ % {'col': sql_col, 'filter': where_clause}
 
+        elif sql_tab == 'hashtags':
+            stmt = """
+                SELECT * FROM (
+                    SELECT %(col)s AS x, COUNT(*) AS occs
+                    FROM scholars
+                    -- 0 or many
+                    LEFT JOIN sch_ht
+                        ON scholars.luid = sch_ht.uid
+                    LEFT JOIN hashtags
+                        ON sch_ht.htid = hashtags.htid
+                    GROUP BY %(col)s
+                ) AS allcounts
+                %(filter)s
+                ORDER BY occs DESC
+            """ % {'col': sql_col, 'filter': where_clause}
 
         mlog("DEBUGSQL", "get_field_aggs STATEMENT:\n-- SQL\n%s\n-- /SQL" % stmt)
 
@@ -179,6 +195,9 @@ def get_field_aggs(a_field, hapax_threshold=int(REALCONFIG['HAPAX_THRESHOLD'])):
 
 def get_full_scholar(uid):
     """
+    uid : str
+          local user id aka luid
+
     Autonomous function to be used by User class
        => Retrieves one line from *scholars* table, with joined optional concatenated *affiliations*, *keywords* and *linked_ids*
        => Parse it all into a structured python user info dict
@@ -195,7 +214,7 @@ def get_full_scholar(uid):
     one_usr_stmt = """
 
         SELECT
-            sch_n_aff_n_kws.*,
+            sch_n_aff_n_kws_n_hts.*,
 
             -- linked_ids info condensed
             -- (format : "type1:ID1,type2:ID2,...")
@@ -205,49 +224,68 @@ def get_full_scholar(uid):
             COUNT(linked_ids.ext_id) AS linked_ids_nb
 
         FROM (
-                SELECT
-                    sch_n_aff.*,
 
-                    -- kws info condensed
-                    COUNT(keywords.kwid) AS keywords_nb,
-                    -- GROUP_CONCAT(keywords.kwid) AS kwids,
-                    GROUP_CONCAT(keywords.kwstr) AS keywords
+            SELECT
+                sch_n_aff_n_kws.*,
+                -- hts info condensed
+                COUNT(hashtags.htid) AS hashtags_nb,
+                -- GROUP_CONCAT(hashtags.htid) AS htids,
+                GROUP_CONCAT(hashtags.htstr) AS hashtags
 
-                FROM (
+            FROM (
                     SELECT
-                        scholars.*,
-                        -- for debug replace scholars.* by
-                        -- scholars.doors_uid,
-                        -- scholars.email,
-                        -- scholars.last_modified_date,
-                        -- scholars.initials,
+                        sch_n_aff.*,
 
-                        affiliations.*
+                        -- kws info condensed
+                        COUNT(keywords.kwid) AS keywords_nb,
+                        -- GROUP_CONCAT(keywords.kwid) AS kwids,
+                        GROUP_CONCAT(keywords.kwstr) AS keywords
 
-                    FROM scholars
+                    FROM (
+                        SELECT
+                            -- scholars.*,
+                            -- for debug replace scholars.* by
+                            scholars.luid,
+                            scholars.doors_uid,
+                            scholars.email,
+                            -- scholars.last_modified_date,
+                            -- scholars.initials,
 
-                    LEFT JOIN affiliations
-                        ON scholars.affiliation_id = affiliations.affid
+                            affiliations.*
 
-                    GROUP BY doors_uid
+                        FROM scholars
 
-                    ) AS sch_n_aff
+                        LEFT JOIN affiliations
+                            ON scholars.affiliation_id = affiliations.affid
 
-                -- two step JOIN for keywords
-                LEFT JOIN sch_kw
-                    ON sch_n_aff.doors_uid = sch_kw.uid
-                LEFT JOIN keywords
-                    ON sch_kw.kwid = keywords.kwid
-                GROUP BY doors_uid
+                        GROUP BY luid
 
-        ) AS sch_n_aff_n_kws
+                        ) AS sch_n_aff
+
+                    -- two step JOIN for keywords
+                    LEFT JOIN sch_kw
+                        ON sch_kw.uid = luid
+                    LEFT JOIN keywords
+                        ON sch_kw.kwid = keywords.kwid
+                    GROUP BY luid
+
+            ) AS sch_n_aff_n_kws
+
+            -- also two step JOIN for hashtags
+            LEFT JOIN sch_ht
+                ON sch_ht.uid = luid
+            LEFT JOIN hashtags
+                ON sch_ht.htid = hashtags.htid
+            GROUP BY luid
+
+        ) AS sch_n_aff_n_kws_n_hts
 
         LEFT JOIN linked_ids
-            ON linked_ids.uid = sch_n_aff_n_kws.doors_uid
+            ON linked_ids.uid = luid
 
         -- WHERE our user UID
-        WHERE  doors_uid = "%s"
-        GROUP BY doors_uid
+        WHERE  luid = "%s"
+        GROUP BY luid
     """ % str(uid)
 
     mlog("DEBUGSQL", "DB get_full_scholar STATEMENT:\n-- SQL\n%s\n-- /SQL" % one_usr_stmt)
@@ -289,16 +327,17 @@ def get_full_scholar(uid):
 
     # post-treatments
     # ---------------
-    # 1/ split concatenated kw lists and check correct length
-    if urow_dict['keywords_nb'] == 0:
-        urow_dict['keywords'] = []
-    else:
-        kws_array = urow_dict['keywords'].split(',')
-
-        if len(kws_array) != urow_dict['keywords_nb']:
-            raise ValueError("Can't correctly split keywords for user %s" % uid)
+    # 1/ split concatenated kw an ht lists and check correct length
+    for toktype in ['keywords', 'hashtags']:
+        if urow_dict[toktype+'_nb'] == 0:
+            urow_dict[toktype] = []
         else:
-            urow_dict['keywords'] = kws_array
+            tokarray = urow_dict[toktype].split(',')
+
+            if len(tokarray) != urow_dict[toktype+'_nb']:
+                raise ValueError("Can't correctly split %s for user %s" % (toktype, uid))
+            else:
+                urow_dict[toktype] = tokarray
 
     # 2/ also split and parse all linked_ids
     if urow_dict['linked_ids_nb'] == 0:
@@ -326,21 +365,21 @@ def get_full_scholar(uid):
     return urow_dict
 
 
-def save_scholar(uid, date, safe_recs, reg_db, uactive=True, update_flag=False):
+def save_scholar(safe_recs, reg_db, uactive=True, update_luid=None):
     """
     For new registration:
-      -> add to *scholars* table
+      -> add to *scholars* table, return new local uid
 
-    For profile change (just toggle update_flag to True)
+    For profile change (just pass previous local uid in update_luid)
       -> *update* scholars table
 
     see also COLS variable and doc/table_specifications.md
     """
 
-    # we already have the first two columns
-    db_tgtcols = ['doors_uid', 'last_modified_date']
-    db_qstrvals = ["'"+str(uid)+"'", "'"+str(date)+"'"]
-    actual_len_dbg = 2
+    # column names and column quoted values
+    db_tgtcols = []
+    db_qstrvals = []
+    actual_len_dbg = 0
 
     # REMARK:
     # => In theory should be possible to execute(statment, values) to insert all
@@ -353,8 +392,7 @@ def save_scholar(uid, date, safe_recs, reg_db, uactive=True, update_flag=False):
     #                            -------------              -----------
     #    and then we execute(full_statmt)         :-)
 
-
-    for colinfo in USER_COLS[2:]:
+    for colinfo in USER_COLS:
         colname = colinfo[0]
 
         # NB: each val already contains no quotes because of sanitize()
@@ -385,7 +423,7 @@ def save_scholar(uid, date, safe_recs, reg_db, uactive=True, update_flag=False):
 
     reg_db_c = reg_db.cursor()
 
-    if not update_flag:
+    if not update_luid:
         # expected colnames "(doors_uid, last_modified_date, email, ...)"
         db_tgtcols_str = ','.join(db_tgtcols)
 
@@ -404,63 +442,82 @@ def save_scholar(uid, date, safe_recs, reg_db, uactive=True, update_flag=False):
         set_full_str = ','.join([db_tgtcols[i] + '=' + db_qstrvals[i] for i in range(len(db_tgtcols))])
 
         # UPDATE: full_statement with formated values
-        full_statmt = 'UPDATE scholars SET %s WHERE doors_uid = "%s"' % (
+        full_statmt = 'UPDATE scholars SET %s WHERE luid = "%s"' % (
                             set_full_str,
-                            uid
+                            update_luid
         )
 
-    mlog("DEBUG", "UPDATE" if update_flag else "INSERT",  "SQL statement:", full_statmt)
+    mlog("DEBUG", "UPDATE" if update_luid else "INSERT",  "SQL statement:", full_statmt)
 
     reg_db_c.execute(full_statmt)
+    if not update_luid:
+        luid = reg_db_c.lastrowid
+    else:
+        luid = update_luid
     reg_db.commit()
+    return luid
 
 
-def save_pairs_sch_kw(pairings_list, comex_db):
+def save_pairs_sch_tok(pairings_list, comex_db, map_table='sch_kw'):
     """
-    Simply save all pairings (uid, kwid) in the list
+    Simply save all pairings (luid, kwid) or (luid, htid) in the list
     """
     db_cursor = comex_db.cursor()
     for id_pair in pairings_list:
-        db_cursor.execute('INSERT INTO sch_kw VALUES %s' % str(id_pair))
+        db_cursor.execute('INSERT INTO %s VALUES %s' % (map_table, str(id_pair)))
         comex_db.commit()
-        mlog("DEBUG", "Keywords: saved %s pair" % str(id_pair))
+        mlog("DEBUG", "%s: saved %s pair" % (map_table, str(id_pair)))
 
 
-def delete_pairs_sch_kw(uid, comex_db):
+def delete_pairs_sch_tok(uid, comex_db, map_table='sch_kw'):
     """
-    Simply deletes all pairings (uid, *) in the table
+    Simply deletes all pairings (luid, *) in the table
     """
+    if map_table not in ['sch_kw', 'sch_ht']:
+        raise TypeError('ERROR: Unknown map_table')
     db_cursor = comex_db.cursor()
-    n = db_cursor.execute('DELETE FROM sch_kw WHERE uid = "%s"' % uid)
+    n = db_cursor.execute('DELETE FROM %s WHERE uid = "%s"' % (map_table, uid))
     comex_db.commit()
-    mlog("DEBUG", "Keywords: DELETED %i pairings for %s" % (n, str(uid)))
+    mlog("DEBUG", "%s: DELETED %i pairings for %s" % (map_table, n, str(uid)))
 
 
-def get_or_create_keywords(kw_list, comex_db):
+def get_or_create_tokitems(tok_list, comex_db, tok_table='keywords'):
     """
         kw_str -> lookup/add to *keywords* table -> kw_id
+        ht_str -> lookup/add to *hashtags* table -> ht_id
         -------------------------------------------------
 
-    kw_list is an array of strings
+    tok_list is an array of strings
 
     NB keywords are mandatory: each registration should provide at least MIN_KW
-
+       hashtags aren't
 
     for loop
-       1) query to *keywords* table (exact match)
+       1) query to *keywords* or *hashtags* table (exact match)
        2) return id
-          => if a keyword matches return kwid
-          => if no keyword matches create new and return kwid
+          => if a keyword/tag matches return kwid/htid
+          => if no keyword/tag matches create new and return kwid/htid
     """
+
+    # sql names
+    fill = {'tb': tok_table}
+    if tok_table == 'keywords':
+        fill['idc'] = 'kwid'
+        fill['strc']= 'kwstr'
+    elif tok_table == 'hashtags':
+        fill['idc'] = 'htid'
+        fill['strc']= 'htstr'
 
     db_cursor = comex_db.cursor()
     found_ids = []
-    for kw_str in kw_list:
+    for tok_str in tok_list:
 
         # TODO better string normalization here or in read_record
-        kw_str = kw_str.lower()
+        tok_str = tok_str.lower()
+        fill['q'] = tok_str
 
-        n_matched = db_cursor.execute('SELECT kwid FROM keywords WHERE kwstr = "%s"' % kw_str)
+        # ex: SELECT kwid FROM keywords WHERE kwstr = "complexity"
+        n_matched = db_cursor.execute('SELECT %(idc)s FROM %(tb)s WHERE %(strc)s = "%(q)s"' % fill)
 
         # ok existing keyword => row id
         if n_matched == 1:
@@ -468,15 +525,17 @@ def get_or_create_keywords(kw_list, comex_db):
 
         # no matching keyword => add => row id
         elif n_matched == 0:
-            db_cursor.execute('INSERT INTO keywords(kwstr) VALUES ("%s")' % kw_str)
+
+            # ex: INSERT INTO keywords(kwstr) VALUES ("complexity")
+            db_cursor.execute('INSERT INTO %(tb)s(%(strc)s) VALUES ("%(q)s")' % fill)
             comex_db.commit()
 
-            mlog("INFO", "Added keyword '%s'" % kw_str)
+            mlog("INFO", "Added '%s' to %s table" % (tok_str, tok_table))
 
             found_ids.append(db_cursor.lastrowid)
 
         else:
-            raise Exception("ERROR: non-unique keyword '%s'" % kw_str)
+            raise Exception("ERROR: non-unique token '%s'" % tok_str)
     return found_ids
 
 
@@ -489,9 +548,11 @@ def get_or_create_affiliation(org_info, comex_db):
      1) query to *affiliations* table
      2) return id
         => TODO if institution almost matches send suggestion
-        => TODO unicity constraint on institution + lab
+        => unicity constraint on institution + lab + org_type
         => if an institution matches return affid
         => if no institution matches create new and return affid
+
+        TODO test more
     """
 
     the_aff_id = None
@@ -512,11 +573,9 @@ def get_or_create_affiliation(org_info, comex_db):
             db_qstrvals.append(quotedstrval)
 
             # for select
-            if colname != 'org_type':
-                db_constraints.append("%s = %s" % (colname, quotedstrval))
+            db_constraints.append("%s = %s" % (colname, quotedstrval))
         else:
-            if colname != 'org_type':
-                db_constraints.append("%s IS NULL" % colname)
+            db_constraints.append("%s IS NULL" % colname)
 
     db_cursor = comex_db.cursor()
 

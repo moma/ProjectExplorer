@@ -11,7 +11,7 @@ CREATE TABLE scholars (
     -- local uid necessary for users who still have no doors_uid
     luid                 int(15) not null auto_increment unique primary key,
     -- doors uid common to all lab's services
-    doors_uid            char(36) not null unique,
+    doors_uid            char(36) unique,
     last_modified_date   char(24) not null,
     email                varchar(255) not null unique,
     country              varchar(60) not null,

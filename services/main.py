@@ -43,7 +43,7 @@ if __package__ == 'services':
     from services.user  import User, login_manager, doors_login, UCACHE
     from services.text  import keywords
     from services.tools import restparse, mlog, re_hash, REALCONFIG
-    from services.db    import connect_db, get_or_create_keywords, save_pairs_sch_kw, delete_pairs_sch_kw, get_or_create_affiliation, save_scholar, get_field_aggs
+    from services.db    import connect_db, get_or_create_tokitems, save_pairs_sch_tok, delete_pairs_sch_tok, get_or_create_affiliation, save_scholar, get_field_aggs
     from services.db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 else:
     # when this script is run directly
@@ -51,7 +51,7 @@ else:
     from user           import User, login_manager, doors_login, UCACHE
     from text           import keywords
     from tools          import restparse, mlog, re_hash, REALCONFIG
-    from db             import connect_db, get_or_create_keywords, save_pairs_sch_kw, delete_pairs_sch_kw, get_or_create_affiliation, save_scholar, get_field_aggs
+    from db             import connect_db, get_or_create_tokitems, save_pairs_sch_tok, delete_pairs_sch_tok, get_or_create_affiliation, save_scholar, get_field_aggs
     from db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 
 # ============= app creation ============
@@ -61,7 +61,7 @@ app = Flask("services",
              static_folder=path.join(config['HOME'],"static"),
              template_folder=path.join(config['HOME'],"templates"))
 
-app.config['DEBUG'] = (config['LOG_LEVEL'] == "DEBUG")
+app.config['DEBUG'] = (config['LOG_LEVEL'] in ["DEBUG","DEBUGSQL"])
 app.config['SECRET_KEY'] = 'TODO fill secret key for sessions for login'
 
 # for SSL
@@ -82,6 +82,7 @@ login_manager.init_app(app)
 # all inputs as they are declared in form, as a couple
 SOURCE_FIELDS = [
 #             NAME,              SANITIZE?
+         ("luid",                  False  ),
          ("doors_uid",             False  ),
          ("last_modified_date",    False  ),   # ex 2016-11-16T17:47:07.308Z
          ("email",                  True  ),
@@ -95,8 +96,7 @@ SOURCE_FIELDS = [
          ("position",               True  ),
          ("hon_title",              True  ),
          ("interests_text",         True  ),
-         ("community_hashtags",     True  ),
-         ("gender",                 True  ),   # M|F
+         ("gender",                False  ),   # M|F
          ("job_looking_date",       True  ),   # def null: not looking for a job
          ("home_url",               True  ),   # scholar's homepage
          ("pic_url",                True  ),
@@ -110,8 +110,11 @@ SOURCE_FIELDS = [
          ("org_city",               True  ),
          # => for *affiliations* table
 
-         ("keywords",               True  )
+         ("keywords",               True  ),
          # => for *keywords* table (after split str)
+
+         ("community_hashtags",     True  )
+         # => for *hashtags* table (after split str)
       ]
 
 # NB password values have already been sent by ajax to Doors
@@ -442,10 +445,11 @@ def save_form(request_form, request_files, update_flag=False):
     """
     # only safe values
     clean_records = {}
-    kw_array = []
 
     # 1) handles all the inputs from form, no matter what target table
-    (duuid, rdate, kw_array, clean_records) = read_record(request_form)
+    clean_records = read_record(request_form)
+
+    mlog("DEBUG", "===== clean_records =====", clean_records)
 
     # 2) handles the pic_file if present
     if 'pic_file' in request_files:
@@ -461,27 +465,41 @@ def save_form(request_form, request_files, update_flag=False):
     # B) read/fill the affiliation table to get associated id
     clean_records['affiliation_id'] = get_or_create_affiliation(clean_records, reg_db)
 
-    # C) create record into the primary user table
-    # ---------------------------------------------
+    # C) create/update record into the primary user table
+    # ----------------------------------------------------
         # TODO class User method !!
-    save_scholar(duuid, rdate, clean_records, reg_db, update_flag=update_flag)
+    luid = None
+    if update_flag:
+        luid = clean_records['luid']
+        save_scholar(clean_records, reg_db, update_luid=luid)
+    else:
+        luid = save_scholar(clean_records, reg_db)
+
 
     # D) read/fill each keyword and save the (uid <=> kwid) pairings
-    kwids = get_or_create_keywords(kw_array, reg_db)
+    #    read/fill each hashtag and save the (uid <=> htid) pairings
+    for intables in [['keywords',           'keywords', 'sch_kw'],
+                     ['community_hashtags', 'hashtags', 'sch_ht']]:
+        tok_field = intables[0]
+        if tok_field in clean_records:
+            tok_table = intables[1]
+            map_table = intables[2]
 
-        # TODO class User method !!
-        # POSS selective delete ?
-    if update_flag:
-        delete_pairs_sch_kw(duuid, reg_db)
+            tokids = get_or_create_tokitems(clean_records[tok_field], reg_db, tok_table)
 
-    save_pairs_sch_kw([(duuid, kwid) for kwid in kwids], reg_db)
+                # TODO class User method !!
+                # POSS selective delete ?
+            if update_flag:
+                delete_pairs_sch_tok(luid, reg_db, map_table)
+
+            save_pairs_sch_tok([(luid, tokid) for tokid in tokids], reg_db, map_table)
+
+    # F) end connection
+    reg_db.close()
 
     # clear cache concerning this scholar
-        # TODO class User method !!
-    if duuid in UCACHE: UCACHE.pop(duuid)
-
-    # E) end connection
-    reg_db.close()
+    # TODO class User method !!
+    if luid in UCACHE: UCACHE.pop(luid)
 
     return clean_records
 
@@ -492,13 +510,8 @@ def read_record(incoming_data):
       - custom made for regcomex/templates/base_form
       - uses SOURCE_FIELDS
     """
-
     # init var
     clean_records = {}
-
-    # read in + sanitize values
-    duuid = None
-    rdate = None
 
     # we should have all the mandatory fields (checked in client-side js)
     # TODO recheck b/c if post comes from elsewhere
@@ -513,31 +526,29 @@ def read_record(incoming_data):
                 else:
                     # mysql will want None instead of ''
                     val = None
-
-            # these 2 fields already validated and useful separately
-            elif field == 'doors_uid':
-                duuid = incoming_data[field]
-            elif field == 'last_modified_date':
-                rdate = incoming_data[field]
-
             # any other fields that don't need sanitization (ex: menu options)
             else:
                 clean_records[field] = incoming_data[field]
+
 
     # special treatment for "other" subquestions
     if 'org_type' in clean_records:
         if clean_records['org_type'] == 'other' and 'other_org_type' in clean_records:
             clean_records['org_type'] = clean_records['other_org_type']
 
-    # split for kw_array
-    kw_array = []
-    if 'keywords' in clean_records:
-        for kw in clean_records['keywords'].split(','):
-            kw = sanitize(kw)
-            if kw != '':
-                kw_array.append(kw)
+    # splits for kw_array and ht_array
+    for tok_field in ['keywords', 'community_hashtags']:
+        if tok_field in clean_records:
+            print(tok_field, "in clean_records")
+            temp_array = []
+            for tok in clean_records[tok_field].split(','):
+                tok = sanitize(tok)
+                if tok != '':
+                    temp_array.append(tok)
+            # replace str by array
+            clean_records[tok_field] = temp_array
 
-    return (duuid, rdate, kw_array, clean_records)
+    return clean_records
 
 
 # TODO move to text submodules
