@@ -1,5 +1,8 @@
 <?php
 
+
+// NOT USED ANYMORE: duplicate with labs_list
+
 $content .='<br/>
 
 <br/>

@@ -19,7 +19,7 @@ $q = "%".sanitize_input($login)."%";
 
 $query = 'concat(first_name, " ", IFNULL(middle_name,""), " ", last_name) LIKE "%'.$q.'%"';
 
-$req = "SELECT doors_uid, first_name, middle_name, last_name FROM scholars WHERE ".$query." GROUP BY doors_uid";
+$req = "SELECT luid, first_name, middle_name, last_name FROM scholars WHERE ".$query." GROUP BY luid";
 // echo "req: ".$req.";";
 $results = array();
 $i = 0;
@@ -32,7 +32,7 @@ $completion = array(
 
 foreach($res as $row) {
      array_push($completion["results"], array(
-        'id' => $row["doors_uid"],
+        'id' => $row["luid"],
         'term' => $login,
         'firstname' => $row["first_name"],
         'lastname' => $row["last_name"],

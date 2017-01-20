@@ -17,7 +17,7 @@ $other_organization = 0;
 $missing_country = 0;
 $missing_title = 0;
 $missing_position = 0;
-$missing_organization = 0;
+$missing_affiliation = 0;
 // données des pays
 foreach ($scholars as $row) {
 
@@ -103,7 +103,7 @@ foreach ($scholars as $row) {
     }
 
     // traitement des organismes de rattachement
-    $affiliation = trim($row["affiliation"]);
+    $affiliation = trim($row["affiliation"] ?? "");
 
     if (strcmp($affiliation, "") == 0) {
         $missing_affiliation+=1;
@@ -116,19 +116,19 @@ foreach ($scholars as $row) {
 
         }
     }
-    $affiliation2 = trim($row["affiliation2"]);
-
-    if (strcmp($affiliation2, "") == 0) {
-        $missing_affiliation+=1;
-    } else {
-
-        if (array_key_exists($affiliation2, $organizations_list)) {
-            $organizations_list[$affiliation2]+=1;
-        } else {
-            $organizations_list[$affiliation2] = 1;
-
-        }
-    }
+    // $affiliation2 = trim($row["affiliation2"] ?? "");
+    //
+    // if (strcmp($affiliation2, "") == 0) {
+    //     $missing_affiliation+=1;
+    // } else {
+    //
+    //     if (array_key_exists($affiliation2, $organizations_list)) {
+    //         $organizations_list[$affiliation2]+=1;
+    //     } else {
+    //         $organizations_list[$affiliation2] = 1;
+    //
+    //     }
+    // }
 
 }
 
@@ -162,6 +162,9 @@ if ($other_country>0){
 }
 
 $country_data.=']';
+
+
+
 
 // données des position
 $position_data = "data: [";
@@ -205,10 +208,33 @@ if ($other_title>0){
 $title_data.=']';
 
 
+// données des institutions/affiliations
+$organizations_data = "data: [";
+foreach ($organizations_list as $key => $value) {
+
+        if ($value > min(9, count($organizations_list) / 10)) {
+            $organizations_data.='["' . $key . '",' . $value . '],';
+        } else {
+            $other_organization+=$value;
+        }
+
+}
+if ($missing_affiliation>0){
+    $organizations_data.='["Missing data",' . $missing_affiliation . '],';
+}
+if ($other_organization>0){
+    $organizations_data.='["Others",' . $other_organization . ']';
+} else {
+    $organizations_data = substr($organizations_data, 0, -1);
+}
+
+$organizations_data.=']';
+
 $stats = '<script type="text/javascript">
 var country;
 var position;
 var title;
+var organization;
 $(document).ready(function() {
 	country= new Highcharts.Chart({
 		chart: {
@@ -281,7 +307,7 @@ $(document).ready(function() {
         '}]
 	});
 
-        titre= new Highcharts.Chart({
+        title= new Highcharts.Chart({
 		chart: {
 			renderTo: "title",
 			plotBackgroundColor: null,

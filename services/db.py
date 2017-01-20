@@ -243,11 +243,11 @@ def get_full_scholar(uid):
 
                     FROM (
                         SELECT
-                            -- scholars.*,
+                            scholars.*,
                             -- for debug replace scholars.* by
-                            scholars.luid,
-                            scholars.doors_uid,
-                            scholars.email,
+                            -- scholars.luid,
+                            -- scholars.doors_uid,
+                            -- scholars.email,
                             -- scholars.last_modified_date,
                             -- scholars.initials,
 

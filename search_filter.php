@@ -29,7 +29,7 @@ if ($category == 'country' || $category == 'countries') {
   $query = 'LIKE upper(\''.strtoupper($q).'\')';
 }
 elseif ($category == 'tag' || $category == 'tags') {
-  $cat = "community_hashtags";
+  $cat = "hashtags_list";
   $query = 'LIKE upper(\''.strtoupper($q).'\')';
 }
 elseif (v == 'labs' || $category == 'laboratories' || $category == 'laboratory') {
@@ -60,20 +60,24 @@ $req = <<<END_QUERY
         SELECT
             -- we create all needed cats for the outer select
             -- ==============================================
-            scholars.doors_uid,
+            scholars.luid,
             scholars.country,
-            scholars.community_hashtags,
             affiliations.org,
             affiliations.team_lab,
-            GROUP_CONCAT(kwstr) AS keywords_list
+            GROUP_CONCAT(kwstr) AS keywords_list,
+            GROUP_CONCAT(htstr) AS hashtags_list
         FROM scholars
-        JOIN sch_kw
-            ON scholars.doors_uid = sch_kw.uid
-        JOIN keywords
+        LEFT JOIN sch_kw
+            ON sch_kw.uid = luid
+        LEFT JOIN keywords
             ON sch_kw.kwid = keywords.kwid
+        LEFT JOIN sch_ht
+            ON sch_ht.uid = luid
+        LEFT JOIN hashtags
+            ON sch_ht.htid = hashtags.htid
         LEFT JOIN affiliations
             ON scholars.affiliation_id = affiliations.affid
-        GROUP BY doors_uid
+        GROUP BY luid
         ) AS full_scholars_info
     WHERE {$cat} {$query}                          -- <== our filter
     GROUP BY $cat
@@ -85,7 +89,7 @@ $results = array();
 $i = 0;
 foreach ($base->query($req) as $row) {
   $nb = $row['value'];
-  if ($cat == "keywords_list" || $cat == "tags") {
+  if ($cat == "keywords_list" || $cat == "hashtags_list") {
     //echo "in keywords\n";
      $words = explode(",", $row["clef"]);
     foreach ($words as $word) {

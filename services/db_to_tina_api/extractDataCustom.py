@@ -75,17 +75,18 @@ class MyExtractor:
                 sql_query="""
                 SELECT
                     neighbors_by_kw.uid,
+                    scholars.initials,
                     COUNT(matching.kwid) AS cooc
 
                 FROM scholars
                 -- step 1
                 JOIN sch_kw AS matching
-                            ON matching.uid = scholars.doors_uid
+                            ON matching.uid = scholars.luid
                 -- step 2
                 JOIN sch_kw AS neighbors_by_kw
                             ON neighbors_by_kw.kwid = matching.kwid
 
-                WHERE doors_uid = "%s"
+                WHERE luid = "%s"
                 GROUP BY neighbors_by_kw.uid
                 ORDER BY cooc DESC
                 """ % unique_id
@@ -104,7 +105,7 @@ class MyExtractor:
                     for row in results:
                         # mlog("DEBUG", "the row:", row)
                         node_uid = row['uid']
-                        node_shortid = "D::"+node_uid[0:8]
+                        node_shortid = "D::"+row['initials']+"/%05i"%int(node_uid);
 
                         #    old way: candidate = ( integerID , realSize , #keywords )
                         #    new way: scholars_array[uid] = ( ID , occ size )
@@ -116,13 +117,12 @@ class MyExtractor:
             elif qtype == "filters":
                 sql_query = None
 
-                # debug
-                mlog("DEBUG", "filters: REST query is", filter_dict)
+                mlog("INFO", "filters: REST query is", filter_dict)
 
                 if "query" in filter_dict and filter_dict["query"] == "*":
                     # query is "*" <=> all scholars
                     sql_query = """
-                        SELECT doors_uid
+                        SELECT luid
                         FROM scholars
                     """
 
@@ -175,7 +175,7 @@ class MyExtractor:
                     # use constraints as WHERE-clause
                     sql_query = """
                         SELECT
-                            scholars.doors_uid,
+                            scholars.luid,
 
                             -- kws info
                             COUNT(keywords.kwid) AS keywords_nb,
@@ -186,7 +186,7 @@ class MyExtractor:
 
                         -- two step JOIN for keywords
                         JOIN sch_kw
-                            ON doors_uid = uid
+                            ON uid = luid
                         JOIN keywords
                             ON sch_kw.kwid = keywords.kwid
                         -- LEFT JOIN affiliations
@@ -194,7 +194,7 @@ class MyExtractor:
 
                         -- our filtering constraints fit here
                         WHERE  %s
-                        GROUP BY doors_uid
+                        GROUP BY luid
 
                     """ % (" AND ".join(sql_constraints))
 
@@ -202,14 +202,14 @@ class MyExtractor:
                 self.cursor.execute(sql_query)
                 scholar_rows=self.cursor.fetchall()
                 for row in scholar_rows:
-                    scholar_array[ row['doors_uid'] ] = 1
+                    scholar_array[ row['luid'] ] = 1
 
             return scholar_array
 
         except Exception as error:
             mlog("ERROR", "===== getScholarsList SQL ERROR ====")
-            if queryargs != None:
-                mlog("ERROR", "qtype "+qtype+" received REST queryargs:\t"+str(queryargs))
+            if filter_dict != None:
+                mlog("ERROR", "qtype "+qtype+" received REST queryargs:\t"+str(filter_dict))
             if sql_query != None:
                 mlog("ERROR", "qtype filter attempted SQL query:\t"+sql_query)
             mlog("ERROR", repr(error) + "("+error.__doc__+")")
@@ -220,6 +220,8 @@ class MyExtractor:
     def extract(self,scholar_array):
         """
         Adding each connected scholar per unique_id
+
+        TODO this should be done by JOINS at previous step (faster but more verbose to program)
         """
         # debug
         # mlog("DEBUG", "MySQL extract scholar_array:", scholar_array)
@@ -233,14 +235,14 @@ class MyExtractor:
                         GROUP_CONCAT(keywords.kwid) AS keywords_ids,
                         GROUP_CONCAT(kwstr) AS keywords_list
                     FROM scholars
-                    JOIN sch_kw
-                        ON doors_uid = uid
-                    JOIN keywords
+                    LEFT JOIN sch_kw
+                        ON uid = luid
+                    LEFT JOIN keywords
                         ON sch_kw.kwid = keywords.kwid
                     LEFT JOIN affiliations
                         ON affiliation_id = affid
-                    WHERE doors_uid = "%s"
-                    GROUP BY doors_uid ;
+                    WHERE luid = "%s"
+                    GROUP BY luid ;
             ''' % scholar_id
 
             # debug
@@ -250,20 +252,19 @@ class MyExtractor:
                 self.cursor.execute(sql3)
                 res3=self.cursor.fetchone()
                 info = {};
-                # POSS: semantic short ID
-                # ex "D::JFK/4913d6c7"
 
-                # for now we use uid substring [0:8]
-                # ex ide="D::4913d6c7"
-                ide="D::"+res3['doors_uid'][0:8];
+                # semantic short ID
+                # ex "D::JFK/00001"
+                ide="D::"+res3['initials']+("/%05i"%int(res3['luid']));
                 info['id'] = ide;
+                info['luid'] = res3['luid'];
                 info['doors_uid'] = res3['doors_uid'];
                 info['pic_url'] = res3['pic_url'];
                 info['first_name'] = res3['first_name'];
-                info['mid_initial'] = res3['middle_name'][0] if res3['middle_name'] else ""       # TODO adapt usage
+                info['mid_initial'] = res3['middle_name'][0] if res3['middle_name'] else ""
                 info['last_name'] = res3['last_name'];
                 info['keywords_nb'] = res3['keywords_nb'];
-                info['keywords_ids'] = res3['keywords_ids'].split(',');
+                info['keywords_ids'] = res3['keywords_ids'].split(',') if res3['keywords_ids'] else [];
                 info['keywords_list'] = res3['keywords_list'];
                 info['country'] = res3['country'];
                 # info['ACR'] = res3['org_acronym']       # TODO create
@@ -281,8 +282,14 @@ class MyExtractor:
                     self.scholars[ide] = info;
 
             except Exception as error:
-                mlog("ERROR", "sql3:\t"+sql3)
-                mlog("ERROR", error)
+                mlog("ERROR", "=====  extract ERROR ====")
+                mlog("ERROR", "extract on scholar no %s" % str(scholar_id))
+                if sql3 != None:
+                    mlog("ERROR", "extract attempted SQL query:\t"+sql3)
+                mlog("ERROR", repr(error) + "("+error.__doc__+")")
+                mlog("ERROR", "stack (\n\t"+"\t".join(format_tb(error.__traceback__))+"\n)")
+                mlog("ERROR", "===== /extract ERROR ====")
+
 
 
         # génère le gexf
@@ -298,7 +305,9 @@ class MyExtractor:
             scholar_keywords = self.scholars[i]['keywords_ids'];
             for k in range(len(scholar_keywords)):
                 kw_k = scholar_keywords[k]
-                mlog('INFO', 'extractDataCustom:keyword'+kw_k)
+
+                # TODO join keywords and count to do this part already via sql
+                mlog('DEBUG', 'extractDataCustom:keyword '+kw_k)
 
                 if kw_k != None and kw_k!="":
                     # mlog("DEBUG", kw_k)
@@ -362,12 +371,12 @@ class MyExtractor:
 
         cont=0
         for term_id in self.terms_dict:
-            sql="SELECT uid FROM sch_kw WHERE kwid=%i" % term_id
+            sql="SELECT uid, initials FROM sch_kw JOIN scholars ON uid=luid WHERE kwid=%i" % term_id
             term_scholars=[]
             self.cursor.execute(sql)
             rows = self.cursor.fetchall()
             for row in rows:
-                term_scholars.append("D::"+row['uid'][0:8])
+                term_scholars.append("D::"+row['initials']+"/%05i"%int(row['uid']))
 
             for k in range(len(term_scholars)):
                 if term_scholars[k] in scholarsMatrix:
@@ -503,7 +512,7 @@ class MyExtractor:
 
                 nodesB+=1
 
-            if idNode[0]=='D':#If it is Document
+            if idNode[0]=='D':#If it is Document (or scholar)
                 nodeLabel= self.scholars[idNode]['hon_title']+" "+self.scholars[idNode]['first_name']+" "+self.scholars[idNode]['mid_initial']+" "+self.scholars[idNode]['last_name']
                 color=""
                 if self.scholars_colors[self.scholars[idNode]['email']]==1:
