@@ -62,6 +62,10 @@ $login = $_GET['query'];
 // $base = new PDO("sqlite:" . $dbname);
 $base = new PDO($dsn, $user, $pass, $opt);
 
+
+// liste des chercheurs
+$scholar_array = array();
+
 if ($login) {
     if (sizeof($login) > 0) {
         // nom du chercheur $target_name
@@ -71,8 +75,6 @@ if ($login) {
             // always one record by design of uid
             $target_name=$row['first_name'].' '.$row['last_name'];
         }
-
-        // liste des chercheurs
 
         // old way in two steps without a scholars <=> keywords table
         // $sql1 = "SELECT keywords,last_name,first_name FROM scholars WHERE luid='" . $login . "'";
@@ -105,7 +107,7 @@ HERE_QUERY;
 arsort($scholar_array);
 
 $scholar_id_array=array_keys($scholar_array);
-// echo var_dump($scholar_id_array)."<br/>" ;
+var_dump($scholar_id_array)."<br/>" ;
 
 // liste des chercheurs
 $scholars = array();
@@ -161,6 +163,7 @@ foreach ($base->query($sql) as $row) {
     // right now duplicate treatment short-circuited like this
     // (effect visible in stat-prep_from_array)
     $info['affiliation'] = $row['org'] . $row['team_lab'];
+    $info['affiliation_id'] = $row['affiliation_id'];
     // ----------------------------------------------------->8---------
     // $info['lab2'] = $row['lab2'];
     // $info['affiliation2'] = $row['affiliation2'];
@@ -240,12 +243,11 @@ $header = '<div class="row" id="welcome">
 <br/>
 <br/>
 <p>
-This directory presents the profiles of <a href="#scholars">'.  count($scholars).' scholars</a> and <a href="#labs">'.  count($labs).' labs</a> in the field of Complex Systems';
+This directory presents the profiles of <a href="#scholars">'.  count($scholars).' scholars</a> and <a href="#labs">'.  count($labs).' labs</a> in the field of Complex Systems
+<br/>
+Scholars have been selected from the complex systems directory when sharing common keywords with '.$target_name.'
 
-Scholars have been selected from the complex systems directory when sharing common keywords with '.$target_name.'.
-
-// TODO restore old version before duplicate lab/orga
-// This directory presents the profiles of <a href="#scholars">'.  count($scholars).' scholars</a>, <a href="#labs">'.  count($labs).' labs</a> and <a href="#orga">'.$orga_count.' organizations</a> in the field of Complex Systems';
+<!-- TODO restore old version before duplicate lab/orga with $orga_count -->
 
 </p>
 <h4>About the complex systems directory</h4>
