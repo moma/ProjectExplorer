@@ -107,7 +107,7 @@ HERE_QUERY;
 arsort($scholar_array);
 
 $scholar_id_array=array_keys($scholar_array);
-var_dump($scholar_id_array)."<br/>" ;
+// var_dump($scholar_id_array)."<br/>" ;
 
 // liste des chercheurs
 $scholars = array();

@@ -26,6 +26,7 @@ $lab_list=array();
 
 // ajout des scholars
 
+$loop = 0;
 
 // NB this array was prepared in print_directory or print_scholar_directory
 foreach ($scholars as $scholar) {

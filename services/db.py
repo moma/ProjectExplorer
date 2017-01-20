@@ -76,6 +76,39 @@ def connect_db(config=REALCONFIG):
         db="comex_shared"
     )
 
+def doors_uid_to_luid(doors_uid):
+    """
+    Find corresponding luid
+    """
+    db = connect_db()
+    db_c = db.cursor()
+
+    stmt = """
+        SELECT luid FROM scholars
+        WHERE doors_uid = "%s"
+    """ % doors_uid
+
+    n_rows = db_c.execute(stmt)
+
+    luid = None
+    if n_rows > 1:
+        db.close()
+        raise ValueError("non unique doors_uid %s" % doors_uid)
+    elif n_rows == 1:
+        luid =  db_c.fetchone()[0]
+        db.close()
+
+    return luid
+
+
+    return connect(
+        host=config['SQL_HOST'],
+        port=int(config['SQL_PORT']),
+        user="root",   # POSS change db ownership to a comexreg user
+        passwd="very-safe-pass",
+        db="comex_shared"
+    )
+
 def get_field_aggs(a_field, hapax_threshold=int(REALCONFIG['HAPAX_THRESHOLD'])):
     """
     Use case: api/aggs?field=a_field

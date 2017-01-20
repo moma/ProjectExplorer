@@ -43,7 +43,7 @@ if __package__ == 'services':
     from services.user  import User, login_manager, doors_login, UCACHE
     from services.text  import keywords
     from services.tools import restparse, mlog, re_hash, REALCONFIG
-    from services.db    import connect_db, get_or_create_tokitems, save_pairs_sch_tok, delete_pairs_sch_tok, get_or_create_affiliation, save_scholar, get_field_aggs
+    from services.db    import connect_db, get_or_create_tokitems, save_pairs_sch_tok, delete_pairs_sch_tok, get_or_create_affiliation, save_scholar, get_field_aggs, doors_uid_to_luid
     from services.db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 else:
     # when this script is run directly
@@ -51,7 +51,7 @@ else:
     from user           import User, login_manager, doors_login, UCACHE
     from text           import keywords
     from tools          import restparse, mlog, re_hash, REALCONFIG
-    from db             import connect_db, get_or_create_tokitems, save_pairs_sch_tok, delete_pairs_sch_tok, get_or_create_affiliation, save_scholar, get_field_aggs
+    from db             import connect_db, get_or_create_tokitems, save_pairs_sch_tok, delete_pairs_sch_tok, get_or_create_affiliation, save_scholar, get_field_aggs, doors_uid_to_luid
     from db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 
 # ============= app creation ============
@@ -255,18 +255,19 @@ def login():
             pwd = request.form['password']
 
             # we do our doors request here server-side to avoid MiM attack on result
-            uid = doors_login(email, pwd, config)
+            doors_uid = doors_login(email, pwd, config)
+            luid = doors_uid_to_luid(doors_uid)
 
-            if uid:
-                login_ok = login_user(User(uid))
+            if luid:
+                login_ok = login_user(User(luid))
 
-                mlog('INFO', 'login of %s was %s' % (uid, str(login_ok)))
+                mlog('INFO', 'login of %s was %s' % (luid, str(login_ok)))
 
                 # TODO check cookie
-                # login_ok = login_user(User(uid), remember=True)
-                #                                  -------------
-                #                           creates REMEMBER_COOKIE_NAME
-                #                       which is itself bound to session cookie
+                # login_ok = login_user(User(luid), remember=True)
+                #                                   -------------
+                #                            creates REMEMBER_COOKIE_NAME
+                #                        which is itself bound to session cookie
 
                 if login_ok:
                     # normal user
@@ -406,6 +407,8 @@ def register():
 
         # dbg
         # mlog("DEBUG", str(captcha_verifhash))
+
+        clean_records = {}
 
         if captcha_userhash != captcha_verifhash:
             mlog("INFO", "pb captcha rejected")
