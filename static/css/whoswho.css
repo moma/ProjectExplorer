@@ -153,7 +153,21 @@ border: 0px solid #ffffff;
 input.name {
   height: 35px;
   font-size: 29px;
-  width: 320px;
+  width: 290px;
+}
+
+@media(max-width:544px){
+    /* xs and smaller */
+    input.name {
+      font-size: 14px;
+      width: 180px;
+    }
+}
+@media(min-width:1200px){
+    /* xl and bigger */
+    input.name {
+      width: 320px;
+    }
 }
 
 .nav > li > a.topbarlink:hover {

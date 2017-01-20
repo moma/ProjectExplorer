@@ -12,33 +12,16 @@ $meta = '<!DOCTYPE html>
         <meta name="author" content="">
 
         <!-- Le styles -->
+        <link type="text/css" href="http://fonts.googleapis.com/css?family=Droid%20Sans" rel="stylesheet">
         <link type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
-        <link type="text/css" href="static/css/bootstrap_directory.css" rel="stylesheet">
-        <link type="text/css" href="static/css/brownian-motion/jquery-ui-1.8.16.custom.css" rel="stylesheet">
         <link type="text/css" href="static/css/whoswho.css" rel="stylesheet">
+        <link type="text/css" href="static/css/comex.css" rel="stylesheet">
+        <link type="text/css" href="static/css/bootstrap_directory.css" rel="stylesheet">
 
-        <!-- TODO test if each is really needed -->
-        <!-- TODO upgrade versions as per comments -->
-        <script type="text/javascript" src="static/js/jquery/jquery-1.7.min.js"></script>
-        <script type="text/javascript" src="static/js/jquery-ui-1.8.16.custom.min.js"></script>
-        <!-- upgraded available files
-            <script type="text/javascript" src="static/js/jquery/jquery-3.1.1.min.js"></script>
-            <script type="text/javascript" src="static/js/jquery-ui-1.12.1/jquery-ui.min.js"></script>
-        -->
-        <script type="text/javascript" src="static/js/jquery-ui-1.8.16.custom.min.js"></script>
-        <script type="text/javascript" src="static/js/bootstrap/bootstrap-dropdown-fade.js"></script>
-        <script type="text/javascript" src="static/js/misc/underscore.min.js"></script>
-        <script type="text/javascript" src="static/js/jquery/jquery.highlight-3.js"></script>
-        <script type="text/javascript" src="static/js/misc/json2.js"></script>
-        <script type="text/javascript" src="static/js/utils.js"></script>
-
-        <script type="text/javascript" src="static/js/highcharts-2.2/js/highcharts.js"></script>
-        <script type="text/javascript" src="static/js/highcharts-2.2/modules/exporting.js"></script>
-
-        <link rel="shortcut icon" href="images/favicon.ico">
-        <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-        <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
-        <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+        <!-- updated versions as of 2016-2017 -->
+        <script type="text/javascript" src="static/js/jquery/jquery-3.1.1.min.js"></script>
+        <script type="text/javascript" src="static/js/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="static/js/highcharts-5.0.js"></script>
 
         <script type="text/javascript">
           var _gaq = _gaq || [];

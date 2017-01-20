@@ -147,7 +147,19 @@ div.my-box {
 h2.oldstyle {
   font-family: "Droid Sans", Calibri, Ubuntu, sans-serif;
   font-weight: bold;
-  /*font-size: 2.5em;*/
+}
+
+@media(max-width:768px){
+    /* sm */
+    h2.oldstyle {
+      font-size: 24px !important;
+    }
+}
+@media(max-width:544px){
+    /* xs */
+    h2.oldstyle {
+      font-size: 18px !important;
+    }
 }
 
 

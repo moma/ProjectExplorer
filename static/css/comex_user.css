@@ -95,7 +95,7 @@ input.readonly {
 }
 
 @media(max-width:400px){
-    /* ~ xs and sm */
+    /* ~ xs and smaller */
     .smlabel {
       padding: 0;
       font-size: 65%;
