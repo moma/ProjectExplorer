@@ -27,6 +27,9 @@ function selectSavedMenus(uinfo) {
                 if (myOption) {
                     selectElt.selectedIndex = myOption.index
                 }
+                else {
+                    console.warn(`selectSavedMenus: couldn't find option: ${chosenV} for element: ${colName}`)
+                }
             }
             else {
                 console.warn("selectSavedMenus: couldn't find element: "+colName)

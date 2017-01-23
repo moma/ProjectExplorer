@@ -59,7 +59,8 @@
                <h3 class="formcatfirst"> Carte de visite </h3>
                <div id="information-example" class="our-vcard">
                    <ul>
-                       <img src="{{ current_user.info.pic_url }}" width="80px" style="float:left;margin:5px">
+                       <!-- TODO if empty then click on image starts showPicImg -->
+                       <img src="{{ (current_user.pic_url | safe) if current_user.info else '' }}" width="80px" style="float:left;margin:5px">
                        <li>
                            <b>{{ current_user.info.hon_title }}
                                {{ current_user.info.first_name }}
@@ -317,25 +318,19 @@
 
                <div class="question">
                  <div class="input-group">
-                   <label for="community_hashtags" class="smlabel input-group-addon">Interest groups</label>
-                   <input id="community_hashtags" name="community_hashtags" maxlength="350"
-                          type="text" class="form-control" placeholder="eg #dataviz or #networks"
-                          value="{{ current_user.info.community_hashtags }}">
+                   <label for="hashtags" class="smlabel input-group-addon">Interest groups</label>
+                   <input id="hashtags" name="hashtags" maxlength="350"
+                          type="text" class="form-control" placeholder="eg #dataviz, #networks"
+                          value="{{ current_user.info.hashtags }}">
                  </div>
-                 <p class="legend">Interest groups aka "seminar hashtags" (full suggestion list available shortly)</p>
+                 <p class="legend">Interest groups (for seminars, mailing lists, events) aka "community hashtags"</p>
                </div>
 
+            </div> <!-- /panel-body -->
 
-           </div> <!-- /panel-body -->
             <div class="panel-footer ccsection-footer">&nbsp;</div>
 
           </div>
-
-
-
-
-
-
 
 
 
@@ -527,9 +522,14 @@
           <input id="last_modified_date" name="last_modified_date" type="text" hidden>
           </input>
 
+          <!-- hidden input for main user id -->
+          <input id="luid" name="luid" type="text" hidden
+                 value="{{ current_user.uid | safe }}">
+          </input>
+
           <!-- hidden input for doors user id -->
           <input id="doors_uid" name="doors_uid" type="text" hidden
-                 value="{{ current_user.uid | safe }}">
+                 value="{{ current_user.info.doors_uid | safe }}">
           </input>
 
 

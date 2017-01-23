@@ -50,7 +50,7 @@ var cmxClt = (function() {
                 ["initials",               true,       "pref",    "t",  null],
                 ["position",               true,       "plsfill", "t",  "map_infos"],
                 ["interests_text",        false,       "pref",    "t",  "other_infos"],
-                ["community_hashtags",    false,       "plsfill", "at", "map_infos"],
+                ["hashtags",              false,       "plsfill", "at", "map_infos"],
                 ["gender",                false,       "plsfill", "m",  "other_infos"],
                 ["job_looking_date",      false,       "pref"   , "d",  "map_infos"],
                 ["home_url",              false,       "plsfill", "t",  "other_infos"],

@@ -597,7 +597,7 @@
         //               ---------
         // a copy of the user info in json
         //               ---------
-        var uinfo = {{ current_user.json_info if current_user.info else "null" | safe }};
+        var uinfo = {{ (current_user.json_info | safe) if current_user.info else ("null" | safe) }};
     </script>
 
     <!--  our js  -->

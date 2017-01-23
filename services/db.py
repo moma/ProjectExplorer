@@ -340,7 +340,7 @@ def get_full_scholar(uid):
 
     # Exemple data in urow_dict
     # --------------------------
-    # {'affid': 1, 'affiliation_id': 1, 'community_hashtags': '#something',
+    # {'affid': 1, 'affiliation_id': 1, 'hashtags': '#something, #another',
     #  'country': 'France', 'doors_uid': '5e3adbc1-bcfb-42da-a2c4-4af006fe2b91',
     #  'email': 'jfk@usa.com', 'first_name': 'John', 'gender': 'M',
     #  'home_url': 'http://localhost/regcomex/', 'hon_title': 'Student',

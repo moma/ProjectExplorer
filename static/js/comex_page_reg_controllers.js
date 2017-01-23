@@ -35,7 +35,7 @@ cmxClt.uform.multiTextinput('keywords')
 var shortRegVersion = true
 var ignoredFields = []
 if (shortRegVersion) {
-    ignoredFields = ['community_hashtags', 'gender', 'home_url', 'org', 'org_type']
+    ignoredFields = ['gender', 'home_url', 'org', 'org_type']
 }
 
 // done when anything in the form changes

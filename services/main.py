@@ -113,7 +113,7 @@ SOURCE_FIELDS = [
          ("keywords",               True  ),
          # => for *keywords* table (after split str)
 
-         ("community_hashtags",     True  )
+         ("hashtags",               True  )
          # => for *hashtags* table (after split str)
       ]
 
@@ -340,6 +340,7 @@ def profile():
             mlog("DEBUG",  "PROFILE: current_user details: \n  - %s" % (
                                 '\n  - '.join([current_user.info['email'],
                                             current_user.info['initials'],
+                                           current_user.info['doors_uid'],
                                         str(current_user.info['keywords']),
                                             current_user.info['country']]
                                           )
@@ -481,12 +482,11 @@ def save_form(request_form, request_files, update_flag=False):
 
     # D) read/fill each keyword and save the (uid <=> kwid) pairings
     #    read/fill each hashtag and save the (uid <=> htid) pairings
-    for intables in [['keywords',           'keywords', 'sch_kw'],
-                     ['community_hashtags', 'hashtags', 'sch_ht']]:
-        tok_field = intables[0]
+    for intable in ['keywords', 'hashtags']:
+        tok_field = intable
         if tok_field in clean_records:
-            tok_table = intables[1]
-            map_table = intables[2]
+            tok_table = tok_field
+            map_table = "sch_" + ('kw' if intable == 'keywords' else 'ht')
 
             tokids = get_or_create_tokitems(clean_records[tok_field], reg_db, tok_table)
 
@@ -540,9 +540,9 @@ def read_record(incoming_data):
             clean_records['org_type'] = clean_records['other_org_type']
 
     # splits for kw_array and ht_array
-    for tok_field in ['keywords', 'community_hashtags']:
+    for tok_field in ['keywords', 'hashtags']:
         if tok_field in clean_records:
-            print(tok_field, "in clean_records")
+            mlog("DEBUG", "in clean_records, found a field to tokenize: %s" % tok_field)
             temp_array = []
             for tok in clean_records[tok_field].split(','):
                 tok = sanitize(tok)
