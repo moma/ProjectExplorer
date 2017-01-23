@@ -307,7 +307,7 @@ class MyExtractor:
                 kw_k = scholar_keywords[k]
 
                 # TODO join keywords and count to do this part already via sql
-                mlog('DEBUG', 'extractDataCustom:keyword '+kw_k)
+                # mlog('DEBUG', 'extractDataCustom:keyword '+kw_k)
 
                 if kw_k != None and kw_k!="":
                     # mlog("DEBUG", kw_k)

@@ -101,14 +101,6 @@ def doors_uid_to_luid(doors_uid):
     return luid
 
 
-    return connect(
-        host=config['SQL_HOST'],
-        port=int(config['SQL_PORT']),
-        user="root",   # POSS change db ownership to a comexreg user
-        passwd="very-safe-pass",
-        db="comex_shared"
-    )
-
 def get_field_aggs(a_field, hapax_threshold=int(REALCONFIG['HAPAX_THRESHOLD'])):
     """
     Use case: api/aggs?field=a_field
@@ -224,6 +216,22 @@ def get_field_aggs(a_field, hapax_threshold=int(REALCONFIG['HAPAX_THRESHOLD'])):
 
     mlog('INFO', agg_rows)
     return agg_rows
+
+
+def rm_scholar(luid):
+    """
+    Remove a scholar by id
+
+    (removals from sch_kw and sch_ht maps are triggered by cascade)
+    """
+    db = connect_db()
+    db_c = db.cursor()
+    stmt = 'DELETE FROM scholars WHERE luid = %s' % luid
+    mlog("DEBUGSQL", "rm_scholar STATEMENT:\n-- SQL\n%s\n-- /SQL" % stmt)
+    dbresp = db_c.execute(stmt)
+    db.commit()
+    print("DELETED, with", dbresp)
+    db.close()
 
 
 def get_full_scholar(uid):

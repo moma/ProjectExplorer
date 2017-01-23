@@ -533,6 +533,11 @@
           </input>
 
 
+          <!-- hidden input for special action: DELETE USER -->
+          <input id="delete_user" name="delete_user" type="checkbox" hidden>
+          </input>
+
+
           <!-- <p> TEST UID {{ current_user.uid | safe }} </p> -->
 
           <!-- == S U B M I T == -->
@@ -542,6 +547,43 @@
                     type="button" onclick="cmxClt.uform.theForm.submit()">
                   Save profile
             </button>
+            <button class="btn btn-lg btn-warning" id="delete_check"
+                    type="button" data-toggle="modal" data-target="#deleteUserModal">
+                  Delete profile
+            </button>
+
+            <!-- modal: are you sure you want to delete ? -->
+            <div class="modal fade" id="deleteUserModal" tabindex="-1" role="dialog" aria-labelledby="dumTitle" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h5 class="modal-title" id="dumTitle">Delete profile</h5>
+                  </div>
+                  <div class="modal-body big-warning">
+                    <span class="glyphicon glyphicon-alert glyphicon-float-left"></span>
+                    <br/>
+                    Are you sure ?
+                    <br/>
+                    This will delete all your profile and user data.
+                    <br/>
+                    It cannot be undone.
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary"
+                            onclick="deleteUser.checked=true;cmxClt.uform.theForm.submit()">
+                            Yes delete my data
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+
           </div>
 
         </form>

@@ -385,13 +385,15 @@ var cmxClt = (function() {
           var fieldLabel = labelElt ? labelElt.innerText : fieldName
 
           // alternative filled values from storage lists
+          // POSS: do this only at the end before submit ?
+          // POSS: (in that case the testFillField would only look at array)
           if (  (actualValue == null  || actualValue == "" )
                     && cC.uform.mtiStock[fieldName]
                     && cC.uform.mtiStock[fieldName].length) {
               actualValue = cC.uform.mtiStock[fieldName].join(',')
 
               // debug
-              console.log('recreated multiTextinput value', actualValue)
+              // console.log('recreated multiTextinput value', actualValue)
           }
 
 

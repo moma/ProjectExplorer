@@ -43,7 +43,7 @@ if __package__ == 'services':
     from services.user  import User, login_manager, doors_login, UCACHE
     from services.text  import keywords
     from services.tools import restparse, mlog, re_hash, REALCONFIG
-    from services.db    import connect_db, get_or_create_tokitems, save_pairs_sch_tok, delete_pairs_sch_tok, get_or_create_affiliation, save_scholar, get_field_aggs, doors_uid_to_luid
+    from services.db    import connect_db, get_or_create_tokitems, save_pairs_sch_tok, delete_pairs_sch_tok, get_or_create_affiliation, save_scholar, get_field_aggs, doors_uid_to_luid, rm_scholar
     from services.db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 else:
     # when this script is run directly
@@ -51,7 +51,7 @@ else:
     from user           import User, login_manager, doors_login, UCACHE
     from text           import keywords
     from tools          import restparse, mlog, re_hash, REALCONFIG
-    from db             import connect_db, get_or_create_tokitems, save_pairs_sch_tok, delete_pairs_sch_tok, get_or_create_affiliation, save_scholar, get_field_aggs, doors_uid_to_luid
+    from db             import connect_db, get_or_create_tokitems, save_pairs_sch_tok, delete_pairs_sch_tok, get_or_create_affiliation, save_scholar, get_field_aggs, doors_uid_to_luid, rm_scholar
     from db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 
 # ============= app creation ============
@@ -362,27 +362,40 @@ def profile():
         )
     elif request.method == 'POST':
         mlog("DEBUG", "saving profile with request.form=", request.form)
-        try:
-            clean_records = save_form(
-                      request.form,
-                      request.files if hasattr(request, "files") else {},
-                      update_flag = True
-                     )
 
-        except Exception as perr:
+        # special action DELETE!!
+        if request.form['delete_user'] == 'on':
+            the_id_to_delete = current_user.uid
+            mlog("INFO", "executing DELETE scholar's data at the request of user %s" % str(the_id_to_delete))
+            logout_user()
+            rm_scholar(the_id_to_delete)
+            if the_id_to_delete in UCACHE: UCACHE.pop(the_id_to_delete)
+            return(redirect(url_for('rootstub', _external=True)))
+
+        # normal action UPDATE
+        else:
+            try:
+                clean_records = save_form(
+                          request.form,
+                          request.files if hasattr(request, "files") else {},
+                          update_flag = True
+                         )
+
+
+            except Exception as perr:
+                return render_template("thank_you.html",
+                                        form_accepted = False,
+                                        backend_error = True,
+                                        message = ("ERROR ("+str(perr.__doc__)+"):<br/>"
+                                                    + ("<br/>".join(format_tb(perr.__traceback__)+[repr(perr)]))
+                                                    )
+                                       )
+
             return render_template("thank_you.html",
-                                    form_accepted = False,
-                                    backend_error = True,
-                                    message = ("ERROR ("+str(perr.__doc__)+"):<br/>"
-                                                + ("<br/>".join(format_tb(perr.__traceback__)+[repr(perr)]))
-                                                )
-                                   )
-
-        return render_template("thank_you.html",
-                                debug_records = (clean_records if app.config['DEBUG'] else {}),
-                                form_accepted = True,
-                                backend_error = False,
-                                message = "")
+                                    debug_records = (clean_records if app.config['DEBUG'] else {}),
+                                    form_accepted = True,
+                                    backend_error = False,
+                                    message = "")
 
 
 # /services/user/register/
