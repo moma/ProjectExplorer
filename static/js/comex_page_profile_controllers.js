@@ -46,6 +46,7 @@ cmxClt.uform.initialize("comex_profile_form", completionAsYouGo)
 
 // activate multiTextinput
 cmxClt.uform.multiTextinput('keywords', uinfo.keywords)
+cmxClt.uform.multiTextinput('hashtags', uinfo.hashtags, "#23A")
 
 var deleteUser = document.getElementById('delete_user')
 deleteUser.checked = false

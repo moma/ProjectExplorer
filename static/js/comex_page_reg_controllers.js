@@ -30,6 +30,7 @@ var validateWithMessage = false
 
 // activate multiTextinput
 cmxClt.uform.multiTextinput('keywords')
+cmxClt.uform.multiTextinput('hashtags', [], "#23A")
 
 
 var shortRegVersion = true
@@ -44,7 +45,10 @@ function testAsYouGo() {
 
   cmxClt.uauth.earlyValidate()
   if (validateWithMessage) {
-      cmxClt.uform.simpleValidateAndMessage({'ignore':ignoredFields})
+      cmxClt.uform.simpleValidateAndMessage({'ignore':ignoredFields, 'fixResidue':true})
+      // NB fixResidue is useful when user has a problem
+      //    on submit then clicks "back" and ends up with
+      //    hashtags in brackets like "['#a','#b']"
   }
   cmxClt.uform.checkJobDateStatus()
 

@@ -38,6 +38,8 @@ var cmxClt = (function() {
     cC.COLS = [
                 ["keywords",               true,       "plsfill", "at", "map_infos"],
                     // ==> *keywords* table
+                ["hashtags",              false,       "plsfill", "at", "map_infos"],
+                    // ==> *hashtags* table
 
                 ["doors_uid",              true,       "auto"   , "t",  null],
                 ["last_modified_date",     true,       "auto"   , "d",  null],
@@ -50,7 +52,6 @@ var cmxClt = (function() {
                 ["initials",               true,       "pref",    "t",  null],
                 ["position",               true,       "plsfill", "t",  "map_infos"],
                 ["interests_text",        false,       "pref",    "t",  "other_infos"],
-                ["hashtags",              false,       "plsfill", "at", "map_infos"],
                 ["gender",                false,       "plsfill", "m",  "other_infos"],
                 ["job_looking_date",      false,       "pref"   , "d",  "map_infos"],
                 ["home_url",              false,       "plsfill", "t",  "other_infos"],
@@ -165,7 +166,7 @@ var cmxClt = (function() {
     //   => validate words become removable "pills"
     //   => result is concatenated texts in hidden input.#fName
     // TODO finalize and add to initialize
-    cC.uform.multiTextinput = function (fName, perhapsPreviousValues) {
+    cC.uform.multiTextinput = function (fName, perhapsPreviousValues, perhapsColor) {
         // HTML elt to insert tag boxes around
         var refElt = null
 
@@ -192,56 +193,66 @@ var cmxClt = (function() {
             // debug
             // console.log ('poptagbox from event' + event.type)
 
-            var newValue = normalInput.value
+            var asIsValue = normalInput.value
 
-            if (newValue != '') {
-                var newBox = document.createElement('div')
+            if (asIsValue != '') {
+                // maybe several values from cache (comma is reserved as separator)
+                var subValues = asIsValue.split(/,/)
+                for (var i in subValues) {
+                    var newValue = subValues[i]
 
-                // move the value
-                normalInput.value = ''
-                newBox.textContent = newValue
+                    // "let" so that it's unique for each i
+                    // (this unique pointer is useful in newBoxClose)
+                    let newBox = document.createElement('div')
 
-                // and save it
-                var nSaved = cC.uform.mtiStock[fName].push(newValue)
+                    // move the value
+                    normalInput.value = ''
+                    newBox.textContent = newValue
 
+                    // and save it
+                    var nSaved = cC.uform.mtiStock[fName].push(newValue)
 
-                // create a close elt for the box
-                var newBoxClose = document.createElement('div')
-                newBoxClose.classList.add('box-highlight-close')
-                newBoxClose.classList.add('operation')
-                newBoxClose.innerHTML = '<span class="glyphicon glyphicon-remove"></span>'
+                    // create a close elt for the box
+                    var newBoxClose = document.createElement('div')
+                    newBoxClose.classList.add('box-highlight-close')
+                    newBoxClose.classList.add('operation')
+                    newBoxClose.innerHTML = '<span class="glyphicon glyphicon-remove"></span>'
 
-                var closeBox = function() {
-                    // start transition
-                    newBox.style.opacity = 0
+                    var closeBox = function() {
+                        // start transition
+                        newBox.style.opacity = 0
 
-                    // remove value from stock
-                    var i = 0
-                    for (i in cC.uform.mtiStock[fName]){
-                        if (cC.uform.mtiStock[fName][i] == newValue) {
-                            break ;
+                        // remove value from stock
+                        var i = 0
+                        for (i in cC.uform.mtiStock[fName]){
+                            if (cC.uform.mtiStock[fName][i] == newValue) {
+                                break ;
+                            }
                         }
+                        cC.uform.mtiStock[fName].splice(i, 1)
+
+                        // signal form change
+                        cC.uform.theForm.dispatchEvent(new CustomEvent('change'))
+
+                        // remove box
+                        setTimeout(function(){newBox.style.display = 'none'}, 300)
+
+                        // console.debug("droptagbox", cC.uform.mtiStock[fName].length, cC.uform.mtiStock[fName])
                     }
-                    cC.uform.mtiStock[fName].splice(i, 1)
 
-                    // signal form change
-                    cC.uform.theForm.dispatchEvent(new CustomEvent('change'))
+                    newBoxClose.onclick = closeBox
+                    newBox.insertBefore(newBoxClose, newBox.firstChild)
 
-                    // remove box
-                    setTimeout(function(){newBox.style.display = 'none'}, 300)
 
-                    console.log("droptagbox", cC.uform.mtiStock[fName].length, cC.uform.mtiStock[fName])
+                    // show the box
+                    newBox.classList.add("box-highlight")
+                    if (perhapsColor) {
+                        newBox.style.backgroundColor = perhapsColor
+                    }
+                    cC.insertAfter(refElt, newBox)
+
+                    // console.debug("poptagbox", cC.uform.mtiStock[fName].length, cC.uform.mtiStock[fName])
                 }
-
-                newBoxClose.onclick = closeBox
-                newBox.insertBefore(newBoxClose, newBox.firstChild)
-
-
-                // show the box
-                newBox.classList.add("box-highlight")
-                cC.insertAfter(refElt, newBox)
-
-                console.log("poptagbox", cC.uform.mtiStock[fName].length, cC.uform.mtiStock[fName])
             }
         }
 
