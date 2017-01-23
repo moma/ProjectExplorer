@@ -364,7 +364,7 @@ def profile():
         mlog("DEBUG", "saving profile with request.form=", request.form)
 
         # special action DELETE!!
-        if request.form['delete_user'] == 'on':
+        if 'delete_user' in request.form and request.form['delete_user'] == 'on':
             the_id_to_delete = current_user.uid
             mlog("INFO", "executing DELETE scholar's data at the request of user %s" % str(the_id_to_delete))
             logout_user()
