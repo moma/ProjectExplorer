@@ -73,8 +73,10 @@ var sigmaJsDrawingProperties = {
     defaultLabelSize: 10,//in fact I'm using it as minLabelSize'
     defaultLabelBGColor: '#fff',
     defaultLabelHoverColor: '#000',
-    labelThreshold: 6,
+    labelThreshold: 8,
+    labelSizeRatio: 1.7,    // for proportional display only
     defaultEdgeType: 'curve',
+    font:"Droid Sans",
 
     borderSize: 2.5,//Something other than 0
     nodeBorderColor: "default",//exactly like this
@@ -87,7 +89,20 @@ var sigmaJsGraphProperties = {
 };
 var sigmaJsMouseProperties = {
     minRatio:0.1,
-    maxRatio: 15
+    maxRatio: 15,
+
+    // zoomMultiply
+    // is scroll reactivity
+    //    >1 => multiplies reaction
+    //    1 => doesn't react
+    //    <1 => reacts opposite direction
+    // default: 2
+    zoomMultiply: 1.5,
+
+    // directZooming
+    // debounces scrolling effect (useful for slower client gpus)
+    // default: false
+    directZooming: false
 };
 // ============ < / SIGMA.JS PROPERTIES > ============
 

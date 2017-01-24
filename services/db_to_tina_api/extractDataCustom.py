@@ -23,9 +23,9 @@ class MyExtractor:
             host=dbhost, db="comex_shared",
             user="root", passwd="very-safe-pass"
         )
-        mlog("DEBUG", "MySQL connected:", self.connection)
+        mlog("DEBUGSQL", "MyExtractor connected:", self.connection)
         self.cursor=self.connection.cursor(cursors.DictCursor)
-        mlog("DEBUG", "MySQL gotcursor:", self.cursor)
+        mlog("DEBUGSQL", "MyExtractor gotcursor:", self.cursor)
         self.scholars = {}
         self.scholars_colors = {}
         self.terms_colors = {}
@@ -332,15 +332,19 @@ class MyExtractor:
                             else:
                                 termsMatrix[kw_k]['cooc'][kw_l] = 1;
 
+
+        # ------- debug -------------------------------
+        # print(">>>>>>>>>termsMatrix<<<<<<<<<")
+        # print(termsMatrix)
+        # ------- /debug ------------------------------
+
         # TODO restore job snippet 1
         # sql='select login from jobs';
         # for res in self.cursor.execute(sql):
         #     if res['login'].strip() in self.scholars_colors:
         #         self.scholars_colors[res['login'].strip()]+=1;
 
-        # TODO add occurrences ?
-        # query = "SELECT kwstr,kwid,occurrences FROM keywords WHERE kwid IN "
-        query = "SELECT kwstr,kwid FROM keywords WHERE kwid IN "
+        query = "SELECT kwstr,kwid,occs FROM keywords WHERE kwid IN "
         conditions = ' (' + ','.join(sorted(list(termsMatrix))) + ')'
 
         # debug
@@ -355,7 +359,7 @@ class MyExtractor:
             idT = res['kwid']
             info = {}
             info['kwid'] = idT
-            # info['occurrences'] = res['occurrences']  # TODO add occurrences ?
+            info['occurrences'] = res['occs']
             info['kwstr'] = res['kwstr']
             self.terms_dict[idT] = info
         count=1
@@ -408,7 +412,7 @@ class MyExtractor:
                 if len(scholarsMatrix[scholar]['cooc']) >= self.min_num_friends:
                     scholarsIncluded += 1;
                     nodeId = str(scholar);
-                    self.Graph.add_node(nodeId)
+                    self.Graph.add_node(nodeId, weight=3)
 
         edgeid = 0
         for scholar in self.scholars:
@@ -429,9 +433,17 @@ class MyExtractor:
                     if neigh != str(term):
                         source="N::"+str(term)
                         target="N::"+neigh
-                        # TODO restore keywords.occurrences
-                        # weight=neighbors[str(neigh)]/float(self.terms_dict[term]['occurrences'])
-                        weight=neighbors[str(neigh)]
+
+                        weight=neighbors[str(neigh)]/float(self.terms_dict[term]['occurrences'])
+                        # TODO ^^^ check formula ^^^
+
+                        if neighbors[str(neigh)] != 1:
+                            mlog("DEBUG", "extractDataCustom.extract edges b/w terms====")
+                            mlog("DEBUG", "term:", self.terms_dict[int(term)]['kwstr'], "<===> neighb:", self.terms_dict[int(neigh)]['kwstr'])
+                            mlog("DEBUG", "kwoccs:", self.terms_dict[term]['occurrences'])
+                            mlog("DEBUG", "neighbors[neigh]:", neighbors[str(neigh)])
+                            mlog("DEBUG", "edge w", weight)
+
                         self.Graph.add_edge( source , target , {'weight':weight,'type':"nodes2"})
 
         for scholar in self.scholars:
@@ -488,9 +500,7 @@ class MyExtractor:
                     nodeLabel= self.terms_dict[numID]['kwstr'].replace("&"," and ")
                     colorg=max(0,180-(100*self.terms_colors[numID]))
 
-                    # TODO restore keywords.occurrences
-                    # term_occ = self.terms_dict[numID]['occurrences']
-                    term_occ = 1
+                    term_occ = self.terms_dict[numID]['occurrences']
 
                 except KeyError:
                     mlog("WARNING", "couldn't find label and meta for term " + str(numID))
@@ -565,7 +575,6 @@ class MyExtractor:
                 node["label"] = nodeLabel
                 node["color"] = color
 
-
                 dacountry = self.scholars[idNode]["country"]
                 code=inst.searchCode(dacountry)
 
@@ -579,6 +588,9 @@ class MyExtractor:
                 node["ACR"] = self.scholars[idNode]["org"]
                 if node["ACR"]=="": node["ACR"]="-"
 
+
+                # /!\ Fixed weight for all SOC nodes /!\
+                # cf. node.size in sigma.parseCustom.js
                 node["term_occ"] = "12"
                 if coordsRAW: node["x"] = str(coords[idNode]['x'])
                 if coordsRAW: node["y"] = str(coords[idNode]['y'])
