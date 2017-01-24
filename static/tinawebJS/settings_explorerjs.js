@@ -31,8 +31,9 @@ ircCHN="";
 var catSoc = "Document";
 var catSem = "NGram";
 
+// newSize = oldSize + (sizeMult * oldSize)
 var sizeMult = [];
-    sizeMult[catSoc] = 0.0;
+    sizeMult[catSoc] = 0.7;
     sizeMult[catSem] = 0.0;
 
 var inactiveColor = '#666';
@@ -58,7 +59,8 @@ var desirableScholarSize=6; //Remember that all scholars have the same size!
  *  - "off": button doesn't exist, fa2 stopped forever
  **/ var fa2enabled=false;//"off";
 var stopcriteria = false;
-var iterationsFA2=1000;
+var iterationsFA2=2000;               // <= should be proportional to graph size
+                                      //    TODO also adjust speed after initial
 var seed=999999999;//defaultseed
 var semanticConverged=false;
 
