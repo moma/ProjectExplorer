@@ -4,10 +4,12 @@ var ForceAtlas2 = function(graph) {
   var self = this;
   this.graph = graph;
 
+  // NB some settings are rewritten in setAutoSettings
+  //                                   ---------------
   this.p = {
     linLogMode: false,
     outboundAttractionDistribution: false,
-    adjustSizes: false,
+    adjustSizes: true,     // imho <=> overlap prevention ? TODO check more
     edgeWeightInfluence: 1,
     scalingRatio: 1,
     strongGravityMode: false,
@@ -361,11 +363,20 @@ var ForceAtlas2 = function(graph) {
     } else {
       this.p.scalingRatio = 10.0;
     }
+
+    // POSS: trying proportional scaling instead of if
+    // NB: *smaller* scaling ratio improves non overlap of close neighboors
+    // this.p.scalingRatio = 1 / 3 * Math.sqrt(graph.nodes.length)
+    // console.log("scalingRatio", this.p.scalingRatio)
+
     this.p.strongGravityMode = false;
     this.p.gravity = 1;
 
+    // TODO user selected layout should be much slower than initial layout
+    // this.p.speed = 10;
+
     // Behavior
-    this.p.outboundAttractionDistribution = false;
+    this.p.outboundAttractionDistribution = true;
     this.p.linLogMode = false;
     this.p.adjustSizes = true;
     this.p.edgeWeightInfluence = 1;
@@ -379,7 +390,7 @@ var ForceAtlas2 = function(graph) {
       this.p.jitterTolerance = 0.1;
     }
     if (graph.nodes.length >= 1000) {
-      this.p.barnesHutOptimize = false;
+      this.p.barnesHutOptimize = true;
     } else {
       this.p.barnesHutOptimize = false;
     }
