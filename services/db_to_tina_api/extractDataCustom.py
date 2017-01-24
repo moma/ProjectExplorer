@@ -1,7 +1,7 @@
 from MySQLdb   import connect, cursors
 from networkx  import Graph, DiGraph
 from random    import randint
-from math      import floor
+from math      import floor, log, log1p
 from cgi       import escape
 from re        import sub
 from traceback import format_tb
@@ -36,11 +36,25 @@ class MyExtractor:
         self.unique_id = {}
 
 
-    def jaccard(self,occ1,occ2,cooc):
+    def jaccard(self,cooc,occ1,occ2):
+        """
+        Was used for SOC edges (aka nodes1 or edgesA)
+
+        (Cooc normalized by total scholars occs)
+        """
         if occ1==0 or occ2==0:
             return 0
         else:
             return cooc*cooc/float(occ1*occ2)
+
+    def log_sim(self,cooc,occ1,occ2):
+        """
+        Newly used for SOC edges
+            => preserves monotony
+            => + log scale (=> good for display !!)
+        """
+        return log1p(self.jaccard(cooc,
+                                  occ1,occ2))
 
     def getScholarsList(self,qtype,filter_dict):
         """
@@ -449,14 +463,36 @@ class MyExtractor:
         for scholar in self.scholars:
             nodeId1 = scholar;
             if str(nodeId1) in scholarsMatrix:
+
+                # weighted list of other scholars
                 neighbors=scholarsMatrix[str(nodeId1)]['cooc'];
+
                 for i, neigh in enumerate(neighbors):
                     if neigh != str(scholar):
                         source=str(scholar)
                         target=str(neigh)
-                        weight=self.jaccard(scholarsMatrix[nodeId1]['occ'],scholarsMatrix[neigh]['occ'],neighbors[str(neigh)])
+                        weight=self.log_sim(neighbors[str(neigh)],
+                                                scholarsMatrix[nodeId1]['occ'],
+                                                scholarsMatrix[neigh]['occ'])
                         #mlog("DEBUG", "\t"+source+","+target+" = "+str(weight))
                         self.Graph.add_edge( source , target , {'weight':weight,'type':"nodes1"})
+
+        # ------- debug nodes1 -------------------------
+        # print(">>>>>>>>>scholarsMatrix<<<<<<<<<")
+        # print(scholarsMatrix)
+
+        # exemple:
+        # {'D::PFC/00002': {'occ': 6,
+        #                   'cooc': {'D::PFC/00002': 6,
+        #                            'D::fl/00009': 1,
+        #                            'D::DC/00010': 1}
+        #                   },
+        #   'D::fl/00009': {'occ': 9,
+        #                   'cooc': {'D::fl/00009': 9,
+        #                            'D::PFC/00002': 1}
+        #                  }
+        # ------- /debug ------------------------------
+
 
 
     def toHTML(self,string):
@@ -611,7 +647,7 @@ class MyExtractor:
 
             if GG.has_edge(s,t):
                 oldw = GG[s][t]['weight']
-                avgw = (oldw+w)/2
+                avgw = (oldw+w)/2      # TODO this avg faster but not indifferent to sequence
                 GG[s][t]['weight'] = avgw
             else:
                 GG.add_edge( s , t , { "weight":w , "type":tp } )
@@ -652,7 +688,7 @@ class MyExtractor:
         graph = {}
         graph["nodes"] = nodes
         graph["links"] = edges
-        graph["stats"] = { "sch":nodesA,"kw":nodesB,"n1":edgesA,"n2":edgesB,"nbi":edgesAB ,  }
+        graph["stats"] = { "sch":nodesA,"kw":nodesB,"n1(soc)":edgesA,"n2(sem)":edgesB,"nbi":edgesAB ,  }
         graph["ID"] = self.unique_id
 
         mlog("INFO", graph["stats"])
