@@ -4,4 +4,5 @@
 FROM mysql
 
 # init script for our db comex_shared (mysql container will run it iff data volume is empty)
+RUN echo "updating init file"
 ADD init_comex_shared.sql /docker-entrypoint-initdb.d/

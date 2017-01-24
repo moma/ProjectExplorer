@@ -56,6 +56,7 @@ ALTER TABLE scholars ADD FOREIGN KEY (affiliation_id) REFERENCES affiliations(af
 CREATE TABLE keywords(
     kwid                int(15) not null auto_increment,
     kwstr               char(50) not null unique,   -- eg 'complex networks'
+    occs                int(15) default 0,
     INDEX kwid_index_kws (kwid),
     INDEX kwstr_index_kws (kwstr),
     PRIMARY KEY (kwid)
@@ -71,6 +72,29 @@ CREATE TABLE sch_kw(
     FOREIGN KEY (uid)  REFERENCES scholars(luid) ON DELETE CASCADE,
     FOREIGN KEY (kwid) REFERENCES keywords(kwid)
 );
+
+
+-- normal triggers
+-- ===============
+-- (+1) to occs on INSERT in sch_kw
+CREATE TRIGGER incr_kwoccs_sum AFTER INSERT ON sch_kw
+FOR EACH ROW UPDATE keywords SET occs = occs + 1
+WHERE keywords.kwid = NEW.kwid ;
+
+-- (-1) to occs on DELETE in sch_kw
+CREATE TRIGGER decr_kwoccs_sum AFTER DELETE ON sch_kw
+FOR EACH ROW UPDATE keywords SET occs = occs - 1
+WHERE keywords.kwid = OLD.kwid ;
+
+
+-- bug workaround trigger
+-- ======================
+-- NB this 3rd trigger below is additionally needed to reproduce the -1 effect when deleting entire scholar, because of INNODB bug "Cascaded foreign key actions do not activate triggers." (cf bugs.mysql.com/bug.php?id=11472)
+-- TODO remove it if the bug is fixed !
+-- (also it must be BEFORE otherwise sch_kw already affected by cascade)
+CREATE TRIGGER decr_all_kwoccs_of_a_scholar BEFORE DELETE ON scholars
+FOR EACH ROW UPDATE keywords JOIN sch_kw ON keywords.kwid = sch_kw.kwid SET occs = occs - 1 WHERE sch_kw.uid = OLD.luid ;
+
 
 -- hashtag/workgroup terms
 CREATE TABLE hashtags(
