@@ -35,6 +35,9 @@
          - ../../config:/comex2/config
          # similar logic used to expose inner logs
          - ../../logs:/comex2/logs
+         # and to pass the ssl keys
+         - /etc/ssl/certs/:/etc/ssl/certs/
+         - /etc/ssl/private/:/etc/ssl/private/
         environment:
             # override values from parametres_comex.ini
             # for a double reason:

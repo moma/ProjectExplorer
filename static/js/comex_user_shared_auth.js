@@ -326,10 +326,13 @@ cmxClt = (function(cC) {
                     "name":     nameStr
                 }
 
+            var scheme = cC.uauth.protoDoors ? 'http' : 'https'
+
             $.ajax({
                 contentType: cC.uauth.protoDoors ? "application/json" : "application/x-www-form-urlencoded; charset=UTF-8",
                 dataType: 'json',
-                url: "http://"+cC.uauth.doorsConnectParam+"/api/" + apiAction,
+
+                url: scheme + "://"+cC.uauth.doorsConnectParam+"/api/" + apiAction,
                 data: cC.uauth.protoDoors ? JSON.stringify(sendData) : sendData,
                 type: 'POST',
                 // traditional: !cC.uauth.protoDoors,

@@ -14,7 +14,7 @@ RUN dpkg-reconfigure locales
 
 # Install global dependencies and utilities
 RUN apt update && apt autoclean
-RUN apt install -y python3-pip libmysqlclient-dev git nano tree iputils-ping nginx-full php7.0-fpm php7.0-mysql
+RUN apt install -y python3-pip libmysqlclient-dev git nano tree iputils-ping nginx-full php7.0-fpm php7.0-mysql ssl-cert
 
 # Configure php fpm to allow environment variables (uncomment removing the ';')
 RUN mv /etc/php/7.0/fpm/pool.d/www.conf /etc/php/7.0/fpm/pool.d/www.conf.bak
@@ -53,6 +53,4 @@ CMD bash run.sh
 
 # nginx server (redirecting to php AND services)
 EXPOSE 80
-
-# TODO SSL configuration
 EXPOSE 443
