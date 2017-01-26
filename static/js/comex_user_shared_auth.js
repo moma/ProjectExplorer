@@ -46,7 +46,9 @@ cmxClt = (function(cC) {
     cC.uauth.realCaptchaLength = 5
 
     // captcha init
-    $(cmxClt.uauth.captcha).realperson({length: cC.uauth.realCaptchaLength})
+    if (cC.uauth.captcha) {
+        $(cmxClt.uauth.captcha).realperson({length: cC.uauth.realCaptchaLength})
+    }
 
     // captchaHash should be appended by itself if normal submit,
     // but otherwise we need to do it ourselves with collectCaptcha()
@@ -78,8 +80,11 @@ cmxClt = (function(cC) {
             cC.uauth.checkPassFormat()
         }
 
-        // finally also update cC.uauth.captchaStatus
-        cC.uauth.captchaStatus = (cC.uauth.captcha.value.length == cC.uauth.realCaptchaLength)
+        // finally also update cC.uauth.captchaStatus if captcha present
+        cC.uauth.captchaStatus = (
+               !cC.uauth.captcha
+            || (cC.uauth.captcha.value.length == cC.uauth.realCaptchaLength)
+        )
     }
 
 
