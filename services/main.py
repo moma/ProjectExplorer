@@ -206,6 +206,9 @@ def graph_api():
         scholars = graphdb.getScholarsList(request.args['qtype'], restparse(request.query_string.decode()))
         if scholars and len(scholars):
             # Data Extraction
+            # (getting details for selected scholars into graph object)
+            # TODO do it along with previous step getScholarsList
+            # (less modular but a lot faster)
             graphdb.extract(scholars)
 
         graphArray = graphdb.buildJSON_sansfa2(graphdb.Graph)

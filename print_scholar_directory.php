@@ -109,10 +109,12 @@ arsort($scholar_array);
 $scholar_id_array=array_keys($scholar_array);
 // var_dump($scholar_id_array)."<br/>" ;
 
-// liste des chercheurs
+// liste des chercheurs "expansion transitive"
 $scholars = array();
 //
 foreach ($scholar_id_array as $scholar_id){
+
+// £TODO do it at once with previous SELECT !!
 $sql = <<< END_QUERY
 SELECT
     scholars.*,
@@ -128,6 +130,8 @@ JOIN keywords
 LEFT JOIN affiliations
     ON affiliation_id = affid
 WHERE luid = "{$scholar_id}"
+AND (record_status = 'active'
+     OR (record_status = 'legacy' AND valid_date >= NOW()))
 GROUP BY luid
 END_QUERY;
 

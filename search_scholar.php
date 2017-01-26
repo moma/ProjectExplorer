@@ -19,7 +19,9 @@ $q = "%".sanitize_input($login)."%";
 
 $query = 'concat(first_name, " ", IFNULL(middle_name,""), " ", last_name) LIKE "%'.$q.'%"';
 
-$req = "SELECT luid, first_name, middle_name, last_name FROM scholars WHERE ".$query." GROUP BY luid";
+$status_constraint = "(record_status = 'active' OR (record_status = 'legacy' AND valid_date >= NOW()))";
+
+$req = "SELECT luid, first_name, middle_name, last_name FROM scholars WHERE ".$query." AND ".$status_constraint." GROUP BY luid";
 // echo "req: ".$req.";";
 $results = array();
 $i = 0;

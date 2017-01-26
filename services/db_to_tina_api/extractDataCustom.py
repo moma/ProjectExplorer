@@ -60,6 +60,8 @@ class MyExtractor:
         """
         select one or more scholars to map in the graph
 
+        the filters take only active scholars or legacy with date <= 3 months
+
         returns a dict of scholar's uids
 
         method1 (qtype "uid")
@@ -93,6 +95,7 @@ class MyExtractor:
                     COUNT(matching.kwid) AS cooc
 
                 FROM scholars
+
                 -- step 1
                 JOIN sch_kw AS matching
                             ON matching.uid = scholars.luid
@@ -101,6 +104,12 @@ class MyExtractor:
                             ON neighbors_by_kw.kwid = matching.kwid
 
                 WHERE luid = "%s"
+
+                AND (
+                    record_status = 'active'
+                    OR
+                    (record_status = 'legacy' AND valid_date >= NOW())
+                )
                 GROUP BY neighbors_by_kw.uid
                 ORDER BY cooc DESC
                 """ % unique_id
@@ -138,6 +147,11 @@ class MyExtractor:
                     sql_query = """
                         SELECT luid
                         FROM scholars
+                        WHERE (
+                            record_status = 'active'
+                            OR
+                            (record_status = 'legacy' AND valid_date >= NOW())
+                        )
                     """
 
                 else:
@@ -151,6 +165,7 @@ class MyExtractor:
                     # build constraints from the args
                     # ================================
                     sql_constraints = []
+
                     for key in filter_dict:
                         known_filter = None
                         sql_column = None
@@ -184,7 +199,7 @@ class MyExtractor:
                                 sql_constraints.append("(%s %s)" % (sql_column, clause))
 
                     # debug
-                    mlog("DEBUG", "sql_constraints", sql_constraints)
+                    mlog("INFO", "SELECTing active users with sql_constraints", sql_constraints)
 
                     # use constraints as WHERE-clause
                     sql_query = """
@@ -208,6 +223,13 @@ class MyExtractor:
 
                         -- our filtering constraints fit here
                         WHERE  %s
+
+                        AND (
+                            record_status = 'active'
+                            OR
+                            (record_status = 'legacy' AND valid_date >= NOW())
+                        )
+
                         GROUP BY luid
 
                     """ % (" AND ".join(sql_constraints))
@@ -235,7 +257,9 @@ class MyExtractor:
         """
         Adding each connected scholar per unique_id
 
-        TODO this should be done by JOINS at previous step (faster but more verbose to program)
+        (getting details for selected scholars into graph object)
+        # TODO do it along with previous step getScholarsList
+        # (less modular but a lot faster)
         """
         # debug
         # mlog("DEBUG", "MySQL extract scholar_array:", scholar_array)
@@ -314,7 +338,7 @@ class MyExtractor:
         scholarsIncluded = 0;
 
         for i in self.scholars:
-            mlog('INFO', 'extractDataCustom:'+self.scholars[i]['email'])
+            mlog('DEBUG', 'extractDataCustom:'+self.scholars[i]['email'])
             self.scholars_colors[self.scholars[i]['email'].strip()]=0;
             scholar_keywords = self.scholars[i]['keywords_ids'];
             for k in range(len(scholar_keywords)):

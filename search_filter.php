@@ -77,6 +77,8 @@ $req = <<<END_QUERY
             ON sch_ht.htid = hashtags.htid
         LEFT JOIN affiliations
             ON scholars.affiliation_id = affiliations.affid
+        WHERE (record_status = 'active'
+                OR (record_status = 'legacy' AND valid_date >= NOW()))
         GROUP BY luid
         ) AS full_scholars_info
     WHERE {$cat} {$query}                          -- <== our filter
