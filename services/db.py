@@ -101,18 +101,38 @@ def doors_uid_to_luid(doors_uid):
     return luid
 
 
-def get_field_aggs(a_field, hapax_threshold=int(REALCONFIG['HAPAX_THRESHOLD'])):
+def get_field_aggs(a_field,
+                   hapax_threshold=int(REALCONFIG['HAPAX_THRESHOLD']),
+                   users_status = "active"):
     """
     Use case: api/aggs?field=a_field
+    ---------------------------------
        => Retrieves distinct field values and count having it
 
        => about *n* vs *occs*:
            - for tables != keywords count is scholar count
            - for table keywords count is occurrences count
 
-    NB relies on FIELDS_FRONTEND_TO_SQL mapping
-    POSS: allow other fields than those in the mapping
-          if they are already in sql table.col format?
+    Parameters
+    ----------
+        a_field: str
+            a front-end fieldname to aggregate, like "keywords" "countries"
+            (allowed values cf. FIELDS_FRONTEND_TO_SQL)
+
+            POSS: allow other fields than those in the mapping
+                  if they are already in sql table.col format?
+
+        hapax_threshold: int
+            for all data_types, categories with a total equal or below this will be excluded from results
+            TODO: put them in an 'others' category
+            POSS: have a different threshold by type
+
+        users_status: str
+            defines the perimeter (set of scholars over which we work),
+            (allowed values are ['active', 'test', 'legacy', 'ALL'])
+
+            NB: if the param is 'legacy' here, set is indifferent to call_date
+                (because aggs useful for *entire* legacy group)
     """
 
     agg_rows = []
@@ -127,82 +147,113 @@ def get_field_aggs(a_field, hapax_threshold=int(REALCONFIG['HAPAX_THRESHOLD'])):
         db = connect_db()
         db_c = db.cursor(DictCursor)
 
-        if type(hapax_threshold) == int and hapax_threshold > 0:
-            count_col = 'occs' if sql_tab == 'keywords' else 'n'
-            where_clause = "WHERE %s > %i" % (count_col, hapax_threshold)
+        # constraints 1, if any
+        prefilters = []
+        if users_status != 'ALL':
+            prefilters.append( "scholars.record_status = \"%s\"" % users_status)
+        if len(prefilters):
+            pre_where = "WHERE "+" AND ".join(
+                                                ['('+f+')' for f in prefilters]
+                                                    )
         else:
-            where_clause = ""
+            pre_where = ""
 
+        # constraints 2, if any
+        postfilters = []
+
+        if hapax_threshold > 0:
+            count_col = 'occs' if sql_tab in ['keywords', 'hashtags'] else 'n'
+            postfilters.append( "%s > %i" % (count_col, hapax_threshold) )
+
+        if len(postfilters):
+            post_where = "WHERE "+" AND ".join(
+                                                ['('+f+')' for f in postfilters]
+                                                    )
+        else:
+            post_where = ""
+
+
+        # retrieval cases
         if sql_tab == 'scholars':
             stmt = """
-                SELECT * FROM (
-                    SELECT %(col)s AS x, COUNT(*) AS n
+                SELECT x, n FROM (
+                    SELECT %(col)s AS x, COUNT(*) AS n, record_status
                     FROM scholars
+                    %(pre_filter)s
                     GROUP BY %(col)s
                 ) AS allcounts
-                %(filter)s
+                %(post_filter)s
                 ORDER BY n DESC
-            """ % {'col': sql_col, 'filter': where_clause}
+            """ % {'col': sql_col, 'pre_filter': pre_where,
+                                   'post_filter': post_where}
 
         elif sql_tab == 'affiliations':
             stmt = """
-                SELECT * FROM (
-                    SELECT %(col)s AS x, COUNT(*) AS n
+                SELECT x, n FROM (
+                    SELECT %(col)s AS x, COUNT(*) AS n, record_status
                     FROM scholars
                     -- 0 or 1
                     LEFT JOIN affiliations
                         ON scholars.affiliation_id = affiliations.affid
+                    %(pre_filter)s
                     GROUP BY %(col)s
                 ) AS allcounts
-                %(filter)s
+                %(post_filter)s
                 ORDER BY n DESC
-            """ % {'col': sql_col, 'filter': where_clause}
+            """ % {'col': sql_col, 'pre_filter': pre_where,
+                                   'post_filter': post_where}
 
         elif sql_tab == 'linked_ids':
             stmt = """
-                SELECT * FROM (
-                    SELECT %(col)s AS x, COUNT(*) AS n
+                SELECT x, n FROM (
+                    SELECT %(col)s AS x, COUNT(*) AS n, record_status
                     FROM scholars
                     -- 0 or 1
                     LEFT JOIN linked_ids
                         ON scholars.luid = linked_ids.uid
+                    %(pre_filter)s
                     GROUP BY %(col)s
                 ) AS allcounts
-                %(filter)s
+                %(post_filter)s
                 ORDER BY n DESC
-            """ % {'col': sql_col, 'filter': where_clause}
+            """ % {'col': sql_col, 'pre_filter': pre_where,
+                                   'post_filter': post_where}
 
         elif sql_tab == 'keywords':
             stmt = """
-                SELECT * FROM (
-                    SELECT %(col)s AS x, COUNT(*) AS occs
+                SELECT x, occs FROM (
+                    SELECT %(col)s AS x, COUNT(*) AS occs, record_status
                     FROM scholars
                     -- 0 or many
                     LEFT JOIN sch_kw
                         ON scholars.luid = sch_kw.uid
                     LEFT JOIN keywords
                         ON sch_kw.kwid = keywords.kwid
+                    %(pre_filter)s
                     GROUP BY %(col)s
                 ) AS allcounts
-                %(filter)s
+                %(post_filter)s
                 ORDER BY occs DESC
-            """ % {'col': sql_col, 'filter': where_clause}
+            """ % {'col': sql_col, 'pre_filter': pre_where,
+                                   'post_filter': post_where}
 
         elif sql_tab == 'hashtags':
             stmt = """
-                SELECT * FROM (
-                    SELECT %(col)s AS x, COUNT(*) AS occs
+                SELECT x, occs FROM (
+                    SELECT %(col)s AS x, COUNT(*) AS occs, record_status
                     FROM scholars
                     -- 0 or many
                     LEFT JOIN sch_ht
                         ON scholars.luid = sch_ht.uid
                     LEFT JOIN hashtags
                         ON sch_ht.htid = hashtags.htid
+                    %(pre_filter)s
                     GROUP BY %(col)s
                 ) AS allcounts
-                %(filter)s
+                %(post_filter)s
                 ORDER BY occs DESC
-            """ % {'col': sql_col, 'filter': where_clause}
+            """ % {'col': sql_col, 'pre_filter': pre_where,
+                                   'post_filter': post_where}
 
         mlog("DEBUGSQL", "get_field_aggs STATEMENT:\n-- SQL\n%s\n-- /SQL" % stmt)
 
@@ -214,7 +265,8 @@ def get_field_aggs(a_field, hapax_threshold=int(REALCONFIG['HAPAX_THRESHOLD'])):
 
         db.close()
 
-    mlog('INFO', agg_rows)
+    # mlog('DEBUG', "aggregation over %s: result rows =" % a_field, agg_rows)
+
     return agg_rows
 
 
