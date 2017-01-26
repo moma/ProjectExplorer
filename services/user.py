@@ -11,7 +11,7 @@ __email__     = "romain.loth@iscpif.fr"
 from re          import match
 from requests    import post
 from json        import dumps, loads
-from datetime    import time, timedelta
+from datetime    import date
 from flask_login import LoginManager
 
 if __package__ == 'services':
@@ -82,6 +82,28 @@ def doors_login(email, password, config):
     return uid
 
 
+def jsonize_uinfo(uinfo_dict):
+    """
+    Dumps user_info in json format for client-side needs
+    """
+
+    # most fields are already serializable
+    serializable_dict = {k:v for k,v in uinfo_dict.items() if k not in ['pic_file', 'valid_date']}
+
+    if 'pic_file' in uinfo_dict and len(uinfo_dict['pic_file']):
+        serializable_dict['pic_file'] = "<blob_not_copied>"
+
+    if 'valid_date' in uinfo_dict and uinfo_dict['valid_date'] is not None:
+        d = uinfo_dict['valid_date']
+        if type(d) != date:
+            raise TypeError("Incorrect type for valid_date: '%s' instead of 'date'" % type(d))
+        else:
+            # "YYYY-MM-DD"
+            serializable_dict['valid_date'] = d.isoformat()
+
+    return dumps(serializable_dict)
+
+
 class User(object):
 
     def __init__(self, uid):
@@ -97,16 +119,14 @@ class User(object):
         else:
             # normal user has a nice info dict
             self.info = user_info
-            self.json_info = dumps({k:v for k,v in user_info.items() if k != 'pic_file'})
+            self.json_info = jsonize_uinfo(user_info)
             self.empty = False
 
     def get_id(self):
         return str(self.uid)
 
     @property
-    def is_active(self,
-                  # 3 months ~ 91 days
-                  legacy_time_active = timedelta(days=91.3125)):
+    def is_active(self):
         """
         :boolean flag:
 
@@ -114,12 +134,10 @@ class User(object):
         and self.empty <=> is also active a user who exists
                            in doors db but not in comex_db
 
-
               STATUS STR           RESULT
                "active"          flag active
                 "test"           flag active if DEBUG
-    "legacy:sent_2017-01-01"     flag active until 2017/04/01
-                                                   (ie 2017/01/01 + 3 months)
+               "legacy"          flag active if validity_date >= NOW()
         """
         if self.empty:
             # the user has a doors uid so he's entitled to a login
@@ -127,16 +145,14 @@ class User(object):
         else:
             # ... or has a record_status in comex_db
             sirstatus = self.info['record_status']
-
-            # maybe occasionaly legacy user
-            legacystatus = match("legacy:sent_([\d-]{10})",sirstatus)
+            sivdate = self.info['valid_date']
 
             # boolean result
             return (sirstatus == "active"
                         or (
-                            legacystatus
+                            sirstatus == "legacy"
                             and
-                            date(*[int(tc) for tc in legacystatus.groups()[0].split('-')]) + legacy_time_active < date.today()
+                            sivdate <= date.today()
                         )
                         or (
                             sirstatus == "test"

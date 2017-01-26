@@ -28,7 +28,8 @@ CREATE TABLE scholars (
     home_url             varchar(120),   -- homepage
     pic_url              varchar(120),   -- an alternative to pic_file blob
     pic_file             mediumblob,
-    record_status        varchar(25),
+    valid_date           date,   -- when user will be ignored, if legacy status
+    record_status        varchar(25),  -- "active|test|legacy"
 
     INDEX luid_index_sch (luid),
     INDEX duid_index_sch (doors_uid),
