@@ -324,6 +324,14 @@ def logout():
     logout_user()
     return redirect(url_for('rootstub', _external=True))
 
+# /test_base
+@app.route('/test_base')
+def test_base():
+    return render_template(
+        "base_layout.html",
+        doors_connect=config['DOORS_HOST']+':'+config['DOORS_PORT']
+    )
+
 
 # /services/user/profile/
 @app.route(config['PREFIX'] + config['USR_ROUTE'] + '/profile/', methods=['GET', 'POST'])

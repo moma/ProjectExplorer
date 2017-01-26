@@ -600,11 +600,6 @@
         var uinfo = {{ (current_user.json_info | safe) if current_user.info else ("null" | safe) }};
     </script>
 
-    <!--  our js  -->
-    <script src="{{ url_for('static', filename='js/comex_user_shared.js') }}"></script>
-
-
-
 
       <!-- for #mini-explorer -->
 <!--

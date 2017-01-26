@@ -13,7 +13,14 @@
  */
 
 // initialize form controllers
-cmxClt.uform.initialize("comex_login_form", loginValidate)
+if (document.getElementById('auth_box')) {
+    // for new popup box
+    cmxClt.uform.initialize("auth_box", loginValidate)
+}
+else {
+    // old separate login page
+    cmxClt.uform.initialize("comex_login_form", loginValidate)
+}
 
 // initialize auth with doors
 cmxClt.uauth.emailIdSupposedToExist = true
@@ -24,17 +31,17 @@ function loginValidate() {
   // console.log("loginValidate Go")
 
   // checks email, pass and captcha formats
-  // and updates uauth.emailStatus, uauth.passStatus, uauth.captchaStatus 
+  // and updates uauth.emailStatus, uauth.passStatus, uauth.captchaStatus
   cmxClt.uauth.earlyValidate()
 
-  if (cmxClt.uauth.passStatus
-        && cmxClt.uauth.emailStatus
-        && cmxClt.uauth.captchaStatus) {
-      cmxClt.uform.submitButton.disabled = false
-  }
-  else {
-      cmxClt.uform.submitButton.disabled = true
-  }
+  // if (cmxClt.uauth.passStatus
+  //       && cmxClt.uauth.emailStatus
+  //       && cmxClt.uauth.captchaStatus) {
+  //     cmxClt.uform.submitButton.disabled = false
+  // }
+  // else {
+  //     cmxClt.uform.submitButton.disabled = true
+  // }
 }
 
 

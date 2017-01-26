@@ -71,7 +71,7 @@
                      <!-- <h3 class="formcat"> Login infos </h3> -->
 
                      <div class="question">
-                       <!-- TODO separate modal -->
+                       <!-- POSS login within modal like comex_test_modal -->
                        <p class="legend">Your email will also be your login for the ISC services. </p>
                        <div class="input-group">
                          <!-- email validation onblur/onchange is done by cmxClt.uauth in comex_user_shared_auth.js -->
@@ -356,9 +356,11 @@
             <!--pseudo captcha using realperson from http://keith-wood.name/realPerson.html -->
             <div class="question input-group">
                 <label for="my-captcha" class="smlabel input-group-addon">Code</label>
-                <input id="my-captcha" name="my-captcha" style="max-width:60%"
-                       type="text" class="form-control input-lg" placeholder="Enter the 5 letters beside =>"
-                       onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)">
+                <div>
+                    <input id="my-captcha" name="my-captcha" style="max-width:60%"
+                           type="text" class="form-control input-lg" placeholder="Enter the 5 letters beside =>"
+                           onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)">
+                </div>
                 <p class="legend legend-float">(A challenge for spam bots)</p>
             </div>
 
@@ -405,8 +407,6 @@
 
 {% block last_imports %}
     <!--  our js  -->
-    <script src="{{ url_for('static', filename='js/comex_user_shared.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/comex_user_shared_auth.js') }}"></script>
     <script src="{{ url_for('static', filename='js/comex_page_reg_controllers.js') }}"></script>
     <script src="{{ url_for('static', filename='js/comex_user_autocompletes.js') }}"></script>
 {% endblock %}

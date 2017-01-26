@@ -66,6 +66,27 @@ div.my-box {
   /*text-align: center;*/
 }
 
+/* self-made modals */
+.modal.self-made {
+    top:25%;
+    display: none;
+
+    /* centered */
+    width: 700px;
+    left:50%;
+    margin-left: -350px;
+
+    opacity: 0;
+    overflow: visible;  /* otherwise mysteriously cut by smth */
+}
+
+.modal-title {
+  font-size: 16px;
+  margin-top: .2em;
+  font-weight: bold;
+  color: #910;
+}
+
 /* operation buttons for instance add middle name, remove box, etc */
 .operation {
   color: #ffc ;

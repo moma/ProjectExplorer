@@ -79,6 +79,13 @@ p#doors_ret_msg {
   max-width: 52em;           /* FORMWIDTH */
 }
 
+@media(max-width:991px){
+    /* sm and md */
+    .question {
+      padding: 0;
+    }
+}
+
 .conditional-q {
   display: none;
 }
@@ -122,11 +129,6 @@ input.readonly {
   text-align:center;
   font-size: 70%;
   padding-right: 2.1em;
-}
-
-input#my-captcha{
-    height: 5em;
-    font-size: 1em;
 }
 
 /* for code blocks or urls */
@@ -216,13 +218,26 @@ li.minilabel {
 }
 
 
-/**/
+/* for captcha */
+input#my-captcha{
+    max-width:60%;
+    min-height:5em;
+    font-size: 1em;
+}
+
 .realperson-challenge {
   float:right;
+  margin: .5em 0 0 0;
+  max-height: 5em;
 }
 .realperson-text {
-  padding: 0 2em;
+  font-family: monospace;
+  font-weight: bold;
+  /*letter-spacing: -.04em;*/
+  /*font-size: .25em;*/
+  /*line-height: .125em;*/
 }
+
 .realperson-regen {
   color: #554 ;
 }

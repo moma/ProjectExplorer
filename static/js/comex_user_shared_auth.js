@@ -30,8 +30,185 @@ cmxClt = (function(cC) {
 
     cC.uauth.emailIdSupposedToExist = null
 
-    cC.uauth.uidInput = document.getElementById('doors_uid')
+
+
+    // login box is set up before the rest to provide the elements early ---
+
+    // a modal box for login/register credentials
+    // -----------
+    cC.uauth.box = {}
+
+    cC.uauth.box.authBox = null
+
+    // our self-made modal open/close function
+    cC.uauth.box.toggleAuthBox = function() {
+        if (cC.uauth.box.authBox) {
+            if (cC.uauth.box.authBox.style.display == 'none') {
+                // show box
+                cC.uauth.box.authBox.style.display = 'block'
+                cC.uauth.box.authBox.style.opacity = 1
+            }
+            else {
+                // remove box
+                cC.uauth.box.authBox.style.opacity = 0
+                setTimeout(function(){cC.uauth.box.authBox.style.display = 'none'}, 300)
+            }
+        }
+        else {
+            console.warn("Can't find cmxClt.uauth.box.authBox try addAuthBox()")
+        }
+    }
+
+
+    // to create an html modal with doors auth (reg or login)
+    cC.uauth.box.addAuthBox = function(boxParams) {
+        var title, preEmail, emailLegend, passLegend, confirmPass, captchaBlock
+
+        // --- default params
+        if (!boxParams)                        boxParams = {}
+        // mode <=> 'login' or 'register'
+        if (boxParams.mode == undefined)       boxParams.mode = 'login'
+        // for prefilled values
+        if (boxParams.email == undefined)      boxParams.email = null
+        // add a captcha ?
+        if (boxParams.doCaptcha == undefined)  boxParams.doCaptcha = false
+
+        // --- template fragments
+        if (boxParams.mode == 'register') {
+            title = "Register your email on the Doors portal of the institute"
+            preEmail = ""
+            emailLegend = "Your email will also be your login for the ISC services."
+            passLegend = "Please make your password difficult to predict."
+            confirmPass = `
+            <div class="question">
+              <div class="input-group">
+                <label for="password2" class="smlabel input-group-addon">* Password</label>
+                <input id="password2" name="password2" maxlength="30"
+                       type="password" class="form-control" placeholder="Repeat the password">
+              </div>
+            </div>
+            `
+        }
+        else if (boxParams.mode == 'login') {
+            title = "Login via the Doors portal"
+            preEmail = boxParams.email || ''
+            emailLegend = "This email is your login for both community explorer and the institute's authentication portal 'Doors'"
+            passLegend = ""
+            confirmPass = ""
+        }
+        else {
+            console.error("Unrecognized mode:", boxParams.mode)
+        }
+
+        // also perhaps captcha
+        if (boxParams.doCaptcha) {
+            captchaBlock = `
+                <input id="my-captchaHash" name="my-captchaHash" type="text" hidden></input>
+                <!--pseudo captcha using realperson from http://keith-wood.name/realPerson.html -->
+                <div class="question input-group">
+                    <label for="my-captcha" class="smlabel input-group-addon">Code</label>
+                    <input id="my-captcha" name="my-captcha"
+                           type="text" class="form-control input-lg" placeholder="Enter the 5 letters beside =>"
+                           onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)">
+                    <p class="legend legend-float">(A challenge for spam bots)</p>
+                </div>
+            `
+        }
+        else {
+            captchaBlock=''
+        }
+
+        // --- insert it all into a new div
+        var myDiv = document.createElement('div')
+        myDiv.innerHTML = `
+            <div class="modal fade self-made" id="auth_modal" role="dialog" aria-labelledby="authTitle" aria-hidden="true" style="display:none">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" onclick="cC.uauth.box.toggleAuthBox()" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h5 class="modal-title" id="authTitle">${title}</h5>
+                  </div>
+                  <div class="modal-body auth-box">
+                    <form id="auth_box" enctype="multipart/form-data"
+                          method="post" onsubmit="console.info('auth_box submitted')">
+                        <div class="question">
+                          <p class="legend">${emailLegend}</p>
+                          <div class="input-group">
+                            <!-- email validation onblur/onchange is done by cmxClt.uauth.box.testMailFormatAndExistence -->
+                            <label for="email" class="smlabel input-group-addon">* Email</label>
+                            <input id="email" name="email" maxlength="255"
+                                   type="text" class="form-control" placeholder="email" value="${preEmail}">
+
+                            <!-- doors return value icon -->
+                            <div id="doors_ret_icon_msg" class="input-group-addon"
+                                 title="The email will be checked in our DB after you type and leave the box.">
+                              <span id="doors_ret_icon"
+                                    class="glyphicon glyphicon-question-sign grey"
+                                    ></span>
+                            </div>
+                          </div>
+                          <!-- doors return value message -->
+                          <p id="doors_ret_message" class="legend"></p>
+                        </div>
+
+                        <div class="question">
+                          <p id="password_message" class="legend red" style="font-weight:bold"></p>
+                          <p class="legend">${passLegend}</p>
+                          <div class="input-group">
+                            <label for="password" class="smlabel input-group-addon">* Password</label>
+                            <input id="password" name="password" maxlength="30"
+                                   type="password" class="form-control" placeholder="Create a password">
+                          </div>
+                        </div>
+                        <br/>
+                        ${confirmPass}
+                        <br/>
+                        ${captchaBlock}
+                    </form>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick='cC.uauth.box.toggleAuthBox()'>
+                        Cancel
+                    </button>
+                    <button type="submit" id="form_submit"
+                            class="btn btn-primary">
+                        Submit
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>`
+
+
+        // append on body (no positioning now: it's a fixed overlay anyway)
+        var body = document.querySelector('body')
+        body.insertBefore(myDiv, body.lastChild)
+
+        // save a ref to it
+        cC.uauth.box.authBox = document.getElementById('auth_modal')
+    }
+
+
+    // if not there, add the box in all pages ( => allows login via menu )
+
+    if (! document.getElementById('email')) {
+        cC.uauth.box.addAuthBox({'mode':'login', 'doCaptcha':false})
+
+        // inserted html elements can now be identified by uauth:
+        //   - cf. uauth.uidInput
+        //   - cf. uauth.email and uauth.emailLbl
+
+    }
+    // /login box ----------------------------------------------------------
+
+
+
+
+
     cC.uauth.email    = document.getElementById('email')
+    cC.uauth.uidInput = document.getElementById('doors_uid')
     cC.uauth.emailLbl = document.querySelector('label[for=email]')
 
     // str of the form: doors_hostname:doors_port
@@ -47,6 +224,7 @@ cmxClt = (function(cC) {
 
     // captcha init
     if (cC.uauth.captcha) {
+        console.log('initializing captcha')
         $(cmxClt.uauth.captcha).realperson({length: cC.uauth.realCaptchaLength})
     }
 

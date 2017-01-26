@@ -58,6 +58,11 @@
 <body>
   {% block incipit %}
   {% endblock %}
+
+  <!-- needed if login -->
+  <input id="doors_connect" name="doors_connect" type="text" hidden
+         value="{{ doors_connect|safe }}">
+
   <div class="topbar" style="opacity: 0.9;">
       <div class="topbar-inner">
           <div class="container-fluid">
@@ -153,7 +158,7 @@
                           <a href="/services/user/register"> Register </a>
                       </li>
                       <li>
-                          <a href="/services/user/login"> Login </a>
+                          <div onclick="cmxClt.uauth.box.toggleAuthBox()"> Login </div>
                       </li>
                       {% endif %}
                   </ul>
@@ -210,7 +215,21 @@
 
 
   <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap-native-1.1.min.js') }}"></script>
-  <!--  for our js: end-of-page javascript imports -->
+
+  <!--  our js for auth and login: to be able to login via popup anywhere -->
+  <script src="{{ url_for('static', filename='js/comex_user_shared.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/comex_user_shared_auth.js') }}"></script>
+  <script>
+      cmxClt.uauth.box.addAuthBox({'mode':'login', 'doCaptcha':false})
+      console.info("ok")
+
+      // inserted html elements can now be identified by uauth:
+      //   - cf. uauth.uidInput
+      //   - cf. uauth.email and uauth.emailLbl
+  </script>
+  <script src="{{ url_for('static', filename='js/comex_page_login_controllers.js') }}"></script>
+
+  <!--  for our other js: end-of-page javascript imports -->
   {% block last_imports %}
   {% endblock %}
 
