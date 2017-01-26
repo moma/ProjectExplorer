@@ -12,8 +12,8 @@ $meta = '<!DOCTYPE html>
         <meta name="author" content="">
 
         <!-- Le styles -->
-        <link type="text/css" href="http://fonts.googleapis.com/css?family=Droid%20Sans" rel="stylesheet">
-        <link type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
+        <link type="text/css" href="https://fonts.googleapis.com/css?family=Droid%20Sans" rel="stylesheet">
+        <link type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
         <link type="text/css" href="static/css/whoswho.css" rel="stylesheet">
         <link type="text/css" href="static/css/comex.css" rel="stylesheet">
         <link type="text/css" href="static/css/bootstrap_directory.css" rel="stylesheet">

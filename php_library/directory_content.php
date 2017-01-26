@@ -44,7 +44,11 @@ foreach ($scholars as $scholar) {
                         <div class="span9" align="justify">';
     $content .= '<div>';
     if ($scholar['photo_url'] != null) {
-        $content .= '<img style="margin: 7px 10px 10px 0px" src="'. $scholar['photo_url'] . '" width="' . $imsize . 'px" align="left">';
+        $photo_url = $scholar['photo_url'] ;
+        if ($_SERVER['REQUEST_SCHEME'] == 'https') {
+            $photo_url = preg_replace('/^http:/i', 'https:', $photo_url) ;
+        }
+        $content .= '<img style="margin: 7px 10px 10px 0px" src="'. $photo_url . '" width="' . $imsize . 'px" align="left">';
     }
     // raw binary picture
     elseif ($scholar['pic_file'] != null) {
