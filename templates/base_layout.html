@@ -158,7 +158,9 @@
                           <a href="/services/user/register"> Register </a>
                       </li>
                       <li>
-                          <div onclick="cmxClt.uauth.box.toggleAuthBox()"> Login </div>
+                          <div class="dropdown-a-like" id="poplogin"
+                            onclick="cmxClt.uauth.box.toggleAuthBox()">
+                            Login </div>
                       </li>
                       {% endif %}
                   </ul>
@@ -219,15 +221,7 @@
   <!--  our js for auth and login: to be able to login via popup anywhere -->
   <script src="{{ url_for('static', filename='js/comex_user_shared.js') }}"></script>
   <script src="{{ url_for('static', filename='js/comex_user_shared_auth.js') }}"></script>
-  <script>
-      cmxClt.uauth.box.addAuthBox({'mode':'login', 'doCaptcha':false})
-      console.info("ok")
-
-      // inserted html elements can now be identified by uauth:
-      //   - cf. uauth.uidInput
-      //   - cf. uauth.email and uauth.emailLbl
-  </script>
-  <script src="{{ url_for('static', filename='js/comex_page_login_controllers.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/comex_menubar_login_controllers.js') }}"></script>
 
   <!--  for our other js: end-of-page javascript imports -->
   {% block last_imports %}

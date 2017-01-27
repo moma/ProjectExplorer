@@ -31,6 +31,22 @@ body {
     */
 }
 
+/* just like bs "topbar > li.dropdown > a" but planned for divs with onclick */
+.dropdown-a-like {
+    font-size: 14px;
+    clear: both;
+    padding: 4px 15px;
+    color: #999;
+    line-height: 18px;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+}
+.dropdown-a-like:hover {
+    background-color: #191919;
+    background-image: linear-gradient(top, #292929, #191919);
+    color: #fff;
+}
+
 /* main content for all new pages */
 div.my-box {
     padding:0 20px;

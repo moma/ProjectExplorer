@@ -69,7 +69,7 @@ cmxClt = (function(cC) {
         // mode <=> 'login' or 'register'
         if (boxParams.mode == undefined)       boxParams.mode = 'login'
         // for prefilled values
-        if (boxParams.email == undefined)      boxParams.email = null
+        if (boxParams.email == undefined)      boxParams.email = ""
         // add a captcha ?
         if (boxParams.doCaptcha == undefined)  boxParams.doCaptcha = false
 
@@ -91,7 +91,7 @@ cmxClt = (function(cC) {
         }
         else if (boxParams.mode == 'login') {
             title = "Login via the Doors portal"
-            preEmail = boxParams.email || ''
+            preEmail = boxParams.email
             emailLegend = "This email is your login for both community explorer and the institute's authentication portal 'Doors'"
             passLegend = ""
             confirmPass = ""
@@ -124,15 +124,15 @@ cmxClt = (function(cC) {
             <div class="modal fade self-made" id="auth_modal" role="dialog" aria-labelledby="authTitle" aria-hidden="true" style="display:none">
               <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                  <div class="modal-header">
-                    <button type="button" class="close" onclick="cC.uauth.box.toggleAuthBox()" aria-label="Close">
-                      <span aria-hidden="true">&times;</span>
-                    </button>
-                    <h5 class="modal-title" id="authTitle">${title}</h5>
-                  </div>
-                  <div class="modal-body auth-box">
-                    <form id="auth_box" enctype="multipart/form-data"
-                          method="post" onsubmit="console.info('auth_box submitted')">
+                  <form id="auth_box" enctype="multipart/form-data"
+                        method="post" onsubmit="console.info('auth_box submitted')">
+                      <div class="modal-header">
+                        <button type="button" class="close" onclick="cC.uauth.box.toggleAuthBox()" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h5 class="modal-title" id="authTitle">${title}</h5>
+                      </div>
+                      <div class="modal-body">
                         <div class="question">
                           <p class="legend">${emailLegend}</p>
                           <div class="input-group">
@@ -166,17 +166,17 @@ cmxClt = (function(cC) {
                         ${confirmPass}
                         <br/>
                         ${captchaBlock}
-                    </form>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick='cC.uauth.box.toggleAuthBox()'>
-                        Cancel
-                    </button>
-                    <button type="submit" id="form_submit"
-                            class="btn btn-primary">
-                        Submit
-                    </button>
-                  </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick='cC.uauth.box.toggleAuthBox()'>
+                            Cancel
+                        </button>
+                        <button type="submit" id="menu_form_submit"
+                                class="btn btn-primary">
+                            Submit
+                        </button>
+                      </div>
+                  </form>
                 </div>
               </div>
             </div>`
@@ -191,21 +191,23 @@ cmxClt = (function(cC) {
     }
 
 
-    // if not there, add the box in all pages ( => allows login via menu )
-
+    // add the box in all pages ( => allows login via menu ) ---
+    // directly when there's no previous form
     if (! document.getElementById('email')) {
-        cC.uauth.box.addAuthBox({'mode':'login', 'doCaptcha':false})
+        cC.uauth.box.addAuthBox({'mode':'login', 'doCaptcha':true})
 
         // inserted html elements can now be identified by uauth:
         //   - cf. uauth.uidInput
         //   - cf. uauth.email and uauth.emailLbl
 
     }
+    // TODO don't crowd uform values but still work with uauth
+    else {
+        console.warn('duplicate form case to fix')
+        cC.uauth.box.addAuthBox({'mode':'login', 'doCaptcha':true})
+    }
+
     // /login box ----------------------------------------------------------
-
-
-
-
 
     cC.uauth.email    = document.getElementById('email')
     cC.uauth.uidInput = document.getElementById('doors_uid')
@@ -258,10 +260,11 @@ cmxClt = (function(cC) {
             cC.uauth.checkPassFormat()
         }
 
-        // finally also update cC.uauth.captchaStatus if captcha present
+        // finally also update cC.uauth.captchaStatus
+        // (if captcha absent then false, to handle in caller)
         cC.uauth.captchaStatus = (
-               !cC.uauth.captcha
-            || (cC.uauth.captcha.value.length == cC.uauth.realCaptchaLength)
+               cC.uauth.captcha
+            && (cC.uauth.captcha.value.length == cC.uauth.realCaptchaLength)
         )
     }
 

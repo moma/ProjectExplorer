@@ -122,11 +122,19 @@ SOURCE_FIELDS = [
 # mandatory minimum of keywords # TODO use
 MIN_KW = 5
 
-# ============= views =============
+# ============= context =============
+@app.context_processor
+def inject_doors_params():
+    """
+    Keys will be available in *all* templates
 
-# -----------------------------------------------------------------------
-# /!\ Routes are not prefixed by nginx in prod so we do it ourselves /!\
-# -----------------------------------------------------------------------
+       -> 'doors_connect'
+          (base_layout-rendered templates need it for login popup)
+    """
+    return dict(
+        doors_connect= config['DOORS_HOST']+':'+config['DOORS_PORT']
+        )
+
 
 @login_manager.unauthorized_handler
 def unauthorized():
@@ -147,6 +155,12 @@ def unauthorized():
     )
 
 
+
+# ============= views =============
+
+# -----------------------------------------------------------------------
+# /!\ Routes are not prefixed by nginx in prod so we do it ourselves /!\
+# -----------------------------------------------------------------------
 @app.route("/")
 def rootstub():
     """
@@ -229,8 +243,7 @@ def user():
 def login():
     if request.method == 'GET':
         return render_template(
-            "login.html",
-            doors_connect = config['DOORS_HOST']+':'+config['DOORS_PORT']
+            "login.html"
         )
     elif request.method == 'POST':
         # testing the captcha answer
@@ -328,8 +341,7 @@ def logout():
 @app.route('/test_base')
 def test_base():
     return render_template(
-        "base_layout.html",
-        doors_connect=config['DOORS_HOST']+':'+config['DOORS_PORT']
+        "base_layout.html"
     )
 
 
@@ -363,11 +375,7 @@ def profile():
         mlog("DEBUG", "PROFILE view with flag session.new = ", session.new)
 
         return render_template(
-            "profile.html",
-
-            # doors info only for link
-            doors_connect=config['DOORS_HOST']+':'+config['DOORS_PORT']
-
+            "profile.html"
             # NB we also got user info in {{current_user.info}}
             #                         and {{current_user.json_info}}
         )
@@ -418,9 +426,8 @@ def register():
 
     if request.method == 'GET':
         return render_template(
-            "registration_short_form.html",
-            doors_connect=config['DOORS_HOST']+':'+config['DOORS_PORT']
-        )
+            "registration_short_form.html"
+            )
     elif request.method == 'POST':
         # ex: request.form = ImmutableMultiDict([('initials', 'R.L.'), ('email', 'romain.loth@iscpif.fr'), ('last_name', 'Loth'), ('country', 'France'), ('first_name', 'Romain'), ('my-captchaHash', '-773776109'), ('my-captcha', 'TSZVIN')])
         # mlog("DEBUG", "GOT ANSWERS <<========<<", request.form)

@@ -154,6 +154,7 @@ input.name {
   height: 35px;
   font-size: 29px;
   width: 290px;
+  padding: 4px 6px;
 }
 
 @media(max-width:544px){

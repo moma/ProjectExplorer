@@ -90,7 +90,7 @@ def jsonize_uinfo(uinfo_dict):
     # most fields are already serializable
     serializable_dict = {k:v for k,v in uinfo_dict.items() if k not in ['pic_file', 'valid_date']}
 
-    if 'pic_file' in uinfo_dict and len(uinfo_dict['pic_file']):
+    if 'pic_file' in uinfo_dict and type(uinfo_dict['pic_file']) == bytes and len(uinfo_dict['pic_file']):
         serializable_dict['pic_file'] = "<blob_not_copied>"
 
     if 'valid_date' in uinfo_dict and uinfo_dict['valid_date'] is not None:
@@ -171,9 +171,8 @@ class User(object):
     @property
     def is_authenticated(self):
         """
-        TODO choose strategy
-          - assume user object only exists if user was authenticated
-          - or re-test each time with doors?
+        We assume user object only exists if user was authenticated or has cookie
+        POSS: re-test each time with doors
         """
         return True
 
