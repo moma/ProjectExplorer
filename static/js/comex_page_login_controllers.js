@@ -12,36 +12,30 @@
  * @requires comex_user_shared_auth
  */
 
-// initialize form controllers
-if (document.getElementById('auth_box')) {
-    // for new popup box
-    cmxClt.uform.initialize("auth_box", loginValidate)
-}
-else {
-    // old separate login page
-    cmxClt.uform.initialize("comex_login_form", loginValidate)
-}
+ // initialize auth with doors
+var loginForm = cmxClt.uauth.AuthForm(
+                    "comex_login_form",
+                    loginValidate,
+                    {'type': "login",
+                     'emailId': "email",
+                     'duuidId': "doors_uid",
+                     'passId':  "password"}
+                )
 
-// initialize auth with doors
-cmxClt.uauth.emailIdSupposedToExist = true
-
+var submitButton = document.getElementById('form_submit')
 
 // done when anything in the form changes
-function loginValidate() {
-  // console.log("loginValidate Go")
+function loginValidate(myForm) {
+  console.log("loginValidate Go")
 
-  // checks email, pass and captcha formats
-  // and updates uauth.emailStatus, uauth.passStatus, uauth.captchaStatus
-  cmxClt.uauth.earlyValidate()
-
-  // if (cmxClt.uauth.passStatus
-  //       && cmxClt.uauth.emailStatus
-  //       && cmxClt.uauth.captchaStatus) {
-  //     cmxClt.uform.submitButton.disabled = false
-  // }
-  // else {
-  //     cmxClt.uform.submitButton.disabled = true
-  // }
+  if (myForm.emailStatus
+      && myForm.passStatus
+      && myForm.captchaStatus) {
+      submitButton.disabled = false
+  }
+  else {
+      submitButton.disabled = true
+  }
 }
 
 

@@ -16,22 +16,26 @@
  * @requires comex_user_shared_auth
  */
 
-// initialize form controllers
-cmxClt.uform.initialize("comex_reg_form", testAsYouGo)
-// our form is now in cmxClt.uform.theForm
 
-// initialize auth with doors
-cmxClt.uauth.emailIdSupposedToExist = false
+// initialize form controllers
+var regfo = cmxClt.uauth.AuthForm(
+    'comex_reg_form',
+    testAsYouGo,
+    {
+      'type': "register",
+      'multiTextinputs': [{'id':'keywords'},
+                          {'id':'hashtags', 'color': "#23A"}]
+    }
+)
 
 // initially we let the user fill
 // with no validation message, then at some point we turn the flag on
 var validateWithMessage = false
 
-
-// activate multiTextinput
-cmxClt.uform.multiTextinput('keywords')
-cmxClt.uform.multiTextinput('hashtags', [], "#23A")
-
+// debug main validation message
+// validateWithMessage = true
+// regfo.elMainMessage.style.opacity = 1
+// regfo.elMainMessage.style.display = 'block'
 
 var shortRegVersion = true
 var ignoredFields = []
@@ -43,26 +47,29 @@ if (shortRegVersion) {
 function testAsYouGo() {
   // console.log("testAsYouGo Go")
 
-  cmxClt.uauth.earlyValidate()
   if (validateWithMessage) {
-      cmxClt.uform.simpleValidateAndMessage({'ignore':ignoredFields, 'fixResidue':true})
+      cmxClt.uform.simpleValidateAndMessage(
+          regfo,
+          {'ignore':ignoredFields,
+           'fixResidue':true}
+      )
       // NB fixResidue is useful when user has a problem
       //    on submit then clicks "back" and ends up with
       //    hashtags in brackets like "['#a','#b']"
   }
   cmxClt.uform.checkJobDateStatus()
 
-  if (cmxClt.uauth.passStatus
-        && cmxClt.uauth.emailStatus
-        && cmxClt.uauth.captchaStatus
+  if (regfo.passStatus
+        && regfo.emailStatus
+        && regfo.captchaStatus
         && cmxClt.uform.jobLookingDateStatus) {
-      cmxClt.uform.submitButton.disabled = false
+      regfo.elSubmitBtn.disabled = false
   }
   else {
-      cmxClt.uform.submitButton.disabled = true
+      regfo.elSubmitBtn.disabled = true
   }
   // stamp => #last_modified_date
-  cmxClt.uform.stampTime()
+  cmxClt.uform.stampTime(regfo)
 }
 
 var teamCityDivStyle = document.getElementById('team_city_div').style
@@ -72,11 +79,12 @@ if (document.getElementById('other_org_div')) {
 }
 
 function registerDoorsAndSubmit(){
-    cmxClt.uform.mainMessage.innerHTML = "Registering with ISCPIF Doors..."
+    regfo.elMainMessage.innerHTML = "Registering with ISCPIF Doors..."
 
+    // REGISTERING ON THE DOORS -------------------------------------
     // all values from the form have now been validated
-    var emailValue = cmxClt.uauth.email.value
-    var passValue = cmxClt.uauth.pass1.value
+    var emailValue = regfo.elEmail.value
+    var passValue = regfo.elPass.value
     var wholenameValue = ""
 
     if (cmxClt.uform.mName.value != "") {
@@ -86,10 +94,8 @@ function registerDoorsAndSubmit(){
         wholenameValue = cmxClt.uform.lName.value + ', ' + cmxClt.uform.fName.value
     }
 
-
-    // REGISTERING ON THE DOORS -------------------------------------
     // /!\ async
-    console.warn ("TODO wait for return of '[DOORS] Email confirmation'")
+    // POSS: could now be invoked via regfo object
     cmxClt.uauth.callDoors(
         "register",
         [emailValue, passValue, wholenameValue],
@@ -100,28 +106,9 @@ function registerDoorsAndSubmit(){
             addUidThenSubmit(doorsResp)
         }
     )
+
 }
 
-function addUidThenSubmit(doorsResp) {
-    var doorsUid = doorsResp[0]
-    var doorsMsg = doorsResp[1]
-
-    if (doorsUid == null) {
-        cmxClt.uform.mainMessage.innerHTML = "Problem with doors registration... TODO debug"
-        cmxClt.uform.mainMessage.style.color = cmxClt.colorRed
-        cmxClt.uform.submitButton.disabled = false
-    }
-    else {
-        // fill in the answer we got
-        cmxClt.uauth.uidInput.value = doorsUid
-
-        console.info("form was validated and registered@doors: submitting now")
-
-        //==== SEND! ==================
-         cmxClt.uform.theForm.submit()
-        //=============================
-    }
-}
 
 // validateAndMsg() : bool (validates fields before doors registration and send)
 // -----------------------------------------------------------------------------
@@ -135,12 +122,12 @@ function validateAndMsg() {
     // not necessary b/c button type is set and is != "submit"
     // submitEvent.preventDefault()
 
-    cmxClt.uform.submitButton.disabled = true
-    cmxClt.uform.mainMessage.style.display = 'block'
-    cmxClt.uform.mainMessage.innerHTML = "Validating the form..."
+    regfo.elSubmitBtn.disabled = true
+    regfo.elMainMessage.style.display = 'block'
+    regfo.elMainMessage.innerHTML = "Validating the form..."
 
     // runs field-by-field validation and highlights mandatory missing fields
-    var diagnostic = cmxClt.uform.testFillField(cmxClt.uform.theForm)
+    var diagnostic = cmxClt.uform.testFillField(regfo)
     //                            +++++++++++++
 
     // RESULTS
@@ -148,12 +135,9 @@ function validateAndMsg() {
     var missingFields = diagnostic[1]
 
     if (valid) {
-      // adds the captchaCheck inside the form
-      cmxClt.uauth.collectCaptcha()
-
-      cmxClt.uform.mainMessage.innerHTML = "Form is valid... Will register and submit..."
-      cmxClt.uform.mainMessage.style.opacity = 1
-      cmxClt.uform.mainMessage.style.display = 'block'
+      regfo.elMainMessage.innerHTML = "Form is valid... Will register and submit..."
+      regfo.elMainMessage.style.opacity = 1
+      regfo.elMainMessage.style.display = 'block'
 
       return true
     }
@@ -162,25 +146,54 @@ function validateAndMsg() {
 
       // we reinvoke the testAsYouGo validators with message turned on to help the user
       validateWithMessage = true
+      regfo.elMainMessage.style.opacity = 1
+      regfo.elMainMessage.style.display = 'block'
       testAsYouGo()
       return false
     }
 }
 
+// bound inline to submit button if validateAndMsg was true
+function addUidThenSubmit(doorsResp) {
+    var doorsUid = doorsResp[0]
+    var doorsMsg = doorsResp[1]
+
+    if (doorsUid == null) {
+        regfo.elMainMessage.innerHTML = "Problem with doors registration... TODO debug"
+        regfo.elMainMessage.mainMessage.style.color = cmxClt.colorRed
+        regfo.elSubmitBtn.disabled = false
+    }
+    else {
+        // fill in the answer we got
+        regfo.elDuuid.value = doorsUid
+
+        console.info("form was validated and registered@doors: submitting now")
+
+        //==== SEND! ==========
+         regfo.elForm.submit()
+        //=====================
+    }
+}
+
+
 
 console.log("reg controllers load OK")
 
 // £DEBUG autofill ----------->8------
-cmxClt.uform.fName.value = "Jean"
-cmxClt.uform.lName.value = "Tartampion"
-document.getElementById('initials').value="JPP"
-document.getElementById('country').value = "France"
-document.getElementById('position').value = "atitle"
-document.getElementById('keywords').value = "Blabla"
-document.getElementById('team_lab').value = "CNRS"
-
-cmxClt.uauth.email.value= cmxClt.makeRandomString(7)+"@om.fr"
-cmxClt.uauth.pass1.value="123456+789"
-cmxClt.uauth.pass2.value="123456+789"
-cmxClt.uauth.testMailFormatAndExistence(email.value, false)
+// cmxClt.uform.fName.value = "Jean"
+// cmxClt.uform.lName.value = "Tartampion"
+// document.getElementById('initials').value="JPP"
+// document.getElementById('country').value = "France"
+// document.getElementById('position').value = "atitle"
+// document.getElementById('keywords').value = "Blabla"
+// document.getElementById('team_lab').value = "CNRS"
+//
+// regfo.elEmail.value= cmxClt.makeRandomString(7)+"@om.fr"
+// regfo.elPass.value="123456+789"
+// regfo.elPass2.value="123456+789"
+// // trigger once all auth validations for browser-cache values
+// regfo.elForm.dispatchEvent(new CustomEvent('change'))
+// console.log('>>>> pass values', regfo.elPass.value, regfo.elPass2.value)
+// regfo.elPass.dispatchEvent(new CustomEvent('change'))
+// regfo.elCaptcha.dispatchEvent(new CustomEvent('change'))
 // --------------------------->8------

@@ -41,12 +41,19 @@ function selectSavedMenus(uinfo) {
 selectSavedMenus(uinfo)
 
 // initialize form controllers
-cmxClt.uform.initialize("comex_profile_form", completionAsYouGo)
-
-
-// activate multiTextinput
-cmxClt.uform.multiTextinput('keywords', uinfo.keywords)
-cmxClt.uform.multiTextinput('hashtags', uinfo.hashtags, "#23A")
+var theUForm = cmxClt.uform.Form(
+    // id
+    "comex_profile_form",
+    // onkeyup function
+    completionAsYouGo,
+    // other params
+    { 'multiTextinputs': [{'id':'keywords',
+                           'prevals': uinfo.keywords},
+                          {'id':'hashtags',
+                           'prevals': uinfo.hashtags,
+                           'color': "#23A"}]
+    }
+)
 
 var deleteUser = document.getElementById('delete_user')
 deleteUser.checked = false
@@ -57,16 +64,16 @@ var formValid = false
 // main validation function
 // ------------------------
 function completionAsYouGo() {
-    cmxClt.uform.mainMessage.style.display = 'block'
-    cmxClt.uform.mainMessage.innerHTML = "Checking the answers..."
+    theUForm.elMainMessage.style.display = 'block'
+    theUForm.elMainMessage.innerHTML = "Checking the answers..."
 
     var diagnosticParams = {'fixResidue': true,
                             'ignore': ['email']}
 
-    cmxClt.uform.simpleValidateAndMessage(diagnosticParams)
+    cmxClt.uform.simpleValidateAndMessage(theUForm, diagnosticParams)
 
     // stamp => #last_modified_date
-    cmxClt.uform.stampTime()
+    cmxClt.uform.stampTime(theUForm)
 
     // debug
     // console.log("timestamp:", cmxClt.uform.timestamp.value)
@@ -81,7 +88,6 @@ var otherInstDivStyle = document.getElementById('other_org_div').style
 
 
 // open middlename if there is one
-
 if (uinfo.middle_name != "" && uinfo.middle_name != "None") {
     cmxClt.uform.displayMidName()
 }

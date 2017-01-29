@@ -159,7 +159,8 @@
                       </li>
                       <li>
                           <div class="dropdown-a-like" id="poplogin"
-                            onclick="cmxClt.uauth.box.toggleAuthBox()">
+                            data-toggle="dropdown"
+                            onclick="cmxClt.elts.box.toggleAuthBox()">
                             Login </div>
                       </li>
                       {% endif %}
@@ -221,6 +222,7 @@
   <!--  our js for auth and login: to be able to login via popup anywhere -->
   <script src="{{ url_for('static', filename='js/comex_user_shared.js') }}"></script>
   <script src="{{ url_for('static', filename='js/comex_user_shared_auth.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/comex_lib_elts.js') }}"></script>
   <script src="{{ url_for('static', filename='js/comex_menubar_login_controllers.js') }}"></script>
 
   <!--  for our other js: end-of-page javascript imports -->

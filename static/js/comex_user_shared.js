@@ -13,10 +13,11 @@
  *
  */
 
+
 // initialize and export cmxClt module
 var cmxClt = (function() {
 
-    cC = {}
+    let cC = {}
 
     // cf corresponding css classes
     cC.colorWhite = '#fff'
@@ -94,7 +95,7 @@ var cmxClt = (function() {
             var flabel = cplArray[i][1]
 
             // to open any collapsible containing the label and input
-            var openFun = 'return cC.uform.gotoField(\''+fname+'\')'
+            var openFun = 'return cmxClt.uform.gotoField(\''+fname+'\')'
 
             // debug onclick fun
             // console.log("openFun", openFun)
@@ -127,30 +128,28 @@ var cmxClt = (function() {
     // find ancestor
     // cf. stackoverflow.com/questions/22119673
     cC.findAncestor = function(elt, cls) {
+        console.log("findAncestor starting from", elt.id)
         while ((elt = elt.parentElement) && !elt.classList.contains(cls));
+        console.log("findAncestor returning", elt)
         return elt
     }
 
     // ============================================
-    // cmxClt.uform: common vars to all user forms
+    // cmxClt.uform: user forms class and functions
     // ============================================
 
-    // exposed vars that may be used during the interaction
     cC.uform = {}
-    cC.uform.theFormId = null
-    cC.uform.theForm = null
-    cC.uform.submitButton = document.getElementById('form_submit')
-    cC.uform.timestamp = document.getElementById('last_modified_date')
-    cC.uform.mainMessage = document.getElementById('main_message')
-    cC.uform.mtiStock = {}  // arrays of inputs per fieldName
+
+    // a class var with all initialized forms on the page
+    cC.uform.formIds = []
 
     // functions
     cC.uform.initialize
     cC.uform.testFillField
     cC.uform.simpleValidateAndMessage
-    cC.uform.stampTime
     cC.uform.gotoField
     cC.uform.multiTextinput
+    cC.uform.stampTime  // <= POSS replace by sql stamp
 
     // dates up to 2049/12/31
     cC.uform.validDate = new RegExp( /^20[0-4][0-9]\/(?:0?[1-9]|1[0-2])\/(?:0?[1-9]|[1-2][0-9]|3[0-1])$/)
@@ -166,19 +165,21 @@ var cmxClt = (function() {
     //   => validate words become removable "pills"
     //   => result is concatenated texts in hidden input.#fName
     // TODO finalize and add to initialize
-    cC.uform.multiTextinput = function (fName, perhapsPreviousValues, perhapsColor) {
+    cC.uform.multiTextinput = function (fName, perhapsPreviousValues, perhapsColor, aUForm) {
+
+        // console.debug ("multiTextinput args:", fName, perhapsPreviousValues, perhapsColor, aUForm)
         // HTML elt to insert tag boxes around
         var refElt = null
 
         // new array for full results
-        cC.uform.mtiStock[fName] = []
+        aUForm.mtiStock[fName] = []
 
         // there must be a normal text input
         var normalInput = document.getElementById(fName)
         // POSS use autocomp
 
-        // perhaps surrounding input group
-        var inputWrap = cC.findAncestor(normalInput, 'question')
+        // perhaps surrounding input group useful if we want to insertBefore
+        // var inputWrap = cC.findAncestor(normalInput, 'question')
 
         // if (inputWrap) {
         //     refElt = inputWrap
@@ -186,12 +187,12 @@ var cmxClt = (function() {
         // else {
             refElt = normalInput
         // }
-        // refElt.style.marginBottom = 0
+        refElt.style.marginBottom = 0
 
         // shows a box and saves the input value in mtiStock
-        var popTagbox = function(event) {
+        var pushTagbox = function(event) {
             // debug
-            // console.log ('poptagbox from event' + event.type)
+            // console.log ('pushTagbox from event' + event.type)
 
             var asIsValue = normalInput.value
 
@@ -210,7 +211,7 @@ var cmxClt = (function() {
                     newBox.textContent = newValue
 
                     // and save it
-                    var nSaved = cC.uform.mtiStock[fName].push(newValue)
+                    var nSaved = aUForm.mtiStock[fName].push(newValue)
 
                     // create a close elt for the box
                     var newBoxClose = document.createElement('div')
@@ -224,20 +225,20 @@ var cmxClt = (function() {
 
                         // remove value from stock
                         var i = 0
-                        for (i in cC.uform.mtiStock[fName]){
-                            if (cC.uform.mtiStock[fName][i] == newValue) {
+                        for (i in aUForm.mtiStock[fName]){
+                            if (aUForm.mtiStock[fName][i] == newValue) {
                                 break ;
                             }
                         }
-                        cC.uform.mtiStock[fName].splice(i, 1)
+                        aUForm.mtiStock[fName].splice(i, 1)
 
                         // signal form change
-                        cC.uform.theForm.dispatchEvent(new CustomEvent('change'))
+                        aUForm.elForm.dispatchEvent(new CustomEvent('change'))
 
                         // remove box
                         setTimeout(function(){newBox.style.display = 'none'}, 300)
 
-                        // console.debug("droptagbox", cC.uform.mtiStock[fName].length, cC.uform.mtiStock[fName])
+                        // console.debug("droptagbox", aUForm.id aUForm.mtiStock[fName].length, aUForm.mtiStock[fName])
                     }
 
                     newBoxClose.onclick = closeBox
@@ -249,9 +250,10 @@ var cmxClt = (function() {
                     if (perhapsColor) {
                         newBox.style.backgroundColor = perhapsColor
                     }
+
                     cC.insertAfter(refElt, newBox)
 
-                    // console.debug("poptagbox", cC.uform.mtiStock[fName].length, cC.uform.mtiStock[fName])
+                    // console.debug("pushTagbox", aUForm.id, aUForm.mtiStock[fName].length, cC.uform.mtiStock[fName])
                 }
             }
         }
@@ -261,13 +263,13 @@ var cmxClt = (function() {
             && perhapsPreviousValues.length) {
             for (var i in perhapsPreviousValues) {
                 normalInput.value = perhapsPreviousValues[i]
-                popTagbox()
+                pushTagbox()
             }
         }
 
         // bind it to 'blur', 'change' and ENTER
-        normalInput.onblur = popTagbox
-        normalInput.onchange = popTagbox
+        normalInput.onblur = pushTagbox
+        normalInput.onchange = pushTagbox
         normalInput.onkeydown = function (ev) {
 
             // perhaps now there's a jquery-ui autocomplete
@@ -279,7 +281,7 @@ var cmxClt = (function() {
                      ||
                      !hasAutocomplete.menu.active) {
 
-                    popTagbox()
+                    pushTagbox()
                 }
             }
             else if (ev.which == 27) {
@@ -287,38 +289,73 @@ var cmxClt = (function() {
                 normalInput.value = ""
             }
         }
-
-        // expose
-        if (! cC.uform.mtiPopOneTag) {
-            cC.uform.mtiPopOneTag = {}
-        }
-        cC.uform.mtiPopOneTag[fName] = popTagbox()
-
     }
 
     // initialize
     // -----------
-    cC.uform.initialize = function(aFormId, aValidationFun) {
-        cC.uform.theFormId = aFormId
-        cC.uform.theForm = document.getElementById(aFormId)
+    cC.uform.Form = function(aFormId, aValidationFun, fParams) {
+
+        // new "obj"
+        var myUform = {}
+
+        // exposed vars that may be used during the interaction
+        myUform.id = aFormId
+        myUform.elForm = document.getElementById(aFormId)
+
+        // keep it in global
+        cC.uform.formIds.push(aFormId)
 
         // events
-        cC.uform.theForm.onkeyup = aValidationFun
-        cC.uform.theForm.onchange = aValidationFun
-        cC.uform.theForm.onblur = aValidationFun
+        myUform.elForm.onkeyup = function(event) {
+            // console.info('..elForm '+myUform.id+' event:'+event.type)
+            return aValidationFun(myUform)
+        }
+        myUform.elForm.onchange = myUform.elForm.onkeyup
+        myUform.elForm.onblur = myUform.elForm.onkeyup
 
-        cC.uform.theForm.classicSubmit = cC.uform.theForm.submit
-        cC.uform.theForm.submit = function() {
+        // main interaction elements, if present
+        // ------------------------
+        if (!fParams)        fParams = {}
+        var mainMessageId, timestampId, buttonId
 
-            // collect multiTextinput values
-            for (var field in cC.uform.mtiStock) {
-                console.log('collecting', field)
-                document.getElementById(field).value = cC.uform.mtiStock[field].join(',')
-                console.log("new value is", document.getElementById(field).value)
+        mainMessageId = fParams.mainMessageId || 'main_message'
+        timestampId   = fParams.timestampId   || 'last_modified_date'
+        submitBtnId   = fParams.submitBtnId   || 'form_submit'
+
+        myUform.elMainMessage = document.getElementById(mainMessageId)
+        myUform.elTimestamp = document.getElementById(timestampId)
+        myUform.elSubmitBtn = document.getElementById(submitBtnId)
+
+        // optional: init mtis
+        if (fParams.multiTextinputs) {
+            myUform.mtiStock = {}  // arrays of inputs per fieldName
+            for (var i in fParams.multiTextinputs) {
+                // creates mtiStock entries and mti elements and events
+                cC.uform.multiTextinput(
+                    fParams.multiTextinputs[i].id,      // ex "keywords"
+                    fParams.multiTextinputs[i].prevals, // ex ['great subject']
+                    fParams.multiTextinputs[i].color,
+                    myUform
+                )
             }
 
-            cC.uform.theForm = cC.uform.theForm.classicSubmit()
+            myUform.elForm.classicSubmit = myUform.elForm.submit
+            myUform.elForm.submit = function(fofo) {
+
+                // collect multiTextinput values
+                for (var field in myUform.mtiStock) {
+                    console.log('collecting', field)
+                    document.getElementById(field).value = myUform.mtiStock[field].join(',')
+                    console.log("new value is", document.getElementById(field).value)
+                }
+
+                console.log("go classicSubmit")
+                // proceed with normal submit
+                myUform.elForm.classicSubmit(fofo)
+            }
         }
+
+        return myUform
     }
 
     // testFillField
@@ -328,9 +365,9 @@ var cmxClt = (function() {
     // checks if mandatory fields are filled
     // checks if other plsfill ones are filled
     // highlights labels of missing mandatory fields
-    cC.uform.testFillField = function (aForm, params, cols) {
+    cC.uform.testFillField = function (aUForm, params, cols) {
         // "private" copy
-        var wholeFormData = new FormData(aForm)
+        var wholeFormData = new FormData(aUForm.elForm)
 
         // our return values
         var valid = true
@@ -395,13 +432,15 @@ var cmxClt = (function() {
           var labelElt = document.querySelector('label[for='+fieldName+']')
           var fieldLabel = labelElt ? labelElt.innerText : fieldName
 
+        //   console.warn('>>testFillField mtiStock:', aUForm.mtiStock)
+
           // alternative filled values from storage lists
           // POSS: do this only at the end before submit ?
           // POSS: (in that case the testFillField would only look at array)
           if (  (actualValue == null  || actualValue == "" )
-                    && cC.uform.mtiStock[fieldName]
-                    && cC.uform.mtiStock[fieldName].length) {
-              actualValue = cC.uform.mtiStock[fieldName].join(',')
+                    && aUForm.mtiStock[fieldName]
+                    && aUForm.mtiStock[fieldName].length) {
+              actualValue = aUForm.mtiStock[fieldName].join(',')
 
               // debug
               // console.log('recreated multiTextinput value', actualValue)
@@ -452,46 +491,44 @@ var cmxClt = (function() {
 
     // simple timestamp on #last_modified_date element
     //                      ------------------
-    cC.uform.stampTime = function () {
+    cC.uform.stampTime = function (aUForm) {
         var now = new Date()
-        cC.uform.timestamp.value = now.toISOString()
+        aUForm.elTimestamp.value = now.toISOString()
     }
-
 
 
     // diagnosticParams are optional
     //
-    cC.uform.simpleValidateAndMessage = function (diagnosticParams) {
-        var diagnostic = cmxClt.uform.testFillField(cmxClt.uform.theForm,
+    cC.uform.simpleValidateAndMessage = function (aUform, diagnosticParams) {
+        var diagnostic = cmxClt.uform.testFillField(aUform,
                                                     diagnosticParams)
         var isValid = diagnostic[0]
         var mandatoryMissingFields = diagnostic[1]
         var optionalMissingFields = diagnostic[2]
 
         if (isValid) {
-            cmxClt.uform.mainMessage.innerHTML = "<span class='green glyphicon glyphicon-check glyphicon-float-left' style='float:left;'></span><p>OK thank you! <br/>(we have all the fields needed for the mapping!)<br/>(don't forget to SAVE!)</p>"
+            aUform.elMainMessage.innerHTML = "<span class='green glyphicon glyphicon-check glyphicon-float-left' style='float:left;'></span><p>OK thank you! <br/>(we have all the fields needed for the mapping!)<br/>(don't forget to SAVE!)</p>"
 
 
-            cmxClt.uform.mainMessage.classList.add('faded')
+            aUform.elMainMessage.classList.add('faded')
         }
         else {
-            cmxClt.uform.mainMessage.innerHTML = "<span class='orange glyphicon glyphicon-exclamation-sign glyphicon-float-left'></span><p>Sorry, there are some<br/> important missing fields</p>"
+            aUform.elMainMessage.innerHTML = "<span class='orange glyphicon glyphicon-exclamation-sign glyphicon-float-left'></span><p>Sorry, there are some<br/> important missing fields</p>"
 
-            cmxClt.uform.mainMessage.classList.remove('faded')
+            aUform.elMainMessage.classList.remove('faded')
         }
 
         // list of missing fields
-        cmxClt.uform.mainMessage.innerHTML += cmxClt.ulListFromLabelsArray(mandatoryMissingFields, ['orange'])
+        aUform.elMainMessage.innerHTML += cmxClt.ulListFromLabelsArray(mandatoryMissingFields, ['orange'])
 
         if (optionalMissingFields.length) {
-            cmxClt.uform.mainMessage.innerHTML += cmxClt.ulListFromLabelsArray(
+            aUform.elMainMessage.innerHTML += cmxClt.ulListFromLabelsArray(
                     optionalMissingFields,
                     ['white'],
                     "You may also want to fill:"
                 )
         }
     }
-
 
 
     // gotoField

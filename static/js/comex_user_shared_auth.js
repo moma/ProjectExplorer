@@ -28,286 +28,203 @@ cmxClt = (function(cC) {
     // otherwise assume normal doors (commit >= a0ce580)
     cC.uauth.protoDoors = true
 
-    cC.uauth.emailIdSupposedToExist = null
-
-
-
-    // login box is set up before the rest to provide the elements early ---
-
-    // a modal box for login/register credentials
-    // -----------
-    cC.uauth.box = {}
-
-    cC.uauth.box.authBox = null
-
-    // our self-made modal open/close function
-    cC.uauth.box.toggleAuthBox = function() {
-        if (cC.uauth.box.authBox) {
-            if (cC.uauth.box.authBox.style.display == 'none') {
-                // show box
-                cC.uauth.box.authBox.style.display = 'block'
-                cC.uauth.box.authBox.style.opacity = 1
-            }
-            else {
-                // remove box
-                cC.uauth.box.authBox.style.opacity = 0
-                setTimeout(function(){cC.uauth.box.authBox.style.display = 'none'}, 300)
-            }
-        }
-        else {
-            console.warn("Can't find cmxClt.uauth.box.authBox try addAuthBox()")
-        }
-    }
-
-
-    // to create an html modal with doors auth (reg or login)
-    cC.uauth.box.addAuthBox = function(boxParams) {
-        var title, preEmail, emailLegend, passLegend, confirmPass, captchaBlock
-
-        // --- default params
-        if (!boxParams)                        boxParams = {}
-        // mode <=> 'login' or 'register'
-        if (boxParams.mode == undefined)       boxParams.mode = 'login'
-        // for prefilled values
-        if (boxParams.email == undefined)      boxParams.email = ""
-        // add a captcha ?
-        if (boxParams.doCaptcha == undefined)  boxParams.doCaptcha = false
-
-        // --- template fragments
-        if (boxParams.mode == 'register') {
-            title = "Register your email on the Doors portal of the institute"
-            preEmail = ""
-            emailLegend = "Your email will also be your login for the ISC services."
-            passLegend = "Please make your password difficult to predict."
-            confirmPass = `
-            <div class="question">
-              <div class="input-group">
-                <label for="password2" class="smlabel input-group-addon">* Password</label>
-                <input id="password2" name="password2" maxlength="30"
-                       type="password" class="form-control" placeholder="Repeat the password">
-              </div>
-            </div>
-            `
-        }
-        else if (boxParams.mode == 'login') {
-            title = "Login via the Doors portal"
-            preEmail = boxParams.email
-            emailLegend = "This email is your login for both community explorer and the institute's authentication portal 'Doors'"
-            passLegend = ""
-            confirmPass = ""
-        }
-        else {
-            console.error("Unrecognized mode:", boxParams.mode)
-        }
-
-        // also perhaps captcha
-        if (boxParams.doCaptcha) {
-            captchaBlock = `
-                <input id="my-captchaHash" name="my-captchaHash" type="text" hidden></input>
-                <!--pseudo captcha using realperson from http://keith-wood.name/realPerson.html -->
-                <div class="question input-group">
-                    <label for="my-captcha" class="smlabel input-group-addon">Code</label>
-                    <input id="my-captcha" name="my-captcha"
-                           type="text" class="form-control input-lg" placeholder="Enter the 5 letters beside =>"
-                           onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)">
-                    <p class="legend legend-float">(A challenge for spam bots)</p>
-                </div>
-            `
-        }
-        else {
-            captchaBlock=''
-        }
-
-        // --- insert it all into a new div
-        var myDiv = document.createElement('div')
-        myDiv.innerHTML = `
-            <div class="modal fade self-made" id="auth_modal" role="dialog" aria-labelledby="authTitle" aria-hidden="true" style="display:none">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <form id="auth_box" enctype="multipart/form-data"
-                        method="post" onsubmit="console.info('auth_box submitted')">
-                      <div class="modal-header">
-                        <button type="button" class="close" onclick="cC.uauth.box.toggleAuthBox()" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                        </button>
-                        <h5 class="modal-title" id="authTitle">${title}</h5>
-                      </div>
-                      <div class="modal-body">
-                        <div class="question">
-                          <p class="legend">${emailLegend}</p>
-                          <div class="input-group">
-                            <!-- email validation onblur/onchange is done by cmxClt.uauth.box.testMailFormatAndExistence -->
-                            <label for="email" class="smlabel input-group-addon">* Email</label>
-                            <input id="email" name="email" maxlength="255"
-                                   type="text" class="form-control" placeholder="email" value="${preEmail}">
-
-                            <!-- doors return value icon -->
-                            <div id="doors_ret_icon_msg" class="input-group-addon"
-                                 title="The email will be checked in our DB after you type and leave the box.">
-                              <span id="doors_ret_icon"
-                                    class="glyphicon glyphicon-question-sign grey"
-                                    ></span>
-                            </div>
-                          </div>
-                          <!-- doors return value message -->
-                          <p id="doors_ret_message" class="legend"></p>
-                        </div>
-
-                        <div class="question">
-                          <p id="password_message" class="legend red" style="font-weight:bold"></p>
-                          <p class="legend">${passLegend}</p>
-                          <div class="input-group">
-                            <label for="password" class="smlabel input-group-addon">* Password</label>
-                            <input id="password" name="password" maxlength="30"
-                                   type="password" class="form-control" placeholder="Create a password">
-                          </div>
-                        </div>
-                        <br/>
-                        ${confirmPass}
-                        <br/>
-                        ${captchaBlock}
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" onclick='cC.uauth.box.toggleAuthBox()'>
-                            Cancel
-                        </button>
-                        <button type="submit" id="menu_form_submit"
-                                class="btn btn-primary">
-                            Submit
-                        </button>
-                      </div>
-                  </form>
-                </div>
-              </div>
-            </div>`
-
-
-        // append on body (no positioning now: it's a fixed overlay anyway)
-        var body = document.querySelector('body')
-        body.insertBefore(myDiv, body.lastChild)
-
-        // save a ref to it
-        cC.uauth.box.authBox = document.getElementById('auth_modal')
-    }
-
-
-    // add the box in all pages ( => allows login via menu ) ---
-    // directly when there's no previous form
-    if (! document.getElementById('email')) {
-        cC.uauth.box.addAuthBox({'mode':'login', 'doCaptcha':true})
-
-        // inserted html elements can now be identified by uauth:
-        //   - cf. uauth.uidInput
-        //   - cf. uauth.email and uauth.emailLbl
-
-    }
-    // TODO don't crowd uform values but still work with uauth
-    else {
-        console.warn('duplicate form case to fix')
-        cC.uauth.box.addAuthBox({'mode':'login', 'doCaptcha':true})
-    }
-
-    // /login box ----------------------------------------------------------
-
-    cC.uauth.email    = document.getElementById('email')
-    cC.uauth.uidInput = document.getElementById('doors_uid')
-    cC.uauth.emailLbl = document.querySelector('label[for=email]')
-
-    // str of the form: doors_hostname:doors_port
+    // #doors_connect.value ~~> like a @classparam for uauthforms
+    // :str: "doors_hostname:doors_port"
     cC.uauth.doorsConnectParam = document.getElementById('doors_connect').value
 
-    // captcha
-    // -------
-    // div
-    cC.uauth.captcha = document.getElementById('my-captcha')
-
-    // param for generation & validation
+    // param for "realperson" widget generation & validation
     cC.uauth.realCaptchaLength = 5
 
-    // captcha init
-    if (cC.uauth.captcha) {
-        console.log('initializing captcha')
-        $(cmxClt.uauth.captcha).realperson({length: cC.uauth.realCaptchaLength})
-    }
+    // AuthForm: init(id, onchange, params)
+    // --------
+    // @id
+    // @params:
+    //   - type         login|register
+    //   - emailId      html email input element id
+    //   - duuidId      html doors_uid hidden input element id
+    //   - passId       html password input element id
+    //   - pass2Id      optional
+    //   - captchaId    optional
+    //   - capcheckId   optional
+    //   - all  other params are passed to super()
+    //     (optional main_message, mtis, etc)
 
-    // captchaHash should be appended by itself if normal submit,
-    // but otherwise we need to do it ourselves with collectCaptcha()
-    cC.uauth.captchaCheck = document.getElementById('my-captchaHash')
-    cC.uauth.collectCaptcha = function() {
-        cC.uauth.captchaCheck.value = $(cmxClt.uauth.captcha).realperson('getHash')
-    }
+    cC.uauth.AuthForm = function(aFormId, aValidationFun, afParams) {
+        if (!afParams)  afParams = {}
 
-    // doors-related html elements
-    // ---------------------------
-    cC.uauth.doorsMessage = document.getElementById('doors_ret_message')
-    cC.uauth.doorsIconMessage = document.getElementById('doors_ret_icon_msg')
-    cC.uauth.doorsIcon = document.getElementById('doors_ret_icon')
+        // "super"
+        var auForm = cC.uform.Form(aFormId, aValidationFun, afParams)
+        // var auForm = {'id':aFormId, 'elForm':document.getElementById(aFormId)}
+        auForm.emailStatus = null
+        auForm.passStatus = null
+        auForm.captchaStatus = null
 
-    // cmxClt.uauth flags (usually needed to even get the submitButton)
-    cC.uauth.emailStatus = false
-    cC.uauth.passStatus = false
-    cC.uauth.captchaStatus = false
+        //  -> type
+        auForm.type = afParams.type || "login"
+        auForm.emailIdSupposedToExist = (auForm.type != 'register')
 
-    cC.uauth.earlyValidate = function() {
-        // will update the cC.uauth.emailStatus boolean
-        cC.uauth.testMailFormatAndExistence(cC.uauth.email.value, cC.uauth.emailIdSupposedToExist)
+        //  -> interaction elements (params, else default)
+        var emailId, duuidId, passId, pass2Id, captchaId, capcheckId
 
-        // will update cC.uauth.passStatus
-        if (cC.uauth.pass2) {
-            cC.uauth.doubleCheck()
+        // console.info('new AuthForm "'+auForm.id+'"[.type='+auForm.type+'] init params', afParams)
+
+        emailId    = afParams.emailId    || 'email'
+        duuidId    = afParams.duuidId    || 'doors_uid'
+        passId     = afParams.passId     || 'password'
+        pass2Id    = afParams.pass2Id    || 'password2'
+        captchaId  = afParams.captchaId  || 'my-captcha'
+        capcheckId = afParams.capcheckId || 'my-captchaHash'
+
+        // keep them as properties
+        auForm.elDuuid = document.getElementById(duuidId)
+        auForm.elEmail = document.getElementById(emailId)
+
+        auForm.elPass = document.getElementById(passId)
+        auForm.elPass2 = document.getElementById(pass2Id)
+
+        auForm.elCaptcha = document.getElementById(captchaId)
+        auForm.elCapcheck = document.getElementById(capcheckId)
+
+
+        // dials init
+        //  = signaling elements (icons, divs) for user feed-back
+        auForm.emailDials = {}
+        var emailQ = cC.findAncestor(auForm.elEmail, 'question')
+        auForm.emailDials.elIcon = emailQ.querySelector('.uicon')
+        auForm.emailDials.elMsg = emailQ.querySelector('.umessage')
+        auForm.emailDials.elLbl = emailQ.querySelector('label[for='+auForm.elEmail.id+']')
+
+        // individual event/function bindings -----------
+
+        // 1) for email
+        // side-effects: email icon + message
+        auForm.elEmail.onkeyup = function(event) {
+            // console.debug('..elMail '+auForm.id+' event:'+event.type)
+            cC.uauth.testMailFormatAndExistence(auForm)
         }
+        auForm.elEmail.onchange = auForm.elEmail.onkeyup
+
+        // 2) for password
+        // login <=> just test password's length
+        if (auForm.type != 'register') {
+            auForm.elPass.onkeyup = function(event) {
+                // console.debug("..elPass "+auForm.id+" event:"+event.type)
+                auForm.passStatus = (auForm.elPass.value.length > 7)
+            }
+            auForm.elPass.onchange = auForm.elPass.onkeyup
+        }
+        // register <=> do pass 1 and pass 2 match?
         else {
-            cC.uauth.checkPassFormat()
+            // retrieve message element
+            auForm.pass2Dials = {}
+            var passQ = cC.findAncestor(auForm.elPass2, 'question')
+            auForm.pass2Dials.elMsg = passQ.querySelector('.umessage')
+
+            // bind doubleCheck
+            auForm.elPass.onkeyup = function(event) {
+              // console.debug('..elPass '+auForm.id+' event:'+event.type)
+              cC.uauth.doubleCheck(auForm)
+            }
+            auForm.elPass.onchange = auForm.elPass.onkeyup
+            auForm.elPass2.onkeyup = auForm.elPass.onkeyup
+            auForm.elPass2.onchange = auForm.elPass.onkeyup
         }
 
-        // finally also update cC.uauth.captchaStatus
-        // (if captcha absent then false, to handle in caller)
-        cC.uauth.captchaStatus = (
-               cC.uauth.captcha
-            && (cC.uauth.captcha.value.length == cC.uauth.realCaptchaLength)
-        )
+        // 3) for captcha
+        if (auForm.elCaptcha) {
+            // NB this captcha init requires *jquery*
+            $(auForm.elCaptcha).realperson(
+                {length: cC.uauth.realCaptchaLength}
+            )
+
+            // so... the events
+            auForm.elCaptcha.onkeyup = function(event) {
+                // console.debug('..elCaptcha '+auForm.id+' event:'+event.type)
+                auForm.captchaStatus = (auForm.elCaptcha.value.length == cC.uauth.realCaptchaLength)
+            }
+            auForm.elCaptcha.onchange = auForm.elCaptcha.onkeyup
+
+            // also form submit overoverload
+            var oldSubmitAction = auForm.elForm.submit
+            auForm.elForm.submit = function() {
+                auForm.elCapcheck.value = $(auForm.elCaptcha).realperson('getHash')
+
+                console.debug(auForm.id+'collected captcha hash: '+auForm.elCapcheck.value)
+
+                console.log("go oldSubmit")
+                oldSubmitAction()
+            }
+        }
+
+        // return new obj
+        return auForm
     }
+    // -------------------
+
+    // NB removed earlyValidate
+    //       => no need for 1 exposed validation function
+    //          b/c all 3 checks bound to their elements onchange/onkeyup
 
 
-    // email validation and side-effects
-    // =================================
-    cC.uauth.lastEmailValueCheckedDisplayed = null
+    // ----------- interaction for mailID check via fetch @doors ---------------
+    // global scope memoize email & last flags
+    cC.uauth.lastEmailValueCheckedDisplayed = ''
+    cC.uauth.lastExpectExists = true
+    cC.uauth.lastEmailStatus = null
 
     // function testMailFormatAndExistence
     // ------------------------------------
+    // args:
+    //    obja: an AuthForm object
+    //          in which we'll use
+    //             elEmail.value,
+    //             emailIdSupposedToExist,
+    //             emailDials,
+    //             emailStatus // == the updated flag ~~ 'return val'
+    //
     // NB for login, use --------> expectExists = true
     //    for registration, use -> expectExists = false
 
-    // no return value, but side effect on icon + msg + emailStatus
+    // effect 1 emailStatus ok/no, and side effect 2 on icon + msg
     //    wrong format ===========================> grey
     //    format ok, doorsStatus != expectExists => red
     //    format ok, doorsStatus == expectExists => green
+    cC.uauth.testMailFormatAndExistence = function (obja) {
 
-    cC.uauth.testMailFormatAndExistence = function (emailValue, expectExists) {
+      var emailValue = obja.elEmail.value
 
-      if (cC.uauth.email.value != cC.uauth.lastEmailValueCheckedDisplayed) {
-
-          // tests if email is well-formed
+      // if we have it in memo already then it's finished :) !
+      if (emailValue == cC.uauth.lastEmailValueCheckedDisplayed) {
+          // FIXME value ok but greying out forgotten:
+          //       because the class value is above all forms
+          //       but the dials effects are for current form obj only
+          if (obja.emailIdSupposedToExist == cC.uauth.lastExpectExists)
+            obja.emailStatus = cC.uauth.lastEmailStatus
+          else
+            obja.emailStatus = !cC.uauth.lastEmailStatus
+      }
+      // ...otherwise we do checks normally then modify the object's flag
+      else {
+          // 1) tests if email is well-formed
           // TODO: better extension and allowed chars set
           var emailFormatOk = /^[-A-z0-9_=.+]+@[-A-z0-9_=.+]+\.[-A-z0-9_=.+]{2,4}$/.test(emailValue)
 
           if (! emailFormatOk) {
               // restore original lack of message
-              cC.uauth.doorsMessage.title = 'The email will be checked in our DB after you finish typing'
-              cC.uauth.doorsIcon.classList.remove('glyphicon-remove')
-              cC.uauth.doorsIcon.classList.remove('glyphicon-ok')
-              cC.uauth.doorsIcon.classList.add('glyphicon-question-sign')
-              cC.uauth.doorsIcon.style.color = cC.colorGrey
-              cC.uauth.doorsMessage.innerHTML = ""
-              cC.uauth.doorsMessage.style.fontWeight = "normal"
+              obja.emailDials.elIcon.classList.remove('glyphicon-remove')
+              obja.emailDials.elIcon.classList.remove('glyphicon-ok')
+              obja.emailDials.elIcon.classList.add('glyphicon-question-sign')
+              obja.emailDials.elIcon.style.color = cC.colorGrey
+              obja.emailDials.elMsg.innerHTML = ""
+              obja.emailDials.elMsg.style.fontWeight = "normal"
 
-              cC.uauth.emailLbl.style.color = ""
+              obja.emailDials.elLbl.style.color = ""
 
-              // module-wide flag
-              cC.uauth.emailStatus = false
+              // new emailStatus
+              obja.emailStatus = false
           }
           else {
-              // additional ajax to check login availability
+              // 2) additional ajax to check login availability
               //  => updates the emailStatus global boolean
               //  => displays an icon
 
@@ -322,114 +239,106 @@ cmxClt = (function(cC) {
                       var doorsUid = doorsResp[0]
                       var doorsMsg = doorsResp[1]
 
-                      // the global status can be true iff login is as expected and format ok
-                      if (expectExists) {
-                          cC.uauth.emailStatus = (doorsMsg == "login exists")
-                      }
-                      else {
-                          cC.uauth.emailStatus = (doorsMsg == "login available")
-                      }
+                      // status true iff login is as expected and format ok
+                      obja.emailStatus = (
+                            (obja.emailIdSupposedToExist
+                                && (doorsMsg == "login exists"))
+                            ||
+                            (!obja.emailIdSupposedToExist
+                                && (doorsMsg == "login available"))
+                        )
+                      // signals the form change after this input status change
+                      // (we're now after async came back, so long after keyup finished)
+                      obja.elForm.dispatchEvent(new CustomEvent('change'))
 
-                      if (cC.uauth.emailStatus) {
+                      // effects on dials
+                      if (obja.emailStatus) {
                           // icon
-                          cC.uauth.doorsIconMessage.title = "OK: "+doorsMsg
-                          cC.uauth.doorsIcon.style.color = cC.colorGreen
-                          cC.uauth.doorsIcon.classList.remove('glyphicon-remove')
-                          cC.uauth.doorsIcon.classList.remove('glyphicon-question-sign')
-                          cC.uauth.doorsIcon.classList.add('glyphicon-ok')
+                          obja.emailDials.elIcon.style.color = cC.colorGreen
+                          obja.emailDials.elIcon.classList.remove('glyphicon-remove')
+                          obja.emailDials.elIcon.classList.remove('glyphicon-question-sign')
+                          obja.emailDials.elIcon.classList.add('glyphicon-ok')
 
                           // message in legend
-                          cC.uauth.doorsMessage.innerHTML = "OK: "+doorsMsg
-                          cC.uauth.doorsMessage.style.color = cC.colorGreen
-                          cC.uauth.doorsMessage.style.fontWeight = "bold"
-                          cC.uauth.doorsMessage.style.textShadow = cC.strokeWhite
+                          obja.emailDials.elMsg.innerHTML = "OK: "+doorsMsg
+                          obja.emailDials.elMsg.style.color = cC.colorGreen
+                          obja.emailDials.elMsg.style.fontWeight = "bold"
+                          obja.emailDials.elMsg.style.textShadow = cC.strokeWhite
 
                           // label
-                          cC.uauth.emailLbl.style.backgroundColor = ""
+                          obja.emailDials.elLbl.style.backgroundColor = ""
                       }
                       else {
-                          var errMsg = expectExists ? "your ID isn't recognized" : "this ID is already taken"
+                          var errMsg = obja.emailIdSupposedToExist ? "your ID isn't recognized" : "this ID is already taken"
                           // icon
-                          cC.uauth.doorsIconMessage.title= "Sorry: "+errMsg+" !"
-                          cC.uauth.doorsIcon.style.color = cC.colorOrange
-                          cC.uauth.doorsIcon.classList.remove('glyphicon-ok')
-                          cC.uauth.doorsIcon.classList.remove('glyphicon-question-sign')
-                          cC.uauth.doorsIcon.classList.add('glyphicon-remove')
+                          obja.emailDials.elIcon.style.color = cC.colorOrange
+                          obja.emailDials.elIcon.classList.remove('glyphicon-ok')
+                          obja.emailDials.elIcon.classList.remove('glyphicon-question-sign')
+                          obja.emailDials.elIcon.classList.add('glyphicon-remove')
 
                           // message in legend
-                          cC.uauth.doorsMessage.innerHTML = "Sorry: "+errMsg+" !"
-                          cC.uauth.doorsMessage.style.color = cC.colorOrange
-                          cC.uauth.doorsMessage.style.fontWeight = "bold"
-                          cC.uauth.doorsMessage.style.textShadow = cC.strokeDeepGrey
+                          obja.emailDials.elMsg.innerHTML = "Sorry: "+errMsg+" !"
+                          obja.emailDials.elMsg.style.color = cC.colorOrange
+                          obja.emailDials.elMsg.style.fontWeight = "bold"
+                          obja.emailDials.elMsg.style.textShadow = cC.strokeDeepGrey
 
                           // label
-                          cC.uauth.emailLbl.style.backgroundColor = cC.colorOrange
+                          obja.emailDials.elLbl.style.backgroundColor = cC.colorOrange
                       }
-
-                      // to debounce re-invocations
-                      cC.uauth.lastEmailValueCheckedDisplayed = emailValue
                   }
               )
           }
       }
+
+      // memoize in CLASS vars to debounce re-invocations
+      cC.uauth.lastEmailValueCheckedDisplayed = emailValue
+      cC.uauth.lastEmailStatus = obja.emailStatus
     }
 
     // -----------------------------------------------------------------------
-    // Password validations
+    // Password validations functions
     // TODO use a most common passwords lists
-    cC.uauth.pass1 = document.getElementById('password')
-    cC.uauth.pass2 = document.getElementById('password2')
-    cC.uauth.passMsg = document.getElementById('password_message')
 
-    // register <=> do pass 1 and pass 2 match?
-    if (cC.uauth.pass2) {
-      cC.uauth.pass1.onkeyup = cC.uauth.doubleCheck
-      cC.uauth.pass1.onchange = cC.uauth.doubleCheck
-      cC.uauth.pass2.onkeyup = cC.uauth.doubleCheck
-      cC.uauth.pass2.onchange = cC.uauth.doubleCheck
-    }
-    // login <=> just one password
-    else {
-        cC.uauth.pass1.onkeyup = cC.uauth.checkPassFormat
-        cC.uauth.pass1.onchange = cC.uauth.checkPassFormat
-    }
-
-    // used only for logins
-    cC.uauth.checkPassFormat = function () {
-        cC.uauth.passStatus = (cC.uauth.pass1.value.length > 7)
-    }
+    // args: a AUForm object
+    //       we use properties:
+    //        - elPass,
+    //        - elPass2,
+    //        - pass2Dials,
+    //        - passStatus   // <= "ret value"
 
     // 2 in 1: used only for registration
-    cC.uauth.doubleCheck = function () {
-      if (cC.uauth.pass1.value || cC.uauth.pass2.value) {
-        var pass1v = cC.uauth.pass1.value
-        var pass2v = cC.uauth.pass2.value
+    cC.uauth.doubleCheck = function (aUForm) {
+      console.log('=========doubleCheck('+aUForm.elPass.value+','+aUForm.elPass2.value+')')
+
+      if (aUForm.elPass.value || aUForm.elPass2.value) {
+        var pass1v = aUForm.elPass.value
+        var pass2v = aUForm.elPass2.value
 
         if ((pass1v && pass1v.length > 7)
             || (pass2v && pass2v.length > 7)) {
           // test values
           if (pass1v == pass2v) {
               if (pass1v.match('[^A-z0-9]')) {
-                  cC.uauth.passMsg.innerHTML = 'Ok valid passwords!'
-                  cC.uauth.passStatus = true
+                  aUForm.pass2Dials.elMsg.innerHTML = 'Ok valid passwords!'
+                  aUForm.passStatus = true
               }
               else {
-                  cC.uauth.passMsg.innerHTML = "Passwords match but don't contain any special characters, please complexify!"
-                  cC.uauth.passStatus = false
+                  aUForm.pass2Dials.elMsg.innerHTML = "Passwords match but don't contain any special characters, please complexify!"
+                  aUForm.passStatus = false
               }
           }
           else {
-            cC.uauth.passMsg.innerHTML = "The passwords don't match yet."
-            cC.uauth.passStatus = false
-        }
+            aUForm.pass2Dials.elMsg.innerHTML = "The passwords don't match yet."
+            aUForm.passStatus = false
+          }
         }
         else {
-          cC.uauth.passMsg.innerHTML = "The password is too short (8 chars min)."
-          cC.uauth.passStatus = false
+          aUForm.pass2Dials.elMsg.innerHTML = "The password is too short (8 chars min)."
+          aUForm.passStatus = false
         }
       }
-      if (!cC.uauth.passStatus) cC.uauth.passMsg.style.color = cC.colorRed
-      else                            cC.uauth.passMsg.style.color = cC.colorGreen
+      if (!aUForm.passStatus) aUForm.pass2Dials.elMsg.style.color = cC.colorRed
+      else                   aUForm.pass2Dials.elMsg.style.color = cC.colorGreen
     }
 
 
@@ -442,6 +351,12 @@ cmxClt = (function(cC) {
     *
     *     callback:   function that will be called after success AND after error
     *                 with the return couple
+    *
+    *     process
+    *     -------
+    *     for userExists synchronous process: we block flag newEmailStatus
+    *                                         until we get a response
+    *     TODO: use fetch instead of $.ajax
     *
     *     returns couple (id, message)
     *     ----------------------------

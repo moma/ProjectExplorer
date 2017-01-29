@@ -43,15 +43,14 @@
                          type="text" class="form-control" placeholder="email">
 
                   <!-- doors return value icon -->
-                  <div id="doors_ret_icon_msg" class="input-group-addon"
+                  <div class="uicontitmsg input-group-addon"
                        title="The email will be checked in our DB after you type and leave the box.">
-                    <span id="doors_ret_icon"
-                          class="glyphicon glyphicon-question-sign grey"
+                    <span class="uicon glyphicon glyphicon-question-sign grey"
                           ></span>
                   </div>
                 </div>
                 <!-- doors return value message -->
-                <p id="doors_ret_message" class="legend"></p>
+                <p class="umessage legend"></p>
               </div>
 
               <div class="question">
@@ -105,10 +104,10 @@
 
         <!-- FOR DEBUG: test go-between with Doors -->
         <!-- <p>
-            <button type=button onclick='cmxClt.uauth.callDoors("user", [cmxClt.uauth.email.value, cmxClt.uauth.pass1.value], console.warn)'>
+            <button type=button onclick='cmxClt.uauth.callDoors("user", [regfo.elEmail.value, regfo.elEmail.elPass.value], console.warn)'>
                 test doors login
             </button>
-            <button type=button onclick='cmxClt.uauth.callDoors("userExists", [cmxClt.uauth.email.value], console.warn)'>
+            <button type=button onclick='cmxClt.uauth.callDoors("userExists", [regfo.elEmail.elEmail.value], console.warn)'>
                 test doors userExists
             </button>
         </p> -->

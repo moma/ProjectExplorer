@@ -62,6 +62,7 @@ div.my-box {
 
 .page {
   margin-top: 45px;   /* topbar height is 40px */
+  -webkit-transition: opacity .2s ease-out;
 }
 
 /* for intro text */
