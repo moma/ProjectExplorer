@@ -23,6 +23,7 @@ var regfo = cmxClt.uauth.AuthForm(
     testAsYouGo,
     {
       'type': "register",
+      'validateCaptcha': true,
       'multiTextinputs': [{'id':'keywords'},
                           {'id':'hashtags', 'color': "#23A"}]
     }

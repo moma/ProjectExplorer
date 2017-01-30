@@ -17,12 +17,16 @@ var loginForm = cmxClt.uauth.AuthForm(
                     "comex_login_form",
                     loginValidate,
                     {'type': "login",
-                     'emailId': "email",
-                     'duuidId': "doors_uid",
-                     'passId':  "password"}
+                     'validateCaptcha': true}
+                     // element ids are default so unspecified
                 )
 
 var submitButton = document.getElementById('form_submit')
+
+// trigger changes (useful if browser completed from cache)
+loginForm.elEmail.dispatchEvent(new CustomEvent('change'))
+loginForm.elPass.dispatchEvent(new CustomEvent('change'))
+loginForm.elCaptcha.dispatchEvent(new CustomEvent('change'))
 
 // done when anything in the form changes
 function loginValidate(myForm) {

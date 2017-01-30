@@ -62,6 +62,7 @@ cmxClt = (function(cC) {
         //  -> type
         auForm.type = afParams.type || "login"
         auForm.emailIdSupposedToExist = (auForm.type != 'register')
+        auForm.validateCaptcha = afParams.validateCaptcha || false
 
         //  -> interaction elements (params, else default)
         var emailId, duuidId, passId, pass2Id, captchaId, capcheckId
@@ -84,7 +85,6 @@ cmxClt = (function(cC) {
 
         auForm.elCaptcha = document.getElementById(captchaId)
         auForm.elCapcheck = document.getElementById(capcheckId)
-
 
         // dials init
         //  = signaling elements (icons, divs) for user feed-back
@@ -131,7 +131,7 @@ cmxClt = (function(cC) {
         }
 
         // 3) for captcha
-        if (auForm.elCaptcha) {
+        if (auForm.validateCaptcha) {
             // NB this captcha init requires *jquery*
             $(auForm.elCaptcha).realperson(
                 {length: cC.uauth.realCaptchaLength}
@@ -154,6 +154,9 @@ cmxClt = (function(cC) {
                 console.log("go oldSubmit")
                 oldSubmitAction()
             }
+        }
+        else {
+            console.log("No captcha in auForm", auForm.id)
         }
 
         // return new obj

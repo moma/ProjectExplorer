@@ -71,7 +71,8 @@ var cmxClt = (function(cC) {
         if (boxParams.email == undefined)      boxParams.email = ""
 
         // add a captcha (requires jquery)?
-        if (boxParams.doCaptcha == undefined)  boxParams.doCaptcha = false
+        if (boxParams.insertCaptcha == undefined)
+            boxParams.insertCaptcha = false
 
 
         var title, preEmail, emailLegend, passLegend, confirmPass, captchaBlock
@@ -85,7 +86,7 @@ var cmxClt = (function(cC) {
             <div class="question">
               <div class="input-group">
                 <label for="menu_password2" class="smlabel input-group-addon">* Password</label>
-                <input id="menu_password2" name="menu_password2" maxlength="30"
+                <input id="menu_password2" name="password2" maxlength="30"
                        type="password" class="form-control" placeholder="Repeat the password">
               </div>
               <p class="umessage legend red" style="font-weight:bold"></p>
@@ -104,14 +105,14 @@ var cmxClt = (function(cC) {
         }
 
         // also perhaps captcha
-        if (boxParams.doCaptcha) {
+        if (boxParams.insertCaptcha) {
 
             captchaBlock = `
-                <input id="menu_my-captchaHash" name="my-captchaHash" type="text" hidden></input>
+                <input id="menu_captcha_hash" name="my-captchaHash" type="text" hidden></input>
                 <!--pseudo captcha using realperson from http://keith-wood.name/realPerson.html -->
                 <div class="question input-group">
-                    <label for="menu_my-captcha" class="smlabel input-group-addon">Code</label>
-                    <input id="menu_my-captcha" name="my-captcha"
+                    <label for="menu_captcha" class="smlabel input-group-addon">Code</label>
+                    <input id="menu_captcha" name="my-captcha"
                            type="text" class="form-control input-lg" placeholder="Enter the 5 letters beside =>"
                            onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)">
                     <p class="legend legend-float">(A challenge for spam bots)</p>
@@ -128,8 +129,7 @@ var cmxClt = (function(cC) {
             <div class="modal fade self-made" id="auth_modal" role="dialog" aria-labelledby="authTitle" aria-hidden="true" style="display:none">
               <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                  <form id="auth_box" enctype="multipart/form-data"
-                        method="post" onsubmit="console.info('auth_box submitted')">
+                  <form id="auth_box" enctype="multipart/form-data">
                       <div class="modal-header">
                         <button type="button" class="close" onclick="cmxClt.elts.box.toggleAuthBox()" aria-label="Close">
                           <span aria-hidden="true">&times;</span>
@@ -142,7 +142,7 @@ var cmxClt = (function(cC) {
                           <div class="input-group">
                             <!-- email validation onblur/onchange is done by cmxClt.uauth.box.testMailFormatAndExistence -->
                             <label for="menu_email" class="smlabel input-group-addon">* Email</label>
-                            <input id="menu_email" name="menu_email" maxlength="255"
+                            <input id="menu_email" name="email" maxlength="255"
                                    type="text" class="form-control" placeholder="email" value="${preEmail}">
 
                             <!-- doors return value icon -->
@@ -159,7 +159,7 @@ var cmxClt = (function(cC) {
                           <p class="legend">${passLegend}</p>
                           <div class="input-group">
                             <label for="menu_password" class="smlabel input-group-addon">* Password</label>
-                            <input id="menu_password" name="menu_password" maxlength="30"
+                            <input id="menu_password" name="password" maxlength="30"
                                    type="password" class="form-control" placeholder="Create a password">
                           </div>
                         </div>
