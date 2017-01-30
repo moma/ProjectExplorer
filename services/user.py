@@ -8,8 +8,6 @@ __author__    = "CNRS"
 __copyright__ = "Copyright 2016 ISCPIF-CNRS"
 __email__     = "romain.loth@iscpif.fr"
 
-from re          import match
-from requests    import post
 from json        import dumps, loads
 from datetime    import date
 from flask_login import LoginManager
@@ -44,42 +42,6 @@ def load_user(uid):
         except Exception as err:
             mlog("ERROR", "User(%s) init error:" % str(uid), err)
     return u
-
-
-def doors_login(email, password, config):
-    """
-    Remote query to Doors API to login a user
-
-    Doors responses look like this:
-        {'status': 'login ok',
-          'userInfo': {
-            'hashAlgorithm': 'PBKDF2',
-            'password': '8df55dde7b1a2cc013afe5ed2d20ae22',
-            'id': {'id': '9e30ce89-72a1-46cf-96ca-cf2713b7fe9d'},
-            'name': 'Corser, Peter',
-            'hashParameters': {
-              'iterations' : 1000,
-              'keyLenght' : 128
-            }
-          }
-        }
-    """
-    uid = None
-
-    # £TODO https here !! + certificate for doors
-    doors_base_url = 'http://'+config['DOORS_HOST']+':'+config['DOORS_PORT']
-    doors_response = post(doors_base_url+'/api/user', data=dumps({'login':email, 'password':password}))
-
-
-    print("doors_response",doors_response)
-    mlog("INFO", "doors_response",doors_response)
-    if doors_response.ok:
-        login_info = loads(doors_response.content.decode())
-
-        if login_info['status'] == "login ok":
-            uid = login_info['userInfo']['id']['id']
-
-    return uid
 
 
 def jsonize_uinfo(uinfo_dict):
@@ -178,3 +140,76 @@ class User(object):
 
     def __eq__(self, other):
         return self.uid == other.uid
+
+
+
+# ----------- remote user -----------------------
+
+from requests    import post
+
+# dev flag
+doorsProto = True
+
+
+def doors_login(email, password, config):
+    """
+    Remote query to Doors API to login a user
+
+    Doors responses look like this:
+        {'status': 'login ok',
+          'userInfo': {
+            'hashAlgorithm': 'PBKDF2',
+            'password': '8df55dde7b1a2cc013afe5ed2d20ae22',
+            'id': {'id': '9e30ce89-72a1-46cf-96ca-cf2713b7fe9d'},
+            'name': 'Corser, Peter',
+            'hashParameters': {
+              'iterations' : 1000,
+              'keyLenght' : 128
+            }
+          }
+        }
+    """
+    uid = None
+    sentdata = {'login':email, 'password':password}
+
+    if doorsProto:
+        sentdata = dumps(sentdata)
+
+    # £TODO https here !! + certificate for doors
+    doors_base_url = 'http://'+config['DOORS_HOST']+':'+config['DOORS_PORT']
+    doors_response = post(doors_base_url+'/api/user', data=sentdata)
+
+    mlog("INFO", "/api/user doors_response",doors_response)
+    if doors_response.ok:
+        login_info = loads(doors_response.content.decode())
+
+        if login_info['status'] == "login ok":
+            uid = login_info['userInfo']['id']['id']
+
+    return uid
+
+def doors_register(email, password, name, config):
+    """
+    Remote query to Doors API to register a user
+    """
+    uid = None
+    sentdata = {'login':email, 'password':password, 'name':name}
+
+    if doorsProto:
+        sentdata = dumps(sentdata)
+
+    # £TODO https here !! + certificate for doors
+    doors_base_url = 'http://'+config['DOORS_HOST']+':'+config['DOORS_PORT']
+    doors_response = post(doors_base_url+'/api/register', data=sentdata)
+
+    mlog("INFO", "/api/register doors_response",doors_response)
+    if doors_response.ok:
+        # eg doors_response.content = b'{"status":"registration email sent",
+        #                                "email":"john@locke.com"}''
+        answer = loads(doors_response.content.decode())
+
+
+    return (doors_response.ok
+                and (answer['status'] == "registration email sent"))
+
+    return uid
