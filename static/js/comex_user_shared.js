@@ -128,9 +128,9 @@ var cmxClt = (function() {
     // find ancestor
     // cf. stackoverflow.com/questions/22119673
     cC.findAncestor = function(elt, cls) {
-        console.log("findAncestor starting from", elt.id)
+        // console.log("findAncestor starting from", elt.id)
         while ((elt = elt.parentElement) && !elt.classList.contains(cls));
-        console.log("findAncestor returning", elt)
+        // console.log("findAncestor returning", elt)
         return elt
     }
 
@@ -141,7 +141,7 @@ var cmxClt = (function() {
     cC.uform = {}
 
     // a class var with all initialized forms on the page
-    cC.uform.formIds = []
+    cC.uform.allForms = {}
 
     // functions
     cC.uform.initialize
@@ -301,9 +301,12 @@ var cmxClt = (function() {
         // exposed vars that may be used during the interaction
         myUform.id = aFormId
         myUform.elForm = document.getElementById(aFormId)
+        myUform.asFormData = function() {
+            return new FormData(myUform.elForm)
+        }
 
-        // keep it in global
-        cC.uform.formIds.push(aFormId)
+        // keep a ref to it in global scope
+        cC.uform.allForms[aFormId] = myUform
 
         // events
         myUform.elForm.onkeyup = function(event) {
@@ -339,19 +342,23 @@ var cmxClt = (function() {
                 )
             }
 
+            // NB overloading the submit() function seems more practical than the submit *event* but it implies to use this function each time
+            // (if impossible, collect values manually)
+
+            // NB2 we save it as a property of the html form (and not indep var or object property otherwise the invocation context is illegal)
+
             myUform.elForm.classicSubmit = myUform.elForm.submit
-            myUform.elForm.submit = function(fofo) {
+            myUform.elForm.submit = function() {
 
                 // collect multiTextinput values
                 for (var field in myUform.mtiStock) {
-                    console.log('collecting', field)
                     document.getElementById(field).value = myUform.mtiStock[field].join(',')
-                    console.log("new value is", document.getElementById(field).value)
+                    console.debug("  mti collected field '"+field+"', new value =", document.getElementById(field).value)
                 }
 
                 console.log("go classicSubmit")
                 // proceed with normal submit
-                myUform.elForm.classicSubmit(fofo)
+                myUform.elForm.classicSubmit()
             }
         }
 

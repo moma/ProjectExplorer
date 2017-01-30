@@ -23,6 +23,9 @@ var loginForm = cmxClt.uauth.AuthForm(
 
 var submitButton = document.getElementById('form_submit')
 
+// bind our overloaded submit() function
+submitButton.onclick = loginForm.elForm.submit
+
 // trigger changes (useful if browser completed from cache)
 loginForm.elEmail.dispatchEvent(new CustomEvent('change'))
 loginForm.elPass.dispatchEvent(new CustomEvent('change'))

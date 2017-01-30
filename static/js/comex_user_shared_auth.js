@@ -35,6 +35,13 @@ cmxClt = (function(cC) {
     // param for "realperson" widget generation & validation
     cC.uauth.realCaptchaLength = 5
 
+    // our functions
+    cC.uauth.AuthForm
+    cC.uauth.collectCaptcha
+    cC.uauth.testMailFormatAndExistence
+    cC.uauth.doubleCheck
+    cC.uauth.callDoors
+
     // AuthForm: init(id, onchange, params)
     // --------
     // @id
@@ -144,15 +151,13 @@ cmxClt = (function(cC) {
             }
             auForm.elCaptcha.onchange = auForm.elCaptcha.onkeyup
 
-            // also form submit overoverload
-            var oldSubmitAction = auForm.elForm.submit
+            // also form submit() overoverload
+            auForm.elForm.oldSubmitAction = auForm.elForm.submit
             auForm.elForm.submit = function() {
-                auForm.elCapcheck.value = $(auForm.elCaptcha).realperson('getHash')
-
-                console.debug(auForm.id+'collected captcha hash: '+auForm.elCapcheck.value)
-
+                console.log("go newSubmit")
+                cmxClt.uauth.collectCaptcha(auForm)
                 console.log("go oldSubmit")
-                oldSubmitAction()
+                auForm.elForm.oldSubmitAction()
             }
         }
         else {
@@ -163,6 +168,12 @@ cmxClt = (function(cC) {
         return auForm
     }
     // -------------------
+
+    cC.uauth.collectCaptcha = function (uformObj) {
+        console.log
+        uformObj.elCapcheck.value = $(uformObj.elCaptcha).realperson('getHash')
+        console.debug('  '+uformObj.id+': collected captcha hash ' +uformObj.elCapcheck.value)
+    }
 
     // NB removed earlyValidate
     //       => no need for 1 exposed validation function
@@ -311,7 +322,6 @@ cmxClt = (function(cC) {
 
     // 2 in 1: used only for registration
     cC.uauth.doubleCheck = function (aUForm) {
-      console.log('=========doubleCheck('+aUForm.elPass.value+','+aUForm.elPass2.value+')')
 
       if (aUForm.elPass.value || aUForm.elPass2.value) {
         var pass1v = aUForm.elPass.value
