@@ -30,6 +30,18 @@
   <script type="text/javascript" src="{{ url_for('static', filename='js/misc/underscore.min.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/jquery/jquery.highlight-3.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/whoswho.js') }}"></script>
+
+  <!-- realperson
+       factorized here in base layout because menubar login has captcha -->
+  <!-- realperson salt:
+       possible to change it and send it each time with makeSalt-->
+  <script type="text/javascript">$.salt = 'verylonverylongverylonverylongverylonverylong'</script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/realperson/jquery.plugin.min.js') }}"></script>
+  <!-- for some reason jquery.realperson.min.js reacts differently to salt than jquery.realperson.js -->
+  <script type="text/javascript" src="{{ url_for('static', filename='js/realperson/jquery.realperson.js') }}"></script>
+  <!-- /realperson -->
+
+
   <!--  NB our js will be at the end -->
 
   <!-- ## Piwik ## -->

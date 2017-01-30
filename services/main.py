@@ -36,7 +36,6 @@ from flask        import Flask, render_template, request, \
 from flask_login  import fresh_login_required, login_required, \
                          current_user, login_user, logout_user
 
-
 if __package__ == 'services':
     # when we're run via import
     print("*** comex services ***")
@@ -246,14 +245,21 @@ def login():
             "login.html"
         )
     elif request.method == 'POST':
+        mlog("DEBUG", "login form received from "+request.path+", with keys:", [k for k in request.values])
+
+        called_as_api = False
+        if request.path != config['PREFIX'] + config['USR_ROUTE'] + '/login/':
+            # the referer is another page
+            called_as_api = True
+
         # testing the captcha answer
         captcha_userinput = request.form['my-captcha']
         captcha_userhash = re_hash(captcha_userinput)
         captcha_verifhash = int(request.form['my-captchaHash'])
 
         # dbg
-        mlog("DEBUG", "login captcha verif", str(captcha_verifhash))
-        mlog("DEBUG", "login captcha user", str(captcha_userhash))
+        # mlog("DEBUG", "login captcha verif", str(captcha_verifhash))
+        # mlog("DEBUG", "login captcha user", str(captcha_userhash))
 
         if captcha_userhash != captcha_verifhash:
             mlog("WARNING", "pb captcha rejected")
@@ -271,7 +277,12 @@ def login():
             pwd = request.form['password']
 
             # we do our doors request here server-side to avoid MiM attack on result
-            doors_uid = doors_login(email, pwd, config)
+            try:
+                doors_uid = doors_login(email, pwd, config)
+            except Exception as err:
+                mlog("ERROR", "error in doors_login request")
+                raise (err)
+
             luid = doors_uid_to_luid(doors_uid)
 
             if luid:
@@ -306,8 +317,14 @@ def login():
                             # in next_url so we won't go there
                             return(redirect(url_for('rootstub', _external=True)))
                     else:
-                        # no specified next_url => profile
-                        return redirect(url_for('profile', _external=True))
+                        # no specified next_url
+                        # => profile if page, or just status ok if api
+                        if not called_as_api:
+                            return redirect(url_for('profile', _external=True))
+
+                        # eg menubar login
+                        else:
+                            return ('', 204)
 
                 else:
                     # user exists in doors but has no comex profile yet

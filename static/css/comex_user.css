@@ -219,8 +219,8 @@ li.minilabel {
 
 
 /* for captcha */
-input#my-captcha{
-    max-width:60%;
+input.is-realperson {
+    max-width:55%;
     min-height:5em;
     font-size: 1em;
 }

@@ -10,7 +10,7 @@
  */
 
 // add the form element in all pages that load us
-cmxClt.elts.box.addAuthBox({'mode':'login'})
+cmxClt.elts.box.addAuthBox({'mode':'login', 'insertCaptcha': true})
 
 // initialize form controllers
 var menuUForm = cmxClt.uauth.AuthForm(

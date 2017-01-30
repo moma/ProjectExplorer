@@ -4,13 +4,6 @@
   <title>Login to your Community Explorer Profile</title>
   <meta name="description" content="Community Explorer Scholar User Login">
   <meta name="keywords" content="login page, complex systems, community">
-
-
-  <!-- possible to change it and send it each time with makeSalt-->
-  <script type="text/javascript">$.salt = 'verylonverylongverylonverylongverylonverylong'</script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/realperson/jquery.plugin.min.js') }}"></script>
-  <!-- for some reason jquery.realperson.min.js reacts differently to salt than jquery.realperson.js -->
-  <script type="text/javascript" src="{{ url_for('static', filename='js/realperson/jquery.realperson.js') }}"></script>
 {% endblock %}
 
 <!-- ======================================================================= -->
@@ -32,7 +25,7 @@
         <!-- ########################### ( FORM ) ########################## -->
         <div class="uform">
         <form id="comex_login_form" enctype="multipart/form-data"
-              method="post" onsubmit="console.info('login submitted')">
+              method="post">
 
               <div class="question">
                 <p class="legend">(It is the same login for all the ISC services.)</p>

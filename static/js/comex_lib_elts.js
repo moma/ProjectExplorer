@@ -31,8 +31,82 @@ var cmxClt = (function(cC) {
     // an optional modal box for login/register credentials
     //            -----------
     cC.elts.box = {}
-
+    cC.elts.box.toggleAuthBox
+    cC.elts.box.addAuthBox
+    cC.elts.box.postAuthBox
     cC.elts.box.authBox = null
+
+
+    // function to login via ajax
+    cC.elts.box.postAuthBox = function(formId) {
+        var formObj = cmxClt.uform.allForms[formId]
+
+        // so lame: we already put collectCaptcha in this form's submit()
+        //          but here we are circumventing submit() b/c different url!
+        if (formObj.validateCaptcha) {
+            cmxClt.uauth.collectCaptcha(formObj)
+        }
+
+        // inputs should already have correct names: 'email', 'password'
+        var formdat = formObj.asFormData();
+
+        // TODO for SSL
+        //      currently relative URL <=> same protocol as source
+        //
+        //      but ideally should force https either:
+        //           1) https on all site
+        //              NB if 1st option use nginx rewrite
+        //              or
+        //           2) https at least for login
+        //              NB if 2nd option http => https just for login
+        //                 then need CORS on flask side to allow it
+
+        // new-style ajax
+        if (window.fetch) {
+            fetch('/services/user/login/', {
+                method: 'POST',
+                body: formdat,
+                credentials: "same-origin"  // <= this allows response's Set-Cookie
+            })
+            // 1st then() over promise
+            .then(function(response) {
+                // NB unwrapping the promise by consuming the body AND finishing this 1st then() will allow Fetch to complete which allows the cookie to be set
+                if(response.ok) {
+                  // unwraps the promise
+                  return response.text()
+                }
+                else {
+                  throw new Error('Network response was not ok.');
+                }
+            })
+            // 2nd then(): at this point Fetch has completed and cookie is set
+            .then(function(bodyText) {
+                console.log('the login cookie should be set, changing page now')
+                window.location = '/services/user/profile'
+            })
+            .catch(function(error) {
+                console.warn('fetch error:'+error.message);
+            });
+        }
+
+        // also possible using old-style jquery ajax
+        else {
+            $.ajax({
+                contentType: false,  // <=> multipart
+                processData: false,  // <=> multipart
+                data: formdat,
+                type: 'POST',
+                url: "/services/user/login/",
+                success: function(data) {
+                    console.log('JQUERY got return', data, 'and login cookie should be set')
+                    window.location = '/services/user/profile'
+                },
+                error: function(result) {
+                    console.log('got error with result', result)
+                }
+            });
+        }
+    }
 
     // our self-made modal open/close function
     cC.elts.box.toggleAuthBox = function() {
@@ -81,11 +155,12 @@ var cmxClt = (function(cC) {
             title = "Register your email on the Doors portal of the institute"
             preEmail = ""
             emailLegend = "Your email will also be your login for the ISC services."
+            passPlaceholder = "Create a password"
             passLegend = "Please make your password difficult to predict."
             confirmPass = `
             <div class="question">
               <div class="input-group">
-                <label for="menu_password2" class="smlabel input-group-addon">* Password</label>
+                <label for="menu_password2" class="smlabel input-group-addon">Password</label>
                 <input id="menu_password2" name="password2" maxlength="30"
                        type="password" class="form-control" placeholder="Repeat the password">
               </div>
@@ -97,6 +172,7 @@ var cmxClt = (function(cC) {
             title = "Login via the Doors portal"
             preEmail = boxParams.email
             emailLegend = "This email is your login for both community explorer and the institute's authentication portal 'Doors'"
+            passPlaceholder = "Your password"
             passLegend = ""
             confirmPass = ""
         }
@@ -111,7 +187,7 @@ var cmxClt = (function(cC) {
                 <input id="menu_captcha_hash" name="my-captchaHash" type="text" hidden></input>
                 <!--pseudo captcha using realperson from http://keith-wood.name/realPerson.html -->
                 <div class="question input-group">
-                    <label for="menu_captcha" class="smlabel input-group-addon">Code</label>
+                    <label for="menu_captcha" class="smlabel input-group-addon">Verification</label>
                     <input id="menu_captcha" name="my-captcha"
                            type="text" class="form-control input-lg" placeholder="Enter the 5 letters beside =>"
                            onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)">
@@ -141,9 +217,9 @@ var cmxClt = (function(cC) {
                           <p class="legend">${emailLegend}</p>
                           <div class="input-group">
                             <!-- email validation onblur/onchange is done by cmxClt.uauth.box.testMailFormatAndExistence -->
-                            <label for="menu_email" class="smlabel input-group-addon">* Email</label>
+                            <label for="menu_email" class="smlabel input-group-addon">Email</label>
                             <input id="menu_email" name="email" maxlength="255"
-                                   type="text" class="form-control" placeholder="email" value="${preEmail}">
+                                   type="text" class="form-control" placeholder="Your email" value="${preEmail}">
 
                             <!-- doors return value icon -->
                             <div class="input-group-addon"
@@ -158,9 +234,9 @@ var cmxClt = (function(cC) {
                         <div class="question">
                           <p class="legend">${passLegend}</p>
                           <div class="input-group">
-                            <label for="menu_password" class="smlabel input-group-addon">* Password</label>
+                            <label for="menu_password" class="smlabel input-group-addon">Password</label>
                             <input id="menu_password" name="password" maxlength="30"
-                                   type="password" class="form-control" placeholder="Create a password">
+                                   type="password" class="form-control" placeholder="${passPlaceholder}">
                           </div>
                         </div>
                         <br/>
@@ -172,7 +248,9 @@ var cmxClt = (function(cC) {
                         <button type="button" class="btn btn-secondary" onclick='cmxClt.elts.box.toggleAuthBox()'>
                             Cancel
                         </button>
-                        <button type="submit" id="menu_form_submit"
+                        <!-- submit -->
+                        <button type="button" id="menu_form_submit"
+                                onclick="cmxClt.elts.box.postAuthBox('auth_box')"
                                 class="btn btn-primary">
                             Submit
                         </button>
@@ -199,4 +277,4 @@ var cmxClt = (function(cC) {
 })(cmxClt) ;
 
 
-console.log("test modal auth load OK")
+console.log("html elements lib load OK")
