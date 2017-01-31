@@ -422,7 +422,7 @@ def profile():
                 return render_template("thank_you.html",
                                         form_accepted = False,
                                         backend_error = True,
-                                        message = ("ERROR ("+str(perr.__doc__)+"):<br/>"
+                                        debug_message = ("ERROR ("+str(perr.__doc__)+"):<br/>"
                                                     + ("<br/>".join(format_tb(perr.__traceback__)+[repr(perr)]))
                                                     )
                                        )
@@ -430,8 +430,7 @@ def profile():
             return render_template("thank_you.html",
                                     debug_records = (clean_records if app.config['DEBUG'] else {}),
                                     form_accepted = True,
-                                    backend_error = False,
-                                    message = "")
+                                    backend_error = False)
 
 
 # /services/user/register/
@@ -469,7 +468,7 @@ def register():
             form_accepted = True
 
             try:
-                clean_records = save_form(
+                (luid, clean_records) = save_form(
                                           request.form,
                                           request.files if hasattr(request, "files") else {}
                                          )
@@ -478,16 +477,35 @@ def register():
                 return render_template("thank_you.html",
                                         form_accepted = False,
                                         backend_error = True,
-                                        message = ("ERROR ("+str(perr.__doc__)+"):<br/>"
+                                        debug_message = ("ERROR ("+str(perr.__doc__)+"):<br/>"
                                                     + ("<br/>".join(format_tb(perr.__traceback__)+[repr(perr)]))
                                                     )
                                        )
+
+            # all went well: we can login the user
+            login_user(User(luid))
 
         return render_template("thank_you.html",
                                 debug_records = (clean_records if app.config['DEBUG'] else {}),
                                 form_accepted = True,
                                 backend_error = False,
-                                message = "")
+                                message = """
+                                  You can now visit elements of the members section:
+                                  <ul style="list-style-type: none;">
+                                      <li>
+                                          <span class="glyphicon glyphicon glyphicon-education"></span>&nbsp;&nbsp;
+                                          <a href="/services/user/profile"> Your Profile </a>
+                                      </li>
+                                      <li>
+                                          <span class="glyphicon glyphicon-eye-open"></span>&nbsp;&nbsp;
+                                          <a href='/explorerjs.html?type="uid"&nodeidparam=%(luid)i'> Your Map </a>
+                                      </li>
+                                      <li>
+                                          <span class="glyphicon glyphicon glyphicon-stats"></span>&nbsp;&nbsp;
+                                          <a href='/print_scholar_directory.php?query=%(luid)i'> Your Neighboor Stats </a>
+                                      </li>
+                                  </ul>
+                                """ % {'luid': luid })
 
 
 ########### SUBS ###########
@@ -552,7 +570,7 @@ def save_form(request_form, request_files, update_flag=False):
     # TODO class User method !!
     if luid in UCACHE: UCACHE.pop(luid)
 
-    return clean_records
+    return (luid, clean_records)
 
 
 def read_record(incoming_data):

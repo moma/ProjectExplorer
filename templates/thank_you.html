@@ -16,7 +16,7 @@
 
         <!-- INTRODUCTION TEXT -->
         <div id="intro">
-          <h2 class="oldstyle">Registration form</h2>
+          <h2 class="oldstyle">Registration {{ "ok" if form_accepted else "failed" }}</h2>
               <p class="mini-hero">
                 {% if form_accepted %}
                   Thank you for your answers ! We have updated the <strong>Community Explorer</strong> registration database with this new information.
@@ -31,6 +31,9 @@
                     <br/> (if you click "back" you should be able to have your answers still in the form)
                   </span>
                 {% endif %}
+              </p>
+              <p class="mini-hero">
+                  {{message|safe}}
               </p>
         </div>
 
@@ -48,8 +51,9 @@
           <p> {{key}} {{debug_records[key]}} </p>
         {% endfor %}
 
+
         <p style="font-family: monospace; font-weight: bold">
-            {{message|safe}}
+            {{debug_message|safe}}
         </p>
       </div>
       <div class="spacer col-sm-2 col-md-2">&nbsp;</div>
