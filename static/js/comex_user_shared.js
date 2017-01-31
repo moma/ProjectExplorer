@@ -353,7 +353,7 @@ var cmxClt = (function() {
                 // collect multiTextinput values
                 for (var field in myUform.mtiStock) {
                     document.getElementById(field).value = myUform.mtiStock[field].join(',')
-                    console.debug("  mti collected field '"+field+"', new value =", document.getElementById(field).value)
+                    // console.debug("  mti collected field '"+field+"', new value =", document.getElementById(field).value)
                 }
 
                 console.log("go classicSubmit")

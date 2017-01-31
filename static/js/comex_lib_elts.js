@@ -81,7 +81,7 @@ var cmxClt = (function(cC) {
             })
             // 2nd then(): at this point Fetch has completed and cookie is set
             .then(function(bodyText) {
-                console.log('the login cookie should be set, changing page now')
+                // console.log('the login cookie should be set, changing page now')
                 window.location = '/services/user/profile'
             })
             .catch(function(error) {
@@ -98,11 +98,11 @@ var cmxClt = (function(cC) {
                 type: 'POST',
                 url: "/services/user/login/",
                 success: function(data) {
-                    console.log('JQUERY got return', data, 'and login cookie should be set')
+                    // console.log('JQUERY got return', data, 'and login cookie should be set')
                     window.location = '/services/user/profile'
                 },
                 error: function(result) {
-                    console.log('got error with result', result)
+                    console.warn('jquery ajax error with result', result)
                 }
             });
         }

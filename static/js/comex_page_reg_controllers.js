@@ -103,7 +103,7 @@ function registerDoorsAndSubmit(){
 
         // callback: send to DB -------------------
         function(doorsResp) {
-            console.log("register resp:", doorsResp)
+            // console.log("register resp:", doorsResp)
             addUidThenSubmit(doorsResp)
         }
     )

@@ -154,9 +154,9 @@ cmxClt = (function(cC) {
             // also form submit() overoverload
             auForm.elForm.oldSubmitAction = auForm.elForm.submit
             auForm.elForm.submit = function() {
-                console.log("go newSubmit")
+                // console.log("go newSubmit")
                 cmxClt.uauth.collectCaptcha(auForm)
-                console.log("go oldSubmit")
+                // console.log("go oldSubmit")
                 auForm.elForm.oldSubmitAction()
             }
         }
@@ -170,9 +170,8 @@ cmxClt = (function(cC) {
     // -------------------
 
     cC.uauth.collectCaptcha = function (uformObj) {
-        console.log
         uformObj.elCapcheck.value = $(uformObj.elCaptcha).realperson('getHash')
-        console.debug('  '+uformObj.id+': collected captcha hash ' +uformObj.elCapcheck.value)
+        // console.debug('  '+uformObj.id+': collected captcha hash ' +uformObj.elCapcheck.value)
     }
 
     // NB removed earlyValidate
@@ -393,9 +392,9 @@ cmxClt = (function(cC) {
     */
     cC.uauth.callDoors = function(apiAction, data, callback) {
 
-        console.warn("=====> CORS  <=====")
-        console.log("data",data)
-        console.log("apiAction",apiAction)
+        // console.warn("=====> CORS  <=====")
+        // console.log("data",data)
+        // console.log("apiAction",apiAction)
 
         var doorsUid = null
         var doorsMsg = null
@@ -410,7 +409,7 @@ cmxClt = (function(cC) {
             || (! /user|register|userExists/.test(apiAction))) {
             // currently forces login action unless we got an accepted action
             apiAction = 'user'
-            console.warn('DBG: forcing user route')
+            // console.warn('DBG: forcing user route')
         }
 
         if (typeof callback != 'function') {
@@ -431,7 +430,7 @@ cmxClt = (function(cC) {
                )
         if (!ok) {
             doorsMsg = "Invalid parameters in input data (arg #1)"
-            console.warn('DEBUG callDoors() internal validation failed before ajax')
+            console.warn('DBG callDoors() internal validation failed before ajax')
         }
         else {
             var sendData = {
@@ -476,7 +475,7 @@ cmxClt = (function(cC) {
                 },
 
                 error: function(result) {
-                        console.log(result)
+                        // console.log(result)
                         if (apiAction == 'user'){
                             if (result.responseText.match(/"User .+@.+ not found"/)) {
                                 doorsMsg = result.responseText.replace(/^"/g, '').replace(/"$/g, '')

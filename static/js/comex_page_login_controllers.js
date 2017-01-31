@@ -33,7 +33,7 @@ loginForm.elCaptcha.dispatchEvent(new CustomEvent('change'))
 
 // done when anything in the form changes
 function loginValidate(myForm) {
-  console.log("loginValidate Go")
+  // console.log("loginValidate Go")
 
   if (myForm.emailStatus
       && myForm.passStatus
