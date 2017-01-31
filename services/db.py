@@ -457,7 +457,6 @@ def get_full_scholar(uid):
     # full user info as a dict
     return urow_dict
 
-
 def save_scholar(safe_recs, reg_db, uactive=True, update_luid=None):
     """
     For new registration:
@@ -696,3 +695,31 @@ def get_or_create_affiliation(org_info, comex_db):
         raise Exception("ERROR: non-unique affiliation '%s'" % str(db_qstrvals))
 
     return the_aff_id
+
+
+def save_doors_temp_user(doors_uid, doors_email):
+    db = connect_db()
+    db_c = db.cursor()
+    stmt = "INSERT IGNORE INTO doors_temp_user(doors_uid, email) VALUES (%s,%s)"
+    db_c.execute(stmt, (doors_uid, doors_email))
+    db.commit()
+    db.close()
+
+def get_doors_temp_user(doors_uid):
+    info_row = None
+    db = connect_db()
+    db_c = db.cursor(DictCursor)
+    db_c.execute('''SELECT *
+                    FROM doors_temp_user
+                    WHERE doors_uid = "%s"''' % doors_uid)
+    info_row = db_c.fetchone()
+    db.close()
+    return info_row
+
+def rm_doors_temp_user(doors_uid):
+    db = connect_db()
+    db_c = db.cursor()
+    db_c.execute('''DELETE FROM doors_temp_user
+                    WHERE doors_uid = "%s"''' % doors_uid)
+    db.commit()
+    db.close()

@@ -128,4 +128,11 @@ CREATE TABLE linked_ids(
     PRIMARY KEY (linkid),
     FOREIGN KEY (uid) REFERENCES scholars(luid) ON DELETE CASCADE
 );
-```
+
+-- separate table for incoming doors users without a profile in scholars
+-- (allows us to avoid reasking them for their doors info like email)
+CREATE TABLE doors_temp_user (
+    doors_uid            char(36) not null unique primary key,
+    email                varchar(255) not null unique,
+    INDEX duid_index_dtempu (doors_uid)
+) ;

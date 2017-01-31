@@ -10,6 +10,7 @@ from configparser import ConfigParser
 from os           import environ, path
 from urllib.parse import unquote
 from ctypes       import c_int32
+from traceback    import format_tb
 
 # ========================== FILL REALCONFIG ===================================
 
@@ -215,3 +216,10 @@ def mlog(loglvl, *args):
 
 
 mlog("INFO", "conf\n  "+"\n  ".join(["%s=%s"%(k['var'],REALCONFIG[k['var']]) for k in CONFIGMENU]))
+
+
+def format_err(err):
+    """
+    Formats the exceptions for HTML display
+    """
+    return "ERROR ("+str(err.__doc__)+"):<br/>" + ("<br/>".join(format_tb(err.__traceback__)+[repr(err)]))

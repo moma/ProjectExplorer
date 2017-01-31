@@ -152,16 +152,22 @@
                      <span class="caret"></span>
                  </a>
                   <ul class="dropdown-menu">
-                      {% if current_user.info %}
-                      <li>
-                          <a href="/services/user/profile"> Your Profile </a>
-                      </li>
-                      <li>
-                          <a href='/explorerjs.html?type="uid"&nodeidparam="{{ current_user.uid }}"'> Your Map </a>
-                      </li>
-                      <li>
-                          <a href='/print_scholar_directory.php?query={{ current_user.uid }}'> Your Neighboor Stats </a>
-                      </li>
+                      {% if current_user and not current_user.is_anonymous %}
+                          {% if current_user.empty %}
+                          <li>
+                              <a href="/services/user/profile"> Create your Profile !</a>
+                          </li>
+                          {% else %}
+                          <li>
+                              <a href="/services/user/profile"> Your Profile </a>
+                          </li>
+                          <li>
+                              <a href='/explorerjs.html?type="uid"&nodeidparam="{{ current_user.uid }}"'> Your Map </a>
+                          </li>
+                          <li>
+                              <a href='/print_scholar_directory.php?query={{ current_user.uid }}'> Your Neighboor Stats </a>
+                          </li>
+                          {% endif %}
                       <li>
                           <a href='/services/user/logout/'> Logout </a>
                       </li>

@@ -11,12 +11,13 @@ __email__     = "romain.loth@iscpif.fr"
 from json        import dumps, loads
 from datetime    import date
 from flask_login import LoginManager
+from re          import match
 
 if __package__ == 'services':
-    from services.db    import connect_db, get_full_scholar
+    from services.db    import connect_db, get_full_scholar, get_doors_temp_user
     from services.tools import mlog, REALCONFIG
 else:
-    from db             import connect_db, get_full_scholar
+    from db             import connect_db, get_full_scholar, get_doors_temp_user
     from tools          import mlog, REALCONFIG
 
 # will be exported to main for initialization with app
@@ -26,21 +27,32 @@ login_manager = LoginManager()
 UCACHE = {}
 
 @login_manager.user_loader
-def load_user(uid):
+def load_user(mixedid):
     """
-    Used by flask-login to bring back user object from uid stored in session
+    Used by flask-login to bring back user object from a special id stored in session... this special id is defined in User.get_id()
     """
     u = None
-    if uid in UCACHE:
-        u = UCACHE[uid]
-        mlog("DEBUG", "load_user: user re-loaded by cache")
-    else:
-        try:
-            u = User(uid)
-            UCACHE[uid] = u
-            mlog("DEBUG", "load_user: user re-loaded from DB")
-        except Exception as err:
-            mlog("ERROR", "User(%s) init error:" % str(uid), err)
+    mlog("DEBUG", "load_user: %s" % mixedid)
+    if mixedid is not None:
+
+        testluid = match('normal/luid:(\d+)$', mixedid)
+        testduid = match('empty/doors:([a-f\d-]+)$', mixedid)
+
+        if testluid:
+            luid = int(testluid.groups()[0])
+            if luid in UCACHE:
+                u = UCACHE[luid]
+                mlog("DEBUG", "load_user: normal user re-loaded by cache")
+            else:
+                u = User(luid)
+                UCACHE[luid] = u
+                mlog("DEBUG", "load_user: normal user re-loaded from DB")
+
+        elif testduid:
+            doors_uid = testduid.groups()[0]
+            u = User(None, doors_uid=doors_uid)
+            mlog("DEBUG", "load_user: empty user recreated from doors_uid")
+
     return u
 
 
@@ -68,24 +80,64 @@ def jsonize_uinfo(uinfo_dict):
 
 class User(object):
 
-    def __init__(self, uid):
-        self.uid = uid
+    def __init__(self, luid, doors_uid=None):
+        """
+        Normal user syntax:         User(luid)
+        (user already in db)
+         => has luid
 
-        user_info = get_full_scholar(uid)
+        Empty user syntax:          User(None, doors_uid=foobar)
+        (user exists only in
+         doors but not in db)
+         => no luid, but has doors_uid
 
-        if user_info is None:
-            # user exists in doors but has nothing in DB yet
-            self.info = {}
-            self.json_info = "{}"
-            self.empty = True
-        else:
-            # normal user has a nice info dict
-            self.info = user_info
-            self.json_info = jsonize_uinfo(user_info)
+        This also causes trickier behaviour for get_id:
+         ie load_user() wants a *single id for both*,
+             which is provided by self.get_id()
+        """
+        mlog('DEBUG',
+             'new User(luid=%s, doors_uid="%s")' %(str(luid), str(doors_uid)))
+
+        # normal user has a nice info dict
+        if luid is not None:
+            self.uid = luid
+            self.info = get_full_scholar(luid)
+            self.json_info = jsonize_uinfo(self.info)
+            self.doors_uid = self.info['doors_uid']
             self.empty = False
 
+        # user exists in doors but has nothing in scholars DB yet
+        elif doors_uid is not None:
+            self.uid = None
+            self.info = {}
+            self.json_info = "{}"
+            self.doors_uid = doors_uid
+            self.doors_info = get_doors_temp_user(doors_uid)
+            self.empty = True
+        else:
+            raise TypeError("User can either be initialized with comex_db luid or with doors_uid")
+
     def get_id(self):
-        return str(self.uid)
+        """
+        Provides a special ID used only by login_manager
+
+        NB double init cases forced us to introduce
+           here a *single id to load both cases*,
+           for use later in user_loader
+
+        (it's needed because when reloading user, login_manager
+         will do something like this: u = user_loader(old_u.get_id())
+                                          ---------------------------
+        """
+        mixedid = None
+        if self.uid:
+            mixedid = "normal/luid:"+str(self.uid)
+        elif self.doors_uid:
+            mixedid = "empty/doors:"+self.doors_uid
+        else:
+            raise ValueError("No IDs for this user flask-login won't refind it")
+        return mixedid
+
 
     @property
     def is_active(self):
@@ -103,6 +155,7 @@ class User(object):
         """
         if self.empty:
             # the user has a doors uid so he's entitled to a login
+            # and will be directed to the profile page to create his infos
             return True
         else:
             # ... or has a record_status in comex_db

@@ -22,6 +22,9 @@
         <div id="intro">
             <!-- <h2 class="oldstyle">Your Profile Info</h2> -->
                 <p class="mini-hero">
+                    {% if current_user.empty %}
+                    Welcome to your new empty <strong>profile</strong> !
+                    {% else %}
                     Welcome to your profile page,
                     <strong>
                       {% if current_user.info.hon_title is not none %}
@@ -29,6 +32,7 @@
                       {% endif %}
                       {{ current_user.info.last_name }}
                   </strong> !
+                  {% endif %}
               </p>
         </div>
 
@@ -57,6 +61,7 @@
 
                <!-- CARTE DE VISITE -->
                <h3 class="formcatfirst"> Carte de visite </h3>
+               {% if not current_user.empty %}
                <div id="information-example" class="our-vcard">
                    <ul>
                        <!-- TODO if empty then click on image starts showPicImg -->
@@ -79,8 +84,13 @@
                    </ul>
                    <br>
                </div>
+               {% else %}
+               <p class="mini-hero">
+                   Once you'll fill the information below, your "Carte de visite" will appear here.
+               </p>
+               {% endif %}
 
-               <!-- EMAIL & PASSWORD -->
+               <!-- DOORS EMAIL -->
                <h3 class="formcat"> Login infos </h3>
                <p class="mini-hero">
                   This email is your main ID. You may only change it via the <a href="http://{{ doors_connect }}/">Doors portal</a>.
@@ -93,7 +103,7 @@
                  </label>
                  <input id="email" name="email" maxlength="255" readonly
                         type="text" class="form-control readonly"
-                        value="{{ current_user.info.email }}">
+                        value="{{ current_user.doors_info.email if current_user.empty else current_user.info.email }}">
                </div>
           </div>
           <div class="panel-footer ccsection-footer">&nbsp;</div>
@@ -256,9 +266,9 @@
                    <input id="keywords" name="keywords" maxlength="350"
                           type="text" class="form-control autocomp" placeholder="Add a keyword here"
                           value="{{ current_user.info.keywords }}">
-                    <div class="input-group-addon operation-dark">
-                        <span class="glyphicon glyphicon-plus" onclick="cmxClt.uform.mtiPopOneTag['keywords']"></span>
-                    </div>
+                    <!-- <div class="input-group-addon operation-dark">
+                        <span class="glyphicon glyphicon-plus" onclick="TODO DEPRECATED mtiPopOneTag['keywords']"></span>
+                    </div> -->
                  </div>
                  <p class="legend">Please enter at least 5 keywords (press TAB or ENTER after each)</p>
                </div>
@@ -545,7 +555,7 @@
           <div style="text-align:center">
             <!-- @type button to avoid ENTER submit  -->
             <button class="btn btn-lg btn-success" id="form_submit"
-                    type="button" onclick="cmxClt.uform.theForm.submit()">
+                    type="button" onclick="theUForm.elForm.submit()">
                   Save profile
             </button>
             <button class="btn btn-lg btn-warning" id="delete_check"
@@ -575,7 +585,7 @@
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-primary"
-                            onclick="deleteUser.checked=true;cmxClt.uform.theForm.submit()">
+                            onclick="deleteUser.checked=true;theUForm.elForm.submit()">
                             Yes delete my data
                     </button>
                   </div>

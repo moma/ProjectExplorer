@@ -30,7 +30,6 @@ from os           import path
 from json         import dumps
 from datetime     import timedelta
 from urllib.parse import urlparse, urljoin, unquote
-from traceback    import format_tb
 from flask        import Flask, render_template, request, \
                          redirect, url_for, session
 from flask_login  import fresh_login_required, login_required, \
@@ -41,16 +40,16 @@ if __package__ == 'services':
     print("*** comex services ***")
     from services.user  import User, login_manager, doors_login, UCACHE
     from services.text  import keywords
-    from services.tools import restparse, mlog, re_hash, REALCONFIG
-    from services.db    import connect_db, get_or_create_tokitems, save_pairs_sch_tok, delete_pairs_sch_tok, get_or_create_affiliation, save_scholar, get_field_aggs, doors_uid_to_luid, rm_scholar
+    from services.tools import restparse, mlog, re_hash, REALCONFIG, format_err
+    from services.db    import connect_db, get_or_create_tokitems, save_pairs_sch_tok, delete_pairs_sch_tok, get_or_create_affiliation, save_scholar, get_field_aggs, doors_uid_to_luid, rm_scholar, save_doors_temp_user, rm_doors_temp_user
     from services.db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 else:
     # when this script is run directly
     print("*** comex services (dev server mode) ***")
     from user           import User, login_manager, doors_login, UCACHE
     from text           import keywords
-    from tools          import restparse, mlog, re_hash, REALCONFIG
-    from db             import connect_db, get_or_create_tokitems, save_pairs_sch_tok, delete_pairs_sch_tok, get_or_create_affiliation, save_scholar, get_field_aggs, doors_uid_to_luid, rm_scholar
+    from tools          import restparse, mlog, re_hash, REALCONFIG, format_err
+    from db             import connect_db, get_or_create_tokitems, save_pairs_sch_tok, delete_pairs_sch_tok, get_or_create_affiliation, save_scholar, get_field_aggs, doors_uid_to_luid, rm_scholar, save_doors_temp_user, rm_doors_temp_user
     from db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 
 # ============= app creation ============
@@ -287,21 +286,43 @@ def login():
             luid = doors_uid_to_luid(doors_uid)
 
             if luid:
-                login_ok = login_user(User(luid))
+                # normal user
+                user = User(luid)
+            else:
+                # user exists in doors but has no comex profile nor luid yet
+                save_doors_temp_user(doors_uid, email)  # preserve the email
+                user = User(None, doors_uid=doors_uid)  # get a user.empty
 
-                mlog('INFO', 'login of %s was %s' % (luid, str(login_ok)))
+            # =========================
+            login_ok = login_user(user)
+            # =========================
 
-                # TODO check cookie
-                # login_ok = login_user(User(luid), remember=True)
-                #                                   -------------
-                #                            creates REMEMBER_COOKIE_NAME
-                #                        which is itself bound to session cookie
+            mlog('INFO', 'login of %s (%s) was %s' % (str(luid), doors_uid, str(login_ok)))
 
-                if login_ok:
-                    # normal user
+            # TODO check cookie
+            # login_ok = login_user(User(luid), remember=True)
+            #                                   -------------
+            #                            creates REMEMBER_COOKIE_NAME
+            #                        which is itself bound to session cookie
+
+            if login_ok:
+                if called_as_api:
+                    # menubar login will do the redirect
+                    return('', 204)
+
+                elif user.empty:
+                    mlog('DEBUG',"empty user redirected to profile")
+                    # we go straight to profile for the him to create infos
+                    return(redirect(url_for('profile', _external=True)))
+
+                # normal call, normal user
+                else:
+                    mlog('DEBUG', "normal user login redirect")
                     next_url = request.args.get('next', None)
 
-                    if next_url:
+                    if not next_url:
+                        return(redirect(url_for('profile', _external=True)))
+                    else:
                         next_url = unquote(next_url)
                         mlog("DEBUG", "login with next_url:", next_url)
                         safe_flag = is_safe_url(next_url, request.host_url)
@@ -317,35 +338,11 @@ def login():
                             # server name is different than ours
                             # in next_url so we won't go there
                             return(redirect(url_for('rootstub', _external=True)))
-                    else:
-                        # no specified next_url
-                        # => profile if page, or just status ok if api
-                        if not called_as_api:
-                            return redirect(url_for('profile', _external=True))
-
-                        # eg menubar login
-                        else:
-                            return ('', 204)
-
-                else:
-                    # user exists in doors but has no comex profile yet
-                    #   => TODO
-                    #       => we add him
-                    #       => status = "fresh_profile"
-                    #       => empty profile
-                    # return redirect(url_for('fresh_profile', _external=True))
-                    return redirect(url_for('register', _external=True))
-
             else:
-                # user doesn't exist in doors nor comex_db
-                # (shouldn't happen since client-side blocks submit and displays same message, but still possible if user tweaks the js)
-                return render_template(
+                # failed to login_user()
+                render_template(
                     "message.html",
-                    message = """
-                        We're sorry but you don't exist in our database yet!
-                        <br/>
-                        However you can easily <strong><a href="%s">register here</a></strong>.
-                        """ % url_for('register', _external=True)
+                    message = "There was an unknown problem with the login."
                 )
 
 
@@ -353,6 +350,7 @@ def login():
 @app.route(config['PREFIX'] + config['USR_ROUTE'] + '/logout/')
 def logout():
     logout_user()
+    mlog('INFO', 'logged out previous user')
     return redirect(url_for('rootstub', _external=True))
 
 # /test_base
@@ -409,10 +407,49 @@ def profile():
             if the_id_to_delete in UCACHE: UCACHE.pop(the_id_to_delete)
             return(redirect(url_for('rootstub', _external=True)))
 
+
+        # special action CREATE for a new user already known to doors
+        elif current_user.empty:
+            mlog("DEBUG", "creating a new scholar from new profile of doors user", current_user.doors_uid)
+
+            print(type(request.form))
+
+            # add the doors_uid and doors_email to the form (same keynames!)
+            our_form = { **request.form.to_dict(), **current_user.doors_info }
+            # remove the empty luid
+            our_form.pop('luid')
+            print("MERGED FORM IS", our_form)
+
+            try:
+                # *create* this user in our DB
+                (luid, clean_records) = save_form(
+                          our_form,
+                          request.files if hasattr(request, "files") else {},
+                          update_flag = False)
+                #                      -------
+            except Exception as perr:
+                return render_template("thank_you.html",
+                            form_accepted = False,
+                            backend_error = True,
+                            debug_message = format_err(perr)
+                        )
+
+            # if all went well we can remove the temporary doors user data
+            rm_doors_temp_user(current_user.doors_uid)
+            logout_user()
+            # .. and login the user in his new mode
+            login_user(User(luid))
+            return render_template(
+                "thank_you.html",
+                debug_records = (clean_records if app.config['DEBUG'] else {}),
+                form_accepted = True,
+                backend_error = False
+            )
+
         # normal action UPDATE
         else:
             try:
-                clean_records = save_form(
+                (luid, clean_records) = save_form(
                           request.form,
                           request.files if hasattr(request, "files") else {},
                           update_flag = True
@@ -423,9 +460,7 @@ def profile():
                 return render_template("thank_you.html",
                                         form_accepted = False,
                                         backend_error = True,
-                                        debug_message = ("ERROR ("+str(perr.__doc__)+"):<br/>"
-                                                    + ("<br/>".join(format_tb(perr.__traceback__)+[repr(perr)]))
-                                                    )
+                                        debug_message = format_err(perr)
                                        )
 
             return render_template("thank_you.html",
@@ -478,9 +513,7 @@ def register():
                 return render_template("thank_you.html",
                                         form_accepted = False,
                                         backend_error = True,
-                                        debug_message = ("ERROR ("+str(perr.__doc__)+"):<br/>"
-                                                    + ("<br/>".join(format_tb(perr.__traceback__)+[repr(perr)]))
-                                                    )
+                                        debug_message = format_err(perr)
                                        )
 
             # all went well: we can login the user
@@ -510,7 +543,7 @@ def register():
 
 
 ########### SUBS ###########
-def save_form(request_form, request_files, update_flag=False):
+def save_form(request_form, request_files, update_flag=False, new_doors_info=None):
     """
     wrapper function for save profile/register form actions
     """
