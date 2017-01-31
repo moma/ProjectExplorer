@@ -35,7 +35,9 @@ function topLoginValidate(self) {
   // console.log('topLoginValidate current PASS status', self.passStatus)
   // console.log('topLoginValidate current cmxClt.uauth.lastEmailStatus', cmxClt.uauth.lastEmailStatus)
 
-  menuSubmitButton.disabled = !self.emailStatus || !self.passStatus
+  menuSubmitButton.disabled = (!self.emailStatus
+                                || !self.passStatus
+                                || !self.captchaStatus)
 }
 
 console.log("menubar login controllers load OK")
