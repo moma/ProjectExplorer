@@ -247,10 +247,9 @@ def login():
     elif request.method == 'POST':
         mlog("DEBUG", "login form received from "+request.path+", with keys:", [k for k in request.values])
 
-        called_as_api = False
-        if request.path != config['PREFIX'] + config['USR_ROUTE'] + '/login/':
-            # the referer is another page
-            called_as_api = True
+        # we used this custom header to mark ajax calls => called_as_api True
+        x_req_with = request.headers.get('X-Requested-With', type=str)
+        called_as_api = (x_req_with in ['XMLHttpRequest', 'MyFetchRequest'])
 
         # testing the captcha answer
         captcha_userinput = request.form['my-captcha']
@@ -282,6 +281,8 @@ def login():
             except Exception as err:
                 mlog("ERROR", "error in doors_login request")
                 raise (err)
+
+            mlog("DEBUG", "doors_login returned id '%s'" % doors_uid)
 
             luid = doors_uid_to_luid(doors_uid)
 

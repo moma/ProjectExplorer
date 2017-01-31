@@ -65,6 +65,7 @@ var cmxClt = (function(cC) {
         if (window.fetch) {
             fetch('/services/user/login/', {
                 method: 'POST',
+                headers: {'X-Requested-With': 'MyFetchRequest'},
                 body: formdat,
                 credentials: "same-origin"  // <= this allows response's Set-Cookie
             })
