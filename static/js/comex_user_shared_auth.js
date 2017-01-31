@@ -225,8 +225,8 @@ cmxClt = (function(cC) {
 
           if (! emailFormatOk) {
               // restore original lack of message
-              obja.emailDials.elIcon.classList.remove('glyphicon-remove')
-              obja.emailDials.elIcon.classList.remove('glyphicon-ok')
+              obja.emailDials.elIcon.classList.remove('glyphicon-ban-circle')
+              obja.emailDials.elIcon.classList.remove('glyphicon-ok-circle')
               obja.emailDials.elIcon.classList.add('glyphicon-question-sign')
               obja.emailDials.elIcon.style.color = cC.colorGrey
               obja.emailDials.elMsg.innerHTML = ""
@@ -269,9 +269,9 @@ cmxClt = (function(cC) {
                       if (obja.emailStatus) {
                           // icon
                           obja.emailDials.elIcon.style.color = cC.colorGreen
-                          obja.emailDials.elIcon.classList.remove('glyphicon-remove')
+                          obja.emailDials.elIcon.classList.remove('glyphicon-ban-circle')
                           obja.emailDials.elIcon.classList.remove('glyphicon-question-sign')
-                          obja.emailDials.elIcon.classList.add('glyphicon-ok')
+                          obja.emailDials.elIcon.classList.add('glyphicon-ok-circle')
 
                           // message in legend
                           obja.emailDials.elMsg.innerHTML = "OK: "+doorsMsg
@@ -286,9 +286,9 @@ cmxClt = (function(cC) {
                           var errMsg = obja.emailIdSupposedToExist ? "your ID isn't recognized" : "this ID is already taken"
                           // icon
                           obja.emailDials.elIcon.style.color = cC.colorOrange
-                          obja.emailDials.elIcon.classList.remove('glyphicon-ok')
+                          obja.emailDials.elIcon.classList.remove('glyphicon-ok-circle')
                           obja.emailDials.elIcon.classList.remove('glyphicon-question-sign')
-                          obja.emailDials.elIcon.classList.add('glyphicon-remove')
+                          obja.emailDials.elIcon.classList.add('glyphicon-ban-circle')
 
                           // message in legend
                           obja.emailDials.elMsg.innerHTML = "Sorry: "+errMsg+" !"
