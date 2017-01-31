@@ -475,12 +475,13 @@ class MyExtractor:
                         weight=neighbors[str(neigh)]/float(self.terms_dict[term]['occurrences'])
                         # TODO ^^^ check formula ^^^
 
-                        if neighbors[str(neigh)] != 1:
-                            mlog("DEBUG", "extractDataCustom.extract edges b/w terms====")
-                            mlog("DEBUG", "term:", self.terms_dict[int(term)]['kwstr'], "<===> neighb:", self.terms_dict[int(neigh)]['kwstr'])
-                            mlog("DEBUG", "kwoccs:", self.terms_dict[term]['occurrences'])
-                            mlog("DEBUG", "neighbors[neigh]:", neighbors[str(neigh)])
-                            mlog("DEBUG", "edge w", weight)
+                        # # detailed debug
+                        # if neighbors[str(neigh)] != 1:
+                        #     mlog("DEBUG", "extractDataCustom.extract edges b/w terms====")
+                        #     mlog("DEBUG", "term:", self.terms_dict[int(term)]['kwstr'], "<===> neighb:", self.terms_dict[int(neigh)]['kwstr'])
+                        #     mlog("DEBUG", "kwoccs:", self.terms_dict[term]['occurrences'])
+                        #     mlog("DEBUG", "neighbors[neigh]:", neighbors[str(neigh)])
+                        #     mlog("DEBUG", "edge w", weight)
 
                         self.Graph.add_edge( source , target , {'weight':weight,'type':"nodes2"})
 
