@@ -1,0 +1,18 @@
+[mysqld]
+
+## comex buffer settings
+
+# buffer can be ~ 50% of available RAM (default 128M)
+innodb_buffer_pool_size=2G
+
+# 512M for chunks
+innodb_buffer_pool_instances=4
+innodb_buffer_pool_chunk_size=512M
+
+# smaller than default 1024 is much advised
+innodb_lru_scan_depth=256
+
+## comex character set settings
+collation_server=utf8_unicode_ci
+character_set_server=utf8
+character_set_filesystem=utf8
