@@ -40,7 +40,7 @@ if __package__ == 'services':
     print("*** comex services ***")
     from services.user  import User, login_manager, doors_login, UCACHE
     from services.text  import keywords
-    from services.tools import restparse, mlog, re_hash, REALCONFIG, format_err
+    from services.tools import restparse, mlog, re_hash, REALCONFIG, format_err, pic_blob_to_filename
     from services.db    import connect_db, get_or_create_tokitems, save_pairs_sch_tok, delete_pairs_sch_tok, get_or_create_affiliation, save_scholar, get_field_aggs, doors_uid_to_luid, rm_scholar, save_doors_temp_user, rm_doors_temp_user
     from services.db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 else:
@@ -48,7 +48,7 @@ else:
     print("*** comex services (dev server mode) ***")
     from user           import User, login_manager, doors_login, UCACHE
     from text           import keywords
-    from tools          import restparse, mlog, re_hash, REALCONFIG, format_err
+    from tools          import restparse, mlog, re_hash, REALCONFIG, format_err, pic_blob_to_filename
     from db             import connect_db, get_or_create_tokitems, save_pairs_sch_tok, delete_pairs_sch_tok, get_or_create_affiliation, save_scholar, get_field_aggs, doors_uid_to_luid, rm_scholar, save_doors_temp_user, rm_doors_temp_user
     from db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 
@@ -98,7 +98,7 @@ SOURCE_FIELDS = [
          ("job_looking_date",       True  ),   # def null: not looking for a job
          ("home_url",               True  ),   # scholar's homepage
          ("pic_url",                True  ),
-         ("pic_file",              False  ),   # mediumblob
+         ("pic_file",              False  ),   # will be saved separately
          # => for *scholars* table (optional)
 
          ("org",                    True  ),
@@ -408,65 +408,59 @@ def profile():
             return(redirect(url_for('rootstub', _external=True)))
 
 
-        # special action CREATE for a new user already known to doors
-        elif current_user.empty:
-            mlog("DEBUG", "creating a new scholar from new profile of doors user", current_user.doors_uid)
-
-            print(type(request.form))
-
-            # add the doors_uid and doors_email to the form (same keynames!)
-            our_form = { **request.form.to_dict(), **current_user.doors_info }
-            # remove the empty luid
-            our_form.pop('luid')
-            print("MERGED FORM IS", our_form)
-
-            try:
-                # *create* this user in our DB
-                (luid, clean_records) = save_form(
-                          our_form,
-                          request.files if hasattr(request, "files") else {},
-                          update_flag = False)
-                #                      -------
-            except Exception as perr:
-                return render_template("thank_you.html",
-                            form_accepted = False,
-                            backend_error = True,
-                            debug_message = format_err(perr)
-                        )
-
-            # if all went well we can remove the temporary doors user data
-            rm_doors_temp_user(current_user.doors_uid)
-            logout_user()
-            # .. and login the user in his new mode
-            login_user(User(luid))
-            return render_template(
-                "thank_you.html",
-                debug_records = (clean_records if app.config['DEBUG'] else {}),
-                form_accepted = True,
-                backend_error = False
-            )
-
-        # normal action UPDATE
         else:
-            try:
-                (luid, clean_records) = save_form(
-                          request.form,
-                          request.files if hasattr(request, "files") else {},
-                          update_flag = True
-                         )
+            # input fields data ~> normalized {cols:values}
+            our_records = read_record_from_request(request)
 
+            # special action CREATE for a new user already known to doors
+            if current_user.empty:
+                mlog("DEBUG", "create profile from new doors user", current_user.doors_uid)
+                # remove the empty luid
+                our_records.pop('luid')
 
-            except Exception as perr:
+                # add the doors_uid and doors_email to the form (same keynames!)
+                our_records = { **our_records, **current_user.doors_info }
+
+                try:
+                    # *create* this user in our DB
+                    luid = save_form(our_records, update_flag = False)
+
+                except Exception as perr:
+                    return render_template("thank_you.html",
+                                form_accepted = False,
+                                backend_error = True,
+                                debug_message = format_err(perr)
+                            )
+
+                # if all went well we can remove the temporary doors user data
+                rm_doors_temp_user(current_user.doors_uid)
+                logout_user()
+                # .. and login the user in his new mode
+                login_user(User(luid))
+                return render_template(
+                    "thank_you.html",
+                    debug_records = (our_records if app.config['DEBUG'] else {}),
+                    form_accepted = True,
+                    backend_error = False
+                )
+
+            # normal action UPDATE
+            else:
+                mlog("MOREDEBUG", "UPDATE")
+                try:
+                    luid = save_form(our_records, update_flag = True)
+
+                except Exception as perr:
+                    return render_template("thank_you.html",
+                                            form_accepted = False,
+                                            backend_error = True,
+                                            debug_message = format_err(perr)
+                                           )
+
                 return render_template("thank_you.html",
-                                        form_accepted = False,
-                                        backend_error = True,
-                                        debug_message = format_err(perr)
-                                       )
-
-            return render_template("thank_you.html",
-                                    debug_records = (clean_records if app.config['DEBUG'] else {}),
-                                    form_accepted = True,
-                                    backend_error = False)
+                                        debug_records = (our_records if app.config['DEBUG'] else {}),
+                                        form_accepted = True,
+                                        backend_error = False)
 
 
 # /services/user/register/
@@ -492,7 +486,6 @@ def register():
         # dbg
         # mlog("DEBUG", str(captcha_verifhash))
 
-        clean_records = {}
 
         if captcha_userhash != captcha_verifhash:
             mlog("INFO", "pb captcha rejected")
@@ -502,12 +495,15 @@ def register():
         else:
             mlog("INFO", "ok form accepted")
             form_accepted = True
+            clean_records = {}
+
+            # 1) handles all the inputs from form
+            #    (using SOURCE_FIELDS recreates USER_COLS)
+            clean_records = read_record_from_request(request)
 
             try:
-                (luid, clean_records) = save_form(
-                                          request.form,
-                                          request.files if hasattr(request, "files") else {}
-                                         )
+                # 2) saves the records to db
+                luid = save_form(clean_records)
 
             except Exception as perr:
                 return render_template("thank_you.html",
@@ -543,26 +539,11 @@ def register():
 
 
 ########### SUBS ###########
-def save_form(request_form, request_files, update_flag=False, new_doors_info=None):
+def save_form(clean_records, update_flag=False):
     """
-    wrapper function for save profile/register form actions
+    wrapper function for save profile/register (all DB-related form actions)
     """
-    # only safe values
-    clean_records = {}
 
-    # 1) handles all the inputs from form, no matter what target table
-    clean_records = read_record(request_form)
-
-    mlog("DEBUG", "===== clean_records =====", clean_records)
-
-    # 2) handles the pic_file if present
-    if 'pic_file' in request_files:
-        # type: werkzeug.datastructures.FileStorage.stream
-        pic_blob = request_files['pic_file'].stream.read()
-        if len(pic_blob) != 0:
-            clean_records['pic_file'] = pic_blob
-
-    # 3) save to DB
     # A) a new DB connection
     reg_db = connect_db(config)
 
@@ -604,35 +585,48 @@ def save_form(request_form, request_files, update_flag=False, new_doors_info=Non
     # TODO class User method !!
     if luid in UCACHE: UCACHE.pop(luid)
 
-    return (luid, clean_records)
+    return luid
 
 
-def read_record(incoming_data):
+def read_record_from_request(request):
     """
-    Runs sanitization + string normalization as needed
-      - custom made for regcomex/templates/base_form
-      - uses SOURCE_FIELDS
+    Runs all request-related form actions
+
+    Arg:
+        a flask request
+        werkzeug.pocoo.org/docs/0.11/wrappers/#werkzeug.wrappers.Request
+
+    Process:
+        input SOURCE_FIELDS data ~> normalized {COLS:values}
+
+        Custom made for comex registration forms
+            - sanitization + string normalization as needed
+            - pic_file field ~~> save to fs + pic_fname col
     """
     # init var
     clean_records = {}
 
+    # sources: request.form and request.files
+
     # we should have all the mandatory fields (checked in client-side js)
-    # TODO recheck b/c if post comes from elsewhere
+    # POSS recheck b/c if post comes from elsewhere
     for field_info in SOURCE_FIELDS:
         field = field_info[0]
         do_sanitize = field_info[1]
-        if field in incoming_data:
+        if field in request.form:
             if do_sanitize:
-                val = sanitize(incoming_data[field])
+                val = sanitize(request.form[field])
                 if val != '':
                     clean_records[field] = val
                 else:
                     # mysql will want None instead of ''
                     val = None
+            # this one is done separately at the end
+            elif field == "pic_file":
+                continue
             # any other fields that don't need sanitization (ex: menu options)
             else:
-                clean_records[field] = incoming_data[field]
-
+                clean_records[field] = request.form[field]
 
     # special treatment for "other" subquestions
     if 'org_type' in clean_records:
@@ -650,6 +644,12 @@ def read_record(incoming_data):
                     temp_array.append(tok)
             # replace str by array
             clean_records[tok_field] = temp_array
+
+    # special treatment for pic_file
+    if hasattr(request, "files") and 'pic_file' in request.files:
+        new_fname = pic_blob_to_filename(request.files['pic_file'])
+        clean_records['pic_fname'] = new_fname
+        mlog("DEBUG", "new_fname", new_fname)
 
     return clean_records
 

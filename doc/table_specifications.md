@@ -26,8 +26,8 @@ CREATE TABLE scholars (
     gender               char(1),
     job_looking_date     char(24),       -- null if not looking for a job
     home_url             varchar(120),   -- homepage
-    pic_url              varchar(120),   -- an alternative to pic_file blob
-    pic_file             mediumblob,
+    pic_url              varchar(120),   -- remote pic... (full url)
+    pic_fname            varchar(120),   -- ...or locally saved pic (basename)
     valid_date           date,   -- when user will be ignored, if legacy status
     record_status        varchar(25),  -- "active|test|legacy"
 

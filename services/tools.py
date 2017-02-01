@@ -223,3 +223,27 @@ def format_err(err):
     Formats the exceptions for HTML display
     """
     return "ERROR ("+str(err.__doc__)+"):<br/>" + ("<br/>".join(format_tb(err.__traceback__)+[repr(err)]))
+
+
+from uuid   import uuid4
+from imghdr import what   # diagnoses filetype and returns ext
+def pic_blob_to_filename(pic_blob, path_elts=['data', 'shared_user_img']):
+    """
+    Saves a pic blob, returns the relative path
+
+    Input pic_blob: werkzeug.datastructures.FileStorage
+
+    exemple result:
+        output "12345.png"
+        + saved in /data/shared_user_img/12345.png
+    """
+    # random 32 hex chars
+    filename = uuid4().hex
+    fileext = what(pic_blob.stream)
+    fbasename = filename+'.'+fileext
+    path_elts.append(fbasename)
+    new_img_relpath = path.join(*path_elts)
+    # save
+    pic_blob.save(new_img_relpath)
+    # filename
+    return fbasename

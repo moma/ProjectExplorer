@@ -173,8 +173,8 @@ foreach ($base->query($sql) as $row) {
     // $info['affiliation2'] = $row['affiliation2'];
     $info['title'] = $row['hon_title'];
     $info['position'] = $row['position'];
-    $info['photo_url'] = $row['pic_url'];
-    $info['pic_file'] = $row['pic_file'];
+    $info['pic_src'] = $row['pic_fname'] ? '/data/shared_user_img/'.$row['pic_fname'] : $row['pic_url']  ;
+    $info['pic_fname'] = $row['pic_fname'];
     $info['interests'] = $row['interests_text'];
     // $info['address'] = $row['address'];
     // $info['city'] = $row['city'];

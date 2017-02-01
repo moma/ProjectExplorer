@@ -62,10 +62,7 @@ def jsonize_uinfo(uinfo_dict):
     """
 
     # most fields are already serializable
-    serializable_dict = {k:v for k,v in uinfo_dict.items() if k not in ['pic_file', 'valid_date']}
-
-    if 'pic_file' in uinfo_dict and type(uinfo_dict['pic_file']) == bytes and len(uinfo_dict['pic_file']):
-        serializable_dict['pic_file'] = "<blob_not_copied>"
+    serializable_dict = {k:v for k,v in uinfo_dict.items() if k not in ['valid_date']}
 
     if 'valid_date' in uinfo_dict and uinfo_dict['valid_date'] is not None:
         d = uinfo_dict['valid_date']
@@ -105,6 +102,13 @@ class User(object):
             self.json_info = jsonize_uinfo(self.info)
             self.doors_uid = self.info['doors_uid']
             self.empty = False
+
+            if 'pic_fname' in self.info and self.info['pic_fname']:
+                self.pic_src = '/data/shared_user_img/'+self.info['pic_fname']
+            elif 'pic_url' in self.info and self.info['pic_url']:
+                self.pic_src = self.info['pic_url']
+            else:
+                self.pic_src = None
 
         # user exists in doors but has nothing in scholars DB yet
         elif doors_uid is not None:

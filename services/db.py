@@ -36,7 +36,7 @@ USER_COLS = [
          ("job_looking_date",      False,        24),
          ("home_url",              False,       120),
          ("pic_url",               False,       120),
-         ("pic_file",              False,      None)
+         ("pic_fname",             False,       120)
       ]
 
 ORG_COLS = [
@@ -414,7 +414,7 @@ def get_full_scholar(uid):
     #  'middle_name': 'Fitzgerald',
     #  'org': 'Centre National de la Recherche Scientifique (CNRS)',
     #  'org_city': 'Paris', 'org_type': 'public R&D org',
-    #  'pic_file': '', 'pic_url': None, 'position': 'Engineer',
+    #  'pic_fname': '12345.jpg', 'pic_url': None, 'position': 'Engineer',
     #  'record_status': None, 'team_lab': 'ISCPIF'}
 
 
@@ -473,41 +473,24 @@ def save_scholar(safe_recs, reg_db, uactive=True, update_luid=None):
     db_qstrvals = []
     actual_len_dbg = 0
 
-    # REMARK:
-    # => In theory should be possible to execute(statment, values) to insert all
-    #    (or reg_db.literal(db_pyvals) to convert all)
-
-    # => But currently bug in MySQLdb for binary values)
-    #    (see also MySQLdb.converters)
-
-    # => So for now we build the values string ourselves in db_qstrvals instead
-    #                            -------------              -----------
-    #    and then we execute(full_statmt)         :-)
-
+    # POSS: simplify filter no more binary values triggering previous workaround
     for colinfo in USER_COLS:
         colname = colinfo[0]
 
-        # NB: each val already contains no quotes because of sanitize()
-        val = safe_recs.get(colname, None)
+        if not update_luid or colname != 'luid':
 
-        if val != None:
-            actual_len_dbg += 1
-            quotedstrval = ""
-            if colname != 'pic_file':
+            # NB: each val already contains no quotes because of sanitize()
+            val = safe_recs.get(colname, None)
+
+            if val != None:
+                actual_len_dbg += 1
                 quotedstrval = "'"+str(val)+"'"
 
                 mlog("DEBUG", "DB saving" + quotedstrval)
 
-            else:
-                mlog("DEBUG", "DB picture file is len0?", len(val) == 0 )
-                # str(val) for a bin is already quoted but has the 'b' prefix
-                quotedstrval = '_binary'+str(val)[1:]  # TODO check if \x needs to land in target sql ?
-
-                mlog("DEBUG", "DB added pic blob: " + quotedstrval[:25] + '...' + quotedstrval[-10:])
-
-            # anyways
-            db_tgtcols.append(colname)
-            db_qstrvals.append(quotedstrval)
+                # anyways
+                db_tgtcols.append(colname)
+                db_qstrvals.append(quotedstrval)
 
     if uactive:
         db_tgtcols.append('record_status')
@@ -528,9 +511,6 @@ def save_scholar(safe_recs, reg_db, uactive=True, update_luid=None):
                             db_vals_str
                        )
     else:
-        # we won't change the ID now
-        db_tgtcols.pop(0)
-        db_qstrvals.pop(0)
         set_full_str = ','.join([db_tgtcols[i] + '=' + db_qstrvals[i] for i in range(len(db_tgtcols))])
 
         # UPDATE: full_statement with formated values

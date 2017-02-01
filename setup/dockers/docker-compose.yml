@@ -35,6 +35,8 @@
          - ../../config:/comex2/config
          # similar logic used to expose inner logs
          - ../../logs:/comex2/logs
+         # and user images
+         - ../../data/shared_user_img:/comex2/data/shared_user_img
          # and to pass the ssl keys
          - /etc/ssl/certs/:/etc/ssl/certs/
          - /etc/ssl/private/:/etc/ssl/private/

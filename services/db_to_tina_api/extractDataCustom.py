@@ -293,11 +293,19 @@ class MyExtractor:
 
                 # semantic short ID
                 # ex "D::JFK/00001"
+
+                if 'pic_fname' in res3 and res3['pic_fname']:
+                    pic_src = '/data/shared_user_img/'+res3['pic_fname']
+                elif 'pic_url' in res3 and res3['pic_url']:
+                    pic_src = res3['pic_url']
+                else:
+                    pic_src = ''
+
                 ide="D::"+res3['initials']+("/%05i"%int(res3['luid']));
                 info['id'] = ide;
                 info['luid'] = res3['luid'];
                 info['doors_uid'] = res3['doors_uid'];
-                info['pic_url'] = res3['pic_url'];
+                info['pic_src'] = pic_src ;
                 info['first_name'] = res3['first_name'];
                 info['mid_initial'] = res3['middle_name'][0] if res3['middle_name'] else ""
                 info['last_name'] = res3['last_name'];
@@ -596,11 +604,10 @@ class MyExtractor:
                     color = '78,193,127'
 
                 content=""
-                pic_url=self.scholars[idNode]['pic_url']
+                pic_src=self.scholars[idNode]['pic_src']
 
-                # TODO double case pic_url or pic_file
-                if pic_url and pic_url != "":
-                    content += '<img  src="'+pic_url+'" width=' + str(self.imsize) + 'px  style=float:left;margin:5px>';
+                if pic_src and pic_src != "":
+                    content += '<img  src="'+pic_src+'" width=' + str(self.imsize) + 'px  style=float:left;margin:5px>';
                 else:
                     if len(self.scholars)<2000:
                         im_id = int(floor(randint(0, 11)))

@@ -43,56 +43,15 @@ foreach ($scholars as $scholar) {
                     <div class="row">
                         <div class="span9" align="justify">';
     $content .= '<div>';
-    if ($scholar['photo_url'] != null) {
-        $photo_url = $scholar['photo_url'] ;
+
+    // remote pictures url 'http://some.org/path/blabla.png'
+    //            or local '/data/shared_user_img/blabla.png'
+    if ($scholar['pic_src'] != null) {
+        $pic_src = $scholar['pic_src'] ;
         if ($_SERVER['REQUEST_SCHEME'] == 'https') {
-            $photo_url = preg_replace('/^http:/i', 'https:', $photo_url) ;
+            $pic_src = preg_replace('/^http:/i', 'https:', $pic_src) ;
         }
-        $content .= '<img style="margin: 7px 10px 10px 0px" src="'. $photo_url . '" width="' . $imsize . 'px" align="left">';
-    }
-    // raw binary picture
-    elseif ($scholar['pic_file'] != null) {
-
-        // create temp file
-        // -----------------
-
-
-
-        $finfo    = finfo_open(FILEINFO_MIME_TYPE);
-        // $mimetype = finfo_buffer($finfo, base64_encode(convert_uudecode($scholar['pic_file'])));
-        // $mimetype = finfo_buffer($finfo, convert_uudecode($scholar['pic_file']));
-        $mimetype = finfo_buffer($finfo, $scholar['pic_file']);
-        finfo_close($finfo);
-
-
-        // £TODO more experiments to fix display here
-
-        // find format
-        $raw_beginning = substr($scholar['pic_file'], 0,8);
-        $mimeguess = null;
-        $JPEG = "/^xffxd8xf/";
-        $GIF  = "/^GIF/";
-        $PNG  = "/^x89PNG/";
-        if (preg_match ($JPEG, $raw_beginning)) {
-            // echo "<p>got JPEG</p>";
-            $mimeguess="image/jpeg";
-        }
-        else if (preg_match ($GIF, $raw_beginning)) {
-            // echo "<p>got GIF</p>";
-            $mimeguess="image/gif";
-        }
-        else if (preg_match ($PNG, $raw_beginning)) {
-            // echo "<p>got PNG</p>";
-            $mimeguess="image/png";
-        }
-        else {
-            // echo "<p>no match :(</p>";
-        }
-
-        // debug
-        // echo "<p>mimetype:".$mimeguess."</p>";
-
-        $content .= '<img style="margin: 7px 10px 10px 0px" src="data:'.$mimeguess.';base64,'.$perhaps_decoded.'"/>';
+        $content .= '<img style="margin: 7px 10px 10px 0px" src="'. $pic_src . '" width="' . $imsize . 'px" align="left">';
     }
     else {
         if (count($scholars) < 2000) {

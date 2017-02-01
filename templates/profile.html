@@ -65,7 +65,7 @@
                <div id="information-example" class="our-vcard">
                    <ul>
                        <!-- TODO if empty then click on image starts showPicImg -->
-                       <img src="{{ (current_user.pic_url | safe) if current_user.info else '' }}" width="80px" style="float:left;margin:5px">
+                       <img src="{{ (current_user.pic_src | safe) if current_user.pic_src else ''}}" width="80px" style="float:left;margin:5px">
                        <li>
                            <b>{{ current_user.info.hon_title }}
                                {{ current_user.info.first_name }}
