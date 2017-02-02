@@ -97,18 +97,23 @@ class User(object):
 
         # normal user has a nice info dict
         if luid is not None:
-            self.uid = luid
-            self.info = get_full_scholar(luid)
-            self.json_info = jsonize_uinfo(self.info)
-            self.doors_uid = self.info['doors_uid']
-            self.empty = False
-
-            if 'pic_fname' in self.info and self.info['pic_fname']:
-                self.pic_src = '/data/shared_user_img/'+self.info['pic_fname']
-            elif 'pic_url' in self.info and self.info['pic_url']:
-                self.pic_src = self.info['pic_url']
+            luid = int(luid)
+            scholar = get_full_scholar(luid)
+            if scholar == None:
+                raise ValueError('this uid %i references a scholar that is not really in the DB... Did you change the database recently and have still some old cookies with IDs?' % luid)
             else:
-                self.pic_src = None
+                self.uid = luid
+                self.info = scholar
+                self.json_info = jsonize_uinfo(scholar)
+                self.doors_uid = self.info['doors_uid']
+                self.empty = False
+
+                if 'pic_fname' in self.info and self.info['pic_fname']:
+                    self.pic_src = '/data/shared_user_img/'+self.info['pic_fname']
+                elif 'pic_url' in self.info and self.info['pic_url']:
+                    self.pic_src = self.info['pic_url']
+                else:
+                    self.pic_src = None
 
         # user exists in doors but has nothing in scholars DB yet
         elif doors_uid is not None:
