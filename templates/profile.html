@@ -23,7 +23,9 @@
             <!-- <h2 class="oldstyle">Your Profile Info</h2> -->
                 <p class="mini-hero">
                     {% if current_user.empty %}
-                    Welcome to your new empty <strong>profile</strong> !
+                    <span class="bigger">
+                        Welcome to your new empty <strong>profile</strong> !
+                    </span>
                     {% else %}
                     Welcome to your profile page,
                     <strong>
@@ -93,7 +95,10 @@
                <!-- DOORS EMAIL -->
                <h3 class="formcat"> Login infos </h3>
                <p class="mini-hero">
-                  This email is your main ID. You may only change it via the <a href="http://{{ doors_connect }}/">Doors portal</a>.
+                  This email is your main ID. It won't be shown to the other users (but all the rest will).
+
+                  <br/>
+                  It will be soon possible to change it via the <a href="http://{{ doors_connect }}/">Doors portal</a>.
                </p>
 
                <!-- readonly version for current profile -->
@@ -373,7 +378,7 @@
                  <!-- ORG QUESTIONS -->
                  <div class="question">
                    <div class="input-group">
-                     <label for="org" class="smlabel input-group-addon">* Parent Institution</label>
+                     <label for="org" class="smlabel input-group-addon">Parent Institution</label>
                      <input id="org" name="org" maxlength="120"
                             type="text" class="form-control autocomp" placeholder='eg "CNRS" or "University of Oxford"'
                             value="{{ current_user.info.org }}">
@@ -382,7 +387,7 @@
 
                  <div class="question">
                    <div class="input-group">
-                     <label for="org_type" class="smlabel input-group-addon">* Institution Type</label>
+                     <label for="org_type" class="smlabel input-group-addon">Institution Type</label>
                      <select id="org_type" name="org_type"
                              class="custom-select form-control"
                              onchange="if(this.value=='other'){otherInstDivStyle.display = 'block'} else {otherInstDivStyle.display='none'}">
@@ -558,6 +563,8 @@
                     type="button" onclick="theUForm.elForm.submit()">
                   Save profile
             </button>
+
+            {% if not current_user.empty %}
             <button class="btn btn-lg btn-warning" id="delete_check"
                     type="button" data-toggle="modal" data-target="#deleteUserModal">
                   Delete profile
@@ -592,8 +599,7 @@
                 </div>
               </div>
             </div>
-
-
+            {% endif %}
 
           </div>
 

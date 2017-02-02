@@ -736,29 +736,66 @@ def rm_doors_temp_user(doors_uid):
 
 # another temp table, for the secret return tokens
 # of users coming back (= with a legacy profile)
-def save_legacy_user_rettoken(luid, rettok):
-    db = connect_db()
-    db_c = db.cursor()
-    stmt = "INSERT INTO legacy_temp_rettoks(luid, rettok) VALUES (%s,%s)"
-    db_c.execute(stmt, (luid, rettok))
-    db.commit()
-    db.close()
-
 def get_legacy_user(rettok):
     info_row = None
     db = connect_db()
     db_c = db.cursor(DictCursor)
     db_c.execute('''SELECT *
                     FROM legacy_temp_rettoks
-                    WHERE luid = "%s"''' % luid)
+                    WHERE rettok = "%s"''' % rettok)
     info_row = db_c.fetchone()
     db.close()
-    return info_row
+
+    if info_row and 'luid' in info_row:
+        return info_row['luid']
+    else:
+        return None
 
 def rm_legacy_user_rettoken(luid):
     db = connect_db()
     db_c = db.cursor()
     db_c.execute('''DELETE FROM legacy_temp_rettoks
-                    WHERE luid = "%s"''' % luid)
+                    WHERE luid = %s''' % int(luid))
     db.commit()
     db.close()
+
+
+def create_legacy_user_rettokens(
+            constraints=["record_status = 'legacy'"],
+            validity_months = 3
+            ):
+    """
+    Run this once for a new return campaign
+      - creates a return token for a set of users defined by @constraints
+      - also sets their valid_date to CURDATE + 3 months
+    """
+    db = connect_db()
+    db_c = db.cursor()
+
+    # creates the rettoks by doing a UUID() on each SELECTED luid
+    stmt1 = """
+            INSERT INTO legacy_temp_rettoks (luid, rettok)
+                SELECT luid, UUID() FROM scholars
+                WHERE %s
+           """ % " AND ".join(['(%s)'%c for c in constraints])
+    db_c.execute(stmt1)
+    db.commit()
+
+    # creates/updates the valid_date
+    # same constraints <=> same set of luids
+    stmt2 = """
+            UPDATE scholars
+                SET valid_date = DATE_ADD(CURDATE(), INTERVAL %i MONTH)
+                WHERE %s
+           """ % (int(validity_months),
+                  " AND ".join(['(%s)'%c for c in constraints]))
+    db_c.execute(stmt2)
+    db.commit()
+    db.close()
+
+    # stmt2 variant for all users from legacy_temp_rettoks
+    # stmt2 = """
+    #         UPDATE scholars JOIN legacy_temp_rettoks
+    #                         ON scholars.luid = legacy_temp_rettoks.uid
+    #             SET valid_date = DATE_ADD(CURDATE(), INTERVAL 3 MONTH);
+    #        """

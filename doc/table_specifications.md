@@ -148,7 +148,7 @@ CREATE TABLE doors_temp_user (
 -- (return tokens associated to a legacy user)
 CREATE TABLE legacy_temp_rettoks (
     luid             int(15) not null unique primary key,
-    rettok           varchar(255) not null unique,
+    rettok           char(36) not null unique,
     INDEX luid_index_ltempt (luid),
     INDEX rettok_index_ltempt (rettok)
 ) ;

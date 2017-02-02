@@ -5,6 +5,7 @@ div.uform {
   padding: 15px 30px 53px 30px;
   margin: 38px 38px 8px 38px;
   background-color: #ddd;
+  max-width: 950px;
 }
 
 /*div.uform::before {
@@ -18,6 +19,7 @@ div.uform {
 /* same but to put a panel-body inside */
 div.uform-nobg {
   margin: 38px 38px 8px 38px;
+  max-width: 900px;
 }
 
 @media(max-width:991px){

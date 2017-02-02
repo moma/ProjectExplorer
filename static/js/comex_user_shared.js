@@ -37,34 +37,35 @@ var cmxClt = (function() {
 
     // the target columns in DB: tuple (name, mandatory, group, type, section)
     cC.COLS = [
-                ["keywords",               true,       "plsfill", "at", "map_infos"],
-                    // ==> *keywords* table
-                ["hashtags",              false,       "plsfill", "at", "map_infos"],
-                    // ==> *hashtags* table
+        ["keywords",               true,       "plsfill", "at", "map_infos"],
+        // ==> *keywords* table
+        ["hashtags",              false,       "plsfill", "at", "map_infos"],
+        // ==> *hashtags* table
 
-                ["doors_uid",              true,       "auto"   , "t",  null],
-                ["last_modified_date",     true,       "auto"   , "d",  null],
-                ["hon_title",             false,       "plsfill", "t",  "basic_infos"],
-                ["email",                  true,       "plsfill", "t",  "login_infos"],
-                ["first_name",             true,       "plsfill", "t",  "basic_infos"],
-                ["middle_name",           false,       "pref",    "t",  "basic_infos"],
-                ["last_name",              true,       "plsfill", "t",  "basic_infos"],
-                ["country",                true,       "plsfill", "t",  "basic_infos"],
-                ["initials",               true,       "pref",    "t",  null],
-                ["position",               true,       "plsfill", "t",  "map_infos"],
-                ["interests_text",        false,       "pref",    "t",  "other_infos"],
-                ["gender",                false,       "plsfill", "m",  "other_infos"],
-                ["job_looking_date",      false,       "pref"   , "d",  "map_infos"],
-                ["home_url",              false,       "plsfill", "t",  "other_infos"],
-                ["pic_url",               false,       "pref"   , "t",  "other_infos"],
-                ["pic_file",              false,       "pref"   , "f",  "other_infos"],
-                // ==> *scholars* table
+        ["doors_uid",              true,       "auto"   , "t",  null],
+        ["last_modified_date",     true,       "auto"   , "d",  null],
+        ["hon_title",             false,       "plsfill", "t",  "basic_infos"],
+        ["email",                  true,       "plsfill", "t",  "login_infos"],
+        ["first_name",             true,       "plsfill", "t",  "basic_infos"],
+        ["middle_name",           false,       "pref",    "t",  "basic_infos"],
+        ["last_name",              true,       "plsfill", "t",  "basic_infos"],
+        ["country",                true,       "plsfill", "t",  "basic_infos"],
+        ["initials",               true,       "pref",    "t",  null],
+        ["position",               true,       "plsfill", "t",  "map_infos"],
+        ["interests_text",        false,       "pref",    "t",  "other_infos"],
+        ["gender",                false,       "plsfill", "m",  "other_infos"],
+        ["job_looking_date",      false,       "pref"   , "d",  "map_infos"],
+        ["home_url",              false,       "plsfill", "t",  "other_infos"],
+        ["pic_url",               false,       "pref"   , "t",  "other_infos"],
+        ["pic_file",              false,       "pref"   , "f",  "other_infos"],
+        // ==> *scholars* table
 
-                ["org",                   false,       "plsfill", "t", "org_infos"],
-                ["org_type",              false,       "plsfill", "m", "org_infos"],
-                ["team_lab",               true,       "plsfill", "t", "map_infos"],
-                ["org_city",              false,       "pref"   , "t", "org_infos"]]
-                // ==> *affiliations* table
+        ["org",                   false,       "plsfill", "t", "org_infos"],
+        ["org_type",              false,       "plsfill", "m", "org_infos"],
+        ["team_lab",               true,       "plsfill", "t", "map_infos"],
+        ["org_city",              false,       "pref"   , "t", "org_infos"]
+        // ==> *affiliations* table
+    ]
 
     // group "auto"    === filled by controllers
     // group "plsfill" === filled by user, ideally needed for a complete profile
@@ -309,12 +310,14 @@ var cmxClt = (function() {
         cC.uform.allForms[aFormId] = myUform
 
         // events
-        myUform.elForm.onkeyup = function(event) {
-            // console.info('..elForm '+myUform.id+' event:'+event.type)
-            return aValidationFun(myUform)
+        if (aValidationFun) {
+            myUform.elForm.onkeyup = function(event) {
+                // console.info('..elForm '+myUform.id+' event:'+event.type)
+                return aValidationFun(myUform)
+            }
+            myUform.elForm.onchange = myUform.elForm.onkeyup
+            myUform.elForm.onblur = myUform.elForm.onkeyup
         }
-        myUform.elForm.onchange = myUform.elForm.onkeyup
-        myUform.elForm.onblur = myUform.elForm.onkeyup
 
         // main interaction elements, if present
         // ------------------------
@@ -512,6 +515,9 @@ var cmxClt = (function() {
     // diagnosticParams are optional
     //
     cC.uform.simpleValidateAndMessage = function (aUform, diagnosticParams) {
+
+        // console.log(">> simpleValidateAndMessage on ", aUform.id)
+
         var diagnostic = cmxClt.uform.testFillField(aUform,
                                                     diagnosticParams)
         var isValid = diagnostic[0]

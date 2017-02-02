@@ -68,7 +68,7 @@ div.my-box {
 /* for intro text */
 .mini-hero {
   margin-top: 5px;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 20px;
   font-family: "Droid Sans", Calibri, "Helvetica Neue", Helvetica, sans-serif;
   padding-bottom: .3em;
@@ -192,6 +192,7 @@ div.my-box {
 
 /* page sections: style snippets from old bootstrap h2 */
 h2.oldstyle {
+  font-size: 26px;
   font-family: "Droid Sans", Calibri, Ubuntu, sans-serif;
   font-weight: bold;
 }
@@ -199,13 +200,13 @@ h2.oldstyle {
 @media(max-width:768px){
     /* sm */
     h2.oldstyle {
-      font-size: 24px !important;
+      font-size: 22px !important;
     }
 }
 @media(max-width:544px){
     /* xs */
     h2.oldstyle {
-      font-size: 18px !important;
+      font-size: 16px !important;
     }
 }
 

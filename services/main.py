@@ -467,34 +467,46 @@ def claim_profile():
     For returning users (access by token as GET arg)
     """
     if request.method == 'GET':
+        return_token = None
+        luid = None
 
         # identify who came back from the return token
         if 'token' in request.args:
-            return_token = sanitize(request.args['return_token'])
-
-            # we don't log him in but we put his data as return_user manually
-            # => this way we can use templating to show benign data
-
-            if luid is None:
-                return render_template(
-                    "message.html",
-                    message = """
-                        This is not the correct link. Don't attempt to claim a profile that is not yours.
-                        """
-                )
-            return_user = User
 
 
+            return_token = sanitize(request.args['token'])
+            print("clean token", return_token)
 
+            if (return_token
+                    and type(return_token) == str
+                    and len(return_token) == 36):
+                luid = db.get_legacy_user(return_token)
 
+            if luid is not None:
+                try:
+                    return_user = User(luid)
+                except ValueError:
+                    return_user = None
+
+        # claim failure cases
+        if return_token is None or luid is None or return_user is None:
+            mlog('INFO', 'failed claim profile attempt with return_token=%s, luid=%s' % str(return_token),str(luid))
+            return render_template(
+                "message.html",
+                message = """
+                    This is not the correct link. Don't attempt to claim a profile that is not yours.
+                    """
+            )
+
+        # claim success
         else:
-            return redirect(url_for('rootindex', _external=True))
-
-        # return render_template(
-        #     "profile.html"
-        #     # NB we also got user info in {{current_user.info}}
-        #     #                         and {{current_user.json_info}}
-        # )
+            mlog('INFO', "successful claim_profile attempt with luid=%i", luid)
+            # we *don't* log him in but we do put his data as return_user
+            # => this way we can use templating to show the data
+            return render_template(
+                "claim_profile.html",
+                return_user = return_user
+            )
     elif request.method == 'POST':
         return('not implemented yet')
 
@@ -716,7 +728,7 @@ def sanitize(value):
     str_val = str(value)
     clean_val = sub(r'^\s+', '', str_val)
     clean_val = sub(r'\s+$', '', clean_val)
-    san_val = sub(r'[^\w@\.-:,()# ]', '_', clean_val)
+    san_val = sub(r'[^\w@\.:,()# -]', '_', clean_val)
 
     if vtype not in [int, str]:
         raise ValueError("Value has an incorrect type %s" % str(vtype))
