@@ -218,8 +218,9 @@ class MyExtractor:
                             ON uid = luid
                         JOIN keywords
                             ON sch_kw.kwid = keywords.kwid
-                        -- LEFT JOIN affiliations
-                            -- ON affiliation_id = affid
+                        -- we still must keep affiliations in case it's used in the WHERE-clause...
+                        LEFT JOIN affiliations
+                            ON affiliation_id = affid
 
                         -- our filtering constraints fit here
                         WHERE  %s
