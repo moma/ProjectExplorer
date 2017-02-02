@@ -10,12 +10,23 @@ find . -type d -exec chmod 755 {} +
 # files don't need +x, except php
 find . -type f -exec chmod 644 {} +
 chmod 755 *.php
-chmod 755 services/*.py
-
-# data must be writeable
-chmod 774 data
-chmod 774 data/shared_mysql_data/  # <=> u+rwx, g+rwx, o+r
 
 # and all this belongs to www-data group
 chown -R :www-data .
+```
+
+For the `data` directory:
+  - we need root ownership for the mysql part (accessed by the mysql docker)
+  - and www-data for the pictures
+
+```
+# data must be writeable
+chmod 774 data
+
+# mysql data more restrictive
+find data/shared_mysql_data/ -type d -exec chmod 750 {} +
+find data/shared_mysql_data/ -type f -exec chmod 640 {} +
+
+# and accessible by docker user
+sudo chown -R 999:999 data/shared_mysql_data
 ```
