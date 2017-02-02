@@ -38,22 +38,25 @@ from flask_login  import fresh_login_required, login_required, \
 if __package__ == 'services':
     # when we're run via import
     print("*** comex services ***")
+    from services       import db
+    from services       import tools
+    from services.tools import mlog
     from services.user  import User, login_manager, doors_login, UCACHE
-    from services.text  import keywords
-    from services.tools import restparse, mlog, re_hash, REALCONFIG, format_err, pic_blob_to_filename
-    from services.db    import connect_db, get_or_create_tokitems, save_pairs_sch_tok, delete_pairs_sch_tok, get_or_create_affiliation, save_scholar, get_field_aggs, doors_uid_to_luid, rm_scholar, save_doors_temp_user, rm_doors_temp_user, find_scholar, save_legacy_user_rettoken, get_legacy_user, rm_legacy_user_rettoken
-    from services.db_to_tina_api.extractDataCustom import MyExtractor as MySQL
+    from services.db_to_tina_api.extractDataCustom import MyExtractor
+    # TODO move sanitize there
+    # from services.text  import keywords, sanitize
 else:
     # when this script is run directly
     print("*** comex services (dev server mode) ***")
+    import db
+    import tools
+    from tools          import mlog
     from user           import User, login_manager, doors_login, UCACHE
-    from text           import keywords
-    from tools          import restparse, mlog, re_hash, REALCONFIG, format_err, pic_blob_to_filename
-    from db             import connect_db, get_or_create_tokitems, save_pairs_sch_tok, delete_pairs_sch_tok, get_or_create_affiliation, save_scholar, get_field_aggs, doors_uid_to_luid, rm_scholar, save_doors_temp_user, rm_doors_temp_user, find_scholar, save_legacy_user_rettoken, get_legacy_user, rm_legacy_user_rettoken
-    from db_to_tina_api.extractDataCustom import MyExtractor as MySQL
+    from db_to_tina_api.extractDataCustom import MyExtractor
+    # from text           import keywords, sanitize
 
 # ============= app creation ============
-config = REALCONFIG
+config = tools.REALCONFIG
 
 app = Flask("services",
              static_folder=path.join(config['HOME'],"static"),
@@ -160,36 +163,29 @@ def unauthorized():
 # /!\ Routes are not prefixed by nginx in prod so we do it ourselves /!\
 # -----------------------------------------------------------------------
 @app.route("/")
-def rootstub():
+def rootindex():
     """
     Root of the comex2 app (new index)
     Demo CSS with alternative index (top like old index, then underneath some layout à la notebook)
 
-    also useful to be able to url_for('rootstub') when redirecting to php
+    also useful to be able to url_for('rootindex') when redirecting to php
     """
     return render_template(
-                            "alt_index.html"
+                            "rootindex.html"
                           )
+
+# # /test_base
+# @app.route('/test_base')
+# def test_base():
+#     return render_template(
+#         "base_layout.html"
+#     )
+
 
 # /services/
 @app.route(config['PREFIX']+'/')
 def services():
     return redirect(url_for('login', _external=True))
-
-# /services/test
-@app.route(config['PREFIX'] + '/test', methods=['GET'])
-def test_stuff():
-    return render_template("message.html",
-                           message = "<br/>".join([
-                               "dir(req)"        +  str(dir(request)),
-                               "requrl:"        +  request.url,
-                               "req.host:"      +  request.host,
-                               "req.url_root:"   +  request.url_root,
-                               "req.base_url:"    +  request.base_url,
-                               "req.full_path:"    +  request.full_path,
-                               "req.access_route:" + str(request.access_route)
-                               ])
-                           )
 
 # /services/api/aggs
 @app.route(config['PREFIX'] + config['API_ROUTE'] + '/aggs')
@@ -199,7 +195,7 @@ def aggs_api():
     """
     if 'field' in request.args:
         # field name itself is tested by db module
-        result = get_field_aggs(request.args['field'])
+        result = db.get_field_aggs(request.args['field'])
         return dumps(result)
 
     else:
@@ -214,8 +210,8 @@ def graph_api():
     (original author S. Castillo)
     """
     if 'qtype' in request.args:
-        graphdb=MySQL(config['SQL_HOST'])
-        scholars = graphdb.getScholarsList(request.args['qtype'], restparse(request.query_string.decode()))
+        graphdb = MyExtractor(config['SQL_HOST'])
+        scholars = graphdb.getScholarsList(request.args['qtype'], tools.restparse(request.query_string.decode()))
         if scholars and len(scholars):
             # Data Extraction
             # (getting details for selected scholars into graph object)
@@ -252,7 +248,7 @@ def login():
 
         # testing the captcha answer
         captcha_userinput = request.form['my-captcha']
-        captcha_userhash = re_hash(captcha_userinput)
+        captcha_userhash = tools.re_hash(captcha_userinput)
         captcha_verifhash = int(request.form['my-captchaHash'])
 
         # dbg
@@ -283,21 +279,25 @@ def login():
 
             mlog("DEBUG", "doors_login returned id '%s'" % doors_uid)
 
-            luid = doors_uid_to_luid(doors_uid)
+            luid = db.doors_uid_to_luid(doors_uid)
 
             if luid:
                 # normal user
                 user = User(luid)
             else:
                 # user exists in doors but has no comex profile nor luid yet
-                save_doors_temp_user(doors_uid, email)  # preserve the email
-                user = User(None, doors_uid=doors_uid)  # get a user.empty
+                db.save_doors_temp_user(doors_uid, email)  # preserve the email
+                user = User(None, doors_uid=doors_uid)     # get a user.empty
 
             # =========================
             login_ok = login_user(user)
             # =========================
 
-            mlog('INFO', 'login of %s (%s) was %s' % (str(luid), doors_uid, str(login_ok)))
+            mlog('INFO',
+                 'login of %s (%s) was %s' % (str(luid),
+                                              doors_uid,
+                                              str(login_ok))
+            )
 
             # TODO check cookie
             # login_ok = login_user(User(luid), remember=True)
@@ -305,45 +305,45 @@ def login():
             #                            creates REMEMBER_COOKIE_NAME
             #                        which is itself bound to session cookie
 
-            if login_ok:
-                if called_as_api:
-                    # menubar login will do the redirect
-                    return('', 204)
-
-                elif user.empty:
-                    mlog('DEBUG',"empty user redirected to profile")
-                    # we go straight to profile for the him to create infos
-                    return(redirect(url_for('profile', _external=True)))
-
-                # normal call, normal user
-                else:
-                    mlog('DEBUG', "normal user login redirect")
-                    next_url = request.args.get('next', None)
-
-                    if not next_url:
-                        return(redirect(url_for('profile', _external=True)))
-                    else:
-                        next_url = unquote(next_url)
-                        mlog("DEBUG", "login with next_url:", next_url)
-                        safe_flag = is_safe_url(next_url, request.host_url)
-                        # normal next_url
-                        if safe_flag:
-                            # if relative
-                            if next_url[0] == '/':
-                                next_url = url_for('rootstub', _external=True) + next_url[1:]
-                                mlog("DEBUG", "reabsoluted next_url:", next_url)
-
-                            return(redirect(next_url))
-                        else:
-                            # server name is different than ours
-                            # in next_url so we won't go there
-                            return(redirect(url_for('rootstub', _external=True)))
-            else:
-                # failed to login_user()
+            if not login_ok:
+                # break: failed to login_user()
                 render_template(
                     "message.html",
                     message = "There was an unknown problem with the login."
                 )
+
+            if called_as_api:
+                # menubar login will do the redirect
+                return('', 204)
+
+            elif user.empty:
+                mlog('DEBUG',"empty user redirected to profile")
+                # we go straight to profile for the him to create infos
+                return(redirect(url_for('profile', _external=True)))
+
+            # normal call, normal user
+            else:
+                mlog('DEBUG', "normal user login redirect")
+                next_url = request.args.get('next', None)
+
+                if not next_url:
+                    return(redirect(url_for('profile', _external=True)))
+                else:
+                    next_url = unquote(next_url)
+                    mlog("DEBUG", "login with next_url:", next_url)
+                    safe_flag = is_safe_url(next_url, request.host_url)
+                    # normal next_url
+                    if safe_flag:
+                        # if relative
+                        if next_url[0] == '/':
+                            next_url = url_for('rootindex', _external=True) + next_url[1:]
+                            mlog("DEBUG", "reabsoluted next_url:", next_url)
+
+                        return(redirect(next_url))
+                    else:
+                        # server name is different than ours
+                        # in next_url so we won't go there
+                        return(redirect(url_for('rootindex', _external=True)))
 
 
 # /services/user/logout/
@@ -351,15 +351,7 @@ def login():
 def logout():
     logout_user()
     mlog('INFO', 'logged out previous user')
-    return redirect(url_for('rootstub', _external=True))
-
-# /test_base
-@app.route('/test_base')
-def test_base():
-    return render_template(
-        "base_layout.html"
-    )
-
+    return redirect(url_for('rootindex', _external=True))
 
 # /services/user/profile/
 @app.route(config['PREFIX'] + config['USR_ROUTE'] + '/profile/', methods=['GET', 'POST'])
@@ -401,11 +393,12 @@ def profile():
         # special action DELETE!!
         if 'delete_user' in request.form and request.form['delete_user'] == 'on':
             the_id_to_delete = current_user.uid
-            mlog("INFO", "executing DELETE scholar's data at the request of user %s" % str(the_id_to_delete))
+            mlog("INFO",
+                 "executing DELETE scholar's data at the request of user %s" % str(the_id_to_delete))
             logout_user()
-            rm_scholar(the_id_to_delete)
+            db.rm_scholar(the_id_to_delete)
             if the_id_to_delete in UCACHE: UCACHE.pop(the_id_to_delete)
-            return(redirect(url_for('rootstub', _external=True)))
+            return(redirect(url_for('rootindex', _external=True)))
 
 
         else:
@@ -414,7 +407,8 @@ def profile():
 
             # special action CREATE for a new user already known to doors
             if current_user.empty:
-                mlog("DEBUG", "create profile from new doors user", current_user.doors_uid)
+                mlog("DEBUG",
+                     "create profile from new doors user %s" % current_user.doors_uid)
                 # remove the empty luid
                 our_records.pop('luid')
 
@@ -429,11 +423,11 @@ def profile():
                     return render_template("thank_you.html",
                                 form_accepted = False,
                                 backend_error = True,
-                                debug_message = format_err(perr)
+                                debug_message = tools.format_err(perr)
                             )
 
                 # if all went well we can remove the temporary doors user data
-                rm_doors_temp_user(current_user.doors_uid)
+                db.rm_doors_temp_user(current_user.doors_uid)
                 logout_user()
                 # .. and login the user in his new mode
                 login_user(User(luid))
@@ -446,21 +440,23 @@ def profile():
 
             # normal action UPDATE
             else:
-                mlog("MOREDEBUG", "UPDATE")
                 try:
                     luid = save_form(our_records, update_flag = True)
 
                 except Exception as perr:
-                    return render_template("thank_you.html",
-                                            form_accepted = False,
-                                            backend_error = True,
-                                            debug_message = format_err(perr)
-                                           )
+                    return render_template(
+                        "thank_you.html",
+                        form_accepted = False,
+                        backend_error = True,
+                        debug_message = tools.format_err(perr)
+                    )
 
-                return render_template("thank_you.html",
-                                        debug_records = (our_records if app.config['DEBUG'] else {}),
-                                        form_accepted = True,
-                                        backend_error = False)
+                return render_template(
+                    "thank_you.html",
+                    debug_records = (our_records if app.config['DEBUG'] else {}),
+                    form_accepted = True,
+                    backend_error = False
+                )
 
 
 
@@ -520,7 +516,7 @@ def register():
 
         # 1 - testing the captcha answer
         captcha_userinput = request.form['my-captcha']
-        captcha_userhash = re_hash(captcha_userinput)
+        captcha_userhash = tools.re_hash(captcha_userinput)
         captcha_verifhash = int(request.form['my-captchaHash'])
 
         # dbg
@@ -546,36 +542,38 @@ def register():
                 luid = save_form(clean_records)
 
             except Exception as perr:
-                return render_template("thank_you.html",
-                                        form_accepted = False,
-                                        backend_error = True,
-                                        debug_message = format_err(perr)
-                                       )
+                return render_template(
+                    "thank_you.html",
+                    form_accepted = False,
+                    backend_error = True,
+                    debug_message = tools.format_err(perr)
+                )
 
             # all went well: we can login the user
             login_user(User(luid))
 
-        return render_template("thank_you.html",
-                                debug_records = (clean_records if app.config['DEBUG'] else {}),
-                                form_accepted = True,
-                                backend_error = False,
-                                message = """
-                                  You can now visit elements of the members section:
-                                  <ul style="list-style-type: none;">
-                                      <li>
-                                          <span class="glyphicon glyphicon glyphicon-education"></span>&nbsp;&nbsp;
-                                          <a href="/services/user/profile"> Your Profile </a>
-                                      </li>
-                                      <li>
-                                          <span class="glyphicon glyphicon-eye-open"></span>&nbsp;&nbsp;
-                                          <a href='/explorerjs.html?type="uid"&nodeidparam=%(luid)i'> Your Map </a>
-                                      </li>
-                                      <li>
-                                          <span class="glyphicon glyphicon glyphicon-stats"></span>&nbsp;&nbsp;
-                                          <a href='/print_scholar_directory.php?query=%(luid)i'> Your Neighboor Stats </a>
-                                      </li>
-                                  </ul>
-                                """ % {'luid': luid })
+        return render_template(
+            "thank_you.html",
+            debug_records = (clean_records if app.config['DEBUG'] else {}),
+            form_accepted = True,
+            backend_error = False,
+            message = """
+              You can now visit elements of the members section:
+              <ul style="list-style-type: none;">
+                  <li>
+                      <span class="glyphicon glyphicon glyphicon-education"></span>&nbsp;&nbsp;
+                      <a href="/services/user/profile"> Your Profile </a>
+                  </li>
+                  <li>
+                      <span class="glyphicon glyphicon-eye-open"></span>&nbsp;&nbsp;
+                      <a href='/explorerjs.html?type="uid"&nodeidparam=%(luid)i'> Your Map </a>
+                  </li>
+                  <li>
+                      <span class="glyphicon glyphicon glyphicon-stats"></span>&nbsp;&nbsp;
+                      <a href='/print_scholar_directory.php?query=%(luid)i'> Your Neighboor Stats </a>
+                  </li>
+              </ul>
+            """ % {'luid': luid })
 
 
 ########### SUBS ###########
@@ -585,10 +583,13 @@ def save_form(clean_records, update_flag=False):
     """
 
     # A) a new DB connection
-    reg_db = connect_db(config)
+    reg_db = db.connect_db(config)
 
     # B) read/fill the affiliation table to get associated id
-    clean_records['affiliation_id'] = get_or_create_affiliation(clean_records, reg_db)
+    clean_records['affiliation_id'] = db.get_or_create_affiliation(
+        clean_records,
+        reg_db
+    )
 
     # C) create/update record into the primary user table
     # ----------------------------------------------------
@@ -596,9 +597,9 @@ def save_form(clean_records, update_flag=False):
     luid = None
     if update_flag:
         luid = clean_records['luid']
-        save_scholar(clean_records, reg_db, update_luid=luid)
+        db.save_scholar(clean_records, reg_db, update_luid=luid)
     else:
-        luid = save_scholar(clean_records, reg_db)
+        luid = db.save_scholar(clean_records, reg_db)
 
 
     # D) read/fill each keyword and save the (uid <=> kwid) pairings
@@ -609,14 +610,22 @@ def save_form(clean_records, update_flag=False):
             tok_table = tok_field
             map_table = "sch_" + ('kw' if intable == 'keywords' else 'ht')
 
-            tokids = get_or_create_tokitems(clean_records[tok_field], reg_db, tok_table)
+            tokids = db.get_or_create_tokitems(
+                clean_records[tok_field],
+                reg_db,
+                tok_table
+            )
 
                 # TODO class User method !!
                 # POSS selective delete ?
             if update_flag:
-                delete_pairs_sch_tok(luid, reg_db, map_table)
+                db.delete_pairs_sch_tok(luid, reg_db, map_table)
 
-            save_pairs_sch_tok([(luid, tokid) for tokid in tokids], reg_db, map_table)
+            db.save_pairs_sch_tok(
+                [(luid, tokid) for tokid in tokids],
+                reg_db,
+                map_table
+            )
 
     # F) end connection
     reg_db.close()
@@ -676,7 +685,8 @@ def read_record_from_request(request):
     # splits for kw_array and ht_array
     for tok_field in ['keywords', 'hashtags']:
         if tok_field in clean_records:
-            mlog("DEBUG", "in clean_records, found a field to tokenize: %s" % tok_field)
+            mlog("DEBUG",
+                 "in clean_records, found a field to tokenize: %s" % tok_field)
             temp_array = []
             for tok in clean_records[tok_field].split(','):
                 tok = sanitize(tok)
@@ -686,8 +696,8 @@ def read_record_from_request(request):
             clean_records[tok_field] = temp_array
 
     # special treatment for pic_file
-    if hasattr(request, "files") and 'pic_file' in request.files:
-        new_fname = pic_blob_to_filename(request.files['pic_file'])
+    if hasattr(request, "files") and 'pic_file' in request.files and request.files['pic_file']:
+        new_fname = tools.pic_blob_to_filename(request.files['pic_file'])
         clean_records['pic_fname'] = new_fname
         mlog("DEBUG", "new_fname", new_fname)
 
@@ -697,9 +707,10 @@ def read_record_from_request(request):
 # TODO move to text submodules
 def sanitize(value):
     """
-    simple and radical: leaves only alphanum and '.' '-' ':' ',' '(', ')', '#', ' '
+    simple and radical: leaves only alphanum and '@' '.' '-' ':' ',' '(', ')', '#', ' '
 
-    TODO better
+    One of the main goals is to remove ';'
+    POSS better
     """
     vtype = type(value)
     str_val = str(value)
@@ -722,7 +733,8 @@ def is_safe_url(target, host_url):
     """
     ref_url = urlparse(host_url)
     test_url = urlparse(urljoin(host_url, target))
-    return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
+    return (test_url.scheme in ('http', 'https')
+            and ref_url.netloc == test_url.netloc)
 
 
 ########### MAIN ###########
