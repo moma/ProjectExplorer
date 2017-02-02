@@ -278,11 +278,11 @@ def rm_scholar(luid):
     """
     db = connect_db()
     db_c = db.cursor()
-    stmt = 'DELETE FROM scholars WHERE luid = %s' % luid
+    stmt = 'DELETE FROM scholars WHERE luid = %s' % str(luid)
     mlog("DEBUGSQL", "rm_scholar STATEMENT:\n-- SQL\n%s\n-- /SQL" % stmt)
     dbresp = db_c.execute(stmt)
     db.commit()
-    print("DELETED, with", dbresp)
+    mlog('INFO', 'deleted user %i at his request' % int(luid))
     db.close()
 
 
@@ -456,6 +456,32 @@ def get_full_scholar(uid):
 
     # full user info as a dict
     return urow_dict
+
+
+def find_scholar(some_key, some_str_value):
+    """
+    Get the luid of a scholar based on some str value
+
+    To make sense, the key should be a unique one
+    but this function doesn't check it !
+    """
+    luid = None
+    db = connect_db()
+    db_c = db.cursor(DictCursor)
+
+    try:
+        db_c.execute('''SELECT luid
+                        FROM scholars
+                        WHERE %s = "%s"
+                        ''' % (some_key, some_str_value))
+        first_row = db_c.fetchone()
+        if first_row:
+            luid = first_row['luid']
+    except:
+        mlog('WARNING', 'unsuccessful attempt to identify a scholar on key %s' % some_key)
+    db.close()
+    return luid
+
 
 def save_scholar(safe_recs, reg_db, uactive=True, update_luid=None):
     """
@@ -677,6 +703,9 @@ def get_or_create_affiliation(org_info, comex_db):
     return the_aff_id
 
 
+
+# for users coming in from doors with no profile yet, we keep their doors infos (email, also name in the future)
+
 def save_doors_temp_user(doors_uid, doors_email):
     db = connect_db()
     db_c = db.cursor()
@@ -701,5 +730,35 @@ def rm_doors_temp_user(doors_uid):
     db_c = db.cursor()
     db_c.execute('''DELETE FROM doors_temp_user
                     WHERE doors_uid = "%s"''' % doors_uid)
+    db.commit()
+    db.close()
+
+
+# another temp table, for the secret return tokens
+# of users coming back (= with a legacy profile)
+def save_legacy_user_rettoken(luid, rettok):
+    db = connect_db()
+    db_c = db.cursor()
+    stmt = "INSERT INTO legacy_temp_rettoks(luid, rettok) VALUES (%s,%s)"
+    db_c.execute(stmt, (luid, rettok))
+    db.commit()
+    db.close()
+
+def get_legacy_user(rettok):
+    info_row = None
+    db = connect_db()
+    db_c = db.cursor(DictCursor)
+    db_c.execute('''SELECT *
+                    FROM legacy_temp_rettoks
+                    WHERE luid = "%s"''' % luid)
+    info_row = db_c.fetchone()
+    db.close()
+    return info_row
+
+def rm_legacy_user_rettoken(luid):
+    db = connect_db()
+    db_c = db.cursor()
+    db_c.execute('''DELETE FROM legacy_temp_rettoks
+                    WHERE luid = "%s"''' % luid)
     db.commit()
     db.close()

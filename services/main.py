@@ -41,7 +41,7 @@ if __package__ == 'services':
     from services.user  import User, login_manager, doors_login, UCACHE
     from services.text  import keywords
     from services.tools import restparse, mlog, re_hash, REALCONFIG, format_err, pic_blob_to_filename
-    from services.db    import connect_db, get_or_create_tokitems, save_pairs_sch_tok, delete_pairs_sch_tok, get_or_create_affiliation, save_scholar, get_field_aggs, doors_uid_to_luid, rm_scholar, save_doors_temp_user, rm_doors_temp_user
+    from services.db    import connect_db, get_or_create_tokitems, save_pairs_sch_tok, delete_pairs_sch_tok, get_or_create_affiliation, save_scholar, get_field_aggs, doors_uid_to_luid, rm_scholar, save_doors_temp_user, rm_doors_temp_user, find_scholar, save_legacy_user_rettoken, get_legacy_user, rm_legacy_user_rettoken
     from services.db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 else:
     # when this script is run directly
@@ -49,7 +49,7 @@ else:
     from user           import User, login_manager, doors_login, UCACHE
     from text           import keywords
     from tools          import restparse, mlog, re_hash, REALCONFIG, format_err, pic_blob_to_filename
-    from db             import connect_db, get_or_create_tokitems, save_pairs_sch_tok, delete_pairs_sch_tok, get_or_create_affiliation, save_scholar, get_field_aggs, doors_uid_to_luid, rm_scholar, save_doors_temp_user, rm_doors_temp_user
+    from db             import connect_db, get_or_create_tokitems, save_pairs_sch_tok, delete_pairs_sch_tok, get_or_create_affiliation, save_scholar, get_field_aggs, doors_uid_to_luid, rm_scholar, save_doors_temp_user, rm_doors_temp_user, find_scholar, save_legacy_user_rettoken, get_legacy_user, rm_legacy_user_rettoken
     from db_to_tina_api.extractDataCustom import MyExtractor as MySQL
 
 # ============= app creation ============
@@ -461,6 +461,46 @@ def profile():
                                         debug_records = (our_records if app.config['DEBUG'] else {}),
                                         form_accepted = True,
                                         backend_error = False)
+
+
+
+# /services/user/claim_profile/
+@app.route(config['PREFIX'] + config['USR_ROUTE'] + '/claim_profile/', methods=['GET', 'POST'])
+def claim_profile():
+    """
+    For returning users (access by token as GET arg)
+    """
+    if request.method == 'GET':
+
+        # identify who came back from the return token
+        if 'token' in request.args:
+            return_token = sanitize(request.args['return_token'])
+
+            # we don't log him in but we put his data as return_user manually
+            # => this way we can use templating to show benign data
+
+            if luid is None:
+                return render_template(
+                    "message.html",
+                    message = """
+                        This is not the correct link. Don't attempt to claim a profile that is not yours.
+                        """
+                )
+            return_user = User
+
+
+
+
+        else:
+            return redirect(url_for('rootindex', _external=True))
+
+        # return render_template(
+        #     "profile.html"
+        #     # NB we also got user info in {{current_user.info}}
+        #     #                         and {{current_user.json_info}}
+        # )
+    elif request.method == 'POST':
+        return('not implemented yet')
 
 
 # /services/user/register/

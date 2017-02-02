@@ -1,4 +1,11 @@
-### Set up the tables
+### Setting up the tables in SQL
+
+
+
+**NB:**
+If you started with `docker-compose up`, you **don't** need to do this at all !
+
+Use this only if you want to recreate the app's tables manually, say, for development.
 
 ```
 # connect to your sql host or container
@@ -129,10 +136,20 @@ CREATE TABLE linked_ids(
     FOREIGN KEY (uid) REFERENCES scholars(luid) ON DELETE CASCADE
 );
 
--- separate table for incoming doors users without a profile in scholars
+-- separate buffer table for incoming doors users without a profile in scholars
 -- (allows us to avoid reasking them for their doors info like email)
 CREATE TABLE doors_temp_user (
     doors_uid            char(36) not null unique primary key,
     email                varchar(255) not null unique,
     INDEX duid_index_dtempu (doors_uid)
 ) ;
+
+-- separate buffer table for rettoks
+-- (return tokens associated to a legacy user)
+CREATE TABLE legacy_temp_rettoks (
+    luid             int(15) not null unique primary key,
+    rettok           varchar(255) not null unique,
+    INDEX luid_index_ltempt (luid),
+    INDEX rettok_index_ltempt (rettok)
+) ;
+```
