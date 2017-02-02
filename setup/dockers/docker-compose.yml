@@ -4,12 +4,14 @@
       comex_db:
         image: comex2_mysql_server:latest
         build: ./comex2_mysql_server
+        container_name: comex_db
         environment:
          - MYSQL_ROOT_PASSWORD=very-safe-pass
         volumes:
          - ../../data/shared_mysql_data:/var/lib/mysql
 
       doors_test:
+        container_name: doors_test
         image: minidoors:latest
         build: ./minidoors
         ports:
@@ -21,6 +23,7 @@
      #                                          and DOORS_PORT)
 
       comex_test:
+        container_name: comex_test
         image: comex2_services:testing
         build: ./comex2_services
         # logs will show all that's printed to STDOUT with tty:true

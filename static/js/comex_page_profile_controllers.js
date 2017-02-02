@@ -38,7 +38,6 @@ function selectSavedMenus(uinfo) {
     }
 }
 
-selectSavedMenus(uinfo)
 
 // initialize form controllers
 var theUForm = cmxClt.uform.Form(
@@ -57,6 +56,8 @@ var theUForm = cmxClt.uform.Form(
 
 var deleteUser = document.getElementById('delete_user')
 deleteUser.checked = false
+
+selectSavedMenus(uinfo)
 
 // memory
 var formValid = false

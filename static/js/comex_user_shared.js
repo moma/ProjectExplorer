@@ -329,6 +329,11 @@ var cmxClt = (function() {
         myUform.elTimestamp = document.getElementById(timestampId)
         myUform.elSubmitBtn = document.getElementById(submitBtnId)
 
+        // optional: init midname
+        if (mnDiv) {
+            cC.uform.hideMidName()
+        }
+
         // optional: init mtis
         if (fParams.multiTextinputs) {
             myUform.mtiStock = {}  // arrays of inputs per fieldName

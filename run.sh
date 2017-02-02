@@ -19,7 +19,7 @@ fi
 # anyway we always need a simple web server to run the services
 
 echo "binding gunicorn to unix:/tmp/comex.sock"
-gunicorn -b unix:/tmp/comex.sock services.main:app --workers 8
+gunicorn -b unix:/tmp/comex.sock services.main:app --workers 2
 
 # export COMEX_HOST=$(grep -oP '(?<=COMEX_HOST=).*' config/parametres_comex.ini)
 # export COMEX_PORT=$(grep -oP '(?<=COMEX_PORT=).*' config/parametres_comex.ini)

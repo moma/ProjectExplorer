@@ -42,3 +42,5 @@ CMD sbt "project lab" run
 
 # ports
 EXPOSE 8989
+
+# TODO expose ssl
