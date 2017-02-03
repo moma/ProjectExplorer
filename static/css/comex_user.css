@@ -2,10 +2,25 @@
 
 /* form content for reg, profile, login, etc.... */
 div.uform {
-  padding: 15px 30px 53px 30px;
-  margin: 38px 38px 8px 38px;
+  /*padding: 15px 30px 53px 30px;*/
+  padding: 0px 5px 3px 5px;
+  margin: 7px 5px 3px 5px;
   background-color: #ddd;
-  max-width: 950px;
+  max-width: 57em;           /* FORMWIDTH */
+}
+
+/* form content for reg, profile, login, etc.... */
+div.uform-white {
+  padding: 0px 5px 3px 5px;
+  margin: 7px 5px 3px 5px;
+  background-color: #fff;
+  max-width: 57em;           /* FORMWIDTH */
+  border-radius: 5px;
+}
+
+div.uform-white .ccsection-heading,
+div.uform-white .ccsection-uform-body {
+    background-color: #fff;
 }
 
 /*div.uform::before {
@@ -16,17 +31,40 @@ div.uform {
     color: #000;
 }*/
 
-/* same but to put a panel-body inside */
+/* same but no margin and no color: good to put a panel-body inside */
 div.uform-nobg {
-  margin: 38px 38px 8px 38px;
-  max-width: 900px;
+  max-width: 57em;           /* FORMWIDTH */
+}
+
+.uform.readonly input,
+.uform.readonly label,
+.uform-white.readonly input,
+.uform-white.readonly label {
+    color: #888;
+}
+
+.uform.readonly .tagbox-container,
+.uform-white.readonly .tagbox-container {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.uform.readonly .tagbox-container input,
+.uform-white.readonly .tagbox-container input {
+    display: none;
+}
+.uform.readonly .tagbox-container label,
+.uform-white.readonly .tagbox-container label {
+    border-top: none;
+    border-left: none;
+    border-bottom: none;
+    border-right: 1px solid #ccc;;
 }
 
 @media(max-width:991px){
     /* sm and md */
     div.uform, div.uform-nobg {
         padding: 0;
-        margin: 12px 12px 2px 12px;
+        margin: 5px 0px 0px 5px;
     }
 }
 
@@ -54,8 +92,13 @@ p#doors_ret_msg {
   border-radius: 2em;
   padding: 1em 3em;
   text-align: center;
+  max-width: 57em;
 }
 
+/* ex: profile overview in readonly */
+.readonly.panel-body {
+    background-color: #ddd;
+}
 
 /* a fixed div for validation messsages */
 .menu-right-fixed {
@@ -78,7 +121,7 @@ p#doors_ret_msg {
 .question {
   padding: 0 1em;
   margin-bottom: 2em;
-  max-width: 52em;           /* FORMWIDTH */
+  max-width: 57em;           /* FORMWIDTH */
 }
 
 @media(max-width:991px){
@@ -175,24 +218,17 @@ input.readonly {
     border-bottom: 3px solid #ccc;
 }
 
-/* collapsible sections */
-h2.ccsection {
-  padding-top: 1em;
-  font-size: 1.5em;
-  font-family: "Droid Sans", Calibri, Ubuntu, sans-serif;
-  font-weight: bold;
-}
 
-/* big categories: like form sections etc. */
+/* form categories: like form sections etc. */
 h3.formcat {
-  font-size: 20px;
+  font-size: 16px;
   padding-top: 1em;
   font-weight: bold;
   color: #910;
 }
 
 h3.formcatfirst {
-  font-size: 20px;
+  font-size: 16px;
   margin-top: .2em;
   font-weight: bold;
   color: #910;

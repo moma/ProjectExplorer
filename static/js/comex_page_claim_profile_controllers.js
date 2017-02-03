@@ -25,6 +25,7 @@ function selectSavedMenus(uinfo) {
         if (colType == 'm') {
             var colName = cmxClt.COLS[i][0]
             var chosenV = uinfo[colName]
+            console.log("..selectSavedMenus", colName, chosenV)
             var selectElt = document.getElementById(colName)
             if (selectElt) {
                 var myOption = selectElt.querySelector(`option[value="${chosenV}"]`)
@@ -42,6 +43,19 @@ function selectSavedMenus(uinfo) {
     }
 }
 
+// the contents are conditioned on what return_user had in his info
+
+var presentMtis = []
+if (uinfo.keywords.length) {
+    presentMtis.push(
+        {'id':'keywords', 'prevals': uinfo.keywords}
+    )
+}
+if (uinfo.hashtags.length) {
+    presentMtis.push(
+        {'id':'hashtags', 'prevals': uinfo.hashtags,'color': "#23A"}
+    )
+}
 
 // initialize form controllers
 var theUForm = cmxClt.uform.Form(
@@ -50,16 +64,8 @@ var theUForm = cmxClt.uform.Form(
     // onkeyup function
     null,
     // other params
-    { 'multiTextinputs': [{'id':'keywords',
-                           'prevals': uinfo.keywords},
-                          {'id':'hashtags',
-                           'prevals': uinfo.hashtags,
-                           'color': "#23A"}]
-    }
+    { 'multiTextinputs': presentMtis }
 )
-
-var deleteUser = document.getElementById('delete_user')
-deleteUser.checked = false
 
 selectSavedMenus(uinfo)
 

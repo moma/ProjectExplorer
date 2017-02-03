@@ -399,13 +399,13 @@ function htmlfied_nodesatts(elems){
             socnodes.push(information);
         } else {
             if(node.type==catSoc){
-                information += '<li><b>' + node.label + '</b></li>';
                 if(node.htmlCont==""){
+                    information += '<li><b>' + node.label + '</b></li>';
                     if (!isUndef(node.level)) {
                         information += '<li>' + node.level + '</li>';
                     }
                 } else {
-                    information += '<li>' + $("<div/>").html(node.htmlCont).text() + '</li>';
+                    information += $("<div/>").html(node.htmlCont).text() ;
                 }
                 socnodes.push(information)
             }
@@ -451,9 +451,7 @@ function updateLeftPanel_fix() {
 
         // getTopPapers("semantic");
 
-    informationDIV += '<br><h4>Information:</h4><ul>';
-    informationDIV += htmlfied_nodesatts( getNodeIDs(selections) ).join("<br>\n")
-    informationDIV += '</ul><br>';
+    informationDIV = htmlfied_nodesatts( getNodeIDs(selections) ).join("<br>\n")
 
     //using the readmore.js
     // ive put a limit for nodes-name div

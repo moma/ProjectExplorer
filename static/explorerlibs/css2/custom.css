@@ -2,17 +2,17 @@
 .loader{
     text-align:center;
     transform: translate(0, 50%) !important;
-    -ms-transform: translate(0, 50%) !important;  /*IE 9*/ 
+    -ms-transform: translate(0, 50%) !important;  /*IE 9*/
     -webkit-transform: translate(0, 50%) !important;  /*Safari and Chrome */
 }
 
 
 
-.navbar { 
+.navbar {
 	margin-bottom:1px;
 }
 
-#defaultop{	
+#defaultop{
     min-height: 5%;
     max-height: 10%;
 }
@@ -60,10 +60,10 @@
 /*.selection-item{
     display:inline-block;
     border:solid 1px;
-    -moz-border-radius: 6px; 
-    -webkit-border-radius: 6px; 
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
     -khtml-border-radius: 6px;'+
-    border-color:#BDBDBD; 
+    border-color:#BDBDBD;
     padding:0px 2px 0px 2px;
     margin:1px 0px 1px 0px;
     cursor: pointer;
@@ -90,10 +90,10 @@
     display:inline-block;
     border:solid 1px;
     /*box-shadow: 0px 0px 0px 1px rgba(0,0,0,0.3); */
-    -moz-border-radius: 6px; 
-    -webkit-border-radius: 6px; 
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
     -khtml-border-radius: 6px;'+
-    border-color:#BDBDBD; 
+    border-color:#BDBDBD;
     padding:0px 2px 0px 2px;
     margin:1px 0px 1px 0px;
     cursor: pointer;
@@ -122,7 +122,7 @@
 }
 
 .gradient {
-    background-color: #f0f0f8; 
+    background-color: #f0f0f8;
     background-image: -webkit-radial-gradient(#ffffff, #d8d8e0); background-image: -moz-radial-gradient(#ffffff, #d8d8e0);
     /*background-color: #434343;*/
     /*background-image: linear-gradient(#434343, #282828);*/
@@ -261,19 +261,34 @@
 }
 #tips ul{
     /*list-style:none;*/
-    padding-left:10%;    
+    padding-left:10%;
 }
 
 
 
+/* "carte de visite" */
 #information {
-    font-size:80%;
+    line-height: 110%;
+    background-color:#fff;
+    border-radius: .3em;
+    padding: 2em 1em .3em 1em;
+    margin: 2em ;
+    border: 2px solid #555;
+    max-width: 35em;
 }
+
+#information img {
+    clear:both
+    width: 90px;
+    position: relative;
+    top: -7px;
+    right: 10px;
+}​
 
 #information ul {
-    list-style:none;
-    padding-left:5%;
-}​
+    list-style: none;
+}
+
 
 .btn-sm:hover {
 	font-weight: bold;

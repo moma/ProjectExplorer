@@ -604,16 +604,47 @@ class MyExtractor:
                 else:
                     color = '78,193,127'
 
-                content=""
-                pic_src=self.scholars[idNode]['pic_src']
+                 # content is an instance of #information.our-vcard
+                 # --------------------------------------------------
+                 #     <img src="....">
+                 #     <ul>
+                 #         <li class=bigger>
+                 #             <b>{{ hon_title }}
+                 #                 {{ first_name }}
+                 #                 {{ mid_initials }}
+                 #                 {{ last_name }}</b>
+                 #                 <br/>
+                 #                 <br/>
+                 #         </li>
+                 #         <li>
+                 #             <b>Country: </b>{{ country }}<br>
+                 #             <b>Position: </b>{{ position }}<br>
+                 #             <b>Keywords: </b>{{ keywords }}<br>
+                 #             [ <a href="{{ info.home_url }}" target="blank">
+                 #                 View homepage
+                 #             </a>]
+                 #             <br>
+                 #         </li>
+                 #     </ul>
 
+
+                content=""
+
+
+                # pic in vcard
+                pic_src=self.scholars[idNode]['pic_src']
                 if pic_src and pic_src != "":
-                    content += '<img  src="'+pic_src+'" width=' + str(self.imsize) + 'px  style=float:left;margin:5px>';
+                    content += '<img  src="'+pic_src+'" width=' + str(self.imsize) + 'px>';
                 else:
                     if len(self.scholars)<2000:
                         im_id = int(floor(randint(0, 11)))
-                        content += '<img src="static/img/'+str(im_id)+'.png" width='  + str(self.imsize) +  'px   style=float:left;margin:5px>'
+                        content += '<img src="static/img/'+str(im_id)+'.png" width='  + str(self.imsize) +  'px>'
 
+                # label in vcard
+                content += '<p class=bigger><b>'+nodeLabel+'</b></p>'
+
+                # other infos in vcard
+                content += '<p>'
                 content += '<b>Country: </b>' + self.scholars[idNode]['country'] + '</br>'
 
                 if self.scholars[idNode]['position'] and self.scholars[idNode]['position'] != "":
@@ -638,6 +669,8 @@ class MyExtractor:
                     elif self.scholars[idNode]['home_url'][0:4] == "http":
                         content += '[ <a href=' +self.scholars[idNode]['home_url'].replace("&"," and ")+ ' target=blank > View homepage </a >]<br/>'
 
+
+                content += '</p>'
 
                 node = {}
                 node["type"] = "Document"

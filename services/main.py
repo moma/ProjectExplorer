@@ -473,7 +473,6 @@ def claim_profile():
         # identify who came back from the return token
         if 'token' in request.args:
 
-
             return_token = sanitize(request.args['token'])
             print("clean token", return_token)
 
@@ -490,12 +489,15 @@ def claim_profile():
 
         # claim failure cases
         if return_token is None or luid is None or return_user is None:
-            mlog('INFO', 'failed claim profile attempt with return_token=%s, luid=%s' % str(return_token),str(luid))
+            mlog('INFO', 'failed claim profile attempt with return_token=%s, luid=%s' % (str(return_token),str(luid)))
             return render_template(
                 "message.html",
                 message = """
-                    This is not the correct link. Don't attempt to claim a profile that is not yours.
-                    """
+                    This is not the correct link. If you're trying to register to an old profile, please simply click on the link in the email you received.
+                    <br/>
+                    <br/>
+                    Otherwise you can simply register via <span class='code'><a href="%s">%s</a></span>
+                    """ % (url_for('register'),url_for('register'))
             )
 
         # claim success

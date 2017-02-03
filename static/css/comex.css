@@ -65,6 +65,10 @@ div.my-box {
   -webkit-transition: opacity .2s ease-out;
 }
 
+.panel-body {
+    padding: 5px 15px;
+}
+
 /* for intro text */
 .mini-hero {
   margin-top: 5px;
@@ -82,6 +86,11 @@ div.my-box {
 #cnil_warning {
   /*text-align: center;*/
 }
+
+#information-example {
+}
+
+
 
 /* self-made modals */
 .modal.self-made {
@@ -190,22 +199,41 @@ div.my-box {
   margin-top: -.5em;
 }
 
+
+
+/* big categories */
+h2.cat {
+  font-size: 24px;
+  font-family: "Droid Sans", Calibri, Ubuntu, sans-serif;
+  padding-top: 1em;
+  font-weight: bold;
+  color: #910;
+}
+
+h2.catfirst {
+  font-size: 24px;
+  margin-top: .2em;
+  font-weight: bold;
+  color: #910;
+}
+
+
 /* page sections: style snippets from old bootstrap h2 */
 h2.oldstyle {
-  font-size: 26px;
-  font-family: "Droid Sans", Calibri, Ubuntu, sans-serif;
+  font-size: 24px;
+  font-family: Ubuntu, sans-serif;
   font-weight: bold;
 }
 
 @media(max-width:768px){
     /* sm */
-    h2.oldstyle {
+    h2.cat, h2.oldstyle {
       font-size: 22px !important;
     }
 }
 @media(max-width:544px){
     /* xs */
-    h2.oldstyle {
+    h2.cat, h2.oldstyle {
       font-size: 16px !important;
     }
 }
@@ -215,7 +243,9 @@ h2.oldstyle {
 div.ccsection-wrap {
     margin: 0 ;
     padding: 0 ;
+    border: none;
     background-color: transparent;
+    max-width: 62em;           /* must be > FORMWIDTH */
 }
 a.ccsection-toggle  {
     margin: 0 ;
@@ -224,6 +254,20 @@ a.ccsection-toggle  {
 a.ccsection-toggle:hover, a.ccsection-toggle:focus {
     text-decoration: none;
 }
+
+h2.ccsection {
+  padding-top: 1em;
+  font-size: 1.5em;
+  font-family: "Droid Sans", Calibri, Ubuntu, sans-serif;
+  font-weight: bold;
+}
+
+/* uform with bg has already enough padding */
+/*uform > h2.ccsection {
+  padding: 0;
+  margin: 0
+}*/
+
 .ccsection-toggle h2.ccsection, .ccsection-toggle:focus h2.ccsection {
     color: #333 ; /* passive: like normal body color */
 }
@@ -244,7 +288,7 @@ div.ccsection-heading {
 div.ccsection-uform-body {
     background-color: #ddd;
     border-radius: 0 ;
-    padding: 15px 30px 53px 30px;
+    padding: 5px 15px 20px 15px;
 }
 
 div.ccsection-footer {
@@ -255,9 +299,30 @@ div.ccsection-footer {
 
 
 
-/**/
+/* "carte de visite" */
 .our-vcard {
     line-height: 110%;
+    background-color:#fff;
+    border-radius: .3em;
+    padding: 2em 1em .3em 1em;
+    margin: 2em ;
+    border: 2px solid #555;
+    max-width: 35em;
+}
+.our-vcard img {
+    float:left;
+    width: 90px;
+    position: relative;
+    margin: -7px 10px 5px 5px;
+}
+
+.our-vcard ul {
+    list-style: none;
+}
+
+/**/
+.bigger {
+    font-size: 150%;
 }
 
 
