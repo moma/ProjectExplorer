@@ -59,9 +59,6 @@ deleteUser.checked = false
 
 selectSavedMenus(uinfo)
 
-// memory
-var formValid = false
-
 // main validation function
 // ------------------------
 function completionAsYouGo() {
@@ -89,7 +86,10 @@ var otherInstDivStyle = document.getElementById('other_org_div').style
 
 
 // open middlename if there is one
-if (uinfo.middle_name != "" && uinfo.middle_name != "None") {
+if (uinfo.middle_name != null
+    && uinfo.middle_name != ""
+    && uinfo.middle_name != "None") {
+    console.log("showing midname for profile")
     cmxClt.uform.displayMidName()
 }
 

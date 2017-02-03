@@ -166,9 +166,13 @@ var cmxClt = (function() {
     //   => validate words become removable "pills"
     //   => result is concatenated texts in hidden input.#fName
     // TODO finalize and add to initialize
-    cC.uform.multiTextinput = function (fName, perhapsPreviousValues, perhapsColor, aUForm) {
+    cC.uform.multiTextinput = function (fName, otherMtiParams, aUForm) {
+        // console.debug ("multiTextinput args:", fName, otherMtiParams, aUForm)
 
-        // console.debug ("multiTextinput args:", fName, perhapsPreviousValues, perhapsColor, aUForm)
+        var perhapsPreviousValues = otherMtiParams.prevals
+        var perhapsColor = otherMtiParams.color
+        var perhapsReadonly = otherMtiParams.readonly
+
         // HTML elt to insert tag boxes around
         var refElt = null
 
@@ -242,7 +246,10 @@ var cmxClt = (function() {
                         // console.debug("droptagbox", aUForm.id aUForm.mtiStock[fName].length, aUForm.mtiStock[fName])
                     }
 
-                    newBoxClose.onclick = closeBox
+                    // /!\ null is like true here
+                    if (perhapsReadonly != false) {
+                        newBoxClose.onclick = closeBox
+                    }
                     newBox.insertBefore(newBoxClose, newBox.firstChild)
 
 
@@ -332,20 +339,14 @@ var cmxClt = (function() {
         myUform.elTimestamp = document.getElementById(timestampId)
         myUform.elSubmitBtn = document.getElementById(submitBtnId)
 
-        // optional: init midname
-        if (mnDiv) {
-            cC.uform.hideMidName()
-        }
-
         // optional: init mtis
         if (fParams.multiTextinputs) {
             myUform.mtiStock = {}  // arrays of inputs per fieldName
             for (var i in fParams.multiTextinputs) {
                 // creates mtiStock entries and mti elements and events
                 cC.uform.multiTextinput(
-                    fParams.multiTextinputs[i].id,      // ex "keywords"
-                    fParams.multiTextinputs[i].prevals, // ex ['great subject']
-                    fParams.multiTextinputs[i].color,
+                    fParams.multiTextinputs[i].id,  // ex "keywords"
+                    fParams.multiTextinputs[i],     // ex color, previous values
                     myUform
                 )
             }
