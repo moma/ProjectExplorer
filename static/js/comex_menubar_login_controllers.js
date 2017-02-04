@@ -29,6 +29,11 @@ var menuUForm = cmxClt.uauth.AuthForm(
 )
 var menuSubmitButton = document.getElementById('menu_form_submit')
 
+// trigger auth changes (useful if browser completed from cache)
+menuUForm.elEmail.dispatchEvent(new CustomEvent('change'))
+menuUForm.elPass.dispatchEvent(new CustomEvent('change'))
+menuUForm.elCaptcha.dispatchEvent(new CustomEvent('change'))
+
 // done when anything in the form changes
 function topLoginValidate(self) {
   // console.log('topLoginValidate current EMAIL status', self.emailStatus)

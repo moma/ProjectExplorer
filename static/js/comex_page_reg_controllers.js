@@ -178,6 +178,12 @@ function addUidThenSubmit(doorsResp) {
 
 
 
+// trigger auth changes (useful if browser completed from cache)
+regfo.elEmail.dispatchEvent(new CustomEvent('change'))
+regfo.elPass.dispatchEvent(new CustomEvent('change'))
+regfo.elCaptcha.dispatchEvent(new CustomEvent('change'))
+
+
 console.log("reg controllers load OK")
 
 // £DEBUG autofill ----------->8------
