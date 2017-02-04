@@ -47,7 +47,7 @@
 
           <div class="panel-heading ccsection-heading" role="tab">
             <h2 class="ccsection">
-              Your database entries
+              All database entries
             </h2>
           </div>
 
@@ -55,10 +55,12 @@
           <div id="overview" class="readonly panel-body" role="tabpanel">
 
            <p class="mini-hero">
-               Unfold the tabs below to check all the entries we have in the database.
+               Unfold the tabs below to check all the entries you had filled in the previous database.
+               <br/>
+               (This data is readonly until you re-create your account!)
            </p>
 
-           <div class="uform-white readdonly" id="profile_uform">
+           <div class="uform-white readonly" id="profile_uform">
 
 
            <form id="comex_claim_profile_form" enctype="multipart/form-data"
@@ -357,7 +359,7 @@
                     role="tabpanel" aria-expanded="false">
 
                 {% if return_user.info.home_url %}
-                <h3 class="formcat"> Homepage</h3>
+                <h3 class="formcatfirst"> Homepage</h3>
                 <div class="question">
                   <div class="input-group">
                     <label for="home_url" class="smlabel input-group-addon">Homepage</label>
@@ -448,10 +450,7 @@
 
            <p class="mini-hero">
                <br/><br/>
-               During the renewal period, you can claim this data and get the possibility to change or remove it.
-           </p>
-           <p class="mini-hero">
-               Simply  <strong>register your email with the Institute's portal at the bottom of this page</strong>. If you don't claim this data, we will remove it after 3 months.
+               To claim your rights on your data, simply <strong>re-create your account credentials at the bottom of this page</strong>. If you don't claim this data, we will remove it after 3 months.
            </p>
 
           </div>
@@ -512,7 +511,7 @@
             <!-- EMAIL & PASSWORD -->
             <h2 class="cat"> Register and claim this profile </h2>
             <p class="mini-hero">
-               To gain back your access to the data, just pick a password below and this account will become active, receive a confirmation email from the ISC services portal "Doors"
+               To gain back your access to the data, just pick a password below and submit.
             </p>
 
             <form id="comex_createlogin_form" enctype="multipart/form-data"
@@ -563,8 +562,12 @@
             <button class="btn btn-lg btn-success" style="float:right"
                     id="form_submit" type=button disabled
                     onclick="if (validateAndMsg(event)) {registerDoorsAndSubmit()}">
-                    Submit your form to the doors portal.
+                    Submit your account renewal
             </button>
+
+            <p class="mini-hero">
+               <small>After submit, you'll receive a last confirmation email from the ISCPIF authenticating portal "Doors", then this account <strong>will become active</strong>.</small>
+            </p>
 
               <!-- hidden input for main user id -->
               <input readonly id="luid" name="luid" type="text" hidden
