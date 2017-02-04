@@ -93,14 +93,6 @@ cmxClt = (function(cC) {
         auForm.elCaptcha = document.getElementById(captchaId)
         auForm.elCapcheck = document.getElementById(capcheckId)
 
-        // dials init
-        //  = signaling elements (icons, divs) for user feed-back
-        auForm.emailDials = {}
-        var emailQ = cC.findAncestor(auForm.elEmail, 'question')
-        auForm.emailDials.elIcon = emailQ.querySelector('.uicon')
-        auForm.emailDials.elMsg = emailQ.querySelector('.umessage')
-        auForm.emailDials.elLbl = emailQ.querySelector('label[for='+auForm.elEmail.id+']')
-
         // individual event/function bindings -----------
 
         // 1) for email
@@ -180,20 +172,11 @@ cmxClt = (function(cC) {
 
 
     // ----------- interaction for mailID check via fetch @doors ---------------
-    // global scope memoize email & last flags
-    cC.uauth.lastEmailValueCheckedDisplayed = ''
-    cC.uauth.lastExpectExists = true
-    cC.uauth.lastEmailStatus = null
 
     // function testMailFormatAndExistence
     // ------------------------------------
     // args:
     //    obja: an AuthForm object
-    //          in which we'll use
-    //             elEmail.value,
-    //             emailIdSupposedToExist,
-    //             emailDials,
-    //             emailStatus // == the updated flag ~~ 'return val'
     //
     // NB for login, use --------> expectExists = true
     //    for registration, use -> expectExists = false
@@ -204,108 +187,117 @@ cmxClt = (function(cC) {
     //    format ok, doorsStatus == expectExists => green
     cC.uauth.testMailFormatAndExistence = function (obja) {
 
+
+      // PREP-ING
+      if (obja.lastEmailValue == undefined) {
+          obja.lastEmailValue == null
+      }
+
+      // locate our dials if any and if not already done
+      if (!obja.emailDials) {
+          //  = signaling elements (icons, divs) for user feed-back
+          obja.emailDials = {}
+          var emailQ = cC.findAncestor(obja.elEmail, 'question')
+          obja.emailDials.elIcon = emailQ.querySelector('.uicon')
+          obja.emailDials.elMsg = emailQ.querySelector('.umessage')
+          obja.emailDials.elLbl = emailQ.querySelector('label[for='+obja.elEmail.id+']')
+      }
+
+      // GO TESTS
       var emailValue = obja.elEmail.value
 
-      // if we have it in memo already then it's finished :) !
-      if (emailValue == cC.uauth.lastEmailValueCheckedDisplayed) {
-          // FIXME value ok but greying out forgotten:
-          //       because the class value is above all forms
-          //       but the dials effects are for current form obj only
-          if (obja.emailIdSupposedToExist == cC.uauth.lastExpectExists)
-            obja.emailStatus = cC.uauth.lastEmailStatus
-          else
-            obja.emailStatus = !cC.uauth.lastEmailStatus
+
+      // 0) memo
+      if (obja.emailStatus != null
+          && emailValue == obja.lastEmailValue) {
+          return obja.emailStatus
       }
-      // ...otherwise we do checks normally then modify the object's flag
+
+      // 1) tests if email is well-formed
+      // TODO: better extension and allowed chars set
+      var emailFormatOk = /^[-A-z0-9_=.+]+@[-A-z0-9_=.+]+\.[-A-z0-9_=.+]{2,4}$/.test(emailValue)
+
+      if (! emailFormatOk) {
+          // restore original lack of message
+          obja.emailDials.elIcon.classList.remove('glyphicon-ban-circle')
+          obja.emailDials.elIcon.classList.remove('glyphicon-ok-circle')
+          obja.emailDials.elIcon.classList.add('glyphicon-question-sign')
+          obja.emailDials.elIcon.style.color = cC.colorGrey
+          obja.emailDials.elMsg.innerHTML = ""
+          obja.emailDials.elMsg.style.fontWeight = "normal"
+
+          obja.emailDials.elLbl.style.color = ""
+
+          // new emailStatus
+          obja.emailStatus = false
+          return false
+      }
       else {
-          // 1) tests if email is well-formed
-          // TODO: better extension and allowed chars set
-          var emailFormatOk = /^[-A-z0-9_=.+]+@[-A-z0-9_=.+]+\.[-A-z0-9_=.+]{2,4}$/.test(emailValue)
+          // 2) additional ajax to check login availability
+          //  => updates the emailStatus global boolean
+          //  => displays an icon
 
-          if (! emailFormatOk) {
-              // restore original lack of message
-              obja.emailDials.elIcon.classList.remove('glyphicon-ban-circle')
-              obja.emailDials.elIcon.classList.remove('glyphicon-ok-circle')
-              obja.emailDials.elIcon.classList.add('glyphicon-question-sign')
-              obja.emailDials.elIcon.style.color = cC.colorGrey
-              obja.emailDials.elMsg.innerHTML = ""
-              obja.emailDials.elMsg.style.fontWeight = "normal"
+          // NB using route in doors api/userExists
+          // case true => Ok("""{"status":"login exists"}""")
+          // case false => Ok("""{"status":"login available"}""")
+          // /!\ async
+          cC.uauth.callDoors(
+              "userExists",
+              [emailValue],
+              function(doorsResp) {
+                  var doorsUid = doorsResp[0]
+                  var doorsMsg = doorsResp[1]
 
-              obja.emailDials.elLbl.style.color = ""
+                  // status true iff login is as expected and format ok
+                  obja.emailStatus = (
+                        (obja.emailIdSupposedToExist
+                            && (doorsMsg == "login exists"))
+                        ||
+                        (!obja.emailIdSupposedToExist
+                            && (doorsMsg == "login available"))
+                    )
+                  // signals the form change after this input status change
+                  // (we're now after async came back, so long after keyup finished)
+                  obja.elForm.dispatchEvent(new CustomEvent('change'))
 
-              // new emailStatus
-              obja.emailStatus = false
-          }
-          else {
-              // 2) additional ajax to check login availability
-              //  => updates the emailStatus global boolean
-              //  => displays an icon
+                  // effects on dials
+                  if (obja.emailStatus) {
+                      // icon
+                      obja.emailDials.elIcon.style.color = cC.colorGreen
+                      obja.emailDials.elIcon.classList.remove('glyphicon-ban-circle')
+                      obja.emailDials.elIcon.classList.remove('glyphicon-question-sign')
+                      obja.emailDials.elIcon.classList.add('glyphicon-ok-circle')
 
-              // NB using route in doors api/userExists
-              // case true => Ok("""{"status":"login exists"}""")
-              // case false => Ok("""{"status":"login available"}""")
-              // /!\ async
-              cC.uauth.callDoors(
-                  "userExists",
-                  [emailValue],
-                  function(doorsResp) {
-                      var doorsUid = doorsResp[0]
-                      var doorsMsg = doorsResp[1]
+                      // message in legend
+                      obja.emailDials.elMsg.innerHTML = "OK: "+doorsMsg
+                      obja.emailDials.elMsg.style.color = cC.colorGreen
+                      obja.emailDials.elMsg.style.fontWeight = "bold"
+                      obja.emailDials.elMsg.style.textShadow = cC.strokeWhite
 
-                      // status true iff login is as expected and format ok
-                      obja.emailStatus = (
-                            (obja.emailIdSupposedToExist
-                                && (doorsMsg == "login exists"))
-                            ||
-                            (!obja.emailIdSupposedToExist
-                                && (doorsMsg == "login available"))
-                        )
-                      // signals the form change after this input status change
-                      // (we're now after async came back, so long after keyup finished)
-                      obja.elForm.dispatchEvent(new CustomEvent('change'))
-
-                      // effects on dials
-                      if (obja.emailStatus) {
-                          // icon
-                          obja.emailDials.elIcon.style.color = cC.colorGreen
-                          obja.emailDials.elIcon.classList.remove('glyphicon-ban-circle')
-                          obja.emailDials.elIcon.classList.remove('glyphicon-question-sign')
-                          obja.emailDials.elIcon.classList.add('glyphicon-ok-circle')
-
-                          // message in legend
-                          obja.emailDials.elMsg.innerHTML = "OK: "+doorsMsg
-                          obja.emailDials.elMsg.style.color = cC.colorGreen
-                          obja.emailDials.elMsg.style.fontWeight = "bold"
-                          obja.emailDials.elMsg.style.textShadow = cC.strokeWhite
-
-                          // label
-                          obja.emailDials.elLbl.style.backgroundColor = ""
-                      }
-                      else {
-                          var errMsg = obja.emailIdSupposedToExist ? "your ID isn't recognized" : "this ID is already taken"
-                          // icon
-                          obja.emailDials.elIcon.style.color = cC.colorOrange
-                          obja.emailDials.elIcon.classList.remove('glyphicon-ok-circle')
-                          obja.emailDials.elIcon.classList.remove('glyphicon-question-sign')
-                          obja.emailDials.elIcon.classList.add('glyphicon-ban-circle')
-
-                          // message in legend
-                          obja.emailDials.elMsg.innerHTML = "Sorry: "+errMsg+" !"
-                          obja.emailDials.elMsg.style.color = cC.colorOrange
-                          obja.emailDials.elMsg.style.fontWeight = "bold"
-                          obja.emailDials.elMsg.style.textShadow = cC.strokeDeepGrey
-
-                          // label
-                          obja.emailDials.elLbl.style.backgroundColor = cC.colorOrange
-                      }
+                      // label
+                      obja.emailDials.elLbl.style.backgroundColor = ""
                   }
-              )
-          }
-      }
+                  else {
+                      var errMsg = obja.emailIdSupposedToExist ? "your ID isn't recognized" : "this ID is already taken"
+                      // icon
+                      obja.emailDials.elIcon.style.color = cC.colorOrange
+                      obja.emailDials.elIcon.classList.remove('glyphicon-ok-circle')
+                      obja.emailDials.elIcon.classList.remove('glyphicon-question-sign')
+                      obja.emailDials.elIcon.classList.add('glyphicon-ban-circle')
 
-      // memoize in CLASS vars to debounce re-invocations
-      cC.uauth.lastEmailValueCheckedDisplayed = emailValue
-      cC.uauth.lastEmailStatus = obja.emailStatus
+                      // message in legend
+                      obja.emailDials.elMsg.innerHTML = "Sorry: "+errMsg+" !"
+                      obja.emailDials.elMsg.style.color = cC.colorOrange
+                      obja.emailDials.elMsg.style.fontWeight = "bold"
+                      obja.emailDials.elMsg.style.textShadow = cC.strokeDeepGrey
+
+                      // label
+                      obja.emailDials.elLbl.style.backgroundColor = cC.colorOrange
+                  }
+                  return obja.emailStatus
+              }
+          )
+      }
     }
 
     // -----------------------------------------------------------------------
