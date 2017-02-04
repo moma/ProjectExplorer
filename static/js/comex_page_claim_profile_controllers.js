@@ -9,12 +9,16 @@
  * @author romain.loth@iscpif.fr
  *
  * @requires comex_user_shared
+ * @requires comex_user_shared_auth
  *
  * NB The uinfo variable should be set to template's user.json_info value.
  *
- *  THIS IS A SIMPLE COPY OF comex_page_profile_controllers
- *               with the old input re-fills
- *          but without the new input validations
+ * 2 forms here:
+ *   1/ The consultation of legacy profile is simply a copy of
+ *   comex_page_profile_controllers with the old input re-fills
+ *   iff present but without the new input validations
+ *
+ *   2/ The "re-create your account" form is a doors-auth of register type
  */
 
 // first menu setup from DB values
@@ -48,17 +52,17 @@ function selectSavedMenus(uinfo) {
 var presentMtis = []
 if (uinfo.keywords.length) {
     presentMtis.push(
-        {'id':'keywords', 'prevals': uinfo.keywords}
+        {'id':'keywords', 'prevals': uinfo.keywords, 'readonly':true}
     )
 }
 if (uinfo.hashtags.length) {
     presentMtis.push(
-        {'id':'hashtags', 'prevals': uinfo.hashtags,'color': "#23A"}
+        {'id':'hashtags', 'prevals': uinfo.hashtags,'readonly':true, 'color': "#23A"}
     )
 }
 
-// initialize form controllers
-var theUForm = cmxClt.uform.Form(
+// initialize readonly form controllers
+var consultReturnDataUForm = cmxClt.uform.Form(
     // id
     "comex_claim_profile_form",
     // onkeyup function
@@ -69,17 +73,40 @@ var theUForm = cmxClt.uform.Form(
 
 selectSavedMenus(uinfo)
 
-// memory
-var formValid = false
-
 // 2 exposed vars for inline js controls
 var teamCityDivStyle = document.getElementById('team_city_div').style
 var otherInstDivStyle = document.getElementById('other_org_div').style
 
 
 // open middlename if there is one
-if (uinfo.middle_name != "" && uinfo.middle_name != "None") {
+if (uinfo.middle_name != null
+    && uinfo.middle_name != ""
+    && uinfo.middle_name != "None") {
     cmxClt.uform.displayMidName()
 }
+
+
+//  the "re-create this account" form
+
+
+// initialize "createlogin form" controllers
+var returnForm = cmxClt.uauth.AuthForm(
+    'comex_createlogin_form',
+    miniregValidate,
+    {
+      'type': "register",
+      // if email validation, captcha perhaps too much?
+      'validateCaptcha': false
+    }
+)
+
+
+// the email is readonly
+function miniregValidate(self) {
+  self.elSubmitBtn.disabled = !self.passStatus
+}
+
+// trigger auth changes (email always autocompleted for return_user)
+returnForm.elEmail.dispatchEvent(new CustomEvent('change'))
 
 console.log("profile controllers load OK")
