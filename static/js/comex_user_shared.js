@@ -612,6 +612,32 @@ var cmxClt = (function() {
     var picMsg = document.getElementById('picture_message')
     var imgReader = new FileReader();
 
+    cC.uform.showPic = function(aSrc) {
+        showPicImg.src = aSrc
+
+        // prepare max size while preserving ratio
+        var realValues = window.getComputedStyle(showPicImg)
+        var imgW = realValues.getPropertyValue("width")
+        var imgH = realValues.getPropertyValue("height")
+
+        // debug
+        // console.log("img wid", imgW)
+        // console.log("img hei", imgH)
+
+        if (imgW > imgH) {
+            showPicImg.style.width  = "100%"
+            showPicImg.style.height  = "auto"
+        }
+        else {
+            showPicImg.style.width  = "auto"
+            showPicImg.style.height = "100%"
+        }
+
+        // now show it
+        boxShowPicImg.style.display = 'block'
+        // possible re-adjust outerbox ?
+    }
+
     cC.uform.checkShowPic = function (aForm, doHighlight) {
         // TEMPORARY initial size already 200 kB, user has to do it himself
         var max_size = 204800
@@ -644,30 +670,8 @@ var cmxClt = (function() {
               picMsg.style.color = cmxClt.colorGreen
 
               // to show the pic when readAsDataURL
-              imgReader.onload = function () {
-                  showPicImg.src = imgReader.result;
-
-                  // prepare max size while preserving ratio
-                  var realValues = window.getComputedStyle(showPicImg)
-                  var imgW = realValues.getPropertyValue("width")
-                  var imgH = realValues.getPropertyValue("height")
-
-                  // debug
-                  // console.log("img wid", imgW)
-                  // console.log("img hei", imgH)
-
-                  if (imgW > imgH) {
-                      showPicImg.style.width  = "100%"
-                      showPicImg.style.height  = "auto"
-                  }
-                  else {
-                      showPicImg.style.width  = "auto"
-                      showPicImg.style.height = "100%"
-                  }
-
-                  // now show it
-                  boxShowPicImg.style.display = 'block'
-                  // possible re-adjust outerbox ?
+              imgReader.onload = function() {
+                  cC.uform.showPic(imgReader.result)
               }
               // create fake src url & trigger the onload
               imgReader.readAsDataURL(theFile);

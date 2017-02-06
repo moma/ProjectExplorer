@@ -65,14 +65,16 @@
                <h3 class="formcatfirst"> Carte de visite </h3>
                {% if not current_user.empty %}
                <div id="information-example" class="our-vcard">
+                   <!-- TODO if empty then click on image starts showPicImg -->
+                   <img src="{{ (current_user.pic_src | safe) if current_user.pic_src else ''}}" class="our-vcard-img">
                    <ul>
-                       <!-- TODO if empty then click on image starts showPicImg -->
-                       <img src="{{ (current_user.pic_src | safe) if current_user.pic_src else ''}}" width="80px" style="float:left;margin:5px">
-                       <li>
+                       <li class=bigger>
                            <b>{{ current_user.info.hon_title }}
                                {{ current_user.info.first_name }}
                                <!-- TODO mid initials -->
                                {{ current_user.info.last_name }}</b>
+                               <br/>
+                               <br/>
                        </li>
                        <li>
                            <b>Country: </b>{{ current_user.info.country }}<br>
@@ -559,6 +561,7 @@
 
           <!-- == S U B M I T == -->
           <div style="text-align:center">
+              <br/><br/>
             <!-- @type button to avoid ENTER submit  -->
             <button class="btn btn-lg btn-success" id="form_submit"
                     type="button" onclick="theUForm.elForm.submit()">
