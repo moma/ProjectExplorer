@@ -532,7 +532,7 @@ var cmxClt = (function() {
             aUform.elMainMessage.classList.add('faded')
         }
         else {
-            aUform.elMainMessage.innerHTML = "<span class='orange glyphicon glyphicon-exclamation-sign glyphicon-float-left'></span><p>Sorry, there are some<br/> important missing fields</p>"
+            aUform.elMainMessage.innerHTML = "<span class='orange glyphicon glyphicon-exclamation-sign glyphicon-float-left'></span><p>There are some <br/> important missing fields</p>"
 
             aUform.elMainMessage.classList.remove('faded')
         }
