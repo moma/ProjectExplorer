@@ -610,10 +610,10 @@ def save_form(clean_records, update_flag=False):
         # TODO class User method !!
     luid = None
     if update_flag:
-        luid = clean_records['luid']
+        luid = int(clean_records['luid'])
         db.save_scholar(clean_records, reg_db, update_luid=luid)
     else:
-        luid = db.save_scholar(clean_records, reg_db)
+        luid = int(db.save_scholar(clean_records, reg_db))
 
 
     # D) read/fill each keyword and save the (uid <=> kwid) pairings
