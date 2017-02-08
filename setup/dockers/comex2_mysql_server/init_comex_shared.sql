@@ -22,14 +22,15 @@ CREATE TABLE scholars (
     affiliation_id       int(15) not null,
     position             varchar(30),            -- eg Director
     hon_title            varchar(30),            -- eg Doctor
-    interests_text       varchar(1200),
+    interests_text       varchar(3500),
     gender               char(1),
     job_looking_date     char(24),       -- null if not looking for a job
     home_url             varchar(120),   -- homepage
     pic_url              varchar(120),   -- remote pic... (full url)
     pic_fname            varchar(120),   -- ...or locally saved pic (basename)
     valid_date           date,   -- when user will be ignored, if legacy status
-    record_status        varchar(25),  -- "active|test|legacy"
+    record_status        varchar(25),  -- "active|test|legacy|closed_legacy"
+    future_reserved      varchar(30),  -- eg for an imported id or temp status
 
     INDEX luid_index_sch (luid),
     INDEX duid_index_sch (doors_uid),
@@ -56,7 +57,7 @@ ALTER TABLE scholars ADD FOREIGN KEY (affiliation_id) REFERENCES affiliations(af
 -- keyword/subject terms
 CREATE TABLE keywords(
     kwid                int(15) not null auto_increment,
-    kwstr               char(50) not null unique,   -- eg 'complex networks'
+    kwstr               char(70) not null unique,   -- eg 'complex networks'
     occs                int(15) default 0,
     INDEX kwid_index_kws (kwid),
     INDEX kwstr_index_kws (kwstr),
