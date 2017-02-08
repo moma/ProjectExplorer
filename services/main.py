@@ -522,7 +522,7 @@ def register():
 
     if request.method == 'GET':
         return render_template(
-            "registration_short_form.html"
+            "registration_super_short_form.html"
             )
     elif request.method == 'POST':
         # ex: request.form = ImmutableMultiDict([('initials', 'R.L.'), ('email', 'romain.loth@iscpif.fr'), ('last_name', 'Loth'), ('country', 'France'), ('first_name', 'Romain'), ('my-captchaHash', '-773776109'), ('my-captcha', 'TSZVIN')])

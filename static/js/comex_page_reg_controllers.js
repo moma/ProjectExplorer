@@ -24,8 +24,7 @@ var regfo = cmxClt.uauth.AuthForm(
     {
       'type': "register",
       'validateCaptcha': true,
-      'multiTextinputs': [{'id':'keywords'},
-                          {'id':'hashtags', 'color': "#23A"}]
+      'multiTextinputs': [{'id':'keywords'}]
     }
 )
 
@@ -41,7 +40,9 @@ var validateWithMessage = false
 var shortRegVersion = true
 var ignoredFields = []
 if (shortRegVersion) {
-    ignoredFields = ['gender', 'home_url', 'org', 'org_type']
+    ignoredFields = ['gender', 'home_url', 'org',
+                     'hon_title', 'position', 'org_type',
+                     'hashtags']
 }
 
 // done when anything in the form changes
@@ -58,12 +59,9 @@ function testAsYouGo() {
       //    on submit then clicks "back" and ends up with
       //    hashtags in brackets like "['#a','#b']"
   }
-  cmxClt.uform.checkJobDateStatus()
-
   if (regfo.passStatus
         && regfo.emailStatus
-        && regfo.captchaStatus
-        && cmxClt.uform.jobLookingDateStatus) {
+        && regfo.captchaStatus) {
       regfo.elSubmitBtn.disabled = false
   }
   else {
@@ -74,10 +72,6 @@ function testAsYouGo() {
 }
 
 var teamCityDivStyle = document.getElementById('team_city_div').style
-
-if (document.getElementById('other_org_div')) {
-    var otherInstDivStyle = document.getElementById('other_org_div').style
-}
 
 function registerDoorsAndSubmit(){
     regfo.elMainMessage.innerHTML = "Registering with ISCPIF Doors..."
@@ -128,15 +122,17 @@ function validateAndMsg() {
     regfo.elMainMessage.innerHTML = "Validating the form..."
 
     // runs field-by-field validation and highlights mandatory missing fields
-    var diagnostic = cmxClt.uform.testFillField(regfo)
-    //                            +++++++++++++
+    var diagnostic = cmxClt.uform.testFillField(
+            regfo,
+            {'ignore':ignoredFields}
+    )
 
     // RESULTS
     var valid = diagnostic[0]
     var missingFields = diagnostic[1]
 
     if (valid) {
-      regfo.elMainMessage.innerHTML = "Form is valid... Will register and submit..."
+      regfo.elMainMessage.innerHTML = "Form is valid... Will submit and register..."
       regfo.elMainMessage.style.opacity = 1
       regfo.elMainMessage.style.display = 'block'
 
@@ -159,8 +155,10 @@ function addUidThenSubmit(doorsResp) {
     var doorsUid = doorsResp[0]
     var doorsMsg = doorsResp[1]
 
+    console.warn("TODO FIX doorsUid will be available only later now")
+
     if (doorsUid == null) {
-        regfo.elMainMessage.innerHTML = "Problem with doors registration... TODO debug"
+        regfo.elMainMessage.innerHTML = "Problem with doors registration..."
         regfo.elMainMessage.mainMessage.style.color = cmxClt.colorRed
         regfo.elSubmitBtn.disabled = false
     }

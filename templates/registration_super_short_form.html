@@ -1,0 +1,256 @@
+{% extends "base_layout.html" %}
+
+{% block headers %}
+  <title>Formulaire Community Explorer : se ré-enregistrer</title>
+  <meta name="description" content="Formulaire d'enregistrement sur la plateforme Community Explorer (ISCPIF CNRS UPS 3611)">
+  <meta name="keywords" content="complex systems, community, registration form">
+{% endblock %}
+
+<!-- ======================================================================= -->
+
+{% block main_content %}
+    <div class="row">
+      <div class="spacer col-lg-1 hidden-md-down">&nbsp;</div>
+      <div class="my-box col-lg-9 col-md-11 col-sm-12">
+
+        <!-- INTRODUCTION TEXT -->
+        <div id="intro">
+          <h2 class="oldstyle">Registration form</h2>
+              <p class="mini-hero">
+                  <strong>Community Explorer</strong> maps your own socio-semantic network and enables to explore the complex systems researchers community.
+                  <br/>
+                  <br/>
+                  This <strong>registration form</strong> will allow us to update your database information and to create your *login credentials* in <a href="http://{{ doors_connect }}/">the Doors platform (login portal of the institute)</a>.
+              </p>
+        </div>
+
+
+        <!-- ########################### ( FORM ) ########################## -->
+      <div class="uform-nobg">
+        <form id="comex_reg_form" enctype="multipart/form-data"
+              method="post" onsubmit="console.info('submitted')">
+
+        <!-- todo onsubmit also save to cache -->
+
+                     <!-- EMAIL & PASSWORD -->
+
+                     <h3 class="formcat">Login credentials</h3>
+
+                     <div class="question">
+                       <!-- POSS login within modal like comex_test_modal -->
+                       <p class="legend">Your email will also be your login for the ISC services. </p>
+                       <div class="input-group">
+                         <!-- email validation onblur/onchange is done by cmxClt.uauth in comex_user_shared_auth.js -->
+                         <label for="email" class="smlabel input-group-addon">* Email</label>
+                         <input id="email" name="email" maxlength="255"
+                                type="text" class="form-control" placeholder="email">
+
+                         <!-- doors return value icon -->
+                         <div class="uicontitmsg input-group-addon"
+                              title="The email will be checked in our DB after you type and leave the box.">
+                           <span class="uicon glyphicon glyphicon-question-sign grey"
+                                 ></span>
+                         </div>
+                       </div>
+                       <!-- doors return value message -->
+                       <p class="umessage legend"></p>
+                     </div>
+
+                     <div class="question">
+                       <p class="legend">Please make your password difficult to predict.</p>
+                       <div class="input-group">
+                         <label for="password" class="smlabel input-group-addon">* Password</label>
+                         <input id="password" name="password" maxlength="30"
+                                type="password" class="form-control" placeholder="Create a password">
+                       </div>
+                     </div>
+
+                     <div class="question">
+                       <div class="input-group">
+                         <label for="password2" class="smlabel input-group-addon">* Password</label>
+                         <input id="password2" name="password2" maxlength="30"
+                                type="password" class="form-control" placeholder="Repeat the password">
+                       </div>
+                       <p class="umessage legend red" style="font-weight:bold"></p>
+                     </div>
+
+
+                 <h3 class="formcat">Name and country</h3>
+
+                 <!-- NAME & COUNTRY -->
+                 <div class="question input-group">
+                   <label for="first_name" class="smlabel input-group-addon">
+                     * First name
+                   </label>
+                   <input id="first_name" name="first_name" maxlength="30"
+                          type="text" class="form-control" placeholder="prénom"
+                          onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
+                          placeholder="first_name">
+
+                   <div class="input-group-addon"
+                        title="Add middle name(s)">
+                        <button class="btn btn-xs btn-default operation-dark"
+                                title="Opens the input for middle name(s)" id="btn-midname"
+                                type="button">
+                          <span id="btn-midname-icon"
+                                class="glyphicon glyphicon-plus"></span>
+                          Add name
+                        </button>
+                   </div>
+                 </div>
+
+                 <!-- optionnel -->
+                 <div id="group-midname" class="question input-group" style='display:none'>
+                   <label for="middle_name" class="smlabel input-group-addon">
+                     Middle name
+                   </label>
+                   <input id="middle_name" name="middle_name" maxlength="30"
+                          type="text" class="form-control" placeholder="autres prénoms"
+                          onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
+                          placeholder="middle_name">
+                 </div>
+
+                 <div class="question input-group">
+                   <label for="last_name" class="smlabel input-group-addon">
+                     * Last name
+                   </label>
+                   <input id="last_name" name="last_name" maxlength="30"
+                          type="text" class="form-control" placeholder="nom de famille"
+                          onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
+                          placeholder="last_name">
+                 </div>
+
+                 <input id="initials" name="initials" maxlength="7"
+                        type="text"  hidden
+                         placeholder="initials">
+
+                 <div class="question input-group">
+                   <label for="country" class="smlabel input-group-addon">
+                     * Country
+                   </label>
+                   <input id="country" name="country" maxlength="60"
+                          type="text" class="form-control autocomp"
+                          placeholder="pays"
+                          onblur="if(this.value=='France'){teamCityDivStyle.display = 'block'} else {teamCityDivStyle.display='none'}"
+                          placeholder="country">
+                 </div>
+
+
+
+
+
+          <!-- essential mapping infos -->
+
+               <!-- JOB, INTERESTS AND ORGANIZATION -->
+               <h3 class="formcat"> About your job and research </h3>
+
+               <p class="mini-hero">
+                   The <strong>keywords</strong> and <strong>affiliation</strong> will count as similarities to identify your network neighbours. Just start typing... we have autocomplete!
+               </p>
+
+               <div class="question">
+                 <div class="input-group">
+                   <label for="keywords" class="smlabel input-group-addon tagbox-container">* Key subjects</label>
+                   <input id="keywords" name="keywords" maxlength="350"
+                          type="text" class="form-control autocomp" placeholder="keywords"
+                          placeholder="keywords">
+                 </div>
+                 <p class="legend">Please enter at least 5 keywords (press TAB or ENTER after each)</p>
+               </div>
+
+               <div class="question">
+                 <div class="input-group">
+                   <label for="team_lab" class="smlabel input-group-addon">* Lab / Team / Dept</label>
+                   <input id="team_lab" name="team_lab" maxlength="120"
+                          type="text" class="form-control" placeholder="Your lab"
+                          placeholder="team_lab">
+                 </div>
+               </div>
+
+               <!-- Lab city <=> only for France -->
+               <div class="question conditional-q" id="team_city_div">
+                 <div class="input-group">
+                   <label for="org_city" class="smlabel input-group-addon">Lab city</label>
+                   <input id="org_city" name="org_city" maxlength="50"
+                          type="text" class="form-control" placeholder="Ville de votre institution"
+                          placeholder="org_city">
+                 </div>
+               </div>
+
+
+            <!-- hidden input for doors "hostname:port" -->
+            <input id="doors_connect" name="doors_connect" type="text" hidden value="{{doors_connect|safe}}">
+            </input>
+
+            <!-- hidden input for modification date -->
+            <input id="last_modified_date" name="last_modified_date" type="text" hidden>
+            </input>
+
+            <!-- hidden input for doors user id -->
+            <input id="doors_uid" name="doors_uid" type="text" hidden>
+            </input>
+
+            <!-- hidden input for captcha verification hash -->
+            <input id="my-captchaHash" name="my-captchaHash" type="text" hidden>
+            </input>
+
+
+            <!-- CAPTCHA & SUBMIT BTN + INFOS-->
+            <h3 class="formcat">Verify and submit</h3>
+
+            <!--pseudo captcha using realperson from http://keith-wood.name/realPerson.html -->
+            <div class="question input-group">
+                <label for="my-captcha" class="smlabel input-group-addon">Code</label>
+                <div>
+                    <input id="my-captcha" name="my-captcha" style="max-width:60%"
+                           type="text" class="form-control input-lg" placeholder="Enter the 5 letters beside =>"
+                           onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)">
+                </div>
+                <p class="legend legend-float">(A challenge for spam bots)</p>
+            </div>
+
+
+            <!-- == S U B M I T == -->
+            <!-- button instead of input.submit to validate before real submit action -->
+            <!-- also remember stackoverflow.com/a/3315016/2489184 -->
+            <button class="btn btn-lg btn-success" style="float:right"
+                    id="form_submit" type=button disabled
+                    onclick="if (validateAndMsg(event)) {registerDoorsAndSubmit()}">
+                    Submit your form
+            </button>
+
+        </form>
+
+        <!-- FOR DEBUG: test go-between with Doors -->
+        <p>
+            <button type=button onclick='cmxClt.uauth.callDoors("user", [regfo.elEmail.value, regfo.elPass.value], console.warn)'>
+                test doors login
+            </button>
+            <button type=button onclick='cmxClt.uauth.callDoors("register", [regfo.elEmail.value, regfo.elPass.value, "anyname"], console.warn)'>
+                test doors register
+            </button>
+            <button type=button onclick='cmxClt.uauth.callDoors("userExists", [regfo.elEmail.value], console.warn)'>
+                test doors userExists
+            </button>
+        </p>
+      </div>
+      </div>
+
+      <div class="spacer col-lg-2 col-md-1 hidden-sm-down">&nbsp;</div>
+    </div>
+
+    <div class="menu-right-fixed">
+      <!-- main validation message -->
+      <p id="main_message" class="legend" style="display:none"></p>
+    </div>
+
+
+{% endblock %}
+
+<!-- ======================================================================= -->
+
+{% block last_imports %}
+    <!--  our js  -->
+    <script src="{{ url_for('static', filename='js/comex_page_reg_controllers.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/comex_user_autocompletes.js') }}"></script>
+{% endblock %}
