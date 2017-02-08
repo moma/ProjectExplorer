@@ -26,7 +26,7 @@ cmxClt = (function(cC) {
     // -------------------
     // true if we are using first minidoors prototype (commit fca0f79)
     // otherwise assume normal doors (commit >= a0ce580)
-    cC.uauth.protoDoors = true
+    cC.uauth.protoDoors = false
 
     // #doors_connect.value ~~> like a @classparam for uauthforms
     // :str: "doors_hostname:doors_port"
@@ -249,13 +249,25 @@ cmxClt = (function(cC) {
                   var doorsMsg = doorsResp[1]
 
                   // status true iff login is as expected and format ok
-                  obja.emailStatus = (
-                        (obja.emailIdSupposedToExist
-                            && (doorsMsg == "login exists"))
-                        ||
-                        (!obja.emailIdSupposedToExist
-                            && (doorsMsg == "login available"))
-                    )
+
+                  if (cC.uauth.protoDoors) {
+                      obja.emailStatus = (
+                            (obja.emailIdSupposedToExist
+                                && (doorsMsg == "login exists"))
+                            ||
+                            (!obja.emailIdSupposedToExist
+                                && (doorsMsg == "login available"))
+                        )
+                  }
+                  else {
+                      obja.emailStatus = (
+                            (obja.emailIdSupposedToExist
+                                && (doorsMsg == "LoginExists"))
+                            ||
+                            (!obja.emailIdSupposedToExist
+                                && (doorsMsg == "LoginAvailable"))
+                        )
+                  }
                   // signals the form change after this input status change
                   // (we're now after async came back, so long after keyup finished)
                   obja.elForm.dispatchEvent(new CustomEvent('change'))
@@ -433,6 +445,9 @@ cmxClt = (function(cC) {
 
             var scheme = cC.uauth.protoDoors ? 'http' : 'https'
 
+            // FORDEBUG
+            scheme = 'http'
+
             $.ajax({
                 contentType: cC.uauth.protoDoors ? "application/json" : "application/x-www-form-urlencoded; charset=UTF-8",
                 dataType: 'json',
@@ -442,19 +457,31 @@ cmxClt = (function(cC) {
                 type: 'POST',
                 // traditional: !cC.uauth.protoDoors,
                 success: function(data) {
+
+                        console.log('response data', data)
                         if (typeof data != 'undefined'
                              && apiAction == 'userExists') {
                             // userExists success case: it's all in the message :)
                             doorsUid =  null
                             doorsMsg = data.status
                         }
-                        else if (typeof data != 'undefined'
+                        else if (cC.uauth.protoDoors
+                                && typeof data != 'undefined'
                                 && typeof data.userInfo != undefined
                                 && typeof data.userInfo.id != undefined
                                 && typeof data.userInfo.id.id != undefined
                                 && typeof data.status == 'string') {
+                            // prototype version
                             // main success case: get the id
                             doorsUid = data.userInfo.id.id
+                            doorsMsg = data.status
+                        }
+                        else if (!cC.uauth.protoDoors
+                                && typeof data != 'undefined'
+                                && typeof data.userID != undefined
+                                && typeof data.status == 'string') {
+                            // main success case: get the id
+                            doorsUid = data.userID
                             doorsMsg = data.status
                         }
                         else {

@@ -210,7 +210,7 @@ class User(object):
 from requests    import post
 
 # dev flag
-doorsProto = True
+doorsProto = False
 
 
 def doors_login(email, password, config):
@@ -245,8 +245,12 @@ def doors_login(email, password, config):
     if doors_response.ok:
         login_info = loads(doors_response.content.decode())
 
-        if login_info['status'] == "login ok":
-            uid = login_info['userInfo']['id']['id']
+        if doorsProto:
+            if login_info['status'] == "login ok":
+                uid = login_info['userInfo']['id']['id']
+        else:
+            if login_info['status'] == "LoginOK":
+                uid = login_info['userID']
 
     return uid
 
@@ -271,7 +275,9 @@ def doors_register(email, password, name, config):
         answer = loads(doors_response.content.decode())
 
 
-    return (doors_response.ok
+    if doorsProto:
+        return (doors_response.ok
                 and (answer['status'] == "registration email sent"))
-
-    return uid
+    else:
+        return (doors_response.ok
+                and (answer['status'] == "RegistrationPending"))
