@@ -227,9 +227,9 @@ foreach ($lab_list as $affid) {
         //              (here and its effects in labs_list.php)
 
 
-        $info['acronym'] = $row['acronym'] ?? 'N/A';
-        $info['homepage'] = $row['homepage'] ?? 'N/A';
-        $info['country'] = $row['country'] ?? 'N/A';
+        $info['acronym'] = $row['acronym'] ?? '';
+        $info['homepage'] = $row['homepage'] ?? '';
+        $info['country'] = $row['country'] ?? '';
 
 
 
