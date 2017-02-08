@@ -10,7 +10,7 @@ innodb_buffer_pool_instances=4
 innodb_buffer_pool_chunk_size=512M
 
 # smaller than default 1024 is much advised
-innodb_lru_scan_depth=256
+innodb_lru_scan_depth=128
 
 ## comex character set settings
 collation_server=utf8_unicode_ci
