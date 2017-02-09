@@ -3,4 +3,6 @@
 *.pyc
 logs/
 logs/services.log
+data/shared_user_img/*
+.agignore
 __pycache__/

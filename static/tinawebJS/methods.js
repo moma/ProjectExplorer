@@ -151,7 +151,7 @@ function RefreshState(newNOW){
             $.doTimeout(30,function (){
                 EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
                 NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size");
-                NodeSizeSlider("#sliderBNodeSize","NGram", 25, "#FFA500")
+                NodeSizeSlider("#sliderBNodeSize","NGram", 10, "#FFA500")
 
             });
         } else {
@@ -1628,7 +1628,7 @@ function changeToMeso(iwannagraph) {
         $("#category-B").show();
         EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
         NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size");
-        NodeSizeSlider("#sliderBNodeSize","NGram", 25, "#FFA500")
+        NodeSizeSlider("#sliderBNodeSize","NGram", 10, "#FFA500")
         $("#colorGraph").hide();
     }
 
@@ -1737,7 +1737,7 @@ function changeToMeso(iwannagraph) {
         $("#category-B").show();
         EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
         NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size");
-        NodeSizeSlider("#sliderBNodeSize","NGram", 25, "#FFA500")
+        NodeSizeSlider("#sliderBNodeSize","NGram", 10, "#FFA500")
         $("#colorGraph").hide();
     }
 
@@ -1787,7 +1787,7 @@ function changeToMacro(iwannagraph) {
             $("#category-B").show();
             EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
             NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size");
-            NodeSizeSlider("#sliderBNodeSize","NGram", 25, "#FFA500")
+            NodeSizeSlider("#sliderBNodeSize","NGram", 10, "#FFA500")
         }
 
         swMacro=true;
