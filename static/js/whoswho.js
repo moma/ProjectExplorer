@@ -181,7 +181,7 @@ $(document).ready(function() {
 
         // change the 2 onclick events
         $("#print2").click(function() {
-          return window.open("/print_scholar_directory.php?query=" + ui.item.id, "Scholar's list");
+          return window.open("/print_scholar_directory.php?query=" + ui.item.id);
         });
         $("#generate2").click(function() {
           return window.open('/explorerjs.html?type="uid"&nodeidparam="' + ui.item.id + '"');
@@ -261,7 +261,7 @@ $(document).ready(function() {
     return collectFilters(function(query) {
       // debug
       // console.log("collected filters: " + query);
-      return window.location.href='/explorerjs.html?type="filter"&nodeidparam="' + escape(query) +'"';
+      return window.open('/explorerjs.html?type="filter"&nodeidparam="' + escape(query) +'"');
       //return loadGraph("getgraph.php?query=" + query);
     });
   });
@@ -270,7 +270,7 @@ $(document).ready(function() {
     return collectFilters(function(query) {
       // debug
       // console.log("collected filters: " + query);
-      return window.open("/print_directory.php?query=" + query, "Scholar's list");
+      return window.open("/print_directory.php?query=" + query);
     });
   });
   hide("#loading");
