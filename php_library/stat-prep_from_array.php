@@ -105,7 +105,8 @@ foreach ($scholars as $row) {
     // traitement des organismes de rattachement
     $affiliation = trim($row["affiliation"] ?? "");
 
-    if (strcmp($affiliation, "") == 0) {
+    // TODO RESTORE NON NULL affiliation
+    if (strcmp($affiliation, "") == 0 || $affiliation == "_NULL") {
         $missing_affiliation+=1;
     } else {
 
@@ -212,8 +213,10 @@ $title_data.=']';
 $organizations_data = "data: [";
 foreach ($organizations_list as $key => $value) {
 
-        if ($value > min(9, count($organizations_list) / 10)) {
-            $organizations_data.='["' . $key . '",' . $value . '],';
+        $htmlsafe_key = htmlspecialchars($key, ENT_XML1 | ENT_COMPAT, 'UTF-8');
+
+        if ($value > min(9, count($organizations_list) / 15)) {
+            $organizations_data.='["' . $htmlsafe_key . '",' . $value . '],';
         } else {
             $other_organization+=$value;
         }

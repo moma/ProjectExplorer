@@ -31,6 +31,19 @@ $loop = 0;
 // NB this array was prepared in print_directory or print_scholar_directory
 foreach ($scholars as $scholar) {
 
+    // -----------------------------8<------------------
+    // alternative null values during DB transition
+    // TODO remove when DB finalized and refilled by returning users
+    if (preg_match ('/^ *_NULL *$/', $scholar['position'])) {
+        $scholar['position'] = null ;
+    }
+    if (preg_match ('/^ *_NULL *$/', $scholar['affiliation'])) {
+        $scholar['affiliation'] = null ;
+    }
+
+    error_log('aff:/'.$scholar['affiliation'].'/');
+    // -----------------------------8<------------------
+
     // debug
     // var_dump($scholar);
 
@@ -64,18 +77,19 @@ foreach ($scholars as $scholar) {
             ' <small> - ' . $scholar['country'] . '</small></h2>';
 
 
-    if (($scholar['position'] != null)||($scholar['lab'] != null)||($scholar['affiliation'] != null)) {
+    // TODO restore lab // affiliation difference
+    // if (($scholar['position'] != null)||($scholar['lab'] != null)||($scholar['affiliation'] != null)) {
+    if (($scholar['position'] != null)||($scholar['affiliation'] != null)) {
        $content .= '<dl>';
     }
 
     if ($scholar['position'] != null) {
-
-    $content .= '<dt>' . $scholar['position'] . '</dt>';
+        $content .= '<dt>' . $scholar['position'] . '</dt>';
     }
     $affiliation = '';
 
     // TODO restore lab vs org ---------------------------------------------8<-----------
-    // new way: already merged in data retrievam in print_*
+    // new way: already merged in data retrieval in print_*
     if ($scholar['affiliation'] != null) {
         $affiliation = $scholar['affiliation'];
         $lab_list[]=$scholar['affiliation_id'];
@@ -138,7 +152,9 @@ foreach ($scholars as $scholar) {
     //     }
     // }
 
-   if (($scholar['position'] != null)||($scholar['lab'] != null)||($scholar['affiliation'] != null)) {
+   //TODO restore difference lab // affiliation
+    // if (($scholar['position'] != null)||($scholar['lab'] != null)||($scholar['affiliation'] != null)) {
+    if (($scholar['position'] != null)||($scholar['affiliation'] != null)) {
        $content .= '</dl>';
     }
 
@@ -149,7 +165,7 @@ foreach ($scholars as $scholar) {
     if ($scholar['interests'] != null) {
         $content .= '<div>';
         $content .= '<h4>Research</h4>';
-        $content .= '<p>' . $scholar['interests'] . '</p>';
+        $content .= '<p>' . str_replace('%%%', '<br/>', $scholar['interests']) . '</p>';
         $content .= '</div>';
     }
 
