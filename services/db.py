@@ -48,17 +48,17 @@ ORG_COLS = [
 
 
 FIELDS_FRONTEND_TO_SQL = {
-    "keywords": "keywords.kwstr",
-    "tags": "hashtags.htstr",
+    "keywords":      {'col':"keywords.kwstr",        "type": "LIKE_relation"},
+    "tags":          {'col':"hashtags.htstr",        'type': "LIKE_relation"},
 
-    "countries": "scholars.country",
-    "gender": "scholars.gender",
+    "countries":     {'col':"scholars.country",      'type': "EQ_relation"},
+    "gender":        {'col':"scholars.gender",       'type': "EQ_relation"},
 
-    "organizations": "affiliations.org",
-    "laboratories": "affiliations.team_lab",
-    "cities": "affiliations.org_city",
+    "organizations": {'col':"affiliations.org",      'type': "LIKE_relation"},
+    "laboratories":  {'col':"affiliations.team_lab", 'type': "LIKE_relation"},
+    "cities":        {'col':"affiliations.org_city", 'type': "EQ_relation"},
 
-    "linked": "linked_ids.ext_id_type"
+    "linked":          {'col':"linked_ids.ext_id_type", 'type': "EQ_relation"}
 }
 
 
@@ -139,7 +139,7 @@ def get_field_aggs(a_field,
 
     if a_field in FIELDS_FRONTEND_TO_SQL:
 
-        sql_col = FIELDS_FRONTEND_TO_SQL[a_field]
+        sql_col = FIELDS_FRONTEND_TO_SQL[a_field]['col']
         sql_tab = sql_col.split('.')[0]
 
         mlog('INFO', "AGG API sql_col", sql_col)

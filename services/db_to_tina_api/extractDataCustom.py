@@ -174,29 +174,56 @@ class MyExtractor:
                             continue
                         else:
                             known_filter = key
-                            sql_column = FIELDS_FRONTEND_TO_SQL[key]
+                            sql_column = FIELDS_FRONTEND_TO_SQL[key]['col']
+
+                            # "LIKE_relation" or "EQ_relation"
+                            rel_type = FIELDS_FRONTEND_TO_SQL[key]['type']
 
                         val = filter_dict[known_filter]
 
                         if len(val):
-                            clause = ""
-                            if isinstance(val, list) or isinstance(val, tuple):
-                                tested_array = [x for x in val if x != '']
+                            # clause type          clause is full
+                            #  IN (val1, val2)       False
+                            # "= val"                False
+                            # "col LIKE '%val%'"     True
+                            clause_is_full = False
+                            rhsclause = ""
+                            fullclause = ""
+                            if (isinstance(val, list) or isinstance(val, tuple)):
+                                tested_array = [x for x in val if x]
                                 mlog("DEBUG", "tested_array", tested_array)
                                 if len(tested_array):
-                                    qwliststr = repr(tested_array)
-                                    qwliststr = sub(r'^\[', '(', qwliststr)
-                                    qwliststr = sub(r'\]$', ')', qwliststr)
-                                    clause = 'IN '+qwliststr
+                                    if rel_type == "EQ_relation":
+                                        qwliststr = repr(tested_array)
+                                        qwliststr = sub(r'^\[', '(', qwliststr)
+                                        qwliststr = sub(r'\]$', ')', qwliststr)
+                                        clause = 'IN '+qwliststr
+                                    elif rel_type == "LIKE_relation":
+                                        like_clauses = []
+                                        for singleval in tested_array:
+                                            if type(singleval) == str and len(singleval):
+                                                like_clauses.append(
+                                                   sql_column+" LIKE '%"+singleval+"%'"
+                                                )
+                                        clause = " OR ".join(like_clauses)
+                                        # clause already includes col name
+                                        clause_is_full = True
+
                             elif isinstance(val, int):
                                 clause = '= %i' % val
                             elif isinstance(val, float):
                                 clause = '= %f' % val
+                            # elif isinstance(val, str):
+                            #     clause = '= "%s"' % val
                             elif isinstance(val, str):
-                                clause = '= "%s"' % val
+                                clause = 'LIKE "%'+val+'%"'
+                                clause_is_full = True
 
                             if len(clause):
-                                sql_constraints.append("(%s %s)" % (sql_column, clause))
+                                if clause_is_full:
+                                    sql_constraints.append("(%s)" % clause)
+                                else:
+                                    sql_constraints.append("(%s %s)" % (sql_column, clause))
 
                     # debug
                     mlog("INFO", "SELECTing active users with sql_constraints", sql_constraints)
