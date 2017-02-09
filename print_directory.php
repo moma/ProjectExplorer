@@ -103,6 +103,12 @@ $query_details='<ul>';
 
 $f = "";// requête
 $labfilter='';
+
+
+// NB hashtags and keywords were additionally split on ',' before being transformed into constraints... we keep this mechanism here but fixed (in legacy version the $i used only in inner loop so 'OR' was missing)
+//    (1st array level: several inputs)
+//    (2nd array level: several words in one input)
+//    constraints <=> each elt of the 2nd level
 if ($tags) {
     // debug
     // echo '<p style="color:white">MATCHING ON tags<p>';
@@ -110,46 +116,59 @@ if ($tags) {
     if (sizeof($tags) > 0) {
         $f .= 'AND (';
     }
-        $query_details.='<li><strong>Community tags: </strong>';
-    foreach ($tags as $kw) {
-        $words = explode(',', $kw);
-        $i = 0;
-        foreach ($words as $word) {
-            $word = sanitize_input(trim(strtolower($word)));
-            if ($word == "") continue;
-            if ($i > 0)
-                $f .= " OR ";
-            $f .= 'hashtags_list LIKE "%' . $word . '%" ';
-                        $query_details.=$word.', ';
-            $i++;
+    $query_details.='<li><strong>Community tags: </strong>';
+
+    $exploded_hts = [];
+    foreach ($tags as $ht) {
+        $subwords = explode(',', $ht);
+        foreach ($subwords as $subword) {
+            $subword = sanitize_input(trim(strtolower($subword)));
+            if ($subword == "") continue;
+            else array_push($exploded_hts, $subword);
         }
     }
-    $f .= ") ";
+
+    $i = 0;
+    foreach($exploded_hts as $clean_subword) {
+        $query_details.=$clean_subword.', ';
+        if ($i > 0)
+            $f .= " OR ";
+        $f .= 'hashtags_list LIKE "%' . $clean_subword . '%" ';
+        $i++;
+    }
+    $f .= ")  ";
 }
 
 if ($keywords) {
     // debug
     // echo '<p style="color:white">MATCHING ON keywords<p>';
-
     if (sizeof($keywords) > 0) {
         $f .= 'AND (';
     }
-        $query_details.='<li><strong>Working on: </strong>';
+    $query_details.='<li><strong>Working on: </strong>';
+
+    $exploded_kws = [];
     foreach ($keywords as $kw) {
-        $words = explode(',', $kw);
-        $i = 0;
-        foreach ($words as $word) {
-            $word = sanitize_input(trim(strtolower($word)));
-            if ($word == "") continue;
-                        $query_details.=$word.', ';
-            if ($i > 0)
-                $f .= " OR ";
-            $f .= 'keywords_list LIKE "%' . $word . '%" ';
-            $i++;
+        $subwords = explode(',', $kw);
+        foreach ($subwords as $subword) {
+            $subword = sanitize_input(trim(strtolower($subword)));
+            if ($subword == "") continue;
+            else array_push($exploded_kws, $subword);
         }
+    }
+
+    $i = 0;
+    foreach($exploded_kws as $clean_subword) {
+        $query_details.=$clean_subword.', ';
+        if ($i > 0)
+            $f .= " OR ";
+        $f .= 'keywords_list LIKE "%' . $clean_subword . '%" ';
+        $i++;
     }
     $f .= ")  ";
 }
+
+
 if ($countries) {
     // debug
     // echo '<p style="color:white">MATCHING ON countries<p>';
@@ -171,6 +190,8 @@ if ($countries) {
     }
     $f .= ")  ";
 }
+
+
 if ($laboratories) {
     // debug
     // echo '<p style="color:white">MATCHING ON labs<p>';
@@ -231,6 +252,8 @@ if (substr($labfilter, 0,3)=='AND'){
 $imsize = 150;
 
 $content='';
+
+error_log("=======> WHERE filters {$f}");
 
 // filtered query
 if (strlen($f)>0) {
