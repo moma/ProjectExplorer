@@ -19,8 +19,6 @@ $imsize = 150;
 $content='';
 
 
-
-
 $lab_list=array();
 // $orga_list=array();       // TODO restore separate organizations (right now duplicate with labs)
 
@@ -163,9 +161,14 @@ foreach ($scholars as $scholar) {
 
 
     if ($scholar['interests'] != null) {
+
+        $htmlsafe_interests = str_replace('%%%', '<br/>',
+                                htmlspecialchars($scholar['interests'],
+                                                 ENT_XML1, 'UTF-8')
+                              );
         $content .= '<div>';
         $content .= '<h4>Research</h4>';
-        $content .= '<p>' . str_replace('%%%', '<br/>', $scholar['interests']) . '</p>';
+        $content .= '<p>' . $htmlsafe_interests . '</p>';
         $content .= '</div>';
     }
 
