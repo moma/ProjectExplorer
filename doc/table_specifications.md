@@ -27,16 +27,17 @@ CREATE TABLE scholars (
     last_name            varchar(50) not null,
     initials             varchar(7) not null,
     affiliation_id       int(15) not null,
-    position             varchar(30),            -- eg Director
+    position             varchar(120),            -- eg Director
     hon_title            varchar(30),            -- eg Doctor
     interests_text       varchar(3500),
     gender               char(1),
     job_looking_date     char(24),       -- null if not looking for a job
-    home_url             varchar(120),   -- homepage
-    pic_url              varchar(120),   -- remote pic... (full url)
+    home_url             varchar(180),   -- homepage
+    pic_url              varchar(180),   -- remote pic... (full url)
     pic_fname            varchar(120),   -- ...or locally saved pic (basename)
     valid_date           date,   -- when user will be ignored, if legacy status
     record_status        varchar(25),  -- "active|test|legacy|closed_legacy"
+    old_itemid           varchar(30),  -- eg imported id from CSS originals
     future_reserved      varchar(30),  -- eg for an imported id or temp status
 
     INDEX luid_index_sch (luid),
@@ -53,6 +54,7 @@ CREATE TABLE affiliations(
     org_type            varchar(50),
     team_lab            varchar(120) not null,
     org_city            varchar(50),
+    reserved            varchar(30),
     INDEX affid_index_affs (affid),
     PRIMARY KEY (affid),
     UNIQUE KEY full_affiliation (org, team_lab, org_city, org_type)
