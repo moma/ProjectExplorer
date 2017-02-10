@@ -13,6 +13,7 @@ RUN locale-gen fr_FR fr_FR.UTF-8
 RUN dpkg-reconfigure locales
 
 # Install global dependencies and utilities
+RUN echo "updating apt"
 RUN apt update && apt autoclean
 RUN apt install -y python3-pip libmysqlclient-dev git nano tree iputils-ping nginx-full php7.0-fpm php7.0-mysql ssl-cert
 
@@ -47,10 +48,12 @@ WORKDIR /comex2
 # CMD python3 server_comex_registration.py
 
 # start nginx inner wrapper and gunicorn production server
-CMD bash run.sh
+CMD bash comex-run.sh
 
 # ports -----------------------------------------------------------------------
 
 # nginx server (redirecting to php AND services)
 EXPOSE 80
+
+# https test
 EXPOSE 443

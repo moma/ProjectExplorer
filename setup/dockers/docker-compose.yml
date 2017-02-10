@@ -10,18 +10,6 @@
         volumes:
          - ../../data/shared_mysql_data:/var/lib/mysql
 
-      doors_test:
-        container_name: doors_test
-        image: minidoors:latest
-        build: ./minidoors
-        ports:
-         - "32789:8989"
-        volumes:
-         - ../../../shared_minidoors_data:/root/.doors
-     # in the future: external service (=> just remove doors_test
-     #                                     & change DOORS_HOST
-     #                                          and DOORS_PORT)
-
       comex_test:
         container_name: comex_test
         image: comex2_services:testing

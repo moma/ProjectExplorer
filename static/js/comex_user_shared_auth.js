@@ -445,9 +445,6 @@ cmxClt = (function(cC) {
 
             var scheme = cC.uauth.protoDoors ? 'http' : 'https'
 
-            // FORDEBUG
-            scheme = 'http'
-
             $.ajax({
                 contentType: cC.uauth.protoDoors ? "application/json" : "application/x-www-form-urlencoded; charset=UTF-8",
                 dataType: 'json',
