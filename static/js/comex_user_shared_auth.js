@@ -54,8 +54,10 @@ cmxClt = (function(cC) {
     //   - captchaId    optional
     //   - capcheckId   optional
     //   - all  other params are passed to super()
-    //     (optional main_message, mtis, etc)
-
+    //       (optional:  - mainMessageId
+    //        optional:  - timestampId
+    //        optional:  - submitBtnId
+    //        optional:  - multiTextinputs)
     cC.uauth.AuthForm = function(aFormId, aValidationFun, afParams) {
         if (!afParams)  afParams = {}
 
@@ -411,9 +413,7 @@ cmxClt = (function(cC) {
         // test params and set defaults
         if (typeof apiAction != 'string'
             || (! /user|register|userExists/.test(apiAction))) {
-            // currently forces login action unless we got an accepted action
-            apiAction = 'user'
-            // console.warn('DBG: forcing user route')
+            console.error('callDoors error: Unknown doors-api action')
         }
 
         if (typeof callback != 'function') {

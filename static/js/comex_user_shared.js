@@ -130,7 +130,7 @@ var cmxClt = (function() {
     // cf. stackoverflow.com/questions/22119673
     cC.findAncestor = function(elt, cls) {
         // console.log("findAncestor starting from", elt.id)
-        while ((elt = elt.parentElement) && !elt.classList.contains(cls));
+        while ((elt = elt.parentElement) && !elt.classList.contains(cls) && elt);
         // console.log("findAncestor returning", elt)
         return elt
     }
@@ -301,6 +301,12 @@ var cmxClt = (function() {
 
     // initialize
     // -----------
+    // @params:
+    //   - mainMessageId
+    //   - timestampId
+    //   - submitBtnId
+    //   - multiTextinputs: [(...multiTextinputsParams...)]
+
     cC.uform.Form = function(aFormId, aValidationFun, fParams) {
 
         // new "obj"
