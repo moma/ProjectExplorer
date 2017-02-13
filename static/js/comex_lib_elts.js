@@ -31,7 +31,7 @@ var cmxClt = (function(cC) {
     // an optional modal box for login/register credentials
     //            -----------
     cC.elts.box = {}
-    cC.elts.box.toggleAuthBox
+    cC.elts.box.toggleBox
     cC.elts.box.addAuthBox
     cC.elts.box.postAuthBox
     cC.elts.box.authBox = null
@@ -110,27 +110,28 @@ var cmxClt = (function(cC) {
     }
 
     // our self-made modal open/close function
-    cC.elts.box.toggleAuthBox = function() {
-        if (cC.elts.box.authBox) {
-            if (cC.elts.box.authBox.style.display == 'none') {
+    cC.elts.box.toggleBox = function(boxId) {
+        var laBox = document.getElementById(boxId)
+        if (laBox) {
+            if (laBox.style.display == 'none') {
                 // show box
-                cC.elts.box.authBox.style.display = 'block'
-                cC.elts.box.authBox.style.opacity = 1
+                laBox.style.display = 'block'
+                laBox.style.opacity = 1
 
                 // opacify .page element
                 if (cC.elts.elPage) cC.elts.elPage.style.opacity = .2
             }
             else {
                 // remove box
-                cC.elts.box.authBox.style.opacity = 0
-                setTimeout(function(){cC.elts.box.authBox.style.display = 'none'}, 300)
+                laBox.style.opacity = 0
+                setTimeout(function(){laBox.style.display = 'none'}, 300)
 
                 // show .page
                 if (cC.elts.elPage) cC.elts.elPage.style.opacity = ''
             }
         }
         else {
-            console.warn("Can't find cmxClt.uauth.box.authBox try addAuthBox()")
+            console.warn("Can't find box with id '"+$boxId+"'")
         }
     }
 
@@ -208,7 +209,7 @@ var cmxClt = (function(cC) {
                 <div class="modal-content">
                   <form id="auth_box" enctype="multipart/form-data">
                       <div class="modal-header">
-                        <button type="button" class="close" onclick="cmxClt.elts.box.toggleAuthBox()" aria-label="Close">
+                        <button type="button" class="close" onclick="cmxClt.elts.box.toggleBox('auth_modal')" aria-label="Close">
                           <span aria-hidden="true">&times;</span>
                         </button>
                         <h5 class="modal-title" id="authTitle">${title}</h5>
@@ -246,7 +247,7 @@ var cmxClt = (function(cC) {
                         ${captchaBlock}
                       </div>
                       <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" onclick='cmxClt.elts.box.toggleAuthBox()'>
+                        <button type="button" class="btn btn-secondary" onclick='cmxClt.elts.box.toggleBox('auth_modal')'>
                             Cancel
                         </button>
                         <!-- submit -->
@@ -272,6 +273,46 @@ var cmxClt = (function(cC) {
 
 
     // /login box ----------------------------------------------------------
+
+
+    // generic message box -------------------------------------------------
+
+    // to create an html message modal with doors auth (reg or login)
+    cC.elts.box.addGenericBox = function(boxId, boxTitle, boxContent) {
+
+        // in a new div
+        var myDiv = document.createElement('div')
+        myDiv.innerHTML = `
+            <div class="modal fade self-made" id="${boxId}" role="dialog" aria-labelledby="authTitle" aria-hidden="true" style="display:none">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <form id="auth_box" enctype="multipart/form-data">
+                      <div class="modal-header">
+                        <button type="button" class="close" onclick="cmxClt.elts.box.toggleBox('${boxId}')" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h5 class="modal-title" id="authTitle">${boxTitle}</h5>
+                      </div>
+                      <div class="modal-body mini-hero">
+                        ${boxContent}
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="cmxClt.elts.box.toggleBox('${boxId}')">
+                            Ok
+                        </button>
+                      </div>
+                  </form>
+                </div>
+              </div>
+            </div>`
+
+
+        // append on body (no positioning now: it's a fixed overlay anyway)
+        var body = document.querySelector('body')
+        body.insertBefore(myDiv, body.lastChild)
+    }
+
+    // /generic message box ------------------------------------------------
 
     return cC
 
