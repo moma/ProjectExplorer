@@ -257,7 +257,6 @@ $(document).ready(function() {
     hide(".hero-unit");
     $("#welcome").fadeOut("slow");
     // console.log("initiating graphexplorer")
-    // show("#loading", "fast");
     return collectFilters(function(query) {
       // debug
       // console.log("collected filters: " + query);
@@ -273,7 +272,7 @@ $(document).ready(function() {
       return window.open("/print_directory.php?query=" + query);
     });
   });
-  // hide("#loading");
+  hide("#loading");
   cache = {};
   return xhrs = {};
 });
