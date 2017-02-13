@@ -283,7 +283,7 @@ var cmxClt = (function(cC) {
         // in a new div
         var myDiv = document.createElement('div')
         myDiv.innerHTML = `
-            <div class="modal fade self-made" id="${boxId}" role="dialog" aria-labelledby="authTitle" aria-hidden="true" style="display:none">
+            <div class="modal fade self-made" id="${boxId}" role="dialog" aria-labelledby="${boxId}-title" aria-hidden="true" style="display:none">
               <div class="modal-dialog" role="document">
                 <div class="modal-content">
                   <form id="auth_box" enctype="multipart/form-data">
@@ -291,7 +291,10 @@ var cmxClt = (function(cC) {
                         <button type="button" class="close" onclick="cmxClt.elts.box.toggleBox('${boxId}')" aria-label="Close">
                           <span aria-hidden="true">&times;</span>
                         </button>
-                        <h5 class="modal-title" id="authTitle">${boxTitle}</h5>
+                        <h5 class="modal-title" id="${boxId}-title">
+                            <span class="glyphicon glyphicon-comment glyphicon-float-left"></span>&nbsp;&nbsp;
+                            ${boxTitle}
+                        </h5>
                       </div>
                       <div class="modal-body mini-hero">
                         ${boxContent}

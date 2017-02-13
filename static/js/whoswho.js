@@ -259,7 +259,20 @@ $(document).ready(function() {
     // console.log("initiating graphexplorer")
     return collectFilters(function(query) {
       // debug
-      // console.log("collected filters: " + query);
+    //   console.log("collected filters: " + query);
+      // empty query => no map + warning
+      if (query == "" || decodeURI(query) == "{}") {
+          if (document.getElementById('refine-warning')) {
+            cmxClt.elts.box.toggleBox("refine-warning")
+          }
+          else {
+            cmxClt.elts.box.addGenericBox('refine-warning',
+                "No filters were selected",
+                "Please fill at least a filter before generating a MAP <br/>(mapping without filters takes a long time and overloads servers)")
+            cmxClt.elts.box.toggleBox("refine-warning")
+          }
+          return null
+      }
       return window.open('/explorerjs.html?type="filter"&nodeidparam="' + escape(query) +'"');
       //return loadGraph("getgraph.php?query=" + query);
     });
