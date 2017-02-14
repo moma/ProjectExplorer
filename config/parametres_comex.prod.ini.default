@@ -23,7 +23,7 @@ SQL_HOST=comex_db
 SQL_PORT=3306
 
 #; outer address for doors server (doors <=> client authentication)
-#; (used only in ajax context of sending credentials) #; TODO SSL
+#; (used only in ajax context of sending credentials)
 DOORS_HOST=134.158.75.71
 DOORS_PORT=80
 

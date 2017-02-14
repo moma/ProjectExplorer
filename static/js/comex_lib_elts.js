@@ -32,6 +32,7 @@ var cmxClt = (function(cC) {
     //            -----------
     cC.elts.box = {}
     cC.elts.box.toggleBox
+    cC.elts.box.addGenericBox
     cC.elts.box.addAuthBox
     cC.elts.box.postAuthBox
     cC.elts.box.authBox = null
@@ -247,7 +248,7 @@ var cmxClt = (function(cC) {
                         ${captchaBlock}
                       </div>
                       <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" onclick='cmxClt.elts.box.toggleBox('auth_modal')'>
+                        <button type="button" class="btn btn-secondary" onclick="cmxClt.elts.box.toggleBox('auth_modal')">
                             Cancel
                         </button>
                         <!-- submit -->
@@ -300,7 +301,7 @@ var cmxClt = (function(cC) {
                         ${boxContent}
                       </div>
                       <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" onclick="cmxClt.elts.box.toggleBox('${boxId}')">
+                        <button type="button" class="btn btn-primary" onclick="cmxClt.elts.box.toggleBox('${boxId}')">
                             Ok
                         </button>
                       </div>

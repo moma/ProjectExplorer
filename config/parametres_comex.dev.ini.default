@@ -23,7 +23,7 @@ SQL_HOST=172.18.0.2
 SQL_PORT=3306
 
 #; outer address for doors server (doors <=> client authentication)
-#; (used only in ajax context of sending credentials) #; TODO SSL
+#; (used only in ajax context of sending credentials)
 DOORS_HOST=172.18.0.3
 DOORS_PORT=8989
 

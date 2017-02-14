@@ -155,7 +155,7 @@ function addUidThenSubmit(doorsResp) {
     var doorsUid = doorsResp[0]
     var doorsMsg = doorsResp[1]
 
-    console.warn("TODO FIX doorsUid will be available only later now")
+    console.warn("FIXME doorsUid is valid but pending (subject to confirmation or not) => find a strategy to confirm it later ??")
 
     if (doorsUid == null) {
         regfo.elMainMessage.innerHTML = "Problem with doors registration..."
