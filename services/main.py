@@ -197,7 +197,6 @@ def aggs_api():
         # field name itself is tested by db module
         result = db.get_field_aggs(request.args['field'])
         return dumps(result)
-
     else:
         raise TypeError("aggs API query is missing 'field' argument")
 
@@ -224,6 +223,25 @@ def graph_api():
 
     else:
         raise TypeError("graph API query is missing qtype (should be 'filters' or 'uid')")
+
+
+
+# /services/api/user
+@app.route(config['PREFIX'] + config['API_ROUTE'] + '/user')
+def user_api():
+    """
+    API to provide json infos about user DB
+
+    implemented "op" <=> verbs:
+        exists  => bool
+    """
+    if 'op' in request.args and request.args['op'] == "exists":
+        if 'email' in request.args:
+            email = sanitize(request.args['email'])
+            return(dumps({'exists':db.email_exists(email)}))
+
+    else:
+        raise TypeError("user API query is missing the operation to perform (eg op=exists)")
 
 
 # /services/user/

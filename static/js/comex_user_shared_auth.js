@@ -360,6 +360,71 @@ cmxClt = (function(cC) {
     }
 
 
+    /* ------------------ local ajax function ------------------
+    * @args:
+    *     apiOp:  'exists' is the only supported operation atm
+    *
+    *     theEmail: an email as search param
+    *
+    *     callback:   function that will be called after success ONLY
+    *                 (takes the boolean value of 'exists' response)
+    */
+
+    cC.uauth.callUserApi = function(apiOperation, theEmail, callback) {
+        if (apiOperation != 'exists') {
+            console.error('uauth:callUserApi unsupported apiOp:', apiOperation)
+        }
+        else {
+            var urlArgs = new URLSearchParams();
+            urlArgs.append('op', "exists");
+            urlArgs.append('email', theEmail);
+        }
+
+        if (!callback) {
+            callback = function (boolean) { console.log("callUserApi response:", boolean) }
+        }
+
+        if (window.fetch) {
+            fetch('/services/api/user?' + urlArgs)
+            // 1st then() over promise
+            .then(function(response) {
+                if(response.ok) {
+                  // unwraps the promise
+                  return response.json()
+                }
+                else {
+                  console.warn('uauth:callUserApi: Network response was not ok.');
+                }
+            })
+            // 2nd then(): takes response.json() from preceding
+            .then(function(bodyJson) {
+                // ex: {'exists': true}
+                callback(bodyJson[apiOperation])
+            })
+            // .catch(function(error) {
+            //     console.warn('uauth:callUserApi: fetch error:'+error.message);
+            // });
+        }
+
+        // also possible using old-style jquery ajax
+        else {
+            $.ajax({
+                type: 'GET',
+                dataType: "json",
+                url: '/services/api/user?' + urlArgs,
+                success: function(data) {
+                    // ex: {'exists': true}
+                    callback(data[apiOperation])
+                },
+                error: function(result) {
+                    console.warn('uauth:callUserApi(jquery version) ajax error with result', result)
+                }
+            });
+        }
+    }
+
+
+
     /* --------------- doors ajax cors function ----------------
     * @args:
     *     apiAction:  'register' or 'user' or 'userExists' => route to doors api

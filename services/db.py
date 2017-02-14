@@ -101,6 +101,25 @@ def doors_uid_to_luid(doors_uid):
     return luid
 
 
+def email_exists(email):
+    """
+    Tests if there is already a user with this email
+    """
+    db = connect_db()
+    db_c = db.cursor()
+
+    stmt = """
+        SELECT luid FROM scholars
+        WHERE email = "%s"
+    """ % email
+
+    n_rows = db_c.execute(stmt)
+
+    exi_bool = (n_rows >= 1)
+    db.close()
+
+    return exi_bool
+
 def get_field_aggs(a_field,
                    hapax_threshold=int(REALCONFIG['HAPAX_THRESHOLD']),
                    users_status = "active"):
