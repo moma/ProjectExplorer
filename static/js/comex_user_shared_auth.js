@@ -70,7 +70,6 @@ cmxClt = (function(cC) {
 
         //  -> type
         auForm.type = afParams.type || "login"
-        auForm.emailIdSupposedToExist = (auForm.type != 'register')
         auForm.validateCaptcha = afParams.validateCaptcha || false
 
         //  -> interaction elements (params, else default)
@@ -174,14 +173,13 @@ cmxClt = (function(cC) {
 
 
     // ----------- interaction for mailID check via fetch @doors ---------------
-
     // function testMailFormatAndExistence
     // ------------------------------------
     // args:
     //    obja: an AuthForm object
     //
-    // NB for login, use --------> expectExists = true
-    //    for registration, use -> expectExists = false
+    // NB for login we only check the doors DB
+    //    for registration, we must check both DBs if email is available
 
     // effect 1 emailStatus ok/no, and side effect 2 on icon + msg
     //    wrong format ===========================> grey
@@ -220,6 +218,8 @@ cmxClt = (function(cC) {
       var emailFormatOk = /^[-A-z0-9_=.+]+@[-A-z0-9_=.+]+\.[-A-z0-9_=.+]{2,4}$/.test(emailValue)
 
       if (! emailFormatOk) {
+
+          // TODO add to showEmailGUIEffects with a status == "neutral"
           // restore original lack of message
           obja.emailDials.elIcon.classList.remove('glyphicon-ban-circle')
           obja.emailDials.elIcon.classList.remove('glyphicon-ok-circle')
@@ -232,17 +232,25 @@ cmxClt = (function(cC) {
 
           // new emailStatus
           obja.emailStatus = false
-          return false
+          obja.lastEmailValue = emailValue
       }
       else {
-          // 2) additional ajax to check login availability
+          // 2) additional ajax(es) to check login availability
           //  => updates the emailStatus global boolean
           //  => displays an icon
 
+          // NEW: added a user api check in register case
+
+          // if login <=> just callDoors
+          // if register <=> callUserApi and callDoors
+
           // NB using route in doors api/userExists
-          // case true => Ok("""{"status":"login exists"}""")
-          // case false => Ok("""{"status":"login available"}""")
+          //    using route in comex api/user?op=exists
           // /!\ async
+
+          // TODO emove protoDoors case... cases are already complicated by potential ajax chaining !!
+
+
           cC.uauth.callDoors(
               "userExists",
               [emailValue],
@@ -250,67 +258,96 @@ cmxClt = (function(cC) {
                   var doorsUid = doorsResp[0]
                   var doorsMsg = doorsResp[1]
 
-                  // status true iff login is as expected and format ok
+                  if (obja.type == "login") {
 
-                  if (cC.uauth.protoDoors) {
-                      obja.emailStatus = (
-                            (obja.emailIdSupposedToExist
-                                && (doorsMsg == "login exists"))
-                            ||
-                            (!obja.emailIdSupposedToExist
-                                && (doorsMsg == "login available"))
-                        )
+                      obja.emailStatus = (doorsMsg == (cC.uauth.protoDoors ? "login exists" : "LoginAlreadyExists"))
+                        // signals the form change after this input status change
+                        // (we're now after async came back, so long after keyup finished)
+                        obja.elForm.dispatchEvent(new CustomEvent('change'))
+
+                        // trigger visual side-effects
+                        cC.uauth.showEmailGUIEffects(obja, "login recognized")
+                        obja.lastEmailValue = emailValue
                   }
-                  else {
-                      obja.emailStatus = (
-                            (obja.emailIdSupposedToExist
-                                && (doorsMsg == "LoginExists"))
-                            ||
-                            (!obja.emailIdSupposedToExist
-                                && (doorsMsg == "LoginAvailable"))
-                        )
-                  }
-                  // signals the form change after this input status change
-                  // (we're now after async came back, so long after keyup finished)
-                  obja.elForm.dispatchEvent(new CustomEvent('change'))
+                  // similar but one chained call to local api
+                  else if (obja.type == "register") {
 
-                  // effects on dials
-                  if (obja.emailStatus) {
-                      // icon
-                      obja.emailDials.elIcon.style.color = cC.colorGreen
-                      obja.emailDials.elIcon.classList.remove('glyphicon-ban-circle')
-                      obja.emailDials.elIcon.classList.remove('glyphicon-question-sign')
-                      obja.emailDials.elIcon.classList.add('glyphicon-ok-circle')
+                    // email available on doors side
+                    // -----------------------------
+                    if (doorsMsg == (cC.uauth.protoDoors ? "login available" : "LoginAvailable")) {
 
-                      // message in legend
-                      obja.emailDials.elMsg.innerHTML = "OK: "+doorsMsg
-                      obja.emailDials.elMsg.style.color = cC.colorGreen
-                      obja.emailDials.elMsg.style.fontWeight = "bold"
-                      obja.emailDials.elMsg.style.textShadow = cC.strokeWhite
-
-                      // label
-                      obja.emailDials.elLbl.style.backgroundColor = ""
-                  }
-                  else {
-                      var errMsg = obja.emailIdSupposedToExist ? "your ID isn't recognized" : "this ID is already taken"
-                      // icon
-                      obja.emailDials.elIcon.style.color = cC.colorOrange
-                      obja.emailDials.elIcon.classList.remove('glyphicon-ok-circle')
-                      obja.emailDials.elIcon.classList.remove('glyphicon-question-sign')
-                      obja.emailDials.elIcon.classList.add('glyphicon-ban-circle')
-
-                      // message in legend
-                      obja.emailDials.elMsg.innerHTML = "Sorry: "+errMsg+" !"
-                      obja.emailDials.elMsg.style.color = cC.colorOrange
-                      obja.emailDials.elMsg.style.fontWeight = "bold"
-                      obja.emailDials.elMsg.style.textShadow = cC.strokeDeepGrey
-
-                      // label
-                      obja.emailDials.elLbl.style.backgroundColor = cC.colorOrange
-                  }
-                  return obja.emailStatus
+                      // let's see if it's also available on comexdb side
+                      cC.uauth.callUserApi(
+                          "exists",
+                          emailValue,
+                          function(boolExists) {
+                              obja.emailStatus = !boolExists
+                              var guiMsg = boolExists ? 'login already taken in communityexplorer' : 'login available'
+                              // signal and trigger
+                              obja.elForm.dispatchEvent(new CustomEvent('change'))
+                              cC.uauth.showEmailGUIEffects(obja, guiMsg)
+                              obja.lastEmailValue = emailValue
+                          }
+                      )
+                    }
+                    // not available on doors side
+                    // ---------------------------
+                    else if (doorsMsg == (cC.uauth.protoDoors ? "login exists" : "LoginAlreadyExists"))
+                        obja.emailStatus = false
+                        // signal and trigger
+                        obja.elForm.dispatchEvent(new CustomEvent('change'))
+                        cC.uauth.showEmailGUIEffects(obja, "login already taken in ISC services")
+                        obja.lastEmailValue = emailValue
+                    }
+                    // doors error
+                    else {
+                        console.error("Error with doors connection")
+                    }
               }
           )
+      }
+    }
+
+    // showEmailGUIEffects(aUform)
+    //
+    // Uses a status (the boolean aUform.emailStatus) to show info in gui
+    // Now as a separate function to call in different callback nesting levels
+    //
+    // TODO A add the status == "neutral" case
+    // TODO B add a status == "ERROR" case
+    cC.uauth.showEmailGUIEffects = function(formObj, ajaxMsg) {
+      // effects on dials
+      if (formObj.emailStatus) {
+          // icon
+          formObj.emailDials.elIcon.style.color = cC.colorGreen
+          formObj.emailDials.elIcon.classList.remove('glyphicon-ban-circle')
+          formObj.emailDials.elIcon.classList.remove('glyphicon-question-sign')
+          formObj.emailDials.elIcon.classList.add('glyphicon-ok-circle')
+
+          // message in legend
+          formObj.emailDials.elMsg.innerHTML = "OK: "+ajaxMsg
+          formObj.emailDials.elMsg.style.color = cC.colorGreen
+          formObj.emailDials.elMsg.style.fontWeight = "bold"
+          formObj.emailDials.elMsg.style.textShadow = cC.strokeWhite
+
+          // label
+          formObj.emailDials.elLbl.style.backgroundColor = ""
+      }
+      else {
+          // icon
+          formObj.emailDials.elIcon.style.color = cC.colorOrange
+          formObj.emailDials.elIcon.classList.remove('glyphicon-ok-circle')
+          formObj.emailDials.elIcon.classList.remove('glyphicon-question-sign')
+          formObj.emailDials.elIcon.classList.add('glyphicon-ban-circle')
+
+          // message in legend
+          formObj.emailDials.elMsg.innerHTML = "Sorry: "+ajaxMsg+" !"
+          formObj.emailDials.elMsg.style.color = cC.colorOrange
+          formObj.emailDials.elMsg.style.fontWeight = "bold"
+          formObj.emailDials.elMsg.style.textShadow = cC.strokeDeepGrey
+
+          // label
+          formObj.emailDials.elLbl.style.backgroundColor = cC.colorOrange
       }
     }
 
