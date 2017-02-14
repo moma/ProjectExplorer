@@ -7,7 +7,9 @@ COMEX_PORT=9090
 #; that's how much we'll log from services: DEBUG, INFO, WARNING or ERROR
 LOG_LEVEL=INFO
 LOG_FILE=logs/services.log
-LOG_TEE=false
+
+#; also show the log on STDOUT ?
+LOG_TEE=true
 
 [routes]
 PREFIX=/services

@@ -7,6 +7,8 @@ COMEX_PORT=9090
 #; that's how much we'll log from services: DEBUG, INFO, WARNING or ERROR
 LOG_LEVEL=DEBUG
 LOG_FILE=logs/services.log
+
+#; also show the log on STDOUT ?
 LOG_TEE=true
 
 [routes]
@@ -24,8 +26,8 @@ SQL_PORT=3306
 
 #; outer address for doors server (doors <=> client authentication)
 #; (used only in ajax context of sending credentials)
-DOORS_HOST=172.18.0.3
-DOORS_PORT=8989
+DOORS_HOST=192.168.1.190
+DOORS_PORT=80
 
 [content]
 # used for all aggregations queries
