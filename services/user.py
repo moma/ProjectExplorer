@@ -230,16 +230,25 @@ def doors_login(email, password, config):
             }
           }
         }
+    NB: returned doors_uid will be None if user not found
     """
     uid = None
     sentdata = {'login':email, 'password':password}
 
+    http_scheme = "https:"
     if doorsProto:
         sentdata = dumps(sentdata)
+        http_scheme = "http:"
 
-    # £TODO https here !! + certificate for doors
-    doors_base_url = 'http://'+config['DOORS_HOST']+':'+config['DOORS_PORT']
-    doors_response = post(doors_base_url+'/api/user', data=sentdata)
+    # (TODO generalize this logic)
+    if config['DOORS_PORT'] in ['80', '443']:
+        # implicit port
+        doors_base_url = http_scheme + '//'+config['DOORS_HOST']
+    else:
+        doors_base_url = http_scheme + '//'+config['DOORS_HOST']+':'+config['DOORS_PORT']
+
+    mlog("WARNING", "user.doors_login: SSL certificate verification turned off for https staging tests (after tests do remove verify=False !!)")
+    doors_response = post(doors_base_url+'/api/user', data=sentdata, verify=False)
 
     mlog("INFO", "/api/user doors_response",doors_response)
     if doors_response.ok:
@@ -252,6 +261,12 @@ def doors_login(email, password, config):
             if login_info['status'] == "LoginOK":
                 uid = login_info['userID']
 
+    elif match(r'User .* not found$', doors_response.json()):
+        uid = None
+        mlog('INFO', "doors_login says user '%s' was not found" % email)
+    else:
+        raise Exception('Doors request failed')
+
     return uid
 
 def doors_register(email, password, name, config):
@@ -261,11 +276,17 @@ def doors_register(email, password, name, config):
     uid = None
     sentdata = {'login':email, 'password':password, 'name':name}
 
+    http_scheme = "https:"
     if doorsProto:
         sentdata = dumps(sentdata)
+        http_scheme = "http:"
 
-    # £TODO https here !! + certificate for doors
-    doors_base_url = 'http://'+config['DOORS_HOST']+':'+config['DOORS_PORT']
+    if config['DOORS_PORT'] in ['80', '443']:
+        # implicit port
+        doors_base_url = http_scheme + '//'+config['DOORS_HOST']
+    else:
+        doors_base_url = http_scheme + '//'+config['DOORS_HOST']+':'+config['DOORS_PORT']
+
     doors_response = post(doors_base_url+'/api/register', data=sentdata)
 
     mlog("INFO", "/api/register doors_response",doors_response)
