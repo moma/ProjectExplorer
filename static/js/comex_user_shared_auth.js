@@ -39,8 +39,10 @@ cmxClt = (function(cC) {
     cC.uauth.AuthForm
     cC.uauth.collectCaptcha
     cC.uauth.testMailFormatAndExistence
+    cC.uauth.showEmailGUIEffects          // helper for testMail
     cC.uauth.doubleCheck
     cC.uauth.callDoors
+    cC.uauth.callUserApi
 
     // AuthForm: init(id, onchange, params)
     // --------
@@ -266,7 +268,12 @@ cmxClt = (function(cC) {
                         obja.elForm.dispatchEvent(new CustomEvent('change'))
 
                         // trigger visual side-effects
-                        cC.uauth.showEmailGUIEffects(obja, "login recognized")
+                        if (obja.emailStatus) {
+                            cC.uauth.showEmailGUIEffects(obja, "login recognized")
+                        }
+                        else {
+                            cC.uauth.showEmailGUIEffects(obja, "login not found")
+                        }
                         obja.lastEmailValue = emailValue
                   }
                   // similar but one chained call to local api
