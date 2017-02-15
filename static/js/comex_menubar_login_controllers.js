@@ -23,7 +23,8 @@ var menuUForm = cmxClt.uauth.AuthForm(
      'duuidId': "doors_uid",
      'passId':  "menu_password",
      'captchaId': "menu_captcha",
-     'capcheckId': "menu_captcha_hash"}
+     'capcheckId': "menu_captcha_hash",
+     'mainMessageId': "menu_message"}
     // NB the dials aka htmlEffectTgtIds are now
     //    auto-retrieved by their classname
 )

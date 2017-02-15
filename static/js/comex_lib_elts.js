@@ -72,19 +72,30 @@ var cmxClt = (function(cC) {
             })
             // 1st then() over promise
             .then(function(response) {
-                // NB unwrapping the promise by consuming the body AND finishing this 1st then() will allow Fetch to complete which allows the cookie to be set
+                // NB 2 promises to unwrap for Fetch to complete which allows the cookie to be set in the OK case
                 if(response.ok) {
-                  // unwraps the promise
-                  return response.text()
+                  // unwraps the promise => 2nd then()
+                  response.text().then( function(bodyText) {
+                    // cookie should be set now !
+                    console.log("Login was OK, redirecting to profile...")
+                    window.location = '/services/user/profile'
+                  })
                 }
                 else {
-                  throw new Error('Network response was not ok.');
+                   // also unwraps the promise => 2nd then()
+                   // (we want to use the bodyText as message)
+                   // cf. github.com/github/fetch/issues/203
+                  response.text().then( function(bodyText) {
+                    console.log("Login failed, aborting and showing message")
+                    formObj.elMainMessage.innerHTML = bodyText
+
+                    // TODO factorize CSS with old #main_message as a class
+                    formObj.elMainMessage.style.color = cmxClt.colorRed
+                    formObj.elMainMessage.style.fontSize = "150%"
+                    formObj.elMainMessage.style.lineHeight = "130%"
+                    formObj.elMainMessage.style.textAlign = "center"
+                  })
                 }
-            })
-            // 2nd then(): at this point Fetch has completed and cookie is set
-            .then(function(bodyText) {
-                // console.log('the login cookie should be set, changing page now')
-                window.location = '/services/user/profile'
             })
             .catch(function(error) {
                 console.warn('fetch error:'+error.message);
@@ -246,6 +257,8 @@ var cmxClt = (function(cC) {
                         ${confirmPass}
                         <br/>
                         ${captchaBlock}
+                        <br/>
+                        <div id="menu_message" class="legend"></div>
                       </div>
                       <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" onclick="cmxClt.elts.box.toggleBox('auth_modal')">

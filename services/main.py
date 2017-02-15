@@ -295,7 +295,19 @@ def login():
                 mlog("ERROR", "error in doors_login request")
                 raise (err)
 
-            mlog("DEBUG", "doors_login returned id '%s'" % doors_uid)
+            mlog("DEBUG", "doors_login returned doors_uid '%s'" % doors_uid)
+
+            if doors_uid is None:
+                # break: can't doors_login
+                nologin_message = """<b>The login exists but it was invalid!</b><br/>Perhaps the password was wrong ?<br/>Or perhaps you never checked your mailbox and clicked on the validation link ?"""
+                if called_as_api:
+                    # menubar login will prevent redirect
+                    return(nologin_message, 404)
+                else:
+                    return render_template(
+                        "message.html",
+                        message = nologin_message
+                    )
 
             luid = db.doors_uid_to_luid(doors_uid)
 
@@ -325,11 +337,19 @@ def login():
 
             if not login_ok:
                 # break: failed to login_user()
-                render_template(
-                    "message.html",
-                    message = "There was an unknown problem with the login."
-                )
+                notok_message = "There was an unknown problem with the login."
+                if called_as_api:
+                    # menubar login will prevent redirect
+                    return(nologin_message, 404)
+                else:
+                    return render_template(
+                        "message.html",
+                        message = notok_message
+                    )
 
+            # ========
+            # OK cases
+            # ========
             if called_as_api:
                 # menubar login will do the redirect
                 return('', 204)
@@ -389,7 +409,7 @@ def profile():
             mlog("DEBUG",  "PROFILE: current_user details: \n  - %s" % (
                                 '\n  - '.join([current_user.info['email'],
                                             current_user.info['initials'],
-                                           current_user.info['doors_uid'],
+                                           current_user.info['doors_uid'] if current_user.info['doors_uid'] else "(no doors_uid)" ,
                                         str(current_user.info['keywords']),
                                             current_user.info['country']]
                                           )
