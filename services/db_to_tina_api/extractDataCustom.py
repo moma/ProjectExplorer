@@ -21,7 +21,8 @@ class MyExtractor:
     def __init__(self,dbhost):
         self.connection=connect(
             host=dbhost, db="comex_shared",
-            user="root", passwd="very-safe-pass"
+            user="root", passwd="very-safe-pass",
+            charset="utf8"
         )
         mlog("DEBUGSQL", "MyExtractor connected:", self.connection)
         self.cursor=self.connection.cursor(cursors.DictCursor)

@@ -73,7 +73,8 @@ def connect_db(config=REALCONFIG):
         port=int(config['SQL_PORT']),
         user="root",   # POSS change db ownership to a comexreg user
         passwd="very-safe-pass",
-        db="comex_shared"
+        db="comex_shared",
+        charset="utf8"
     )
 
 def doors_uid_to_luid(doors_uid):
