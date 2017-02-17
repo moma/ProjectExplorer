@@ -18,6 +18,10 @@ $meta = '<!DOCTYPE html>
         <link type="text/css" href="static/css/comex.css" rel="stylesheet">
         <link type="text/css" href="static/css/bootstrap_directory.css" rel="stylesheet">
 
+        <!-- ## fonts ## -->
+        <link type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
+        <link type="text/css" href="https://fonts.googleapis.com/css?family=Droid%20Sans" rel="stylesheet">
+
         <!-- updated versions as of 2016-2017 -->
         <script type="text/javascript" src="static/js/jquery/jquery-3.1.1.min.js"></script>
         <script type="text/javascript" src="static/js/jquery-ui-1.12.1/jquery-ui.min.js"></script>
