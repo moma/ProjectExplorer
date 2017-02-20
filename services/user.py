@@ -267,9 +267,15 @@ def doors_login(email, password, config):
     else:
         raise Exception('Doors request failed')
 
+    if not doorsProto:
+        # ID is a string of the form: "UserID(12849e74-b039-481f-b8eb-1e52562fbda6)"
+        capture = match(r'UserID\(([0-9a-f-]+)\)', uid)
+        if capture:
+            uid = capture.groups()[0]
+
     return uid
 
-def doors_register(email, password, name, config):
+def doors_register(email, password, name, config=REALCONFIG):
     """
     Remote query to Doors API to register a user
     """

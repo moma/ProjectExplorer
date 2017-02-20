@@ -127,7 +127,7 @@ function bringTheNoise(sourceinfo,type){
             $('.etabs a[href="#tabs1"]').trigger('click');
         });
 
-		printStates()
+		// printStates()
     	pr(" ############  / changeTYPE click");
     	pr("")
     });

@@ -358,11 +358,15 @@ var ForceAtlas2 = function(graph) {
     var graph = this.graph;
 
     // Tuning
-    if (graph.nodes.length >= 100) {
-      this.p.scalingRatio = 2.0;
-    } else {
-      this.p.scalingRatio = 10.0;
-    }
+    // if (graph.nodes.length >= 100) {
+    //   this.p.scalingRatio = 2.0;
+    // } else {
+    //   this.p.scalingRatio = 10.0;
+    // }
+
+    this.p.scalingRatio = 100 / Math.sqrt(graph.nodes.length)
+    console.warn ("this p scalingRatio", this.p.scalingRatio, "for length:", graph.nodes.length)
+
 
     // POSS: trying proportional scaling instead of if
     // NB: *smaller* scaling ratio improves non overlap of close neighboors

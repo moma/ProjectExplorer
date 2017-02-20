@@ -216,7 +216,7 @@
             <div class="panel panel-default wwwpanel">
                 <div class="panel-heading">
                     <p class="pull-up-right">
-                        <a target="_blank" href="/services/user/{% if current_user.info %}profile{% else %}register{% endif %}">
+                        <a id="inlink" target="_blank" href="/services/user/{% if current_user.info %}profile{% else %}register{% endif %}">
                             <span class="glyphicon glyphicon-new-window"></span>
                             Open in another tab
                         </a>
@@ -283,5 +283,6 @@
         //               ---------
         var uinfo = {{ (current_user.json_info | safe) if current_user.info else ("null" | safe) }};
     </script>
+    <script src="{{ url_for('static', filename='js/comex_page_rootindex.js') }}"></script>
 
 {% endblock %}

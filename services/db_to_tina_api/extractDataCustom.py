@@ -533,7 +533,10 @@ class MyExtractor:
                     if neigh != str(scholar):
                         source=str(scholar)
                         target=str(neigh)
-                        weight=self.log_sim(neighbors[str(neigh)],
+                        # weight=self.log_sim(neighbors[str(neigh)],
+                        #                         scholarsMatrix[nodeId1]['occ'],
+                        #                         scholarsMatrix[neigh]['occ'])
+                        weight=self.jaccard(neighbors[str(neigh)],
                                                 scholarsMatrix[nodeId1]['occ'],
                                                 scholarsMatrix[neigh]['occ'])
                         #mlog("DEBUG", "\t"+source+","+target+" = "+str(weight))

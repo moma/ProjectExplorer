@@ -33,7 +33,7 @@ var catSem = "NGram";
 
 // newSize = oldSize + (sizeMult * oldSize)
 var sizeMult = [];
-    sizeMult[catSoc] = 0.7;
+    sizeMult[catSoc] = -.5;
     sizeMult[catSem] = 0.0;
 
 var inactiveColor = '#666';
@@ -59,7 +59,7 @@ var desirableScholarSize=6; //Remember that all scholars have the same size!
  *  - "off": button doesn't exist, fa2 stopped forever
  **/ var fa2enabled=false;//"off";
 var stopcriteria = false;
-var iterationsFA2=2000;               // <= should be proportional to graph size
+var iterationsFA2=3000;               // <= should be proportional to graph size
                                       //    TODO also adjust speed after initial
 var seed=999999999;//defaultseed
 var semanticConverged=false;
@@ -75,12 +75,13 @@ var sigmaJsDrawingProperties = {
     defaultLabelSize: 10,//in fact I'm using it as minLabelSize'
     defaultLabelBGColor: '#fff',
     defaultLabelHoverColor: '#000',
-    labelThreshold: 8,
-    labelSizeRatio: 1.7,    // for proportional display only
+    labelThreshold: 7,
+    labelSizeRatio: 1.3,    // for proportional display only
     defaultEdgeType: 'curve',
-    font:"Droid Sans",
+    // font:"Droid Sans",
+    font:"Ubuntu",
 
-    borderSize: 2.5,//Something other than 0
+    borderSize: 2,//Something other than 0
     nodeBorderColor: "default",//exactly like this
     defaultNodeBorderColor: "black"//,//Any color of your choice
     //defaultBorderView: "always"
