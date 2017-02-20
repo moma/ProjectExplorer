@@ -272,7 +272,7 @@ cmxClt = (function(cC) {
 
                     // email available on doors side
                     // -----------------------------
-                    if (doorsMsg == ("LoginAvailable") {
+                    if (doorsMsg == ("LoginAvailable")) {
 
                       // let's see if it's also available on comexdb side
                       cC.uauth.callUserApi(

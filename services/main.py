@@ -203,7 +203,6 @@ def aggs_api():
         if 'hapax' in request.args:
             try:
                 hap_thresh = int(request.args['hapax'])
-                print("new hap_thresh", hap_thresh)
             except:
                 pass
 
