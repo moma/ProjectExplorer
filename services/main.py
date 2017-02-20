@@ -194,8 +194,20 @@ def aggs_api():
     API to read DB aggregation data (ex: for autocompletes)
     """
     if 'field' in request.args:
-        # field name itself is tested by db module
-        result = db.get_field_aggs(request.args['field'])
+        hap_thresh = None
+        if 'hapax' in request.args:
+            try:
+                hap_thresh = int(request.args['hapax'])
+                print("new hap_thresh", hap_thresh)
+            except:
+                pass
+
+        if hap_thresh is not None:
+            # field name itself is tested by db module
+            result = db.get_field_aggs(request.args['field'], hapax_threshold=hap_thresh)
+        else:
+            result = db.get_field_aggs(request.args['field'])
+
         return dumps(result)
     else:
         raise TypeError("aggs API query is missing 'field' argument")

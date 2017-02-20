@@ -252,337 +252,79 @@
  });
 
 
- // autocomplete keywords
- $(function() {
-   var $kwInput = $('#keywords')
+ // autocomplete via remote aggs api
+ //   @fieldName : 'keywords' or 'hashtags'
+ //       => must match the html form input id (eg #keywords)
+ //       => supposed to also match the REST param
+ //            (eg services/api/aggs?field=keywords)
+function remoteAutocompleteInit(fieldName) {
+   var nMax = 80
+   var hapaxThresh = 5
 
-   // TODO transform into simple array => faster
-   var kwFreqs = {
-     "complex networks": 154,
-     "complex systems": 134,
-     "networks": 84,
-     "modelling": 63,
-     "simulation": 63,
-     "social networks": 53,
-     "emergence": 52,
-     "complexity": 50,
-     "statistical physics": 42,
-     "machine learning": 40,
-     "dynamical systems": 36,
-     "multi-agent systems": 36,
-     "evolution": 35,
-     "data mining and analysis": 34,
-     "self-organization": 34,
-     "ABM (agent-based modeling and simulation)": 32,
-     "systems biology": 31,
-     "synchronization": 29,
-     "artificial life": 28,
-     "game theory": 28,
-     "nonlinear dynamics": 28,
-     "ecology": 27,
-     "econophysics": 27,
-     "information theory": 26,
-     "complex adaptive systems": 25,
-     "sustainability": 25,
-     "neural networks": 24,
-     "chaos": 23,
-     "cellular automata": 22,
-     "cognition": 22,
-     "innovation": 22,
-     "morphogenesis": 21,
-     "neuroscience": 21,
-     "statistical mechanics": 21,
-     "artificial intelligence": 20,
-     "epidemiology": 20,
-     "collective intelligence and behavior": 19,
-     "epistemology": 18,
-     "mathematical modelling": 18,
-     "resilience": 18,
-     "social network analysis": 18,
-     "transportation": 18,
-     "network": 17,
-     "network dynamics": 17,
-     "social simulation": 17,
-     "environment": 16,
-     "evolutionary computation": 16,
-     "geography": 16,
-     "opinion dynamics": 16,
-     "sociophysics": 16,
-     "bioinformatics": 15,
-     "biology": 15,
-     "complexity science": 15,
-     "computational biology": 15,
-     "learning": 15,
-     "philosophy": 15,
-     "sociology": 15,
-     "visualization": 15,
-     "GIS (geographic information systems)": 14,
-     "graph theory": 14,
-     "optimization": 14,
-     "social systems": 14,
-     "swarm intelligence": 14,
-     "computational neuroscience": 13,
-     "economics": 13,
-     "fractals": 13,
-     "network analysis": 13,
-     "phase transitions": 13,
-     "population dynamics": 13,
-     "spatial networks": 13,
-     "urban planning and design": 13,
-     "big data": 12,
-     "cognitive science": 12,
-     "control": 12,
-     "design": 12,
-     "mathematics": 12,
-     "social dynamics": 12,
-     "social sciences": 12,
-     "spatial analysis": 12,
-     "statistics": 12,
-     "archaeology": 11,
-     "biological networks": 11,
-     "biophysics": 11,
-     "brain": 11,
-     "dynamics": 11,
-     "financial markets": 11,
-     "management": 11,
-     "network theory": 11,
-     "security": 11,
-     "data science": 10,
-     "decision making": 10,
-     "developmental biology": 10,
-     "network science": 10,
-     "pattern formation": 10,
-     "robotics": 10,
-     "stochastic processes": 10,
-     "anthropology": 9,
-     "community detection": 9,
-     "cooperation": 9,
-     "development": 9,
-     "education": 9,
-     "entropy": 9,
-     "evolutionary algorithms": 9,
-     "internet": 9,
-     "mathematical biology": 9,
-     "psychology": 9,
-     "risk": 9,
-     "social network": 9,
-     "urban systems": 9,
-     "agents": 8,
-     "architecture": 8,
-     "digital humanities": 8,
-     "distributed systems": 8,
-     "epidemics": 8,
-     "evolutionary game theory": 8,
-     "finance": 8,
-     "robustness": 8,
-     "sustainable development": 8,
-     "synthetic biology": 8,
-     "systemic risk": 8,
-     "text mining": 8,
-     "viability theory": 8,
-     "adaptation": 7,
-     "cities": 7,
-     "computational social science": 7,
-     "epidemic spreading": 7,
-     "image processing": 7,
-     "leadership": 7,
-     "natural language processing": 7,
-     "origin of life": 7,
-     "pattern recognition": 7,
-     "policy": 7,
-     "scientometrics": 7,
-     "social": 7,
-     "social-ecological systems": 7,
-     "aging": 6,
-     "analysis": 6,
-     "artificial neural networks": 6,
-     "autopoiesis": 6,
-     "complex systems dynamics": 6,
-     "cultural evolution": 6,
-     "ecosystems": 6,
-     "gene regulatory networks": 6,
-     "information": 6,
-     "java": 6,
-     "linguistics": 6,
-     "mobility": 6,
-     "multiplex": 6,
-     "non linear dynamics": 6,
-     "prediction": 6,
-     "public policy": 6,
-     "self-assembly": 6,
-     "semantic networks": 6,
-     "signal processing": 6,
-     "social science": 6,
-     "strategy": 6,
-     "system dynamics": 6,
-     "systems": 6,
-     "systems engineering": 6,
-     "temporal networks": 6,
-     "time series analysis": 6,
-     "adaptive systems": 5,
-     "applied mathematics": 5,
-     "behavior": 5,
-     "bibliometrics": 5,
-     "cancer": 5,
-     "causality": 5,
-     "communication": 5,
-     "community structure": 5,
-     "complexity theory": 5,
-     "computational intelligence": 5,
-     "consciousness": 5,
-     "critical phenomena": 5,
-     "culture": 5,
-     "cybernetics": 5,
-     "decision support": 5,
-     "diffusion": 5,
-     "economic complexity": 5,
-     "EEG": 5,
-     "energy": 5,
-     "entrepreneurship": 5,
-     "evolutionary economics": 5,
-     "fracture": 5,
-     "games": 5,
-     "genetic algorithms": 5,
-     "genetics": 5,
-     "governance": 5,
-     "health": 5,
-     "human mobility": 5,
-     "immunology": 5,
-     "information retrieval": 5,
-     "language evolution": 5,
-     "MAS": 5,
-     "mathematical physics": 5,
-     "methodology": 5,
-     "multi-scale": 5,
-     "multiscale": 5,
-     "netlogo": 5,
-     "ontology": 5,
-     "organization": 5,
-     "philosophy of science": 5,
-     "physics": 5,
-     "plasticity": 5,
-     "public health": 5,
-     "risk management": 5,
-     "scaling": 5,
-     "science of science": 5,
-     "SNA": 5,
-     "social cognition": 5,
-     "social complexity": 5,
-     "social media": 5,
-     "socio-technical systems": 5,
-     "spin glasses": 5,
-     "systems thinking": 5,
-     "technology": 5,
-     "trust": 5,
-     "validation": 5
-     // ,
-     // "adaptive networks": 4,
-     // "agent-based computational economics": 4,
-     // "agriculture": 4,
-     // "bacteria": 4,
-     // "chaos theory": 4,
-     // "climate and climate change": 4,
-     // "cloud computing": 4,
-     // "co-evolution": 4,
-     // "collective motion": 4,
-     // "combinatorics": 4,
-     // "complex systems engineering": 4,
-     // "complex systems modelling": 4,
-     // "complexity management": 4,
-     // "computational complexity": 4,
-     // "computational linguistics": 4,
-     // "computational science": 4,
-     // "computer science": 4,
-     // "creativity": 4,
-     // "criticality": 4,
-     // "data": 4,
-     // "decision": 4,
-     // "diffusion of innovation": 4,
-     // "distributed computing": 4,
-     // "distributed system": 4,
-     // "DNA": 4,
-     // "dynamic": 4,
-     // "dynamical networks": 4,
-     // "dynamical system": 4,
-     // "e-learning": 4,
-     // "engineering": 4,
-     // "evolutionary biology": 4,
-     // "evolutionary robotics": 4,
-     // "extreme events": 4,
-     // "financial networks": 4,
-     // "formal concept analysis": 4,
-     // "grid computing": 4,
-     // "high performance computing": 4,
-     // "HIV": 4,
-     // "information diffusion": 4,
-     // "information systems": 4,
-     // "international relations": 4,
-     // "language": 4,
-     // "language dynamics": 4,
-     // "markov chains": 4,
-     // "metabolic networks": 4,
-     // "morphodynamics": 4,
-     // "negotiation": 4,
-     // "nonequilibrium statistical physics": 4,
-     // "online social networks": 4,
-     // "open-ended evolution": 4,
-     // "percolation": 4,
-     // "perturbation": 4,
-     // "planning": 4,
-     // "population genetics": 4,
-     // "privacy": 4,
-     // "probability": 4,
-     // "quantitative finance": 4,
-     // "semantic web": 4,
-     // "social computing": 4,
-     // "society": 4,
-     // "software engineering": 4,
-     // "space-time": 4,
-     // "stability": 4,
-     // "structure": 4,
-     // "swarm robotics": 4,
-     // "symbolic dynamics": 4,
-     // "system biology": 4,
-     // "topology": 4,
-     // "twitter": 4,
-     // "uncertainty": 4,
-     // "vulnerability": 4,
-     // "wireless sensor networks": 4
-   }
+   var $theInput = $('#'+fieldName)
 
+   var theValuedArray = []
 
-   // sorted couples [[networks, 84], [cooperation, 8], [topology, 4]...]
-   var kwValuedArray = [];
-   for (var kwKey in kwFreqs) {
-     kwValuedArray.push([kwKey, kwFreqs[kwKey]])
-   }
+   $.ajax({
+       type: 'GET',
+       dataType: 'json',
+       url: "/services/api/aggs?field="+fieldName+"&hapax="+hapaxThresh,
+       success: function(data) {
+           // ex data is array like:
+           // [{"occs": 1116, "x": null},
+           //  {"occs": 100, "x": "complex systems"},
+           //  {"occs": 90, "x": "complex networks"},
+           //  {"occs": 66, "x": "agent-based models"}]
 
-   // rn sort on vals
-   kwValuedArray.sort(
-     function(a, b) {
-         return  b[1] - a[1]
-     }
-   )
+           for (var i in data) {
+               if (data[i].x != null) {
+                   var item = data[i].x
+                   var occs = data[i].occs
+                   theValuedArray.push([item, occs])
+               }
+           }
 
-   // console.log(kwValuedArray)
+           // sorted couples [[networks, 84], [cooperation, 8], [topology, 4]...]
+           // rn sort on vals
+           theValuedArray.sort(
+             function(a, b) {
+                 return  b[1] - a[1]
+             }
+           )
 
-   // sorted auto completion array by previous freq
-   var kwArray = []
-   for (var i in kwValuedArray) {
-     kwArray.push(kwValuedArray[i][0])
-   }
+           // console.log(kwValuedArray)
 
+           // sorted auto completion array by previous freq, with max
+           var theArray = []
+           for (var i in theValuedArray) {
+             theArray.push(theValuedArray[i][0])
+             if (i > nMax) {
+                 break;
+             }
+           }
 
-   $kwInput.autocomplete({
-       source: kwArray,
-       autoFocus: true,
-       focus: function () {
-           // prevent value inserted on focus
-           return false;
+           $theInput.autocomplete({
+               source: theArray,
+               autoFocus: true,
+               focus: function () {
+                   // prevent value inserted on focus
+                   return false;
+               },
+               select: function (event, ui) {
+               }
+           });
+
        },
-       select: function (event, ui) {
+       error: function(result) {
+           console.warn('jquery ajax error with result', result)
        }
    });
+}
+
+
+ $(function() {
+     remoteAutocompleteInit('keywords')
+     remoteAutocompleteInit('hashtags')
  });
 
  console.log("autocompletes load OK")
