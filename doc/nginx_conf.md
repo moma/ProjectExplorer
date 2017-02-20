@@ -34,20 +34,27 @@ This below is a full config exemple you can paste in nano:
 server {
     listen 80 ;
     listen [::]:80 ;
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    # SSL certificates
+        # self-signed certificates
+        include snippets/snakeoil.conf;
 
-    # server_name communityexplorer.org;
-    server_name _ ;
+        # uncomment if certificates for https://your-domain.org
+        # ssl_certificate /etc/ssl/cert/ssl-for_your_domain.pem;
+        # ssl_certificate_key /etc/ssl/private/ssl-for_your_domain.key;
+
+    # server_name your-domain.org;
 
     # get the logs in a custom place
     # (adapt paths)
-    access_log /home/romain/comex/outer_nginx_access.log ;
-    error_log /home/romain/comex/outer_nginx_error.log ;
+    access_log /home/somewhere/outer_nginx_access.log ;
+    error_log /home/somewhere/outer_nginx_error.log ;
 
-    # independant app with its own nginx serving:
+    # proxy pointing to the docker app with its own inner nginx serving:
     #     the php root on '/'
     #     the python server on 'services/'
     location / {
-        # pointing to the local bridge to the dockerized nginx serving all comex2 parts
         proxy_pass http://0.0.0.0:8080;
         proxy_redirect     off;
 
@@ -58,6 +65,10 @@ server {
         proxy_set_header   X-Forwarded-Host $server_name;
     }
 
+    # faster shortcut to static files w/o docker
+    location /static {
+        alias  /path/to/your/install/of/comex2/static;
+    }
 }
 ```
 

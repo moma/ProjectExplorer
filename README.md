@@ -1,39 +1,119 @@
 Community Explorer v.2 beta
 ===========================
 
-## comex app with refactoring in progress
+## Setting up the server
 
-It contains:  
-  - an html index based on old bootstrap
-  - several php files specialized in retrieving custom lists of scholars, labs, jobs for directory showing
-    - `whoswho.js` is used to GUIise the queries
-    - legacy jquery and highcharts are used to GUIise the directories
-  - a linked couple python server + tinawebJS to explore the data in graph view
-    - the twjs is in a legacy version, downloadable [via this subtree](https://github.com/moma/tinawebJS/tree/comex_wip)
-    - the server can be run with `nohup bash run.sh`
+### Running it directly [for development]
+See `doc/dev_setup.md`
+
+### Running it wrapped in docker [for production]
+Prerequisites:
+  - `docker`
+  - `docker-compose` (>= v. 1.7.0)  
+
+##### 1) Get the app
+```
+git clone https://github.com/moma/comex2.git
+```
+
+##### 2) Set up the doors connection
+```
+nano config/parametres_comex.ini
+```
+The environment variable `DOORS_HOST` must simply be set to your doors server's hostname or IP, and `DOORS_PORT` to the doors server's exposed port, or none if it's ports 80/443.
 
 
-#### TODOES
-  - remove the legacy links to csregistry.org
-  - do the profile pages beyond register
+##### 3) Run the docker
+```
+# prepare the data directory (or copy one if you already have data)
+mkdir data/shared_mysql_data
 
-------
+# build the components
+cd setup/dockers
+sudo docker-compose build
+
+# run them and link them
+sudo docker-compose up
+# at this point your comex app is available on http://localhost:8080
+```
+
+#### Nginx
+We ask nginx to reverse-proxy our app
+
+This is a minimal conf:
+
+```
+# nginx exemple
+server {
+    listen 80;
+
+    location / {
+        proxy_pass http://0.0.0.0:8080;
+    }
+}
+```
+See the [detailed doc](https://github.com/moma/comex2/blob/master/doc/nginx_conf.md) and a [typical production conf file](https://github.com/moma/comex2/blob/master/setup/comex2_deployed_outer.nginx.conf)) for a real-life configuration example.
+
+```
+# the app is then accessible directly on localhost
+# here is the operational schema
+
+          your-server:80 or :443
+                   ___
+                    |
+           |------------------|
+           |    your nginx    |
+           |------------------|
+                    |                         |-------------------|
+             your-server:8080  <------------> |  Doors external   |
+                    |                         |    auth server    |
+                    |                         |-------------------|
+        D O C K E R   C O N T A I N E R
+                    |
+          |---------------------|
+          |     inner  nginx    |
+          |---------------------|
+               /            \
+              /              \
+      (reverse proxy)        $host/
+      $host/services/           \
+            |                    \
+ |----------------------------------------------|       |-----------------|
+ |     (serveur python3     +     site php)     | <---> |  mysql docker   |
+ |- - - - - - - - - - - - - - - +---------------|       |      with       |
+ |                              |                       |  "comex_shared" |
+ | services/api | services/user | <-------------------> |-----------------|
+ |------------------------------|
+```
+
+
+## About the data
+
+All user data and keywords list and occurrences are in a MySQL database in the app's directory **`data/shared_mysql_data`**,
+
+Uploaded images are in `data/shared_user_img`.
+
 ### DB structure
 
-###### Overview
+##### Overview
   - the DB name is *`comex_shared`*  
-  - `scholars` is the main table, with a **doors_uid** as primary key
-     - email is also unique in this table
-  - we have three related tables
-    - `affiliations` (directly pointed by an **affiliation_id** in scholars table), for labs and institutions (TODO ~~> 2 tables)
+  - `scholars` is the main table:
+     - a local user id (aka **luid**) is the primary key
+     - a unique external doors_uid (the user id for the entire lab)
+     - a unique email
+  - we have four related tables
+    - `affiliations` for labs and institutions
+      - (directly pointed by an **affiliation_id** in scholars table)
     - `keywords`
       - and `sch_kw` for scholars <=> keywords mapping
+    - `hashtags`
+      - and `sch_ht` for scholars <=> hashtags mapping
     - `linked_ids` for other ids of the researcher (eg: [ORCID](http://orcid.org/), not used yet)
 
-###### More info
+##### More info
 Full table structure is described in [this documentation file](https://github.com/moma/comex2/blob/master/doc/table_specifications.md).
 
-###### Exemple queries
+##### Exemple queries
 ```SQL
 
 -- ==========================
@@ -62,180 +142,23 @@ JOIN keywords
 GROUP BY uid ;
 ```
 
-
-
 ### User and registration service
 The comex app was refactored and merged in dec 2016 with a new registration form server
 
   - the form is served by [flask](http://flask.pocoo.org/) and uses [javascript functions](https://github.com/moma/comex2/blob/master/static/js/comex_reg_form_controllers.js) for validation etc  
-  - the registration credentials are transmitted to a doors prototype  
+  - the registration credentials are transmitted to an authentication portal: Doors prototype  
   - the answers are POSTed back to server that writes new users in a local DB  
 
 More info in `doc/` directory
 
--------
+### TODOLIST
+  - once we have SSL certificates for communityexplorer, add them to inner nginx
+      ```
+      # ssl_certificate /etc/ssl/cert/ssl-future-comex.pem;
+      # ssl_certificate_key /etc/ssl/private/ssl-future-comex.key;
+      ```
 
-## Setting up the servers
-
-### Running it all via docker
-Prerequisites:
-  - `docker`
-  - `docker-compose` (>= v. 1.7.0)  
-
-Steps to run:
-```
-# prepare the data directory (or copy one if you already have data)
-mkdir data/shared_mysql_data
-
-# build the components
-cd setup/dockers
-docker create mysql
-docker build -t comex2_services:latest comex2_services/
-docker build -t minidoors:latest minidoors/
-
-# run them and link them
-docker-compose up
-
-             |---------------------|
-             |        nginx        |
-             |---------------------|
-                   /            \
-                  /              \
-          (reverse proxy)        $host/
-          $host/services/           \
-                |                    \
-     |----------------------------------------------|
-     |     (serveur python3     +     site php)     |
-     |- - - - - - - - - - - - - - - +---------------|
-     | services/api | services/user |      |
-     |------------------------------|      |
-                       / \                 |
-                      /   \                |
-   |-------------------|   \               |
-   | minidoors docker  |    \              |
-   | émule futur doors |     \             |
-   |-------------------|      \            |
-                               \           |
-                             |-----------------|
-                             |  mysql docker   |
-                             |  "comex_shared" |
-                             |-----------------|
-```
-
--------
-
-### Running in dev
-
-#### Minimal config
-
-NB: The communityexplorer.org app was using a separate DB from legacy wiki csv (cf. master branch of the `moma/legacy_php_comex` repository)
-
-
-
-```
-# get the site
-git clone https://github.com/moma/comex2
-
-# get prerequisites
-sudo apt install php7.0-fpm php7.0-mysql python3 libmysqlclient-dev
-cd $INSTALL_DIR
-sudo pip3 install -r setup/requirements.txt
-```
-
-Then to run the comex2 services in the simplest way just do:
-```
-cd services
-python3 comex_main_backend.py
-```
-The form server is then accessible locally on `0.0.0.0:5000/services/user`  
-The tina api server is on `0.0.0.0:5000/services/api`  
-
-Finally, simply configure the serving of your php|www documentroot in nginx (cf [detailed doc](https://github.com/moma/comex2/blob/master/doc/nginx_conf.md) for real-life conf).
-
-
--------
-
-#### Real-world dev config
-  1. external mysql database  
-  2. external doors (or simulated by docker)  
-  3. gunicorn webserver (linked to 1 & 2 via `$SQL_HOST` and `$DOORS_HOST`)  
-
-##### 1) Set up your mysql database
-
-###### If you have your own local mysql
-```
-# edit ini file to put the correct SQL_HOST (or IP)
-nano config/parametres_comex.ini
-```
-Then just create the table following [the table specifications](https://github.com/moma/comex2/blob/master/doc/table_specifications.md)
-
-###### If you want a dedicated mysql in docker
-
-  - Follow the detailed steps in [mysql_prerequisites](https://github.com/moma/comex2/blob/master/setup/dockers/mysql_prerequisites.md): it will explain how to create the docker and connect to it.
-
-  - Then create the table following [the table specifications](https://github.com/moma/comex2/blob/master/doc/table_specifications.md)
-  - Now run it as follows:
-
-```
-# run the database docker
-docker start comex_db
-
-# read its IP
-docker inspect comex_db | jq -r '.[0].NetworkSettings.IPAddress'
-
-# edit ini file to put it as SQL_HOST
-nano config/parametres_comex.ini
-```
-
-##### 2) Set up a doors connection
-Again, the environment variable `DOORS_HOST` must simply be set to the doors server's hostname or IP, and `DOORS_PORT` to the doors server's exposed port.
-
-###### If you have a doors server
-```
-# edit ini file to put it as DOORS_HOST and DOORS_PORT
-nano config/parametres_comex.ini
-```
-
-###### If you have no doors server
-
-For tests you can use a `minidoors` container
-```
-# build the docker image (once)
-cd setup/dockers
-docker build -t minidoors:latest minidoors/
-
-# run the container (each time)
-docker run -it -p 32789:8989 --name doors_test minidoors
-```
-
-##### 3) Run the regomex app with gunicorn
-```
-bash run.sh
-```
-
-The form server is then accessible locally on `0.0.0.0:9090/services/user/register`  
-
-**Remark:** the prefix `/services` and the user route `/user` can both be changed in the config file
-
--------
-
-### Running in prod
-
-#### Nginx
-We ask nginx to reverse-proxy our app
-
-This is a minimal conf (cf [detailed doc](https://github.com/moma/comex2/blob/master/doc/nginx_conf.md) for real-life conf)
-
-```
-# nginx exemple
-server {
-    listen 80;
-
-    location /$PREFIX {
-        proxy_pass http://0.0.0.0:9090;
-    }
-}
-```
+  - transform `affiliations` table into 2 tables (differentiate labs and orgs)
 
 ##### Copyright
 ###### Authors
