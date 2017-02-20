@@ -209,9 +209,6 @@ class User(object):
 
 from requests    import post
 
-# dev flag
-doorsProto = False
-
 
 def doors_login(email, password, config):
     """
@@ -236,9 +233,6 @@ def doors_login(email, password, config):
     sentdata = {'login':email, 'password':password}
 
     http_scheme = "https:"
-    if doorsProto:
-        sentdata = dumps(sentdata)
-        http_scheme = "http:"
 
     # (TODO generalize this logic)
     if config['DOORS_PORT'] in ['80', '443']:
@@ -254,24 +248,18 @@ def doors_login(email, password, config):
     if doors_response.ok:
         login_info = loads(doors_response.content.decode())
 
-        if doorsProto:
-            if login_info['status'] == "login ok":
-                uid = login_info['userInfo']['id']['id']
-        else:
-            if login_info['status'] == "LoginOK":
-                uid = login_info['userID']
+        if login_info['status'] == "LoginOK":
+            uid = login_info['userID']
+            # ID is a string of the form: "UserID(12849e74-b039-481f-b8eb-1e52562fbda6)"
+            capture = match(r'UserID\(([0-9a-f-]+)\)', uid)
+            if capture:
+                uid = capture.groups()[0]
 
     elif match(r'User .* not found$', doors_response.json()):
         uid = None
         mlog('INFO', "doors_login says user '%s' was not found" % email)
     else:
         raise Exception('Doors request failed')
-
-    if not doorsProto:
-        # ID is a string of the form: "UserID(12849e74-b039-481f-b8eb-1e52562fbda6)"
-        capture = match(r'UserID\(([0-9a-f-]+)\)', uid)
-        if capture:
-            uid = capture.groups()[0]
 
     return uid
 
@@ -283,9 +271,6 @@ def doors_register(email, password, name, config=REALCONFIG):
     sentdata = {'login':email, 'password':password, 'name':name}
 
     http_scheme = "https:"
-    if doorsProto:
-        sentdata = dumps(sentdata)
-        http_scheme = "http:"
 
     if config['DOORS_PORT'] in ['80', '443']:
         # implicit port
@@ -301,10 +286,5 @@ def doors_register(email, password, name, config=REALCONFIG):
         #                                "email":"john@locke.com"}''
         answer = loads(doors_response.content.decode())
 
-
-    if doorsProto:
-        return (doors_response.ok
-                and (answer['status'] == "registration email sent"))
-    else:
-        return (doors_response.ok
+    return (doors_response.ok
                 and (answer['status'] == "RegistrationPending"))

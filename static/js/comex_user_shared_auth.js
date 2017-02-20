@@ -22,12 +22,6 @@ cmxClt = (function(cC) {
     // common vars to authenticating/registering in user area
     cC.uauth = {}
 
-    // temporary parameter (TODO remove after doors deployment)
-    // -------------------
-    // true if we are using first minidoors prototype (commit fca0f79)
-    // otherwise assume normal doors (commit >= a0ce580)
-    cC.uauth.protoDoors = false
-
     // #doors_connect.value ~~> like a @classparam for uauthforms
     // :str: "doors_hostname:doors_port"
     cC.uauth.doorsConnectParam = document.getElementById('doors_connect').value
@@ -250,9 +244,6 @@ cmxClt = (function(cC) {
           //    using route in comex api/user?op=exists
           // /!\ async
 
-          // TODO emove protoDoors case... cases are already complicated by potential ajax chaining !!
-
-
           cC.uauth.callDoors(
               "userExists",
               [emailValue],
@@ -262,7 +253,7 @@ cmxClt = (function(cC) {
 
                   if (obja.type == "login") {
 
-                      obja.emailStatus = (doorsMsg == (cC.uauth.protoDoors ? "login exists" : "LoginAlreadyExists"))
+                      obja.emailStatus = (doorsMsg == "LoginAlreadyExists")
                         // signals the form change after this input status change
                         // (we're now after async came back, so long after keyup finished)
                         obja.elForm.dispatchEvent(new CustomEvent('change'))
@@ -281,7 +272,7 @@ cmxClt = (function(cC) {
 
                     // email available on doors side
                     // -----------------------------
-                    if (doorsMsg == (cC.uauth.protoDoors ? "login available" : "LoginAvailable")) {
+                    if (doorsMsg == ("LoginAvailable") {
 
                       // let's see if it's also available on comexdb side
                       cC.uauth.callUserApi(
@@ -299,7 +290,7 @@ cmxClt = (function(cC) {
                     }
                     // not available on doors side
                     // ---------------------------
-                    else if (doorsMsg == (cC.uauth.protoDoors ? "login exists" : "LoginAlreadyExists"))
+                    else if (doorsMsg == "LoginAlreadyExists")
                         obja.emailStatus = false
                         // signal and trigger
                         obja.elForm.dispatchEvent(new CustomEvent('change'))
@@ -552,16 +543,15 @@ cmxClt = (function(cC) {
                     "name":     nameStr
                 }
 
-            var scheme = cC.uauth.protoDoors ? 'http' : 'https'
+            var scheme = 'https'
 
             $.ajax({
-                contentType: cC.uauth.protoDoors ? "application/json" : "application/x-www-form-urlencoded; charset=UTF-8",
+                contentType: "application/x-www-form-urlencoded; charset=UTF-8",
                 dataType: 'json',
 
                 url: scheme + "://"+cC.uauth.doorsConnectParam+"/api/" + apiAction,
-                data: cC.uauth.protoDoors ? JSON.stringify(sendData) : sendData,
+                data: sendData,
                 type: 'POST',
-                // traditional: !cC.uauth.protoDoors,
                 success: function(data) {
 
                         console.log('response data', data)
@@ -571,19 +561,7 @@ cmxClt = (function(cC) {
                             doorsUid =  null
                             doorsMsg = data.status
                         }
-                        else if (cC.uauth.protoDoors
-                                && typeof data != 'undefined'
-                                && typeof data.userInfo != undefined
-                                && typeof data.userInfo.id != undefined
-                                && typeof data.userInfo.id.id != undefined
-                                && typeof data.status == 'string') {
-                            // prototype version
-                            // main success case: get the id
-                            doorsUid = data.userInfo.id.id
-                            doorsMsg = data.status
-                        }
-                        else if (!cC.uauth.protoDoors
-                                && typeof data != 'undefined'
+                        else if (typeof data != 'undefined'
                                 && typeof data.userID != undefined
                                 && typeof data.status == 'string') {
                             // main success case: get the id

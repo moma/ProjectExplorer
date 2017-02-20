@@ -132,10 +132,15 @@ def inject_doors_params():
        -> 'doors_connect'
           (base_layout-rendered templates need it for login popup)
     """
-    return dict(
-        doors_connect= config['DOORS_HOST']+':'+config['DOORS_PORT']
+    if 'DOORS_PORT' not in config or config['DOORS_PORT'] in ['', '80', '443']:
+        context_dict = dict(
+            doors_connect= config['DOORS_HOST']
         )
-
+    else:
+        context_dict = dict(
+            doors_connect= config['DOORS_HOST']
+        )
+    return context_dict
 
 @login_manager.unauthorized_handler
 def unauthorized():
