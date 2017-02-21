@@ -29,9 +29,7 @@
                     {% else %}
                     Welcome to your profile page,
                     <strong>
-                      {% if current_user.info.hon_title is not none %}
-                          {{ current_user.info.hon_title }}
-                      {% endif %}
+                      {{ current_user.info.hon_title or '' }}
                       {{ current_user.info.last_name }}
                   </strong> !
                   {% endif %}
@@ -69,9 +67,9 @@
                    <img src="{{ (current_user.pic_src | safe) if current_user.pic_src else ''}}" class="our-vcard-img">
                    <ul>
                        <li class=bigger>
-                           <b>{{ current_user.info.hon_title }}
+                           <b>                      {{ current_user.info.hon_title or '' }}
                                {{ current_user.info.first_name }}
-                               <!-- TODO mid initials -->
+                               {{ current_user.info.middle_name or '' }}
                                {{ current_user.info.last_name }}</b>
                                <br/>
                                <br/>

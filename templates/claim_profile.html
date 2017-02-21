@@ -25,9 +25,7 @@
                     <span class="bigger">
                             Welcome to your archived profile page,
                         <strong>
-                          {% if return_user.info.hon_title is not none %}
-                              {{ return_user.info.hon_title }}
-                          {% endif %}
+                          {{ return_user.info.hon_title or '' }}
                           {{ return_user.info.last_name }}
                         </strong> !
                     </span>
