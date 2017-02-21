@@ -60,7 +60,7 @@ function is_utf8($string) {
 }
 //phpinfo();
 //echo $_GET['query']."<br/>";
-$login = $_GET['query'];
+$userid = $_GET['query'];
 
 
 // $base = new PDO("sqlite:" . $dbname);
@@ -70,15 +70,8 @@ $base = new PDO($dsn, $user, $pass, $opt);
 // liste des chercheurs
 $scholar_array = array();
 
-if ($login) {
-    if (sizeof($login) > 0) {
-        // nom du chercheur $target_name
-        $sql0 = "SELECT last_name,first_name FROM scholars WHERE luid='" . $login . "'";
-
-        foreach ($base->query($sql0) as $row) {
-            // always one record by design of uid
-            $target_name=$row['first_name'].' '.$row['last_name'];
-        }
+if ($userid) {
+    if (sizeof($userid) > 0) {
 
         // old way in two steps without a scholars <=> keywords table
         // $sql1 = "SELECT keywords,last_name,first_name FROM scholars WHERE luid='" . $login . "'";
@@ -91,10 +84,11 @@ if ($login) {
         LEFT JOIN sch_kw
             AS second_level
             ON sch_kw.kwid = second_level.kwid
-        WHERE sch_kw.uid = "{$login}"
+        WHERE sch_kw.uid = {$userid}
             -- (uncomment if ego not self-neighboor)
             -- AND second_level.uid != sch_kw.uid
-        GROUP BY second_level.uid ;
+        GROUP BY second_level.uid
+        ORDER BY second_level.uid != {$userid} ;  -- allows ego to be first
 HERE_QUERY;
 
         foreach ($base->query($sql1) as $row) {
