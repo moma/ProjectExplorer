@@ -140,6 +140,7 @@ def inject_doors_params():
         context_dict = dict(
             doors_connect= config['DOORS_HOST']
         )
+
     return context_dict
 
 @login_manager.unauthorized_handler
@@ -494,7 +495,9 @@ def profile():
             # normal action UPDATE
             else:
                 try:
-                    luid = save_form(our_records, update_flag = True)
+                    luid = save_form(our_records,
+                                     update_flag = True,
+                                     previous_user_info = current_user.info)
 
                 except Exception as perr:
                     return render_template(
@@ -644,9 +647,16 @@ def register():
 
 
 ########### SUBS ###########
-def save_form(clean_records, update_flag=False):
+def save_form(clean_records, update_flag=False, previous_user_info=None):
     """
     wrapper function for save profile/register (all DB-related form actions)
+
+    @args :
+        *clean_records*   a dict of sanitized form fields
+
+        optional (together):
+            update_flag            we update in DB instead of INSERT
+            previous_user_info     iff update_flag, like current_user.info
     """
 
     # A) a new DB connection
@@ -663,8 +673,13 @@ def save_form(clean_records, update_flag=False):
         # TODO class User method !!
     luid = None
     if update_flag:
-        luid = int(clean_records['luid'])
-        db.save_scholar(clean_records, reg_db, update_luid=luid)
+        luid = int(previous_user_info['luid'])
+        sent_luid = int(clean_records['luid'])
+        if luid != sent_luid:
+            mlog("WARNING", "User %i attempted to modify the data of another user (%i)!... Aborting update" % (luid, sent_luid))
+            return None
+        else:
+            db.save_scholar(clean_records, reg_db, update_user=previous_user_info)
     else:
         luid = int(db.save_scholar(clean_records, reg_db))
 

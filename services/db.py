@@ -503,12 +503,12 @@ def find_scholar(some_key, some_str_value):
     return luid
 
 
-def save_scholar(safe_recs, reg_db, uactive=True, update_luid=None):
+def save_scholar(safe_recs, reg_db, uactive=True, update_user=None):
     """
     For new registration:
       -> add to *scholars* table, return new local uid
 
-    For profile change (just pass previous local uid in update_luid)
+    For profile change (just pass previous local user info in update_user)
       -> *update* scholars table
 
     see also COLS variable and doc/table_specifications.md
@@ -519,24 +519,44 @@ def save_scholar(safe_recs, reg_db, uactive=True, update_luid=None):
     db_qstrvals = []
     actual_len_dbg = 0
 
-    # POSS: simplify filter no more binary values triggering previous workaround
     for colinfo in USER_COLS:
         colname = colinfo[0]
+        # NB: each val already contains no quotes because of sanitize()
+        val = safe_recs.get(colname, None)
 
-        if not update_luid or colname != 'luid':
+        # when updating, we keep all values that have changed, including None
+        if update_user:
+            if colname in ["luid", "email"]:
+                # these two can't be updated
+                continue
 
-            # NB: each val already contains no quotes because of sanitize()
-            val = safe_recs.get(colname, None)
+            old_val = update_user[colname]
+            if val != old_val:
+                actual_len_dbg += 1
 
+                if val == None:
+                    quotedstrval = "NULL"
+                else:
+                    quotedstrval = "'"+str(val)+"'"
+
+                mlog("DEBUG",
+                     "DB update %s (was: %s)" % (quotedstrval, str(old_val)))
+
+                db_tgtcols.append(colname)
+                db_qstrvals.append(quotedstrval)
+
+
+        # when inserting, we keep all values != None
+        else:
             if val != None:
                 actual_len_dbg += 1
                 quotedstrval = "'"+str(val)+"'"
 
                 mlog("DEBUG", "DB saving" + quotedstrval)
 
-                # anyways
                 db_tgtcols.append(colname)
                 db_qstrvals.append(quotedstrval)
+
 
     if uactive:
         db_tgtcols.append('record_status')
@@ -544,7 +564,7 @@ def save_scholar(safe_recs, reg_db, uactive=True, update_luid=None):
 
     reg_db_c = reg_db.cursor()
 
-    if not update_luid:
+    if not update_user:
         # expected colnames "(doors_uid, last_modified_date, email, ...)"
         db_tgtcols_str = ','.join(db_tgtcols)
 
@@ -562,16 +582,16 @@ def save_scholar(safe_recs, reg_db, uactive=True, update_luid=None):
         # UPDATE: full_statement with formated values
         full_statmt = 'UPDATE scholars SET %s WHERE luid = "%s"' % (
                             set_full_str,
-                            update_luid
+                            update_user['luid']
         )
 
-    mlog("DEBUG", "UPDATE" if update_luid else "INSERT",  "SQL statement:", full_statmt)
+    mlog("DEBUG", "UPDATE" if update_user else "INSERT",  "SQL statement:", full_statmt)
 
     reg_db_c.execute(full_statmt)
-    if not update_luid:
+    if not update_user:
         luid = reg_db_c.lastrowid
     else:
-        luid = update_luid
+        luid = update_user['luid']
     reg_db.commit()
     return luid
 
