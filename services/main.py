@@ -98,7 +98,7 @@ SOURCE_FIELDS = [
          ("hon_title",              True,        None),
          ("interests_text",         True,        None),
          ("gender",                False,        None),   # M|F
-         ("job_looking_date",       True,        None),   # def null: not looking for a job
+         ("job_looking_date",       True,       "date"),   # def null: not looking for a job
          ("home_url",               True,        "url"),  # scholar's homepage
          ("pic_url",                True,        "url"),
          ("pic_file",              False,        None),   # saved separately
@@ -114,7 +114,7 @@ SOURCE_FIELDS = [
          ("keywords",               True,        None),
          # => for *keywords* table (after split str)
 
-         ("hashtags",               True  )
+         ("hashtags",               True,        None)
          # => for *hashtags* table (after split str)
       ]
 
@@ -733,10 +733,7 @@ def read_record_from_request(request):
         spec_type = field_info[2]
         if field in request.form:
             if do_sanitize:
-                val = sanitize(
-                                request.form[field],
-                                is_url = (spec_type == "url")
-                                )
+                val = sanitize(request.form[field], spec_type)
                 if val != '':
                     clean_records[field] = val
                 else:
@@ -777,22 +774,30 @@ def read_record_from_request(request):
 
 
 # TODO move to text submodules
-def sanitize(value, is_url=False):
+def sanitize(value, specific_type=None):
     """
     simple and radical: leaves only alphanum and '@' '.' '-' ':' ',' '(', ')', '#', ' '
 
     One of the main goals is to remove ';'
     POSS better
+
+
+    args:
+        @value: any string to santize
+
+        @specific_type: None or 'url' or 'date'
     """
     vtype = type(value)
     str_val = str(value)
     clean_val = sub(r'^\s+', '', str_val)
     clean_val = sub(r'\s+$', '', clean_val)
 
-    if is_url:
-        san_val = sub(r'[^\w@\.: -/]', '_', clean_val)
-    else:
+    if not specific_type:
         san_val = sub(r'[^\w@\.:,()# -]', '_', clean_val)
+    elif specific_type == "url":
+        san_val = sub(r'[^\w@\.: -/]', '_', clean_val)
+    elif specific_type == "date":
+        san_val = sub(r'[^0-9/-:]', '_', clean_val)
 
     if vtype not in [int, str]:
         raise ValueError("Value has an incorrect type %s" % str(vtype))
