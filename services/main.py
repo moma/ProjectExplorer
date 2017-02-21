@@ -41,7 +41,7 @@ if __package__ == 'services':
     from services       import db
     from services       import tools
     from services.tools import mlog
-    from services.user  import User, login_manager, doors_login, UCACHE
+    from services.user  import User, login_manager, doors_login
     from services.db_to_tina_api.extractDataCustom import MyExtractor
     # TODO move sanitize there
     # from services.text  import keywords, sanitize
@@ -51,7 +51,7 @@ else:
     import db
     import tools
     from tools          import mlog
-    from user           import User, login_manager, doors_login, UCACHE
+    from user           import User, login_manager, doors_login
     from db_to_tina_api.extractDataCustom import MyExtractor
     # from text           import keywords, sanitize
 
@@ -451,7 +451,6 @@ def profile():
                  "executing DELETE scholar's data at the request of user %s" % str(the_id_to_delete))
             logout_user()
             db.rm_scholar(the_id_to_delete)
-            if the_id_to_delete in UCACHE: UCACHE.pop(the_id_to_delete)
             return(redirect(url_for('rootindex', _external=True)))
 
 
@@ -697,10 +696,6 @@ def save_form(clean_records, update_flag=False):
 
     # F) end connection
     reg_db.close()
-
-    # clear cache concerning this scholar
-    # TODO class User method !!
-    if luid in UCACHE: UCACHE.pop(luid)
 
     return luid
 

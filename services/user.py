@@ -23,9 +23,6 @@ else:
 # will be exported to main for initialization with app
 login_manager = LoginManager()
 
-# scholar User objects cache
-UCACHE = {}
-
 @login_manager.user_loader
 def load_user(mixedid):
     """
@@ -40,13 +37,7 @@ def load_user(mixedid):
 
         if testluid:
             luid = int(testluid.groups()[0])
-            if luid in UCACHE:
-                u = UCACHE[luid]
-                mlog("DEBUG", "load_user: normal user re-loaded by cache")
-            else:
-                u = User(luid)
-                UCACHE[luid] = u
-                mlog("DEBUG", "load_user: normal user re-loaded from DB")
+            u = User(luid)
 
         elif testduid:
             doors_uid = testduid.groups()[0]
