@@ -68,4 +68,21 @@ function sanitize_input($value) {
     return $value;
 }
 
+// for html display of concatenated lists
+// to make spaces insides the elements unbreakable
+function split_join_keywords_for_html($str_value) {
+    $arr = explode(',', $str_value);
+    $mod_arr = [];
+
+    foreach ($arr as $kw) {
+        if (strlen(str_replace(' ', '', $kw))) {
+            $mod_kw = str_replace(' ', '&nbsp;', $kw) ;
+            array_push($mod_arr, $mod_kw);
+        }
+
+    }
+
+    return join(', ', $mod_arr);
+}
+
 ?>

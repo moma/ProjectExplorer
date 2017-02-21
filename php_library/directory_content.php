@@ -178,7 +178,7 @@ foreach ($scholars as $scholar) {
     if ($scholar['keywords'] != null) {
     // TODO change strategy : add email, check if we want to keep phone
     // if (($scholar['keywords'] != null) || ($scholar['address'] != null) || ($scholar['phone'] != null)) {
-        $content .= '<div class="span3" align="justify">';
+        $content .= '<div class="span3" align="left">';
 
         if ($scholar['keywords'] != null){
                  $content .= '<i class="icon-tags"></i> ' . clean_exp($scholar['keywords']). '.<br/><br/>';

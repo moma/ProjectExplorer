@@ -155,7 +155,7 @@ foreach ($base->query($sql) as $row) {
     // retrieved from secondary table and GROUP_CONCATenated
     $info['keywords_ids'] = explode(',', $row['keywords_ids']);
     $info['nb_keywords'] = $row['keywords_nb'];
-    $info['keywords'] = $row['keywords_list'];
+    $info['keywords'] = split_join_keywords_for_html($row['keywords_list']);
 
     // $info['status'] = $row['status'];
     $info['record_status'] = $row['record_status'];  // TODO use this one
