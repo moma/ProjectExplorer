@@ -295,21 +295,28 @@ class MyExtractor:
 
         for scholar_id in scholar_array:
             sql3='''
+                SELECT
+                    scholars_and_affiliations.*,
+                    COUNT(keywords.kwid) AS keywords_nb,
+                    GROUP_CONCAT(keywords.kwid) AS keywords_ids,
+                    GROUP_CONCAT(kwstr) AS keywords_list
+                FROM (
                     SELECT
                         scholars.*,
-                        affiliations.*,
-                        COUNT(keywords.kwid) AS keywords_nb,
-                        GROUP_CONCAT(keywords.kwid) AS keywords_ids,
-                        GROUP_CONCAT(kwstr) AS keywords_list
+                        affiliations.*
                     FROM scholars
-                    LEFT JOIN sch_kw
-                        ON uid = luid
-                    LEFT JOIN keywords
-                        ON sch_kw.kwid = keywords.kwid
                     LEFT JOIN affiliations
-                        ON affiliation_id = affid
-                    WHERE luid = "%s"
-                    GROUP BY luid ;
+                        ON scholars.affiliation_id = affiliations.affid
+                    WHERE (record_status = 'active'
+                        OR (record_status = 'legacy' AND valid_date >= NOW()))
+                ) AS scholars_and_affiliations
+
+                LEFT JOIN sch_kw
+                    ON sch_kw.uid = scholars_and_affiliations.luid
+                LEFT JOIN keywords
+                    ON sch_kw.kwid = keywords.kwid
+                WHERE luid = %s
+                GROUP BY luid ;
             ''' % scholar_id
 
             # debug

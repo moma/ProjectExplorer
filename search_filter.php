@@ -1,7 +1,8 @@
 <?php
 
 /*
- * Génère le json des scholars à partir de la base mysql
+ * Génère les agrégations pour les filtres à partir de la base mysql
+ * £TODO remplacer les appels à search_filter par des appels à api/aggs
  */
 include("php_library/parametres.php");
 include("php_library/normalize.php");
@@ -52,39 +53,51 @@ function filter_word($value) {
 // $req = "SELECT ".$cat." AS clef, count(".$cat.") AS value FROM scholars WHERE ".$cat." ".$query." GROUP BY ".$cat." ORDER BY value DESC";
 
 // TODO differentiate req's target cols earlier: above in "if ($category == X)"
-$req = <<<END_QUERY
+
+$req = <<<END_SQL
+SELECT
+    {$cat} AS clef,
+    count({$cat}) AS value
+FROM (
     SELECT
-        {$cat} AS clef,
-        count({$cat}) AS value
+        scholars_affiliations_and_keywords.*,
+        GROUP_CONCAT(htstr) AS hashtags_list
     FROM (
         SELECT
-            -- we create all needed cats for the outer select
-            -- ==============================================
-            scholars.luid,
-            scholars.country,
-            affiliations.org,
-            affiliations.team_lab,
-            GROUP_CONCAT(kwstr) AS keywords_list,
-            GROUP_CONCAT(htstr) AS hashtags_list
-        FROM scholars
+            scholars_and_affiliations.*,
+            GROUP_CONCAT(kwstr) AS keywords_list
+        FROM (
+            SELECT
+                scholars.luid,
+                scholars.country,
+                affiliations.org,
+                affiliations.team_lab
+            FROM scholars
+            LEFT JOIN affiliations
+                ON scholars.affiliation_id = affiliations.affid
+            WHERE (record_status = 'active'
+                OR (record_status = 'legacy' AND valid_date >= NOW()))
+        ) AS scholars_and_affiliations
+
         LEFT JOIN sch_kw
-            ON sch_kw.uid = luid
+            ON sch_kw.uid = scholars_and_affiliations.luid
         LEFT JOIN keywords
             ON sch_kw.kwid = keywords.kwid
-        LEFT JOIN sch_ht
-            ON sch_ht.uid = luid
-        LEFT JOIN hashtags
-            ON sch_ht.htid = hashtags.htid
-        LEFT JOIN affiliations
-            ON scholars.affiliation_id = affiliations.affid
-        WHERE (record_status = 'active'
-                OR (record_status = 'legacy' AND valid_date >= NOW()))
         GROUP BY luid
-        ) AS full_scholars_info
-    WHERE {$cat} {$query}                          -- <== our filter
-    GROUP BY $cat
-    ORDER BY value DESC ;
-END_QUERY;
+
+    ) AS scholars_affiliations_and_keywords
+    LEFT JOIN sch_ht
+        ON sch_ht.uid = luid
+    LEFT JOIN hashtags
+        ON sch_ht.htid = hashtags.htid
+    GROUP BY luid
+) AS scholars_info
+
+WHERE {$cat} {$query}                          -- <== our filter
+GROUP BY $cat
+ORDER BY value DESC ;
+
+END_SQL;
 
 // echo $req;
 $results = array();

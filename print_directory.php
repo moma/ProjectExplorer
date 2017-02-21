@@ -268,32 +268,40 @@ else {
     $filter = "";
 }
 $sql = <<< END_QUERY
-SELECT * FROM
-    (SELECT
-        scholars.*,
-        affiliations.*,
-        COUNT(keywords.kwid) AS keywords_nb,
-        GROUP_CONCAT(keywords.kwid) AS keywords_ids,
-        GROUP_CONCAT(kwstr) AS keywords_list,
-        GROUP_CONCAT(hashtags.htid) AS hashtags_ids,
+SELECT * FROM (
+    SELECT
+        scholars_affiliations_and_keywords.*,
         GROUP_CONCAT(htstr) AS hashtags_list
-    FROM scholars
-    LEFT JOIN sch_kw
-        ON sch_kw.uid = luid
-    LEFT JOIN keywords
-        ON sch_kw.kwid = keywords.kwid
+    FROM (
+        SELECT
+            scholars_and_affiliations.*,
+            GROUP_CONCAT(kwstr) AS keywords_list
+        FROM (
+            SELECT
+                scholars.*,
+                affiliations.*
+            FROM scholars
+            LEFT JOIN affiliations
+                ON scholars.affiliation_id = affiliations.affid
+            WHERE (record_status = 'active'
+                OR (record_status = 'legacy' AND valid_date >= NOW()))
+        ) AS scholars_and_affiliations
+
+        LEFT JOIN sch_kw
+            ON sch_kw.uid = scholars_and_affiliations.luid
+        LEFT JOIN keywords
+            ON sch_kw.kwid = keywords.kwid
+        GROUP BY luid
+
+    ) AS scholars_affiliations_and_keywords
     LEFT JOIN sch_ht
         ON sch_ht.uid = luid
     LEFT JOIN hashtags
         ON sch_ht.htid = hashtags.htid
-    LEFT JOIN affiliations
-        ON affiliation_id = affid
-    WHERE (record_status = 'active'
-            OR (record_status = 'legacy' AND valid_date >= NOW()))
-    GROUP BY luid) AS full_scholars_info
+    GROUP BY luid
+) AS full_scholars_info
     {$filter}
 END_QUERY;
-
 
 // debug
 // echo '<p style="color:white">query:'. $sql ."<p>";

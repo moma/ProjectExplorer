@@ -115,21 +115,25 @@ foreach ($scholar_id_array as $scholar_id){
 // £TODO do it at once with previous SELECT !!
 $sql = <<< END_QUERY
 SELECT
-    scholars.*,
-    affiliations.*,
+    scholars_and_affiliations.*,
     COUNT(keywords.kwid) AS keywords_nb,
     GROUP_CONCAT(keywords.kwid) AS keywords_ids,
     GROUP_CONCAT(kwstr) AS keywords_list
-FROM scholars
-JOIN sch_kw
-    ON luid = uid
-JOIN keywords
+FROM (
+    SELECT
+        scholars.*,
+        affiliations.*
+    FROM scholars
+    LEFT JOIN affiliations
+        ON scholars.affiliation_id = affiliations.affid
+    WHERE (record_status = 'active'
+        OR (record_status = 'legacy' AND valid_date >= NOW()))
+) AS scholars_and_affiliations
+
+LEFT JOIN sch_kw
+    ON sch_kw.uid = scholars_and_affiliations.luid
+LEFT JOIN keywords
     ON sch_kw.kwid = keywords.kwid
-LEFT JOIN affiliations
-    ON affiliation_id = affid
-WHERE luid = "{$scholar_id}"
-AND (record_status = 'active'
-     OR (record_status = 'legacy' AND valid_date >= NOW()))
 GROUP BY luid
 END_QUERY;
 
