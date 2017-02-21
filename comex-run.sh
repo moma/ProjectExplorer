@@ -17,14 +17,13 @@ if grep --quiet docker /proc/1/cgroup
 fi
 
 # anyway we always need a simple web server to run the services
+export COMEX_NWORKERS=$(grep -oP '(?<=COMEX_NWORKERS=).*' config/parametres_comex.ini)
 
 echo "binding gunicorn to unix:/tmp/comex.sock"
-gunicorn -b unix:/tmp/comex.sock services.main:app --workers 8
-# TODO make n_workers a param in the ini file
-
+gunicorn -b unix:/tmp/comex.sock services.main:app --workers $COMEX_NWORKERS
 
 
 # export COMEX_HOST=$(grep -oP '(?<=COMEX_HOST=).*' config/parametres_comex.ini)
 # export COMEX_PORT=$(grep -oP '(?<=COMEX_PORT=).*' config/parametres_comex.ini)
 # echo "binding gunicorn to $COMEX_HOST:$COMEX_PORT"
-# gunicorn -b $COMEX_HOST:$COMEX_PORT services.main:app --workers 8
+# gunicorn -b $COMEX_HOST:$COMEX_PORT services.main:app --workers $COMEX_NWORKERS

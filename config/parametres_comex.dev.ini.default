@@ -1,4 +1,8 @@
 [main]
+#; how many "workers" (ie parallel instances of the server)
+#; (cf. http://docs.gunicorn.org/en/stable/settings.html#worker-processes)
+COMEX_NWORKERS=2
+
 #; that's where we'll be serving our routes for web server
 #; (must match apache/nginx reverse proxy **target**)
 COMEX_HOST=0.0.0.0
