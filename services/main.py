@@ -82,36 +82,36 @@ login_manager.init_app(app)
 
 # all inputs as they are declared in form, as a couple
 SOURCE_FIELDS = [
-#             NAME,              SANITIZE?
-         ("luid",                  False  ),
-         ("doors_uid",             False  ),
-         ("last_modified_date",    False  ),   # ex 2016-11-16T17:47:07.308Z
-         ("email",                  True  ),
-         ("country",                True  ),
-         ("first_name",             True  ),
-         ("middle_name",            True  ),
-         ("last_name",              True  ),
-         ("initials",               True  ),
+#             NAME,              SANITIZE?      Specificity
+         ("luid",                  False,        None),
+         ("doors_uid",             False,        None),
+         ("last_modified_date",    False,        None),   # TODO use stamp
+         ("email",                  True,        None),
+         ("country",                True,        None),
+         ("first_name",             True,        None),
+         ("middle_name",            True,        None),
+         ("last_name",              True,        None),
+         ("initials",               True,        None),
          # => for *scholars* table
 
-         ("position",               True  ),
-         ("hon_title",              True  ),
-         ("interests_text",         True  ),
-         ("gender",                False  ),   # M|F
-         ("job_looking_date",       True  ),   # def null: not looking for a job
-         ("home_url",               True  ),   # scholar's homepage
-         ("pic_url",                True  ),
-         ("pic_file",              False  ),   # will be saved separately
+         ("position",               True,        None),
+         ("hon_title",              True,        None),
+         ("interests_text",         True,        None),
+         ("gender",                False,        None),   # M|F
+         ("job_looking_date",       True,        None),   # def null: not looking for a job
+         ("home_url",               True,        "url"),  # scholar's homepage
+         ("pic_url",                True,        "url"),
+         ("pic_file",              False,        None),   # saved separately
          # => for *scholars* table (optional)
 
-         ("org",                    True  ),
-         ("org_type",              False  ),   # values are predefined for this
-         (  "other_org_type",       True  ),   # +=> org_type in read_record()
-         ("team_lab",               True  ),
-         ("org_city",               True  ),
+         ("org",                    True,        None),
+         ("org_type",              False,        None),   # predefined values
+         (  "other_org_type",       True,        None),   # +=> org_type
+         ("team_lab",               True,        None),
+         ("org_city",               True,        None),
          # => for *affiliations* table
 
-         ("keywords",               True  ),
+         ("keywords",               True,        None),
          # => for *keywords* table (after split str)
 
          ("hashtags",               True  )
@@ -730,9 +730,13 @@ def read_record_from_request(request):
     for field_info in SOURCE_FIELDS:
         field = field_info[0]
         do_sanitize = field_info[1]
+        spec_type = field_info[2]
         if field in request.form:
             if do_sanitize:
-                val = sanitize(request.form[field])
+                val = sanitize(
+                                request.form[field],
+                                is_url = (spec_type == "url")
+                                )
                 if val != '':
                     clean_records[field] = val
                 else:
@@ -773,7 +777,7 @@ def read_record_from_request(request):
 
 
 # TODO move to text submodules
-def sanitize(value):
+def sanitize(value, is_url=False):
     """
     simple and radical: leaves only alphanum and '@' '.' '-' ':' ',' '(', ')', '#', ' '
 
@@ -784,7 +788,11 @@ def sanitize(value):
     str_val = str(value)
     clean_val = sub(r'^\s+', '', str_val)
     clean_val = sub(r'\s+$', '', clean_val)
-    san_val = sub(r'[^\w@\.:,()# -]', '_', clean_val)
+
+    if is_url:
+        san_val = sub(r'[^\w@\.: -/]', '_', clean_val)
+    else:
+        san_val = sub(r'[^\w@\.:,()# -]', '_', clean_val)
 
     if vtype not in [int, str]:
         raise ValueError("Value has an incorrect type %s" % str(vtype))

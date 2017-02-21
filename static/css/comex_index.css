@@ -61,3 +61,7 @@ iframe.wwwthumbsmall {
     border-radius: 1em;
     padding: .8em;
 }
+
+#news-container {
+    min-height: 50px !important;
+}

@@ -13,7 +13,7 @@
 body {
   margin: 0;
   font-family: "Droid Sans", Calibri, "Helvetica Neue", Helvetica, sans-serif;
-  letter-spacing: -0.04em;
+  /*letter-spacing: -0.04em;*/
   color: #333;
   background-color: #fff;
   line-height: .9em;

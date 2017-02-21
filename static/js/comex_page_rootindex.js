@@ -19,6 +19,10 @@
 //           so we put an absolute path and change the domain name at rendering.
 
 var relsrc = document.getElementById('inlink').src
-document.getElementById('inlink').src = 'https://'+location.host+'/'+relsrc
+
+if (! /^https/.test(relsrc)) {
+    relsrc = 'https://'+location.host+'/'+relsrc
+}
+document.getElementById('inlink').src = relsrc
 
 console.log("rootindex controllers load OK")
