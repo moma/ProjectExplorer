@@ -583,7 +583,8 @@ def update_scholar_cols(selected_safe_recs, reg_db, where_luid=None):
     For modification of selected columns:
       -> *update* row with the values that are present and are real columns
 
-         (if values are null or absent, they are left unchanged)
+         (if values are absent, they are left unchanged)
+         (if values are present and None, they are become NULL in db)
 
     see also COLS variable and doc/table_specifications.md
     """
@@ -592,15 +593,21 @@ def update_scholar_cols(selected_safe_recs, reg_db, where_luid=None):
     db_tgtcols = []
     db_qstrvals = []
 
+    mlog("INFO",
+         "DB selective update %s" % selected_safe_recs)
+
     for colinfo in USER_COLS:
         colname = colinfo[0]
-        val = selected_safe_recs.get(colname, None)
 
-        # selective updating: ignoring None values
-        if val != None and colname != 'luid':
-            quotedstrval = "'"+str(val)+"'"
+        # selective updating: only provided columns
+        if colname in selected_safe_recs and colname != 'luid':
+            val = selected_safe_recs[colname]
+            if val is None:
+                quotedstrval = "NULL"
+            else:
+                quotedstrval = "'"+str(val)+"'"
             mlog("DEBUG",
-                 "DB selective update %s" % quotedstrval)
+                 "DB selective update %s %s" % (colname, quotedstrval))
 
             db_tgtcols.append(colname)
             db_qstrvals.append(quotedstrval)
