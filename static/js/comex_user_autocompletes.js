@@ -258,8 +258,8 @@
  //       => supposed to also match the REST param
  //            (eg services/api/aggs?field=keywords)
 function remoteAutocompleteInit(fieldName) {
-   var nMax = 80
-   var hapaxThresh = 5
+   var nMax = 100
+   var hapaxThresh = 1
 
    var $theInput = $('#'+fieldName)
 
