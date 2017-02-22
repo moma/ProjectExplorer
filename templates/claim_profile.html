@@ -26,8 +26,10 @@
                             Welcome to your <b>archived profile</b> page,
                         <strong>
                           {{ return_user.info.hon_title or '' }}
+                          {{ return_user.info.first_name }}
+                          {{ return_user.info.middle_name or '' }}
                           {{ return_user.info.last_name }}
-                        </strong> !
+                        </strong>
                     </span>
               </p>
         </div>
@@ -61,8 +63,9 @@
            <div class="uform-white readonly" id="profile_uform">
 
 
-           <form id="comex_claim_profile_form" enctype="multipart/form-data"
-                 method="post" onsubmit="console.info('submitted')">
+            <!-- this form is only used for styling
+                 (no submit mechanism necessary) -->
+           <form id="comex_claim_profile_form">
 
 
                <!-- basic name infos -->
@@ -477,7 +480,7 @@
                     <img src="{{ (return_user.pic_src | safe) if return_user.pic_src else ''}}" class="our-vcard-img">
                     <ul>
                         <li class=bigger>
-                            <b>{{ return_user.info.hon_title }}
+                            <b>{{ return_user.info.hon_title or '' }}
                                 {{ return_user.info.first_name }}
                                 <!-- TODO mid initials -->
                                 {{ return_user.info.last_name }}</b>
@@ -563,9 +566,9 @@
 
 
             <!-- == S U B M I T == -->
-            <button class="btn btn-lg btn-success" style="float:right"
+            <button class="btn btn-lg btn-success" style="float:left;margin: 0 2em"
                     id="form_submit" type=button disabled
-                    onclick="returnForm.elForm.submit()">
+                    onclick="showMessageAndSubmit()">
                     Submit your account renewal
             </button>
 

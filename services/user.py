@@ -276,6 +276,6 @@ def doors_register(email, password, name, config=REALCONFIG):
         # eg doors_response.content = b'{"status":"registration email sent",
         #                                "email":"john@locke.com"}''
         answer = loads(doors_response.content.decode())
-        return answer
+        return answer['userID']
     else:
         return None

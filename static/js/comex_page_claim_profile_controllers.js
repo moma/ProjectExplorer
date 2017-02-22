@@ -116,6 +116,12 @@ function miniregValidate(self) {
   self.elSubmitBtn.disabled = !self.passStatus
 }
 
+function showMessageAndSubmit() {
+    returnForm.elMainMessage.style.display = "block"
+    returnForm.elMainMessage.innerHTML = "Registering with ISCPIF Doors and sending validation email..."
+    returnForm.elForm.submit()
+}
+
 // trigger auth changes (email always autocompleted for return_user)
 returnForm.elEmail.dispatchEvent(new CustomEvent('change'))
 
