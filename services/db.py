@@ -123,7 +123,7 @@ def email_exists(email):
 
 def get_field_aggs(a_field,
                    hapax_threshold=int(REALCONFIG['HAPAX_THRESHOLD']),
-                   users_status = "active"):
+                   users_status = "ALL"):
     """
     Use case: api/aggs?field=a_field
     ---------------------------------
@@ -167,17 +167,6 @@ def get_field_aggs(a_field,
         db = connect_db()
         db_c = db.cursor(DictCursor)
 
-        # constraints 1, if any
-        prefilters = []
-        if users_status != 'ALL':
-            prefilters.append( "scholars.record_status = \"%s\"" % users_status)
-        if len(prefilters):
-            pre_where = "WHERE "+" AND ".join(
-                                                ['('+f+')' for f in prefilters]
-                                                    )
-        else:
-            pre_where = ""
-
         # constraints 2, if any
         postfilters = []
 
@@ -197,83 +186,72 @@ def get_field_aggs(a_field,
         if sql_tab == 'scholars':
             stmt = """
                 SELECT x, n FROM (
-                    SELECT %(col)s AS x, COUNT(*) AS n, record_status
+                    SELECT %(col)s AS x, COUNT(*) AS n
                     FROM scholars
-                    %(pre_filter)s
                     GROUP BY %(col)s
                 ) AS allcounts
                 %(post_filter)s
                 ORDER BY n DESC
-            """ % {'col': sql_col, 'pre_filter': pre_where,
-                                   'post_filter': post_where}
+            """ % {'col': sql_col, 'post_filter': post_where}
 
         elif sql_tab == 'affiliations':
             stmt = """
                 SELECT x, n FROM (
-                    SELECT %(col)s AS x, COUNT(*) AS n, record_status
+                    SELECT %(col)s AS x, COUNT(*) AS n
                     FROM scholars
                     -- 0 or 1
                     LEFT JOIN affiliations
                         ON scholars.affiliation_id = affiliations.affid
-                    %(pre_filter)s
                     GROUP BY %(col)s
                 ) AS allcounts
-                %(post_filter)s
                 ORDER BY n DESC
-            """ % {'col': sql_col, 'pre_filter': pre_where,
-                                   'post_filter': post_where}
+            """ % {'col': sql_col, 'post_filter': post_where}
 
         elif sql_tab == 'linked_ids':
             stmt = """
                 SELECT x, n FROM (
-                    SELECT %(col)s AS x, COUNT(*) AS n, record_status
+                    SELECT %(col)s AS x, COUNT(*) AS n
                     FROM scholars
                     -- 0 or 1
                     LEFT JOIN linked_ids
                         ON scholars.luid = linked_ids.uid
-                    %(pre_filter)s
                     GROUP BY %(col)s
                 ) AS allcounts
                 %(post_filter)s
                 ORDER BY n DESC
-            """ % {'col': sql_col, 'pre_filter': pre_where,
-                                   'post_filter': post_where}
+            """ % {'col': sql_col, 'post_filter': post_where}
 
         elif sql_tab == 'keywords':
             stmt = """
                 SELECT x, occs FROM (
-                    SELECT %(col)s AS x, COUNT(*) AS occs, record_status
+                    SELECT %(col)s AS x, COUNT(*) AS occs
                     FROM scholars
                     -- 0 or many
                     LEFT JOIN sch_kw
                         ON scholars.luid = sch_kw.uid
                     LEFT JOIN keywords
                         ON sch_kw.kwid = keywords.kwid
-                    %(pre_filter)s
                     GROUP BY %(col)s
                 ) AS allcounts
                 %(post_filter)s
                 ORDER BY occs DESC
-            """ % {'col': sql_col, 'pre_filter': pre_where,
-                                   'post_filter': post_where}
+            """ % {'col': sql_col, 'post_filter': post_where}
 
         elif sql_tab == 'hashtags':
             stmt = """
                 SELECT x, occs FROM (
-                    SELECT %(col)s AS x, COUNT(*) AS occs, record_status
+                    SELECT %(col)s AS x, COUNT(*) AS occs
                     FROM scholars
                     -- 0 or many
                     LEFT JOIN sch_ht
                         ON scholars.luid = sch_ht.uid
                     LEFT JOIN hashtags
                         ON sch_ht.htid = hashtags.htid
-                    %(pre_filter)s
                     GROUP BY %(col)s
                 ) AS allcounts
                 %(post_filter)s
                 ORDER BY occs DESC
-            """ % {'col': sql_col, 'pre_filter': pre_where,
-                                   'post_filter': post_where}
+            """ % {'col': sql_col, 'post_filter': post_where}
 
         mlog("DEBUGSQL", "get_field_aggs STATEMENT:\n-- SQL\n%s\n-- /SQL" % stmt)
 
