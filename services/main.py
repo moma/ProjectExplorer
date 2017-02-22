@@ -558,7 +558,7 @@ def claim_profile():
 
         # claim success
         else:
-            mlog('INFO', "successful claim_profile attempt with luid=%i", luid)
+            mlog('INFO', "successful claim_profile attempt with luid =", luid)
             # we *don't* log him in but we do put his data as return_user
             # => this way we can use templating to show the data
             return render_template(
@@ -594,17 +594,17 @@ def claim_profile():
         else:
             try:
                 db_connection = db.connect_db(config)
-                db.save_scholar({
+                db.update_scholar_cols({
                                   'doors_uid':doors_uid,
                                   'record_status': 'active',
                                   'valid_date': None
                                  },
                                  db_connection,
-                                 update_user=return_user.info)
+                                 where_luid=return_user.uid)
                 db_connection.close()
                 # the user is not a legacy user anymore
                 # POSS: do this on first login instead
-                rm_legacy_user_rettoken(luid)
+                db.rm_legacy_user_rettoken(luid)
 
             except Exception as perr:
                 return render_template(
@@ -733,9 +733,9 @@ def save_form(clean_records, update_flag=False, previous_user_info=None):
             mlog("WARNING", "User %i attempted to modify the data of another user (%i)!... Aborting update" % (luid, sent_luid))
             return None
         else:
-            db.save_scholar(clean_records, reg_db, update_user=previous_user_info)
+            db.save_full_scholar(clean_records, reg_db, update_user=previous_user_info)
     else:
-        luid = int(db.save_scholar(clean_records, reg_db))
+        luid = int(db.save_full_scholar(clean_records, reg_db))
 
 
     # D) read/fill each keyword and save the (uid <=> kwid) pairings

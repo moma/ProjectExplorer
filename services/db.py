@@ -36,7 +36,9 @@ USER_COLS = [
          ("job_looking_date",      False,        24),
          ("home_url",              False,       120),
          ("pic_url",               False,       120),
-         ("pic_fname",             False,       120)
+         ("pic_fname",             False,       120),
+         ("valid_date",            False,       None),
+         ("record_status",         False,        25)
       ]
 
 ORG_COLS = [
@@ -481,13 +483,15 @@ def find_scholar(some_key, some_str_value):
     return luid
 
 
-def save_scholar(safe_recs, reg_db, uactive=True, update_user=None):
+def save_full_scholar(safe_recs, reg_db, uactive=True, update_user=None):
     """
     For new registration:
       -> add to *scholars* table, return new local uid
 
     For profile change (just pass previous local user info in update_user)
-      -> *update* scholars table
+      -> *update* entire scholar row
+         (if values are null or absent in safe_recs, they become null)
+
 
     see also COLS variable and doc/table_specifications.md
     """
@@ -572,6 +576,46 @@ def save_scholar(safe_recs, reg_db, uactive=True, update_user=None):
         luid = update_user['luid']
     reg_db.commit()
     return luid
+
+
+def update_scholar_cols(selected_safe_recs, reg_db, where_luid=None):
+    """
+    For modification of selected columns:
+      -> *update* row with the values that are present and are real columns
+
+         (if values are null or absent, they are left unchanged)
+
+    see also COLS variable and doc/table_specifications.md
+    """
+
+    # column names and column quoted values
+    db_tgtcols = []
+    db_qstrvals = []
+
+    for colinfo in USER_COLS:
+        colname = colinfo[0]
+        val = selected_safe_recs.get(colname, None)
+
+        # selective updating: ignoring None values
+        if val != None and colname != 'luid':
+            quotedstrval = "'"+str(val)+"'"
+            mlog("DEBUG",
+                 "DB selective update %s" % quotedstrval)
+
+            db_tgtcols.append(colname)
+            db_qstrvals.append(quotedstrval)
+
+    reg_db_c = reg_db.cursor()
+    set_full_str = ','.join([db_tgtcols[i] + '=' + db_qstrvals[i] for i in range(len(db_tgtcols))])
+
+    # UPDATE: full_statement with formated values
+    full_statmt = 'UPDATE scholars SET %s WHERE luid = "%s"' % (
+                        set_full_str,
+                        where_luid
+    )
+    reg_db_c.execute(full_statmt)
+    reg_db.commit()
+    return where_luid
 
 
 def save_pairs_sch_tok(pairings_list, comex_db, map_table='sch_kw'):
