@@ -23,7 +23,7 @@
             <!-- <h2 class="oldstyle">Your Profile Info</h2> -->
                 <p class="mini-hero">
                     <span class="bigger">
-                            Welcome to your archived profile page,
+                            Welcome to your <b>archived profile</b> page,
                         <strong>
                           {{ return_user.info.hon_title or '' }}
                           {{ return_user.info.last_name }}
@@ -35,7 +35,7 @@
         <!-- overview -->
 
         <h2 class="cat">
-            You legacy data
+            Your legacy data
         </h2>
         <p class="mini-hero">
             In these 2 panels, you will find your data from the <strong>previous version of Community Explorer</strong>.
@@ -160,7 +160,7 @@
                       <input readonly id="country" name="country" maxlength="60"
                              type="text" class="form-control autocomp"
                              placeholder="pays"
-                             onblur="if(this.value=='France'){teamCityDivStyle.display = 'block'} else {teamCityDivStyle.display='none'}"
+                             onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
                              value="{{ return_user.info.country }}">
                     </div>
                     {% endif %}
@@ -244,7 +244,7 @@
                       <label for="org_type" class="smlabel input-group-addon">Institution Type</label>
                       <select id="org_type" name="org_type"
                               class="custom-select form-control"
-                              onchange="if(this.value=='other'){otherInstDivStyle.display = 'block'} else {otherInstDivStyle.display='none'}">
+                              onchange="if(!uinfo.org_type){console.log('hello no org_type')}">
                         <option selected disabled value="">Please select</option>
                         <option value="university">University</option>
                         <option value="public R&amp;D org">Public sector R&amp;D organization</option>
@@ -252,7 +252,7 @@
                         <option value="private org">Private sector organization</option>
                         <option value="none">None at the moment</option>
                         <option value="other"
-                                onclick="otherInstDivStyle.display = 'block'"
+                                onclick="otherInstDiv.style.display = 'block'"
                                 >Other</option>
 
                       </select>
@@ -514,6 +514,12 @@
 
             <form id="comex_createlogin_form" enctype="multipart/form-data"
                   method="post" onsubmit="console.info('createlogin submitted')">
+
+             <!-- hidden input for main user id -->
+             <input id="return_user_luid" name="return_user_luid"
+                     type="text" hidden
+                     value="{{ return_user.uid | safe }}">
+             </input>
 
              <div class="question">
                <!-- POSS login within modal like comex_test_modal -->

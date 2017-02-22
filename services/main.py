@@ -41,7 +41,7 @@ if __package__ == 'services':
     from services       import db
     from services       import tools
     from services.tools import mlog
-    from services.user  import User, login_manager, doors_login
+    from services.user  import User, login_manager, doors_login, doors_register
     from services.db_to_tina_api.extractDataCustom import MyExtractor
     # TODO move sanitize there
     # from services.text  import keywords, sanitize
@@ -51,7 +51,7 @@ else:
     import db
     import tools
     from tools          import mlog
-    from user           import User, login_manager, doors_login
+    from user           import User, login_manager, doors_login, doors_register
     from db_to_tina_api.extractDataCustom import MyExtractor
     # from text           import keywords, sanitize
 
@@ -566,7 +566,61 @@ def claim_profile():
                 return_user = return_user
             )
     elif request.method == 'POST':
-        return('not implemented yet')
+
+        email = request.form['email']
+        pwd = request.form['password']
+        luid = request.form['return_user_luid']
+
+        return_user = User(luid)
+        name = return_user.info.get('last_name')+', '+return_user.info.get('first_name', '')+' '+return_user.info.get('middle_name', '')
+
+        # we do our doors request here server-side to avoid MiM attack on result
+        try:
+            doors_uid = doors_register(email, pwd, name, config)
+        except Exception as err:
+            mlog("ERROR", "error in doors_register remote request")
+            raise (err)
+
+        mlog("DEBUG", "doors_register returned doors_uid '%s'" % doors_uid)
+
+        if doors_uid is None:
+            return render_template(
+                "thank_you.html",
+                form_accepted = False,
+                backend_error = True,
+                debug_message = "No ID was returned from the portal at registration"
+            )
+
+        else:
+            try:
+                db_connection = db.connect_db(config)
+                db.save_scholar({
+                                  'doors_uid':doors_uid,
+                                  'record_status': 'active',
+                                  'valid_date': None
+                                 },
+                                 db_connection,
+                                 update_user=return_user.info)
+                db_connection.close()
+                # the user is not a legacy user anymore
+                # POSS: do this on first login instead
+                rm_legacy_user_rettoken(luid)
+
+            except Exception as perr:
+                return render_template(
+                    "thank_you.html",
+                    form_accepted = False,
+                    backend_error = True,
+                    debug_message = tools.format_err(perr)
+                )
+
+            return render_template(
+                "message.html",
+                message = "Your new login credentials are saved. To complete your registration, just click the link in the confirmation email you should receive."
+            )
+
+
+
 
 
 # /services/user/register/

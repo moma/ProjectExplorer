@@ -84,9 +84,8 @@ var consultReturnDataUForm = cmxClt.uform.Form(
 
 selectSavedMenus(uinfo)
 
-// 2 exposed vars for inline js controls
-var teamCityDivStyle = document.getElementById('team_city_div').style
-var otherInstDivStyle = document.getElementById('other_org_div').style
+// 1 exposed vars for inline js controls
+var otherInstDiv = document.getElementById('other_org_div')
 
 
 // open middlename if there is one
@@ -105,7 +104,7 @@ var returnForm = cmxClt.uauth.AuthForm(
     'comex_createlogin_form',
     miniregValidate,
     {
-      'type': "register",
+      'type': "doorsRegister",
       // if email validation, captcha perhaps too much?
       'validateCaptcha': false
     }

@@ -42,7 +42,7 @@ cmxClt = (function(cC) {
     // --------
     // @id
     // @params:
-    //   - type         login|register
+    //   - type         login|register|doorsRegister
     //   - emailId      html email input element id
     //   - duuidId      html doors_uid hidden input element id
     //   - passId       html password input element id
@@ -71,7 +71,7 @@ cmxClt = (function(cC) {
         //  -> interaction elements (params, else default)
         var emailId, duuidId, passId, pass2Id, captchaId, capcheckId
 
-        // console.info('new AuthForm "'+auForm.id+'"[.type='+auForm.type+'] init params', afParams)
+        console.info('new AuthForm "'+auForm.id+'"[.type='+auForm.type+'] init params', afParams)
 
         emailId    = afParams.emailId    || 'email'
         duuidId    = afParams.duuidId    || 'doors_uid'
@@ -102,14 +102,14 @@ cmxClt = (function(cC) {
 
         // 2) for password
         // login <=> just test password's length
-        if (auForm.type != 'register') {
+        if (auForm.type == 'login') {
             auForm.elPass.onkeyup = function(event) {
                 // console.debug("..elPass "+auForm.id+" event:"+event.type)
                 auForm.passStatus = (auForm.elPass.value.length > 7)
             }
             auForm.elPass.onchange = auForm.elPass.onkeyup
         }
-        // register <=> do pass 1 and pass 2 match?
+        // register cases <=> do pass 1 and pass 2 match?
         else {
             // retrieve message element
             auForm.pass2Dials = {}
@@ -128,29 +128,31 @@ cmxClt = (function(cC) {
 
         // 3) for captcha
         if (auForm.validateCaptcha) {
-            // NB this captcha init requires *jquery*
-            $(auForm.elCaptcha).realperson(
-                {length: cC.uauth.realCaptchaLength}
-            )
+            if (auForm.elCaptcha) {
+                // NB this captcha init requires *jquery*
+                $(auForm.elCaptcha).realperson(
+                    {length: cC.uauth.realCaptchaLength}
+                )
 
-            // so... the events
-            auForm.elCaptcha.onkeyup = function(event) {
-                // console.debug('..elCaptcha '+auForm.id+' event:'+event.type)
-                auForm.captchaStatus = (auForm.elCaptcha.value.length == cC.uauth.realCaptchaLength)
-            }
-            auForm.elCaptcha.onchange = auForm.elCaptcha.onkeyup
+                // so... the events
+                auForm.elCaptcha.onkeyup = function(event) {
+                    // console.debug('..elCaptcha '+auForm.id+' event:'+event.type)
+                    auForm.captchaStatus = (auForm.elCaptcha.value.length == cC.uauth.realCaptchaLength)
+                }
+                auForm.elCaptcha.onchange = auForm.elCaptcha.onkeyup
 
-            // also form submit() overoverload
-            auForm.elForm.oldSubmitAction = auForm.elForm.submit
-            auForm.elForm.submit = function() {
-                // console.log("go newSubmit")
-                cmxClt.uauth.collectCaptcha(auForm)
-                // console.log("go oldSubmit")
-                auForm.elForm.oldSubmitAction()
+                // also form submit() overoverload
+                auForm.elForm.oldSubmitAction = auForm.elForm.submit
+                auForm.elForm.submit = function() {
+                    // console.log("go newSubmit")
+                    cmxClt.uauth.collectCaptcha(auForm)
+                    // console.log("go oldSubmit")
+                    auForm.elForm.oldSubmitAction()
+                }
             }
-        }
-        else {
-            console.log("No captcha in auForm", auForm.id)
+            else {
+            console.warn(`validateCaptcha is set to true but there is no captcha in the authentication form #${auForm.id}`)
+            }
         }
 
         // return new obj
@@ -237,8 +239,9 @@ cmxClt = (function(cC) {
 
           // NEW: added a user api check in register case
 
-          // if login <=> just callDoors
-          // if register <=> callUserApi and callDoors
+          // if type == login <=> just callDoors for an existing ID
+          // if type == register <=> callUserApi and callDoors for a new ID
+          // if type == doorsRegister <=> just callDoors for a new ID
 
           // NB using route in doors api/userExists
           //    using route in comex api/user?op=exists
@@ -268,29 +271,40 @@ cmxClt = (function(cC) {
                         obja.lastEmailValue = emailValue
                   }
                   // similar but one chained call to local api
-                  else if (obja.type == "register") {
+                  else if (obja.type == "register"
+                            || obja.type == "doorsRegister") {
 
                     // email available on doors side
                     // -----------------------------
                     if (doorsMsg == ("LoginAvailable")) {
 
-                      // let's see if it's also available on comexdb side
-                      cC.uauth.callUserApi(
-                          "exists",
-                          emailValue,
-                          function(boolExists) {
-                              obja.emailStatus = !boolExists
-                              var guiMsg = boolExists ? 'login already taken in communityexplorer' : 'login available'
-                              // signal and trigger
-                              obja.elForm.dispatchEvent(new CustomEvent('change'))
-                              cC.uauth.showEmailGUIEffects(obja, guiMsg)
-                              obja.lastEmailValue = emailValue
-                          }
-                      )
+                      if (obja.type == 'doorsRegister') {
+                          obja.emailStatus = true
+                          obja.elForm.dispatchEvent(new CustomEvent('change'))
+                          cC.uauth.showEmailGUIEffects(obja, doorsMsg)
+                          obja.lastEmailValue = emailValue
+                      }
+
+                      // full register
+                      else {
+                          // let's see if it's also available on comexdb side
+                          cC.uauth.callUserApi(
+                              "exists",
+                              emailValue,
+                              function(boolExists) {
+                                  obja.emailStatus = !boolExists
+                                  var guiMsg = boolExists ? 'login already taken in communityexplorer' : 'login available'
+                                  // signal and trigger
+                                  obja.elForm.dispatchEvent(new CustomEvent('change'))
+                                  cC.uauth.showEmailGUIEffects(obja, guiMsg)
+                                  obja.lastEmailValue = emailValue
+                              }
+                          )
+                      }
                     }
                     // not available on doors side
                     // ---------------------------
-                    else if (doorsMsg == "LoginAlreadyExists")
+                    else if (doorsMsg == "LoginAlreadyExists") {
                         obja.emailStatus = false
                         // signal and trigger
                         obja.elForm.dispatchEvent(new CustomEvent('change'))
@@ -301,6 +315,7 @@ cmxClt = (function(cC) {
                     else {
                         console.error("Error with doors connection")
                     }
+                  }
               }
           )
       }
@@ -314,6 +329,7 @@ cmxClt = (function(cC) {
     // TODO A add the status == "neutral" case
     // TODO B add a status == "ERROR" case
     cC.uauth.showEmailGUIEffects = function(formObj, ajaxMsg) {
+
       // effects on dials
       if (formObj.emailStatus) {
           // icon

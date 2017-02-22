@@ -201,7 +201,7 @@ class User(object):
 from requests    import post
 
 
-def doors_login(email, password, config):
+def doors_login(email, password, config=REALCONFIG):
     """
     Remote query to Doors API to login a user
 
@@ -276,6 +276,6 @@ def doors_register(email, password, name, config=REALCONFIG):
         # eg doors_response.content = b'{"status":"registration email sent",
         #                                "email":"john@locke.com"}''
         answer = loads(doors_response.content.decode())
-
-    return (doors_response.ok
-                and (answer['status'] == "RegistrationPending"))
+        return answer
+    else:
+        return None
