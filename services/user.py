@@ -70,7 +70,6 @@ def jsonize_uinfo(uinfo_dict):
             if type(v) not in [date, datetime]:
                 raise TypeError("Incorrect type for %s field: /%s/ instead of date or datetime" % (k, type(v)))
             else:
-                print("toto")
                 serializable_dict[k] = v.isoformat()
                 #   date   "YYYY-MM-DD"
                 # datetime "YYYY-MM-DDTHH:MM:SS"
@@ -286,7 +285,7 @@ def doors_register(email, password, name, config=REALCONFIG):
         # eg doors_response.content = b'{"status":"registration email sent",
         #                                "email":"john@locke.com"}''
         answer = loads(doors_response.content.decode())
-        mlog("INFO", "/api/register answer",answer)
+        # mlog("INFO", "/api/register answer",answer)
         return answer['userID']
     else:
         return None

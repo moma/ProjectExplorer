@@ -532,7 +532,6 @@ def claim_profile():
         if 'token' in request.args:
 
             return_token = sanitize(request.args['token'])
-            print("clean token", return_token)
 
             if (return_token
                     and type(return_token) == str
@@ -547,7 +546,7 @@ def claim_profile():
 
         # claim failure cases
         if return_token is None or luid is None or return_user is None:
-            mlog('INFO', 'failed claim profile attempt with return_token=%s, luid=%s' % (str(return_token),str(luid)))
+            mlog('INFO', 'failed claim profile GET with return_token=%s, luid=%s' % (str(return_token),str(luid)))
             return render_template(
                 "message.html",
                 message = """
@@ -560,7 +559,7 @@ def claim_profile():
 
         # claim success
         else:
-            mlog('INFO', "successful claim_profile attempt with luid =", luid)
+            mlog('DEBUG', "successful claim_profile GET for luid =", luid)
             # we *don't* log him in but we do put his data as return_user
             # => this way we can use templating to show the data
             return render_template(
@@ -618,6 +617,8 @@ def claim_profile():
                     backend_error = True,
                     debug_message = tools.format_err(perr)
                 )
+
+            mlog('DEBUG', "successful claim_profile for luid =", luid)
 
             return render_template(
                 "message.html",
