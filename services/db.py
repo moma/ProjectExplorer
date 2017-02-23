@@ -68,7 +68,7 @@ def connect_db(config=REALCONFIG):
     """
     Simple connection
 
-    TODO decide if we'll use one or multiple (<= atm multiple)
+    By default we use one new connection per function, but it can be passed to prevent that (in which case it should be closed at the end)
     """
     return connect(
         host=config['SQL_HOST'],
@@ -79,11 +79,15 @@ def connect_db(config=REALCONFIG):
         charset="utf8"
     )
 
-def doors_uid_to_luid(doors_uid):
+def doors_uid_to_luid(doors_uid, cmx_db = None):
     """
     Find corresponding luid
     """
-    db = connect_db()
+
+    if cmx_db:
+        db = cmx_db
+    else:
+        db = connect_db()
     db_c = db.cursor()
 
     stmt = """
@@ -95,20 +99,25 @@ def doors_uid_to_luid(doors_uid):
 
     luid = None
     if n_rows > 1:
-        db.close()
+        if not cmx_db:
+            db.close()
         raise ValueError("non unique doors_uid %s" % doors_uid)
     elif n_rows == 1:
         luid =  db_c.fetchone()[0]
-        db.close()
+        if not cmx_db:
+            db.close()
 
     return luid
 
 
-def email_exists(email):
+def email_exists(email, cmx_db = None):
     """
     Tests if there is already a user with this email
     """
-    db = connect_db()
+    if cmx_db:
+        db = cmx_db
+    else:
+        db = connect_db()
     db_c = db.cursor()
 
     stmt = """
@@ -119,7 +128,9 @@ def email_exists(email):
     n_rows = db_c.execute(stmt)
 
     exi_bool = (n_rows >= 1)
-    db.close()
+
+    if not cmx_db:
+        db.close()
 
     return exi_bool
 
@@ -270,23 +281,28 @@ def get_field_aggs(a_field,
     return agg_rows
 
 
-def rm_scholar(luid):
+def rm_scholar(luid, cmx_db = None):
     """
     Remove a scholar by id
 
     (removals from sch_kw and sch_ht maps are triggered by cascade)
     """
-    db = connect_db()
+
+    if cmx_db:
+        db = cmx_db
+    else:
+        db = connect_db()
     db_c = db.cursor()
     stmt = 'DELETE FROM scholars WHERE luid = %s' % str(luid)
     mlog("DEBUGSQL", "rm_scholar STATEMENT:\n-- SQL\n%s\n-- /SQL" % stmt)
     dbresp = db_c.execute(stmt)
     db.commit()
     mlog('INFO', 'deleted user %i at his request' % int(luid))
-    db.close()
+    if not cmx_db:
+        db.close()
 
 
-def get_full_scholar(uid):
+def get_full_scholar(uid, cmx_db = None):
     """
     uid : str
           local user id aka luid
@@ -295,10 +311,14 @@ def get_full_scholar(uid):
        => Retrieves one line from *scholars* table, with joined optional concatenated *affiliations*, *keywords* and *linked_ids*
        => Parse it all into a structured python user info dict
 
-       => NB: None if user doesn't exist in comex_db (but may exist in doors db)
+       => NB: None if user doesn't exist in cmx_db (but may exist in doors db)
     """
     u_row = None
-    db = connect_db()
+
+    if cmx_db:
+        db = cmx_db
+    else:
+        db = connect_db()
     db_c = db.cursor(DictCursor)
 
     # one user + all linked infos concatenated in one row
@@ -388,15 +408,20 @@ def get_full_scholar(uid):
     if n_rows > 1:
         raise IndexError("DB one_usr_stmt returned %i rows instead of 1 for user %s" % (n_rows, uid))
 
-    elif n_rows == 0:
-        mlog("WARNING", "DB get_full_scholar attempt got no rows for: %s" % uid)
+
+    urow_dict = db_c.fetchone()
+
+    # we won't use the connect
+    if not cmx_db:
         db.close()
+
+    # break with None if no results
+    if urow_dict is None:
+        mlog("WARNING", "DB get_full_scholar attempt got no rows for: %s" % uid)
         return None
 
 
-    # normal case: we got exactly 1 user
-    urow_dict = db_c.fetchone()
-    db.close()
+    # normal case <=> exactly one row
 
     # Exemple data in urow_dict
     # --------------------------
@@ -406,15 +431,15 @@ def get_full_scholar(uid):
     #  'home_url': 'http://localhost/regcomex/', 'hon_title': 'Student',
     #  'initials': 'JFK', 'interests_text': 'Blablabla',
     #  'job_looking_date': '2019_09_28T22:00:00.000Z',
-    #  'keywords': 'complex networks,complex systems,text mining,machine learning',
-    #  'keywords_nb': 4,
+    #  'hashtags': '#eccs15', 'hashtags_nb': 1,
+    #  'keywords': 'complex networks,complex systems,text mining,machine learning', 'keywords_nb': 4,
     #  'last_modified_date': '2016-12-07T15:56:09.721Z',
     #  'last_name': 'Kennedy',
-    #  'linked_ids': 'yoyo:42,foobar:XWING', 'linked_ids_nb': 2,
+    #  'linked_ids': 'twitter:@jfk,yoyo:42,foobar:XWING', 'linked_ids_nb': 3,
     #  'middle_name': 'Fitzgerald',
     #  'org': 'Centre National de la Recherche Scientifique (CNRS)',
     #  'org_city': 'Paris', 'org_type': 'public R&D org',
-    #  'pic_fname': '12345.jpg', 'pic_url': None, 'position': 'Engineer',
+    #  'pic_fname': '12345.jpg', 'pic_url': None, 'position': 'Research Fellow',
     #  'record_status': None, 'team_lab': 'ISCPIF'}
 
 
@@ -458,7 +483,7 @@ def get_full_scholar(uid):
     return urow_dict
 
 
-def find_scholar(some_key, some_str_value):
+def find_scholar(some_key, some_str_value, cmx_db = None):
     """
     Get the luid of a scholar based on some str value
 
@@ -466,7 +491,11 @@ def find_scholar(some_key, some_str_value):
     but this function doesn't check it !
     """
     luid = None
-    db = connect_db()
+
+    if cmx_db:
+        db = cmx_db
+    else:
+        db = connect_db()
     db_c = db.cursor(DictCursor)
 
     try:
@@ -479,11 +508,14 @@ def find_scholar(some_key, some_str_value):
             luid = first_row['luid']
     except:
         mlog('WARNING', 'unsuccessful attempt to identify a scholar on key %s' % some_key)
-    db.close()
+
+    if not cmx_db:
+        db.close()
+
     return luid
 
 
-def save_full_scholar(safe_recs, reg_db, uactive=True, update_user=None):
+def save_full_scholar(safe_recs, cmx_db, uactive=True, update_user=None):
     """
     For new registration:
       -> add to *scholars* table, return new local uid
@@ -544,7 +576,7 @@ def save_full_scholar(safe_recs, reg_db, uactive=True, update_user=None):
         db_tgtcols.append('record_status')
         db_qstrvals.append('"active"')
 
-    reg_db_c = reg_db.cursor()
+    cmx_db_c = cmx_db.cursor()
 
     if not update_user:
         # expected colnames "(doors_uid, last_modified_date, email, ...)"
@@ -569,16 +601,16 @@ def save_full_scholar(safe_recs, reg_db, uactive=True, update_user=None):
 
     mlog("DEBUG", "UPDATE" if update_user else "INSERT",  "SQL statement:", full_statmt)
 
-    reg_db_c.execute(full_statmt)
+    cmx_db_c.execute(full_statmt)
     if not update_user:
-        luid = reg_db_c.lastrowid
+        luid = cmx_db_c.lastrowid
     else:
         luid = update_user['luid']
-    reg_db.commit()
+    cmx_db.commit()
     return luid
 
 
-def update_scholar_cols(selected_safe_recs, reg_db, where_luid=None):
+def update_scholar_cols(selected_safe_recs, cmx_db, where_luid=None):
     """
     For modification of selected columns:
       -> *update* row with the values that are present and are real columns
@@ -612,7 +644,7 @@ def update_scholar_cols(selected_safe_recs, reg_db, where_luid=None):
             db_tgtcols.append(colname)
             db_qstrvals.append(quotedstrval)
 
-    reg_db_c = reg_db.cursor()
+    cmx_db_c = cmx_db.cursor()
     set_full_str = ','.join([db_tgtcols[i] + '=' + db_qstrvals[i] for i in range(len(db_tgtcols))])
 
     # UPDATE: full_statement with formated values
@@ -620,35 +652,35 @@ def update_scholar_cols(selected_safe_recs, reg_db, where_luid=None):
                         set_full_str,
                         where_luid
     )
-    reg_db_c.execute(full_statmt)
-    reg_db.commit()
+    cmx_db_c.execute(full_statmt)
+    cmx_db.commit()
     return where_luid
 
 
-def save_pairs_sch_tok(pairings_list, comex_db, map_table='sch_kw'):
+def save_pairs_sch_tok(pairings_list, cmx_db, map_table='sch_kw'):
     """
     Simply save all pairings (luid, kwid) or (luid, htid) in the list
     """
-    db_cursor = comex_db.cursor()
+    db_cursor = cmx_db.cursor()
     for id_pair in pairings_list:
         db_cursor.execute('INSERT INTO %s VALUES %s' % (map_table, str(id_pair)))
-        comex_db.commit()
+        cmx_db.commit()
         mlog("DEBUG", "%s: saved %s pair" % (map_table, str(id_pair)))
 
 
-def delete_pairs_sch_tok(uid, comex_db, map_table='sch_kw'):
+def delete_pairs_sch_tok(uid, cmx_db, map_table='sch_kw'):
     """
     Simply deletes all pairings (luid, *) in the table
     """
     if map_table not in ['sch_kw', 'sch_ht']:
         raise TypeError('ERROR: Unknown map_table')
-    db_cursor = comex_db.cursor()
+    db_cursor = cmx_db.cursor()
     n = db_cursor.execute('DELETE FROM %s WHERE uid = "%s"' % (map_table, uid))
-    comex_db.commit()
+    cmx_db.commit()
     mlog("DEBUG", "%s: DELETED %i pairings for %s" % (map_table, n, str(uid)))
 
 
-def get_or_create_tokitems(tok_list, comex_db, tok_table='keywords'):
+def get_or_create_tokitems(tok_list, cmx_db, tok_table='keywords'):
     """
         kw_str -> lookup/add to *keywords* table -> kw_id
         ht_str -> lookup/add to *hashtags* table -> ht_id
@@ -675,7 +707,7 @@ def get_or_create_tokitems(tok_list, comex_db, tok_table='keywords'):
         fill['idc'] = 'htid'
         fill['strc']= 'htstr'
 
-    db_cursor = comex_db.cursor()
+    db_cursor = cmx_db.cursor()
     found_ids = []
     for tok_str in tok_list:
 
@@ -695,7 +727,7 @@ def get_or_create_tokitems(tok_list, comex_db, tok_table='keywords'):
 
             # ex: INSERT INTO keywords(kwstr) VALUES ("complexity")
             db_cursor.execute('INSERT INTO %(tb)s(%(strc)s) VALUES ("%(q)s")' % fill)
-            comex_db.commit()
+            cmx_db.commit()
 
             mlog("INFO", "Added '%s' to %s table" % (tok_str, tok_table))
 
@@ -706,7 +738,7 @@ def get_or_create_tokitems(tok_list, comex_db, tok_table='keywords'):
     return found_ids
 
 
-def get_or_create_affiliation(org_info, comex_db):
+def get_or_create_affiliation(org_info, cmx_db):
     """
     (parent organization + lab) ---> lookup/add to *affiliations* table -> affid
 
@@ -744,7 +776,7 @@ def get_or_create_affiliation(org_info, comex_db):
         else:
             db_constraints.append("%s IS NULL" % colname)
 
-    db_cursor = comex_db.cursor()
+    db_cursor = cmx_db.cursor()
 
     n_matched = db_cursor.execute(
                     'SELECT affid FROM affiliations WHERE %s' %
@@ -764,7 +796,7 @@ def get_or_create_affiliation(org_info, comex_db):
                            )
                          )
         the_aff_id = db_cursor.lastrowid
-        comex_db.commit()
+        cmx_db.commit()
         mlog("DEBUG", "Added affiliation '%s'" % str(db_qstrvals))
     else:
         raise Exception("ERROR: non-unique affiliation '%s'" % str(db_qstrvals))
@@ -775,32 +807,44 @@ def get_or_create_affiliation(org_info, comex_db):
 
 # for users coming in from doors with no profile yet, we keep their doors infos (email, also name in the future)
 
-def save_doors_temp_user(doors_uid, doors_email):
-    db = connect_db()
+def save_doors_temp_user(doors_uid, doors_email, cmx_db = None):
+    if cmx_db:
+        db = cmx_db
+    else:
+        db = connect_db()
     db_c = db.cursor()
     stmt = "INSERT IGNORE INTO doors_temp_user(doors_uid, email) VALUES (%s,%s)"
     db_c.execute(stmt, (doors_uid, doors_email))
     db.commit()
-    db.close()
+    if not cmx_db:
+        db.close()
 
-def get_doors_temp_user(doors_uid):
+def get_doors_temp_user(doors_uid, cmx_db = None):
     info_row = None
-    db = connect_db()
+    if cmx_db:
+        db = cmx_db
+    else:
+        db = connect_db()
     db_c = db.cursor(DictCursor)
     db_c.execute('''SELECT *
                     FROM doors_temp_user
                     WHERE doors_uid = "%s"''' % doors_uid)
     info_row = db_c.fetchone()
-    db.close()
+    if not cmx_db:
+        db.close()
     return info_row
 
-def rm_doors_temp_user(doors_uid):
-    db = connect_db()
+def rm_doors_temp_user(doors_uid, cmx_db = None):
+    if cmx_db:
+        db = cmx_db
+    else:
+        db = connect_db()
     db_c = db.cursor()
     db_c.execute('''DELETE FROM doors_temp_user
                     WHERE doors_uid = "%s"''' % doors_uid)
     db.commit()
-    db.close()
+    if not cmx_db:
+        db.close()
 
 
 # another temp table, for the secret return tokens

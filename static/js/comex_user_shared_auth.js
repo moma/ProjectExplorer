@@ -71,7 +71,7 @@ cmxClt = (function(cC) {
         //  -> interaction elements (params, else default)
         var emailId, duuidId, passId, pass2Id, captchaId, capcheckId
 
-        console.info('new AuthForm "'+auForm.id+'"[.type='+auForm.type+'] init params', afParams)
+        // console.info('new AuthForm "'+auForm.id+'"[.type='+auForm.type+'] init params', afParams)
 
         emailId    = afParams.emailId    || 'email'
         duuidId    = afParams.duuidId    || 'doors_uid'

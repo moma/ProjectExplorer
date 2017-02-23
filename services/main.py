@@ -98,9 +98,9 @@ SOURCE_FIELDS = [
          ("hon_title",              True,        None),
          ("interests_text",         True,        None),
          ("gender",                False,        None),   # M|F
-         ("job_looking_date",       True,       "date"),   # def null: not looking for a job
-         ("home_url",               True,        "url"),  # scholar's homepage
-         ("pic_url",                True,        "url"),
+         ("job_looking_date",       True,       "sdate"),   # def null: not looking for a job
+         ("home_url",               True,       "surl"),  # scholar's homepage
+         ("pic_url",                True,       "surl"),
          ("pic_file",              False,        None),   # saved separately
          # => for *scholars* table (optional)
 
@@ -132,13 +132,13 @@ def inject_doors_params():
        -> 'doors_connect'
           (base_layout-rendered templates need it for login popup)
     """
-    if 'DOORS_PORT' not in config or config['DOORS_PORT'] in ['', '80', '443']:
+    if 'DOORS_PORT' not in config or config['DOORS_PORT'] in ['80', '443']:
         context_dict = dict(
             doors_connect= config['DOORS_HOST']
         )
     else:
         context_dict = dict(
-            doors_connect= config['DOORS_HOST']
+            doors_connect= config['DOORS_HOST']+':'+config['DOORS_PORT']
         )
 
     return context_dict
@@ -252,10 +252,11 @@ def user_api():
     implemented "op" <=> verbs:
         exists  => bool
     """
-    if 'op' in request.args and request.args['op'] == "exists":
-        if 'email' in request.args:
-            email = sanitize(request.args['email'])
-            return(dumps({'exists':db.email_exists(email)}))
+    if 'op' in request.args:
+        if request.args['op'] == "exists":
+            if 'email' in request.args:
+                email = sanitize(request.args['email'])
+                return(dumps({'exists':db.email_exists(email)}))
 
     else:
         raise TypeError("user API query is missing the operation to perform (eg op=exists)")
@@ -275,7 +276,7 @@ def login():
             "login.html"
         )
     elif request.method == 'POST':
-        mlog("DEBUG", "login form received from "+request.path+", with keys:", [k for k in request.values])
+        mlog("DEBUG", "LOGIN: form received from "+request.path+", with keys:", [k for k in request.values])
 
         # we used this custom header to mark ajax calls => called_as_api True
         x_req_with = request.headers.get('X-Requested-With', type=str)
@@ -309,10 +310,10 @@ def login():
             try:
                 doors_uid = doors_login(email, pwd, config)
             except Exception as err:
-                mlog("ERROR", "error in doors_login request")
+                mlog("ERROR", "LOGIN: error in doors_login request")
                 raise (err)
 
-            mlog("DEBUG", "doors_login returned doors_uid '%s'" % doors_uid)
+            mlog("DEBUG", "user.doors_login() returned doors_uid '%s'" % doors_uid)
 
             if doors_uid is None:
                 # break: can't doors_login
@@ -332,6 +333,7 @@ def login():
                 # normal user
                 user = User(luid)
             else:
+                mlog("DEBUG", "LOGIN: encountered new doors id (%s), switching to empty user profile" % doors_uid)
                 # user exists in doors but has no comex profile nor luid yet
                 db.save_doors_temp_user(doors_uid, email)  # preserve the email
                 user = User(None, doors_uid=doors_uid)     # get a user.empty
@@ -354,7 +356,7 @@ def login():
 
             if not login_ok:
                 # break: failed to login_user()
-                notok_message = "There was an unknown problem with the login."
+                notok_message = "LOGIN There was an unknown problem with the login."
                 if called_as_api:
                     # menubar login will prevent redirect
                     return(nologin_message, 404)
@@ -373,7 +375,7 @@ def login():
 
             elif user.empty:
                 mlog('DEBUG',"empty user redirected to profile")
-                # we go straight to profile for the him to create infos
+                # we go straight to empty profile for the person to create infos
                 return(redirect(url_for('profile', _external=True)))
 
             # normal call, normal user
@@ -392,7 +394,7 @@ def login():
                         # if relative
                         if next_url[0] == '/':
                             next_url = url_for('rootindex', _external=True) + next_url[1:]
-                            mlog("DEBUG", "reabsoluted next_url:", next_url)
+                            mlog("DEBUG", "LOGIN: reabsoluted next_url:", next_url)
 
                         return(redirect(next_url))
                     else:
@@ -572,7 +574,10 @@ def claim_profile():
         luid = request.form['return_user_luid']
 
         return_user = User(luid)
-        name = return_user.info.get('last_name')+', '+return_user.info.get('first_name', '')+' '+return_user.info.get('middle_name', '')
+        info = return_user.info
+        name = info['last_name']+', '+info['first_name']
+        if info['middle_name']:
+            name += ' '+info['middle_name']
 
         # we do our doors request here server-side to avoid MiM attack on result
         try:
@@ -679,7 +684,7 @@ def register():
         return render_template(
             "thank_you.html",
             debug_records = (clean_records if app.config['DEBUG'] else {}),
-            form_accepted = True,
+            form_accepted = form_accepted,
             backend_error = False,
             message = """
               You can now visit elements of the members section:
@@ -858,9 +863,9 @@ def sanitize(value, specific_type=None):
 
     if not specific_type:
         san_val = sub(r'[^\w@\.:,()# -]', '_', clean_val)
-    elif specific_type == "url":
+    elif specific_type == "surl":
         san_val = sub(r'[^\w@\.: -/]', '_', clean_val)
-    elif specific_type == "date":
+    elif specific_type == "sdate":
         san_val = sub(r'[^0-9/-:]', '_', clean_val)
 
     if vtype not in [int, str]:

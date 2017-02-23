@@ -79,8 +79,7 @@ class User(object):
          doors but not in db)
          => no luid, but has doors_uid
 
-        This also causes trickier behaviour for get_id:
-         ie load_user() wants a *single id for both*,
+         NB load_user() wants a *single id for both*,
              which is provided by self.get_id()
         """
         mlog('DEBUG',
@@ -225,7 +224,6 @@ def doors_login(email, password, config=REALCONFIG):
 
     http_scheme = "https:"
 
-    # (TODO generalize this logic)
     if config['DOORS_PORT'] in ['80', '443']:
         # implicit port
         doors_base_url = http_scheme + '//'+config['DOORS_HOST']
@@ -276,6 +274,7 @@ def doors_register(email, password, name, config=REALCONFIG):
         # eg doors_response.content = b'{"status":"registration email sent",
         #                                "email":"john@locke.com"}''
         answer = loads(doors_response.content.decode())
+        mlog("INFO", "/api/register answer",answer)
         return answer['userID']
     else:
         return None
