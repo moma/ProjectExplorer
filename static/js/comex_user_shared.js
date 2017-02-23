@@ -161,11 +161,10 @@ var cmxClt = (function() {
 
     // multiTextinput
     //
-    // stub for multiple textinput like keywords
-    //   => UX shows newInput where user enters words one by one
-    //   => validate words become removable "pills"
-    //   => result is concatenated texts in hidden input.#fName
-    // TODO finalize and add to initialize
+    // A textinput element containing multiple values like keywords
+    //   => UI shows input where user enters words one by one
+    //   => validated words become removable "boxes"
+    //   => result is an array of texts in memory, concatenated at form.submit()
     cC.uform.multiTextinput = function (fName, otherMtiParams, aUForm) {
         // console.debug ("multiTextinput args:", fName, otherMtiParams, aUForm)
 
@@ -176,22 +175,16 @@ var cmxClt = (function() {
         // HTML elt to insert tag boxes around
         var refElt = null
 
-        // new array for full results
+        // new array for full result
         aUForm.mtiStock[fName] = []
 
         // there must be a normal text input
         var normalInput = document.getElementById(fName)
-        // POSS use autocomp
+        // (and it can use autocomplete)
 
-        // perhaps surrounding input group useful if we want to insertBefore
-        // var inputWrap = cC.findAncestor(normalInput, 'question')
+        // refElt is where we show the boxes
+        refElt = normalInput
 
-        // if (inputWrap) {
-        //     refElt = inputWrap
-        // }
-        // else {
-            refElt = normalInput
-        // }
         refElt.style.marginBottom = 0
 
         // shows a box and saves the input value in mtiStock
@@ -218,40 +211,38 @@ var cmxClt = (function() {
                     // and save it
                     var nSaved = aUForm.mtiStock[fName].push(newValue)
 
-                    // create a close elt for the box
-                    var newBoxClose = document.createElement('div')
-                    newBoxClose.classList.add('box-highlight-close')
-                    newBoxClose.classList.add('operation')
-                    newBoxClose.innerHTML = '<span class="glyphicon glyphicon-remove"></span>'
+                    // normal case gets a close button x
+                    if (!perhapsReadonly) {
+                        var newBoxClose = document.createElement('div')
+                        newBoxClose.classList.add('box-highlight-close')
+                        newBoxClose.classList.add('operation')
+                        newBoxClose.innerHTML = '<span class="glyphicon glyphicon-remove"></span>'
 
-                    var closeBox = function() {
-                        // start transition
-                        newBox.style.opacity = 0
+                        var closeBox = function() {
+                            // start transition
+                            newBox.style.opacity = 0
 
-                        // remove value from stock
-                        var i = 0
-                        for (i in aUForm.mtiStock[fName]){
-                            if (aUForm.mtiStock[fName][i] == newValue) {
-                                break ;
+                            // remove value from stock
+                            var i = 0
+                            for (i in aUForm.mtiStock[fName]){
+                                if (aUForm.mtiStock[fName][i] == newValue) {
+                                    break ;
+                                }
                             }
+                            aUForm.mtiStock[fName].splice(i, 1)
+
+                            // signal form change
+                            aUForm.elForm.dispatchEvent(new CustomEvent('change'))
+
+                            // remove box
+                            setTimeout(function(){newBox.style.display = 'none'}, 300)
+
+                            // console.debug("droptagbox", aUForm.id aUForm.mtiStock[fName].length, aUForm.mtiStock[fName])
                         }
-                        aUForm.mtiStock[fName].splice(i, 1)
 
-                        // signal form change
-                        aUForm.elForm.dispatchEvent(new CustomEvent('change'))
-
-                        // remove box
-                        setTimeout(function(){newBox.style.display = 'none'}, 300)
-
-                        // console.debug("droptagbox", aUForm.id aUForm.mtiStock[fName].length, aUForm.mtiStock[fName])
-                    }
-
-                    // /!\ null is like true here
-                    if (perhapsReadonly != false) {
+                        newBox.insertBefore(newBoxClose, newBox.firstChild)
                         newBoxClose.onclick = closeBox
                     }
-                    newBox.insertBefore(newBoxClose, newBox.firstChild)
-
 
                     // show the box
                     newBox.classList.add("box-highlight")
@@ -785,13 +776,13 @@ var cmxClt = (function() {
 
     // jobLookingDateStatus ~~~> is job date a valid date?
     // ---------------------------------------------------
-    var jobBool = document.getElementById('job_bool')
+    var jobBool = document.getElementById('job_looking')
     var jobDate = document.getElementById('job_looking_date')
     var jobDateMsg = document.getElementById('job_date_message')
     var jobLookingDiv = document.getElementById('job_looking_div')
 
     cC.uform.checkJobDateStatus = function () {
-      cC.uform.jobLookingDateStatus = (jobBool.value == "No" || cC.uform.validDate.test(jobDate.value))
+      cC.uform.jobLookingDateStatus = (jobBool.value == "0" || cC.uform.validDate.test(jobDate.value))
       if (!cC.uform.jobLookingDateStatus) {
           jobDateMsg.style.color = "#888"
           jobDateMsg.innerHTML = '<small>format is YYYY/MM/DD</small>'
@@ -806,7 +797,7 @@ var cmxClt = (function() {
     if (jobBool && jobDate) {
         jobBool.onchange = function() {
             // shows "Until when"
-            if(this.value=='Yes'){
+            if(this.value=='1'){
                 jobLookingDiv.style.display = 'block'
             }
             else {
