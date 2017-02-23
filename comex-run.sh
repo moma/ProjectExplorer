@@ -20,7 +20,7 @@ fi
 export COMEX_NWORKERS=$(grep -oP '(?<=COMEX_NWORKERS=).*' config/parametres_comex.ini)
 
 echo "binding gunicorn to unix:/tmp/comex.sock"
-gunicorn -b unix:/tmp/comex.sock services.main:app --workers $COMEX_NWORKERS
+gunicorn -b unix:/tmp/comex.sock services.main:app --workers $COMEX_NWORKERS --worker-class gevent
 
 
 # export COMEX_HOST=$(grep -oP '(?<=COMEX_HOST=).*' config/parametres_comex.ini)
