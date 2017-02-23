@@ -70,11 +70,6 @@ div.uform-nobg {
 
 button.clean-btn
 
-p#doors_ret_msg {
-    font-weight: bold;
-    text-shadow: .8px .8px #333, -.8px -.8px #333, -.8px .8px #333, .8px -.8px #333;
-}
-
 /* not used at present but could be useful for autompleted inputs */
 .autocomp {
 }

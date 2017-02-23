@@ -26,6 +26,7 @@ var cmxClt = (function() {
     cC.colorGrey = '#554'
     cC.colorLGrey = '#ddd'
     cC.colorOrange = '#F96'
+    cC.colorDarkerOrange = '#C73'
     cC.colorBlue = '#23A'
 
 

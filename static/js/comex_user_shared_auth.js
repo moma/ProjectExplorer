@@ -342,7 +342,9 @@ cmxClt = (function(cC) {
           formObj.emailDials.elMsg.innerHTML = "OK: "+ajaxMsg
           formObj.emailDials.elMsg.style.color = cC.colorGreen
           formObj.emailDials.elMsg.style.fontWeight = "bold"
+          formObj.emailDials.elMsg.style.fontSize = ""
           formObj.emailDials.elMsg.style.textShadow = cC.strokeWhite
+          formObj.emailDials.elMsg.style.backgroundColor = ""
 
           // label
           formObj.emailDials.elLbl.style.backgroundColor = ""
@@ -356,9 +358,12 @@ cmxClt = (function(cC) {
 
           // message in legend
           formObj.emailDials.elMsg.innerHTML = "Sorry: "+ajaxMsg+" !"
-          formObj.emailDials.elMsg.style.color = cC.colorOrange
+          formObj.emailDials.elMsg.style.color = cC.colorDarkerOrange
           formObj.emailDials.elMsg.style.fontWeight = "bold"
-          formObj.emailDials.elMsg.style.textShadow = cC.strokeDeepGrey
+          formObj.emailDials.elMsg.style.fontSize = "110%"
+          //   formObj.emailDials.elMsg.style.backgroundColor = "#888"
+          //   formObj.emailDials.elMsg.style.textShadow = cC.strokeDeepGrey
+          formObj.emailDials.elMsg.style.textShadow = ""
 
           // label
           formObj.emailDials.elLbl.style.backgroundColor = cC.colorOrange
