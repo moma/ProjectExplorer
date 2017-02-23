@@ -28,12 +28,11 @@ CREATE TABLE scholars (
     home_url             varchar(180),   -- homepage
     pic_url              varchar(180),   -- remote pic... (full url)
     pic_fname            varchar(120),   -- ...or locally saved pic (basename)
-    valid_date           date,   -- when user will be ignored, if legacy status
     record_status        varchar(25),  -- "active|test|legacy|closed_legacy"
+    valid_date           date,   -- when user will be ignored, if legacy status
     old_itemid           varchar(30),  -- eg imported id from CSS originals
     future_reserved      varchar(30),  -- eg for an imported id or temp status
 
-    INDEX luid_index_sch (luid),
     INDEX duid_index_sch (doors_uid),
     INDEX affs_index_sch (affiliation_id),
     INDEX country_index_sch (country),
@@ -48,7 +47,6 @@ CREATE TABLE affiliations(
     team_lab            varchar(120) not null,
     org_city            varchar(50),
     reserved            varchar(30),
-    INDEX affid_index_affs (affid),
     PRIMARY KEY (affid),
     UNIQUE KEY full_affiliation (org, team_lab, org_city, org_type)
     -- NB org_type should be entailed by other 3 in business logic
@@ -61,7 +59,6 @@ CREATE TABLE keywords(
     kwid                int(15) not null auto_increment,
     kwstr               char(70) not null unique,   -- eg 'complex networks'
     occs                int(15) default 0,
-    INDEX kwid_index_kws (kwid),
     INDEX kwstr_index_kws (kwstr),
     PRIMARY KEY (kwid)
 );
@@ -70,8 +67,6 @@ CREATE TABLE keywords(
 CREATE TABLE sch_kw(
     uid            int(15) not null,
     kwid           int(15) not null,
-    INDEX uid_index_schkw (uid),
-    INDEX kwid_index_schkw (kwid),
     PRIMARY KEY (uid, kwid),
     FOREIGN KEY (uid)  REFERENCES scholars(luid) ON DELETE CASCADE,
     FOREIGN KEY (kwid) REFERENCES keywords(kwid)
@@ -104,7 +99,6 @@ FOR EACH ROW UPDATE keywords JOIN sch_kw ON keywords.kwid = sch_kw.kwid SET occs
 CREATE TABLE hashtags(
     htid                int(15) not null auto_increment,
     htstr               char(50) not null unique,   -- eg '#dataviz'
-    INDEX htid_index_hts (htid),
     INDEX htstr_index_hts (htstr),
     PRIMARY KEY (htid)
 );
@@ -113,8 +107,6 @@ CREATE TABLE hashtags(
 CREATE TABLE sch_ht(
     uid            int(15) not null,
     htid           int(15) not null,
-    INDEX uid_index_schht (uid),
-    INDEX htid_index_schht (htid),
     PRIMARY KEY (uid, htid),
     FOREIGN KEY (uid)  REFERENCES scholars(luid) ON DELETE CASCADE,
     FOREIGN KEY (htid) REFERENCES hashtags(htid)
@@ -127,7 +119,6 @@ CREATE TABLE linked_ids(
     uid                 int(15) not null,
     ext_id_type         char(50) not null,   -- eg 'orcid','LinkedIn','Twitter'
     ext_id              char(50) not null,   -- eg "0000-0002-1825-0097"
-    INDEX uid_index_eids (uid),
     PRIMARY KEY (linkid),
     FOREIGN KEY (uid) REFERENCES scholars(luid) ON DELETE CASCADE
 );
@@ -135,16 +126,16 @@ CREATE TABLE linked_ids(
 -- separate buffer table for incoming doors users without a profile in scholars
 -- (allows us to avoid reasking them for their doors info like email)
 CREATE TABLE doors_temp_user (
-    doors_uid            char(36) not null unique primary key,
+    doors_uid            char(36) not null unique,
     email                varchar(255) not null unique,
-    INDEX duid_index_dtempu (doors_uid)
+    PRIMARY KEY(doors_uid)
 ) ;
 
 -- separate buffer table for rettoks
 -- (return tokens associated to a legacy user)
 CREATE TABLE legacy_temp_rettoks (
-    luid             int(15) not null unique primary key,
+    luid             int(15) not null unique,
     rettok           char(36) not null unique,
-    INDEX luid_index_ltempt (luid),
+    PRIMARY KEY (luid),
     INDEX rettok_index_ltempt (rettok)
 ) ;
