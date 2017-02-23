@@ -71,7 +71,7 @@ function testAsYouGo() {
 var teamCityDivStyle = document.getElementById('team_city_div').style
 
 function registerDoorsAndSubmit(){
-    regfo.elMainMessage.innerHTML = "Registering with ISCPIF Doors..."
+    regfo.elMainMessage.innerHTML = "Registering with ISCPIF Doors<br/> and sending validation email..."
 
     // REGISTERING ON THE DOORS -------------------------------------
     // all values from the form have now been validated

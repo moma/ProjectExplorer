@@ -550,11 +550,19 @@ def claim_profile():
             return render_template(
                 "message.html",
                 message = """
-                    This is not the correct link. If you're trying to register to an old profile, please simply click on the link in the email you received.
+                    <p><b>This activation link has already been used !</b></p>
+
+                    <p>If you just created a new password for an archived profile:
+                    </p>
+                    <ol>
+                        <li>go and click the validation link in your <b>confirmation email</b></li>
+                        <li>then come back here to <span class='link-like' onclick="cmxClt.elts.box.toggleBox('auth_modal')">login</span></li>
+                    </ol>
                     <br/>
-                    <br/>
-                    Otherwise you can simply register via <span class='code'><a href="%s">%s</a></span>
-                    """ % (url_for('register'),url_for('register'))
+                    <p>
+                    Otherwise you can also register a completely new account via <span class='code'><a href="%(register_url)s">%(register_url)s</a></span>
+                    </p>
+                    """ % { 'register_url': url_for('register') }
             )
 
         # claim success
@@ -622,11 +630,14 @@ def claim_profile():
 
             return render_template(
                 "message.html",
-                message = "Your new login credentials are saved. To complete your registration, just click the link in the confirmation email you should receive."
+                message = """
+                <p>Your new login credentials are saved. To complete your registration:</p>
+                <ol>
+                    <li>go check your mailbox and click the link in your <b>confirmation email</b></li>
+                    <li>then come back here to <span class='link-like' onclick="cmxClt.elts.box.toggleBox('auth_modal')">login</span></li> to your old profile with your new credentials.
+                </ol>
+                """
             )
-
-
-
 
 
 # /services/user/register/
@@ -704,6 +715,16 @@ def register():
                   </li>
               </ul>
             """ % {'luid': luid })
+
+
+
+# any static pages with topbar are set in /about prefix
+
+# /about/privacy
+@app.route('/about/privacy')
+def show_privacy():
+    return render_template("privacy.html")
+
 
 
 ########### SUBS ###########

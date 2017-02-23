@@ -124,6 +124,13 @@ cmxClt = (function(cC) {
             auForm.elPass.onchange = auForm.elPass.onkeyup
             auForm.elPass2.onkeyup = auForm.elPass.onkeyup
             auForm.elPass2.onchange = auForm.elPass.onkeyup
+
+            // another form submit() overload to prevent double registrations
+            auForm.elForm.normalSubmitAction = auForm.elForm.submit
+            auForm.elForm.submit = function() {
+                auForm.elSubmitBtn.disabled = true
+                auForm.elForm.normalSubmitAction()
+            }
         }
 
         // 3) for captcha
@@ -575,7 +582,8 @@ cmxClt = (function(cC) {
                 type: 'POST',
                 success: function(data) {
 
-                        console.log('response data', data)
+                        // console.log('response data', data)
+
                         if (typeof data != 'undefined'
                              && apiAction == 'userExists') {
                             // userExists success case: it's all in the message :)

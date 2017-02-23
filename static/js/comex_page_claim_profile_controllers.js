@@ -40,7 +40,7 @@ function setupSavedItems(uinfo) {
             var chosenV = uinfo[colName]
 
             var tgtElt = document.getElementById(colName)
-            if (tgtElt && chosenV != null) {
+            if (tgtElt && (chosenV != null)) {
                 // d <=> convert to YY/MM/DD from iso string YYYY-MM-DD
                 if (colType == 'd') {
                     // console.log('setting date', colName, 'with', chosenV)
@@ -77,7 +77,7 @@ function setupSavedItems(uinfo) {
                 }
             }
             else {
-                console.warn("setupSavedItems: couldn't find element: "+colName)
+                // console.warn("setupSavedItems: couldn't find element: "+colName)
             }
         }
     }
@@ -152,7 +152,7 @@ function miniregValidate(self) {
 
 function showMessageAndSubmit() {
     returnForm.elMainMessage.style.display = "block"
-    returnForm.elMainMessage.innerHTML = "Registering with ISCPIF Doors and sending validation email..."
+    returnForm.elMainMessage.innerHTML = "Registering with ISCPIF Doors<br/> and sending validation email..."
     returnForm.elForm.submit()
 }
 

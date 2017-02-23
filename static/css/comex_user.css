@@ -83,11 +83,11 @@ button.clean-btn
 
 
 .cartouche {
-  border: .4em dotted #988 ;
+  border: .2em dotted #988 ;
   border-radius: 2em;
   padding: 1em 3em;
   text-align: center;
-  max-width: 57em;
+  max-width: 40em;
 }
 
 /* ex: profile overview in readonly */

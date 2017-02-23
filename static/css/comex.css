@@ -20,6 +20,7 @@ body {
   font-size: 12px;
 }
 
+
 .comex-nav-item {
     vertical-align: middle;
     line-height: 2em;
@@ -47,6 +48,18 @@ body {
     color: #fff;
 }
 
+/* for buttons/divs/spans looking like links */
+.link-like {
+    cursor: pointer;
+    color: #337ab7;
+    text-decoration: none;
+    font-weight: bold;
+}
+.link-like {
+    color: #23527c;
+    text-decoration: underline;
+}
+
 /* main content for all new pages */
 div.my-box {
     padding:0 20px;
@@ -69,7 +82,7 @@ div.my-box {
     padding: 5px 15px;
 }
 
-/* for intro text */
+/* paragraph, for intro text */
 .mini-hero {
   margin-top: 5px;
   font-size: 16px;
@@ -83,13 +96,20 @@ div.my-box {
   line-height: 110%;
 }
 
+/* div, for message main text */
+.message-hero {
+  margin-top: 28px;
+  font-size: 18px;
+  line-height: 25px;
+}
+
+
 #cnil_warning {
   /*text-align: center;*/
 }
 
 #information-example {
 }
-
 
 
 /* self-made modals */
@@ -298,7 +318,6 @@ div.ccsection-footer {
 }
 
 
-
 /* "carte de visite" */
 .our-vcard {
     line-height: 110%;
@@ -337,6 +356,11 @@ div.ccsection-footer {
 
 .bigspacerrow {
   height: 15em;
+}
+
+/* spacer columns tend to block what's underneath when hidden-foo-down */
+.spacer {
+    z-index: -1;
 }
 
 footer {
