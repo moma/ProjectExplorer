@@ -54,7 +54,7 @@ def jsonize_uinfo(uinfo_dict):
 
     serializable_dict = {}
     for k,v in uinfo_dict.items():
-        mlog('DEBUG', 'user: jsonize_uinfo k=v', k, '=' , v)
+        # mlog('DEBUG', 'user: jsonize_uinfo k=v', k, '=' , v)
 
         # most values are already serializable
         if (   v is None
