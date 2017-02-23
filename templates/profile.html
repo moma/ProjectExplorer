@@ -311,11 +311,11 @@
 
                <div class="question">
                  <div class="input-group">
-                   <label for="job_bool" class="smlabel input-group-addon">Soon on the job market? <br/><small>and do you want our job contacts?</small></label>
-                   <select id="job_bool" name="job_bool"
+                   <label for="job_looking" class="smlabel input-group-addon">Soon on the job market? <br/><small>and do you want our job contacts?</small></label>
+                   <select id="job_looking" name="job_looking"
                            class="custom-select form-control">
-                     <option selected value="No">No</option>
-                     <option value="Yes">Yes</option>
+                     <option selected value="0">No</option>
+                     <option value="1">Yes</option>
                    </select>
                  </div>
                  <!-- job_looking_date_div <=> only if previous choice == Yes -->
@@ -533,11 +533,6 @@
             <div class="panel-footer ccsection-footer">&nbsp;</div>
 
           </div>
-
-
-          <!-- hidden input for modification date -->
-          <input id="last_modified_date" name="last_modified_date" type="text" hidden>
-          </input>
 
           <!-- hidden input for main user id -->
           <input id="luid" name="luid" type="text" hidden

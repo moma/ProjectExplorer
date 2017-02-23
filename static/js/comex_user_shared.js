@@ -43,9 +43,8 @@ var cmxClt = (function() {
         // ==> *hashtags* table
 
         ["doors_uid",              true,       "auto"   , "t",  null],
-        ["last_modified_date",     true,       "auto"   , "d",  null],
-        ["hon_title",             false,       "plsfill", "t",  "basic_infos"],
         ["email",                  true,       "plsfill", "t",  "login_infos"],
+        ["hon_title",             false,       "plsfill", "t",  "basic_infos"],
         ["first_name",             true,       "plsfill", "t",  "basic_infos"],
         ["middle_name",           false,       "pref",    "t",  "basic_infos"],
         ["last_name",              true,       "plsfill", "t",  "basic_infos"],
@@ -54,6 +53,7 @@ var cmxClt = (function() {
         ["position",               true,       "plsfill", "t",  "map_infos"],
         ["interests_text",        false,       "pref",    "t",  "other_infos"],
         ["gender",                false,       "plsfill", "m",  "other_infos"],
+        ["job_looking",           false,       "pref"   , "m",  "map_infos"],
         ["job_looking_date",      false,       "pref"   , "d",  "map_infos"],
         ["home_url",              false,       "plsfill", "t",  "other_infos"],
         ["pic_url",               false,       "pref"   , "t",  "other_infos"],
@@ -338,7 +338,7 @@ var cmxClt = (function() {
         var mainMessageId, timestampId, buttonId
 
         mainMessageId = fParams.mainMessageId || 'main_message'
-        timestampId   = fParams.timestampId   || 'last_modified_date'
+        timestampId   = fParams.timestampId   || 'form_timestamp'
         submitBtnId   = fParams.submitBtnId   || 'form_submit'
 
         myUform.elMainMessage = document.getElementById(mainMessageId)
@@ -511,8 +511,7 @@ var cmxClt = (function() {
                   otherMissingFields         ]
     }
 
-    // simple timestamp on #last_modified_date element
-    //                      ------------------
+    // simple timestamp if needed
     cC.uform.stampTime = function (aUForm) {
         var now = new Date()
         aUForm.elTimestamp.value = now.toISOString()

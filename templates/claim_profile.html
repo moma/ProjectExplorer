@@ -297,7 +297,7 @@
                   {% endif %}
 
 
-                  {% if return_user.info.job_looking_date or return_user.info.hashtags %}
+                  {% if return_user.info.job_looking or return_user.info.hashtags %}
 
                   <h3 class="formcat"> About your future activities </h3>
 
@@ -306,11 +306,11 @@
                   {% if return_user.info.job_looking %}
                   <div class="question">
                     <div class="input-group">
-                      <label for="job_bool" class="smlabel input-group-addon">Job offers</label>
-                      <select disabled id="job_bool" name="job_bool"
+                      <label for="job_looking" class="smlabel input-group-addon">Job offers</label>
+                      <select disabled id="job_looking" name="job_looking"
                               class="custom-select form-control">
-                        <option selected value="No">No</option>
-                        <option value="Yes">Yes</option>
+                        <option selected value="0">No</option>
+                        <option value="1">Yes</option>
                       </select>
                     </div>
                   </div>

@@ -25,7 +25,7 @@ __status__    = "Dev"
 
 
 # ============== imports ==============
-from re           import sub
+from re           import sub, match
 from os           import path
 from json         import dumps
 from datetime     import timedelta
@@ -82,10 +82,9 @@ login_manager.init_app(app)
 
 # all inputs as they are declared in form, as a couple
 SOURCE_FIELDS = [
-#             NAME,              SANITIZE?      Specificity
+#             NAME,              SANITIZE?    sanitizing specificity
          ("luid",                  False,        None),
          ("doors_uid",             False,        None),
-         ("last_modified_date",    False,        None),   # TODO use stamp
          ("email",                  True,        None),
          ("country",                True,        None),
          ("first_name",             True,        None),
@@ -98,7 +97,8 @@ SOURCE_FIELDS = [
          ("hon_title",              True,        None),
          ("interests_text",         True,        None),
          ("gender",                False,        None),   # M|F
-         ("job_looking_date",       True,       "sdate"),   # def null: not looking for a job
+         ("job_looking",            True,       "sbool"),
+         ("job_looking_date",       True,       "sdate"),
          ("home_url",               True,       "surl"),  # scholar's homepage
          ("pic_url",                True,       "surl"),
          ("pic_file",              False,        None),   # saved separately
@@ -863,6 +863,14 @@ def sanitize(value, specific_type=None):
 
     if not specific_type:
         san_val = sub(r'[^\w@\.:,()# -]', '_', clean_val)
+    elif specific_type == "sbool":
+        # DB uses int(0) or int(1)
+        if match('^[01]$',clean_val):
+            san_val = int(clean_val)
+        else:
+            san_val = 0
+        # NB san_val_bool = bool(san_val)
+
     elif specific_type == "surl":
         san_val = sub(r'[^\w@\.: -/]', '_', clean_val)
     elif specific_type == "sdate":

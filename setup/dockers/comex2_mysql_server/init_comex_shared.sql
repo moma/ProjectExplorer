@@ -12,7 +12,7 @@ CREATE TABLE scholars (
     luid                 int(15) not null auto_increment unique primary key,
     -- doors uid common to all lab's services
     doors_uid            char(36) unique,
-    last_modified_date   char(24) not null,
+    last_modified        timestamp,
     email                varchar(255) not null unique,
     country              varchar(60) not null,
     first_name           varchar(30) not null,
@@ -24,7 +24,8 @@ CREATE TABLE scholars (
     hon_title            varchar(30),            -- eg Doctor
     interests_text       varchar(3500),
     gender               char(1),
-    job_looking_date     char(24),       -- null if not looking for a job
+    job_looking          boolean,
+    job_looking_date     date,
     home_url             varchar(180),   -- homepage
     pic_url              varchar(180),   -- remote pic... (full url)
     pic_fname            varchar(120),   -- ...or locally saved pic (basename)

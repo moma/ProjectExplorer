@@ -21,7 +21,7 @@ USER_COLS = [
 #          NAME,               NOT NULL,  N or MAXCHARS (if applicable)
          ("luid",                   True,        15),
          ("doors_uid",             False,        36),
-         ("last_modified_date",     True,        24),
+        #  ("last_modified",          True,      None),  # autoset on update
          ("email",                  True,       255),
          ("country",                True,        60),
          ("first_name",             True,        30),
@@ -33,6 +33,7 @@ USER_COLS = [
          ("hon_title",             False,        30),
          ("interests_text",        False,      1200),
          ("gender",                False,         1),
+         ("job_looking",           False,         1),
          ("job_looking_date",      False,        24),
          ("home_url",              False,       120),
          ("pic_url",               False,       120),
@@ -430,18 +431,17 @@ def get_full_scholar(uid, cmx_db = None):
     #  'email': 'jfk@usa.com', 'first_name': 'John', 'gender': 'M',
     #  'home_url': 'http://localhost/regcomex/', 'hon_title': 'Student',
     #  'initials': 'JFK', 'interests_text': 'Blablabla',
-    #  'job_looking_date': '2019_09_28T22:00:00.000Z',
+    #  'job_looking_date': datetime.date(2019, 9, 28),
     #  'hashtags': '#eccs15', 'hashtags_nb': 1,
     #  'keywords': 'complex networks,complex systems,text mining,machine learning', 'keywords_nb': 4,
-    #  'last_modified_date': '2016-12-07T15:56:09.721Z',
+    #  'last_modified_date': datetime.datetime(2017, 2, 22, 12, 25, 59),
     #  'last_name': 'Kennedy',
     #  'linked_ids': 'twitter:@jfk,yoyo:42,foobar:XWING', 'linked_ids_nb': 3,
     #  'middle_name': 'Fitzgerald',
     #  'org': 'Centre National de la Recherche Scientifique (CNRS)',
     #  'org_city': 'Paris', 'org_type': 'public R&D org',
     #  'pic_fname': '12345.jpg', 'pic_url': None, 'position': 'Research Fellow',
-    #  'record_status': None, 'team_lab': 'ISCPIF'}
-
+    #  'record_status': 'legacy', 'valid_date': datetime.date(2017, 5, 22)}
 
     # post-treatments
     # ---------------

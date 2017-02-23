@@ -121,11 +121,7 @@ function completionAsYouGo() {
 
     cmxClt.uform.simpleValidateAndMessage(theUForm, diagnosticParams)
 
-    // stamp => #last_modified_date
-    cmxClt.uform.stampTime(theUForm)
-
-    // debug
-    // console.log("timestamp:", cmxClt.uform.timestamp.value)
+    // timestamp is done server-side
 }
 
 // run first check on existing profile data pre-filled by the template

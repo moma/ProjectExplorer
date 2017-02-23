@@ -9,7 +9,7 @@ __copyright__ = "Copyright 2016 ISCPIF-CNRS"
 __email__     = "romain.loth@iscpif.fr"
 
 from json        import dumps, loads
-from datetime    import date
+from datetime    import date, datetime
 from flask_login import LoginManager
 from re          import match
 
@@ -52,16 +52,28 @@ def jsonize_uinfo(uinfo_dict):
     Dumps user_info in json format for client-side needs
     """
 
-    # most fields are already serializable
-    serializable_dict = {k:v for k,v in uinfo_dict.items() if k not in ['valid_date']}
+    serializable_dict = {}
+    for k,v in uinfo_dict.items():
+        mlog('DEBUG', 'user: jsonize_uinfo k=v', k, '=' , v)
 
-    if 'valid_date' in uinfo_dict and uinfo_dict['valid_date'] is not None:
-        d = uinfo_dict['valid_date']
-        if type(d) != date:
-            raise TypeError("Incorrect type for valid_date: '%s' instead of 'date'" % type(d))
+        # most values are already serializable
+        if (   v is None
+            or k not in [ 'last_modified',
+                          'valid_date',
+                          'job_looking_date' ]
+            ):
+            serializable_dict[k] = v
+
+        # when k is a non-empty date field
         else:
-            # "YYYY-MM-DD"
-            serializable_dict['valid_date'] = d.isoformat()
+            # if type(v) != date or type(v) != datetime:
+            if type(v) not in [date, datetime]:
+                raise TypeError("Incorrect type for %s field: /%s/ instead of date or datetime" % (k, type(v)))
+            else:
+                print("toto")
+                serializable_dict[k] = v.isoformat()
+                #   date   "YYYY-MM-DD"
+                # datetime "YYYY-MM-DDTHH:MM:SS"
 
     return dumps(serializable_dict)
 

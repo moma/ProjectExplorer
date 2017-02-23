@@ -1,7 +1,6 @@
 /**
  * @fileoverview
  * Validates the comex (communityexplorer.org) registration form
- *  + adds a timestamp in input#last_modified_date
  *  + adds autocompletes
  *  + prepares DB save into cmxClt.COLS
  *
@@ -67,8 +66,6 @@ function testAsYouGo() {
   else {
       regfo.elSubmitBtn.disabled = true
   }
-  // stamp => #last_modified_date
-  cmxClt.uform.stampTime(regfo)
 }
 
 var teamCityDivStyle = document.getElementById('team_city_div').style
