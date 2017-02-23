@@ -13,26 +13,64 @@
  * NB The uinfo variable should be set to template's user.json_info value.
  */
 
-// first menu setup from DB values
-function selectSavedMenus(uinfo) {
+ // 3 exposed vars for inline js controls
+ var teamCityDiv = document.getElementById('team_city_div')
+ var otherInstDiv = document.getElementById('other_org_div')
+ // TODO make relative to org_type and move inline snippet to extended form obj
+ var otherOrgTypeInput = document.getElementById('other_org_type')
+
+// reselecting current_user's info choices
+function setupSavedItems(uinfo) {
+    //  (date and menu values are set up here
+    //   but normal text vals are set up via html,
+    //   pic is set below from a separate function,
+    //   and multi text inputs are set up via form init... fixable to harmonize)
     for (var i in cmxClt.COLS) {
         var colType = cmxClt.COLS[i][3]
-        // m <=> menu
-        if (colType == 'm') {
+
+        if (colType == 'd' || colType == 'm') {
             var colName = cmxClt.COLS[i][0]
             var chosenV = uinfo[colName]
-            var selectElt = document.getElementById(colName)
-            if (selectElt) {
-                var myOption = selectElt.querySelector(`option[value="${chosenV}"]`)
-                if (myOption) {
-                    selectElt.selectedIndex = myOption.index
+
+            var tgtElt = document.getElementById(colName)
+            if (tgtElt && chosenV != null) {
+                // d <=> convert to YY/MM/DD from iso string YYYY-MM-DD
+                if (colType == 'd') {
+                    // console.log('setting date', colName, 'with', chosenV)
+                    tgtElt.value = chosenV.replace(/-/g,'/')
+                    tgtElt.dispatchEvent(new CustomEvent('change'))
                 }
-                else {
-                    console.warn(`selectSavedMenus: couldn't find option: ${chosenV} for element: ${colName}`)
+                // m <=> select saved menus
+                if (colType == 'm') {
+                    // console.log('setting menu', colName, 'with', chosenV)
+                    var myOption = tgtElt.querySelector(`option[value="${chosenV}"]`)
+
+                    // normal case
+                    if (myOption) {
+                        tgtElt.selectedIndex = myOption.index
+                        tgtElt.dispatchEvent(new CustomEvent('change'))
+                    }
+
+                    // this case is really just for org_type right now
+                    else if (tgtElt.querySelector(`option[value="other"]`)) {
+                        tgtElt.selectedIndex = tgtElt.querySelector(`option[value="other"]`).index
+                        tgtElt.dispatchEvent(new CustomEvent('change'))
+
+                        var relatedFreeTxt = document.getElementById('other_'+colName)
+                        if (relatedFreeTxt) {
+                            relatedFreeTxt.value = chosenV
+                            relatedFreeTxt.dispatchEvent(new CustomEvent('change'))
+                        }
+                    }
+                    // fallback case
+                    else {
+                        var optionOthers =
+                        console.warn(`setupSavedItems: couldn't find option: ${chosenV} for select element: ${colName}`)
+                    }
                 }
             }
             else {
-                console.warn("selectSavedMenus: couldn't find element: "+colName)
+                console.warn("setupSavedItems: couldn't find element: "+colName)
             }
         }
     }
@@ -70,7 +108,7 @@ var theUForm = cmxClt.uform.Form(
 var deleteUser = document.getElementById('delete_user')
 deleteUser.checked = false
 
-selectSavedMenus(uinfo)
+setupSavedItems(uinfo)
 
 // main validation function
 // ------------------------
@@ -92,10 +130,6 @@ function completionAsYouGo() {
 
 // run first check on existing profile data pre-filled by the template
 completionAsYouGo()
-
-// 2 exposed vars for inline js controls
-var teamCityDivStyle = document.getElementById('team_city_div').style
-var otherInstDivStyle = document.getElementById('other_org_div').style
 
 
 // open middlename if there is one

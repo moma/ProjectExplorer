@@ -217,7 +217,7 @@
                    <input id="country" name="country" maxlength="60"
                           type="text" class="form-control autocomp"
                           placeholder="pays"
-                          onblur="if(this.value=='France'){teamCityDivStyle.display = 'block'} else {teamCityDivStyle.display='none'}"
+                          onblur="if(this.value=='France'){teamCityDiv.style.display = 'block'} else {teamCityDiv.style.display='none'}"
                           value="{{ current_user.info.country }}">
                  </div>
 
@@ -391,7 +391,7 @@
                      <label for="org_type" class="smlabel input-group-addon">Institution Type</label>
                      <select id="org_type" name="org_type"
                              class="custom-select form-control"
-                             onchange="if(this.value=='other'){otherInstDivStyle.display = 'block'} else {otherInstDivStyle.display='none'}">
+                             onchange="if(this.value=='other'){otherInstDiv.style.display = 'block'} else {otherInstDiv.style.display='none';otherOrgTypeInput.value=''}">
                        <option selected disabled value="">Please select</option>
                        <option value="university">University</option>
                        <option value="public R&amp;D org">Public sector R&amp;D organization</option>
@@ -399,7 +399,7 @@
                        <option value="private org">Private sector organization</option>
                        <option value="none">None at the moment</option>
                        <option value="other"
-                               onclick="otherInstDivStyle.display = 'block'"
+                               onclick="otherInstDiv.style.display = 'block'"
                                >Other</option>
 
                      </select>
@@ -409,7 +409,7 @@
                      <div class="input-group">
                        <label for="other_org_type" class="smlabel input-group-addon">Other type</label>
                        <input id="other_org_type" name="other_org_type" maxlength="120"
-                              type="text" class="form-control" placeholder="Clarify here the type of your parent institution">
+                               type="text" class="form-control" placeholder="Clarify here the type of your parent institution">
                      </div>
                    </div>
                  </div>

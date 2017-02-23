@@ -245,9 +245,9 @@
                   <div class="question">
                     <div class="input-group">
                       <label for="org_type" class="smlabel input-group-addon">Institution Type</label>
-                      <select id="org_type" name="org_type"
+                      <select disabled id="org_type" name="org_type"
                               class="custom-select form-control"
-                              onchange="if(!uinfo.org_type){console.log('hello no org_type')}">
+                             onchange="if(this.value=='other'){otherInstDiv.style.display = 'block'} else {otherInstDiv.style.display='none';otherOrgTypeInput.value=''}">
                         <option selected disabled value="">Please select</option>
                         <option value="university">University</option>
                         <option value="public R&amp;D org">Public sector R&amp;D organization</option>
@@ -285,7 +285,7 @@
 
 
                   {% if return_user.info.org_city %}
-                  <!-- Lab city <=> only for France -->
+                  <!-- legacy Lab city <=> whenever present -->
                   <div class="question conditional-q" id="team_city_div">
                     <div class="input-group">
                       <label for="org_city" class="smlabel input-group-addon">Lab city</label>
@@ -303,11 +303,11 @@
 
                   {% endif %}
 
-                  {% if return_user.info.job_looking_date %}
+                  {% if return_user.info.job_looking %}
                   <div class="question">
                     <div class="input-group">
                       <label for="job_bool" class="smlabel input-group-addon">Job offers</label>
-                      <select id="job_bool" name="job_bool"
+                      <select disabled id="job_bool" name="job_bool"
                               class="custom-select form-control">
                         <option selected value="No">No</option>
                         <option value="Yes">Yes</option>
@@ -393,7 +393,6 @@
                     <input readonly type="file" id="pic_file" name="pic_file"
                            accept="image/png,image/jpeg" class="form-control"
                            onchange="cmxClt.uform.checkShowPic(this)">
-                           <!-- £TODO retrieve and show db picture if not None -->
                   </div>
                   <p id="picture_message" class="legend red" style="font-weight:bold"></p>
                 </div>
@@ -411,7 +410,7 @@
                 <div class="question">
                   <div class="input-group">
                     <label for="gender" class="smlabel input-group-addon">Gender</label>
-                    <select id="gender" name="gender"
+                    <select disabled id="gender" name="gender"
                             class="custom-select form-control">
                       <option selected value="0">Select your gender</option>
                       <option value="F">Woman</option>
@@ -429,7 +428,7 @@
                       Personal interests
                     </label>
 
-                    <textarea id="interests_text" name="interests_text" maxlength="1200"
+                    <textarea readonly id="interests_text" name="interests_text" maxlength="1200"
                               rows="7" style="resize:none"
                               class="form-control" placeholder="If you wish, you may describe here your personal scientific interests."
                               onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
