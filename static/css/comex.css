@@ -112,6 +112,16 @@ div.my-box {
 }
 
 
+/* sub containers */
+.nopadding {
+    padding: 0;
+}
+.nomargin {
+    margin: 0;
+}
+
+
+
 /* self-made modals */
 .modal.self-made {
     top:25%;

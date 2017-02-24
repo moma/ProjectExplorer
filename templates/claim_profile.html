@@ -11,19 +11,15 @@
 {% block main_content %}
     <div class="row">
       <div class="spacer col-lg-1 hidden-md-down">&nbsp;</div>
-      <div class="my-box col-lg-9 col-md-11 col-sm-12 panel-group"
-           id="profile_box"
-           role="tablist"
-           aria-multiselectable="true">
+      <div class="col-lg-9 col-md-11 col-sm-12">
 
 
         <!-- ##################### ( PROFILE OVERVIEW ) #################### -->
 
         <div id="intro">
-            <!-- <h2 class="oldstyle">Your Profile Info</h2> -->
                 <p class="mini-hero">
                     <span class="bigger">
-                            Welcome to your <b>archived profile</b> page,
+                            Welcome
                         <strong>
                           {{ return_user.info.hon_title or '' }}
                           {{ return_user.info.first_name }}
@@ -35,557 +31,130 @@
         </div>
 
         <!-- overview -->
+        <h2 class="cat"> Create your new password </h2>
 
-        <h2 class="cat">
-            Your legacy data
-        </h2>
         <p class="mini-hero">
-            In these 2 panels, you will find your data from the <strong>previous version of Community Explorer</strong>.
+            It will allow you to login with the associated email: <u><b>{{ return_user.info.email }}</b></u>
         </p>
 
-        <div class="panel ccsection-wrap">
 
-          <div class="panel-heading ccsection-heading" role="tab">
-            <h2 class="ccsection">
-              All database entries
-            </h2>
-          </div>
-
-
-          <div id="overview" class="readonly panel-body" role="tabpanel">
-
-           <p class="mini-hero">
-               Unfold the tabs below to check all the entries you had filled in the previous database.
-               <br/>
-               (This data is readonly until you re-create your account!)
-           </p>
-
-           <div class="uform-white readonly" id="profile_uform">
-
-
-            <!-- this form is only used for styling
-                 (no submit mechanism necessary) -->
-           <form id="comex_claim_profile_form">
-
-
-               <!-- basic name infos -->
-               <div class="panel ccsection-wrap" style="display:none;">
-                 <a class="ccsection-toggle"
-                    data-parent="#profile_uform"
-                    data-toggle="collapse"
-                             href="#basic_infos_usection"
-                    aria-controls="basic_infos_usection"
-                    id="ccsection_toggle_basic_infos">
-
-                     <div class="panel-heading ccsection-heading" role="tab">
-                       <h2 class="ccsection"
-                           title="This is your name and country data">
-                         <span class="glyphicon glyphicon-collapse-down glyphicon-float-right"></span>
-                         <span class="glyphicon glyphicon-user"></span>
-                         Basic info
-                     </h2>
-                     </div>
-
-                 </a>
-
-                 <div id="basic_infos_usection"
-                      class="panel-body ccsection-uform-body panel-collapse collapse out"
-                      role="tabpanel" aria-expanded="false">
-
-                    <!-- NAME & COUNTRY -->
-                    {% if return_user.info.hon_title %}
-                    <div class="question input-group">
-                     <label for="hon_title" class="smlabel input-group-addon"> Title </label>
-                     <input readonly id="hon_title" name="hon_title" maxlength="30"
-                            type="text" class="form-control autocomp" placeholder="eg. Mr or Prof. Dr."
-                            onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
-                            value="{{ return_user.info.hon_title }}">
-                    </div>
-                   {% endif %}
-
-                   {% if return_user.info.first_name %}
-                    <div class="question input-group">
-                      <label for="first_name" class="smlabel input-group-addon">
-                        First name
-                      </label>
-                      <input readonly id="first_name" name="first_name" maxlength="30"
-                             type="text" class="form-control" placeholder="prénom"
-                             onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
-                             value="{{ return_user.info.first_name }}">
-
-                      <div class="input-group-addon"
-                           title="Add middle name(s)">
-                           <button class="btn btn-xs btn-default operation-dark"
-                                   title="Opens the input for middle name(s)" id="btn-midname"
-                                   type="button">
-                             <span id="btn-midname-icon"
-                                   class="glyphicon glyphicon-plus"></span>
-                             Add name
-                           </button>
-                      </div>
-                    </div>
-                    {% endif %}
-
-                    {% if return_user.info.middle_name %}
-                    <div id="group-midname" class="question input-group" style='display:none'>
-                      <label for="middle_name" class="smlabel input-group-addon">
-                        Middle name
-                      </label>
-                      <input readonly id="middle_name" name="middle_name" maxlength="30"
-                             type="text" class="form-control" placeholder="autres prénoms"
-                             onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
-                             value="{{ return_user.info.middle_name }}">
-                    </div>
-                    {% endif %}
-
-                    {% if return_user.info.last_name %}
-                    <div class="question input-group">
-                      <label for="last_name" class="smlabel input-group-addon">
-                        Last name
-                      </label>
-                      <input readonly id="last_name" name="last_name" maxlength="30"
-                             type="text" class="form-control" placeholder="nom de famille"
-                             onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
-                             value="{{ return_user.info.last_name }}">
-                    </div>
-                    {% endif %}
-
-                    <input readonly id="initials" name="initials" maxlength="7"
-                           type="text"  hidden
-                            value="{{ return_user.info.initials }}">
-
-
-                    {% if return_user.info.country %}
-                    <div class="question input-group">
-                      <label for="country" class="smlabel input-group-addon">
-                        Country
-                      </label>
-                      <input readonly id="country" name="country" maxlength="60"
-                             type="text" class="form-control autocomp"
-                             placeholder="pays"
-                             onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
-                             value="{{ return_user.info.country }}">
-                    </div>
-                    {% endif %}
-
-
-                  </div> <!-- /panel-body -->
-
-               </div>
-
-
-             <!-- essential mapping infos -->
-
-             <div class="panel ccsection-wrap">
-               <a class="ccsection-toggle"
-                  data-parent="#profile_uform"
-                  data-toggle="collapse"
-                           href="#map_infos_usection"
-                  aria-controls="map_infos_usection"
-                  id="ccsection_toggle_map_infos">
-
-                   <div class="panel-heading ccsection-heading" role="tab">
-                     <h2 class="ccsection"
-                         title="This is the main data that allows us to plot you in the exploration graph and render the 'carte de visite'">
-                       <span class="glyphicon glyphicon-collapse-down glyphicon-float-right"></span>
-                       <span class="glyphicon glyphicon-tags"></span>&nbsp;
-                       Mapping data
-                       <small>(Click here to see more)</small>
-                   </h2>
-                   </div>
-
-               </a>
-
-               <div id="map_infos_usection"
-                    class="panel-body ccsection-uform-body panel-collapse collapse out"
-                    role="tabpanel" aria-expanded="true">
-
-                    <p class="mini-hero">
-                        The <strong>keywords</strong> and <strong>affiliation</strong> count as similarities to identify your network neighbours.
-                        <br/>
-                    </p>
-
-
-                  <!-- JOB, INTERESTS AND ORGANIZATION -->
-                  {% if return_user.info.keywords %}
-                  <div class="question">
-                    <div class="input-group tagbox-container">
-                      <label for="keywords" class="smlabel input-group-addon">Key subjects</label>
-                      <input readonly id="keywords" name="keywords" maxlength="350"
-                             type="text" class="form-control autocomp" placeholder="Add a keyword here"
-                             value="{{ return_user.info.keywords }}">
-                    </div>
-                  </div>
-                  {% endif %}
-
-                  {% if return_user.info.position %}
-                  <div class="question input-group">
-                    <label for="position" class="smlabel input-group-addon">Job Position</label>
-                    <input readonly id="position" name="position" maxlength="30"
-                           type="text" class="form-control autocomp" placeholder="titre"
-                           onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
-                           value="{{ return_user.info.position }}">
-                  </div>
-                  {% endif %}
-
-
-                  <!-- ORG QUESTIONS -->
-                  {% if return_user.info.org %}
-                  <div class="question">
-                    <div class="input-group">
-                      <label for="org" class="smlabel input-group-addon">Parent Institution</label>
-                      <input readonly id="org" name="org" maxlength="120"
-                             type="text" class="form-control autocomp" placeholder='eg "CNRS" or "University of Oxford"'
-                             value="{{ return_user.info.org }}">
-                    </div>
-                  </div>
-                  {% endif %}
-
-                  {% if return_user.info.org_type and return_user.info.org_type != "null" %}
-                  <div class="question">
-                    <div class="input-group">
-                      <label for="org_type" class="smlabel input-group-addon">Institution Type</label>
-                      <select disabled id="org_type" name="org_type"
-                              class="custom-select form-control"
-                             onchange="if(this.value=='other'){otherInstDiv.style.display = 'block'} else {otherInstDiv.style.display='none';otherOrgTypeInput.value=''}">
-                        <option selected disabled value="">Please select</option>
-                        <option value="university">University</option>
-                        <option value="public R&amp;D org">Public sector R&amp;D organization</option>
-                        <option value="public other org">Other public sector organization</option>
-                        <option value="private org">Private sector organization</option>
-                        <option value="none">None at the moment</option>
-                        <option value="other"
-                                onclick="otherInstDiv.style.display = 'block'"
-                                >Other</option>
-
-                      </select>
-                    </div>
-                    <!-- Other institution type <=> only if previous choice == 5 -->
-                    <div class="question conditional-q" id="other_org_div">
-                      <div class="input-group">
-                        <label for="other_org_type" class="smlabel input-group-addon">Other type</label>
-                        <input readonly id="other_org_type" name="other_org_type" maxlength="120"
-                               type="text" class="form-control" placeholder="Clarify here the type of your parent institution">
-                      </div>
-                    </div>
-                  </div>
-                  {% endif %}
-
-
-                  {% if return_user.info.team_lab %}
-                  <div class="question">
-                    <div class="input-group">
-                      <label for="team_lab" class="smlabel input-group-addon">Lab / Team / Dept</label>
-                      <input readonly id="team_lab" name="team_lab" maxlength="120"
-                             type="text" class="form-control" placeholder="More detailed affiliation, if relevant"
-                             value="{{ return_user.info.team_lab }}">
-                    </div>
-                  </div>
-                  {% endif %}
-
-
-                  {% if return_user.info.org_city %}
-                  <!-- legacy Lab city <=> whenever present -->
-                  <div class="question conditional-q" id="team_city_div">
-                    <div class="input-group">
-                      <label for="org_city" class="smlabel input-group-addon">Lab city</label>
-                      <input readonly id="org_city" name="org_city" maxlength="50"
-                             type="text" class="form-control" placeholder="Ville de votre institution"
-                             value="{{ return_user.info.org_city }}">
-                    </div>
-                  </div>
-                  {% endif %}
-
-
-                  {% if return_user.info.job_looking or return_user.info.hashtags %}
-
-                  <h3 class="formcat"> About your future activities </h3>
-
-                  {% endif %}
-
-                  {% if return_user.info.job_looking %}
-                  <div class="question">
-                    <div class="input-group">
-                      <label for="job_looking" class="smlabel input-group-addon">Job offers</label>
-                      <select disabled id="job_looking" name="job_looking"
-                              class="custom-select form-control">
-                        <option selected value="0">No</option>
-                        <option value="1">Yes</option>
-                      </select>
-                    </div>
-                  </div>
-                  {% endif %}
-
-                  {% if return_user.info.hashtags %}
-                  <div class="question">
-                    <p class="legend">Hashtags for community interest groups (seminars, mailing lists, events...)</p>
-                    <div class="input-group tagbox-container">
-                      <label for="hashtags" class="smlabel input-group-addon">Interest groups</label>
-                      <input readonly id="hashtags" name="hashtags" maxlength="350"
-                             type="text" class="form-control" placeholder="eg #dataviz, #networks, #rochebrune2018"
-                             value="{{ return_user.info.hashtags }}">
-                    </div>
-                  </div>
-                  {% endif %}
-
-               </div> <!-- /panel-body -->
-
-
-             </div>
-
-             <!-- additional mapping infos -->
-
-             <div class="panel ccsection-wrap">
-               <a class="ccsection-toggle"
-                  data-parent="#profile_uform"
-                  data-toggle="collapse"
-                           href="#other_infos_usection"
-                  aria-controls="other_infos_usection"
-                  id="ccsection_toggle_other_infos">
-
-                   <div class="panel-heading ccsection-heading" role="tab">
-                     <h2 class="ccsection"
-                         title="This is additional data like picture, home page, etc.">
-                       <span class="glyphicon glyphicon-collapse-down glyphicon-float-right"></span>
-                       <span class="glyphicon glyphicon-picture"></span>
-                       Additional Personal data
-                       <small>(Click here to see more)</small>
-                     </h2>
-                   </div>
-
-               </a>
-
-               <div id="other_infos_usection"
-                    class="panel-body ccsection-uform-body panel-collapse collapse out"
-                    role="tabpanel" aria-expanded="false">
-
-                {% if return_user.info.home_url %}
-                <h3 class="formcatfirst"> Homepage</h3>
-                <div class="question">
-                  <div class="input-group">
-                    <label for="home_url" class="smlabel input-group-addon">Homepage</label>
-                    <input readonly id="home_url" name="home_url" maxlength="120"
-                           type="text" class="form-control autocomp" placeholder='eg "http://www.wittyexample.org/~me"'
-                           value="{{ return_user.info.home_url }}">
-                  </div>
-                </div>
-                {% endif %}
-
-                {% if return_user.info.pic_url %}
-                <h3 class="formcat"> Picture </h3>
-                <div class="question">
-                  <p class="legend">Link to a picture of yours...</p>
-                  <div class="input-group">
-                    <label for="pic_url" class="smlabel input-group-addon">Picture link</label>
-                    <input readonly id="pic_url" name="pic_url" maxlength="120"
-                           type="text" class="form-control autocomp" placeholder='eg "http://www.wittyexample.org/~me/my_great_pic.png"'
-                           value="{{ return_user.info.pic_url }}">
-                  </div>
-                </div>
-                {% endif %}
-
-                {% if return_user.info.pic_fname %}
-                <div class="question" style="margin-bottom:.5em" >
-                  <p class="legend">... or upload a picture (png, jpg or gif, max source size: 200kB)</p>
-                  <!-- <p class="legend">Upload a picture of yours (max source size: 4MB, then the image will be reduced to 200kB)</p> -->
-                  <div class="input-group">
-                    <label for="pic_file" class="smlabel input-group-addon">Picture</label>
-                    <input readonly type="file" id="pic_file" name="pic_file"
-                           accept="image/png,image/jpeg" class="form-control"
-                           onchange="cmxClt.uform.checkShowPic(this)">
-                  </div>
-                  <p id="picture_message" class="legend red" style="font-weight:bold"></p>
-                </div>
-                {% endif %}
-
-                <div id="box_show_pic">
-                    <img id="show_pic" src=""></img>
-                </div>
-
-                <!-- OTHER PERSONAL INFO -->
-                {% if return_user.info.gender or return_user.info.interests_text %}
-                <h3 class="formcat"> Complementary information </h3>
-                {% endif %}
-                {% if return_user.info.gender and return_user.info.gender != 0 %}
-                <div class="question">
-                  <div class="input-group">
-                    <label for="gender" class="smlabel input-group-addon">Gender</label>
-                    <select disabled id="gender" name="gender"
-                            class="custom-select form-control">
-                      <option selected value="0">Select your gender</option>
-                      <option value="F">Woman</option>
-                      <option value="M">Man</option>
-                    </select>
-                    <!-- £TODO js select return_user.info.gender -->
-                  </div>
-                </div>
-                {% endif %}
-
-                {% if return_user.info.interests_text %}
-                <div class="question">
-                  <div class="input-group">
-                    <label for="interests_text" class="input-group-addon">
-                      Personal interests
-                    </label>
-
-                    <textarea readonly id="interests_text" name="interests_text" maxlength="1200"
-                              rows="7" style="resize:none"
-                              class="form-control" placeholder="If you wish, you may describe here your personal scientific interests."
-                              onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
-                              >{{ return_user.info.interests_text }}</textarea>
-                  </div>
-                  <p class="legend">Optional, ~15 lines max (1200 chars)</p>
-                </div>
-                {% endif %}
-
-               </div>  <!-- /panel-body -->
-
-             </div>
-
-
-             <!-- no submit, this form is read-only -->
-
-           </form>
-           </div>
-
-           <p class="mini-hero">
-               <br/><br/>
-               To claim your rights on your data, simply <strong>re-create your account credentials at the bottom of this page</strong>. If you don't claim this data, we will remove it after 3 months.
-           </p>
-
-          </div>
-          <div class="panel-footer ccsection-footer" style="min-height:2em;">&nbsp;</div>
-
-        </div>
-
-
-
-        <div class="panel ccsection-wrap">
-
-          <div class="panel-heading ccsection-heading" role="tab">
-            <h2 class="ccsection">
-              What the others see
-            </h2>
-          </div>
-
-          <div id="avcard" class="readonly panel-body" role="tabpanel">
-              <p class="mini-hero">
-                  This "visiting card" is shown to those who find you in the directory.
-              </p>
-
-                <!-- CARTE DE VISITE -->
-                <div id="information-example" class="our-vcard">
-                    <!-- TODO if empty then click on image starts showPicImg -->
-                    <img src="{{ (return_user.pic_src | safe) if return_user.pic_src else ''}}" class="our-vcard-img">
-                    <ul>
-                        <li class=bigger>
-                            <b>{{ return_user.info.hon_title or '' }}
-                                {{ return_user.info.first_name }}
-                                <!-- TODO mid initials -->
-                                {{ return_user.info.last_name }}</b>
-                                <br/>
-                                <br/>
-                        </li>
-                        <li>
-                            <b>Country: </b>{{ return_user.info.country }}<br>
-                            <b>Position: </b>{{ return_user.info.position }}<br>
-                            <b>Keywords: </b>{{ return_user.info.keywords }}<br>
-                            [ <a href="{{ return_user.info.home_url }}" target="blank">
-                                View homepage
-                            </a>]
-                            <br>
-                        </li>
-                    </ul>
-                    <br>
-                </div>
-
-          </div>
-          <div class="panel-footer ccsection-footer" style="min-height:2em;">&nbsp;</div>
-
-        </div>
-
-
-        <!-- createlogin -->
-
-        <div class="uform-nobg">
+        <!-- uform with double-width (over 2 columns) -->
+        <div class="uform-nobg" style="max-width:104em" >
             <!-- EMAIL & PASSWORD -->
-            <h2 class="cat"> Register and claim this profile </h2>
-            <p class="mini-hero">
-               To gain back your access to the data, just pick a password below and submit.
-            </p>
+            <!-- <h3 class="formcat"> Create your new password </h3> -->
 
-            <form id="comex_createlogin_form" enctype="multipart/form-data"
-                  method="post" onsubmit="console.info('createlogin submitted')">
+        <form id="comex_createlogin_form" enctype="multipart/form-data"
+              method="post" onsubmit="console.info('createlogin submitted')">
 
-             <!-- hidden input for main user id -->
-             <input id="return_user_luid" name="return_user_luid"
-                     type="text" hidden
-                     value="{{ return_user.uid | safe }}">
-             </input>
+            <div class="page container-fluid nopadding nomargin">
 
-             <div class="question">
-               <!-- POSS login within modal like comex_test_modal -->
-               <p class="legend">Your email will also be your login for the ISC services. </p>
-               <div class="input-group">
-                 <!-- email validation onblur/onchange is done by cmxClt.uauth in comex_user_shared_auth.js -->
-                 <label for="email" class="smlabel input-group-addon">* Email</label>
-                 <input readonly id="email" name="email" maxlength="255" readonly
-                        type="text" class="form-control readonly"
-                        value="{{ return_user.info.email }}">
+              <div class="row nopadding nomargin">
+               <!-- the create login/password form -->
+               <div class="col-lg-6 col-md-5 col-sm-4 nopadding nomargin">
 
-                 <!-- doors return value icon -->
-                 <div class="uicontitmsg input-group-addon"
-                      title="The email will be checked in our DB after you type and leave the box.">
-                   <span class="uicon glyphicon glyphicon-question-sign grey"
-                         ></span>
-                 </div>
+                   <br/><br/><br/>
+                      <div class="question">
+                        <div class="input-group">
+                          <label for="password" class="smlabel input-group-addon">* Password</label>
+                          <input id="password" name="password" maxlength="30"
+                                 type="password" class="form-control" placeholder="Create a password">
+                        </div>
+                      </div>
+
+                      <div class="question">
+                        <div class="input-group">
+                          <label for="password2" class="smlabel input-group-addon">* Password</label>
+                          <input id="password2" name="password2" maxlength="30"
+                                 type="password" class="form-control" placeholder="Repeat the password">
+                        </div>
+                        <p class="legend">Please make your password difficult to predict.</p>
+                        <p class="umessage legend red" style="font-weight:bold"></p>
+                       </div>
+
+
                </div>
-               <!-- doors return value message -->
-               <p class="umessage legend"></p>
-             </div>
+
+              <!-- a vcard-like resume on the right side -->
+               <div class="col-lg-5 col-md-6 col-sm-7">
+
+                   <center>
+                       <div class="legend-alone">
+                           If this isn't your data, please <a href="/services/user/register">register a new account instead</a>.
+                       </div>
+                   </center>
+
+                   <!-- CARTE DE VISITE -->
+                   <div id="information-example" class="our-vcard" style="margin: 0 0 0 25">
+
+                       <img src="{{ (return_user.pic_src | safe) if return_user.pic_src else ''}}" class="our-vcard-img">
+                       <ul>
+                           <li class=bigger>
+                               <b>{{ return_user.info.hon_title or '' }}
+                                   {{ return_user.info.first_name }}
+                                   <!-- TODO mid initials -->
+                                   {{ return_user.info.last_name }}</b>
+                                   <br/>
+                                   <br/>
+                           </li>
+                           <li>
+                               <b>Country: </b>{{ return_user.info.country }}<br>
+                               <b>Position: </b>{{ return_user.info.position }}<br>
+                               <b>Keywords: </b>{{ return_user.info.keywords }}<br>
+
+                               {% if return_user.info.home_url %}
+                               <b>Homepage: </b>{{ return_user.info.home_url }}<br>
+                               {% endif %}
+
+                               {% if return_user.info.team_lab %}
+                               <b>Lab: </b>{{ return_user.info.team_lab }}<br>
+                               {% endif %}
+
+                               {% if return_user.info.interests_text %}
+                               <b>key: </b>{{ return_user.info.interests_text }}<br>
+                               {% endif %}
 
 
-             <div class="question">
-               <p class="legend">Please make your password difficult to predict.</p>
-               <div class="input-group">
-                 <label for="password" class="smlabel input-group-addon">* Password</label>
-                 <input id="password" name="password" maxlength="30"
-                        type="password" class="form-control" placeholder="Create a password">
+                           </li>
+                       </ul>
+                       <br>
+                   </div>
                </div>
-             </div>
 
-             <div class="question">
-               <div class="input-group">
-                 <label for="password2" class="smlabel input-group-addon">* Password</label>
-                 <input id="password2" name="password2" maxlength="30"
-                        type="password" class="form-control" placeholder="Repeat the password">
-               </div>
-               <p class="umessage legend red" style="font-weight:bold"></p>
               </div>
+            </div>
 
 
             <!-- == S U B M I T == -->
             <button class="btn btn-lg btn-success" style="float:left;margin: 0 2em"
-                    id="form_submit" type=button disabled
-                    onclick="showMessageAndSubmit()">
-                    Submit your account renewal
+                 id="form_submit" type=button disabled
+                 onclick="showMessageAndSubmit()">
+                 Create pass and validate
             </button>
 
-            <p class="mini-hero">
-               <small>After submit, you'll receive a last confirmation email from the ISCPIF authenticating portal "Doors", then this account <strong>will become active</strong>.</small>
+
+            <p class="mini-hero" style="max-width:40em">
+              <small>After submit, you will receive a validation email from the ISCPIF authenticating portal "Doors", then this account <strong>will become active</strong>.</small>
             </p>
 
-              <!-- hidden input for main user id -->
-              <input readonly id="luid" name="luid" type="text" hidden
-                     value="{{ return_user.uid | safe }}">
-              </input>
 
-              <!-- hidden input for doors user id after registration -->
-              <input readonly id="doors_uid" name="doors_uid" type="text" hidden>
-              </input>
-            </form>
+            <!-- hidden input for email value -->
+            <input hidden readonly id="email" name="email" maxlength="255" readonly type="text" value="{{ return_user.info.email }}">
 
+            <!-- doors return value message -->
+            <p class="umessage legend"></p>
+
+            <!-- hidden input for main user id -->
+            <input id="return_user_luid" name="return_user_luid"
+                 type="text" hidden
+                 value="{{ return_user.uid | safe }}">
+            </input>
+
+            <!-- hidden input for doors user id after registration -->
+            <input readonly id="doors_uid" name="doors_uid" type="text" hidden>
+            </input>
+          </form>
         </div>
+
       </div>
       <div class="spacer col-lg-1 hidden-md-down">&nbsp;</div>
     </div>

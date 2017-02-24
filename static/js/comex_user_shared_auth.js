@@ -66,7 +66,19 @@ cmxClt = (function(cC) {
 
         //  -> type
         auForm.type = afParams.type || "login"
-        auForm.validateCaptcha = afParams.validateCaptcha || false
+
+        if (afParams.validateEmail != undefined) {
+            auForm.validateEmail   = afParams.validateEmail
+        }
+        else {
+             auForm.validateEmail = true
+        }
+        if (afParams.validateCaptcha != undefined) {
+            auForm.validateCaptcha   = afParams.validateCaptcha
+        }
+        else {
+             auForm.validateCaptcha = false
+        }
 
         //  -> interaction elements (params, else default)
         var emailId, duuidId, passId, pass2Id, captchaId, capcheckId
@@ -94,11 +106,13 @@ cmxClt = (function(cC) {
 
         // 1) for email
         // side-effects: email icon + message
-        auForm.elEmail.onkeyup = function(event) {
-            // console.debug('..elMail '+auForm.id+' event:'+event.type)
-            cC.uauth.testMailFormatAndExistence(auForm)
+        if (auForm.validateEmail) {
+            auForm.elEmail.onkeyup = function(event) {
+                // console.debug('..elMail '+auForm.id+' event:'+event.type)
+                cC.uauth.testMailFormatAndExistence(auForm)
+            }
+            auForm.elEmail.onchange = auForm.elEmail.onkeyup
         }
-        auForm.elEmail.onchange = auForm.elEmail.onkeyup
 
         // 2) for password
         // login <=> just test password's length

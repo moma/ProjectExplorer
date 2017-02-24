@@ -171,6 +171,16 @@ input.readonly {
   padding-right: 2.1em;
 }
 
+.legend-alone {
+  font-family: Cambria, serif;
+  color: #554 ;
+  font-style: italic;
+  text-align: center;
+  font-size: 120%;
+  padding-bottom: 1em;
+  font-weight: 500;
+}
+
 /* for code blocks or urls */
 .code {
   font-family: "Fira Mono", "Droid Sans Mono", monospace;
