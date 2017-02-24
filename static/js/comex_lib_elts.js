@@ -166,7 +166,7 @@ var cmxClt = (function(cC) {
         var title, preEmail, emailLegend, passLegend, confirmPass, captchaBlock
         // --- template fragments
         if (boxParams.mode == 'register') {
-            title = "Register your email on the Doors portal of the institute"
+            title = "Register your email"
             preEmail = ""
             emailLegend = "Your email will also be your login for the ISC services."
             passPlaceholder = "Create a password"
@@ -183,9 +183,9 @@ var cmxClt = (function(cC) {
             `
         }
         else if (boxParams.mode == 'login') {
-            title = "Login via the Doors portal"
+            title = "Login"
             preEmail = boxParams.email
-            emailLegend = "This email is your login for both community explorer and the institute's authentication portal 'Doors'"
+            emailLegend = "This email is your login for community explorer"
             passPlaceholder = "Your password"
             passLegend = ""
             confirmPass = ""

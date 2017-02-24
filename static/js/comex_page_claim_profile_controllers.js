@@ -45,7 +45,7 @@ function miniregValidate(self) {
 
 function showMessageAndSubmit() {
     returnForm.elMainMessage.style.display = "block"
-    returnForm.elMainMessage.innerHTML = "Registering with ISCPIF Doors<br/> and sending validation email..."
+    returnForm.elMainMessage.innerHTML = "Registering with the test login portal<br/> and sending validation email..."
     returnForm.elForm.submit()
 }
 
