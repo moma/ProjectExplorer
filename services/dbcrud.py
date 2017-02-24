@@ -50,21 +50,6 @@ ORG_COLS = [
     ]
 
 
-FIELDS_FRONTEND_TO_SQL = {
-    "keywords":      {'col':"keywords.kwstr",        "type": "LIKE_relation"},
-    "tags":          {'col':"hashtags.htstr",        'type': "LIKE_relation"},
-
-    "countries":     {'col':"scholars.country",      'type': "EQ_relation"},
-    "gender":        {'col':"scholars.gender",       'type': "EQ_relation"},
-
-    "organizations": {'col':"affiliations.org",      'type': "LIKE_relation"},
-    "laboratories":  {'col':"affiliations.team_lab", 'type': "LIKE_relation"},
-    "cities":        {'col':"affiliations.org_city", 'type': "EQ_relation"},
-
-    "linked":          {'col':"linked_ids.ext_id_type", 'type': "EQ_relation"}
-}
-
-
 def connect_db(config=REALCONFIG):
     """
     Simple connection
@@ -84,20 +69,16 @@ def doors_uid_to_luid(doors_uid, cmx_db = None):
     """
     Find corresponding luid
     """
-
     if cmx_db:
         db = cmx_db
     else:
         db = connect_db()
     db_c = db.cursor()
-
     stmt = """
         SELECT luid FROM scholars
         WHERE doors_uid = "%s"
     """ % doors_uid
-
     n_rows = db_c.execute(stmt)
-
     luid = None
     if n_rows > 1:
         if not cmx_db:
@@ -107,7 +88,6 @@ def doors_uid_to_luid(doors_uid, cmx_db = None):
         luid =  db_c.fetchone()[0]
         if not cmx_db:
             db.close()
-
     return luid
 
 
@@ -134,152 +114,6 @@ def email_exists(email, cmx_db = None):
         db.close()
 
     return exi_bool
-
-def get_field_aggs(a_field,
-                   hapax_threshold=int(REALCONFIG['HAPAX_THRESHOLD']),
-                   users_status = "ALL"):
-    """
-    Use case: api/aggs?field=a_field
-    ---------------------------------
-       => Retrieves distinct field values and count having it
-
-       => about *n* vs *occs*:
-           - for tables != keywords count is scholar count
-           - for table keywords count is occurrences count
-
-    Parameters
-    ----------
-        a_field: str
-            a front-end fieldname to aggregate, like "keywords" "countries"
-            (allowed values cf. FIELDS_FRONTEND_TO_SQL)
-
-            POSS: allow other fields than those in the mapping
-                  if they are already in sql table.col format?
-
-        hapax_threshold: int
-            for all data_types, categories with a total equal or below this will be excluded from results
-            TODO: put them in an 'others' category
-            POSS: have a different threshold by type
-
-        users_status: str
-            defines the perimeter (set of scholars over which we work),
-            (allowed values are ['active', 'test', 'legacy', 'ALL'])
-
-            NB: if the param is 'legacy' here, set is indifferent to call_date
-                (because aggs useful for *entire* legacy group)
-    """
-
-    agg_rows = []
-
-    if a_field in FIELDS_FRONTEND_TO_SQL:
-
-        sql_col = FIELDS_FRONTEND_TO_SQL[a_field]['col']
-        sql_tab = sql_col.split('.')[0]
-
-        mlog('INFO', "AGG API sql_col", sql_col)
-
-        db = connect_db()
-        db_c = db.cursor(DictCursor)
-
-        # constraints 2, if any
-        postfilters = []
-
-        if hapax_threshold > 0:
-            count_col = 'occs' if sql_tab in ['keywords', 'hashtags'] else 'n'
-            postfilters.append( "%s > %i" % (count_col, hapax_threshold) )
-
-        if len(postfilters):
-            post_where = "WHERE "+" AND ".join(
-                                                ['('+f+')' for f in postfilters]
-                                                    )
-        else:
-            post_where = ""
-
-
-        # retrieval cases
-        if sql_tab == 'scholars':
-            stmt = """
-                SELECT x, n FROM (
-                    SELECT %(col)s AS x, COUNT(*) AS n
-                    FROM scholars
-                    GROUP BY %(col)s
-                ) AS allcounts
-                %(post_filter)s
-                ORDER BY n DESC
-            """ % {'col': sql_col, 'post_filter': post_where}
-
-        elif sql_tab == 'affiliations':
-            stmt = """
-                SELECT x, n FROM (
-                    SELECT %(col)s AS x, COUNT(*) AS n
-                    FROM scholars
-                    -- 0 or 1
-                    LEFT JOIN affiliations
-                        ON scholars.affiliation_id = affiliations.affid
-                    GROUP BY %(col)s
-                ) AS allcounts
-                ORDER BY n DESC
-            """ % {'col': sql_col, 'post_filter': post_where}
-
-        elif sql_tab == 'linked_ids':
-            stmt = """
-                SELECT x, n FROM (
-                    SELECT %(col)s AS x, COUNT(*) AS n
-                    FROM scholars
-                    -- 0 or 1
-                    LEFT JOIN linked_ids
-                        ON scholars.luid = linked_ids.uid
-                    GROUP BY %(col)s
-                ) AS allcounts
-                %(post_filter)s
-                ORDER BY n DESC
-            """ % {'col': sql_col, 'post_filter': post_where}
-
-        elif sql_tab == 'keywords':
-            stmt = """
-                SELECT x, occs FROM (
-                    SELECT %(col)s AS x, COUNT(*) AS occs
-                    FROM scholars
-                    -- 0 or many
-                    LEFT JOIN sch_kw
-                        ON scholars.luid = sch_kw.uid
-                    LEFT JOIN keywords
-                        ON sch_kw.kwid = keywords.kwid
-                    GROUP BY %(col)s
-                ) AS allcounts
-                %(post_filter)s
-                ORDER BY occs DESC
-            """ % {'col': sql_col, 'post_filter': post_where}
-
-        elif sql_tab == 'hashtags':
-            stmt = """
-                SELECT x, occs FROM (
-                    SELECT %(col)s AS x, COUNT(*) AS occs
-                    FROM scholars
-                    -- 0 or many
-                    LEFT JOIN sch_ht
-                        ON scholars.luid = sch_ht.uid
-                    LEFT JOIN hashtags
-                        ON sch_ht.htid = hashtags.htid
-                    GROUP BY %(col)s
-                ) AS allcounts
-                %(post_filter)s
-                ORDER BY occs DESC
-            """ % {'col': sql_col, 'post_filter': post_where}
-
-        mlog("DEBUGSQL", "get_field_aggs STATEMENT:\n-- SQL\n%s\n-- /SQL" % stmt)
-
-        # do it
-        n_rows = db_c.execute(stmt)
-
-        if n_rows > 0:
-            agg_rows = db_c.fetchall()
-
-        db.close()
-
-    # mlog('DEBUG', "aggregation over %s: result rows =" % a_field, agg_rows)
-
-    return agg_rows
 
 
 def rm_scholar(luid, cmx_db = None):
@@ -481,38 +315,6 @@ def get_full_scholar(uid, cmx_db = None):
 
     # full user info as a dict
     return urow_dict
-
-
-def find_scholar(some_key, some_str_value, cmx_db = None):
-    """
-    Get the luid of a scholar based on some str value
-
-    To make sense, the key should be a unique one
-    but this function doesn't check it !
-    """
-    luid = None
-
-    if cmx_db:
-        db = cmx_db
-    else:
-        db = connect_db()
-    db_c = db.cursor(DictCursor)
-
-    try:
-        db_c.execute('''SELECT luid
-                        FROM scholars
-                        WHERE %s = "%s"
-                        ''' % (some_key, some_str_value))
-        first_row = db_c.fetchone()
-        if first_row:
-            luid = first_row['luid']
-    except:
-        mlog('WARNING', 'unsuccessful attempt to identify a scholar on key %s' % some_key)
-
-    if not cmx_db:
-        db.close()
-
-    return luid
 
 
 def save_full_scholar(safe_recs, cmx_db, uactive=True, update_user=None):

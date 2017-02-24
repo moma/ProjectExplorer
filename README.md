@@ -160,6 +160,13 @@ More info in `doc/` directory
 
   - transform `affiliations` table into 2 tables (differentiate labs and orgs)
 
+### Project History Overview
+This project was developed over several years with 3 main development phases.
+
+Scholars statistics and directory structure originally developed by D. Chavalarias (scholars data exploration in the `php_library` folder).
+Graph extraction logic originally developed by [S. Castillo](https://github.com/PkSM3/) (SubsetExtractor in the `dbdatapi` module)
+Ports to python3+MySQL, user registration and merge of the various layers into one deployable docker by [R. Loth](https://github.com/rloth/)
+
 ##### Copyright
 ###### Authors
   - Researchers and engineers of the ISC-PIF
