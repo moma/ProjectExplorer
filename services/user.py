@@ -14,10 +14,12 @@ from flask_login import LoginManager
 from re          import match
 
 if __package__ == 'services':
-    from services.db    import connect_db, get_full_scholar, get_doors_temp_user
+    from services.dbcrud import connect_db, get_full_scholar, \
+                                            get_doors_temp_user
     from services.tools import mlog, REALCONFIG
 else:
-    from db             import connect_db, get_full_scholar, get_doors_temp_user
+    from dbcrud         import connect_db, get_full_scholar, \
+                                           get_doors_temp_user
     from tools          import mlog, REALCONFIG
 
 # will be exported to main for initialization with app

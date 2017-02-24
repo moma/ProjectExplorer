@@ -1,6 +1,6 @@
 from sqlite3  import connect, Row
 
-if __package__ == "services.db_to_tina_api":
+if __package__ == "services.text":
     from services.tools import mlog
 else:
     from tools          import mlog

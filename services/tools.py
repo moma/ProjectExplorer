@@ -8,6 +8,7 @@ __email__     = "romain.loth@iscpif.fr"
 # for reading config
 from configparser import ConfigParser
 from os           import environ, path
+from sys          import stdout
 from urllib.parse import unquote
 from ctypes       import c_int32
 from traceback    import format_tb
@@ -46,7 +47,7 @@ CONFIGMENU = [
 
 def home_path():
     """
-    returns ./../..
+    returns ./../.. in any OS
     """
     return path.dirname(path.dirname(path.realpath(__file__)))
 
@@ -55,13 +56,15 @@ def read_config():
     """
     reads all global config vars trying in order:
         1) env variables of the same name
-        2) the config file $HOME/parametres_comex.ini
+        2) the config file $HOME/config/parametres_comex.ini
         3) hard-coded default values
 
     Effect: fills the var REALCONFIG
               (no return value)
     """
     our_home = home_path()
+
+    print('_^_'+our_home)
 
     ini = ConfigParser()
     inipath = path.join(our_home, "config", "parametres_comex.ini")
@@ -195,7 +198,11 @@ def mlog(loglvl, *args):
     levels = {"DEBUGSQL":-1, "DEBUG":0, "INFO":1, "WARNING":2, "ERROR":3}
 
     if 'LOG_FILE' in REALCONFIG:
-        logfile = open(REALCONFIG["LOG_FILE"], "a")    # a <=> append
+        try:
+            logfile = open(REALCONFIG["LOG_FILE"], "a")    # a <=> append
+        except:
+            print("can't open the logfile indicated in "+REALCONFIG["HOME"]+"/config/parametres_comex.ini, so using STDOUT instead" )
+            logfile = stdout
 
         if loglvl in levels:
             if levels[loglvl] >= levels[REALCONFIG["LOG_LEVEL"]]:

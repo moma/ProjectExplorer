@@ -38,20 +38,20 @@ from flask_login  import fresh_login_required, login_required, \
 if __package__ == 'services':
     # when we're run via import
     print("*** comex services ***")
-    from services       import db
-    from services       import tools
-    from services.tools import mlog
-    from services.user  import User, login_manager, doors_login, doors_register
-    from services.db_to_tina_api.extractDataCustom import MyExtractor
+    from services.tools    import mlog
+    from services          import tools, dbcrud, dbdatapi
+    from services.user     import User, login_manager, \
+                                  doors_login, doors_register
+    from services.dbdatapi import SubsetExtractor
     # TODO move sanitize there
     # from services.text  import keywords, sanitize
 else:
     # when this script is run directly
     print("*** comex services (dev server mode) ***")
-    import db
-    import tools
     from tools          import mlog
-    from user           import User, login_manager, doors_login, doors_register
+    import tools, dbcrud, dbdatapi
+    from user           import User, login_manager, \
+                               doors_login, doors_register
     from db_to_tina_api.extractDataCustom import MyExtractor
     # from text           import keywords, sanitize
 
@@ -209,9 +209,9 @@ def aggs_api():
 
         if hap_thresh is not None:
             # field name itself is tested by db module
-            result = db.get_field_aggs(request.args['field'], hapax_threshold=hap_thresh)
+            result = dbdatapi.get_field_aggs(request.args['field'], hapax_threshold=hap_thresh)
         else:
-            result = db.get_field_aggs(request.args['field'])
+            result = dbdatapi.get_field_aggs(request.args['field'])
 
         return dumps(result)
     else:
@@ -226,8 +226,13 @@ def graph_api():
     (original author S. Castillo)
     """
     if 'qtype' in request.args:
-        graphdb = MyExtractor(config['SQL_HOST'])
-        scholars = graphdb.getScholarsList(request.args['qtype'], tools.restparse(request.query_string.decode()))
+        graphdb = SubsetExtractor(config['SQL_HOST'])
+        scholars = graphdb.getScholarsList(
+                    request.args['qtype'],
+                    tools.restparse(
+                      request.query_string.decode()
+                    )
+                  )
         if scholars and len(scholars):
             # Data Extraction
             # (getting details for selected scholars into graph object)
@@ -235,8 +240,7 @@ def graph_api():
             # (less modular but a lot faster)
             graphdb.extract(scholars)
 
-        graphArray = graphdb.buildJSON_sansfa2(graphdb.Graph)
-        return dumps(graphArray)
+        return dumps(graphdb.buildJSON(graphdb.Graph))
 
     else:
         raise TypeError("graph API query is missing qtype (should be 'filters' or 'uid')")
@@ -256,7 +260,7 @@ def user_api():
         if request.args['op'] == "exists":
             if 'email' in request.args:
                 email = sanitize(request.args['email'])
-                return(dumps({'exists':db.email_exists(email)}))
+                return(dumps({'exists':dbcrud.email_exists(email)}))
 
     else:
         raise TypeError("user API query is missing the operation to perform (eg op=exists)")
@@ -327,7 +331,7 @@ def login():
                         message = nologin_message
                     )
 
-            luid = db.doors_uid_to_luid(doors_uid)
+            luid = dbcrud.doors_uid_to_luid(doors_uid)
 
             if luid:
                 # normal user
@@ -335,7 +339,7 @@ def login():
             else:
                 mlog("DEBUG", "LOGIN: encountered new doors id (%s), switching to empty user profile" % doors_uid)
                 # user exists in doors but has no comex profile nor luid yet
-                db.save_doors_temp_user(doors_uid, email)  # preserve the email
+                dbcrud.save_doors_temp_user(doors_uid, email)  # preserve the email
                 user = User(None, doors_uid=doors_uid)     # get a user.empty
 
             # =========================
@@ -388,7 +392,7 @@ def login():
                 else:
                     next_url = unquote(next_url)
                     mlog("DEBUG", "login with next_url:", next_url)
-                    safe_flag = is_safe_url(next_url, request.host_url)
+                    safe_flag = tools.is_safe_url(next_url, request.host_url)
                     # normal next_url
                     if safe_flag:
                         # if relative
@@ -453,7 +457,7 @@ def profile():
             mlog("INFO",
                  "executing DELETE scholar's data at the request of user %s" % str(the_id_to_delete))
             logout_user()
-            db.rm_scholar(the_id_to_delete)
+            dbcrud.rm_scholar(the_id_to_delete)
             return(redirect(url_for('rootindex', _external=True)))
 
 
@@ -483,7 +487,7 @@ def profile():
                             )
 
                 # if all went well we can remove the temporary doors user data
-                db.rm_doors_temp_user(current_user.doors_uid)
+                dbcrud.rm_doors_temp_user(current_user.doors_uid)
                 logout_user()
                 # .. and login the user in his new mode
                 login_user(User(luid))
@@ -536,7 +540,7 @@ def claim_profile():
             if (return_token
                     and type(return_token) == str
                     and len(return_token) == 36):
-                luid = db.get_legacy_user(return_token)
+                luid = dbcrud.get_legacy_user(return_token)
 
             if luid is not None:
                 try:
@@ -605,8 +609,8 @@ def claim_profile():
 
         else:
             try:
-                db_connection = db.connect_db(config)
-                db.update_scholar_cols({
+                db_connection = dbcrud.connect_db(config)
+                dbcrud.update_scholar_cols({
                                   'doors_uid':doors_uid,
                                   'record_status': 'active',
                                   'valid_date': None
@@ -616,7 +620,7 @@ def claim_profile():
                 db_connection.close()
                 # the user is not a legacy user anymore
                 # POSS: do this on first login instead
-                db.rm_legacy_user_rettoken(luid)
+                dbcrud.rm_legacy_user_rettoken(luid)
 
             except Exception as perr:
                 return render_template(
@@ -741,10 +745,10 @@ def save_form(clean_records, update_flag=False, previous_user_info=None):
     """
 
     # A) a new DB connection
-    reg_db = db.connect_db(config)
+    reg_db = dbcrud.connect_db(config)
 
     # B) read/fill the affiliation table to get associated id
-    clean_records['affiliation_id'] = db.get_or_create_affiliation(
+    clean_records['affiliation_id'] = dbcrud.get_or_create_affiliation(
         clean_records,
         reg_db
     )
@@ -760,9 +764,9 @@ def save_form(clean_records, update_flag=False, previous_user_info=None):
             mlog("WARNING", "User %i attempted to modify the data of another user (%i)!... Aborting update" % (luid, sent_luid))
             return None
         else:
-            db.save_full_scholar(clean_records, reg_db, update_user=previous_user_info)
+            dbcrud.save_full_scholar(clean_records, reg_db, update_user=previous_user_info)
     else:
-        luid = int(db.save_full_scholar(clean_records, reg_db))
+        luid = int(dbcrud.save_full_scholar(clean_records, reg_db))
 
 
     # D) read/fill each keyword and save the (uid <=> kwid) pairings
@@ -773,18 +777,18 @@ def save_form(clean_records, update_flag=False, previous_user_info=None):
             tok_table = tok_field
             map_table = "sch_" + ('kw' if intable == 'keywords' else 'ht')
 
-            tokids = db.get_or_create_tokitems(
-                clean_records[tok_field],
-                reg_db,
-                tok_table
-            )
+            tokids = dbcrud.get_or_create_tokitems(
+                        clean_records[tok_field],
+                        reg_db,
+                        tok_table
+                     )
 
                 # TODO class User method !!
                 # POSS selective delete ?
             if update_flag:
-                db.delete_pairs_sch_tok(luid, reg_db, map_table)
+                dbcrud.delete_pairs_sch_tok(luid, reg_db, map_table)
 
-            db.save_pairs_sch_tok(
+            dbcrud.save_pairs_sch_tok(
                 [(luid, tokid) for tokid in tokids],
                 reg_db,
                 map_table
@@ -906,19 +910,8 @@ def sanitize(value, specific_type=None):
         return san_typed_val
 
 
-def is_safe_url(target, host_url):
-    """
-    Checks if url is ok for redirects
-    cf. http://flask.pocoo.org/snippets/62/
-    """
-    ref_url = urlparse(host_url)
-    test_url = urlparse(urljoin(host_url, target))
-    return (test_url.scheme in ('http', 'https')
-            and ref_url.netloc == test_url.netloc)
-
-
 ########### MAIN ###########
-# this only uses the dev server (in prod we're run by unicorn and not as main)
+# this can only be used for debug
+# (in general use comex-run.sh to run the app)
 if __name__ == "__main__":
-    # our app should be bound to an ip (cf stackoverflow.com/a/30329547/2489184)
-    app.run(host=config['COMEX_HOST'], port=int(config['COMEX_PORT']))
+    app.run(host='0.0.0.0', port=8989)
