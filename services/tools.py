@@ -124,6 +124,18 @@ read_config()
 
 # ============================ other tools =====================================
 
+from urllib.parse import urlparse, urljoin, unquote
+def is_safe_url(target, host_url):
+    """
+    Checks if url is ok for redirects
+    cf. http://flask.pocoo.org/snippets/62/
+    """
+    ref_url = urlparse(host_url)
+    test_url = urlparse(urljoin(host_url, target))
+    return (test_url.scheme in ('http', 'https')
+            and ref_url.netloc == test_url.netloc)
+
+
 def re_hash(userinput, salt="verylonverylongverylonverylongverylonverylong"):
     """
     Build the captcha's verification hash server side

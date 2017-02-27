@@ -1,9 +1,52 @@
 from sqlite3  import connect, Row
+from re       import sub, match
 
 if __package__ == "services.text":
     from services.tools import mlog
 else:
     from tools          import mlog
+
+
+def sanitize(value, specific_type=None):
+    """
+    simple and radical: leaves only alphanum and '@' '.' '-' ':' ',' '(', ')', '#', ' '
+
+    One of the main goals is to remove ';'
+    POSS better
+
+
+    args:
+        @value: any string to santize
+
+        @specific_type: None or 'url' or 'date'
+    """
+    vtype = type(value)
+    str_val = str(value)
+    clean_val = sub(r'^\s+', '', str_val)
+    clean_val = sub(r'\s+$', '', clean_val)
+
+    if not specific_type:
+        san_val = sub(r'[^\w@\.:,()# -]', '_', clean_val)
+    elif specific_type == "sbool":
+        # DB uses int(0) or int(1)
+        if match('^[01]$',clean_val):
+            san_val = int(clean_val)
+        else:
+            san_val = 0
+        # NB san_val_bool = bool(san_val)
+
+    elif specific_type == "surl":
+        san_val = sub(r'[^\w@\.: -/]', '_', clean_val)
+    elif specific_type == "sdate":
+        san_val = sub(r'[^0-9/-:]', '_', clean_val)
+
+    if vtype not in [int, str]:
+        raise ValueError("Value has an incorrect type %s" % str(vtype))
+    else:
+        # cast back to orginal type
+        san_typed_val = vtype(san_val)
+        return san_typed_val
+
 
 
 class CountryConverter:

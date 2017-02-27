@@ -164,7 +164,7 @@ More info in `doc/` directory
 This project was developed over several years with 3 main development phases.
 
 Scholars statistics and directory structure originally developed by D. Chavalarias (scholars data exploration in the `php_library` folder).
-Graph extraction logic originally developed by [S. Castillo](https://github.com/PkSM3/) (SubsetExtractor in the `dbdatapi` module)
+Graph extraction logic originally developed by [S. Castillo](https://github.com/PkSM3/) (BipartiteExtractor in the `dbdatapi` module)
 Ports to python3+MySQL, user registration and merge of the various layers into one deployable docker by [R. Loth](https://github.com/rloth/)
 
 ##### Copyright

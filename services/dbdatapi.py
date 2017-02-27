@@ -18,11 +18,11 @@ from traceback import format_tb
 if __package__ == 'services':
     from services.tools import mlog, REALCONFIG
     from services.dbcrud  import connect_db
-    from services.text.converter import CountryConverter
+    from services.text.utils import CountryConverter
 else:
     from tools          import mlog, REALCONFIG
     from dbcrud         import connect_db
-    from text.converter import CountryConverter
+    from text.utils     import CountryConverter
 
 
 FIELDS_FRONTEND_TO_SQL = {
@@ -219,7 +219,16 @@ def find_scholar(some_key, some_str_value, cmx_db = None):
 
 
 
-class SubsetExtractor:
+class BipartiteExtractor:
+    """
+    JSON FILTERS => SQL SELECT => scholars subset
+                                       ||
+                                       VV
+                                     keywords
+                                       ||
+                                       VV
+                                     neighboors
+    """
 
     def __init__(self,dbhost):
         self.connection=connect(

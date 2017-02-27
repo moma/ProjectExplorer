@@ -25,11 +25,11 @@ __status__    = "Dev"
 
 
 # ============== imports ==============
-from re           import sub, match
+from re           import sub
 from os           import path
 from json         import dumps
 from datetime     import timedelta
-from urllib.parse import urlparse, urljoin, unquote
+from urllib.parse import unquote
 from flask        import Flask, render_template, request, \
                          redirect, url_for, session
 from flask_login  import fresh_login_required, login_required, \
@@ -42,9 +42,8 @@ if __package__ == 'services':
     from services          import tools, dbcrud, dbdatapi
     from services.user     import User, login_manager, \
                                   doors_login, doors_register
-    from services.dbdatapi import SubsetExtractor
-    # TODO move sanitize there
-    # from services.text  import keywords, sanitize
+    from services.dbdatapi import BipartiteExtractor
+    from services.text.utils import sanitize
 else:
     # when this script is run directly
     print("*** comex services (dev server mode) ***")
@@ -52,8 +51,8 @@ else:
     import tools, dbcrud, dbdatapi
     from user           import User, login_manager, \
                                doors_login, doors_register
-    from db_to_tina_api.extractDataCustom import MyExtractor
-    # from text           import keywords, sanitize
+    from dbdatapi       import BipartiteExtractor
+    from text.utils      import sanitize
 
 # ============= app creation ============
 config = tools.REALCONFIG
@@ -162,6 +161,9 @@ def unauthorized():
     )
 
 
+def reroute(function_name_str):
+    return redirect(url_for(function_name_str, _external=True))
+
 
 # ============= views =============
 
@@ -180,18 +182,10 @@ def rootindex():
                             "rootindex.html"
                           )
 
-# # /test_base
-# @app.route('/test_base')
-# def test_base():
-#     return render_template(
-#         "base_layout.html"
-#     )
-
-
 # /services/
 @app.route(config['PREFIX']+'/')
 def services():
-    return redirect(url_for('login', _external=True))
+    return reroute('login')
 
 # /services/api/aggs
 @app.route(config['PREFIX'] + config['API_ROUTE'] + '/aggs')
@@ -226,7 +220,7 @@ def graph_api():
     (original author S. Castillo)
     """
     if 'qtype' in request.args:
-        graphdb = SubsetExtractor(config['SQL_HOST'])
+        graphdb = BipartiteExtractor(config['SQL_HOST'])
         scholars = graphdb.getScholarsList(
                     request.args['qtype'],
                     tools.restparse(
@@ -269,7 +263,7 @@ def user_api():
 # /services/user/
 @app.route(config['PREFIX'] + config['USR_ROUTE']+'/', methods=['GET'])
 def user():
-    return redirect(url_for('login', _external=True))
+    return reroute('login')
 
 
 # /services/user/login/
@@ -380,7 +374,7 @@ def login():
             elif user.empty:
                 mlog('DEBUG',"empty user redirected to profile")
                 # we go straight to empty profile for the person to create infos
-                return(redirect(url_for('profile', _external=True)))
+                return reroute('profile')
 
             # normal call, normal user
             else:
@@ -388,7 +382,7 @@ def login():
                 next_url = request.args.get('next', None)
 
                 if not next_url:
-                    return(redirect(url_for('profile', _external=True)))
+                    return reroute('profile')
                 else:
                     next_url = unquote(next_url)
                     mlog("DEBUG", "login with next_url:", next_url)
@@ -404,7 +398,7 @@ def login():
                     else:
                         # server name is different than ours
                         # in next_url so we won't go there
-                        return(redirect(url_for('rootindex', _external=True)))
+                        return reroute('rootindex')
 
 
 # /services/user/logout/
@@ -412,7 +406,7 @@ def login():
 def logout():
     logout_user()
     mlog('INFO', 'logged out previous user')
-    return redirect(url_for('rootindex', _external=True))
+    return reroute('rootindex')
 
 # /services/user/profile/
 @app.route(config['PREFIX'] + config['USR_ROUTE'] + '/profile/', methods=['GET', 'POST'])
@@ -458,7 +452,8 @@ def profile():
                  "executing DELETE scholar's data at the request of user %s" % str(the_id_to_delete))
             logout_user()
             dbcrud.rm_scholar(the_id_to_delete)
-            return(redirect(url_for('rootindex', _external=True)))
+
+            return reroute('rootindex')
 
 
         else:
@@ -863,51 +858,9 @@ def read_record_from_request(request):
     if hasattr(request, "files") and 'pic_file' in request.files and request.files['pic_file']:
         new_fname = tools.pic_blob_to_filename(request.files['pic_file'])
         clean_records['pic_fname'] = new_fname
-        mlog("DEBUG", "new_fname", new_fname)
+        mlog("INFO", "new_fname", new_fname)
 
     return clean_records
-
-
-# TODO move to text submodules
-def sanitize(value, specific_type=None):
-    """
-    simple and radical: leaves only alphanum and '@' '.' '-' ':' ',' '(', ')', '#', ' '
-
-    One of the main goals is to remove ';'
-    POSS better
-
-
-    args:
-        @value: any string to santize
-
-        @specific_type: None or 'url' or 'date'
-    """
-    vtype = type(value)
-    str_val = str(value)
-    clean_val = sub(r'^\s+', '', str_val)
-    clean_val = sub(r'\s+$', '', clean_val)
-
-    if not specific_type:
-        san_val = sub(r'[^\w@\.:,()# -]', '_', clean_val)
-    elif specific_type == "sbool":
-        # DB uses int(0) or int(1)
-        if match('^[01]$',clean_val):
-            san_val = int(clean_val)
-        else:
-            san_val = 0
-        # NB san_val_bool = bool(san_val)
-
-    elif specific_type == "surl":
-        san_val = sub(r'[^\w@\.: -/]', '_', clean_val)
-    elif specific_type == "sdate":
-        san_val = sub(r'[^0-9/-:]', '_', clean_val)
-
-    if vtype not in [int, str]:
-        raise ValueError("Value has an incorrect type %s" % str(vtype))
-    else:
-        # cast back to orginal type
-        san_typed_val = vtype(san_val)
-        return san_typed_val
 
 
 ########### MAIN ###########
