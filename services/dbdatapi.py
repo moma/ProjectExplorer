@@ -12,7 +12,7 @@ from networkx  import Graph, DiGraph
 from random    import randint
 from math      import floor, log, log1p
 from cgi       import escape
-from re        import sub
+from re        import sub, match
 from traceback import format_tb
 
 if __package__ == 'services':
@@ -392,6 +392,25 @@ class BipartiteExtractor:
                             # "LIKE_relation" or "EQ_relation"
                             rel_type = FIELDS_FRONTEND_TO_SQL[key]['type']
 
+
+                        # pre-treatment: rewrite tables' names if they're inside the sub-query
+
+                        # exemple:
+                        # scholars.country   ~~~~~> scholars_n_hashtags.country
+                        # hashtags.htstr     ~~~~~> scholars_n_hashtags.htstr
+                        # (see cascaded join below for explanation)
+
+                        if match("scholars", sql_column):
+                            (sql_table, sql_field) = sql_column.split('.')
+                            sql_column = 'scholars_n_hashtags.'+sql_field
+
+                            mlog('DBG', "rewrote sql col", sql_column)
+                        elif match("hashtags.htstr", sql_column):
+                            sql_column = 'scholars_n_hashtags.hashtags_list'
+
+                            mlog('DBG', "rewrote sql col", sql_column)
+
+                        # now create the constraints
                         val = filter_dict[known_filter]
 
                         if len(val):
@@ -442,19 +461,35 @@ class BipartiteExtractor:
                     mlog("INFO", "SELECTing active users with sql_constraints", sql_constraints)
 
                     # use constraints as WHERE-clause
+
+                    # NB we must cascade join because
+                    #    both hashtags and keywords are one-to-many
+                    #   => it renames scholars and hashtag tables
+                    #      into 'scholars_n_hashtags'
                     sql_query = """
                         SELECT
-                            scholars.luid,
+                            scholars_n_hashtags.luid,
+                            scholars_n_hashtags.affiliation_id,
 
                             -- kws info
-                            COUNT(keywords.kwid) AS keywords_nb,
-                            GROUP_CONCAT(keywords.kwstr) AS keywords_list,
-                            GROUP_CONCAT(keywords.kwid) AS keywords_ids
+                            GROUP_CONCAT(keywords.kwstr) AS keywords_list
 
-                        FROM scholars
+                        FROM (
+                            SELECT
+                                scholars.*,
+                                -- hts info
+                                GROUP_CONCAT(hashtags.htstr) AS hashtags_list
+
+                            FROM scholars
+                            LEFT JOIN sch_ht
+                                ON uid = luid
+                            JOIN hashtags
+                                ON sch_ht.htid = hashtags.htid
+                            GROUP BY luid
+                        ) AS scholars_n_hashtags
 
                         -- two step JOIN for keywords
-                        JOIN sch_kw
+                        LEFT JOIN sch_kw
                             ON uid = luid
                         JOIN keywords
                             ON sch_kw.kwid = keywords.kwid

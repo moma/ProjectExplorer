@@ -42,7 +42,6 @@ if __package__ == 'services':
     from services          import tools, dbcrud, dbdatapi
     from services.user     import User, login_manager, \
                                   doors_login, doors_register
-    from services.dbdatapi import BipartiteExtractor
     from services.text.utils import sanitize
 else:
     # when this script is run directly
@@ -51,7 +50,6 @@ else:
     import tools, dbcrud, dbdatapi
     from user           import User, login_manager, \
                                doors_login, doors_register
-    from dbdatapi       import BipartiteExtractor
     from text.utils      import sanitize
 
 # ============= app creation ============
@@ -220,7 +218,13 @@ def graph_api():
     (original author S. Castillo)
     """
     if 'qtype' in request.args:
-        graphdb = BipartiteExtractor(config['SQL_HOST'])
+        graphdb = dbdatapi.BipartiteExtractor(config['SQL_HOST'])
+
+        # request.query_string
+        #                => b'qtype=filters&tags[]=%23iscpif'
+        # tools.restparse(request.query_string.decode())
+        #                => {'qtype': 'filters', 'tags': ['#iscpif']}
+
         scholars = graphdb.getScholarsList(
                     request.args['qtype'],
                     tools.restparse(

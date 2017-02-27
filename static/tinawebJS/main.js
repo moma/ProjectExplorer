@@ -303,7 +303,7 @@ function bringTheNoise(sourceinfo,type){
                 var nameSubElts = []
                 for (var value of filteringKeyArrayPairs[fieldName]) {
                     // exemple: "countries[]=France"
-                    restParams.push(fieldName+"[]="+value)
+                    restParams.push(fieldName+'[]='+encodeURIComponent(value))
                     nameSubElts.push ('"'+value+'"')
                 }
                 nameElts.push("("+nameSubElts.join(" or ")+")")
