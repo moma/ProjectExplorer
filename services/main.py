@@ -26,7 +26,7 @@ __status__    = "Dev"
 
 # ============== imports ==============
 from re           import sub
-from os           import path
+from os           import path, remove
 from json         import dumps
 from datetime     import timedelta
 from urllib.parse import unquote
@@ -450,6 +450,10 @@ def profile():
             the_id_to_delete = current_user.uid
             mlog("INFO",
                  "executing DELETE scholar's data at the request of user %s" % str(the_id_to_delete))
+
+            # remove saved image if any
+            if current_user.info['pic_fname']:
+                remove(path.join(*tools.IMAGE_SAVING_POINT, current_user.info['pic_fname']))
             logout_user()
             dbcrud.rm_scholar(the_id_to_delete)
 
@@ -459,6 +463,14 @@ def profile():
         else:
             # input fields data ~> normalized {cols:values}
             our_records = read_record_from_request(request)
+
+            # small gotcha: absence of the file input is the default in GUI
+            #               (even when we keep the image)
+            if 'pic_fname' not in our_records and 'pic_fname' in current_user.info and current_user.info['pic_fname']:
+                our_records['pic_fname'] = current_user.info['pic_fname']
+            # POSS:
+            #      a dedicated button to indicate that the pic should be rm
+
 
             # special action CREATE for a new user already known to doors
             if current_user.empty:
@@ -760,6 +772,16 @@ def save_form(clean_records, update_flag=False, previous_user_info=None):
             return None
         else:
             dbcrud.save_full_scholar(clean_records, reg_db, update_user=previous_user_info)
+
+            # remove previous image from filesystem if changed
+            if (previous_user_info['pic_fname']
+             and ('pic_fname' in clean_records
+                  and
+                  previous_user_info['pic_fname'] != clean_records['pic_fname'])):
+
+                remove(path.join(*tools.IMAGE_SAVING_POINT, previous_user_info['pic_fname']))
+
+
     else:
         luid = int(dbcrud.save_full_scholar(clean_records, reg_db))
 
@@ -858,7 +880,7 @@ def read_record_from_request(request):
     if hasattr(request, "files") and 'pic_file' in request.files and request.files['pic_file']:
         new_fname = tools.pic_blob_to_filename(request.files['pic_file'])
         clean_records['pic_fname'] = new_fname
-        mlog("INFO", "new_fname", new_fname)
+        mlog("DEBUG", "new pic with fname", new_fname)
 
     return clean_records
 

@@ -45,6 +45,9 @@ CONFIGMENU = [
             {"sec": 'content',    "var":'HAPAX_THRESHOLD',   "def": '1 '    }
           ]
 
+
+IMAGE_SAVING_POINT = ['data', 'shared_user_img']
+
 def home_path():
     """
     returns ./../.. in any OS
@@ -246,7 +249,7 @@ def format_err(err):
 
 from uuid   import uuid4
 from imghdr import what   # diagnoses filetype and returns ext
-def pic_blob_to_filename(pic_blob, path_elts=['data', 'shared_user_img']):
+def pic_blob_to_filename(pic_blob):
     """
     Saves a pic blob, returns the relative path
 
@@ -256,10 +259,13 @@ def pic_blob_to_filename(pic_blob, path_elts=['data', 'shared_user_img']):
         output "12345.png"
         + saved in /data/shared_user_img/12345.png
     """
+    # our path starts with a working copy of the saving point
+    path_elts=list(IMAGE_SAVING_POINT)
+
     # random 32 hex chars
     filename = uuid4().hex
     fileext = what(pic_blob.stream)
-    fbasename = filename+'.'+fileext
+    fbasename = str(filename)+'.'+str(fileext)
     path_elts.append(fbasename)
     new_img_relpath = path.join(*path_elts)
     # save
