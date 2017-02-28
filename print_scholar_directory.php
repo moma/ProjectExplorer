@@ -68,127 +68,120 @@ $base = new PDO($dsn, $user, $pass, $opt);
 
 
 // liste des chercheurs
-$scholar_array = array();
+$scholars = array();
 
 if ($userid) {
-    if (sizeof($userid) > 0) {
 
-        // old way in two steps without a scholars <=> keywords table
-        // $sql1 = "SELECT keywords,last_name,first_name FROM scholars WHERE luid='" . $login . "'";
-        // $sql2 = "SELECT uid FROM sch_kw JOIN keywords ON sch_kw.kwid = keywords.kwid WHERE kwstr LIKE \"%" . trim($keyword)."%\"";
+    // query idea:
+    // ------------
+    // SELECT sch_kw.uid AS source,
+    //        count(sch_kw.kwid) AS similarity,
+    //        second_level.uid AS neighboor
+    // FROM      sch_kw
+    // LEFT JOIN sch_kw AS second_level ON sch_kw.kwid = second_level.kwid
+    // WHERE sch_kw.uid = 4207
+    // GROUP BY second_level.uid
+    // ORDER BY count(sch_kw.kwid) DESC, second_level.uid != 4207 ASC;
 
-        // new way in one query
-        $sql1 = <<< HERE_QUERY
-        SELECT second_level.uid
-        FROM      sch_kw
-        LEFT JOIN sch_kw
-            AS second_level
-            ON sch_kw.kwid = second_level.kwid
-        WHERE sch_kw.uid = {$userid}
-            -- (uncomment if ego not self-neighboor)
-            -- AND second_level.uid != sch_kw.uid
-        GROUP BY second_level.uid
-        ORDER BY second_level.uid != {$userid} ;  -- allows ego to be first
+
+    // exemple:
+    // +--------+------------+-----------+
+    // | source | similarity | neighboor |
+    // +--------+------------+-----------+
+    // |   4207 |          2 |      4207 |
+    // |   4207 |          2 |      2792 |
+    // |   4207 |          1 |      2732 |
+    // |   4207 |          1 |      2569 |
+    // |   4207 |          1 |      3128 |
+    // |   4207 |          1 |      2636 |
+    // |   4207 |          1 |      3488 |
+    // |   4207 |          1 |      2727 |
+    // |   4207 |          1 |      3604 |
+    // |   4207 |          1 |      3942 |
+    // |            (...)                |
+    // +--------+------------+-----------+
+
+
+    // implementation with all details and infos to retrieve
+    $sql = <<< HERE_QUERY
+    SELECT
+        scholars_and_affiliations.*,
+        COUNT(keywords.kwid) AS keywords_nb,
+        GROUP_CONCAT(keywords.kwid) AS keywords_ids,
+        GROUP_CONCAT(kwstr) AS keywords_list
+    FROM (
+        SELECT
+            scholars.*,
+            affiliations.*
+        FROM scholars
+        LEFT JOIN affiliations
+            ON scholars.affiliation_id = affiliations.affid
+        WHERE (record_status = 'active'
+            OR (record_status = 'legacy' AND valid_date >= NOW()))
+    ) AS scholars_and_affiliations
+
+    LEFT JOIN sch_kw AS second_level
+        ON second_level.uid = scholars_and_affiliations.luid
+    JOIN sch_kw ON sch_kw.kwid = second_level.kwid
+    JOIN keywords
+        ON sch_kw.kwid = keywords.kwid
+
+    WHERE sch_kw.uid = {$userid}
+    GROUP BY luid
+
+    ORDER BY count(sch_kw.kwid) DESC, second_level.uid != {$userid} ASC;
+
 HERE_QUERY;
 
-        foreach ($base->query($sql1) as $row) {
-            if (array_key_exists($row['uid'], $scholar_array)){
-                $scholar_array[$row['uid']] += 1;
-            }else{
-                $scholar_array[$row['uid']] = 1;
-            }
-        }
+    foreach ($base->query($sql) as $row) {
+        $info = array();
+        $info['unique_id'] = $row['luid'];
+        $info['doors_uid'] = $row['doors_uid'];
+        $info['first_name'] = $row['first_name'];
+        $info['mid_initial'] = (strlen($row['middle_name']) ? substr($row['middle_name'],0,1)."." : "");
+        $info['last_name'] = $row['last_name'];
+        $info['initials'] = $row['initials'];
+
+        // retrieved from secondary table and GROUP_CONCATenated
+        $info['keywords_ids'] = explode(',', $row['keywords_ids']);
+        $info['nb_keywords'] = $row['keywords_nb'];
+        $info['keywords'] = split_join_keywords_for_html($row['keywords_list']);
+
+        // $info['status'] = $row['status'];
+        $info['record_status'] = $row['record_status'];  // TODO use this one
+
+        $info['country'] = $row['country'];
+        $info['homepage'] = $row['home_url'];
+
+
+        // TODO recreate difference between lab and org --------->8--------
+        // $info['lab'] = $row['team_lab'];
+        // $info['affiliation'] = $row['org'];
+
+        // right now duplicate treatment short-circuited like this
+        // (effect visible in stat-prep_from_array)
+        $info['affiliation'] = $row['org'] . $row['team_lab'];
+        $info['affiliation_id'] = $row['affiliation_id'];
+        // ----------------------------------------------------->8---------
+        // $info['lab2'] = $row['lab2'];
+        // $info['affiliation2'] = $row['affiliation2'];
+        $info['title'] = $row['hon_title'];
+        $info['position'] = $row['position'];
+        $info['pic_src'] = $row['pic_fname'] ? '/data/shared_user_img/'.$row['pic_fname'] : $row['pic_url']  ;
+        $info['pic_fname'] = $row['pic_fname'];
+        $info['interests'] = $row['interests_text'];
+        // $info['address'] = $row['address'];
+        // $info['city'] = $row['city'];
+        // $info['postal_code'] = $row['postal_code'];
+        // $info['phone'] = $row['phone'];
+        // $info['mobile'] = $row['mobile'];
+        // $info['fax'] = $row['fax'];
+        // $info['affiliation_acronym'] = $row['affiliation_acronym'];
+        $scholars[$row['luid']] = $info;
     }
 }
 
-// les scholars sont affichés par ordre de pertinence
-arsort($scholar_array);
 
-$scholar_id_array=array_keys($scholar_array);
-// var_dump($scholar_id_array)."<br/>" ;
-
-// liste des chercheurs "expansion transitive"
-$scholars = array();
-//
-foreach ($scholar_id_array as $scholar_id){
-
-// £TODO do it at once with previous SELECT !!
-$sql = <<< END_QUERY
-SELECT
-    scholars_and_affiliations.*,
-    COUNT(keywords.kwid) AS keywords_nb,
-    GROUP_CONCAT(keywords.kwid) AS keywords_ids,
-    GROUP_CONCAT(kwstr) AS keywords_list
-FROM (
-    SELECT
-        scholars.*,
-        affiliations.*
-    FROM scholars
-    LEFT JOIN affiliations
-        ON scholars.affiliation_id = affiliations.affid
-    WHERE (record_status = 'active'
-        OR (record_status = 'legacy' AND valid_date >= NOW()))
-) AS scholars_and_affiliations
-
-LEFT JOIN sch_kw
-    ON sch_kw.uid = scholars_and_affiliations.luid
-LEFT JOIN keywords
-    ON sch_kw.kwid = keywords.kwid
-GROUP BY luid
-END_QUERY;
-
-
-
-// echo var_dump($scholar_id)."<br/>" ;
-//$query = "SELECT * FROM scholars";
-foreach ($base->query($sql) as $row) {
-    $info = array();
-    $info['unique_id'] = $row['luid'];
-    $info['doors_uid'] = $row['doors_uid'];
-    $info['first_name'] = $row['first_name'];
-    $info['mid_initial'] = (strlen($row['middle_name']) ? substr($row['middle_name'],0,1)."." : "");
-    $info['last_name'] = $row['last_name'];
-    $info['initials'] = $row['initials'];
-
-    // retrieved from secondary table and GROUP_CONCATenated
-    $info['keywords_ids'] = explode(',', $row['keywords_ids']);
-    $info['nb_keywords'] = $row['keywords_nb'];
-    $info['keywords'] = split_join_keywords_for_html($row['keywords_list']);
-
-    // $info['status'] = $row['status'];
-    $info['record_status'] = $row['record_status'];  // TODO use this one
-
-    $info['country'] = $row['country'];
-    $info['homepage'] = $row['home_url'];
-
-
-    // TODO recreate difference between lab and org --------->8--------
-    // $info['lab'] = $row['team_lab'];
-    // $info['affiliation'] = $row['org'];
-
-    // right now duplicate treatment short-circuited like this
-    // (effect visible in stat-prep_from_array)
-    $info['affiliation'] = $row['org'] . $row['team_lab'];
-    $info['affiliation_id'] = $row['affiliation_id'];
-    // ----------------------------------------------------->8---------
-    // $info['lab2'] = $row['lab2'];
-    // $info['affiliation2'] = $row['affiliation2'];
-    $info['title'] = $row['hon_title'];
-    $info['position'] = $row['position'];
-    $info['pic_src'] = $row['pic_fname'] ? '/data/shared_user_img/'.$row['pic_fname'] : $row['pic_url']  ;
-    $info['pic_fname'] = $row['pic_fname'];
-    $info['interests'] = $row['interests_text'];
-    // $info['address'] = $row['address'];
-    // $info['city'] = $row['city'];
-    // $info['postal_code'] = $row['postal_code'];
-    // $info['phone'] = $row['phone'];
-    // $info['mobile'] = $row['mobile'];
-    // $info['fax'] = $row['fax'];
-    // $info['affiliation_acronym'] = $row['affiliation_acronym'];
-    $scholars[$row['luid']] = $info;
-}
-
-}
 /// stats
 include ("php_library/stat-prep_from_array.php");
 
