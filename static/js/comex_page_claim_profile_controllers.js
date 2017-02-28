@@ -52,4 +52,12 @@ function showMessageAndSubmit() {
 // trigger auth changes (email always autocompleted for return_user)
 returnForm.elEmail.dispatchEvent(new CustomEvent('change'))
 
+
+// vertical adjust of rCol
+var lCol = document.getElementById('leftcol')
+var rCol = document.getElementById('rightcol')
+var neededAdjustment = Math.round((lCol.offsetHeight - rCol.offsetHeight) / 2)
+rCol.style.marginTop = neededAdjustment
+
+
 console.log("profile controllers load OK")
