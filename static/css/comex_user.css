@@ -195,7 +195,7 @@ input.readonly {
 .box-highlight {
     max-width: 9em;
     background-color: #161;
-    border: 2px solid #ACA;
+    border: 1px solid #ACA;
     padding: 1em .4em .6em .8em;
     margin: .4em .2em .4em .5em;
     border-radius: .4em;
