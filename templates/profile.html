@@ -279,34 +279,6 @@
                  <p class="legend">Please enter at least 5 keywords (press TAB or ENTER after each)</p>
                </div>
 
-               <div class="question input-group">
-                 <label for="position" class="smlabel input-group-addon">* Job Position</label>
-                 <input id="position" name="position" maxlength="30"
-                        type="text" class="form-control autocomp" placeholder="titre"
-                        onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
-                        value="{{ current_user.info.position }}">
-               </div>
-
-               <div class="question">
-                 <div class="input-group">
-                   <label for="team_lab" class="smlabel input-group-addon">* Lab / Team / Dept</label>
-                   <input id="team_lab" name="team_lab" maxlength="120"
-                          type="text" class="form-control" placeholder="More detailed affiliation, if relevant"
-                          value="{{ current_user.info.team_lab }}">
-                 </div>
-               </div>
-
-               <!-- Lab city <=> only for France -->
-               <div class="question conditional-q" id="team_city_div">
-                 <div class="input-group">
-                   <label for="org_city" class="smlabel input-group-addon">Lab city</label>
-                   <input id="org_city" name="org_city" maxlength="50"
-                          type="text" class="form-control" placeholder="Ville de votre institution"
-                          value="{{ current_user.info.org_city }}">
-                 </div>
-               </div>
-
-
                <h3 class="formcat"> About your future activities </h3>
 
                <div class="question">
@@ -375,6 +347,14 @@
                  class="panel-body ccsection-uform-body panel-collapse collapse out"
                  role="tabpanel" aria-expanded="false">
 
+                 <div class="question input-group">
+                   <label for="position" class="smlabel input-group-addon">* Job Position</label>
+                   <input id="position" name="position" maxlength="30"
+                          type="text" class="form-control autocomp" placeholder="titre"
+                          onblur="cmxClt.makeBold(this)" onfocus="cmxClt.makeNormal(this)"
+                          value="{{ current_user.info.position }}">
+                 </div>
+
 
                  <!-- ORG QUESTIONS -->
                  <div class="question">
@@ -411,6 +391,26 @@
                        <input id="other_org_type" name="other_org_type" maxlength="120"
                                type="text" class="form-control" placeholder="Clarify here the type of your parent institution">
                      </div>
+                   </div>
+                 </div>
+
+                  <!-- TEAM QUESTIONS -->
+                 <div class="question">
+                   <div class="input-group">
+                     <label for="team_lab" class="smlabel input-group-addon">* Lab / Team / Dept</label>
+                     <input id="team_lab" name="team_lab" maxlength="120"
+                            type="text" class="form-control" placeholder="More detailed affiliation, if relevant"
+                            value="{{ current_user.info.team_lab }}">
+                   </div>
+                 </div>
+
+                 <!-- Lab city <=> only for France -->
+                 <div class="question conditional-q" id="team_city_div">
+                   <div class="input-group">
+                     <label for="org_city" class="smlabel input-group-addon">Lab city</label>
+                     <input id="org_city" name="org_city" maxlength="50"
+                            type="text" class="form-control" placeholder="Ville de votre institution"
+                            value="{{ current_user.info.org_city }}">
                    </div>
                  </div>
 

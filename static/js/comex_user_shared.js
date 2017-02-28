@@ -51,7 +51,7 @@ var cmxClt = (function() {
         ["last_name",              true,       "plsfill", "t",  "basic_infos"],
         ["country",                true,       "plsfill", "t",  "basic_infos"],
         ["initials",               true,       "pref",    "t",  null],
-        ["position",               true,       "plsfill", "t",  "map_infos"],
+        ["position",               true,       "plsfill", "t",  "org_infos"],
         ["interests_text",        false,       "pref",    "t",  "other_infos"],
         ["gender",                false,       "plsfill", "m",  "other_infos"],
         ["job_looking",           false,       "pref"   , "m",  "map_infos"],
@@ -63,7 +63,7 @@ var cmxClt = (function() {
 
         ["org",                   false,       "plsfill", "t", "org_infos"],
         ["org_type",              false,       "plsfill", "m", "org_infos"],
-        ["team_lab",               true,       "plsfill", "t", "map_infos"],
+        ["team_lab",               true,       "plsfill", "t", "org_infos"],
         ["org_city",              false,       "pref"   , "t", "org_infos"]
         // ==> *affiliations* table
     ]
