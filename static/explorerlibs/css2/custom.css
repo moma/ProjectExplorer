@@ -266,14 +266,10 @@
 
 
 
-/* "carte de visite" */
+/* "carte de visite" si catSoc, infos sur le mot-clef si catSem */
 #information {
     line-height: 110%;
-    background-color:#fff;
-    border-radius: .3em;
-    padding: 2em 1em .3em 1em;
     margin: 2em ;
-    border: 2px solid #555;
     max-width: 35em;
 }
 
@@ -287,6 +283,17 @@
 
 #information ul {
     list-style: none;
+}
+
+#information .information-vcard {
+    border: 2px solid #555;
+    padding: 2em 1em .3em 1em;
+    background-color:#fff;
+    border-radius: .3em;
+}
+
+#information .information-links {
+    padding: 7px 0 0 20px;
 }
 
 

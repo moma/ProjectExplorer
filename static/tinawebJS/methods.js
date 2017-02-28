@@ -411,12 +411,13 @@ function htmlfied_nodesatts(elems){
             }
 
             if(node.type==catSem){
-                information += '<li><b>' + node.label + '</b></li>';
+                information += '<li><b>' + node.label + '</b>';
                 google='<a href=http://www.google.com/#hl=en&source=hp&q=%20'+node.label.replace(" ","+")+'%20><img src="'+'static/img/google.png"></img></a>';
                 wiki = '<a href=http://en.wikipedia.org/wiki/'+node.label.replace(" ","_")+'><img src="'+'static/img/wikipedia.png"></img></a>';
                 flickr= '<a href=http://www.flickr.com/search/?w=all&q='+node.label.replace(" ","+")+'><img src="'+'static/img/flickr.png"></img></a>';
-                information += '<li>'+google+"&nbsp;"+wiki+"&nbsp;"+flickr+'</li><br>';
-                semnodes.push(information)
+                information += "<p class='information-links'>"+google+"&nbsp;"+wiki+"&nbsp;"+flickr+'</p>';
+                information += '</li>' ;
+                semnodes.push(information) ;
             }
         }
     }

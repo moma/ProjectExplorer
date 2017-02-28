@@ -914,7 +914,7 @@ class BipartiteExtractor:
                  #     </ul>
 
 
-                content=""
+                content="<div class='information-vcard'>"
 
 
                 # pic in vcard
@@ -956,7 +956,7 @@ class BipartiteExtractor:
                         content += '[ <a href=' +self.scholars[idNode]['home_url'].replace("&"," and ")+ ' target=blank > View homepage </a >]<br/>'
 
 
-                content += '</p>'
+                content += '</p></div>'
 
                 node = {}
                 node["type"] = "Document"
