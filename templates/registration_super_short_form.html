@@ -10,8 +10,8 @@
 
 {% block main_content %}
     <div class="row">
-      <div class="spacer col-lg-1 hidden-md-down">&nbsp;</div>
-      <div class="my-box col-lg-9 col-md-11 col-sm-12">
+      <div class="spacer col-lg-2 col-md-1 hidden-sm-down">&nbsp;</div>
+      <div class="my-centering-box col-lg-8 col-md-10 col-sm-12">
 
         <!-- INTRODUCTION TEXT -->
         <div id="intro">
@@ -26,7 +26,7 @@
 
 
         <!-- ########################### ( FORM ) ########################## -->
-      <div class="uform-nobg">
+      <div class="uform-white">
         <form id="comex_reg_form" enctype="multipart/form-data"
               method="post" onsubmit="console.info('submitted')">
 
@@ -209,11 +209,13 @@
             <!-- == S U B M I T == -->
             <!-- button instead of input.submit to validate before real submit action -->
             <!-- also remember stackoverflow.com/a/3315016/2489184 -->
-            <button class="btn btn-lg btn-success" style="float:right"
-                    id="form_submit" type=button disabled
-                    onclick="if (validateAndMsg(event)) {registerDoorsAndSubmit()}">
-                    Submit your form
-            </button>
+            <div class="question">
+                <button class="btn btn-lg btn-success" style="float:right"
+                        id="form_submit" type=button disabled
+                        onclick="if (validateAndMsg(event)) {registerDoorsAndSubmit()}">
+                        Submit your form
+                </button>
+            </div>
 
         </form>
 
@@ -235,7 +237,7 @@
       <div class="spacer col-lg-2 col-md-1 hidden-sm-down">&nbsp;</div>
     </div>
 
-    <div class="menu-right-fixed">
+    <div class="menu-left-fixed">
       <!-- main validation message -->
       <p id="main_message" class="legend" style="display:none"></p>
     </div>

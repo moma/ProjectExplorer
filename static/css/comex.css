@@ -1,5 +1,8 @@
 /* =============================== MAIN COMEX STYLESHEET =============================== */
 
+
+@media all{
+
 .white { color:#fff ;}
 .red   { color:#910 ;}
 .green { color:#161 ;}
@@ -20,6 +23,9 @@ body {
   font-size: 12px;
 }
 
+.center {
+    text-align: center;
+}
 
 .comex-nav-item {
     vertical-align: middle;
@@ -60,17 +66,20 @@ body {
     text-decoration: underline;
 }
 
-/* main content for all new pages */
-div.my-box {
+/* main center column */
+div.my-centering-box {
     padding:0 20px;
     line-height: 1.1em;
+    text-align: left;
+    /*background-color: pink ;*/
 }
-@media(max-width:768px){
-    /* xs */
-    div.my-box {
-        padding:0 7px;
-        line-height: .85em;
-    }
+
+div.my-centering-box > * {
+    /* centering effect on all children */
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 70em; /* >= FORMWIDTH */
+    /*background-color: red !important ;*/
 }
 
 .page {
@@ -255,30 +264,17 @@ h2.oldstyle {
   font-weight: bold;
 }
 
-@media(max-width:768px){
-    /* sm */
-    h2.cat, h2.oldstyle {
-      font-size: 22px !important;
-    }
-}
-@media(max-width:544px){
-    /* xs */
-    h2.cat, h2.oldstyle {
-      font-size: 16px !important;
-    }
-}
-
-
 /* "accordeon": collapsible formcats */
 div.ccsection-wrap {
-    margin: 0 ;
+    margin-top: 0 ;
+    margin-bottom: 0 ;
     padding: 0 ;
     border: none;
     background-color: transparent;
-    max-width: 62em;           /* must be > FORMWIDTH */
 }
 a.ccsection-toggle  {
-    margin: 0 ;
+    margin-top: 0 ;
+    margin-bottom: 0 ;
     padding: 0 ;
 }
 a.ccsection-toggle:hover, a.ccsection-toggle:focus {
@@ -369,11 +365,41 @@ div.ccsection-footer {
 }
 
 /* spacer columns tend to block what's underneath when hidden-foo-down */
-.spacer {
+.spacer, .hidden-sm-down, .hidden-md-down {
     z-index: -1;
 }
 
 footer {
     line-height: 1.1em;
     font-size: .9em;
+}
+
+}
+
+
+/* sm and smaller */
+@media(max-width:768px){
+    .page {
+      margin-top: 60px;   /* topbar height increased as elts stack inside it */
+    }
+
+    div.my-centering-box {
+        padding:0 7px;
+        line-height: .85em;
+    }
+
+    h2.cat, h2.oldstyle {
+      font-size: 22px !important;
+    }
+}
+
+/* xs and smaller */
+@media(max-width:544px){
+    .page {
+      margin-top: 75px;   /* topbar height increased as elts stack inside it */
+    }
+
+    h2.cat, h2.oldstyle {
+      font-size: 16px !important;
+    }
 }

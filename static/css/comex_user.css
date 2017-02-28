@@ -1,22 +1,24 @@
-/* =============================== MAIN COMEX SERVICES STYLESHEET =============================== */
+/* ================= MAIN COMEX SERVICES STYLESHEET ================= */
 
+
+@media all {
 /* form content for reg, profile, login, etc.... */
 div.uform {
   /*padding: 15px 30px 53px 30px;*/
   padding: 0px 5px 3px 5px;
-  margin: 7px 5px 3px 5px;
+  margin: 7px auto 3px auto;
   background-color: #ddd;
-  max-width: 57em;           /* FORMWIDTH */
 }
 
 /* form content for reg, profile, login, etc.... */
 div.uform-white {
   padding: 0px 5px 3px 5px;
-  margin: 7px 5px 3px 5px;
+  margin: 7px auto 3px auto;
   background-color: #fff;
-  max-width: 57em;           /* FORMWIDTH */
   border-radius: 5px;
 }
+
+
 
 div.uform-white .ccsection-heading,
 div.uform-white .ccsection-uform-body {
@@ -31,10 +33,6 @@ div.uform-white .ccsection-uform-body {
     color: #000;
 }*/
 
-/* same but no margin and no color: good to put a panel-body inside */
-div.uform-nobg {
-  max-width: 57em;           /* FORMWIDTH */
-}
 
 .uform.readonly input,
 .uform.readonly label,
@@ -60,14 +58,6 @@ div.uform-nobg {
     border-right: 1px solid #ccc;;
 }
 
-@media(max-width:991px){
-    /* sm and md */
-    div.uform, div.uform-nobg {
-        padding: 0;
-        margin: 5px 0px 0px 5px;
-    }
-}
-
 button.clean-btn
 
 /* not used at present but could be useful for autompleted inputs */
@@ -87,7 +77,7 @@ button.clean-btn
   border-radius: 2em;
   padding: 1em 3em;
   text-align: center;
-  max-width: 40em;
+  /*max-width: 40em;*/
 }
 
 /* ex: profile overview in readonly */
@@ -96,35 +86,31 @@ button.clean-btn
 }
 
 /* a fixed div for validation messsages */
-.menu-right-fixed {
+.menu-left-fixed {
     position: fixed;
     top: 4em;
-    right: 0;
+    left: 0;
     display:block;
     z-index: 4;
     opacity: .8;
 }
 
-@media(max-width:991px){
-    /* sm and md */
-    .menu-right-fixed {
-        top: 11em;
-    }
-}
 
 /* ==> a question + input block <== */
 .question {
   padding: 0 1em;
   margin-bottom: 2em;
-  max-width: 57em;           /* FORMWIDTH */
+  max-width: 57em !important;           /* FORMWIDTH */
 }
 
-@media(max-width:991px){
-    /* sm and md */
-    .question {
-      padding: 0;
-    }
+/* we center the questions
+    when there is a visible wrapping */
+div.uform .question,
+.ccsection-wrap .question {
+    margin-left: auto;
+    margin-right: auto;
 }
+
 
 .conditional-q {
   display: none;
@@ -139,18 +125,6 @@ input.readonly {
 /* small label inside addon group*/
 .smlabel {
   min-width: 7.5em;
-}
-
-@media(max-width:400px){
-    /* ~ xs and smaller */
-    .smlabel {
-      padding: 0;
-      font-size: 65%;
-      letter-spacing: -.1em;
-      max-width: 6em;
-      width: 5em;
-      min-width: 5em;
-    }
 }
 
 /* the question's additional legend or caption */
@@ -239,14 +213,19 @@ h3.formcatfirst {
   color: #910;
 }
 
-.raw-responses {
-  font-family: Calibri, sans-serif ;
+.debug-info {
+  font-family: monospace ;
+  max-width: 55em;
   font-size: 80%;
   line-height: 90% ;
-  background-color: #554;
-  color: white;
-  padding-bottom: 3em
+  background-color: #555;
+  color: #fff;
+
+  /* to stay invisible when no debug message */
+  padding: 0 ;
+  min-height: 0px;
 }
+
 /**/
 ul.minilabels {
   padding-top: .5em;
@@ -308,23 +287,14 @@ input.is-realperson {
 }
 
 
-@media(max-width:991px){
-    /* sm and md */
-    #main_message {
-      font-size: 110%;
-      line-height: 1em;
-      padding: .1em .3em ;
-      margin: 0;
-    }
-}
-
-
 /* the picture preview */
 #box_show_pic {
     background-color: #554;
     border: none ;
-    width:250px;
-    height:250px;
+    width:275px;
+    height:275px;
+    margin-left: auto;
+    margin-right: auto;
     margin-bottom: 2em;
     display: none;
 }
@@ -352,4 +322,44 @@ input.is-realperson {
     font-weight: bold !important;
     background-color: #5278B3 !important;
     border: .5px solid #6BB0E3 !important;
+}
+
+}
+
+
+
+/* sm and md */
+@media(max-width:991px){
+    div.uform, div.uform-nobg {
+        padding: 0;
+        margin-top: 5px;
+        margin-bottom: 0;
+    }
+
+    .menu-left-fixed {
+        top: 11em;
+    }
+
+    .question {
+      padding: 0;
+    }
+
+    #main_message {
+      font-size: 110%;
+      line-height: 1em;
+      padding: .1em .3em ;
+      margin: 0;
+    }
+}
+
+/* ~ xs and smaller */
+@media(max-width:400px){
+    .smlabel {
+      padding: 0;
+      font-size: 65%;
+      letter-spacing: -.1em;
+      max-width: 6em;
+      width: 5em;
+      min-width: 5em;
+    }
 }

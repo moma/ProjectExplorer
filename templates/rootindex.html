@@ -48,7 +48,7 @@
       <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
 
       <!-- ##################### ( WELCOME ) #################### -->
-      <div class="my-box col-lg-9 col-md-9 col-sm-12">
+      <div class="my-centering-box col-lg-9 col-md-9 col-sm-12">
         <div id="loading" style="padding-left:-175px; margin-left: 27%;">
             <img src="/static/css/loading.gif" style="border: 0px; opacity: 0.05; " />
         </div>
@@ -63,7 +63,7 @@
       <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
 
       <!-- ### ( 1 big column for directory search ) ### -->
-      <div class="my-box col-lg-6 col-md-6 col-sm-12">
+      <div class="col-lg-6 col-md-6 col-sm-12">
 
           <p class="mini-hero">
             Map your own socio-semantic network or explore sub-communities using the <strong> interactive menu</strong> on the top of the webpage. Use the "refine" filters to select keywords and scholars matching your subjects of interests.
@@ -112,7 +112,7 @@
       </div>
       <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
       <!-- ### ( 1 small column for news and announcements ) ### -->
-      <div class="my-box col-lg-3 col-md-3 col-sm-12">
+      <div class="col-lg-3 col-md-3 col-sm-12">
           <h2 class="oldstyle" style="font-size:1.5em;margin-top:1.5em;text-align:center;">
               Special features
           </h2>
@@ -131,8 +131,8 @@
 
     <!-- INTRO foot (social media likes etc) -->
     <div class="row">
-      <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
-      <div class="my-box col-lg-9 col-md-9 col-sm-12">
+      <div class="spacer col-lg-2 col-md-1 hidden-sm-down">&nbsp;</div>
+      <div class="my-centering-box col-lg-8 col-md-10 col-sm-12">
           <a href="https://twitter.com/intent/tweet?button_hashtag=communityexplorer&text=Map%20your%20%23network%2C%20explore%20the%20worldwide%20%23complexsystems%20%23community%20at%20all%20scales.%20%23dataviz" class="twitter-hashtag-button" data-url="http://communityexplorer.org">Tweet #communityexplorer</a>
 
           &nbsp;
@@ -141,7 +141,7 @@
           </div>
       </div>
 
-      <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
+      <div class="spacer col-lg-2 col-md-1 hidden-sm-down">&nbsp;</div>
     </div>
 
 
@@ -187,90 +187,6 @@
         </div>
         <div class="spacer col-lg-1 col-md-2 hidden-sm-down">&nbsp;</div>
     </div>
-
-
-    <!-- white notebook section: PROFILE -->
-    <div class="row spacerrow">&nbsp;</div>
-    <div class="row banner-row" style="background-color:#fff">
-        <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
-        <div class="col-lg-3 col-md-3 col-sm-10">
-            <div class="panel panel-primary action-announce">
-                <div class="panel-body">
-                    <div class="cmx-action-wrap">
-                        <img src="{{ url_for('static', filename='img/action_profile.png') }}"
-                            class="cmx-action">
-                    </div>
-                    <h2 class="oldstyle">Sharing your "carte de visite"</h2>
-                    <p class="mini-hero">
-                        Add your keywords and you will be plotted in the map
-
-                        <br/>Selecting you will flash a visit card like this:
-                        <div id="information-example">
-                            <br><h4>Information:</h4><ul><li><b>Dr. Jacques Monod</b></li><li><img src="https://upload.wikimedia.org/wikipedia/commons/7/70/Jacques_Monod_nobel.jpg" width="80px" style="float:left;margin:5px"><b>Country: </b>France<br><b>Position: </b>Research Director<br><b>Keywords: </b>emergence, biology, systems biology, autopoiesis, biochemistry.<br>[ <a href="https://fr.wikipedia.org/wiki/Jacques_Monod" target="blank"> View homepage </a>]<br></li></ul><br>
-                        </div>
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-7 col-md-7 col-sm-10">
-            <div class="panel panel-default wwwpanel">
-                <div class="panel-heading">
-                    <p class="pull-up-right">
-                        <a id="inlink" target="_blank" href="/services/user/{% if current_user.info %}profile{% else %}register{% endif %}">
-                            <span class="glyphicon glyphicon-new-window"></span>
-                            Open in another tab
-                        </a>
-                    </p>
-                </div>
-                <div class="panel-body wwwthumb">
-                    <iframe src="/services/user/{% if current_user.info %}profile{% else %}register{% endif %}" class="wwwthumb" frameborder="0" scrolling="yes">
-                        <p>Your web browser doesn't support iframes. :(</p>
-                   </iframe>
-                </div>
-            </div>
-        </div>
-        <div class="spacer col-lg-1 col-md-2 hidden-sm-down">&nbsp;</div>
-    </div>
-
-
-    <!-- coloured notebook section: STATS -->
-    <div class="row spacerrow">&nbsp;</div>
-    <div class="row banner-row" style="background-color:#FAB612">
-        <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
-        <div class="col-lg-3 col-md-3 col-sm-10">
-            <div class="panel panel-primary action-announce">
-                <div class="panel-body">
-                    <div class="cmx-action-wrap">
-                        <img src="{{ url_for('static', filename='img/action_stats.png') }}"
-                            class="cmx-action">
-                    </div>
-                    <h2 class="oldstyle">Analyze the community structure and trends</h2>
-                    <p class="mini-hero">
-                        Our pie-chart directories allow you to explore <strong>scholars</strong>, <strong>keywords</strong> and <strong>affiliations</strong> statistics for any query.
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-7 col-md-7 col-sm-10">
-            <div class="panel panel-default wwwpanel">
-                <div class="panel-heading">
-                    <p class="pull-up-right">
-                        <a target="_blank" href="/print_directory.php?query=%7B%7D">
-                            <span class="glyphicon glyphicon-new-window"></span>
-                            Open in another tab
-                        </a>
-                    </p>
-                </div>
-                <div class="panel-body wwwthumb">
-                    <iframe src="/print_directory.php?query=%7B%7D" class="wwwthumb" frameborder="0" scrolling="yes">
-                        <p>Your web browser doesn't support iframes. :(</p>
-                   </iframe>
-                </div>
-            </div>
-        </div>
-        <div class="spacer col-lg-1 col-md-2 hidden-sm-down">&nbsp;</div>
-    </div>
-
 
 {% endblock %}
 

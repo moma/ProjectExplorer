@@ -9,10 +9,10 @@
 <!-- ======================================================================= -->
 
 {% block main_content %}
-    <div class="row spacerrow">&nbsp;</div>
+    <div class="row smallspacerrow">&nbsp;</div>
     <div class="row">
-      <div class="spacer col-sm-1 col-md-1">&nbsp;</div>
-      <div class="my-box col-sm-8 col-md-8">
+      <div class="spacer col-lg-2 col-md-1 hidden-sm-down">&nbsp;</div>
+      <div class="my-centering-box col-lg-8 col-md-10 col-sm-12">
 
         <!-- INTRODUCTION TEXT -->
         <div id="intro">
@@ -38,25 +38,30 @@
         </div>
 
       </div>
-      <div class="spacer col-sm-2 col-md-2">&nbsp;</div>
+      <div class="spacer col-lg-2 col-md-1 hidden-sm-down">&nbsp;</div>
     </div>
 
-    <!-- raw responses for debug -->
+    <!-- any debug messages -->
     <div class="row spacerrow">&nbsp;</div>
     <div class="row">
-      <div class="spacer col-sm-1 col-md-1">&nbsp;</div>
-      <div class="raw-responses col-sm-8 col-md-8" style="font-family:Calibri, sans-serif">
-        <h3>debug</h3>
-        {% for key in debug_records %}
-          <p> {{key}} {{debug_records[key]}} </p>
-        {% endfor %}
+      <div class="spacer col-lg-2 col-md-1 hidden-sm-down">&nbsp;</div>
+      <div class="my-centering-box col-lg-8 col-md-10 col-sm-12">
+          <div class="debug-info">
+            {% if debug_message or (debug_records|length != 0) %}
+                <h3 style="font-family:Calibri, sans-serif">debug</h3>
+                {% for key in debug_records %}
+                  <p> {{key}} &lt;- {{debug_records[key]}}</p>
+                {% endfor %}
 
-
-        <p style="font-family: monospace; font-weight: bold">
-            {{debug_message|safe}}
-        </p>
+                {% if debug_message %}
+                <p style="font-family: monospace; font-weight: bold">
+                    {{debug_message|safe}}
+                </p>
+                {% endif %}
+            {% endif %}
+          </div>
       </div>
-      <div class="spacer col-sm-2 col-md-2">&nbsp;</div>
+      <div class="spacer col-lg-2 col-md-1 hidden-sm-down">&nbsp;</div>
     </div>
 
 {% endblock %}

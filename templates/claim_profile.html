@@ -10,14 +10,14 @@
 
 {% block main_content %}
     <div class="row">
-      <div class="spacer col-lg-1 hidden-md-down">&nbsp;</div>
-      <div class="col-lg-9 col-md-11 col-sm-12">
+      <div class="spacer col-lg-2 col-md-1 hidden-sm-down">&nbsp;</div>
+      <div class="my-centering-box col-lg-8 col-md-10 col-sm-12">
 
 
         <!-- ##################### ( PROFILE OVERVIEW ) #################### -->
 
         <div id="intro">
-                <p class="mini-hero">
+              <p class="mini-hero">
                     <span class="bigger">
                             Welcome
                         <strong>
@@ -30,16 +30,8 @@
               </p>
         </div>
 
-        <!-- overview -->
-        <h2 class="cat"> Create your new password </h2>
-
-        <p class="mini-hero">
-            It will allow you to login with the associated email: <u><b>{{ return_user.info.email }}</b></u>
-        </p>
-
-
         <!-- uform with double-width (over 2 columns) -->
-        <div class="uform-nobg" style="max-width:104em" >
+        <div class="uform-transparent" style="max-width:104em" >
             <!-- EMAIL & PASSWORD -->
             <!-- <h3 class="formcat"> Create your new password </h3> -->
 
@@ -50,7 +42,13 @@
 
               <div class="row nopadding nomargin">
                <!-- the create login/password form -->
-               <div class="col-lg-6 col-md-5 col-sm-4 nopadding nomargin">
+               <div class="col-lg-6 col-md-5 col-sm-4 nopadding nomargin" id="leftcol">
+
+                   <h2 class="cat"> Create your new password </h2>
+
+                   <p class="mini-hero">
+                       It will allow you to login with the associated email: <u><b>{{ return_user.info.email }}</b></u>
+                   </p>
 
                    <br/><br/><br/>
                       <div class="question">
@@ -74,14 +72,14 @@
 
                </div>
 
-              <!-- a vcard-like resume on the right side -->
-               <div class="col-lg-5 col-md-6 col-sm-7">
+               <div class="col-lg-1 col-md-1 col-sm-1 hidden-xs-down">&nbsp;</div>
 
-                   <center>
-                       <div class="legend-alone">
-                           If this isn't your data, please <a href="/services/user/register">register a new account instead</a>.
-                       </div>
-                   </center>
+              <!-- a vcard-like resume on the right side -->
+               <div class="col-lg-5 col-md-6 col-sm-7"  id="rightcol">
+
+                   <div class="center legend-alone">
+                       If this isn't your data, please <a href="/services/user/register">register a new account instead</a>.
+                   </div>
 
                    <!-- CARTE DE VISITE -->
                    <div id="information-example" class="our-vcard" style="margin: 0 0 0 25">
@@ -118,6 +116,7 @@
                        </ul>
                        <br>
                    </div>
+
                </div>
 
               </div>
@@ -157,11 +156,11 @@
         </div>
 
       </div>
-      <div class="spacer col-lg-1 hidden-md-down">&nbsp;</div>
+      <div class="spacer col-lg-2 col-md-1 hidden-sm-down">&nbsp;</div>
     </div>
 
 
-    <div class="menu-right-fixed">
+    <div class="menu-left-fixed">
       <!-- main validation message -->
       <p id="main_message" class="legend"></p>
     </div>

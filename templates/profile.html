@@ -10,8 +10,8 @@
 
 {% block main_content %}
     <div class="row">
-      <div class="spacer col-sm-1 col-md-1">&nbsp;</div>
-      <div class="my-box col-sm-8 col-md-8 panel-group"
+      <div class="spacer col-lg-2 col-md-1 hidden-sm-down">&nbsp;</div>
+      <div class="my-centering-box col-lg-8 col-md-10 col-sm-12 panel-group"
            id="profile_box"
            role="tablist"
            aria-multiselectable="true">
@@ -118,8 +118,8 @@
         <!-- ########################### ( FORM ) ########################## -->
         <!-- todo onsubmit also save to cache -->
 
-        <div class="uform-nobg accordion" id="profile_uform"
-             style="margin: 38px 38px 8px 38px;">
+        <div class="uform-transparent accordion" id="profile_uform"
+             style="margin: 38px auto 8px auto;">
 
             <h2 class="oldstyle">Edit your profile</h2>
                 <p class="mini-hero">
@@ -610,10 +610,10 @@
         </div>
 
       </div>
-      <div class="spacer col-sm-2 col-md-2">&nbsp;</div>
+      <div class="spacer col-lg-2 col-md-1 hidden-sm-down">&nbsp;</div>
     </div>
 
-    <div class="menu-right-fixed">
+    <div class="menu-left-fixed">
       <!-- main validation message -->
       <p id="main_message" class="legend"></p>
     </div>
@@ -624,8 +624,8 @@
     <!-- CNIL WARNING -->
     <div class="row spacerrow">&nbsp;</div>
     <div class="row">
-      <div class="spacer col-sm-1 col-md-1">&nbsp;</div>
-      <div class="col-sm-8 col-md-8">
+      <div class="spacer col-lg-2 col-md-1 hidden-sm-down">&nbsp;</div>
+      <div class="my-centering-box col-lg-8 col-md-10 col-sm-12">
         <h3 class="formcat"> About your data </h3>
         <div class="cartouche" id="cnil_warning">
           <p>Les informations recueillies à partir de ce formulaire font l’objet d’un traitement
@@ -651,7 +651,7 @@
           </p>
         </div>
       </div>
-      <div class="spacer col-sm-2 col-md-2">&nbsp;</div>
+      <div class="spacer col-lg-2 col-md-1 hidden-sm-down">&nbsp;</div>
     </div>
 
 {% endblock %}
