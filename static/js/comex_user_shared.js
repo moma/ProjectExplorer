@@ -636,8 +636,8 @@ var cmxClt = (function() {
     }
 
     cC.uform.checkShowPic = function (aForm, doHighlight) {
-        // TEMPORARY initial size already 200 kB, user has to do it himself
-        var max_size = 204800
+        // TEMPORARY initial size already 500 kB, user has to do it himself
+        var max_size = 512000
 
         // TODO  max source image size before resizing
         //       see libs or stackoverflow.com/a/24015367
@@ -658,7 +658,7 @@ var cmxClt = (function() {
 
             if (theFile.size > max_size) {
               // msg pb
-              picMsg.innerHTML = "The picture is too big (200kB max)!"
+              picMsg.innerHTML = "The picture is too big (500kB max)!"
               picMsg.style.color = cmxClt.colorRed
             }
             else {
