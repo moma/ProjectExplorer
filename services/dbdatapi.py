@@ -28,6 +28,7 @@ else:
 FIELDS_FRONTEND_TO_SQL = {
     "keywords":      {'col':"keywords.kwstr",        "type": "LIKE_relation"},
     "tags":          {'col':"hashtags.htstr",        'type': "LIKE_relation"},
+    "hashtags":      {'col':"hashtags.htstr",        'type': "LIKE_relation"},
 
     "countries":     {'col':"scholars.country",      'type': "EQ_relation"},
     "gender":        {'col':"scholars.gender",       'type': "EQ_relation"},
