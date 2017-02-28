@@ -180,15 +180,19 @@ $(document).ready(function() {
         //     (by default widget behavior)
 
         // change the 2 onclick events
-        $("#print2").click(function() {
-          return window.open("/print_scholar_directory.php?query=" + ui.item.id);
-        });
-        $("#generate2").click(function() {
-          return window.open('/explorerjs.html?type="uid"&nodeidparam="' + ui.item.id + '"');
-        });
+        changeTargetId(ui.item.id)
       }
     }
   })
+
+  changeTargetId = function(nodeId) {
+      document.getElementById('print2').onclick = function() {
+        return window.open("/print_scholar_directory.php?query=" + nodeId);
+      }
+      document.getElementById('generate2').onclick = function() {
+        return window.open('/explorerjs.html?type="uid"&nodeidparam="' + nodeId + '"');
+      }
+  }
 
   // main form collect function
   collectFilters = function(cb) {
