@@ -69,7 +69,7 @@
             Map your own socio-semantic network or explore sub-communities using the <strong> interactive menu</strong> on the top of the webpage. Use the "refine" filters to select keywords and scholars matching your subjects of interests.
             <br/>
             <br/>
-            The integration of <a href="/print_jobs_directory.php" target="blank">job openings</a> in maps aims at increasing the visibility of new positions or new candidates. <small>[ <a href="/jobmarket.html">more</a> ]</small>
+            The integration of job openings in maps aims at increasing the visibility of new positions or new candidates. <small>[ <a href="/jobmarket.html">more</a> ]</small>
           </p>
 
           <p class="sub-hero">
@@ -113,18 +113,23 @@
       <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
       <!-- ### ( 1 small column for news and announcements ) ### -->
       <div class="col-lg-3 col-md-3 col-sm-12">
-          <h2 class="oldstyle" style="font-size:1.5em;margin-top:1.5em;text-align:center;">
+          <h2 class="oldstyle" style="font-size:1.5em;margin-top:-15px;text-align:center;">
               Special features
           </h2>
            <div id="news-container">
                <ul>
-                   <li><a href="/jobmarket.html">Soon a better job market integration: </a> announce new jobs and find people looking for a job</li>
-                   <li><a href="/community_tags.html">Community tags:</a> Map any workgroup or event audience and get the associated directory.</li>
+                   <li><a href="/jobmarket.html">Soon a better job market integration: </a> announce new jobs and find people looking for a job<br/></li>
+                   <li><a href="/community_tags.html">Community tags:</a> Map any workgroup or event audience and get the associated directory.<br/><br/></li>
                    <li>This beta version of Community Explorer 2 is open source!</a> For sysadmins, it's easy to deploy a new server like this one using docker (<a href="https://github.com/moma/comex2/tree/master/setup/dockers">more info</a>).</li>
                </ul>
            </div>
+
+           <div class="center" style="margin-top:20px;">
+           <iframe src="http://player.vimeo.com/video/38383946" width="400" height="230" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+            </div>
       </div>
       <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
+
     </div>
 
     <div class="row smallspacerrow">&nbsp;</div>
@@ -142,50 +147,6 @@
       </div>
 
       <div class="spacer col-lg-2 col-md-1 hidden-sm-down">&nbsp;</div>
-    </div>
-
-
-
-    <!-- ##################### ( notebook banners ) #################### -->
-
-
-    <!-- colored notebook section: EXPLORE -->
-    <div class="row spacerrow">&nbsp;</div>
-    <div class="row banner-row" style="background-color:#00B4E6">
-        <div class="spacer col-lg-1 col-md-1 hidden-sm-down">&nbsp;</div>
-        <div class="col-lg-3 col-md-3 col-sm-10">
-            <div class="panel panel-primary action-announce">
-                <div class="panel-body">
-                    <div class="cmx-action-wrap">
-                        <img src="{{ url_for('static', filename='img/action_explore.png') }}"
-                            class="cmx-action">
-                    </div>
-                    <h2 class="oldstyle">Graph Explorer</h2>
-                    <p class="mini-hero">
-                        Use our explorer view to browse the map of the community.
-                        <br/>
-                        <br/>
-                        (It's a <strong> network of scholars </strong> connected by their research subjects.)
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-7 col-md-7 col-sm-10 wwwpanel">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <p class="pull-up-right">
-                        <a target="_blank" href="https://player.vimeo.com/video/38383946">
-                            <span class="glyphicon glyphicon-new-window"></span>
-                            Open in another tab
-                        </a>
-                    </p>
-                </div>
-                <div class="panel-body wwwthumb">
-                    <iframe src="https://player.vimeo.com/video/38383946" class="wwwthumb" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
-                </div>
-            </div>
-        </div>
-        <div class="spacer col-lg-1 col-md-2 hidden-sm-down">&nbsp;</div>
     </div>
 
 {% endblock %}
