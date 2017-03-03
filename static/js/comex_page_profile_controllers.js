@@ -8,7 +8,7 @@
  * @copyright ISCPIF-CNRS 2016
  * @author romain.loth@iscpif.fr
  *
- * @requires comex_user_shared
+ * @requires comex_user_shared, comex_lib_elts
  *
  * NB The uinfo variable should be set to template's user.json_info value.
  */
@@ -22,8 +22,8 @@
 // reselecting current_user's info choices
 function setupSavedItems(uinfo) {
     //  (date and menu values are set up here
-    //   but normal text vals are set up via html,
-    //   pic is set below from a separate function,
+    //   but normal text vals are set up via html template,
+    //   pic and middle_name are set below from a separate function,
     //   and multi text inputs are set up via form init... fixable to harmonize)
     for (var i in cmxClt.COLS) {
         var colType = cmxClt.COLS[i][3]
@@ -110,6 +110,15 @@ deleteUser.checked = false
 
 setupSavedItems(uinfo)
 
+// open middlename if there is one
+if (uinfo.middle_name != null
+    && uinfo.middle_name != ""
+    && uinfo.middle_name != "None") {
+    console.log("showing midname for profile")
+    cmxClt.uform.displayMidName()
+}
+
+
 // main validation function
 // ------------------------
 function completionAsYouGo() {
@@ -124,16 +133,79 @@ function completionAsYouGo() {
     // timestamp is done server-side
 }
 
+
 // run first check on existing profile data pre-filled by the template
 completionAsYouGo()
 
 
-// open middlename if there is one
-if (uinfo.middle_name != null
-    && uinfo.middle_name != ""
-    && uinfo.middle_name != "None") {
-    console.log("showing midname for profile")
-    cmxClt.uform.displayMidName()
+// set up a "Your data was saved" modal box (tied to the SUBMIT button)
+
+
+function addAndShowModal(someHtmlContent) {
+    // create and add modal
+    cmxClt.elts.box.addGenericBox(
+        'save_info',
+        'Profile update',
+        someHtmlContent,
+        function(){window.location.reload()}
+    )
+
+    // show modal
+    var saveInfoModal = document.getElementById('save_info')
+    saveInfoModal.style.display = 'block'
+    saveInfoModal.style.opacity = 1
 }
+
+function submitAndModal() {
+
+    var formdat = theUForm.asFormData();
+    var postUrl = "/services/user/profile/"
+
+    // if (window.fetch) {
+    if (false) {
+        fetch(postUrl, {
+            method: 'POST',
+            headers: {'X-Requested-With': 'MyFetchRequest'},
+            body: formdat,
+            credentials: "same-origin"  // <= allows our req to have id cookie
+        })
+        .then(function(response) {
+            if(response.ok) {
+              response.text().then( function(bodyText) {
+                // console.log("Profile POST was OK, showing answer")
+                addAndShowModal(bodyText)
+              })
+            }
+            else {
+              response.text().then( function(bodyText) {
+                console.log("Profile POST failed, aborting and showing message")
+                addAndShowModal("<h4>Profile POST server error:</h4>"+bodyText)
+              })
+            }
+        })
+        .catch(function(error) {
+            console.warn('fetch error:'+error.message);
+        });
+    }
+
+    // also possible using old-style jquery ajax
+    else {
+        $.ajax({
+            contentType: false,  // <=> multipart
+            processData: false,  // <=> multipart
+            data: formdat,
+            type: 'POST',
+            url: postUrl,
+            success: function(data) {
+                addAndShowModal(data)
+            },
+            error: function(result) {
+                console.warn('jquery ajax error with result', result)
+            }
+        });
+    }
+}
+
+
 
 console.log("profile controllers load OK")

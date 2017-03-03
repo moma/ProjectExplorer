@@ -449,6 +449,14 @@ def profile():
     elif request.method == 'POST':
         mlog("DEBUG", "saving profile with request.form=", request.form)
 
+
+        # ajax calls get a little html, normal calls get a full page
+        x_req_with = request.headers.get('X-Requested-With', type=str)
+        called_as_api = (x_req_with in ['XMLHttpRequest', 'MyFetchRequest'])
+        answer_template = "bare_thank_you.html" if called_as_api else "thank_you.html"
+
+        mlog("DEBUG", "profile update flag called_as_api=", called_as_api)
+
         # special action DELETE!!
         if 'delete_user' in request.form and request.form['delete_user'] == 'on':
             the_id_to_delete = current_user.uid
@@ -502,8 +510,9 @@ def profile():
                 logout_user()
                 # .. and login the user in his new mode
                 login_user(User(luid))
+
                 return render_template(
-                    "thank_you.html",
+                    answer_template,
                     debug_records = (our_records if app.config['DEBUG'] else {}),
                     form_accepted = True,
                     backend_error = False
@@ -518,14 +527,14 @@ def profile():
 
                 except Exception as perr:
                     return render_template(
-                        "thank_you.html",
+                        answer_template,
                         form_accepted = False,
                         backend_error = True,
                         debug_message = tools.format_err(perr)
                     )
 
                 return render_template(
-                    "thank_you.html",
+                    answer_template,
                     debug_records = (our_records if app.config['DEBUG'] else {}),
                     form_accepted = True,
                     backend_error = False

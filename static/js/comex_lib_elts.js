@@ -287,7 +287,13 @@ var cmxClt = (function(cC) {
     // generic message box -------------------------------------------------
 
     // to create an html message modal with doors auth (reg or login)
-    cC.elts.box.addGenericBox = function(boxId, boxTitle, boxContent) {
+    // @params
+    //    boxId: string
+    //    boxTitle: any html
+    //    boxContent: any html content
+    //    onOK: optional function to perform on clicking the 'OK' button
+    //          (apart from closing the box)
+    cC.elts.box.addGenericBox = function(boxId, boxTitle, boxContent, onOK) {
 
         // in a new div
         var myDiv = document.createElement('div')
@@ -309,7 +315,7 @@ var cmxClt = (function(cC) {
                         ${boxContent}
                       </div>
                       <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" onclick="cmxClt.elts.box.toggleBox('${boxId}')">
+                        <button type="button" class="btn btn-primary">
                             Ok
                         </button>
                       </div>
@@ -322,6 +328,23 @@ var cmxClt = (function(cC) {
         // append on body (no positioning now: it's a fixed overlay anyway)
         var body = document.querySelector('body')
         body.insertBefore(myDiv, body.lastChild)
+
+        // tie in the custom onclick function
+        var functionOnOk
+        if (onOK) {
+            functionOnOk = function() {
+                onOK()
+                cmxClt.elts.box.toggleBox(boxId)
+            }
+        }
+        else {
+            functionOnOk = function() {
+                cmxClt.elts.box.toggleBox(boxId)
+            }
+        }
+        // we assume there's only one .btn
+        var okBtn = document.getElementById(boxId).querySelector('.btn')
+        okBtn.onclick = functionOnOk
     }
 
     // /generic message box ------------------------------------------------
