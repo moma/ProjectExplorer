@@ -97,7 +97,7 @@
                            <li>
                                <b>Country: </b>{{ return_user.info.country }}<br>
                                <b>Position: </b>{{ return_user.info.position }}<br>
-                               <b>Keywords: </b>{{ return_user.info.keywords }}<br>
+                               <b>Keywords: </b>{{ return_user.info.keywords|join(', ') }}<br>
 
                                {% if return_user.info.home_url %}
                                <b>Homepage: </b>{{ return_user.info.home_url }}<br>

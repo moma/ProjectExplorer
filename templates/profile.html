@@ -77,7 +77,7 @@
                        <li>
                            <b>Country: </b>{{ current_user.info.country }}<br>
                            <b>Position: </b>{{ current_user.info.position }}<br>
-                           <b>Keywords: </b>{{ current_user.info.keywords }}<br>
+                           <b>Keywords: </b>{{ current_user.info.keywords|join(', ') }}<br>
                            [ <a href="{{ current_user.info.home_url }}" target="blank">
                                View homepage
                            </a>]
