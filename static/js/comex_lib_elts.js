@@ -42,14 +42,9 @@ var cmxClt = (function(cC) {
     cC.elts.box.postAuthBox = function(formId) {
         var formObj = cmxClt.uform.allForms[formId]
 
-        // so lame: we already put collectCaptcha in this form's submit()
-        //          but here we are circumventing submit() b/c different url!
-        if (formObj.validateCaptcha) {
-            cmxClt.uauth.collectCaptcha(formObj)
-        }
-
         // inputs should already have correct names: 'email', 'password'
         var formdat = formObj.asFormData();
+        // + real captcha value has also been collected by asFormData()
 
         // TODO for SSL
         //      currently relative URL <=> same protocol as source

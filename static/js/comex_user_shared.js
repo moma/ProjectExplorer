@@ -165,7 +165,7 @@ var cmxClt = (function() {
     // A textinput element containing multiple values like keywords
     //   => UI shows input where user enters words one by one
     //   => validated words become removable "boxes"
-    //   => result is an array of texts in memory, concatenated at form.submit()
+    //   => result is an array of texts in memory, concatenated at mtiCollect()
     cC.uform.multiTextinput = function (fName, otherMtiParams, aUForm) {
         // console.debug ("multiTextinput args:", fName, otherMtiParams, aUForm)
 
@@ -299,20 +299,38 @@ var cmxClt = (function() {
     //   - submitBtnId
     //   - multiTextinputs: [(...multiTextinputsParams...)]
 
+    // exposed members:
+    // theForm.id  <=> the HTML #id value
+    // theForm.elForm <=> the HTML <form> element
+    // theForm.mtiStock <=> all tags entered via multiTextinputs
+    // theUForm.asFormData() <=> all values asFormData...
+    // theForm.preSubmitActions <=> functions to call before sending data
+
+    // NB if you send the data by a classic formElt.submit() or use asFormData(), preSubmitActions will already be called
+
     cC.uform.Form = function(aFormId, aValidationFun, fParams) {
 
         // new "obj"
         var myUform = {}
 
+        // keep a ref to it in global scope
+        cC.uform.allForms[aFormId] = myUform
+
         // exposed vars that may be used during the interaction
         myUform.id = aFormId
         myUform.elForm = document.getElementById(aFormId)
         myUform.asFormData = function() {
+
+            // invoke preSubmitActions to collect widget data (captcha, mtis)
+            for (var i in myUform.preSubmitActions) {
+                myUform.preSubmitActions[i]()
+            }
             return new FormData(myUform.elForm)
         }
 
-        // keep a ref to it in global scope
-        cC.uform.allForms[aFormId] = myUform
+        // an array of functions to call before sending form (submit or fetch)
+        // NB *synchronous* functions only !!
+        myUform.preSubmitActions = []
 
         // events
         if (aValidationFun) {
@@ -349,26 +367,38 @@ var cmxClt = (function() {
                 )
             }
 
-            // NB overloading the submit() function seems more practical than the submit *event* but it implies to use this function each time
-            // (if impossible, collect values manually)
-
-            // NB2 we save it as a property of the html form (and not indep var or object property otherwise the invocation context is illegal)
-
-            myUform.elForm.classicSubmit = myUform.elForm.submit
-            myUform.elForm.submit = function() {
-
-                // collect multiTextinput values
+            // collect multiTextinput values
+            myUform.mtiCollect = function() {
+                // console.log('collecting multiTextinputs')
                 for (var field in myUform.mtiStock) {
                     document.getElementById(field).value = myUform.mtiStock[field].join(',')
                     // console.debug("  mti collected field '"+field+"', new value =", document.getElementById(field).value)
                 }
+            }
 
+            myUform.preSubmitActions.push(myUform.mtiCollect)
+
+
+            // Here we overload the submit() function with preSubmitActions
+            // (submit() is more practical to overload than the submit *event*)
+            // (preSubmitActions are as evaluated at submit invocation time)
+
+            // we keep classicSubmit() as member of the html form
+            // (preserves its invocation context)
+            myUform.elForm.classicSubmit = myUform.elForm.submit
+
+            myUform.elForm.submit = function() {
+
+                // 1) invoke any (synchronous) preparation functions
+                for (var i in myUform.preSubmitActions) {
+                    myUform.preSubmitActions[i]()
+                }
+
+                // 2) proceed with normal submit
                 console.log("go classicSubmit")
-                // proceed with normal submit
                 myUform.elForm.classicSubmit()
             }
         }
-
         return myUform
     }
 

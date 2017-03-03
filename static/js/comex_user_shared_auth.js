@@ -139,12 +139,12 @@ cmxClt = (function(cC) {
             auForm.elPass2.onkeyup = auForm.elPass.onkeyup
             auForm.elPass2.onchange = auForm.elPass.onkeyup
 
-            // another form submit() overload to prevent double registrations
-            auForm.elForm.normalSubmitAction = auForm.elForm.submit
-            auForm.elForm.submit = function() {
+            // we add blocking the button to form submit() prerequisites
+            var blockButton = function() {
+                console.log('blocking submit button')
                 auForm.elSubmitBtn.disabled = true
-                auForm.elForm.normalSubmitAction()
             }
+            auForm.preSubmitActions.push(blockButton)
         }
 
         // 3) for captcha
@@ -162,14 +162,14 @@ cmxClt = (function(cC) {
                 }
                 auForm.elCaptcha.onchange = auForm.elCaptcha.onkeyup
 
-                // also form submit() overoverload
-                auForm.elForm.oldSubmitAction = auForm.elForm.submit
-                auForm.elForm.submit = function() {
-                    // console.log("go newSubmit")
-                    cmxClt.uauth.collectCaptcha(auForm)
-                    // console.log("go oldSubmit")
-                    auForm.elForm.oldSubmitAction()
-                }
+                // we add collecting the captcha real value as another preSubmit
+                auForm.preSubmitActions.push(
+                    function () {
+                        // console.log('collecting captcha data')
+                        cmxClt.uauth.collectCaptcha(auForm)
+                    }
+                )
+
             }
             else {
             console.warn(`validateCaptcha is set to true but there is no captcha in the authentication form #${auForm.id}`)
