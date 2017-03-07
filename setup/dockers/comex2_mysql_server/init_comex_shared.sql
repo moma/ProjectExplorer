@@ -19,7 +19,6 @@ CREATE TABLE scholars (
     middle_name          varchar(30),
     last_name            varchar(50) not null,
     initials             varchar(7) not null,
-    affiliation_id       int(15) not null,
     position             varchar(120),            -- eg Director
     hon_title            varchar(30),            -- eg Doctor
     interests_text       varchar(3500),
@@ -35,25 +34,70 @@ CREATE TABLE scholars (
     future_reserved      varchar(30),  -- eg for an imported id or temp status
 
     INDEX duid_index_sch (doors_uid),
-    INDEX affs_index_sch (affiliation_id),
     INDEX country_index_sch (country),
     INDEX rstatus_index_sch (record_status)
 ) ;
 
--- affiliations: institutions and labs
-CREATE TABLE affiliations(
-    affid               int(15) not null auto_increment,
-    org                 varchar(120),
-    org_type            varchar(50),
-    team_lab            varchar(120) not null,
-    org_city            varchar(50),
+
+CREATE TABLE locs(
+    locname             varchar(120),
+    lat                 float(6,4),
+    lng                 float(7,4),  -- 4 decimals for lat & lng <=> 100m resol
+    PRIMARY KEY (locname)
+) ;
+
+-- table for all organization classes (team, lab, large institution)
+CREATE TABLE orgs(
+    orgid               int(15) not null auto_increment,
+    name                varchar(120),   -- full name
+    acro                varchar(20),    -- acronym or short name
+
+    class               varchar(25),   -- "team|lab|inst"
+                                    -- like the calibre of the organization
+
+    lab_code            varchar(25),   -- ex "UPS 3611" or "UMR 9221" (iff lab)
+    inst_type           varchar(50),   -- ex "public org|private org" (iff inst)
+
+    locname             varchar(120) null,  -- ex "Paris, France" or "France"
+                                         -- (key to more info in table locs)
+
+    url                 varchar(180),  -- the organisation's homepage
+    contact_email       varchar(255),  -- if some email
+    contact_name        varchar(80),   -- if some administrative contact person
+
+    timestamp           timestamp,
+    -- address...          (...)      -- address elements POSS NOT IMPLEMENTED
     reserved            varchar(30),
-    PRIMARY KEY (affid),
-    UNIQUE KEY full_affiliation (org, team_lab, org_city, org_type)
-    -- NB org_type should be entailed by other 3 in business logic
+
+    -- generated column, often useful for autocompletes etc
+    -- ex "Instituto de Fisica de Cantabria (IFCA), Santander, Spain"
+    tostring            varchar(800) AS (CONCAT(
+                                         name, ' (', acro, ')',
+                                         IF(locname IS NOT NULL ,
+                                                 CONCAT(', ', locname),
+                                                 '')
+                                     )),
+
+    PRIMARY KEY (orgid),
+    UNIQUE KEY full_org (name, acro, locname)
+
+    -- POSS FOREIGN KEY locname REFERENCES locs(locname)
+    --  (useful when we use the locs more in the app)
+) ;
+
+-- relationship scholars <n=n> organizations
+CREATE TABLE sch_org(
+    uid            int(15) not null,
+    orgid          int(15) not null,
+    PRIMARY KEY (uid, orgid),
+    FOREIGN KEY (uid)  REFERENCES scholars(luid) ON DELETE CASCADE,
+    FOREIGN KEY (orgid) REFERENCES orgs(orgid)
 );
 
-ALTER TABLE scholars ADD FOREIGN KEY (affiliation_id) REFERENCES affiliations(affid) ;
+
+-- POSS: relationship organizations <=> keywords
+-- POSS: relationship organizations <=> organizations
+
 
 -- keyword/subject terms
 CREATE TABLE keywords(

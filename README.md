@@ -102,8 +102,8 @@ Uploaded images are in `data/shared_user_img`.
      - a unique external doors_uid (the user id for the entire lab)
      - a unique email
   - we have four related tables
-    - `affiliations` for labs and institutions
-      - (directly pointed by an **affiliation_id** in scholars table)
+    - `orgs` for labs and institutions
+      - and sch_org for scholars <=> organisms mapping
     - `keywords`
       - and `sch_kw` for scholars <=> keywords mapping
     - `hashtags`
@@ -123,8 +123,10 @@ SELECT
     scholars.*,
     affiliations.*,
 FROM scholars
-LEFT JOIN affiliations
-    ON affiliation_id = affid
+LEFT JOIN sch_org
+    ON luid = sch_org.uid
+JOIN orgs
+    ON orgs.orgid = sch_org.orgid
 
 
 -- ==================================
@@ -136,7 +138,7 @@ SELECT
     GROUP_CONCAT(kwstr) AS keywords_list
 FROM scholars
 JOIN sch_kw
-    ON doors_uid = uid
+    ON luid = uid
 JOIN keywords
     ON sch_kw.kwid = keywords.kwid
 GROUP BY uid ;
