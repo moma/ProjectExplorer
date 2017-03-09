@@ -196,6 +196,8 @@ if ($countries) {
 }
 
 
+
+// £TODO_ORGS FILTER x 2
 if ($laboratories) {
     // debug
     // echo '<p style="color:white">MATCHING ON labs<p>';
@@ -257,7 +259,7 @@ $imsize = 150;
 
 $content='';
 
-error_log("=======> WHERE filters {$f}");
+// error_log("=======> WHERE filters {$f}");
 
 // filtered query
 if (strlen($f)>0) {
@@ -267,33 +269,54 @@ if (strlen($f)>0) {
 else {
     $filter = "";
 }
+
+// about the query stucture cf. doc/cascade_full_scholar_info.sql
 $sql = <<< END_QUERY
 SELECT * FROM (
     SELECT
-        scholars_affiliations_and_keywords.*,
+        scholars_orgs_and_keywords.*,
         GROUP_CONCAT(htstr) AS hashtags_list
     FROM (
         SELECT
-            scholars_and_affiliations.*,
+            scholars_and_orgs.*,
             GROUP_CONCAT(kwstr) AS keywords_list
         FROM (
             SELECT
-                scholars.*,
-                affiliations.*
-            FROM scholars
-            LEFT JOIN affiliations
-                ON scholars.affiliation_id = affiliations.affid
-            WHERE (record_status = 'active'
-                OR (record_status = 'legacy' AND valid_date >= NOW()))
-        ) AS scholars_and_affiliations
+                scholars_and_labs.*,
+                -- GROUP_CONCAT(insts.orgid SEPARATOR ',') AS insts_ids,
+                GROUP_CONCAT(insts.tostring SEPARATOR '%%%') AS insts_list
+
+                FROM (
+                    SELECT
+                        scholars.*,
+                        -- GROUP_CONCAT(labs.orgid SEPARATOR ',') AS labs_ids,
+                        GROUP_CONCAT(labs.tostring SEPARATOR '%%%') AS labs_list
+                    FROM scholars
+                    LEFT JOIN sch_org AS map_labs
+                        ON map_labs.uid = luid
+                    JOIN orgs AS labs
+                        ON map_labs.orgid = labs.orgid
+                    WHERE (record_status = 'active'
+                            OR (record_status = 'legacy' AND valid_date >= NOW()))
+                    AND labs.class = 'lab'
+                    GROUP BY luid
+                    ) AS scholars_and_labs
+                LEFT JOIN sch_org AS map_insts
+                    ON map_insts.uid = luid
+                JOIN orgs AS insts
+                    ON map_insts.orgid = insts.orgid
+
+                AND insts.class = 'inst'
+                GROUP BY luid
+        ) AS scholars_and_orgs
 
         LEFT JOIN sch_kw
-            ON sch_kw.uid = scholars_and_affiliations.luid
+            ON sch_kw.uid = scholars_and_orgs.luid
         LEFT JOIN keywords
             ON sch_kw.kwid = keywords.kwid
         GROUP BY luid
 
-    ) AS scholars_affiliations_and_keywords
+    ) AS scholars_orgs_and_keywords
     LEFT JOIN sch_ht
         ON sch_ht.uid = luid
     LEFT JOIN hashtags
@@ -312,7 +335,6 @@ $scholars = array();
 //$query = "SELECT * FROM scholars";
 foreach ($base->query($sql) as $row) {
 
-
     $info = array();
     $info['unique_id'] = $row['luid'];
     $info['doors_uid'] = $row['doors_uid'];
@@ -322,7 +344,7 @@ foreach ($base->query($sql) as $row) {
     $info['initials'] = $row['initials'];
 
     // retrieved from secondary table and GROUP_CONCATenated
-    $info['keywords_ids'] = explode(',', $row['keywords_ids']);
+    // $info['keywords_ids'] = explode(',', $row['keywords_ids']);
     $info['nb_keywords'] = $row['keywords_nb'];
     $info['keywords'] = split_join_keywords_for_html($row['keywords_list']);
 
@@ -333,19 +355,10 @@ foreach ($base->query($sql) as $row) {
     $info['country'] = $row['country'];
     $info['homepage'] = $row['home_url'];
 
+    // recreated arrays
+    $info['labs'] = explode('%%%', $row['labs_list'] ?? "") ;
+    $info['institutions'] = explode('%%%', $row['insts_list'] ?? "") ;
 
-    // TODO recreate difference between lab and org --------->8--------
-    // $info['lab'] = $row['team_lab'];
-    // $info['affiliation'] = $row['org'];
-
-    // right now duplicate treatment short-circuited like this
-    // (effect visible in stat-prep_from_array)
-    $info['affiliation'] = $row['org'] . " " . $row['team_lab'];
-    $info['affiliation_id'] = $row['affiliation_id'];
-    // ----------------------------------------------------->8---------
-
-    // $info['lab2'] = $row['lab2'];
-    // $info['affiliation2'] = $row['affiliation2'];
     $info['title'] = $row['hon_title'];
     $info['position'] = $row['position'];
     $info['pic_src'] = $row['pic_fname'] ? '/data/shared_user_img/'.$row['pic_fname'] : $row['pic_url']  ;
@@ -359,16 +372,16 @@ foreach ($base->query($sql) as $row) {
     // $info['affiliation_acronym'] = $row['affiliation_acronym'];
     $scholars[$row['luid']] = $info;
 }
-/// stats
+// creates js for stats visualisations
 include ("php_library/stat-prep_from_array.php");
 
 // debug
 // $content .= var_dump($scholars) ;
 
+// creates listing
 include ("php_library/directory_content.php");
 
 
-// liste des chercheurs
 
 
 
@@ -453,7 +466,11 @@ Contributions and ideas are welcome to improve this directory.
 <div id="country" style="width: 800px; height: 300px; margin: 0 auto"></div>
 <div id="title" style="width: 800px; height: 300px; margin: 0 auto"></div>
 <div id="position" style="width: 800px; height: 300px; margin: 0 auto"></div>
-<div id="organizations" style="width: 800px; height: 300px; margin: 0 auto"></div>
+
+<!-- these two are displayed only if the distribution has
+     at least 3 big groups (cf. n_shown in stats-prep) -->
+<div id="labs_div" style="width: 800px; height: 300px; margin: 0 auto"></div>
+<div id="insts_div" style="width: 800px; height: 300px; margin: 0 auto"></div>
 
 
 <br/>

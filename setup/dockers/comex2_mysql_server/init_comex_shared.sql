@@ -50,7 +50,7 @@ CREATE TABLE locs(
 CREATE TABLE orgs(
     orgid               int(15) not null auto_increment,
     name                varchar(120),   -- full name
-    acro                varchar(20),    -- acronym or short name
+    acro                varchar(30),    -- acronym or short name
 
     class               varchar(25),   -- "team|lab|inst"
                                     -- like the calibre of the organization

@@ -9,7 +9,7 @@ include ("analytics.php");
 echo '
     <div class="container">
 
-        <!-- Main hero unit for a primary marketing message or call to action -->
+        <!-- Directory listing -->
         <div class="hero-unit">
    ';
 
@@ -19,8 +19,10 @@ $imsize = 150;
 $content='';
 
 
-$lab_list=array();
-// $orga_list=array();       // TODO restore separate organizations (right now duplicate with labs)
+// 2 lists for all the scholars' affiliations
+// (used for "Lab's by alphabetical order" section)
+$all_labs_list=array();
+$all_orga_list=array();
 
 // ajout des scholars
 
@@ -29,18 +31,7 @@ $loop = 0;
 // NB this array was prepared in print_directory or print_scholar_directory
 foreach ($scholars as $scholar) {
 
-    // -----------------------------8<------------------
-    // alternative null values during DB transition
-    // TODO remove when DB finalized and refilled by returning users
-    if (preg_match ('/^ *_NULL *$/', $scholar['position'])) {
-        $scholar['position'] = null ;
-    }
-    if (preg_match ('/^ *_NULL *$/', $scholar['affiliation'])) {
-        $scholar['affiliation'] = null ;
-    }
-
-    error_log('aff:/'.$scholar['affiliation'].'/');
-    // -----------------------------8<------------------
+    $scholar['position'] = weedout_alt_nulls($scholar['position']) ;
 
     // debug
     // var_dump($scholar);
@@ -75,84 +66,70 @@ foreach ($scholars as $scholar) {
             ' <small> - ' . $scholar['country'] . '</small></h2>';
 
 
-    // TODO restore lab // affiliation difference
-    // if (($scholar['position'] != null)||($scholar['lab'] != null)||($scholar['affiliation'] != null)) {
-    if (($scholar['position'] != null)||($scholar['affiliation'] != null)) {
+    if (($scholar['position'] != null)||count($scholar['labs'])||count($scholar['institutions'])) {
        $content .= '<dl>';
     }
 
     if ($scholar['position'] != null) {
         $content .= '<dt>' . $scholar['position'] . '</dt>';
     }
-    $affiliation = '';
+    $lab = '';
 
-    // TODO restore lab vs org ---------------------------------------------8<-----------
-    // new way: already merged in data retrieval in print_*
-    if ($scholar['affiliation'] != null) {
-        $affiliation = $scholar['affiliation'];
-        $lab_list[]=$scholar['affiliation_id'];
-        $content .= '<dd>' . clean_exp($affiliation) . '</dd> ';
+    // new way: list of org.tostring values
+    if (count($scholar['labs'])) {
+        $labs_html = implode(
+                    '<br>',
+                    array_map(
+                        clean_exp,
+                        array_map(esc_html,
+                            array_map(
+                                weedout_alt_nulls,
+                                $scholar['labs']
+                            )
+                        )
+                    )
+                );
+        $content .= '<dd class="labs-of-scholar">' ;
+        $content .= $labs_html ;
+        $content .= '</dd> ';
+
+        // FIXME HERE AND BELOW IN all_orga_list
+        // 1 use stat-prep_from_array.$labs_list which is already created before
+        // 2 use ID instead of tostring
+
+        foreach ($scholar['labs'] as $lab) {
+            $all_labs_list[]=$lab;
+        }
     }
 
-    // OLD WAY
-    // if ($scholar['lab'] != null) {
-    //     $affiliation.=$scholar['lab'] . ', ';
-    //     $lab_list[]=$scholar['lab'];
-    // }
-    // if ($scholar['affiliation'] != null) {
-    //     $affiliation.=$scholar['affiliation'];
-    //     $orga_list[]=$scholar['affiliation'];
-    //
-    //     //echo $scholar['affiliation'].'<br/>';
-    //
-    //     //$lab_query.='OR name="'.$scholar['affiliation'].'" ';
-    // }
-    // if (($scholar['affiliation'] != null) | ($scholar['lab'] != null)) {
-    //     $content .= '<dd>' . clean_exp($affiliation) . '</dd> ';
-    // }
-    // TODO restore lab vs org ---------------------------------------------8<-----------
+    // new way: list of org.tostring values
+    if (count($scholar['institutions'])) {
+        $institutions_html = implode(
+                    '<br>',
+                    array_map(
+                        clean_exp,
+                        array_map(esc_html,
+                            $scholar['institutions']
+                        )
+                    )
+                );
+
+        $content .= '<dd class="institutions-of-scholar">' ;
+        $content .= $institutions_html ;
+        $content .= '</dd> ';
+
+        // foreach ($scholar['insts'] as $inst) {
+        //     $all_orga_list[]=$inst;
+        // }
+    }
 
 
-    // $affiliation2 = '';
-    // if ($scholar['lab2'] != null) {
-    //     $affiliation2.=$scholar['lab2'] . ', ';
-    //     $lab_list[]=$scholar['lab2'];
-    // }
-    // if ($scholar['affiliation2'] != null) {
-    //     $affiliation2.=$scholar['affiliation2'];
-    //     $orga_list[]=$scholar['affiliation2'];
-    //     //echo $scholar['affiliation2'].'<br/>';
-    // }
-    // if (($scholar['affiliation2'] != null) | ($scholar['lab2'] != null)) {
-    //     $content .= '<dd><i>Second affiliation: </i>' . clean_exp($affiliation2) . '</dd>';
-    // }
-    //
-    // if ((strcmp($affiliation2, '') != 0) | (strcmp($affiliation, '') != 0)) {
-    //     $content .= '<br/>';
-    // }
+    // POSS: url of lab as link, if filled in DB
 
-    // $www = '';
-    // if (substr($scholar['homepage'], 0, 3) === 'www') {
-    //     $www.=' <a href=' . trim(str_replace('&', ' and ', 'http://' . $scholar['homepage'])) . ' target=blank > ' . trim(str_replace('&', ' and ', 'http://' . $scholar['homepage'])) . '  </a ><br/>';
-    // } elseif (substr($scholar['homepage'], 0, 4) === 'http') {
-    //     $www.=' <a href=' . trim(str_replace('&', ' and ', $scholar['homepage'])) . ' target=blank > ' . trim(str_replace('&', ' and ', $scholar['homepage'])) . ' </a ><br/>';
-    // }
-    //
-    // if (strcmp($www, '') != 0) {
-    //     $content .= '<dd><i class="icon-home"></i>' . $www . '</dd> ';
-    // }
-    //
-    // if ($scholar['css_member'] === 'Yes') {
-    //     if ($scholar['css_voter'] === 'Yes') {
-    //         $content .= '<dd><i class="icon-user"></i> CSS Voting Member</dd> ';
-    //     } else {
-    //         $content .= '<dd><i class="icon-user"></i> CSS Member</dd> ';
-    //     }
-    // }
-
-   //TODO restore difference lab // affiliation
-    // if (($scholar['position'] != null)||($scholar['lab'] != null)||($scholar['affiliation'] != null)) {
-    if (($scholar['position'] != null)||($scholar['affiliation'] != null)) {
+    if (($scholar['position'] != null)
+        ||count($scholar['lab'])
+        ||count($scholar['affiliation'])
+        ) {
        $content .= '</dl>';
     }
 
@@ -164,7 +141,7 @@ foreach ($scholars as $scholar) {
 
         $htmlsafe_interests = str_replace('%%%', '<br/>',
                                 htmlspecialchars($scholar['interests'],
-                                                 ENT_XML1, 'UTF-8')
+                                                 ENT_HTML5, 'UTF-8')
                               );
         $content .= '<div>';
         $content .= '<h4>Research</h4>';
@@ -225,49 +202,53 @@ $content .= '</div>';
 //////////////////////////
 // liste des labs ////////
 //////////////////////////
-$labs = array();
-sort($lab_list);
-
-foreach ($lab_list as $affid) {
-    // debug
-    // var_dump($affid);
-
-    // old way
-    // $sql = 'SELECT * FROM affiliations where team_lab="' . $name . '" OR acronym="' . $name . '"';
-    $sql = 'SELECT * FROM affiliations WHERE affid=' . $affid ;
-    //echo $sql.'<br/>';
-    foreach ($base->query($sql) as $row) {
-        $info = array();
-        $info['unique_id'] = $row['affid'];
-        $info['name'] = $row['team_lab'];
-        $info['organization'] = $row['org'];
-
-        // TODO RESTORE more lab-related infos
-        //              (here and its effects in labs_list.php)
 
 
-        $info['acronym'] = $row['acronym'] ?? '';
-        $info['homepage'] = $row['homepage'] ?? '';
-        $info['country'] = $row['country'] ?? '';
+// £TODO_ORGS needs FIXME about the ids or removal
 
-
-
-        // $info['keywords'] = $row['keywords'];
-        // $info['address'] = $row['address'];
-        // $info['organization2'] = $row['organization2'];
-        // $orga_list[] = $row['organization'];
-        // $orga_list[] = $row['organization2'];
-        // $info['object'] = $row['object'];
-        // $info['methods'] = $row['methods'];
-        // $info['director'] = $row['director'];
-        // $info['admin'] = $row['admin'];
-        // $info['phone'] = $row['phone'];
-        // $info['fax'] = $row['fax'];
-        // $info['login'] = $row['login'];
-        //print_r($info);
-        $labs[$row['affid']] = $info;
-    }
-}
+// $labs = array();
+// sort($all_labs_list);
+//
+// foreach ($all_labs_list as $affid) {
+//     // debug
+//     // var_dump($affid);
+//
+//     // old way
+//     // $sql = 'SELECT * FROM affiliations where team_lab="' . $name . '" OR acronym="' . $name . '"';
+//     $sql = 'SELECT * FROM affiliations WHERE affid=' . $affid ;
+//     //echo $sql.'<br/>';
+//     foreach ($base->query($sql) as $row) {
+//         $info = array();
+//         $info['unique_id'] = $row['affid'];
+//         $info['name'] = $row['team_lab'];
+//         $info['organization'] = $row['org'];
+//
+//         // TODO RESTORE more lab-related infos
+//         //              (here and its effects in labs_list.php)
+//
+//
+//         $info['acronym'] = $row['acronym'] ?? '';
+//         $info['homepage'] = $row['homepage'] ?? '';
+//         $info['country'] = $row['country'] ?? '';
+//
+//
+//
+//         // $info['keywords'] = $row['keywords'];
+//         // $info['address'] = $row['address'];
+//         // $info['organization2'] = $row['organization2'];
+//         // $all_orga_list[] = $row['organization'];
+//         // $all_orga_list[] = $row['organization2'];
+//         // $info['object'] = $row['object'];
+//         // $info['methods'] = $row['methods'];
+//         // $info['director'] = $row['director'];
+//         // $info['admin'] = $row['admin'];
+//         // $info['phone'] = $row['phone'];
+//         // $info['fax'] = $row['fax'];
+//         // $info['login'] = $row['login'];
+//         //print_r($info);
+//         $labs[$row['affid']] = $info;
+//     }
+// }
 
 // print_r($labs);
 
@@ -278,11 +259,11 @@ foreach ($lab_list as $affid) {
 //////////////////////////
 
 // debug
-// $content .= var_dump($orga_list) ;
+// $content .= var_dump($all_orga_list) ;
 //
 // $organiz = array();
-// sort($orga_list);
-// foreach ($orga_list as $name) {
+// sort($all_orga_list);
+// foreach ($all_orga_list as $name) {
 //     if ((trim($name))!=NULL){
 //     $sql = "SELECT * FROM affiliations WHERE org='" . $name. "'";
 //
@@ -323,7 +304,7 @@ $content .='<br/> <A NAME="labs"> </A>
 <p><i>List of labs to which scholars are affiliated</i></p>';
 
 // TODO RESTORE
-include('labs_list.php');
+// include('labs_list.php');
 
 
 // // TODO change strategy: now commented because is fully duplicate of labs_list

@@ -121,12 +121,17 @@ Full table structure is described in [this documentation file](https://github.co
 -- ==========================
 SELECT
     scholars.*,
-    affiliations.*,
+    orgs.*
 FROM scholars
 LEFT JOIN sch_org
     ON luid = sch_org.uid
 JOIN orgs
-    ON orgs.orgid = sch_org.orgid
+    ON orgs.orgid = sch_org.orgid ;
+
+-- NB: scholars <=> orgs is a one-to-many relationship
+--     so this can return multiple lines
+--  => in the app we use GROUP_CONCAT(orgs.tostring)
+--     to fit in the scholars cardinality)
 
 
 -- ==================================

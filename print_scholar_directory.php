@@ -105,23 +105,42 @@ if ($userid) {
     // implementation with all details and infos to retrieve
     $sql = <<< HERE_QUERY
     SELECT
-        scholars_and_affiliations.*,
+        scholars_and_orgs.*,
         COUNT(keywords.kwid) AS keywords_nb,
         GROUP_CONCAT(keywords.kwid) AS keywords_ids,
         GROUP_CONCAT(kwstr) AS keywords_list
     FROM (
         SELECT
-            scholars.*,
-            affiliations.*
-        FROM scholars
-        LEFT JOIN affiliations
-            ON scholars.affiliation_id = affiliations.affid
-        WHERE (record_status = 'active'
-            OR (record_status = 'legacy' AND valid_date >= NOW()))
-    ) AS scholars_and_affiliations
+            scholars_and_labs.*,
+            -- GROUP_CONCAT(insts.orgid SEPARATOR ',') AS insts_ids,
+            GROUP_CONCAT(insts.tostring SEPARATOR '%%%') AS insts_list
+
+            FROM (
+                SELECT
+                    scholars.*,
+                    -- GROUP_CONCAT(labs.orgid SEPARATOR ',') AS labs_ids,
+                    GROUP_CONCAT(labs.tostring SEPARATOR '%%%') AS labs_list
+                FROM scholars
+                LEFT JOIN sch_org AS map_labs
+                    ON map_labs.uid = luid
+                JOIN orgs AS labs
+                    ON map_labs.orgid = labs.orgid
+                WHERE (record_status = 'active'
+                        OR (record_status = 'legacy' AND valid_date >= NOW()))
+                AND labs.class = 'lab'
+                GROUP BY luid
+                ) AS scholars_and_labs
+            LEFT JOIN sch_org AS map_insts
+                ON map_insts.uid = luid
+            JOIN orgs AS insts
+                ON map_insts.orgid = insts.orgid
+
+            AND insts.class = 'inst'
+            GROUP BY luid
+    ) AS scholars_and_orgs
 
     LEFT JOIN sch_kw AS second_level
-        ON second_level.uid = scholars_and_affiliations.luid
+        ON second_level.uid = scholars_and_orgs.luid
     JOIN sch_kw ON sch_kw.kwid = second_level.kwid
     JOIN keywords
         ON sch_kw.kwid = keywords.kwid
@@ -155,8 +174,8 @@ HERE_QUERY;
 
 
         // TODO recreate difference between lab and org --------->8--------
-        // $info['lab'] = $row['team_lab'];
-        // $info['affiliation'] = $row['org'];
+        $info['labs'] = explode('%%%', $row['labs_list'] ?? "") ;
+        $info['institutions'] = explode('%%%', $row['insts_list'] ?? "") ;
 
         // right now duplicate treatment short-circuited like this
         // (effect visible in stat-prep_from_array)
@@ -168,7 +187,6 @@ HERE_QUERY;
         $info['title'] = $row['hon_title'];
         $info['position'] = $row['position'];
         $info['pic_src'] = $row['pic_fname'] ? '/data/shared_user_img/'.$row['pic_fname'] : $row['pic_url']  ;
-        $info['pic_fname'] = $row['pic_fname'];
         $info['interests'] = $row['interests_text'];
         // $info['address'] = $row['address'];
         // $info['city'] = $row['city'];
@@ -182,12 +200,13 @@ HERE_QUERY;
 }
 
 
-/// stats
+// creates js for stats visualisations
 include ("php_library/stat-prep_from_array.php");
 
 // debug
 // $content .= var_dump($scholars) ;
 
+// creates listing
 include ("php_library/directory_content.php");
 
 

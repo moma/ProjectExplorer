@@ -345,6 +345,16 @@ div.ccsection-footer {
     list-style: none;
 }
 
+/*in directory view*/
+.labs-of-scholar {
+    font-family: Georgia, Cambria, serif;
+}
+.institutions-of-scholar {
+    font-family: Georgia, Cambria, serif;
+    font-weight: bold;
+}
+
+
 /**/
 .bigger {
     font-size: 150%;

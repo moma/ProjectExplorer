@@ -52,22 +52,24 @@ foreach ($jobs as $job) {
     $content .= '<dt>Location: '. '</dt>';
     $content .= '<dd><strong>Country:</strong> ' .  $job['country'] . '</dd>';
     }
+
     $affiliation = '';
-    if ($job['lab'] != null) {
-        $content .= '<dd><strong>' . clean_exp('Lab:</strong> '.$job['lab']) . '</dd> ';
-        $lab_list[]=$job['lab'];
-    }
-    if ($job['organization'] != null) {
-        $content .= '<dd><strong>' . clean_exp('Organization:</strong> '.$job['organization']) . '</dd> ';
-        $orga_list[]=$job['organization'];
-
-        //echo $job['affiliation'].'<br/>';
-
-        //$lab_query.='OR name="'.$job['affiliation'].'" ';
-    }
-    if (($job['organization'] != null) | ($job['lab'] != null)) {
-        $content .= '<dd>' . clean_exp($affiliation) . '</dd> ';
-    }
+    // FIXME old lab/institution data structures
+    // if ($job['lab'] != null) {
+    //     $content .= '<dd><strong>' . clean_exp('Lab:</strong> '.$job['lab']) . '</dd> ';
+    //     $lab_list[]=$job['lab'];
+    // }
+    // if ($job['organization'] != null) {
+    //     $content .= '<dd><strong>' . clean_exp('Organization:</strong> '.$job['organization']) . '</dd> ';
+    //     $orga_list[]=$job['organization'];
+    //
+    //     //echo $job['affiliation'].'<br/>';
+    //
+    //     //$lab_query.='OR name="'.$job['affiliation'].'" ';
+    // }
+    // if (($job['organization'] != null) | ($job['lab'] != null)) {
+    //     $content .= '<dd>' . clean_exp($affiliation) . '</dd> ';
+    // }
 
 
     $affiliation2 = '';

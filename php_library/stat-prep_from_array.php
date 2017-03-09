@@ -5,19 +5,29 @@
  * and open the template in the editor.
  */
 
+
+
+// paramters : threshold to display orgs (labs / institutions) diagrams
+$MIN_DISTINCT_LABS = 5 ;
+$MIN_DISTINCT_INSTS = 4 ;
+
+
 $country_list = array();
 $position_list = array();
 $title_list = array();
-$organizations_list = array();
+$labs_list = array();
+$insts_list = array();
 
 $other_country = 0;
 $other_title = 0;
 $other_position = 0;
-$other_organization = 0;
+$other_labs = 0;
+$other_insts = 0;
 $missing_country = 0;
 $missing_title = 0;
 $missing_position = 0;
-$missing_affiliation = 0;
+$missing_labs = 0;
+$missing_insts = 0;
 // données des pays
 foreach ($scholars as $row) {
 
@@ -29,6 +39,7 @@ foreach ($scholars as $row) {
     }
     }
     // traitement des postes
+    // TODO supprimer, l'essentiel est fait/à faire en amont à l'enregistrement
     $position = strtolower(trim($row["position"]));
     if (strcmp($position, "prof.") == 0) {
         $position = "";
@@ -80,7 +91,7 @@ foreach ($scholars as $row) {
         if (strcmp(substr($title, -1), ".") != 0) {
             $title.=".";
         }
-
+        // TODO supprimer, l'essentiel est fait/à faire en amont à l'enregistrement
         if (strcmp($title, "Dr.") == 0) {
             $title = "PhD.";
         } elseif (strcmp(str_replace (' ','',str_replace ('.','', strtolower($title))), "phd") == 0) {
@@ -102,35 +113,40 @@ foreach ($scholars as $row) {
         }
     }
 
-    // traitement des organismes de rattachement
-    $affiliation = trim($row["affiliation"] ?? "");
+    // split et recensement des organismes de rattachement
 
-    // TODO RESTORE NON NULL affiliation
-    if (strcmp($affiliation, "") == 0 || $affiliation == "_NULL") {
-        $missing_affiliation+=1;
-    } else {
-
-        if (array_key_exists($affiliation, $organizations_list)) {
-            $organizations_list[$affiliation]+=1;
-        } else {
-            $organizations_list[$affiliation] = 1;
-
+    // 1- labos
+    foreach ($row['labs'] as $lab) {
+        $lab = trim($lab);
+        // POSS ideally restore NON NULL labs
+        //      but some users never provided any
+        if (strcmp($lab, "") == 0 || preg_match('/^_NULL/', $lab)) {
+            $missing_labs+=1;
+        }
+        else {
+            // >> $labs_list counts
+            if (array_key_exists($lab, $labs_list)) {
+                $labs_list[$lab]+=1;
+            } else {
+                $labs_list[$lab] = 1;
+            }
         }
     }
-    // $affiliation2 = trim($row["affiliation2"] ?? "");
-    //
-    // if (strcmp($affiliation2, "") == 0) {
-    //     $missing_affiliation+=1;
-    // } else {
-    //
-    //     if (array_key_exists($affiliation2, $organizations_list)) {
-    //         $organizations_list[$affiliation2]+=1;
-    //     } else {
-    //         $organizations_list[$affiliation2] = 1;
-    //
-    //     }
-    // }
-
+    // 2 - same for institutions
+    foreach ($row['institutions'] as $inst) {
+        $inst = trim($inst);
+        if (strcmp($inst, "") == 0 || preg_match('/^_NULL/', $inst)) {
+            $missing_insts+=1;
+        }
+        else {
+            // >> $insts_list counts
+            if (array_key_exists($inst, $insts_list)) {
+                $insts_list[$inst]+=1;
+            } else {
+                $insts_list[$inst] = 1;
+            }
+        }
+    }
 }
 
 
@@ -138,12 +154,20 @@ foreach ($scholars as $row) {
 asort($country_list);
 asort($position_list);
 asort($title_list);
-asort($organizations_list);
+asort($labs_list);
+asort($insts_list);
 
+
+
+// TODO factorize all this
+
+// NB escaping: no need to do htmlspeciazlchars($key, ENT_HTML5 | ENT_QUOTES, 'UTF-8'); because the target language is js (doesn't need html entities)
 
 // données des pays
 $country_data = "data: [";
 foreach ($country_list as $key => $value) {
+
+        $key = addslashes($key);
 
         if ($value > min(9, count($country_list) / 10)) {
             $country_data.='["' . $key . '",' . $value . '],';
@@ -170,6 +194,7 @@ $country_data.=']';
 // données des position
 $position_data = "data: [";
 foreach ($position_list as $key => $value) {
+    $key = addslashes($key);
     if ($value > min(9, count($position_list) / 10)) {
         $position_data.='["' . $key . '",' . $value . '],';
     } else {
@@ -191,6 +216,7 @@ $position_data.=']';
 // données des title
 $title_data = "data: [";
 foreach ($title_list as $key => $value) {
+    $key = addslashes($key);
     if ($value > 3) {
         $title_data.='["' . $key . '",' . $value . '],';
     } else {
@@ -210,29 +236,62 @@ $title_data.=']';
 
 
 // données des institutions/affiliations
-$organizations_data = "data: [";
-foreach ($organizations_list as $key => $value) {
+$labs_data = "data: [";
+$n_labs = count($labs_list);
+$n_shown_labs = 0 ;
+foreach ($labs_list as $key => $value) {
 
-        $htmlsafe_key = htmlspecialchars($key, ENT_XML1 | ENT_COMPAT, 'UTF-8');
-
-        if ($value > min(9, count($organizations_list) / 15)) {
-            $organizations_data.='["' . $htmlsafe_key . '",' . $value . '],';
+        $key = addslashes($key);
+        if ($value > min(9, $n_labs / 15)) {
+            $labs_data.='["' . $key . '",' . $value . '],';
+            $n_shown_labs += 1;
         } else {
-            $other_organization+=$value;
+            $other_labs+=$value;
         }
 
 }
-if ($missing_affiliation>0){
-    $organizations_data.='["Missing data",' . $missing_affiliation . '],';
+if ($missing_labs>0){
+    $labs_data.='["Missing data",' . $missing_labs . '],';
 }
-if ($other_organization>0){
-    $organizations_data.='["Others",' . $other_organization . ']';
+if ($other_labs>0){
+    $labs_data.='["Others",' . $other_labs . ']';
 } else {
-    $organizations_data = substr($organizations_data, 0, -1);
+    $labs_data = substr($labs_data, 0, -1);
 }
 
-$organizations_data.=']';
+$labs_data.=']';
 
+
+$insts_data = "data: [";
+$n_insts = count($insts_list);
+$n_shown_insts = 0 ;
+foreach ($insts_list as $key => $value) {
+
+        $key = addslashes($key);
+        if ($value > min(9, $n_insts / 15)) {
+            $insts_data.='["' . $key . '",' . $value . '],';
+            $n_shown_insts += 1;
+        } else {
+            $other_insts+=$value;
+        }
+
+}
+if ($missing_insts>0){
+    $insts_data.='["Missing data",' . $missing_insts . '],';
+}
+if ($other_labs>0){
+    $insts_data.='["Others",' . $other_insts . ']';
+} else {
+    // removes the last ',' from line 257 or 264
+    $insts_data = substr($insts_data, 0, -1);
+}
+
+$insts_data.=']';
+
+
+
+// TODO separate this Highcharts js to factorize and expose as functions
+//      (or replace it by D3 and also separate)
 $stats = '<script type="text/javascript">
 var country;
 var position;
@@ -341,44 +400,89 @@ $(document).ready(function() {
 		},
 		series: [{
 			type: "pie",
-			name: "Titles",' . $title_data
-        . '}]
+			name: "Titles",' . $title_data .
+         '}]
 	});
 
-        organization= new Highcharts.Chart({
-		chart: {
-			renderTo: "organizations",
-			plotBackgroundColor: null,
-			plotBorderWidth: null,
-			plotShadow: false
-		},
-		title: {
-			text: "Affiliations"
-		},
-		tooltip: {
-			formatter: function() {
-				return "<b>"+ this.point.name +"</b>: "+ Math.floor(10*this.percentage)/10 +" %";
-			}
-		},
-		plotOptions: {
-			pie: {
-				allowPointSelect: true,
-				cursor: "pointer",
-				dataLabels: {
-					enabled: true,
-					color: "#000000",
-					connectorColor: "#000000",
-					formatter: function() {
-						return "<b>"+ this.point.name +"</b>: "+ Math.floor(10*this.percentage)/10 +" %";
-					}
-				}
-			}
-		},
-		series: [{
-			type: "pie",
-			name: "Affiliations",' . $organizations_data
-        . '}]
-	});
+    if (parseInt('.$n_shown_labs.') >= parseInt('.$MIN_DISTINCT_LABS.')) {
+
+        labs= new Highcharts.Chart({
+    		chart: {
+    			renderTo: "labs_div",
+    			plotBackgroundColor: null,
+    			plotBorderWidth: null,
+    			plotShadow: false
+    		},
+    		title: {
+    			text: "Laboratories affiliations"
+    		},
+    		tooltip: {
+    			formatter: function() {
+    				return "<b>"+ this.point.name +"</b>: "+ Math.floor(10*this.percentage)/10 +" %";
+    			}
+    		},
+    		plotOptions: {
+    			pie: {
+    				allowPointSelect: true,
+    				cursor: "pointer",
+    				dataLabels: {
+    					enabled: true,
+    					color: "#000000",
+    					connectorColor: "#000000",
+    					formatter: function() {
+    						return "<b>"+ this.point.name +"</b>: "+ Math.floor(10*this.percentage)/10 +" %";
+    					}
+    				}
+    			}
+    		},
+    		series: [{
+    			type: "pie",
+    			name: "Lab Affiliations",' . $labs_data . '}]
+    	});
+    }
+    else {
+        document.getElementById("labs_div").style.display = "none"
+    }
+
+    if (parseInt('.$n_shown_insts.') >= parseInt('.$MIN_DISTINCT_INSTS.')) {
+
+        insts= new Highcharts.Chart({
+    		chart: {
+    			renderTo: "insts_div",
+    			plotBackgroundColor: null,
+    			plotBorderWidth: null,
+    			plotShadow: false
+    		},
+    		title: {
+    			text: "Institutional affiliations"
+    		},
+    		tooltip: {
+    			formatter: function() {
+    				return "<b>"+ this.point.name +"</b>: "+ Math.floor(10*this.percentage)/10 +" %";
+    			}
+    		},
+    		plotOptions: {
+    			pie: {
+    				allowPointSelect: true,
+    				cursor: "pointer",
+    				dataLabels: {
+    					enabled: true,
+    					color: "#000000",
+    					connectorColor: "#000000",
+    					formatter: function() {
+    						return "<b>"+ this.point.name +"</b>: "+ Math.floor(10*this.percentage)/10 +" %";
+    					}
+    				}
+    			}
+    		},
+    		series: [{
+    			type: "pie",
+    			name: "Institutional Affiliations",' . $insts_data . '}]
+    	});
+    }
+    else {
+        document.getElementById("insts_div").style.display = "none"
+    }
 
 
 });
