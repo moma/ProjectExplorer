@@ -46,4 +46,44 @@ $resultat=mysql_query($sql);
         }
 return $out;
 }
+
+
+
+// prepend scheme to homepage
+// NB well-formedness not tested, should be done before recording
+
+function homepage_to_alink($somelinkstr) {
+    $www = '';
+    if (substr($somelinkstr, 0, 3) === 'www') {
+        $www = ' <a href="'.trim('http://'.$somelinkstr).'" target=blank >' ;
+        $www .= $somelinkstr ;
+        $www .= '</a ><br/>';
+    }
+    elseif (substr($somelinkstr, 0, 4) === 'http') {
+        $www =' <a href="'.$somelinkstr.'" target=blank > ' ;
+        $www .= $somelinkstr ;
+        $www .= '</a ><br/>';
+    }
+    return $www ;
+}
+
+// search on ISCPIF's local search engine
+function web_search($a_query_string, $exact=false) {
+    if ($exact) {
+        $a_query_string = '"'.$a_query_string.'"' ;
+    }
+    return 'https://search.iscpif.fr/?q='.urlencode($a_query_string);
+}
+
+// replace '@' and dots to avoid the email being harvested by robots/spiders
+function safe_email($email_str) {
+    return preg_replace(
+            '/\./', '[dot]',
+            preg_replace(
+                '/@/', '[at]',
+                $email_str
+            )
+          );
+}
+
 ?>

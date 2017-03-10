@@ -257,6 +257,14 @@ if (substr($labfilter, 0,3)=='AND'){
 
 $imsize = 150;
 
+// these stats are useful BOTH in stat-prep and directory_content
+// => should be prepared right now (the label mapping contain all orgs ie both labs and institutions)
+$lab_counts = array();
+$inst_counts = array();
+$org_id_to_label = array();
+
+
+// MAIN HTML CONTENT
 $content='';
 
 // error_log("=======> WHERE filters {$f}");
@@ -279,17 +287,18 @@ SELECT * FROM (
     FROM (
         SELECT
             scholars_and_orgs.*,
-            GROUP_CONCAT(kwstr) AS keywords_list
+            GROUP_CONCAT(kwstr) AS keywords_list,
+            COUNT(keywords.kwid) AS keywords_nb
         FROM (
             SELECT
                 scholars_and_labs.*,
-                -- GROUP_CONCAT(insts.orgid SEPARATOR ',') AS insts_ids,
+                GROUP_CONCAT(insts.orgid SEPARATOR ',') AS insts_ids,
                 GROUP_CONCAT(insts.tostring SEPARATOR '%%%') AS insts_list
 
                 FROM (
                     SELECT
                         scholars.*,
-                        -- GROUP_CONCAT(labs.orgid SEPARATOR ',') AS labs_ids,
+                        GROUP_CONCAT(labs.orgid SEPARATOR ',') AS labs_ids,
                         GROUP_CONCAT(labs.tostring SEPARATOR '%%%') AS labs_list
                     FROM scholars
                     LEFT JOIN sch_org AS map_labs
@@ -359,10 +368,15 @@ foreach ($base->query($sql) as $row) {
     $info['labs'] = explode('%%%', $row['labs_list'] ?? "") ;
     $info['institutions'] = explode('%%%', $row['insts_list'] ?? "") ;
 
+    $info['labs_ids'] = explode(',', $row['labs_ids'] ?? "") ;
+    $info['insts_ids'] = explode(',', $row['insts_ids'] ?? "") ;
+
+
     $info['title'] = $row['hon_title'];
     $info['position'] = $row['position'];
     $info['pic_src'] = $row['pic_fname'] ? '/data/shared_user_img/'.$row['pic_fname'] : $row['pic_url']  ;
     $info['interests'] = $row['interests_text'];
+
     // $info['address'] = $row['address'];
     // $info['city'] = $row['city'];
     // $info['postal_code'] = $row['postal_code'];
@@ -371,8 +385,52 @@ foreach ($base->query($sql) as $row) {
     // $info['fax'] = $row['fax'];
     // $info['affiliation_acronym'] = $row['affiliation_acronym'];
     $scholars[$row['luid']] = $info;
+
+    // we prepare the agregated lab stats in this loop too
+    foreach ( array(
+                array('labs','labs_ids', &$lab_counts),
+                array('institutions','insts_ids', &$inst_counts)
+              ) as $cat) {
+
+        // var_dump($cat);
+
+        $namekey = $cat[0];
+        $idkey = $cat[1];
+        $counthash_ref = &$cat[2];
+
+        // £TODO_ORGS we'll need a missing_labs
+
+        $j = -1 ;
+        foreach ($info[$idkey] as $org_id) {
+
+            $j++;
+            $org_label = $info[$namekey][$j];
+            $org_label = trim($org_label);
+
+            if (strcmp($org_label, "") == 0) {
+                $org_label = null;
+            } else {
+                $org_label = weedout_alt_nulls($org_label);
+            }
+
+            // all non-values are there as null
+            $org_id_to_label[$org_id] = $org_label;
+
+
+            if (array_key_exists($org_id, $counthash_ref)) {
+                $counthash_ref[$org_id]+=1;
+            } else {
+                $counthash_ref[$org_id] = 1;
+            }
+        }
+    }
 }
-// creates js for stats visualisations
+
+// both our stats have been filled
+// var_dump($lab_counts) ;
+// var_dump($inst_counts) ;
+
+// creates js for stats visualisations and counts (we re-use the orgs counts)
 include ("php_library/stat-prep_from_array.php");
 
 // debug
@@ -380,8 +438,6 @@ include ("php_library/stat-prep_from_array.php");
 
 // creates listing
 include ("php_library/directory_content.php");
-
-
 
 
 

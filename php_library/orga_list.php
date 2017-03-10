@@ -1,7 +1,6 @@
 <?php
 
 
-// NOT USED ANYMORE: duplicate with labs_list
 
 $content .='<br/>
 
@@ -35,14 +34,10 @@ foreach ($organiz as $orga) {
 
 
         $www = '';
-        if (substr($orga['homepage'], 0, 3) === 'www') {
-            $www.=' <a href=' . trim(str_replace('&', ' and ', 'http://' . $orga['homepage'])) . ' target=blank > ' . trim(str_replace('&', ' and ', 'http://' . $orga['homepage'])) . '  </a ><br/>';
-        } elseif (substr($orga['homepage'], 0, 4) === 'http') {
-            $www.=' <a href=' . trim(str_replace('&', ' and ', $orga['homepage'])) . ' target=blank > ' . trim(str_replace('&', ' and ', $orga['homepage'])) . ' </a ><br/>';
-        }
+        if (array_key_exists('homepage', $lab) && strlen($lab['homepage'])) {
+            $www = homepage_to_alink($lab['homepage']);
 
-        if (strcmp($www, '') != 0) {
-            $content .= '<dl><dd><i class="icon-home"></i>' . $www . '</dd></dl> ';
+            $content .= '<dl><dd><span class="glyphicon glyphicon-home"></span>'.$www.'</dd></dl>';
         }
 
 

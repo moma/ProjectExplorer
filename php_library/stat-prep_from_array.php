@@ -15,8 +15,11 @@ $MIN_DISTINCT_INSTS = 4 ;
 $country_list = array();
 $position_list = array();
 $title_list = array();
-$labs_list = array();
-$insts_list = array();
+
+
+// not needed already factorized in lab_counts, inst_counts
+// $labs_list = array();
+// $insts_list = array();
 
 $other_country = 0;
 $other_title = 0;
@@ -112,41 +115,6 @@ foreach ($scholars as $row) {
             $title_list[$title] = 1;
         }
     }
-
-    // split et recensement des organismes de rattachement
-
-    // 1- labos
-    foreach ($row['labs'] as $lab) {
-        $lab = trim($lab);
-        // POSS ideally restore NON NULL labs
-        //      but some users never provided any
-        if (strcmp($lab, "") == 0 || preg_match('/^_NULL/', $lab)) {
-            $missing_labs+=1;
-        }
-        else {
-            // >> $labs_list counts
-            if (array_key_exists($lab, $labs_list)) {
-                $labs_list[$lab]+=1;
-            } else {
-                $labs_list[$lab] = 1;
-            }
-        }
-    }
-    // 2 - same for institutions
-    foreach ($row['institutions'] as $inst) {
-        $inst = trim($inst);
-        if (strcmp($inst, "") == 0 || preg_match('/^_NULL/', $inst)) {
-            $missing_insts+=1;
-        }
-        else {
-            // >> $insts_list counts
-            if (array_key_exists($inst, $insts_list)) {
-                $insts_list[$inst]+=1;
-            } else {
-                $insts_list[$inst] = 1;
-            }
-        }
-    }
 }
 
 
@@ -154,8 +122,8 @@ foreach ($scholars as $row) {
 asort($country_list);
 asort($position_list);
 asort($title_list);
-asort($labs_list);
-asort($insts_list);
+asort($lab_counts);
+asort($inst_counts);
 
 
 
@@ -237,9 +205,9 @@ $title_data.=']';
 
 // données des institutions/affiliations
 $labs_data = "data: [";
-$n_labs = count($labs_list);
+$n_labs = count($lab_counts);
 $n_shown_labs = 0 ;
-foreach ($labs_list as $key => $value) {
+foreach ($lab_counts as $key => $value) {
 
         $key = addslashes($key);
         if ($value > min(9, $n_labs / 15)) {
@@ -263,9 +231,9 @@ $labs_data.=']';
 
 
 $insts_data = "data: [";
-$n_insts = count($insts_list);
+$n_insts = count($inst_counts);
 $n_shown_insts = 0 ;
-foreach ($insts_list as $key => $value) {
+foreach ($inst_counts as $key => $value) {
 
         $key = addslashes($key);
         if ($value > min(9, $n_insts / 15)) {

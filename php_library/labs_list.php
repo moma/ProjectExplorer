@@ -11,6 +11,11 @@ foreach ($labs as $lab) {
         set_time_limit(20);
     }
     $loop+=1;
+
+    if ($lab['name'] == '_NULL') {
+        continue;
+    }
+
     $content.= '<div class="row">
                 <div class="span12">
                     <div class="row">
@@ -18,46 +23,60 @@ foreach ($labs as $lab) {
     $content .= '<div>';
 
     $content .= '<h2 >' . $lab['name'];
-    if ($lab['acronym'] != null){
-        $content.=' ('.$lab['acronym'].')';
+    if (strlen($lab['acronym'])){
+        $content.=' (<b>'.$lab['acronym'].'</b>)';
     }
-    $content.=' <small> - ' . $lab['country'] . '</small></h2>';
+    $content.=' <small> - ' . $lab['locname'] . '</small></h2>';
 
     // var_dump($lab);
 
     $www = '';
-    if (array_key_exists('homepage', $lab)) {
-        if (substr($lab['homepage'], 0, 3) === 'www') {
-            $www.=' <a href=' . trim(str_replace('&', ' and ', 'http://' . $lab['homepage'])) . ' target=blank > ' . trim(str_replace('&', ' and ', 'http://' . $lab['homepage'])) . '  </a ><br/>';
-        } elseif (substr($lab['homepage'], 0, 4) === 'http') {
-            $www.=' <a href=' . trim(str_replace('&', ' and ', $lab['homepage'])) . ' target=blank > ' . trim(str_replace('&', ' and ', $lab['homepage'])) . ' </a ><br/>';
+    if (array_key_exists('homepage', $lab) && strlen($lab['homepage'])) {
+        $www = homepage_to_alink($lab['homepage']);
+        $content .= '<dl><dd><i class="icon-home"></i>'.$www.'</dd></dl>';
+    }
+    else {
+        $search_elements = array();
+        foreach($lab as $key => $val) {
+            if ($key == 'unique_id' || $key == 'admin') {
+                continue;
+            }
+            elseif ($key == 'related_insts' && count($lab['related_insts'])) {
+                // we use only the most frequent one for search context
+                $search_elements[] = $lab['related_insts'][0];
+            }
+            else {
+                // ... and we add all other strings (name, acro, lab_code, loc)
+                if ($val && strlen($val) > 2) {
+                    $search_elements[] = $val;
+                }
+            }
         }
+        // print_r($search_elements) ;
+        $www = web_search(implode(', ', $search_elements));
 
-        if (strcmp($www, '') != 0) {
-            $content .= '<dl><dd><i class="icon-home"></i>' . $www . '</dd></dl> ';
-        }
+        // print_r($www);
+
+        $content .= '<dl><dd><a href="'.$www.'"><small>search</small></a><i class="icon-search"></i></dd></dl>';
     }
 
-    if ($lab['organization'] != null) {
+    $lab_code = '';
+    if (array_key_exists('lab_code', $lab) && strlen($lab['lab_code'])) {
+        $exact_search = 'https://search.iscpif.fr/?q='.urlencode('"'.$lab['lab_code'].'"');
+        $content .= '<dl><dd><i class="icon-flag"></i>' ;
+        $content .= '<a href="'.web_search($lab['lab_code'], true).'">';
+        $content .= $lab['lab_code'].'</a></dd></dl>';
+    }
+
+    $n_related_insts = count($lab['related_insts']);
+    if ($n_related_insts) {
         $content .= '<dl>
         <dt>Institutions:</dt>';
-    }
 
+        foreach ($lab['related_insts'] as $rinstitution) {
+            $content .= '<dd class="parent-org">' . $rinstitution . '</dd> ';
+        }
 
-    if ($lab['organization'] != null) {
-        $content .= '<dd>' . $lab['organization'] . '</dd> ';
-    }
-    if (array_key_exists('organization2', $lab) && $lab['organization2'] != null) {
-        $content .= '<dd>' . $lab['organization2'] . '</dd> ';
-    }
-
-    if (($lab['organization'] != null)
-        || (array_key_exists('organization2', $lab) && $lab['organization2'] != null)) {
-        $content .= '<br/>';
-    }
-
-
-    if ($lab['organization'] != null) {
         $content .= '</dl>';
     }
 
@@ -65,60 +84,28 @@ foreach ($labs as $lab) {
     $content .= '</div>';
 
 
-    // LABS MORE INFOS: object, methods, director, keywords, address, phone
-    //
-    // if ((trim($lab['object']) != null) || ($lab['methods'] != null)) {
-    //     $content .= '<div><p>';
-    //     if (trim($lab['methods']) != null) {
-    //         $content .= '<b>Methods: </b> ' . str_replace('%%%', ', ',clean_exp($lab['methods'])) . '<br/><br/>';
-    //     }
-    //
-    //     if (trim($lab['object']) != null) {
-    //         $content .= '<b>Objects: </b> ' .str_replace('%%%', ', ',clean_exp($lab['object'])) . '<br/><br/>';
-    //     }
-    //     $content .= '</p></div>';
-    // }
-    // if ($lab['director'] != null) {
-    //     $content .= '<div>';
-    //     $content .= $content .= '<i class="icon-user"></i>  ' . $lab['director'] . '<br/><br/>';
-    //     $content .= '</div>';
-    // }
-    // $content .= '</div>';
-    //
-    // if (($lab['keywords'] != null) || ($lab['address'] != null) || ($lab['phone'] != null)) {
-    //     $content .= '<div class="span3" align="justify">';
-    //
-    //     if ($lab['keywords'] != null) {
-    //
-    //         $content .= '<i class="icon-tags"></i> ' . $lab['keywords'] . '<br/><br/>';
-    //     }
-    //
-    //
-    //
-    //     if ($lab['admin'] != null) {
-    //         $content .= '<address><i class="icon-info-sign"></i> Administrative contact: ' . ucwords($lab['admin']) . '<br/></address>';
-    //     }
-    //     if ($lab['address'] != null) {
-    //         $content .= '<address><i class="icon-envelope"></i> ' . $lab['address'] . '<br/></address>';
-    //     }
-    //
-    //
-    //     if (($lab['phone'] != null)||($lab['fax'] != null)) {
-    //         $content .= '<address><strong>Phone</strong>: '.$lab['phone'] . '<br/>';
-    //         if ($lab['fax'] != null) {
-    //             $content .='<strong>Fax</strong>: '.$lab['fax'] . '<br/>';
-    //         }
-    //     }
-    //
-    //     $content .= '</div>';
-    // }
+    // LABS MORE INFOS: admin (ie contact person),
+    //                  keywords (not used but POSS if orgs_kwid map)
 
+    $has_admin = array_key_exists('admin', $lab) && strlen($lab['admin']);
+    $has_kws = array_key_exists('keywords', $lab) && strlen($lab['keywords']);
+    if ($has_admin || $has_kws) {
+        $content .= '<div class="span3" align="justify">';
+        if ($has_kws) {
+            $content .= '<i class="icon-tags"></i> ' . $lab['keywords'] . '<br/><br/>';
+        }
+        if ($has_admin) {
+                $content .= '<address><i class="icon-info-sign"></i> Administrative contact:<br>' . $lab['admin'] . '<br></address>';
+        }
+
+        $content .= '</div>';
+    }
     $content .= '</div></div></div>';
 
     $content .= '
 <center><img src="static/img/bar.png"></center>';
     $content .= '<br/>';
     $content .= '<br/>';
-    // fin du profil
+    // fin du profil de labo
 }
 ?>
