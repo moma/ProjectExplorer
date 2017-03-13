@@ -25,7 +25,7 @@ __status__    = "Dev"
 
 
 # ============== imports ==============
-from re           import sub
+from re           import sub, match
 from os           import path, remove
 from json         import dumps
 from datetime     import timedelta
@@ -101,12 +101,12 @@ SOURCE_FIELDS = [
          ("pic_file",              False,        None),   # saved separately
          # => for *scholars* table (optional)
 
-         ("org",                    True,        None),
-         ("org_type",              False,        None),   # predefined values
-         (  "other_org_type",       True,        None),   # +=> org_type
-         ("team_lab",               True,        None),
-         ("org_city",               True,        None),
-         # => for *affiliations* table
+         ("lab_label",              True,        None),   # ~ /acro (name)/
+         ("lab_locname",               True,        None),   #  'Paris, France'
+         ("inst_label",             True,        None),   # ~ /acro (name)/
+         ("inst_type",             False,        None),   # predefined values
+         (  "other_inst_type",      True,        None),   # +=> org_type
+         # => for *orgs* table via sort_affiliation_records
 
          ("keywords",               True,        None),
          # => for *keywords* table (after split str)
@@ -752,6 +752,84 @@ def show_privacy():
 
 
 ########### SUBS ###########
+
+def sort_affiliation_records(clean_records):
+    """
+    Transform GUI side input data into at most 2 orgs objects for DB
+
+    In general:
+        1) the front-end inputs are less free than the DB structure
+            (DB could save an array of orgids but in the inputs they're only allowed max 2 atm : lab and inst)
+
+        2) each org has its microstructure:
+            - name, acronym, class, location (base properties)
+            - inst_type (specific to institutions)
+            - lab_code, url, contact <= not fillable in GUI yet
+
+        3) between themselves 2 orgs can have org_org relationships
+            TODO LATER (not a priority)
+
+        4) we want at least one of lab_label or inst_label to be NOT NULL
+
+    Choices:
+        - values are already sanitized by read_record_from_request
+        - We call label the concatenated name + acronym information,
+          handling here the possibilities for the input via str analysis
+          (just short name, just long name, both)
+
+        - We return a map with 2 key/value submaps for lab and institutions
+    """
+    new_orgs = {'lab': None, 'inst': None}
+    for org_class in new_orgs:
+        # can't create org without some kind of label
+        if (org_class+"_label" not in clean_records
+           or not len(clean_records[org_class+"_label"])):
+           pass
+        else:
+            # submap
+            new_org_info = {}
+
+            # 1) label analysis
+            clean_input = clean_records[org_class+"_label"]
+
+            # custom split attempt
+            # eg 'CNRS (Centre National de la Recherche Scientifique)'
+            #     vvvv  vvvvvvvvvv
+            #     acro     name
+            test_two_groups = match(
+                                r'([^\(]{1,30}) \(([^\)]+)\)',
+                                clean_input
+                              )
+            if test_two_groups:
+                new_org_info['acro'] = test_two_groups.groups()[0]
+                new_org_info['name'] = test_two_groups.groups()[1]
+
+            # fallback cases
+            elif len(clean_input) < 30:
+                new_org_info['acro'] = clean_input
+            else:
+                new_org_info['name'] = clean_input
+
+            # 2) enrich with any other optional org info
+            for detail_col in ['type', 'code', 'locname',
+                               'url', 'contact_email', 'contact_name']:
+
+                # this is a convention in our templates
+                org_detail = org_class + '_' + detail_col
+
+                if org_detail in clean_records:
+                    val = clean_records[org_detail]
+                    if len(val):
+                        new_org_info[detail_col] = val
+
+            # 3) keep
+            new_orgs[org_class] = new_org_info
+
+    return new_orgs
+
+
+
+
 def save_form(clean_records, update_flag=False, previous_user_info=None):
     """
     wrapper function for save profile/register (all DB-related form actions)
@@ -767,11 +845,23 @@ def save_form(clean_records, update_flag=False, previous_user_info=None):
     # A) a new DB connection
     reg_db = dbcrud.connect_db(config)
 
-    # B) read/fill the affiliation table to get associated id
-    clean_records['affiliation_id'] = dbcrud.get_or_create_affiliation(
-        clean_records,
-        reg_db
-    )
+    # B1) re-group the org fields into at most 2 org 'objects'
+    declared_orgs = sort_affiliation_records(clean_records)
+
+    # B2) check our constraint (cf. also E.)
+    if (declared_orgs['lab'] is None or declared_orgs['inst'] is None):
+        raise ValueError("At least 1 org (lab or institution) must be filled")
+
+    # B3) for each, read/fill the orgs table to get associated id(s) in DB
+    orgids = []
+    for oclass in ['lab', 'inst']:
+        if (declared_orgs[oclass]):
+            orgids.append(
+                dbcrud.get_or_create_org(declared_orgs[oclass], reg_db)
+            )
+
+    # B4) save the org <=> org mappings TODO LATER (not a priority)
+    # dbcrud.record_org_org_link(src_orgid, tgt_orgid, reg_db)
 
     # C) create/update record into the primary user table
     # ----------------------------------------------------
@@ -824,6 +914,10 @@ def save_form(clean_records, update_flag=False, previous_user_info=None):
                 map_table
             )
 
+    # E) save the (uid <=> orgid) mapping(s)
+    for orgid in orgids:
+        dbcrud.record_sch_org_link(luid, orgid, reg_db)
+
     # F) end connection
     reg_db.close()
 
@@ -872,9 +966,9 @@ def read_record_from_request(request):
                 clean_records[field] = request.form[field]
 
     # special treatment for "other" subquestions
-    if 'org_type' in clean_records:
-        if clean_records['org_type'] == 'other' and 'other_org_type' in clean_records:
-            clean_records['org_type'] = clean_records['other_org_type']
+    if 'inst_type' in clean_records:
+        if clean_records['inst_type'] == 'other' and 'other_inst_type' in clean_records:
+            clean_records['inst_type'] = clean_records['other_inst_type']
 
     # splits for kw_array and ht_array
     for tok_field in ['keywords', 'hashtags']:

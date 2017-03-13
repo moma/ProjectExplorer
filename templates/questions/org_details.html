@@ -1,0 +1,63 @@
+
+
+<!-- ORG QUESTIONS -->
+
+
+<!-- lab or team and details -->
+<div class="question">
+    <div class="input-group">
+     <label for="lab_label" class="smlabel input-group-addon">* Lab / Team / Dept</label>
+     <input id="lab_label" name="lab_label" maxlength="250"
+            type="text" class="form-control" placeholder="More detailed affiliation, if relevant"
+            value="{{ current_user.info.labs[0].tostring if current_user.info.labs|length > 0 }}">
+    </div>
+</div>
+
+<!-- lab locname <=> only for France -->
+<div class="question conditional-q" id="lab_locname_div">
+    <div class="input-group">
+     <label for="lab_locname" class="smlabel input-group-addon">Lab city</label>
+     <input id="lab_locname" name="lab_locname" maxlength="50"
+            type="text" class="form-control" placeholder="Ville de votre institution"
+            value="{{ current_user.info.labs[0].locname if current_user.info.labs|length > 0 }}">
+    </div>
+</div>
+
+
+<!-- larger institution and details -->
+<div class="question">
+    <div class="input-group">
+     <label for="inst_label" class="smlabel input-group-addon">Parent Institution</label>
+     <input id="inst_label" name="inst_label" maxlength="250"
+            type="text" class="form-control autocomp" placeholder='eg "CNRS" or "University of Oxford"'
+            value="{{ current_user.info.insts[0].tostring if current_user.info.insts|length > 0 }}">
+    </div>
+</div>
+
+<div class="question">
+    <div class="input-group">
+      <label for="inst_type" class="smlabel input-group-addon">Institution Type</label>
+      <select id="inst_type" name="inst_type"
+              class="custom-select form-control"
+              onchange="if(this.value=='other'){otherInstDiv.style.display = 'block'} else {otherInstDiv.style.display='none';otherOrgTypeInput.value=''}">
+        <option selected disabled value="">Please select</option>
+        <option value="university">University</option>
+        <option value="public R&amp;D org">Public sector R&amp;D organization</option>
+        <option value="public other org">Other public sector organization</option>
+        <option value="private org">Private sector organization</option>
+        <option value="none">None at the moment</option>
+        <option value="other"
+                onclick="otherInstDiv.style.display = 'block'"
+                >Other</option>
+
+      </select>
+    </div>
+    <!-- Other institution type <=> only if previous choice == 5 -->
+    <div class="question conditional-q" id="other_org_div">
+      <div class="input-group">
+        <label for="other_inst_type" class="smlabel input-group-addon">Other type</label>
+        <input id="other_inst_type" name="other_inst_type" maxlength="120"
+                type="text" class="form-control" placeholder="Clarify here the type of your parent institution">
+      </div>
+    </div>
+</div>

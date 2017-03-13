@@ -1,4 +1,3 @@
-
 ## dev overview
 
 comex app contains:
@@ -34,13 +33,10 @@ cd $INSTALL_DIR
 sudo pip3 install -r setup/requirements.txt
 ```
 
-Then to run the comex2 services in the simplest way just do:
+Then to run the comex2 server just do:
 ```
-cd services
-python3 comex_main_backend.py
+bash comex-run.sh
 ```
-The form server is then accessible locally on `0.0.0.0:5000/services/user`
-The tina api server is on `0.0.0.0:5000/services/api`
 
 Check the parameters in `config/parametres_comex.ini`
 
@@ -49,7 +45,7 @@ Finally, simply configure the serving of your php|www documentroot in nginx (cf 
 
 -------
 
-#### Advanced dev config
+#### Full dev config
   1. external mysql database
   2. external doors (or simulated by docker)
   3. gunicorn webserver (linked to 1 & 2 via `$SQL_HOST` and `$DOORS_HOST`)
@@ -92,15 +88,8 @@ nano config/parametres_comex.ini
 
 ###### If you have no doors server
 
-For tests you can use a `minidoors` container
-```
-# build the docker image (once)
-cd setup/dockers
-docker build -t minidoors:latest minidoors/
+For tests you can use a self-deployed doors container, available on [this repository](https://github.com/ISCPIF/doors-docker)
 
-# run the container (each time)
-docker run -it -p 32789:8989 --name doors_test minidoors
-```
 
 ##### 3) Run the regomex app with gunicorn
 ```

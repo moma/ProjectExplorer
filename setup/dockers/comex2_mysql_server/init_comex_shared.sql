@@ -69,15 +69,14 @@ CREATE TABLE orgs(
     -- address...          (...)      -- address elements POSS NOT IMPLEMENTED
     reserved            varchar(30),
 
-    -- generated column, often useful for autocompletes etc
+    -- tostring: generated column
     -- ex "Instituto de Fisica de Cantabria (IFCA), Santander, Spain"
-    tostring            varchar(800) AS (CONCAT(
-                                         name, ' (', acro, ')',
-                                         IF(locname IS NOT NULL ,
-                                                 CONCAT(', ', locname),
-                                                 '')
-                                     )),
-
+    -- searchable + human readable, often useful for autocompletes etc
+    tostring            varchar(800)
+        AS (CONCAT_WS( '',
+                       CONCAT(name, ' '),
+                       CONCAT('(',acro,')'),
+                       CONCAT(', ', locname)) ),
     PRIMARY KEY (orgid),
     UNIQUE KEY full_org (name, acro, locname)
 
@@ -97,6 +96,7 @@ CREATE TABLE sch_org(
 
 -- POSS: relationship organizations <=> keywords
 -- POSS: relationship organizations <=> organizations
+-- cf. doc/data_mining_exemples/org_to_orgs.sql
 
 
 -- keyword/subject terms

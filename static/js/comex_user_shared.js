@@ -61,11 +61,25 @@ var cmxClt = (function() {
         ["pic_file",              false,       "pref"   , "f",  "other_infos"],
         // ==> *scholars* table
 
-        ["org",                   false,       "plsfill", "t", "org_infos"],
-        ["org_type",              false,       "plsfill", "m", "org_infos"],
-        ["team_lab",               true,       "plsfill", "t", "org_infos"],
-        ["org_city",              false,       "pref"   , "t", "org_infos"]
-        // ==> *affiliations* table
+
+        // org field
+        //   => name, acro in one field "label": #lab_label, #inst_label
+        //   => all other fields
+        //        - are optional
+        //        - if present, should be named: lab|inst + '_' + colname
+        //   => TODO org details suggestions
+        //      url, loc should have autofill when name or acro is chosen
+        //   => POSS org <-> org suggestions
+        //      once a lab is filled, we could propose the institution
+        ["lab_label",              false,       "plsfill", "t", "org_infos"],
+        ["lab_locname",            false,       "pref", "t", "org_infos"],
+        ["inst_label",             false,       "pref", "t", "org_infos"],
+        ["inst_type",              false,       "pref", "m", "org_infos"],
+        // ["lab_code",            false,       "pref", "t", "org_infos"],
+        // ["lab_url",             false,       "pref", "t", "org_infos"],
+        // ["inst_locname",        false,       "pref"   , "t", "org_infos"],
+        // ["inst_url",            false,       "pref"   , "t", "org_infos"],
+        // ==> *orgs* table via pretreatment org is inst or org is lab
     ]
 
     // group "auto"    === filled by controllers

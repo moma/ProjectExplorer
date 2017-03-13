@@ -10,10 +10,12 @@ from MySQLdb.cursors  import DictCursor
 
 if __package__ == 'services':
     # when we're run via import
-    from services.tools import mlog, REALCONFIG
+    from services.tools      import mlog, REALCONFIG
+    from services.text.utils import normalize_chars, normalize_forms
 else:
     # when this script is run directly
     from tools          import mlog, REALCONFIG
+    from text.utils     import normalize_chars, normalize_forms
 
 
 # sorted columns as declared in DB, as a tuple
@@ -21,14 +23,12 @@ USER_COLS = [
 #          NAME,               NOT NULL,  N or MAXCHARS (if applicable)
          ("luid",                   True,        15),
          ("doors_uid",             False,        36),
-        #  ("last_modified",          True,      None),  # autoset on update
          ("email",                  True,       255),
          ("country",                True,        60),
          ("first_name",             True,        30),
          ("middle_name",           False,        30),
          ("last_name",              True,        50),
          ("initials",               True,         7),
-         ("affiliation_id",        False,      None),   # from db_get_or_create_affiliation
          ("position",              False,        30),
          ("hon_title",             False,        30),
          ("interests_text",        False,      1200),
@@ -43,10 +43,19 @@ USER_COLS = [
       ]
 
 ORG_COLS = [
-         ("org",                   False,       120),
-         ("org_type",              False,        50),
-         ("team_lab",               True,       120),
-         ("org_city",              False,        50)
+         ("class",                 False,        25),  # "lab" or "inst"
+         ("name",                  False,       120),
+         ("acro",                  False,        30),  # acronym or short name
+         ("locname",              False,        120),
+         ("inst_type",             False,        50),
+         ("lab_code",              False,        25),  # not in GUI yet
+         ("url",                  False,        180),  # not in GUI yet
+         ("contact_name",         False,         80),  # not in GUI yet
+         ("contact_email",        False,        255)   # not in GUI yet
+
+         # also in concatenations:
+         #  label    = name + acro
+         #  tostring = name + acro + locname
     ]
 
 
@@ -156,6 +165,10 @@ def get_full_scholar(uid, cmx_db = None):
         db = connect_db()
     db_c = db.cursor(DictCursor)
 
+
+    print('DBG', 'uid', uid)
+    print('DBG', 'type(uid)', type(uid))
+
     # one user + all linked infos concatenated in one row
     #                                   <= 3 LEFT JOINS sequentially GROUPed
     #                                     (b/c if simultaneous, loses unicity)
@@ -182,7 +195,7 @@ def get_full_scholar(uid, cmx_db = None):
 
             FROM (
                     SELECT
-                        sch_n_aff.*,
+                        sch_n_orgs.*,
 
                         -- kws info condensed
                         COUNT(keywords.kwid) AS keywords_nb,
@@ -191,24 +204,39 @@ def get_full_scholar(uid, cmx_db = None):
 
                     FROM (
                         SELECT
-                            scholars.*,
-                            -- for debug replace scholars.* by
-                            -- scholars.luid,
-                            -- scholars.doors_uid,
-                            -- scholars.email,
-                            -- scholars.last_modified_date,
-                            -- scholars.initials,
+                            sch_n_labs.*,
+                            COUNT(insts.orgid) AS insts_ids_nb,
+                            GROUP_CONCAT(insts.orgid) AS insts_ids
 
-                            affiliations.*
+                        FROM (
+                            SELECT
+                                scholars.*,
+                                COUNT(labs.orgid) AS labs_ids_nb,
+                                GROUP_CONCAT(labs.orgid) AS labs_ids
 
-                        FROM scholars
+                            FROM scholars
 
-                        LEFT JOIN affiliations
-                            ON scholars.affiliation_id = affiliations.affid
+                            LEFT JOIN sch_org AS map_labs
+                                ON map_labs.uid = luid
+                            LEFT JOIN (
+                                -- class constraint can't appear later,
+                                -- it would give no scholar when empty
+                                SELECT * FROM orgs WHERE class='lab'
+                            ) AS labs
+                                ON map_labs.orgid = labs.orgid
 
+                            GROUP BY luid
+
+                            ) AS sch_n_labs
+
+                        LEFT JOIN sch_org AS map_insts
+                            ON map_insts.uid = luid
+                        LEFT JOIN (
+                            SELECT * FROM orgs WHERE class='inst'
+                        ) AS insts
+                            ON map_insts.orgid = insts.orgid
                         GROUP BY luid
-
-                        ) AS sch_n_aff
+                        ) AS sch_n_orgs
 
                     -- two step JOIN for keywords
                     LEFT JOIN sch_kw
@@ -232,9 +260,9 @@ def get_full_scholar(uid, cmx_db = None):
             ON linked_ids.uid = luid
 
         -- WHERE our user UID
-        WHERE  luid = "%s"
+        WHERE  luid = %i
         GROUP BY luid
-    """ % str(uid)
+    """ % int(uid)
 
     mlog("DEBUGSQL", "DB get_full_scholar STATEMENT:\n-- SQL\n%s\n-- /SQL" % one_usr_stmt)
 
@@ -246,10 +274,6 @@ def get_full_scholar(uid, cmx_db = None):
 
     urow_dict = db_c.fetchone()
 
-    # we won't use the connect
-    if not cmx_db:
-        db.close()
-
     # break with None if no results
     if urow_dict is None:
         mlog("WARNING", "DB get_full_scholar attempt got no rows for: %s" % uid)
@@ -258,9 +282,9 @@ def get_full_scholar(uid, cmx_db = None):
 
     # normal case <=> exactly one row
 
-    # Exemple data in urow_dict
-    # --------------------------
-    # {'affid': 1, 'affiliation_id': 1, 'hashtags': '#something, #another',
+    # Exemple initial data in urow_dict
+    # ----------------------------------
+    # {'hashtags': '#something, #another',
     #  'country': 'France', 'doors_uid': '5e3adbc1-bcfb-42da-a2c4-4af006fe2b91',
     #  'email': 'jfk@usa.com', 'first_name': 'John', 'gender': 'M',
     #  'home_url': 'http://localhost/regcomex/', 'hon_title': 'Student',
@@ -268,19 +292,19 @@ def get_full_scholar(uid, cmx_db = None):
     #  'job_looking_date': datetime.date(2019, 9, 28),
     #  'hashtags': '#eccs15', 'hashtags_nb': 1,
     #  'keywords': 'complex networks,complex systems,text mining,machine learning', 'keywords_nb': 4,
+    #  'labs_ids': '3888,3444', 'labs_ids_nb': 2,
+    #  'insts_ids': '3295', 'insts_ids_nb': 1,
     #  'last_modified_date': datetime.datetime(2017, 2, 22, 12, 25, 59),
     #  'last_name': 'Kennedy',
     #  'linked_ids': 'twitter:@jfk,yoyo:42,foobar:XWING', 'linked_ids_nb': 3,
     #  'middle_name': 'Fitzgerald',
-    #  'org': 'Centre National de la Recherche Scientifique (CNRS)',
-    #  'org_city': 'Paris', 'org_type': 'public R&D org',
     #  'pic_fname': '12345.jpg', 'pic_url': None, 'position': 'Research Fellow',
     #  'record_status': 'legacy', 'valid_date': datetime.date(2017, 5, 22)}
 
     # post-treatments
     # ---------------
-    # 1/ split concatenated kw an ht lists and check correct length
-    for toktype in ['keywords', 'hashtags']:
+    # 1/ split concatenated kw, ht, lab id, inst id lists and check correct length
+    for toktype in ['keywords', 'hashtags', 'labs_ids', 'insts_ids']:
         if urow_dict[toktype+'_nb'] == 0:
             urow_dict[toktype] = []
         else:
@@ -291,7 +315,33 @@ def get_full_scholar(uid, cmx_db = None):
             else:
                 urow_dict[toktype] = tokarray
 
-    # 2/ also split and parse all linked_ids
+    # 2/ must do a secondary SELECT for detailed org info
+    #       dict['labs_ids']: [id1,    id2    ..]
+    #     => dict['labs']   : [{info1},{info2}..]
+
+    for orgclass in ['labs', 'insts']:
+        id_list = urow_dict[orgclass+"_ids"]  # <- ! naming convention
+        if not len(id_list):
+            urow_dict[orgclass] = []
+        else:
+            org_info = """SELECT name, acro, locname,
+                                 inst_type, lab_code,
+                                 tostring
+                            FROM orgs WHERE orgid IN (%s)""" % ','.join(id_list)
+
+            mlog('DEBUGSQL', "org_info stmt :", org_info)
+
+            new_cursor = db.cursor(DictCursor)
+            new_cursor.execute(org_info)
+
+            urow_dict[orgclass] = new_cursor.fetchall()
+
+    # print('===urow_dict with orgs[]===')
+    # print(urow_dict)
+    # print('==/urow_dict with orgs[]===')
+
+
+    # 3/ also split and parse all linked_ids
     if urow_dict['linked_ids_nb'] == 0:
         urow_dict['linked_ids'] = {}
     else:
@@ -312,6 +362,9 @@ def get_full_scholar(uid, cmx_db = None):
                     urow_dict['linked_ids'][lkid_type] = lkid_id
 
     mlog("INFO", "get_full_scholar %s: OK" % uid)
+
+    if not cmx_db:
+        db.close()
 
     # full user info as a dict
     return urow_dict
@@ -540,34 +593,64 @@ def get_or_create_tokitems(tok_list, cmx_db, tok_table='keywords'):
     return found_ids
 
 
-def get_or_create_affiliation(org_info, cmx_db):
+def record_sch_org_link(luid, orgid, cmx_db = None):
+    if cmx_db:
+        db = cmx_db
+    else:
+        db = connect_db()
+    db_c = db.cursor(DictCursor)
+
+    luid = int(luid)
+    orgid = int(orgid)
+    db_c.execute(
+        'INSERT INTO sch_org(uid,orgid) VALUES (%i,%i)' % (luid, orgid)
+    )
+    if not cmx_db:
+        db.close()
+
+
+def record_org_org_link(orgid_src, orgid_tgt, cmx_db = None):
     """
-    (parent organization + lab) ---> lookup/add to *affiliations* table -> affid
+    new mapping or freq++ if mapping already exists
 
-    org_info should contain properties like in ORG_COLS names
+    TODO LATER (not a priority)
+               method cf. php_library/directory_content.php/$labs
+    """
+    pass
 
-     1) query to *affiliations* table
+def get_or_create_org(org_info, cmx_db = None):
+    """
+    (scholar's parent org(s)) ---> lookup/add to *orgs* table -> orgid
+
+     1) query to *orgs* table
      2) return id
-        => TODO if institution almost matches send suggestion
+        => TODO if institution almost matches API to send suggestion
         => unicity constraint on institution + lab + org_type
-        => if an institution matches return affid
-        => if no institution matches create new and return affid
+        => if an institution matches return orgid
+        => if no institution matches create new and return orgid
 
-        TODO test more
+        ! WIP !
     """
+    if cmx_db:
+        db = cmx_db
+    else:
+        db = connect_db()
+    db_c = db.cursor(DictCursor)
 
     the_aff_id = None
     db_tgtcols = []
     db_qstrvals = []
     db_constraints = []
 
+    mlog("INFO", "get_or_create_org, org_info:", org_info)
+
     for colinfo in ORG_COLS:
         colname = colinfo[0]
         val = org_info.get(colname, None)
 
         if val != None:
-             # TODO better string normalization but not lowercase for acronyms...
-            quotedstrval = "'"+str(val)+"'"
+            val = str(normalize_forms(normalize_chars(val, rm_qt=True)))
+            quotedstrval = "'"+val+"'"
 
             # for insert
             db_tgtcols.append(colname)
@@ -580,28 +663,33 @@ def get_or_create_affiliation(org_info, cmx_db):
 
     db_cursor = cmx_db.cursor()
 
+    mlog("DEBUGSQL", "SELECT org.. WHERE %s" % ("\n AND ".join(db_constraints)))
+
     n_matched = db_cursor.execute(
-                    'SELECT affid FROM affiliations WHERE %s' %
+                    'SELECT orgid FROM orgs WHERE %s' %
                                         " AND ".join(db_constraints)
                 )
 
     # ok existing affiliation => row id
     if n_matched == 1:
         the_aff_id = db_cursor.fetchone()[0]
-        mlog("DEBUG", "Found affiliation (affid %i) (WHERE %s)" % (the_aff_id, " AND ".join(db_constraints)))
+        mlog("DEBUG", "Found affiliation (orgid %i) (WHERE %s)" % (the_aff_id, " AND ".join(db_constraints)))
 
     # no matching affiliation => add => row id
     elif n_matched == 0:
-        db_cursor.execute('INSERT INTO affiliations(%s) VALUES (%s)' % (
+        db_cursor.execute('INSERT INTO orgs(%s) VALUES (%s)' % (
                             ','.join(db_tgtcols),
                             ','.join(db_qstrvals)
                            )
                          )
         the_aff_id = db_cursor.lastrowid
         cmx_db.commit()
-        mlog("DEBUG", "Added affiliation '%s'" % str(db_qstrvals))
+        mlog("DEBUG", "dbcrud: added org '%s'" % str(db_qstrvals))
     else:
-        raise Exception("ERROR: non-unique affiliation '%s'" % str(db_qstrvals))
+        raise Exception("ERROR: get_or_create_org non-unique match '%s'" % str(db_qstrvals))
+
+    if not cmx_db:
+        db.close()
 
     return the_aff_id
 

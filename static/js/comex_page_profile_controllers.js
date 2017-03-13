@@ -14,10 +14,10 @@
  */
 
  // 3 exposed vars for inline js controls
- var teamCityDiv = document.getElementById('team_city_div')
- var otherInstDiv = document.getElementById('other_org_div')
- // TODO make relative to org_type and move inline snippet to extended form obj
- var otherOrgTypeInput = document.getElementById('other_org_type')
+ var teamCityDiv = document.getElementById('lab_locname_div')
+ var otherInstDiv = document.getElementById('other_inst_div')
+ // TODO make relative to inst_type and move inline snippet to extended form obj
+ var otherOrgTypeInput = document.getElementById('other_inst_type')
 
 // reselecting current_user's info choices
 function setupSavedItems(uinfo) {

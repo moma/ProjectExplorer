@@ -39,8 +39,8 @@ var validateWithMessage = false
 var shortRegVersion = true
 var ignoredFields = []
 if (shortRegVersion) {
-    ignoredFields = ['gender', 'home_url', 'org',
-                     'hon_title', 'position', 'org_type',
+    ignoredFields = ['gender', 'home_url', 'inst_label',
+                     'hon_title', 'position', 'inst_type',
                      'hashtags']
 }
 
@@ -68,7 +68,7 @@ function testAsYouGo() {
   }
 }
 
-var teamCityDivStyle = document.getElementById('team_city_div').style
+var teamCityDivStyle = document.getElementById('lab_locname_div').style
 
 function registerDoorsAndSubmit(){
     regfo.elMainMessage.innerHTML = "Registering with the test login portal<br/> and sending validation email..."

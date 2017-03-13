@@ -303,19 +303,21 @@ SELECT * FROM (
                     FROM scholars
                     LEFT JOIN sch_org AS map_labs
                         ON map_labs.uid = luid
-                    JOIN orgs AS labs
+                    LEFT JOIN (
+                        SELECT * FROM orgs WHERE class='lab'
+                    ) AS labs
                         ON map_labs.orgid = labs.orgid
                     WHERE (record_status = 'active'
                             OR (record_status = 'legacy' AND valid_date >= NOW()))
-                    AND labs.class = 'lab'
                     GROUP BY luid
                     ) AS scholars_and_labs
                 LEFT JOIN sch_org AS map_insts
                     ON map_insts.uid = luid
-                JOIN orgs AS insts
+                LEFT JOIN (
+                    SELECT * FROM orgs WHERE class='inst'
+                ) AS insts
                     ON map_insts.orgid = insts.orgid
 
-                AND insts.class = 'inst'
                 GROUP BY luid
         ) AS scholars_and_orgs
 
