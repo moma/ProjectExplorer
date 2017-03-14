@@ -25,24 +25,48 @@ else:
     from text.utils     import CountryConverter
 
 
+# col are for str stats api
+# grouped is for full_scholar filters
 FIELDS_FRONTEND_TO_SQL = {
-    "keywords":      {'col':"keywords.kwstr",        "type": "LIKE_relation"},
-    "tags":          {'col':"hashtags.htstr",        'type': "LIKE_relation"},
-    "hashtags":      {'col':"hashtags.htstr",        'type': "LIKE_relation"},
+    "keywords":      {'col':"keywords.kwstr",
+                      'type': "LIKE_relation",
+                      'grouped': "keywords_list"},
+    "tags":          {'col':"hashtags.htstr",
+                      'type': "LIKE_relation",
+                      'grouped': "hashtags_list"},
+    "hashtags":      {'col':"hashtags.htstr",
+                      'type': "LIKE_relation",
+                      'grouped': "hashtags_list"},
 
-    "countries":     {'col':"scholars.country",      'type': "EQ_relation"},
-    "gender":        {'col':"scholars.gender",       'type': "EQ_relation"},
+    "countries":     {'col':"scholars.country",
+                      'type': "EQ_relation",
+                      'grouped': "country"},
+    "gender":        {'col':"scholars.gender",
+                      'type': "EQ_relation",
+                      'grouped': "gender"},
 
-    "organizations": {'col':"affiliations.org",      'type': "LIKE_relation"},
-    "laboratories":  {'col':"affiliations.team_lab", 'type': "LIKE_relation"},
-    "cities":        {'col':"affiliations.org_city", 'type': "EQ_relation"},
+    "organizations": {'col':"orgs.tostring",
+                      'class': "inst",
+                      'type': "LIKE_relation",
+                      'grouped': "orgs_list"},
+    "laboratories":  {'col':"orgs.tostring",
+                      'class': "lab",
+                      'type': "LIKE_relation",
+                      'grouped': "orgs_list"},
+    # TODO use
+    "cities":        {'col':"orgs.locname",
+                      'type': "LIKE_relation",
+                      'grouped': "locnames_list",
+                      'class': "*"},
 
     "linked":          {'col':"linked_ids.ext_id_type", 'type': "EQ_relation"}
 }
 
 
+# TODO also add paging as param and to postfilters
 def get_field_aggs(a_field,
-                   hapax_threshold=int(REALCONFIG['HAPAX_THRESHOLD']),
+                   hapax_threshold = None,
+                   search_filter_str = None,
                    users_status = "ALL"):
     """
     Use case: /services/api/aggs?field=a_field
@@ -61,6 +85,9 @@ def get_field_aggs(a_field,
 
             POSS: allow other fields than those in the mapping
                   if they are already in sql table.col format?
+
+        search_filter_str: str
+            if present, select only results LIKE this %%str%%
 
         hapax_threshold: int
             for all data_types, categories with a total equal or below this will be excluded from results
@@ -89,6 +116,10 @@ def get_field_aggs(a_field,
         # constraints 2, if any
         postfilters = []
 
+        if search_filter_str is not None and len(search_filter_str):
+            search_filter_str = quotestr(search_filter_str)
+            postfilters.append( "x LIKE '%%%s%%'" % search_filter_str)
+
         if hapax_threshold > 0:
             count_col = 'occs' if sql_tab in ['keywords', 'hashtags'] else 'n'
             postfilters.append( "%s > %i" % (count_col, hapax_threshold) )
@@ -113,18 +144,25 @@ def get_field_aggs(a_field,
                 ORDER BY n DESC
             """ % {'col': sql_col, 'post_filter': post_where}
 
-        elif sql_tab == 'affiliations':
+        elif sql_tab == 'orgs':
+            sql_class = FIELDS_FRONTEND_TO_SQL[a_field]['class']
+            sql_class_clause = ""
+            if len(sql_class) and sql_class != "*":
+                sql_class_clause = "WHERE class='%s'" % sql_class
             stmt = """
                 SELECT x, n FROM (
                     SELECT %(col)s AS x, COUNT(*) AS n
-                    FROM scholars
+                    FROM sch_org
                     -- 0 or 1
-                    LEFT JOIN affiliations
-                        ON scholars.affiliation_id = affiliations.affid
+                    LEFT JOIN orgs
+                        ON sch_org.orgid = orgs.orgid
+                    %(class_clause)s
                     GROUP BY %(col)s
                 ) AS allcounts
+                %(post_filter)s
                 ORDER BY n DESC
-            """ % {'col': sql_col, 'post_filter': post_where}
+            """ % {'col': sql_col, 'class_clause': sql_class_clause,
+                   'post_filter': post_where}
 
         elif sql_tab == 'linked_ids':
             stmt = """

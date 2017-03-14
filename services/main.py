@@ -31,7 +31,7 @@ from json         import dumps
 from datetime     import timedelta
 from urllib.parse import unquote
 from flask        import Flask, render_template, request, \
-                         redirect, url_for, session
+                         redirect, url_for, session, jsonify
 from flask_login  import fresh_login_required, login_required, \
                          current_user, login_user, logout_user
 
@@ -190,22 +190,34 @@ def services():
 def aggs_api():
     """
     API to read DB aggregation data (ex: for autocompletes)
+
+    REST params
+        like:str    an optional filter for select
+        hapax:int   an optional min count threshold
     """
     if 'field' in request.args:
+        search_filter = None
         hap_thresh = None
+        if 'like' in request.args:
+            try:
+                search_filter = str(request.args['like'])
+            except:
+                pass
         if 'hapax' in request.args:
             try:
                 hap_thresh = int(request.args['hapax'])
             except:
                 pass
+        if hap_thresh is None:
+            hap_thresh = int(config['HAPAX_THRESHOLD'])
 
-        if hap_thresh is not None:
-            # field name itself is tested by db module
-            result = dbdatapi.get_field_aggs(request.args['field'], hapax_threshold=hap_thresh)
-        else:
-            result = dbdatapi.get_field_aggs(request.args['field'])
-
-        return dumps(result)
+        # field name itself is tested by db module
+        result = dbdatapi.get_field_aggs(
+            request.args['field'],
+            search_filter_str=search_filter,
+            hapax_threshold=hap_thresh
+            )
+        return jsonify(result)
     else:
         raise TypeError("aggs API query is missing 'field' argument")
 

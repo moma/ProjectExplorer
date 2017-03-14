@@ -72,20 +72,26 @@ $(document).ready(function() {
     $('#' + id3).click(closeThisBox)
 
     // debug
-    // console.log("whoswho.popfilter: adding autocomplete menu", $("#" + id1))
+    console.log("whoswho.popfilter: adding autocomplete menu", $("#" + id1))
 
     $("#" + id2).autocomplete({
         source: function (req, resp) {
             $.ajax({
                 dataType: "json",
                 type: "GET",
-                url: "/search_filter.php",
+                // url: "/search_filter.php",
+                url: "/services/api/aggs",
                 data: {
-                    "category": type,
-                    "term": req.term,
+                    "field": type,
+                    "like": req.term,
                 },
                 success: function(data){
-                    resp(data.results)
+                    resp(data.map(function(info) {
+                        return {
+                            'label': info.x,
+                            'score': info.n
+                        }
+                    }))
                 },
                 error: function(response) {
                     console.log("ERROR from search_filter AJAX", response)
