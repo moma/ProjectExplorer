@@ -13,6 +13,14 @@ $MIN_DISTINCT_LABS_SCHOLARS_SHARE = .25;
 $MIN_DISTINCT_INSTS = 1 ;
 $MIN_DISTINCT_INSTS_SCHOLARS_SHARE = .20;
 
+// always the same colors for "others" and "missing" categories
+$COLOR_OTHERS="grey";
+$COLOR_MISSING="darkgrey";
+
+// all the other available color-scheme
+$COLOR_SCHEME = '["#4572A7", "#AA4643", "#89A54E", "#80699B", "#3D96AE",
+"#DB843D", "#92A8CD", "#A47D7C", "#B5CA92"]';
+
 
 
 // main vars
@@ -33,6 +41,8 @@ $missing_title = 0;
 $missing_position = 0;
 $missing_labs = 0;
 $missing_insts = 0;
+
+
 // données des pays
 foreach ($scholars as $row) {
 
@@ -150,10 +160,10 @@ foreach ($country_list as $key => $value) {
 }
 //if (false) {
 if ($missing_country>0){
-    $country_data.='["Missing data",' . $missing_country . '],';
+    $country_data.='{"name":"Missing data", "y":'. $missing_country . ', "color":"'.$COLOR_MISSING.'"},';
 }
 if ($other_country>0){
-    $country_data.='["Others",' . $other_country . ']';
+    $country_data.='{"name":"Others", "y":'. $other_country . ', "color":"'.$COLOR_OTHERS.'"}';
 } else {
     $country_data = substr($country_data, 0, -1);
 }
@@ -176,10 +186,10 @@ foreach ($position_list as $key => $value) {
 //
 //if (false) {
 if ($missing_position>0){
-    $position_data.='["Missing data",' . $missing_position . '],';
+    $position_data.='{"name":"Missing data", "y":'. $missing_position . ', "color":"'.$COLOR_MISSING.'"},';
 }
 if ($other_position>0){
-    $position_data.='["Others",' . $other_position . ']';
+    $position_data.='{"name":"Others", "y":'. $other_position . ', "color":"'.$COLOR_OTHERS.'"}';
 } else {
     $position_data = substr($position_data, 0, -1);
 }
@@ -197,10 +207,10 @@ foreach ($title_list as $key => $value) {
 }
 //if (false) {
 if ($missing_title>0){
-    $title_data.='["Missing data",' . $missing_title . '],';
+    $title_data.='{"name":"Missing data", "y":'. $missing_title . ', "color":"'.$COLOR_MISSING.'"},';
 }
 if ($other_title>0){
-    $title_data.='["Others",' . $other_title . ']';
+    $title_data.='{"name":"Others", "y":'. $other_title . ', "color":"'.$COLOR_OTHERS.'"}';
 } else {
     $title_data = substr($title_data, 0, -1);
 }
@@ -231,12 +241,13 @@ foreach ($lab_counts as $key => $value) {
 
         # doesn't include missing, but we can compare to n_scholars to know
         $labs_total_responses += $value;
+
 }
 if ($missing_labs>0){
-    $labs_data.='["Missing data",' . $missing_labs . '],';
+    $labs_data.='{"name":"Missing data", "y":'. $missing_labs . ', "color":"'.$COLOR_MISSING.'"},';
 }
 if ($other_labs>0){
-    $labs_data.='["Others",' . $other_labs . ']';
+    $labs_data.='{"name":"Others", "y":'. $other_labs . ', "color":"'.$COLOR_OTHERS.'"}';
 } else {
     $labs_data = substr($labs_data, 0, -1);
 }
@@ -271,10 +282,10 @@ foreach ($inst_counts as $key => $value) {
 
 }
 if ($missing_insts>0){
-    $insts_data.='["Missing data",' . $missing_insts . '],';
+    $insts_data.='{"name":"Missing data", "y":'. $missing_insts . ', "color":"'.$COLOR_MISSING.'"},';
 }
 if ($other_labs>0){
-    $insts_data.='["Others",' . $other_insts . ']';
+    $insts_data.='{"name":"Others", "y":'. $other_insts . ', "color":"'.$COLOR_OTHERS.'"}';
 } else {
     // removes the last ',' from line 257 or 264
     $insts_data = substr($insts_data, 0, -1);
@@ -300,7 +311,8 @@ $(document).ready(function() {
 			renderTo: "country",
 			plotBackgroundColor: null,
 			plotBorderWidth: null,
-			plotShadow: false
+			plotShadow: false,
+            colors: '.$COLOR_SCHEME.'
 		},
 		title: {
 			text: "Countries"
@@ -336,7 +348,8 @@ $(document).ready(function() {
 			renderTo: "position",
 			plotBackgroundColor: null,
 			plotBorderWidth: null,
-			plotShadow: false
+			plotShadow: false,
+            colors: '.$COLOR_SCHEME.'
 		},
 		title: {
 			text: "Position of scholars"
@@ -371,7 +384,8 @@ $(document).ready(function() {
 			renderTo: "title",
 			plotBackgroundColor: null,
 			plotBorderWidth: null,
-			plotShadow: false
+			plotShadow: false,
+            colors: '.$COLOR_SCHEME.'
 		},
 		title: {
 			text: "Title of scholars"
@@ -414,7 +428,8 @@ $(document).ready(function() {
     			renderTo: "labs_div",
     			plotBackgroundColor: null,
     			plotBorderWidth: null,
-    			plotShadow: false
+    			plotShadow: false,
+                colors: '.$COLOR_SCHEME.'
     		},
     		title: {
     			text: "Laboratories affiliations"
@@ -459,7 +474,8 @@ $(document).ready(function() {
     			renderTo: "insts_div",
     			plotBackgroundColor: null,
     			plotBorderWidth: null,
-    			plotShadow: false
+    			plotShadow: false,
+                colors: '.$COLOR_SCHEME.'
     		},
     		title: {
     			text: "Institutional affiliations"
