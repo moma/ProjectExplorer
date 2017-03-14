@@ -189,90 +189,104 @@ $loop = 0;
 
 
 // all lab orgids except _NULL
-$ids_str = implode(',', array_keys($lab_counts));
+$lab_ids = array_filter(array_keys($lab_counts));
+sort($lab_ids);
 
-// print_r("all lab ids here:");
-// print_r($ids_str);
-// print_r("<br/>");
-
+// all lab infos to retrieve
 $labs = array();
 
-// normal query would be enough for everything except parent org
-// POSS page the request in nb of ids >= mysql technical limit for IN
-// $sql = 'SELECT * FROM orgs WHERE orgid IN ('.$ids_str.') ORDER BY name, acro' ;
+// paging
+$step = 2000;
+$n_steps = ceil(count($lab_ids)/$step);
 
-// variant with parent org
-// unique org1 (=> unique pairs (sch_org => sch_org2)
-//              => org2 info)
-//
-// it's much longer in code but fast because of indexes
-//
-// a POSS alternative would be to
-//        create an org_org table
-//        at record time
+for($i = 0; $i < $n_steps; $i++) {
+    $batch = array_slice($lab_ids, $step * $i, $step);
+    $ids_str = implode(',', $batch);
 
-$sql = <<< LABSQLEXTENDED
-SELECT orgs.*,
-       GROUP_CONCAT( tgt_tostring ORDER BY tgt_freq DESC SEPARATOR '%%%')
-        AS related_insts
-FROM orgs
-LEFT JOIN (
-    SELECT sch_org.orgid AS src_orgid,
-          sch_org2.orgid AS tgt_orgid,
-          orgs2.tostring AS tgt_tostring,
-          count(*) AS tgt_freq
-    FROM sch_org
-    LEFT JOIN sch_org AS sch_org2
-        ON sch_org.uid = sch_org2.uid
-    JOIN orgs AS orgs2
-        ON sch_org2.orgid = orgs2.orgid
-    WHERE orgs2.class = 'inst'
-    AND  sch_org.orgid != sch_org2.orgid
-    GROUP BY sch_org.orgid, sch_org2.orgid
-    ) AS lab_relationship_to_inst_via_scholars ON src_orgid = orgs.orgid
-WHERE orgs.orgid IN ( {$ids_str} )
-AND orgs.name != '_NULL'
-GROUP BY orgs.orgid
-ORDER BY orgs.name, orgs.acro
+    // print_r("<br>step: ".$i." / ids_str".$ids_str."<br>");
+
+    // normal query would be enough for everything except parent org
+    // POSS page the request in nb of ids >= mysql technical limit for IN
+    // $sql = 'SELECT * FROM orgs WHERE orgid IN ('.$ids_str.')'; // ORDER BY name, acro' ;
+
+    // variant query with parent org
+    // unique org1 (=> unique pairs (sch_org => sch_org2)
+    //              => org2 info)
+    //
+    // it's much longer in code but fast because of indexes
+    //
+    // a POSS alternative would be to
+    //        create an org_org table
+    //        at record time
+    //
+    $sql = <<< LABSQLEXTENDED
+    SELECT orgs.*,
+           GROUP_CONCAT( tgt_tostring ORDER BY tgt_freq DESC SEPARATOR '%%%')
+            AS related_insts
+    FROM orgs
+    LEFT JOIN (
+        SELECT sch_org.orgid AS src_orgid,
+              sch_org2.orgid AS tgt_orgid,
+              orgs2.tostring AS tgt_tostring,
+              count(*) AS tgt_freq
+        FROM sch_org
+        LEFT JOIN sch_org AS sch_org2
+            ON sch_org.uid = sch_org2.uid
+        JOIN orgs AS orgs2
+            ON sch_org2.orgid = orgs2.orgid
+        WHERE orgs2.class = 'inst'
+        AND  sch_org.orgid != sch_org2.orgid
+        GROUP BY sch_org.orgid, sch_org2.orgid
+        ) AS lab_relationship_to_inst_via_scholars ON src_orgid = orgs.orgid
+    WHERE orgs.orgid IN ( {$ids_str} )
+    AND orgs.name != '_NULL'
+    GROUP BY orgs.orgid
+    ORDER BY orgs.name, orgs.acro
 LABSQLEXTENDED;
 
-// print_r($sql);
+    // print_r($sql);
 
-foreach ($base->query($sql) as $row) {
-    $info = array();
-    $info['unique_id'] = $row['orgid'];
+    foreach ($base->query($sql) as $row) {
+        $info = array();
+        $info['unique_id'] = $row['orgid'];
 
-    // print_r($row);
-    // print_r("<br/>");
+        // print_r($row);
+        // print_r("<br/>");
 
-    $info['name'] = $row['name'];
+        $info['name'] = $row['name'];
 
-    $info['acronym'] = $row['acro'] ?? '';
-    $info['homepage'] = $row['url'] ?? '';
-    $info['lab_code'] = $row['lab_code'] ?? '';
-    $info['locname'] = $row['locname'] ?? '';     // ex: 'Barcelona, Spain'
-                                                  //     'London, UK'
-                                                  //     'UK'
+        $info['acronym'] = $row['acro'] ?? '';
+        $info['homepage'] = $row['url'] ?? '';
+        $info['lab_code'] = $row['lab_code'] ?? '';
+        $info['locname'] = $row['locname'] ?? '';     // ex: 'Barcelona, Spain'
+                                                      //     'London, UK'
+                                                      //     'UK'
 
-    // keywords : POSS with an org <=> keywords map
-    // cf. doc/data_mining_exemples/correlated_kws.sql
-    // $info['keywords'] = $row['keywords'];
+        // keywords : POSS with an org <=> keywords map
+        // cf. doc/data_mining_exemples/correlated_kws.sql
+        // $info['keywords'] = $row['keywords'];
 
-    // most frequent parent orgs (max = 3)
-    $related_insts = array_slice(explode('%%%', $row['related_insts'] ?? ""),0,3) ;
-    $info['related_insts'] = $related_insts;
+        // most frequent parent orgs (max = 3)
+        $related_insts = array_slice(explode('%%%', $row['related_insts'] ?? ""),0,3) ;
+        $info['related_insts'] = $related_insts;
 
-    // also add them to orga_list
-    $all_orga_list[] = $related_insts;
+        // also add them to orga_list
+        $all_orga_list[] = $related_insts;
 
-    $info['admin'] = ucwords($row['contact_name'] ?? '');
-    if ($row['contact_email']) {
-        $safe_contact_email = safe_email($row['contact_email']);
-        $info['admin'] .= '<br><span class=code>'.$safe_contact_email.'</span>';
+        $info['admin'] = ucwords($row['contact_name'] ?? '');
+        if ($row['contact_email']) {
+            $safe_contact_email = safe_email($row['contact_email']);
+            $info['admin'] .= '<br><span class=code>'.$safe_contact_email.'</span>';
+        }
+        // print_r($info);
+        $labs[$row['orgid']] = $info;
+
+        // finished batch
     }
-    // print_r($info);
-    $labs[$row['orgid']] = $info;
+    // finished all labs
 }
+
+
 //
 // print_r("all labs here:");
 // print_r($labs);
@@ -284,7 +298,7 @@ foreach ($base->query($sql) as $row) {
 
 // debug
 // $content .= var_dump($all_orga_list) ;
-//
+
 // $organiz = array();
 // sort($all_orga_list);
 // foreach ($all_orga_list as $name) {
@@ -318,7 +332,7 @@ foreach ($base->query($sql) as $row) {
 //     }
 //
 // }
-//
+
 
 
 ///////////////////////////////////////////////////////////////

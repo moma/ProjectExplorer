@@ -70,6 +70,13 @@ $base = new PDO($dsn, $user, $pass, $opt);
 // liste des chercheurs
 $scholars = array();
 
+// these stats are useful BOTH in stat-prep and directory_content
+// => should be prepared right now (the label mapping contain all orgs ie both labs and institutions)
+$lab_counts = array();
+$inst_counts = array();
+$org_id_to_label = array();
+
+
 if ($userid) {
 
     // query idea:
@@ -118,27 +125,30 @@ if ($userid) {
             FROM (
                 SELECT
                     scholars.*,
-                    -- GROUP_CONCAT(labs.orgid SEPARATOR ',') AS labs_ids,
+                    GROUP_CONCAT(labs.orgid SEPARATOR ',') AS labs_ids,
                     GROUP_CONCAT(labs.tostring SEPARATOR '%%%') AS labs_list
                 FROM scholars
                 LEFT JOIN sch_org AS map_labs
-                    ON map_labs.uid = luid
-                JOIN orgs AS labs
-                    ON map_labs.orgid = labs.orgid
-                WHERE (record_status = 'active'
-                        OR (record_status = 'legacy' AND valid_date >= NOW()))
-                AND labs.class = 'lab'
-                GROUP BY luid
-                ) AS scholars_and_labs
-            LEFT JOIN sch_org AS map_insts
-                ON map_insts.uid = luid
-            JOIN orgs AS insts
-                ON map_insts.orgid = insts.orgid
+                        ON map_labs.uid = luid
+                    LEFT JOIN (
+                        SELECT * FROM orgs WHERE class='lab'
+                    ) AS labs
+                         ON map_labs.orgid = labs.orgid
+                    WHERE (record_status = 'active'
+                            OR (record_status = 'legacy' AND valid_date >= NOW()))
+                    GROUP BY luid
+                    ) AS scholars_and_labs
+                LEFT JOIN sch_org AS map_insts
+                    ON map_insts.uid = luid
+                LEFT JOIN (
+                    SELECT * FROM orgs WHERE class='inst'
+                ) AS insts
+                    ON map_insts.orgid = insts.orgid
 
-            AND insts.class = 'inst'
-            GROUP BY luid
+                GROUP BY luid
     ) AS scholars_and_orgs
 
+    -- expansion (+kw info)
     LEFT JOIN sch_kw AS second_level
         ON second_level.uid = scholars_and_orgs.luid
     JOIN sch_kw ON sch_kw.kwid = second_level.kwid
@@ -172,18 +182,14 @@ HERE_QUERY;
         $info['country'] = $row['country'];
         $info['homepage'] = $row['home_url'];
 
-
-        // TODO recreate difference between lab and org --------->8--------
+        // recreated arrays
         $info['labs'] = explode('%%%', $row['labs_list'] ?? "") ;
         $info['institutions'] = explode('%%%', $row['insts_list'] ?? "") ;
 
-        // right now duplicate treatment short-circuited like this
-        // (effect visible in stat-prep_from_array)
-        $info['affiliation'] = $row['org'] . $row['team_lab'];
-        $info['affiliation_id'] = $row['affiliation_id'];
-        // ----------------------------------------------------->8---------
-        // $info['lab2'] = $row['lab2'];
-        // $info['affiliation2'] = $row['affiliation2'];
+        $info['labs_ids'] = explode(',', $row['labs_ids'] ?? "") ;
+        $info['insts_ids'] = explode(',', $row['insts_ids'] ?? "") ;
+
+
         $info['title'] = $row['hon_title'];
         $info['position'] = $row['position'];
         $info['pic_src'] = $row['pic_fname'] ? '/data/shared_user_img/'.$row['pic_fname'] : $row['pic_url']  ;
@@ -196,11 +202,53 @@ HERE_QUERY;
         // $info['fax'] = $row['fax'];
         // $info['affiliation_acronym'] = $row['affiliation_acronym'];
         $scholars[$row['luid']] = $info;
+
+        // we prepare the agregated lab stats in this loop too
+        foreach ( array(
+                    array('labs','labs_ids', &$lab_counts),
+                    array('institutions','insts_ids', &$inst_counts)
+                  ) as $cat) {
+
+            // var_dump($cat);
+
+            $namekey = $cat[0];
+            $idkey = $cat[1];
+            $counthash_ref = &$cat[2];
+
+            // £TODO_ORGS we'll need a missing_labs
+
+            $j = -1 ;
+            foreach ($info[$idkey] as $org_id) {
+
+                $j++;
+                $org_label = $info[$namekey][$j];
+                $org_label = trim($org_label);
+
+                if (strcmp($org_label, "") == 0) {
+                    $org_label = null;
+                } else {
+                    $org_label = weedout_alt_nulls($org_label);
+                }
+
+                // all non-values are there as null
+                $org_id_to_label[$org_id] = $org_label;
+
+
+                if (array_key_exists($org_id, $counthash_ref)) {
+                    $counthash_ref[$org_id]+=1;
+                } else {
+                    $counthash_ref[$org_id] = 1;
+                }
+            }
+        }
     }
 }
 
+// both our stats have been filled
+// var_dump($lab_counts) ;
+// var_dump($inst_counts) ;
 
-// creates js for stats visualisations
+// creates js for stats visualisations and counts (we re-use the orgs counts)
 include ("php_library/stat-prep_from_array.php");
 
 // debug
@@ -208,8 +256,6 @@ include ("php_library/stat-prep_from_array.php");
 
 // creates listing
 include ("php_library/directory_content.php");
-
-
 
 
 
@@ -261,11 +307,9 @@ $header = '<div class="row" id="welcome">
 <br/>
 <br/>
 <p>
-This directory presents the profiles of <a href="#scholars">'.  count($scholars).' scholars</a> and <a href="#labs">'.  count($labs).' labs</a> in the field of Complex Systems
+This directory presents the profiles of <a href="#scholars">'.  count($scholars).' scholars</a>, <a href="#labs">'.  count($labs).' labs</a> and <a href="#orga">'.$orga_count.' organizations</a> in the field of Complex Systems
 <br/>
 Scholars have been selected from the complex systems directory when sharing common keywords with '.$target_name.'
-
-<!-- TODO restore old version before duplicate lab/orga with $orga_count -->
 
 </p>
 <h4>About the complex systems directory</h4>
@@ -287,7 +331,11 @@ Contributions and ideas are welcome to improve this directory.
 <div id="country" style="width: 800px; height: 300px; margin: 0 auto"></div>
 <div id="title" style="width: 800px; height: 300px; margin: 0 auto"></div>
 <div id="position" style="width: 800px; height: 300px; margin: 0 auto"></div>
-<div id="organizations" style="width: 800px; height: 300px; margin: 0 auto"></div>
+
+<!-- these two are displayed only if the distribution has
+     at least 3 big groups (cf. n_shown in stats-prep) -->
+<div id="labs_div" style="width: 800px; height: 300px; margin: 0 auto"></div>
+<div id="insts_div" style="width: 800px; height: 300px; margin: 0 auto"></div>
 
 
 <br/>
@@ -301,6 +349,8 @@ Contributions and ideas are welcome to improve this directory.
 
 echo $meta.' '.$stats.'</head>';
 if (count($scholars)==0){
+
+// TODO message in modal panel
 echo  '<h2>Sorry, '.$target_name.' did not mention any keywords ... we cannot process its network.</h2><br/>
     If you are '.$target_name.', you can  <a href="/services/user/profile"  target="_BLANK">modify your profile</a> and see your
         network in few minutes.';
@@ -308,5 +358,6 @@ echo  '<h2>Sorry, '.$target_name.' did not mention any keywords ... we cannot pr
 echo $header;
 echo $content;
 }
+exit(0);
 
 ?>

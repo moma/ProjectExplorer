@@ -160,6 +160,5 @@
         //               ---------
         var uinfo = {{ (current_user.json_info | safe) if current_user.info else ("null" | safe) }};
     </script>
-    <script src="{{ url_for('static', filename='js/comex_page_rootindex.js') }}"></script>
 
 {% endblock %}

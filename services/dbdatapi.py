@@ -14,6 +14,7 @@ from math      import floor, log, log1p
 from cgi       import escape
 from re        import sub, match
 from traceback import format_tb
+from json      import loads
 
 if __package__ == 'services':
     from services.tools import mlog, REALCONFIG
@@ -257,6 +258,24 @@ def find_scholar(some_key, some_str_value, cmx_db = None):
     return luid
 
 
+class Org:
+    " tiny helper class to serialize/deserialize orgs TODO use more OOP :) "
+
+    def __init__(self, org_array, org_class=None):
+        if len(org_array) < 3:
+            raise ValueError("Org is implemented for at least [name, acr, loc]")
+        self.name = org_array[0]
+        self.acro = org_array[1]
+        self.locname = org_array[2]
+        self.org_class = org_class
+
+        # DB specifications say that at least one of name||acr is NOT NULL
+        self.any = self.acro if self.acro else self.name
+        self.tostring = (  ( self.name if self.name else "")
+                        + ((' ('+self.acro+')') if self.acro else "")
+                        + ((', '+self.locname) if self.locname else "")
+                        )
+
 
 class BipartiteExtractor:
     """
@@ -405,7 +424,6 @@ class BipartiteExtractor:
                             (record_status = 'legacy' AND valid_date >= NOW())
                         )
                     """
-
                 else:
                     # query is a set of filters like: key <=> array of values
                     # (expressed as rest parameters: "keyA[]=valA1&keyB[]=valB1&keyB[]=valB2")
@@ -426,41 +444,28 @@ class BipartiteExtractor:
                             continue
                         else:
                             known_filter = key
-                            sql_column = FIELDS_FRONTEND_TO_SQL[key]['col']
+                            sql_field = FIELDS_FRONTEND_TO_SQL[key]['grouped']
 
                             # "LIKE_relation" or "EQ_relation"
                             rel_type = FIELDS_FRONTEND_TO_SQL[key]['type']
-
-
-                        # pre-treatment: rewrite tables' names if they're inside the sub-query
-
-                        # exemple:
-                        # scholars.country   ~~~~~> scholars_n_hashtags.country
-                        # hashtags.htstr     ~~~~~> scholars_n_hashtags.htstr
-                        # (see cascaded join below for explanation)
-
-                        if match("scholars", sql_column):
-                            (sql_table, sql_field) = sql_column.split('.')
-                            sql_column = 'scholars_n_hashtags.'+sql_field
-
-                            mlog('DBG', "rewrote sql col", sql_column)
-                        elif match("hashtags.htstr", sql_column):
-                            sql_column = 'scholars_n_hashtags.hashtags_list'
-
-                            mlog('DBG', "rewrote sql col", sql_column)
 
                         # now create the constraints
                         val = filter_dict[known_filter]
 
                         if len(val):
-                            # clause type          clause is full
-                            #  IN (val1, val2)       False
-                            # "= val"                False
-                            # "col LIKE '%val%'"     True
-                            clause_is_full = False
-                            rhsclause = ""
-                            fullclause = ""
-                            if (isinstance(val, list) or isinstance(val, tuple)):
+                            # clause exemples
+                            # "col IN (val1, val2)"
+                            # "col = val"
+                            # "col LIKE '%escapedval%'"
+
+                            if (not isinstance(val, list)
+                              and not isinstance(val, tuple)):
+                                mlog("WARNING", "direct graph api query without tina")
+                                clause = sql_field + type_to_sql_filter(val)
+
+                            # normal case
+                            # tina sends an array of str filters
+                            else:
                                 tested_array = [x for x in val if x]
                                 mlog("DEBUG", "tested_array", tested_array)
                                 if len(tested_array):
@@ -468,33 +473,20 @@ class BipartiteExtractor:
                                         qwliststr = repr(tested_array)
                                         qwliststr = sub(r'^\[', '(', qwliststr)
                                         qwliststr = sub(r'\]$', ')', qwliststr)
-                                        clause = 'IN '+qwliststr
+                                        clause = sql_field + ' IN '+qwliststr
+                                        # ex: country IN ('France', 'USA')
+
                                     elif rel_type == "LIKE_relation":
                                         like_clauses = []
                                         for singleval in tested_array:
                                             if type(singleval) == str and len(singleval):
                                                 like_clauses.append(
-                                                   sql_column+" LIKE '%"+singleval+"%'"
+                                                   sql_field+" LIKE '%"+quotestr(singleval)+"%'"
                                                 )
                                         clause = " OR ".join(like_clauses)
-                                        # clause already includes col name
-                                        clause_is_full = True
-
-                            elif isinstance(val, int):
-                                clause = '= %i' % val
-                            elif isinstance(val, float):
-                                clause = '= %f' % val
-                            # elif isinstance(val, str):
-                            #     clause = '= "%s"' % val
-                            elif isinstance(val, str):
-                                clause = 'LIKE "%'+val+'%"'
-                                clause_is_full = True
 
                             if len(clause):
-                                if clause_is_full:
-                                    sql_constraints.append("(%s)" % clause)
-                                else:
-                                    sql_constraints.append("(%s %s)" % (sql_column, clause))
+                                sql_constraints.append("(%s)" % clause)
 
                     # debug
                     mlog("INFO", "SELECTing active users with sql_constraints", sql_constraints)
@@ -502,44 +494,48 @@ class BipartiteExtractor:
                     # use constraints as WHERE-clause
 
                     # NB we must cascade join because
-                    #    both hashtags and keywords are one-to-many
-                    #   => it renames scholars and hashtag tables
-                    #      into 'scholars_n_hashtags'
+                    #    orgs, hashtags and keywords are one-to-many
+                    #   => it renames tables into 'full_scholar'
                     sql_query = """
+                    SELECT * FROM (
                         SELECT
-                            scholars_n_hashtags.luid,
-                            scholars_n_hashtags.affiliation_id,
+                            sch_org_n_tags.*,
 
                             -- kws info
                             GROUP_CONCAT(keywords.kwstr) AS keywords_list
 
                         FROM (
                             SELECT
-                                scholars.*,
+                                scholars_and_orgs.*,
                                 -- hts info
                                 GROUP_CONCAT(hashtags.htstr) AS hashtags_list
 
-                            FROM scholars
+                            FROM (
+                              SELECT scholars.*,
+                                     -- org info
+                                     -- GROUP_CONCAT(orgs.orgid) AS orgs_ids_list,
+                                     GROUP_CONCAT(orgs_set.tostring) AS orgs_list
+                              FROM scholars
+                              LEFT JOIN sch_org ON luid = sch_org.uid
+                              LEFT JOIN (
+                                SELECT * FROM orgs
+                              ) AS orgs_set ON sch_org.orgid = orgs_set.orgid
+                              GROUP BY luid
+                            ) AS scholars_and_orgs
                             LEFT JOIN sch_ht
                                 ON uid = luid
                             JOIN hashtags
                                 ON sch_ht.htid = hashtags.htid
                             GROUP BY luid
-                        ) AS scholars_n_hashtags
+                        ) AS sch_org_n_tags
 
                         -- two step JOIN for keywords
                         LEFT JOIN sch_kw
                             ON uid = luid
                         JOIN keywords
                             ON sch_kw.kwid = keywords.kwid
-                        -- we still must keep affiliations in case it's used in the WHERE-clause...
-                        LEFT JOIN affiliations
-                            ON affiliation_id = affid
 
-                        -- our filtering constraints fit here
-                        WHERE  %s
-
-                        AND (
+                        WHERE (
                             record_status = 'active'
                             OR
                             (record_status = 'legacy' AND valid_date >= NOW())
@@ -547,7 +543,13 @@ class BipartiteExtractor:
 
                         GROUP BY luid
 
-                    """ % (" AND ".join(sql_constraints))
+                    ) AS full_scholar
+                    -- our filtering constraints fit here
+                    WHERE  %s
+
+                    """ % " AND ".join(sql_constraints)
+
+                mlog("DEBUGSQL", "getScholarsList SELECT:  ", sql_query)
 
                 # in both cases "*" or constraints
                 self.cursor.execute(sql_query)
@@ -573,32 +575,55 @@ class BipartiteExtractor:
         Adding each connected scholar per unique_id
 
         (getting details for selected scholars into graph object)
-        # TODO do it along with previous step getScholarsList
+        # POSS if filters, could do it along with previous step getScholarsList
         # (less modular but a lot faster)
+
+        NB here scholar_array is actually a dict :/ ...
         """
         # debug
         # mlog("DEBUG", "MySQL extract scholar_array:", scholar_array)
+        # scholar_array = list(scholar_array.keys())[0:3]
 
+        # TODO loop could be after SELECT
         for scholar_id in scholar_array:
             sql3='''
                 SELECT
-                    scholars_and_affiliations.*,
+                    scholars_and_orgs.*,
                     COUNT(keywords.kwid) AS keywords_nb,
                     GROUP_CONCAT(keywords.kwid) AS keywords_ids,
                     GROUP_CONCAT(kwstr) AS keywords_list
                 FROM (
                     SELECT
-                        scholars.*,
-                        affiliations.*
-                    FROM scholars
-                    LEFT JOIN affiliations
-                        ON scholars.affiliation_id = affiliations.affid
-                    WHERE (record_status = 'active'
-                        OR (record_status = 'legacy' AND valid_date >= NOW()))
-                ) AS scholars_and_affiliations
+                        scholars_and_insts.*,
+                        -- small serializations here to avoid 2nd query
+                        GROUP_CONCAT(
+                          JSON_ARRAY(labs.name, labs.acro, labs.locname)
+                        ) AS labs_list
+                    FROM (
+                        SELECT
+                            scholars.*,
+                            GROUP_CONCAT(
+                              JSON_ARRAY(insts.name, insts.acro, insts.locname)
+                            ) AS insts_list
+                        FROM
+                            scholars
+                            LEFT JOIN sch_org ON luid = sch_org.uid
+                            LEFT JOIN (
+                                SELECT * FROM orgs WHERE class = 'inst'
+                            ) AS insts ON sch_org.orgid = insts.orgid
+                        WHERE (record_status = 'active'
+                            OR (record_status = 'legacy' AND valid_date >= NOW()))
+                        GROUP BY luid
+                    ) AS scholars_and_insts
+                    LEFT JOIN sch_org ON luid = sch_org.uid
+                    LEFT JOIN (
+                        SELECT * FROM orgs WHERE class = 'lab'
+                    ) AS labs ON sch_org.orgid = labs.orgid
+                    GROUP BY luid
+                ) AS scholars_and_orgs
 
                 LEFT JOIN sch_kw
-                    ON sch_kw.uid = scholars_and_affiliations.luid
+                    ON sch_kw.uid = scholars_and_orgs.luid
                 LEFT JOIN keywords
                     ON sch_kw.kwid = keywords.kwid
                 WHERE luid = %s
@@ -623,6 +648,23 @@ class BipartiteExtractor:
                 else:
                     pic_src = ''
 
+                # NB instead of secondary query for orgs.*, we can
+                # simply parse orgs infos
+                # and take labs[0] and insts[0]
+                labs  = list(map(
+                        lambda arr: Org(arr, org_class='lab'),
+                        loads('['+res3['labs_list'] +']')
+                ))
+                insts = list(map(
+                        lambda arr: Org(arr, org_class='insts'),
+                        loads('['+res3['insts_list']+']')
+                ))
+                mlog("DEBUGSQL", "main lab:", labs[0])
+                mlog("DEBUGSQL", "main inst:", insts[0])
+                # each lab is an array [name, acronym, location]
+
+
+                # all detailed node data
                 ide="D::"+res3['initials']+("/%05i"%int(res3['luid']));
                 info['id'] = ide;
                 info['luid'] = res3['luid'];
@@ -635,13 +677,16 @@ class BipartiteExtractor:
                 info['keywords_ids'] = res3['keywords_ids'].split(',') if res3['keywords_ids'] else [];
                 info['keywords_list'] = res3['keywords_list'];
                 info['country'] = res3['country'];
-                # info['ACR'] = res3['org_acronym']       # TODO create
+                info['ACR'] = labs[0].acro if labs[0].acro else labs[0].any
                 #info['CC'] = res3['norm_country'];
                 info['home_url'] = res3['home_url'];
-                info['team_lab'] = res3['team_lab'];
-                info['org'] = res3['org'];
-                # info['lab2'] = res3['lab2'];                 # TODO restore
-                # info['affiliation2'] = res3['affiliation2'];
+                info['team_lab'] = labs[0].tostring;
+                info['org'] = insts[0].tostring;
+
+                if len(labs) > 1:
+                    info['lab2'] = labs[1].tostring
+                if len(insts) > 1:
+                    info['affiliation2'] = insts[1].tostring
                 info['hon_title'] = res3['hon_title'] if res3['hon_title'] else ""
                 info['position'] = res3['position'];
                 info['job_looking'] = res3['job_looking'];
@@ -975,14 +1020,13 @@ class BipartiteExtractor:
                     content += '<b>Position: </b>' +self.scholars[idNode]['position'].replace("&"," and ")+ '</br>'
 
                 affiliation=""
-                if self.scholars[idNode]['team_lab'] and self.scholars[idNode]['team_lab'] != "":
+                if self.scholars[idNode]['team_lab'] and self.scholars[idNode]['team_lab'] not in ["", "_NULL"]:
                     affiliation += self.scholars[idNode]['team_lab']+ ','
                 if self.scholars[idNode]['org'] and self.scholars[idNode]['org'] != "":
                     affiliation += self.scholars[idNode]['org']
 
-                # TODO restore if not redundant with org
-                # if self.scholars[idNode]['affiliation'] != "" or self.scholars[idNode]['lab'] != "":
-                #     content += '<b>Affiliation: </b>' + affiliation.replace("&"," and ") + '</br>'
+                if affiliation != "":
+                    content += '<b>Affiliation: </b>' + escape(affiliation) + '</br>'
 
                 if len(self.scholars[idNode]['keywords_list']) > 3:
                     content += '<b>Keywords: </b>' + self.scholars[idNode]['keywords_list'].replace(",",", ")+'.</br>'
@@ -1009,8 +1053,6 @@ class BipartiteExtractor:
                 else: node["CC"]="-"
 
                 # Affiliation
-                # TODO restore with org_acronym
-                # node["ACR"] = self.scholars[idNode]["ACR"]
                 node["ACR"] = self.scholars[idNode]["org"]
                 if node["ACR"]=="": node["ACR"]="-"
 
@@ -1089,3 +1131,23 @@ class BipartiteExtractor:
         # mlog("DEBUG", "nodes2",edgesB)
         # mlog("DEBUG", "bipartite",edgesAB)
         return graph
+
+
+
+def quotestr(a_str):
+    "helper function if we need to quote values ourselves"
+    return sub(r"(?<!\\)[']",r"\\'",a_str)
+
+
+def type_to_sql_filter(val):
+    "helper functions if we need to build test filters ourselves"
+
+    if isinstance(val, int):
+        rhs = '= %i' % val
+    elif isinstance(val, float):
+        rhs = '= %f' % val
+    # elif isinstance(val, str):
+    #     rhs = '= "%s"' % val
+    elif isinstance(val, str):
+        rhs = 'LIKE "%'+quotestr(val)+'%"'
+    return rhs

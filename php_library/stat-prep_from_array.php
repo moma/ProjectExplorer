@@ -6,17 +6,19 @@
  */
 
 
+// parameters : threshold to display orgs (labs / institutions) diagrams
+$MIN_DISTINCT_LABS = 1 ;
+$MIN_DISTINCT_LABS_SCHOLARS_SHARE = .25;
 
-// paramters : threshold to display orgs (labs / institutions) diagrams
-$MIN_DISTINCT_LABS = 5 ;
-$MIN_DISTINCT_INSTS = 4 ;
+$MIN_DISTINCT_INSTS = 1 ;
+$MIN_DISTINCT_INSTS_SCHOLARS_SHARE = .20;
 
 
+
+// main vars
 $country_list = array();
 $position_list = array();
 $title_list = array();
-
-
 // not needed already factorized in lab_counts, inst_counts
 // $labs_list = array();
 // $insts_list = array();
@@ -129,16 +131,18 @@ asort($inst_counts);
 
 // TODO factorize all this
 
+// we are creating highcharts' arguments for pie chart
+// eg position_data: data: [["senior researcher",11],["assistant professor",23],["lecturer",25],["engineer",26],["associate professor",28],["student",28],["post-doc",48],["professor",51],["phd student",53],["research director",64],["researcher",68],["Missing data",467],["Others",210]]
+
 // NB escaping: no need to do htmlspeciazlchars($key, ENT_HTML5 | ENT_QUOTES, 'UTF-8'); because the target language is js (doesn't need html entities)
 
 // données des pays
 $country_data = "data: [";
 foreach ($country_list as $key => $value) {
 
-        $key = addslashes($key);
-
-        if ($value > min(9, count($country_list) / 10)) {
-            $country_data.='["' . $key . '",' . $value . '],';
+        $thresh = min(9, count($country_list) / 10);
+        if ($value > $thresh) {
+            $country_data.='["' . addslashes($key) . '",' . $value . '],';
         } else {
             $other_country+=$value;
         }
@@ -162,9 +166,9 @@ $country_data.=']';
 // données des position
 $position_data = "data: [";
 foreach ($position_list as $key => $value) {
-    $key = addslashes($key);
-    if ($value > min(9, count($position_list) / 10)) {
-        $position_data.='["' . $key . '",' . $value . '],';
+    $thresh = min(9, count($position_list) / 10);
+    if ($value > $thresh) {
+        $position_data.='["' . addslashes($key) . '",' . $value . '],';
     } else {
         $other_position+=$value;
     }
@@ -207,16 +211,26 @@ $title_data.=']';
 $labs_data = "data: [";
 $n_labs = count($lab_counts);
 $n_shown_labs = 0 ;
+$tot_shown_labs = 0;
+$labs_total_responses = 0;
 foreach ($lab_counts as $key => $value) {
+        // $key is the orgid, but we need the name
+        $label = $org_id_to_label[$key];
+        $thresh = min(9, $n_labs / 15);
 
-        $key = addslashes($key);
-        if ($value > min(9, $n_labs / 15)) {
-            $labs_data.='["' . $key . '",' . $value . '],';
+        if (!$label || $label == "_NULL") {
+            $missing_labs += $value;
+        }
+        elseif ($value > $thresh) {
+            $labs_data.='["' . addslashes($label) . '",' . $value . '],';
             $n_shown_labs += 1;
+            $tot_shown_labs += $value;
         } else {
             $other_labs+=$value;
         }
 
+        # doesn't include missing, but we can compare to n_scholars to know
+        $labs_total_responses += $value;
 }
 if ($missing_labs>0){
     $labs_data.='["Missing data",' . $missing_labs . '],';
@@ -230,18 +244,30 @@ if ($other_labs>0){
 $labs_data.=']';
 
 
+// $share_of_shown_labs = sprintf("%.6f", $tot_shown_labs/$labs_total_responses);
+$share_of_shown_labs = sprintf("%.6f", $tot_shown_labs/count($scholars));
+
 $insts_data = "data: [";
 $n_insts = count($inst_counts);
 $n_shown_insts = 0 ;
+$tot_shown_insts = 0;
+$insts_total_responses = 0;
 foreach ($inst_counts as $key => $value) {
+        $label = $org_id_to_label[$key];
+        $thresh = min(9, $n_insts / 15);
 
-        $key = addslashes($key);
-        if ($value > min(9, $n_insts / 15)) {
-            $insts_data.='["' . $key . '",' . $value . '],';
+        if (!$label) {
+            $missing_insts += $value;
+        }
+        elseif ($value > $thresh) {
+            $insts_data.='["' . addslashes($label) . '",' . $value . '],';
             $n_shown_insts += 1;
+            $tot_shown_insts += $value;
         } else {
             $other_insts+=$value;
         }
+
+        $insts_total_responses+=$value;
 
 }
 if ($missing_insts>0){
@@ -256,7 +282,10 @@ if ($other_labs>0){
 
 $insts_data.=']';
 
+// $share_of_shown_insts = sprintf("%.6f", $tot_shown_insts/$insts_total_responses);
+$share_of_shown_insts = sprintf("%.6f", $tot_shown_insts/count($scholars));
 
+// print_r("shown_insts_total % ".$share_of_shown_insts);
 
 // TODO separate this Highcharts js to factorize and expose as functions
 //      (or replace it by D3 and also separate)
@@ -372,7 +401,13 @@ $(document).ready(function() {
          '}]
 	});
 
-    if (parseInt('.$n_shown_labs.') >= parseInt('.$MIN_DISTINCT_LABS.')) {
+    var MIN_DISTINCT_LABS = parseInt('.$MIN_DISTINCT_LABS.')
+    var MIN_DISTINCT_LABS_SCHOLARS_SHARE = parseFloat('.$MIN_DISTINCT_LABS_SCHOLARS_SHARE.')
+
+    if (
+        parseInt('.$n_shown_labs.') >= MIN_DISTINCT_LABS
+        && parseFloat('.$share_of_shown_labs.') >= MIN_DISTINCT_LABS_SCHOLARS_SHARE
+        ) {
 
         labs= new Highcharts.Chart({
     		chart: {
@@ -412,7 +447,12 @@ $(document).ready(function() {
         document.getElementById("labs_div").style.display = "none"
     }
 
-    if (parseInt('.$n_shown_insts.') >= parseInt('.$MIN_DISTINCT_INSTS.')) {
+    var MIN_DISTINCT_INSTS = parseInt('.$MIN_DISTINCT_INSTS.')
+    var MIN_DISTINCT_INSTS_SCHOLARS_SHARE = parseFloat('.$MIN_DISTINCT_INSTS_SCHOLARS_SHARE.')
+
+    if ( parseInt('.$n_shown_insts.') >= MIN_DISTINCT_INSTS
+            && parseFloat('.$share_of_shown_insts.') >= MIN_DISTINCT_INSTS_SCHOLARS_SHARE
+            ) {
 
         insts= new Highcharts.Chart({
     		chart: {

@@ -3,8 +3,6 @@ include ("php_library/comex_library.php");
 include ("php_library/parametres.php");
 include ("php_library/normalize.php");
 
-//include("../common/library/fonctions_php.php");
-
 $meta = '<!DOCTYPE html>
 <html lang="en">
     <head>
@@ -86,6 +84,7 @@ function objectToArray($d) {
 
 $data = objectToArray($data);
 
+// REST query params
 $categorya = $data["categorya"] ?? [];
 $categoryb = $data["categoryb"] ?? [];
 $countries = $data["countries"] ?? [];
@@ -195,9 +194,6 @@ if ($countries) {
     $f .= ")  ";
 }
 
-
-
-// £TODO_ORGS FILTER x 2
 if ($laboratories) {
     // debug
     // echo '<p style="color:white">MATCHING ON labs<p>';
@@ -211,8 +207,8 @@ if ($laboratories) {
         if ($lab == "") continue;
         if ($i > 0)
             $f .= " OR ";
-        $f .= 'team_lab LIKE "%' . $lab . '%" ';
-                $query_details.=$lab.', ';
+        $f .= 'labs_list LIKE "%' . $lab . '%" ';
+        $query_details.=$lab.', ';
         $i++;
     }
     $f .= ")  ";
@@ -230,17 +226,20 @@ if ($organizations) {
     foreach ($organizations as $org) {
         // echo '<p style="color:white">========> org =====> '. $org ."<p>";
         $org = sanitize_input(trim(strtolower($org)));
-
         if ($org == "") continue;
-                $query_details.=$org.', ';
-        $f .= 'org LIKE "%' . $org . '%" ';
-                //'affiliation LIKE "%' . $org . '% OR affiliation2 LIKE "%' . $org . '%"';
+        if ($i > 0)
+            $f .= " OR ";
+        $f .= 'insts_list LIKE "%' . $org . '%" ';
+        $query_details.=$org.', ';
         $i++;
     }
     $f .= ")  ";
 }
 
 $query_details.='</ul>';
+
+// debug SQL filters
+// print_r("query filters: ". $f);
 
 $base = new PDO($dsn, $user, $pass, $opt);
 $termsMatrix = array(); // liste des termes présents chez les scholars avec leurs cooc avec les autres termes
@@ -301,7 +300,7 @@ SELECT * FROM (
                         GROUP_CONCAT(labs.orgid SEPARATOR ',') AS labs_ids,
                         GROUP_CONCAT(labs.tostring SEPARATOR '%%%') AS labs_list
                     FROM scholars
-                    LEFT JOIN sch_org AS map_labs
+                LEFT JOIN sch_org AS map_labs
                         ON map_labs.uid = luid
                     LEFT JOIN (
                         SELECT * FROM orgs WHERE class='lab'
@@ -338,7 +337,7 @@ SELECT * FROM (
 END_QUERY;
 
 // debug
-// echo '<p style="color:white">query:'. $sql ."<p>";
+// echo '<p style="color:grey;">query:<br>'. $sql ."<p>";
 
 // liste des chercheurs
 $scholars = array();
@@ -491,11 +490,8 @@ $header = '<div class="row" id="welcome">
 <br/>
 <br/>
 <p>
-This directory presents the profiles of <a href="#scholars">'.  count($scholars).' scholars</a> and <a href="#labs">'.  count($labs).' labs</a> in the field of Complex Systems';
+This directory presents the profiles of <a href="#scholars">'.  count($scholars).' scholars</a>, <a href="#labs">'.  count($labs).' labs</a> and <a href="#orga">'.$orga_count.' organizations</a> in the field of Complex Systems';
 
-
-// TODO restore old version before duplicate lab/orga
-// This directory presents the profiles of <a href="#scholars">'.  count($scholars).' scholars</a>, <a href="#labs">'.  count($labs).' labs</a> and <a href="#orga">'.$orga_count.' organizations</a> in the field of Complex Systems';
 
 
 if (strlen(trim($query_details))>3){
