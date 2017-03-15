@@ -84,172 +84,6 @@
  });
 
 
- // autocomplete institution
- $(function() {
-   var $orgInput = $('#team_lab')
-
-   var orgList = [
-     "Centre National de la Recherche Scientifique (CNRS)",
-     "Institut National de la Recherche Agronomique (INRA)",
-     "Université Paris 6 – Pierre et Marie Curie (UPMC)",
-     "University of Warwick",
-     "Instituto Superior das Ciências do Trabalho e da Empresa - Instituto Universitário de Lisboa",
-     "Ecole Normale Supérieure (ENS) - Ulm",
-     "Ecole Polytechnique (X), U. Paris Saclay",
-     "Institut National de Recherche en Informatique et Automatique (INRIA)",
-     "Université Paris 7 – Diderot",
-     "Universidad Nacional Autonoma de Mexico (UNAM)",
-     "Commissariat à l'Energie Atomique (CEA)",
-     "Institut de Recherche en Sciences et Technologies pour l'Environnement et l'Agriculture (IRSTEA)",
-     "Université Paris 1 – Panthéon-Sorbonne",
-     "University College London (UCL)",
-     "State University of São Paulo (UNESP)",
-     "Open University",
-     "Universitat de Barcelona",
-     "Institut des Systèmes Complexes de Paris Ile-de-France (ISCPIF)",
-     "Institut des Systèmes Complexes Rhône Alpes (IXXI)",
-     "Complex System Society",
-     "Institut National de la Santé et de la Recherche Médicale (INSERM), UMRS 707",
-     "Universidad de Zaragoza",
-     "Université du Havre",
-     "Centre for Nonlinear Studies, Institute of Cybernetics at Tallinn University of Technology",
-     "Eotvos Lorand University",
-     "Indiana University",
-     "Institut de Recherche pour le Développement",
-     "Max Planck Institute for Mathematics in the Sciences",
-     "Northeastern University",
-     "Santa Fe Institute",
-     "Universidad Nacional de Colombia",
-     "Universitat Politècnica de Catalunya (UPC)",
-     "Université Grenoble-Alpes",
-     "Université Paris 5 – Descartes",
-     "Sapienza - Università di Roma",
-     "Centre de Coopération Internationale en Recherche Agronomique pour le Développement",
-     "Commonwealth Scientific and Industrial Research Organization",
-     "Complex Open Systems Research Network (COSNet)",
-     "Cranfield Universtiy",
-     "Facultés Universitaires Notre-Dame de la Paix",
-     "Umeå University",
-     "Universidade de Lisboa",
-     "Universitat de les Illes Balears",
-     "Université de Nice – Sophia Antipolis",
-     "Université de Strasbourg",
-     "Université Libre de Bruxelles",
-     "Université Lyon 2 – Lumière",
-     "Université Paris 11 – Sud",
-     "Université Toulouse 1 – Capitole",
-     "University of Limerick",
-     "University of Manchester",
-     "University of Oxford",
-     "University of Cambridge",
-     "University of Stanford",
-     "University of California (UCal), Berkeley",
-     "ETH Zürich",
-     "Bandung Fe Institute",
-     "Bristol Centre for Complexity Sciences",
-     "Center for Genomic Regulation",
-     "Chalmers University of Technology",
-     "Consiglio Nazionale delle Ricerche",
-     "Ecole Polytechnique Fédérale de Lausanne",
-     "Institut Curie",
-     "Institute for Scientific Interchange Foundation",
-     "Instituto de Sistemas Complejos de Valparaiso",
-     "King's College London",
-     "London School of Economics and Political Sciences",
-     "Nanyang Technological University",
-     "Queen Mary, University of London",
-     "Ruhr Universität Bochum",
-     "Technion - Israel Institute of Technology",
-     "Universidad del Rosario",
-     "Universidad Politécnica de Madrid",
-     "Universidade Federal do Rio Grande do Sul",
-     "Universitat Rovira i Virgili",
-     "Université catholique de Louvain",
-     "Université de Cergy-Pontoise",
-     "Université de Lille",
-     "Université de Rouen",
-     "Université de Versailles Saint Quentin",
-     "Université Européenne de Bretagne",
-     "Université Paris 14 – Est Créteil",
-     "University of Amsterdam",
-     "University of Surrey",
-     "Vrije Universiteit Brussel",
-     "Wroclaw University of Technology",
-     "UPM Autonomous Systems Laboratory (ASLab)",
-     "Agency for Science, Technology and Research (A*STAR), Singapore",
-     "Anglia Ruskin University",
-     "ARC Centre for Complex Systems (ACCS)",
-     "Arizona State University",
-     "Brunel University",
-     "Center for the Study of Complex Systems",
-     "Central European University",
-     "Centre for Complex Systems",
-     "Cracow University of Economics, Cracow, Poland",
-     "Delft University of Technology",
-     "Eastern Connecticut State University",
-     "Ecole des Hautes Etudes en Sciences Sociales (EHESS)",
-     "Ecole des Ponts ParisTech, U. Paris Est",
-     "Ecole Superieure de Physique et Chimie Industrielle (ESPCI)",
-     "Emergence Paris",
-     "Ghent University",
-     "Harvard University",
-     "Imperial College London",
-     "Institut des Systèmes Complexes en Normandie",
-     "Institut National Sport Expertise Performance (INSEP)",
-     "Institute for Complex Systems and Mathematical Biology",
-     "Institute for Complex Systems Simulation",
-     "Institute of Energy and Sustainable Development",
-     "Massachusetts Institute of Technology (MIT)",
-     "National Center for Scientific Research 'Demokritos'",
-     "National Centre for Nuclear Research (POLATOM)",
-     "Non-linearity and Complexity Research Group, Aston",
-     "Northwestern University",
-     "Sabanci University",
-     "Swedish Morphological Society",
-     "Technical University of Denmark",
-     "Tel Aviv University",
-     "Telecom ParisTech",
-     "The Australian National University",
-     "The University of Melbourne",
-     "Universidad Carlos III de Madrid",
-     "Universidade Estadual de Campinas",
-     "Universidade Federal do Rio de Janeiro",
-     "Universidade Nova de Lisboa",
-     "Università degli Studi di Bologna",
-     "Università Roma Tre",
-     "Université de Bourgogne",
-     "Université de Montréal",
-     "Université de Valenciennes et du Hainaut-Cambrésis",
-     "Université Paris 4 – Sorbonne",
-     "Université Toulouse 3 – Paul Sabatier",
-     "University of Calgary",
-     "University of Essex",
-     "University of Exeter",
-     "University of Groningen",
-     "University of Hamburg",
-     "University of Lausanne",
-     "University of Macedonia, Thessaloniki, Greece",
-     "University of Maryland",
-     "University of Warsaw",
-     "Uppsala Universitet",
-     "Warsaw University of Technology",
-     "University of California (UCal), Los Angeles",
-     "Institute of Computer Science of Czech Republic (AV ČR)",
-     "Institute for Condensed Matter Physics of the National Academy of Sciences of Ukraine (ICMP)",]
-
-   $orgInput.autocomplete({
-       source: orgList,
-       autoFocus: true,
-       select:   function( event, ui ) {
-           // console.log(ui)
-
-           // not tab because used to move on to next field
-           if(event.keyCode == 9) return false;
-
-           $orgInput[0].style.fontWeight = "bold"
-       }
-   });
- });
 
 
  // autocomplete via remote aggs api
@@ -257,18 +91,25 @@
  //       => must match the html form input id (eg #keywords)
  //       => supposed to also match the REST param
  //            (eg services/api/aggs?field=keywords)
-function remoteAutocompleteInit(fieldName) {
-   var nMax = 100
-   var hapaxThresh = 1
+
+function remoteAutocompleteInit(fieldName, hap, altApiName) {
+    var nMax = 100
+    var hapaxThresh = 1
+    if (hap != null) {
+        hapaxThresh = hap
+    }
+    var apiName = fieldName
+    if (altApiName != null) {
+        apiName = altApiName
+    }
 
    var $theInput = $('#'+fieldName)
 
    var theValuedArray = []
-
    $.ajax({
        type: 'GET',
        dataType: 'json',
-       url: "/services/api/aggs?field="+fieldName+"&hapax="+hapaxThresh,
+       url: "/services/api/aggs?field="+apiName+"&hapax="+hapaxThresh,
        success: function(data) {
            // ex data is array like:
            // [{"occs": 1116, "x": null},
@@ -279,8 +120,11 @@ function remoteAutocompleteInit(fieldName) {
            for (var i in data) {
                if (data[i].x != null) {
                    var item = data[i].x
-                   var occs = data[i].occs
-                   theValuedArray.push([item, occs])
+                   var occs = data[i].occs || data[i].n
+
+                   if (item && item != null) {
+                       theValuedArray.push([item, occs])
+                   }
                }
            }
 
@@ -322,9 +166,12 @@ function remoteAutocompleteInit(fieldName) {
 }
 
 
- $(function() {
-     remoteAutocompleteInit('keywords')
-     remoteAutocompleteInit('hashtags')
- });
+
+// initialize the remote ones
+remoteAutocompleteInit('keywords')
+remoteAutocompleteInit('lab_label', 1, 'laboratories')
+
+if (document.getElementById('hashtags'))   remoteAutocompleteInit('hashtags')
+if (document.getElementById('inst_label') )    remoteAutocompleteInit('inst_label', 1, 'organizations')
 
  console.log("autocompletes load OK")
