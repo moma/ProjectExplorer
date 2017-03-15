@@ -10,7 +10,7 @@ $content .='<br/>
 $orga_count = 0;
 
 // debug
-// $content .= var_dump($organiz) ;
+$content .= var_dump($organiz) ;
 
 foreach ($organiz as $orga) {
 
@@ -26,12 +26,31 @@ foreach ($organiz as $orga) {
                         <div class="span9" align="justify">';
         $content .= '<div>';
 
-        $content .= '<h2 >' . $orga['name'];
-        if ($orga['acronym'] != null) {
-            $content.=' (' . $orga['acronym'] . ')';
-        }
-        $content.=' <small> - ' . $orga['country'] . '</small></h2>';
+        // unique anchor
+        $content .= '<a name="org-'.$orga['unique_id'].'"></a>';
 
+
+        // title
+        $content .= '<h2>' ;
+        $has_acro = false ;
+        if (strlen($orga['acronym'])) {
+            $content .= $orga['acronym'];
+            $has_acro = true ;
+        }
+        if ($orga['name']) {
+            if ($has_acro)   $content .= ' <small>(';
+            $content .= $orga['name'];
+            if ($has_acro)   $content .= ')</small>';
+        }
+
+        if ($orga['locname'] != null) {
+            $content.=' <small> - ' . $orga['locname'] . '</small>';
+        }
+
+    $www = org_info_to_search_link($orga);
+    $content .= '<a href="'.$www.'"><i class="icon-search"></i></a>';
+
+    $content.="</h2>";
 
         $www = '';
         if (array_key_exists('homepage', $lab) && strlen($lab['homepage'])) {
@@ -59,7 +78,7 @@ foreach ($organiz as $orga) {
         }
         $content .= '</div>';
 
-        if (($orga['keywords'] != null) || ($orga['address'] != null) || ($orga['phone'] != null)) {
+        if (($orga['keywords'] != null) || ($orga['admin'] != null)) {
             $content .= '<div class="span3" align="justify">';
 
             if ($orga['keywords'] != null) {
@@ -67,29 +86,9 @@ foreach ($organiz as $orga) {
                 $content .= '<i class="icon-tags"></i> ' . $orga['keywords'] . '<br/><br/>';
             }
 
-
-
             if ($orga['admin'] != null) {
                 $content .= '<address><i class="icon-info-sign"></i> Administrative contact: ' . ucwords($orga['admin']) . '<br/></address>';
             }
-            if (trim($orga['street']) != null) {
-                $address = $orga['street'] . ', ' . $orga['city'] . ', ' . $orga['postal_code']
-                . ', ' . $orga['state']. ', ' . $orga['country'];
-                $address = str_replace(", , , , ", ", ", $address);
-                $address = str_replace(", , , ", ", ", $address);
-                $address = str_replace(", , ", ", ", $address);
-
-                $content .= '<address><i class="icon-envelope"></i> ' . $address . '<br/></address>';
-            }
-
-
-            if (($orga['phone'] != null) || ($orga['fax'] != null)) {
-                $content .= '<address><strong>Phone</strong>: ' . $orga['phone'] . '<br/>';
-                if ($orga['fax'] != null) {
-                    $content .='<strong>Fax</strong>: ' . $orga['fax'] . '<br/>';
-                }
-            }
-
             $content .= '</div>';
         }
 

@@ -792,7 +792,6 @@ def parse_affiliation_records(clean_records):
         - We return a map with 2 key/value submaps for lab and institutions
     """
     new_orgs = {'lab': None, 'inst': None}
-    print(clean_records)
     for org_class in new_orgs:
         # can't create org without some kind of label
         if (org_class+"_label" not in clean_records
@@ -880,7 +879,7 @@ def save_form(clean_records, update_flag=False, previous_user_info=None):
     # B1) re-group the org fields into at most 2 org 'objects'
     declared_orgs = parse_affiliation_records(clean_records)
 
-    mlog('DBG', '=====> save_form: declared_orgs = ', declared_orgs)
+    mlog('DEBUG', 'save_form: declared values for org =', declared_orgs)
 
     # B2) check our constraint (cf. also E.)
     if (declared_orgs['lab'] is None and declared_orgs['inst'] is None):
@@ -895,7 +894,7 @@ def save_form(clean_records, update_flag=False, previous_user_info=None):
                 dbcrud.get_or_create_org(declared_orgs[oclass], oclass, reg_db)
             )
 
-    mlog('DBG orgids:', orgids)
+    mlog('DEBUG', 'save_form: found ids for orgs =', orgid)
 
     # B4) save the org <=> org mappings TODO LATER (not a priority)
     # dbcrud.record_org_org_link(src_orgid, tgt_orgid, reg_db)
@@ -953,9 +952,9 @@ def save_form(clean_records, update_flag=False, previous_user_info=None):
 
     # E) overwrite the (uid <=> orgid) mapping(s)
     dbcrud.rm_sch_org_links(luid, reg_db)
-    mlog("DBG", "removing all orgs for", luid)
+    mlog("DEBUG", "removing all orgs for", luid)
     for orgid in orgids:
-        mlog("DBG", "recording orgs:", luid, orgid)
+        mlog("DEBUG", "recording orgs:", luid, orgid)
         dbcrud.record_sch_org_link(luid, orgid, reg_db)
 
     # F) end connection

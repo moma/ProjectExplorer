@@ -492,10 +492,6 @@ class BipartiteExtractor:
                             if len(clause):
                                 sql_constraints.append("(%s)" % clause)
 
-                    # debug
-                    # £TODO_ORG rm
-                    mlog("INFO", "SELECTing active users with sql_constraints", sql_constraints)
-
                     # use constraints as WHERE-clause
 
                     # NB we must cascade join because

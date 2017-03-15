@@ -338,7 +338,7 @@ def get_full_scholar(uid, cmx_db = None):
 
             urow_dict[orgclass] = new_cursor.fetchall()
 
-            print("get_full_scholar orgs::", urow_dict[orgclass])
+            # print("get_full_scholar orgs::", urow_dict[orgclass])
 
 
     # print('===urow_dict with orgs[]===')
@@ -665,7 +665,7 @@ def get_or_create_org(org_info, oclass, cmx_db = None):
     if oclass:
         org_info['class'] = oclass
 
-    mlog("INFO", "get_or_create_org, org_info:", org_info)
+    mlog("DEBUG", "get_or_create_org, org_info:", org_info)
 
     for colinfo in ORG_COLS:
         colname = colinfo[0]
@@ -699,7 +699,7 @@ def get_or_create_org(org_info, oclass, cmx_db = None):
 
     db_cursor = cmx_db.cursor()
 
-    mlog("INFO", "SELECT org.. WHERE %s" % ("\n AND ".join(db_constraints)))
+    mlog("DEBUGSQL", "SELECT org.. WHERE %s" % ("\n AND ".join(db_constraints)))
 
     n_matched = db_cursor.execute(
                     'SELECT orgid FROM orgs WHERE %s' %
@@ -709,7 +709,7 @@ def get_or_create_org(org_info, oclass, cmx_db = None):
     # ok existing affiliation => row id
     if n_matched == 1:
         the_aff_id = db_cursor.fetchone()[0]
-        mlog("INFO", "Found affiliation (orgid %i) (WHERE %s)" % (the_aff_id, " AND ".join(db_constraints)))
+        mlog("INFO", "dbcrud: found affiliation (orgid %i) (WHERE %s)" % (the_aff_id, " AND ".join(db_constraints)))
 
     # no matching affiliation => add => row id
     elif n_matched == 0:

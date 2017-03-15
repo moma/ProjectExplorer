@@ -130,7 +130,7 @@ JOIN orgs
 
 -- NB: scholars <=> orgs is a one-to-many relationship
 --     so this can return multiple lines
---  => in the app we use GROUP_CONCAT(orgs.tostring)
+--  => in the app we use GROUP_CONCAT(orgs.label) or GROUP_CONCAT(orgs.toarray)
 --     to fit in the scholars cardinality)
 
 

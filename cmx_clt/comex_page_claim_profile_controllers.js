@@ -1,1 +1,0 @@
-../static/js/comex_page_claim_profile_controllers.js

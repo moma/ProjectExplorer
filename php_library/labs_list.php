@@ -22,11 +22,19 @@ foreach ($labs as $lab) {
                         <div class="span9" align="justify">';
     $content .= '<div>';
 
-    $content .= '<h2 >' . $lab['name'];
+    $content .= '<h2 >';
+    $www = org_info_to_search_link($lab);
+    $content .= '<a href="'.$www.'"><i class="icon-search"></i></a>&nbsp;';
+    $content .= $lab['name'];
     if (strlen($lab['acronym'])){
         $content.=' (<b>'.$lab['acronym'].'</b>)';
     }
-    $content.=' <small> - ' . $lab['locname'] . '</small></h2>';
+
+    if ($lab['locname'] != null) {
+        $content.=' <span style="color:grey"><small> - ' . $lab['locname'] . '<small></span>';
+    }
+
+    $content.="</h2>";
 
     // var_dump($lab);
 
@@ -34,30 +42,6 @@ foreach ($labs as $lab) {
     if (array_key_exists('homepage', $lab) && strlen($lab['homepage'])) {
         $www = homepage_to_alink($lab['homepage']);
         $content .= '<dl><dd><i class="icon-home"></i>'.$www.'</dd></dl>';
-    }
-    else {
-        $search_elements = array();
-        foreach($lab as $key => $val) {
-            if ($key == 'unique_id' || $key == 'admin') {
-                continue;
-            }
-            elseif ($key == 'related_insts' && count($lab['related_insts'])) {
-                // we use only the most frequent one for search context
-                $search_elements[] = $lab['related_insts'][0];
-            }
-            else {
-                // ... and we add all other strings (name, acro, lab_code, loc)
-                if ($val && strlen($val) > 2) {
-                    $search_elements[] = $val;
-                }
-            }
-        }
-        // print_r($search_elements) ;
-        $www = web_search(implode(', ', $search_elements));
-
-        // print_r($www);
-
-        $content .= '<dl><dd><a href="'.$www.'"><small>search</small></a><i class="icon-search"></i></dd></dl>';
     }
 
     $lab_code = '';
@@ -70,14 +54,30 @@ foreach ($labs as $lab) {
 
     $n_related_insts = count($lab['related_insts']);
     if ($n_related_insts) {
-        $content .= '<dl>
-        <dt>Institutions:</dt>';
+        $content .= '<br><h4 title="Frequently related institutions">Institutions:</h4>';
+        $content .= '<ul>';
 
-        foreach ($lab['related_insts'] as $rinstitution) {
-            $content .= '<dd class="parent-org">' . $rinstitution . '</dd> ';
+        // $content .= "<p>".$n_related_insts."</p>";
+
+        foreach ($lab['related_insts'] as $rel_inst_id) {
+            $content .= '<li class="parent-org"><a href="#org-'.$rel_inst_id.'">';
+            $rel_inst_info = $organiz[$rel_inst_id];
+
+            $has_acro = false ;
+            if (strlen($rel_inst_info['acronym'])) {
+                $content .= $rel_inst_info['acronym'];
+                $has_acro = true ;
+            } else {
+                $content .= $rel_inst_info['name'];
+            }
+            $content .= '</a>';
+
+            $content .= "</li>";
+
+            // $content .= '<dd class="parent-org">' . ['label'] . '</dd> ';
         }
 
-        $content .= '</dl>';
+        $content .= '</ul>';
     }
 
     $content .= '</div>';

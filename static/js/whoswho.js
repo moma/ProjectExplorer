@@ -214,7 +214,7 @@ $(document).ready(function() {
         var value;
 
         // debug
-        console.log('collecting (filter '+k+') from elt:' + e)
+        // console.log('collecting (filter '+k+') from elt:' + e)
 
         value = $(e).val();
         if (value != null && value != "") {

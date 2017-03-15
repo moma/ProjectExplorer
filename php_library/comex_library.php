@@ -74,6 +74,29 @@ function web_search($a_query_string, $exact=false) {
     return 'https://search.iscpif.fr/?q='.urlencode($a_query_string);
 }
 
+function org_info_to_search_link ($org_info) {
+    $search_elements = array();
+    foreach($org_info as $key => $val) {
+        if ($key == 'unique_id' || $key == 'admin') {
+            continue;
+        }
+        elseif ($key == 'related_insts' && count($org_info['related_insts'])) {
+            // we use only the most frequent one for search context
+            $search_elements[] = $org_info['related_insts'][0];
+        }
+        else {
+            // ... and we add all other strings (name, acro, lab_code, loc)
+            if ($val && strlen($val) > 3) {
+                $search_elements[] = $val;
+            }
+        }
+    }
+    // print_r($search_elements) ;
+    $www = web_search(implode(', ', $search_elements));
+    return $www;
+}
+
+
 // replace '@' and dots to avoid the email being harvested by robots/spiders
 function safe_email($email_str) {
     return preg_replace(

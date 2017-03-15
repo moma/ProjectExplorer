@@ -19,10 +19,9 @@ $imsize = 150;
 $content='';
 
 
-// 2 lists for all the scholars' affiliations
-// (used for "Lab's by alphabetical order" section)
-$all_labs_list=array();
-$all_orga_list=array();
+// prepare the list of scholars' institutions
+// (used for "Institutions by alphabetical order" section)
+$additional_insts_ids=array();
 
 // ajout des scholars
 
@@ -219,13 +218,12 @@ for($i = 0; $i < $n_steps; $i++) {
     //
     $sql = <<< LABSQLEXTENDED
     SELECT orgs.*,
-           GROUP_CONCAT( tgt_label ORDER BY tgt_freq DESC SEPARATOR '%%%')
+           GROUP_CONCAT( tgt_orgid ORDER BY tgt_freq DESC )
             AS related_insts
     FROM orgs
     LEFT JOIN (
         SELECT sch_org.orgid AS src_orgid,
               sch_org2.orgid AS tgt_orgid,
-              orgs2.label AS tgt_label,
               count(*) AS tgt_freq
         FROM sch_org
         LEFT JOIN sch_org AS sch_org2
@@ -265,11 +263,11 @@ LABSQLEXTENDED;
         // $info['keywords'] = $row['keywords'];
 
         // most frequent parent orgs (max = 3)
-        $related_insts = array_slice(explode('%%%', $row['related_insts'] ?? ""),0,3) ;
-        $info['related_insts'] = $related_insts;
+        $related_insts_ids = array_slice(explode(',', $row['related_insts'] ?? ""),0,3) ;
+        $info['related_insts'] = array_filter($related_insts_ids);
 
         // also add them to orga_list
-        $all_orga_list[] = $related_insts;
+        $additional_insts_ids[] = $related_insts_ids;
 
         $info['admin'] = ucwords($row['contact_name'] ?? '');
         if ($row['contact_email']) {
@@ -294,42 +292,42 @@ LABSQLEXTENDED;
 /// liste des organismes / affiliations institutionnelles ///
 /////////////////////////////////////////////////////////////
 
-// debug
-// $content .= var_dump($all_orga_list) ;
+// all direct institutions' orgids except ''
+$inst_ids = array_filter(array_keys($inst_counts));
 
-// $organiz = array();
-// sort($all_orga_list);
-// foreach ($all_orga_list as $name) {
-//     if ((trim($name))!=NULL){
-//     $sql = "SELECT * FROM affiliations WHERE org='" . $name. "'";
-//
-//     $temp=true;
-//     foreach ($base->query($sql) as $row) {
-//         if ($temp){
-//         $info = array();
-//         $info['unique_id'] = $row['affid'];
-//         $info['name'] = $row['org'];
-//         // TODO RESTORE
-//         // $info['acronym'] = $row['acronym'];
-//         // $info['homepage'] = $row['homepage'];
-//         // $info['keywords'] = $row['keywords'];
-//         // $info['country'] = $row['country'];
-//         // $info['street'] = $row['street'];
-//         // $info['city'] = $row['city'];
-//         // $info['state'] = $row['state'];
-//         // $info['postal_code'] = $row['postal_code'];
-//         // $info['fields'] = $row['fields'];
-//         // $info['admin'] = $row['admin'];
-//         // $info['phone'] = $row['phone'];
-//         // $info['fax'] = $row['fax'];
-//         // $info['login'] = $row['login'];
-//         $organiz[$row['affid']] = $info;
-//         $temp=false;
-//         }
-//     }
-//     }
-//
-// }
+// any other institutions we want
+// $insts_ids[] = $additional_insts_ids;
+sort($inst_ids);
+$insts_ids = array_unique($insts_ids);
+
+// all org with infos to retrieve
+$organiz = array();
+
+// debug
+// $content .= var_dump($inst_ids) ;
+
+foreach ($inst_ids as $inst_id) {
+    $sql = "SELECT * FROM orgs WHERE orgid='" . $inst_id. "'";
+
+    foreach ($base->query($sql) as $row) {
+        $info = array();
+        $info['unique_id'] = $inst_id;
+        $info['name'] = $row['name'];
+
+        $info['acronym'] = $row['acro'] ?? '';
+        $info['homepage'] = $row['url'] ?? '';
+        $info['inst_type'] = $row['inst_type'] ?? '';
+        $info['locname'] = $row['locname'] ?? '';     // ex: 'Barcelona, Spain'
+                                                      //     'London, UK'
+                                                      //     'UK'
+
+
+        // TODO RESTORE keywords and contact
+        // $info['keywords'] = $row['keywords'];
+        // $info['admin'] = $row['admin'];
+        $organiz[$inst_id] = $info;
+    }
+}
 
 
 
@@ -341,7 +339,6 @@ $content .='<br/> <A NAME="labs"> </A>
 <h1>Labs by alphabetical order</h1>
 <p><i>List of teams or labs mentioned by the scholars</i></p>';
 
-// TODO RESTORE
 include('labs_list.php');
 
 
@@ -352,8 +349,7 @@ $content .= '<br/> <A NAME="orga"> </A>
 <h1>Institutions by alphabetical order</h1>
 <br/>
 <p><i>List of institutions to which scholars are affiliated</i></p>';
-// £TODO_ORGS
-// include('orga_list.php');
+include('orga_list.php');
 
 
 ?>
