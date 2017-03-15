@@ -42,20 +42,22 @@ USER_COLS = [
          ("record_status",         False,        25)
       ]
 
+
+#          NAME,          NOT NULL,  MAXCHARS  KEY elt
 ORG_COLS = [
-         ("class",                 False,        25),  # "lab" or "inst"
-         ("name",                  False,       120),
-         ("acro",                  False,        30),  # acronym or short name
-         ("locname",              False,        120),
-         ("inst_type",             False,        50),
-         ("lab_code",              False,        25),  # not in GUI yet
-         ("url",                  False,        180),  # not in GUI yet
-         ("contact_name",         False,         80),  # not in GUI yet
-         ("contact_email",        False,        255)   # not in GUI yet
+         ("class",          False,     25,     True),  # "lab" or "inst"
+         ("name",           False,    120,     True),
+         ("acro",           False,     30,     True),  # acronym or short name
+         ("locname",        False,    120,    False),
+         ("inst_type",      False,     50,     None),  # key elt only for inst
+         ("lab_code",       False,     25,    False),  # not in GUI yet
+         ("url",            False,    180,    False),  # not in GUI yet
+         ("contact_name",   False,     80,    False),  # not in GUI yet
+         ("contact_email",  False,    255,    False)   # not in GUI yet
 
          # also in concatenations:
          #  label    = name + acro
-         #  tostring = name + acro + locname
+         #  toarray = json [name, acro, locname]
     ]
 
 
@@ -148,7 +150,7 @@ def rm_scholar(luid, cmx_db = None):
 
 def get_full_scholar(uid, cmx_db = None):
     """
-    uid : str
+    uid : int or int str
           local user id aka luid
 
     Autonomous function to be used by User class
@@ -165,9 +167,9 @@ def get_full_scholar(uid, cmx_db = None):
         db = connect_db()
     db_c = db.cursor(DictCursor)
 
-
-    print('DBG', 'uid', uid)
-    print('DBG', 'type(uid)', type(uid))
+    #
+    # print('DBG', 'uid', uid)
+    # print('DBG', 'type(uid)', type(uid))
 
     # one user + all linked infos concatenated in one row
     #                                   <= 3 LEFT JOINS sequentially GROUPed
@@ -326,7 +328,7 @@ def get_full_scholar(uid, cmx_db = None):
         else:
             org_info = """SELECT name, acro, locname,
                                  inst_type, lab_code,
-                                 tostring
+                                 label
                             FROM orgs WHERE orgid IN (%s)""" % ','.join(id_list)
 
             mlog('DEBUGSQL', "org_info stmt :", org_info)
@@ -335,6 +337,9 @@ def get_full_scholar(uid, cmx_db = None):
             new_cursor.execute(org_info)
 
             urow_dict[orgclass] = new_cursor.fetchall()
+
+            print("get_full_scholar orgs::", urow_dict[orgclass])
+
 
     # print('===urow_dict with orgs[]===')
     # print(urow_dict)
@@ -593,6 +598,22 @@ def get_or_create_tokitems(tok_list, cmx_db, tok_table='keywords'):
     return found_ids
 
 
+
+def rm_sch_org_links(luid, cmx_db = None):
+    if cmx_db:
+        db = cmx_db
+    else:
+        db = connect_db()
+    db_c = db.cursor(DictCursor)
+
+    luid = int(luid)
+    db_c.execute(
+        'DELETE FROM sch_org WHERE uid = %i' % luid
+    )
+    if not cmx_db:
+        db.close()
+
+
 def record_sch_org_link(luid, orgid, cmx_db = None):
     if cmx_db:
         db = cmx_db
@@ -618,18 +639,17 @@ def record_org_org_link(orgid_src, orgid_tgt, cmx_db = None):
     """
     pass
 
-def get_or_create_org(org_info, cmx_db = None):
+def get_or_create_org(org_info, oclass, cmx_db = None):
     """
     (scholar's parent org(s)) ---> lookup/add to *orgs* table -> orgid
 
      1) query to *orgs* table
+        <= unicity constraint is oclass + name + acro + org_type (<=> is_key)
+        => £TODO if institution almost matches API to send suggestion
+          - then TODO also allow completing existing entry
      2) return id
-        => TODO if institution almost matches API to send suggestion
-        => unicity constraint on institution + lab + org_type
         => if an institution matches return orgid
         => if no institution matches create new and return orgid
-
-        ! WIP !
     """
     if cmx_db:
         db = cmx_db
@@ -642,28 +662,44 @@ def get_or_create_org(org_info, cmx_db = None):
     db_qstrvals = []
     db_constraints = []
 
+    if oclass:
+        org_info['class'] = oclass
+
     mlog("INFO", "get_or_create_org, org_info:", org_info)
 
     for colinfo in ORG_COLS:
         colname = colinfo[0]
+
+        # is_key <=> field is part of the distinctive "signature" of a known org
+        if colname == 'inst_type':
+            is_key = (oclass == "inst")
+        else:
+            is_key = colinfo[3]
+
         val = org_info.get(colname, None)
+
 
         if val != None:
             val = str(normalize_forms(normalize_chars(val, rm_qt=True)))
-            quotedstrval = "'"+val+"'"
 
-            # for insert
+        if val and len(val):
+            quotedstrval = "'"+val+"'"
+            # for insert, if needed later
             db_tgtcols.append(colname)
             db_qstrvals.append(quotedstrval)
 
-            # for select
-            db_constraints.append("%s = %s" % (colname, quotedstrval))
+            if is_key:
+                # for select
+                db_constraints.append("%s = %s" % (colname, quotedstrval))
+
+        # being NULL is also a distinctive feature if is_key
         else:
-            db_constraints.append("%s IS NULL" % colname)
+            if is_key:
+                db_constraints.append("%s IS NULL" % colname)
 
     db_cursor = cmx_db.cursor()
 
-    mlog("DEBUGSQL", "SELECT org.. WHERE %s" % ("\n AND ".join(db_constraints)))
+    mlog("INFO", "SELECT org.. WHERE %s" % ("\n AND ".join(db_constraints)))
 
     n_matched = db_cursor.execute(
                     'SELECT orgid FROM orgs WHERE %s' %
@@ -673,7 +709,7 @@ def get_or_create_org(org_info, cmx_db = None):
     # ok existing affiliation => row id
     if n_matched == 1:
         the_aff_id = db_cursor.fetchone()[0]
-        mlog("DEBUG", "Found affiliation (orgid %i) (WHERE %s)" % (the_aff_id, " AND ".join(db_constraints)))
+        mlog("INFO", "Found affiliation (orgid %i) (WHERE %s)" % (the_aff_id, " AND ".join(db_constraints)))
 
     # no matching affiliation => add => row id
     elif n_matched == 0:
@@ -684,7 +720,7 @@ def get_or_create_org(org_info, cmx_db = None):
                          )
         the_aff_id = db_cursor.lastrowid
         cmx_db.commit()
-        mlog("DEBUG", "dbcrud: added org '%s'" % str(db_qstrvals))
+        mlog("INFO", "dbcrud: added org '%s'" % str(db_qstrvals))
     else:
         raise Exception("ERROR: get_or_create_org non-unique match '%s'" % str(db_qstrvals))
 

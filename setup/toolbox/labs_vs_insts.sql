@@ -1,6 +1,6 @@
 SELECT scholars.first_name, scholars.last_name,
-       GROUP_CONCAT(labs.tostring SEPARATOR '/') AS labs_list,
-       GROUP_CONCAT(insts.tostring SEPARATOR '/') AS insts_list
+       GROUP_CONCAT(labs.label SEPARATOR '/') AS labs_list,
+       GROUP_CONCAT(insts.label SEPARATOR '/') AS insts_list
 FROM scholars
 LEFT JOIN sch_org AS map_labs
     ON map_labs.uid = luid

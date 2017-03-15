@@ -3,13 +3,13 @@
 -- (for suggestions and/or than mapping)
 
 SELECT orgs.*,
-       GROUP_CONCAT( tgt_tostring ORDER BY tgt_freq DESC SEPARATOR '%%%')
+       GROUP_CONCAT( tgt_label ORDER BY tgt_freq DESC SEPARATOR '%%%')
         AS related_insts
 FROM orgs
 LEFT JOIN (
     SELECT sch_org.orgid AS src_orgid,
           sch_org2.orgid AS tgt_orgid,
-          orgs2.tostring AS tgt_tostring,
+          orgs2.label AS tgt_label,
           count(*) AS tgt_freq
     FROM sch_org
     LEFT JOIN sch_org AS sch_org2

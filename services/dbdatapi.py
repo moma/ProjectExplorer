@@ -46,12 +46,16 @@ FIELDS_FRONTEND_TO_SQL = {
                       'type': "EQ_relation",
                       'grouped': "gender"},
 
-    "organizations": {'col':"orgs.tostring",
-                      'class': "inst",
+    "organizations": {'col':"orgs.label",
+                      'class': "*",                 # all organizations
                       'type': "LIKE_relation",
                       'grouped': "orgs_list"},
-    "laboratories":  {'col':"orgs.tostring",
-                      'class': "lab",
+    "institutions": {'col':"orgs.label",
+                      'class': "inst",              #  <= local where clause
+                      'type': "LIKE_relation",
+                      'grouped': "orgs_list"},
+    "laboratories":  {'col':"orgs.label",
+                      'class': "lab",               #  <= idem
                       'type': "LIKE_relation",
                       'grouped': "orgs_list"},
     # TODO use
@@ -271,7 +275,7 @@ class Org:
 
         # DB specifications say that at least one of name||acr is NOT NULL
         self.any = self.acro if self.acro else self.name
-        self.tostring = (  ( self.name if self.name else "")
+        self.label  = (  ( self.name if self.name else "")
                         + ((' ('+self.acro+')') if self.acro else "")
                         + ((', '+self.locname) if self.locname else "")
                         )
@@ -489,6 +493,7 @@ class BipartiteExtractor:
                                 sql_constraints.append("(%s)" % clause)
 
                     # debug
+                    # £TODO_ORG rm
                     mlog("INFO", "SELECTing active users with sql_constraints", sql_constraints)
 
                     # use constraints as WHERE-clause
@@ -514,7 +519,7 @@ class BipartiteExtractor:
                               SELECT scholars.*,
                                      -- org info
                                      -- GROUP_CONCAT(orgs.orgid) AS orgs_ids_list,
-                                     GROUP_CONCAT(orgs_set.tostring) AS orgs_list
+                                     GROUP_CONCAT(orgs_set.label) AS orgs_list
                               FROM scholars
                               LEFT JOIN sch_org ON luid = sch_org.uid
                               LEFT JOIN (
@@ -680,13 +685,13 @@ class BipartiteExtractor:
                 info['ACR'] = labs[0].acro if labs[0].acro else labs[0].any
                 #info['CC'] = res3['norm_country'];
                 info['home_url'] = res3['home_url'];
-                info['team_lab'] = labs[0].tostring;
-                info['org'] = insts[0].tostring;
+                info['team_lab'] = labs[0].label;
+                info['org'] = insts[0].label;
 
                 if len(labs) > 1:
-                    info['lab2'] = labs[1].tostring
+                    info['lab2'] = labs[1].label
                 if len(insts) > 1:
-                    info['affiliation2'] = insts[1].tostring
+                    info['affiliation2'] = insts[1].label
                 info['hon_title'] = res3['hon_title'] if res3['hon_title'] else ""
                 info['position'] = res3['position'];
                 info['job_looking'] = res3['job_looking'];

@@ -4,5 +4,6 @@
 logs/
 logs/services.log
 data/shared_user_img/*
+services/.idea/
 .agignore
 __pycache__/

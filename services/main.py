@@ -101,12 +101,12 @@ SOURCE_FIELDS = [
          ("pic_file",              False,        None),   # saved separately
          # => for *scholars* table (optional)
 
-         ("lab_label",              True,        None),   # ~ /acro (name)/
-         ("lab_locname",               True,        None),   #  'Paris, France'
-         ("inst_label",             True,        None),   # ~ /acro (name)/
+         ("lab_label",              True,       "sorg"),  # ~ /name (acro)?/
+         ("lab_locname",            True,        None),   #  'Paris, France'
+         ("inst_label",             True,       "sorg"),  # ~ /name (acro)?/
          ("inst_type",             False,        None),   # predefined values
          (  "other_inst_type",      True,        None),   # +=> org_type
-         # => for *orgs* table via sort_affiliation_records
+         # => for *orgs* table via parse_affiliation_records
 
          ("keywords",               True,        None),
          # => for *keywords* table (after split str)
@@ -765,7 +765,7 @@ def show_privacy():
 
 ########### SUBS ###########
 
-def sort_affiliation_records(clean_records):
+def parse_affiliation_records(clean_records):
     """
     Transform GUI side input data into at most 2 orgs objects for DB
 
@@ -792,6 +792,7 @@ def sort_affiliation_records(clean_records):
         - We return a map with 2 key/value submaps for lab and institutions
     """
     new_orgs = {'lab': None, 'inst': None}
+    print(clean_records)
     for org_class in new_orgs:
         # can't create org without some kind of label
         if (org_class+"_label" not in clean_records
@@ -804,30 +805,49 @@ def sort_affiliation_records(clean_records):
             # 1) label analysis
             clean_input = clean_records[org_class+"_label"]
 
-            # custom split attempt
-            # eg 'CNRS (Centre National de la Recherche Scientifique)'
-            #     vvvv  vvvvvvvvvv
-            #     acro     name
+            # label split attempt
             test_two_groups = match(
-                                r'([^\(]{1,30}) \(([^\)]+)\)',
+                                r'([^\(]+)(?: *\(([^\)]{1,30})\))?',
                                 clean_input
                               )
             if test_two_groups:
-                new_org_info['acro'] = test_two_groups.groups()[0]
-                new_org_info['name'] = test_two_groups.groups()[1]
+                # ex 'Centre National de la Recherche Scientifique (CNRS)'
+                #         vvvvvvvvvvvvvvvv                          vvvv
+                #               name                                acro
+                new_org_info['name'] = test_two_groups.groups()[0].strip()
+                new_org_info['acro'] = test_two_groups.groups()[1].strip()
 
-            # fallback cases
-            elif len(clean_input) < 30:
-                new_org_info['acro'] = clean_input
+                mlog("DEBUG", "parse_affiliation_records found name='%s' and acro='%s'" % (new_org_info['name'], new_org_info['acro']))
             else:
-                new_org_info['name'] = clean_input
+                len_input = len(clean_input)
+                test_uppercase = sub(r'[^0-9A-ZÉ\.]', '')
+                uppercase_rate = len(test_uppercase) / len_input
+
+                # special case short and mostly uppercase => just acro
+                # POSS tune len and uppercase_rate
+                if (len_input <= 8 or
+                    (len_input <= 20 and uppercase_rate > .7)):
+                    # ex 'CNRS'
+                    #     vvvv
+                    #     acro
+                    new_org_info['acro'] = clean_input
+
+                # normal fallback case => just name
+                else:
+                    # ex 'Centre National de la Recherche Scientifique' None
+                    #         vvvvvvvvvvvvvvvv                          vvvv
+                    #               name                                acro
+                    new_org_info['name'] = clean_input
 
             # 2) enrich with any other optional org info
-            for detail_col in ['type', 'code', 'locname',
+            for detail_col in ['inst_type', 'lab_code', 'locname',
                                'url', 'contact_email', 'contact_name']:
 
-                # this is a convention in our templates
-                org_detail = org_class + '_' + detail_col
+                if detail_col not in ['inst_type', 'lab_code']:
+                    # this is a convention in our templates
+                    org_detail = org_class + '_' + detail_col
+                else:
+                    org_detail = detail_col
 
                 if org_detail in clean_records:
                     val = clean_records[org_detail]
@@ -858,19 +878,24 @@ def save_form(clean_records, update_flag=False, previous_user_info=None):
     reg_db = dbcrud.connect_db(config)
 
     # B1) re-group the org fields into at most 2 org 'objects'
-    declared_orgs = sort_affiliation_records(clean_records)
+    declared_orgs = parse_affiliation_records(clean_records)
+
+    mlog('DBG', '=====> save_form: declared_orgs = ', declared_orgs)
 
     # B2) check our constraint (cf. also E.)
-    if (declared_orgs['lab'] is None or declared_orgs['inst'] is None):
+    if (declared_orgs['lab'] is None and declared_orgs['inst'] is None):
         raise ValueError("At least 1 org (lab or institution) must be filled")
 
     # B3) for each, read/fill the orgs table to get associated id(s) in DB
     orgids = []
     for oclass in ['lab', 'inst']:
+
         if (declared_orgs[oclass]):
             orgids.append(
-                dbcrud.get_or_create_org(declared_orgs[oclass], reg_db)
+                dbcrud.get_or_create_org(declared_orgs[oclass], oclass, reg_db)
             )
+
+    mlog('DBG orgids:', orgids)
 
     # B4) save the org <=> org mappings TODO LATER (not a priority)
     # dbcrud.record_org_org_link(src_orgid, tgt_orgid, reg_db)
@@ -926,8 +951,11 @@ def save_form(clean_records, update_flag=False, previous_user_info=None):
                 map_table
             )
 
-    # E) save the (uid <=> orgid) mapping(s)
+    # E) overwrite the (uid <=> orgid) mapping(s)
+    dbcrud.rm_sch_org_links(luid, reg_db)
+    mlog("DBG", "removing all orgs for", luid)
     for orgid in orgids:
+        mlog("DBG", "recording orgs:", luid, orgid)
         dbcrud.record_sch_org_link(luid, orgid, reg_db)
 
     # F) end connection

@@ -32,45 +32,52 @@ function setupSavedItems(uinfo) {
             var colName = cmxClt.COLS[i][0]
             var chosenV = uinfo[colName]
 
-            var tgtElt = document.getElementById(colName)
-            if (tgtElt && chosenV != null) {
-                // d <=> convert to YY/MM/DD from iso string YYYY-MM-DD
-                if (colType == 'd') {
-                    // console.log('setting date', colName, 'with', chosenV)
-                    tgtElt.value = chosenV.replace(/-/g,'/')
-                    tgtElt.dispatchEvent(new CustomEvent('change'))
-                }
-                // m <=> select saved menus
-                if (colType == 'm') {
-                    // console.log('setting menu', colName, 'with', chosenV)
-                    var myOption = tgtElt.querySelector(`option[value="${chosenV}"]`)
+            // console.log('setupSavedItems', colName, '('+colType+')' , 'with', chosenV)
 
-                    // normal case
-                    if (myOption) {
-                        tgtElt.selectedIndex = myOption.index
+            // if the value is none => there's nothing to do
+            if (chosenV != undefined && chosenV != null) {
+
+                var tgtElt = document.getElementById(colName)
+                if (tgtElt != null) {
+                    // d <=> convert to YY/MM/DD from iso string YYYY-MM-DD
+                    if (colType == 'd') {
+                        console.log('setting date', colName, 'with', chosenV)
+                        tgtElt.value = chosenV.replace(/-/g,'/')
                         tgtElt.dispatchEvent(new CustomEvent('change'))
                     }
+                    // m <=> select saved menus
+                    if (colType == 'm') {
+                        // console.log('setting menu', colName, 'with', chosenV)
+                        var myOption = tgtElt.querySelector(`option[value="${chosenV}"]`)
 
-                    // this case is really just for org_type right now
-                    else if (tgtElt.querySelector(`option[value="other"]`)) {
-                        tgtElt.selectedIndex = tgtElt.querySelector(`option[value="other"]`).index
-                        tgtElt.dispatchEvent(new CustomEvent('change'))
+                        // normal case
+                        if (myOption) {
+                            tgtElt.selectedIndex = myOption.index
+                            tgtElt.dispatchEvent(new CustomEvent('change'))
+                        }
 
-                        var relatedFreeTxt = document.getElementById('other_'+colName)
-                        if (relatedFreeTxt) {
-                            relatedFreeTxt.value = chosenV
-                            relatedFreeTxt.dispatchEvent(new CustomEvent('change'))
+                        // this case is really just for inst_type right now
+                        else if (tgtElt.querySelector(`option[value="other"]`)) {
+                            console.log('setting menu option other for', colName, 'with', chosenV)
+                            tgtElt.selectedIndex = tgtElt.querySelector(`option[value="other"]`).index
+                            tgtElt.dispatchEvent(new CustomEvent('change'))
+
+                            var relatedFreeTxt = document.getElementById('other_'+colName)
+                            if (relatedFreeTxt) {
+                                relatedFreeTxt.value = chosenV
+                                relatedFreeTxt.dispatchEvent(new CustomEvent('change'))
+                            }
+                        }
+                        // fallback case
+                        else {
+                            var optionOthers =
+                            console.warn(`setupSavedItems: couldn't find option: ${chosenV} for select element: ${colName}`)
                         }
                     }
-                    // fallback case
-                    else {
-                        var optionOthers =
-                        console.warn(`setupSavedItems: couldn't find option: ${chosenV} for select element: ${colName}`)
-                    }
                 }
-            }
-            else {
-                console.warn("setupSavedItems: couldn't find element: "+colName)
+                else {
+                    console.warn("setupSavedItems: couldn't find element: "+colName)
+                }
             }
         }
     }

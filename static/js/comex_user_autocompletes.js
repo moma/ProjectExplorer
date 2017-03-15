@@ -172,6 +172,6 @@ remoteAutocompleteInit('keywords')
 remoteAutocompleteInit('lab_label', 1, 'laboratories')
 
 if (document.getElementById('hashtags'))   remoteAutocompleteInit('hashtags')
-if (document.getElementById('inst_label') )    remoteAutocompleteInit('inst_label', 1, 'organizations')
+if (document.getElementById('inst_label') )    remoteAutocompleteInit('inst_label', 1, 'institutions')
 
  console.log("autocompletes load OK")

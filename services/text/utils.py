@@ -9,43 +9,47 @@ else:
 
 def sanitize(value, specific_type=None):
     """
-    simple and radical: leaves only alphanum and '@' '.' '-' ':' ',' '(', ')', '#', ' '
-
     One of the main goals is to remove ';'
     POSS better
-
 
     args:
         @value: any string to santize
 
-        @specific_type: None or 'url' or 'date'
+        @specific_type: None or one of {surl,sdate,sbool,sorg}
     """
     vtype = type(value)
-    str_val = str(value)
-    clean_val = sub(r'^\s+', '', str_val)
-    clean_val = sub(r'\s+$', '', clean_val)
+    if vtype not in [int, str]:
+        raise ValueError("Value has an incorrect type %s" % str(vtype))
 
-    if not specific_type:
-        san_val = sub(r'[^\w@\.:,()# -]', '_', clean_val)
-    elif specific_type == "sbool":
+    str_val = str(value)
+
+    if specific_type == "sbool":
         # DB uses int(0) or int(1)
-        if match('^[01]$',clean_val):
-            san_val = int(clean_val)
+        if match('^[01]$',str_val):
+            san_val = int(str_val)
         else:
             san_val = 0
         # NB san_val_bool = bool(san_val)
 
     elif specific_type == "surl":
-        san_val = sub(r'[^\w@\.: -/]', '_', clean_val)
+        san_val = sub(r'[^\w@\.: -/]', '_', str_val)
     elif specific_type == "sdate":
-        san_val = sub(r'[^0-9/-:]', '_', clean_val)
+        san_val = sub(r'[^0-9/-:]', '_', str_val)
 
-    if vtype not in [int, str]:
-        raise ValueError("Value has an incorrect type %s" % str(vtype))
+    # free string types
     else:
-        # cast back to orginal type
-        san_typed_val = vtype(san_val)
-        return san_typed_val
+        clean_val = normalize_forms(normalize_chars(str_val))
+        san_val = sub(r'\b(?:drop|select|update|delete)\b', '_', clean_val)
+        if not specific_type:
+            san_val = sub(r'[^\w@\.:,()# -]', '_', san_val)
+        elif specific_type == "sorg":
+            # most troublesome because we'll want to parse the label
+            # (to split name and acronym and perhaps suggest similar org)
+            san_val = sub(r'[\n;"\']', '_', san_val)
+
+    # cast back to orginal type
+    san_typed_val = vtype(san_val)
+    return san_typed_val
 
 
 

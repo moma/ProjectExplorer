@@ -120,13 +120,13 @@ if ($userid) {
         SELECT
             scholars_and_labs.*,
             -- GROUP_CONCAT(insts.orgid SEPARATOR ',') AS insts_ids,
-            GROUP_CONCAT(insts.tostring SEPARATOR '%%%') AS insts_list
+            GROUP_CONCAT(insts.label SEPARATOR '%%%') AS insts_list
 
             FROM (
                 SELECT
                     scholars.*,
                     GROUP_CONCAT(labs.orgid SEPARATOR ',') AS labs_ids,
-                    GROUP_CONCAT(labs.tostring SEPARATOR '%%%') AS labs_list
+                    GROUP_CONCAT(labs.label SEPARATOR '%%%') AS labs_list
                 FROM scholars
                 LEFT JOIN sch_org AS map_labs
                         ON map_labs.uid = luid

@@ -31,143 +31,141 @@ $loop = 0;
 // NB this array was prepared in print_directory or print_scholar_directory
 
 
-// ----------------------------------------------- uncomment
-// foreach ($scholars as $scholar) {
-//
-//     $scholar['position'] = weedout_alt_nulls($scholar['position']) ;
-//
-//     // debug
-//     // var_dump($scholar);
-//
-//     if ($loop % 100){
-//         set_time_limit(20);
-//     }
-//     $loop+=1;
-//     $content.= '<div class="row">
-//                 <div class="span12">
-//                     <div class="row">
-//                         <div class="span9" align="justify">';
-//     $content .= '<div>';
-//
-//     // remote pictures url 'http://some.org/path/blabla.png'
-//     //            or local '/data/shared_user_img/blabla.png'
-//     if ($scholar['pic_src'] != null) {
-//         $pic_src = $scholar['pic_src'] ;
-//         if ($_SERVER['REQUEST_SCHEME'] == 'https') {
-//             $pic_src = preg_replace('/^http:/i', 'https:', $pic_src) ;
-//         }
-//         $content .= '<img style="margin: 7px 10px 10px 0px" src="'. $pic_src . '" width="' . $imsize . 'px" align="left">';
-//     }
-//     else {
-//         if (count($scholars) < 2000) {
-//             $im_id = floor(rand(0, 11));
-//             $content .= '<img style="margin: 7px 10px 10px 0px" src="static/img/' . $im_id . '.png" width="' . $imsize . 'px" align="left">';
-//         }
-//     }
-//
-//     $content .= '<h2 >' . $scholar['title'] . ' ' . $scholar['first_name'] . ' ' . $scholar['mid_initial'] . ' ' . $scholar['last_name'] .
-//             ' <small> - ' . $scholar['country'] . '</small></h2>';
-//
-//
-//     if (($scholar['position'] != null)||count($scholar['labs'])||count($scholar['institutions'])) {
-//        $content .= '<dl>';
-//     }
-//
-//     if ($scholar['position'] != null) {
-//         $content .= '<dt>' . $scholar['position'] . '</dt>';
-//     }
-//     $lab = '';
-//
-//     // new way: list of org.tostring values
-//     if (count($scholar['labs'])) {
-//         $labs_html = implode(
-//                     '<br>',
-//                     array_map(
-//                         "clean_exp",
-//                         array_map("esc_html",
-//                             array_map(
-//                                 "weedout_alt_nulls",
-//                                 $scholar['labs']
-//                             )
-//                         )
-//                     )
-//                 );
-//         $content .= '<dd class="labs-of-scholar">' ;
-//         $content .= $labs_html ;
-//         $content .= '</dd> ';
-//
-//         # we don't need to recount the organisations globally,
-//         # because we already have $lab_counts (per id)
-//     }
-//
-//     // new way: list of org.tostring values
-//     if (count($scholar['institutions'])) {
-//         $institutions_html = implode(
-//                     '<br>',
-//                     array_map(
-//                         "clean_exp",
-//                         array_map("esc_html",
-//                             $scholar['institutions']
-//                         )
-//                     )
-//                 );
-//
-//         $content .= '<dd class="institutions-of-scholar">' ;
-//         $content .= $institutions_html ;
-//         $content .= '</dd> ';
-//
-//         # here also we already have $insts_counts (per id)
-//     }
-//
-//
-//     // POSS: url of lab as link, if filled in DB
-//
-//     if (($scholar['position'] != null)
-//         ||count($scholar['labs'])
-//         ||count($scholar['institutions'])
-//         ) {
-//        $content .= '</dl>';
-//     }
-//
-//
-//     $content .= '</div>';
-//
-//
-//     if ($scholar['interests'] != null) {
-//
-//         $htmlsafe_interests = str_replace('%%%', '<br/>',
-//                                 htmlspecialchars($scholar['interests'],
-//                                                  ENT_HTML5, 'UTF-8')
-//                               );
-//         $content .= '<div>';
-//         $content .= '<h4>Research</h4>';
-//         $content .= '<p>' . $htmlsafe_interests . '</p>';
-//         $content .= '</div>';
-//     }
-//
-//     $content .= '</div>';
-//
-//
-//     if ($scholar['keywords'] != null) {
-//         $content .= '<div class="span3" align="left">';
-//
-//         if ($scholar['keywords'] != null){
-//                  $content .= '<i class="icon-tags"></i> ' . clean_exp($scholar['keywords']). '.<br/><br/>';
-//         }
-//         $content .= '</div>';
-//     }
-// $content .= '</div>';
-//
-//     $content .= '</div>';
-//     $content .= '</div>';
-//
-//     $content .= '
-// <center><img src="static/img/bar.png"></center>';
-//     $content .= '<br/>';
-//     $content .= '<br/>';
-//     // fin du profil
-// }
-// ----------------------------------------------- uncomment
+foreach ($scholars as $scholar) {
+
+    $scholar['position'] = weedout_alt_nulls($scholar['position']) ;
+
+    // debug
+    // var_dump($scholar);
+
+    if ($loop % 100){
+        set_time_limit(20);
+    }
+    $loop+=1;
+    $content.= '<div class="row">
+                <div class="span12">
+                    <div class="row">
+                        <div class="span9" align="justify">';
+    $content .= '<div>';
+
+    // remote pictures url 'http://some.org/path/blabla.png'
+    //            or local '/data/shared_user_img/blabla.png'
+    if ($scholar['pic_src'] != null) {
+        $pic_src = $scholar['pic_src'] ;
+        if ($_SERVER['REQUEST_SCHEME'] == 'https') {
+            $pic_src = preg_replace('/^http:/i', 'https:', $pic_src) ;
+        }
+        $content .= '<img style="margin: 7px 10px 10px 0px" src="'. $pic_src . '" width="' . $imsize . 'px" align="left">';
+    }
+    else {
+        if (count($scholars) < 2000) {
+            $im_id = floor(rand(0, 11));
+            $content .= '<img style="margin: 7px 10px 10px 0px" src="static/img/' . $im_id . '.png" width="' . $imsize . 'px" align="left">';
+        }
+    }
+
+    $content .= '<h2 >' . $scholar['title'] . ' ' . $scholar['first_name'] . ' ' . $scholar['mid_initial'] . ' ' . $scholar['last_name'] .
+            ' <small> - ' . $scholar['country'] . '</small></h2>';
+
+
+    if (($scholar['position'] != null)||count($scholar['labs'])||count($scholar['institutions'])) {
+       $content .= '<dl>';
+    }
+
+    if ($scholar['position'] != null) {
+        $content .= '<dt>' . $scholar['position'] . '</dt>';
+    }
+    $lab = '';
+
+    // new way: list of org.label values
+    if (count($scholar['labs'])) {
+        $labs_html = implode(
+                    '<br>',
+                    array_map(
+                        "clean_exp",
+                        array_map("esc_html",
+                            array_map(
+                                "weedout_alt_nulls",
+                                $scholar['labs']
+                            )
+                        )
+                    )
+                );
+        $content .= '<dd class="labs-of-scholar">' ;
+        $content .= $labs_html ;
+        $content .= '</dd> ';
+
+        # we don't need to recount the organisations globally,
+        # because we already have $lab_counts (per id)
+    }
+
+    // new way: list of org.label values
+    if (count($scholar['institutions'])) {
+        $institutions_html = implode(
+                    '<br>',
+                    array_map(
+                        "clean_exp",
+                        array_map("esc_html",
+                            $scholar['institutions']
+                        )
+                    )
+                );
+
+        $content .= '<dd class="institutions-of-scholar">' ;
+        $content .= $institutions_html ;
+        $content .= '</dd> ';
+
+        # here also we already have $insts_counts (per id)
+    }
+
+
+    // POSS: url of lab as link, if filled in DB
+
+    if (($scholar['position'] != null)
+        ||count($scholar['labs'])
+        ||count($scholar['institutions'])
+        ) {
+       $content .= '</dl>';
+    }
+
+
+    $content .= '</div>';
+
+
+    if ($scholar['interests'] != null) {
+
+        $htmlsafe_interests = str_replace('%%%', '<br/>',
+                                htmlspecialchars($scholar['interests'],
+                                                 ENT_HTML5, 'UTF-8')
+                              );
+        $content .= '<div>';
+        $content .= '<h4>Research</h4>';
+        $content .= '<p>' . $htmlsafe_interests . '</p>';
+        $content .= '</div>';
+    }
+
+    $content .= '</div>';
+
+
+    if ($scholar['keywords'] != null) {
+        $content .= '<div class="span3" align="left">';
+
+        if ($scholar['keywords'] != null){
+                 $content .= '<i class="icon-tags"></i> ' . clean_exp($scholar['keywords']). '.<br/><br/>';
+        }
+        $content .= '</div>';
+    }
+$content .= '</div>';
+
+    $content .= '</div>';
+    $content .= '</div>';
+
+    $content .= '
+<center><img src="static/img/bar.png"></center>';
+    $content .= '<br/>';
+    $content .= '<br/>';
+    // fin du profil
+}
 
 // if (strcmp(substr($lab_query, 0,2),'OR')==0){
 //     $lab_query=substr($lab_query,2);
@@ -221,13 +219,13 @@ for($i = 0; $i < $n_steps; $i++) {
     //
     $sql = <<< LABSQLEXTENDED
     SELECT orgs.*,
-           GROUP_CONCAT( tgt_tostring ORDER BY tgt_freq DESC SEPARATOR '%%%')
+           GROUP_CONCAT( tgt_label ORDER BY tgt_freq DESC SEPARATOR '%%%')
             AS related_insts
     FROM orgs
     LEFT JOIN (
         SELECT sch_org.orgid AS src_orgid,
               sch_org2.orgid AS tgt_orgid,
-              orgs2.tostring AS tgt_tostring,
+              orgs2.label AS tgt_label,
               count(*) AS tgt_freq
         FROM sch_org
         LEFT JOIN sch_org AS sch_org2

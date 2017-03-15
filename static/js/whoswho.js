@@ -127,8 +127,11 @@ $(document).ready(function() {
   $("#addfiltercountry").click(function() {
     return popfilter("in", "countries", []);
   });
-  $("#addfilterorganization").click(function() {
-    return popfilter("from", "organizations", []);
+  // $("#addfilterorganization").click(function() {
+  //   return popfilter("from", "organizations", []);
+  // });
+  $("#addfilterinstitution").click(function() {
+    return popfilter("from", "institutions", []);
   });
   $("#addfilterlaboratory").click(function() {
     var prefix;
@@ -211,7 +214,7 @@ $(document).ready(function() {
         var value;
 
         // debug
-        // console.log('collecting (filter '+k+') from elt:' + e)
+        console.log('collecting (filter '+k+') from elt:' + e)
 
         value = $(e).val();
         if (value != null && value != "") {
@@ -240,7 +243,7 @@ $(document).ready(function() {
 
     }
 
-    for (filterName of ["keywords", "countries", "laboratories", "tags", "organizations"]) {
+    for (filterName of ["keywords", "countries", "laboratories", "tags", "institutions"]) {
         var filterValuesArray = collect(filterName)
 
         // we add only if something to add :)

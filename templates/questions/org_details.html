@@ -9,7 +9,7 @@
      <label for="lab_label" class="smlabel input-group-addon">* Lab / Team / Dept</label>
      <input id="lab_label" name="lab_label" maxlength="250"
             type="text" class="form-control" placeholder="More detailed affiliation, if relevant"
-            value="{{ current_user.info.labs[0].tostring if current_user.info.labs|length > 0 }}">
+            value="{{ current_user.info.labs[0].label if current_user.info.labs|length > 0 }}">
     </div>
 </div>
 
@@ -30,7 +30,7 @@
      <label for="inst_label" class="smlabel input-group-addon">Parent Institution</label>
      <input id="inst_label" name="inst_label" maxlength="250"
             type="text" class="form-control autocomp" placeholder='eg "CNRS" or "University of Oxford"'
-            value="{{ current_user.info.insts[0].tostring if current_user.info.insts|length > 0 }}">
+            value="{{ current_user.info.insts[0].label if current_user.info.insts|length > 0 }}">
     </div>
 </div>
 
@@ -53,7 +53,7 @@
       </select>
     </div>
     <!-- Other institution type <=> only if previous choice == 5 -->
-    <div class="question conditional-q" id="other_org_div">
+    <div class="question conditional-q" id="other_inst_div">
       <div class="input-group">
         <label for="other_inst_type" class="smlabel input-group-addon">Other type</label>
         <input id="other_inst_type" name="other_inst_type" maxlength="120"
