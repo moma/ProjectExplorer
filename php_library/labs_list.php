@@ -80,12 +80,12 @@ foreach ($labs as $lab) {
 
         if ($n_related_insts) {
             $content .= '<h4 title="Frequently related institutions">Institutions:</h4>';
-            $content .= '<ul>';
+            $content .= '<dl style="margin-top:5px;">';
 
             // $content .= "<p>".$n_related_insts."</p>";
 
             foreach ($lab['related_insts'] as $rel_inst_id) {
-                $content .= '<li class="parent-org"><a href="#org-'.$rel_inst_id.'">';
+                $content .= '<dd class="parent-org"><a href="#org-'.$rel_inst_id.'">';
                 $rel_inst_info = $institutions[$rel_inst_id];
 
                 $has_acro = false ;
@@ -100,12 +100,12 @@ foreach ($labs as $lab) {
                     $content .= "<span class='rel-inst-locname'> - ".$rel_inst_info['locname']."</span>";
                 }
                 // $content .= var_dump($rel_inst_info);
-                $content .= "</li>";
+                $content .= "</dd>";
 
                 // $content .= '<dd class="parent-org">' . ['label'] . '</dd> ';
             }
 
-            $content .= '</ul>';
+            $content .= '</dl>';
         }
 
         $content .= '</div>';

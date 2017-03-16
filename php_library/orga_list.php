@@ -53,8 +53,8 @@ foreach ($institutions as $orga) {
     $content.="</h2>";
 
         $www = '';
-        if (array_key_exists('homepage', $lab) && strlen($lab['homepage'])) {
-            $www = homepage_to_alink($lab['homepage']);
+        if (array_key_exists('homepage', $orga) && strlen($orga['homepage'])) {
+            $www = homepage_to_alink($orga['homepage']);
 
             $content .= '<dl><dd><span class="glyphicon glyphicon-home"></span>'.$www.'</dd></dl>';
         }

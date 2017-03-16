@@ -3,16 +3,9 @@
 // sort un $content
 
 
-echo '
-    <body>';
 include ("analytics.php");
-echo '
-    <div class="container">
 
-        <!-- Directory listing -->
-        <div class="hero-unit">
-   ';
-
+$content.= ' <!-- Directory listing -->  ';
 
 $imsize = 150;
 
@@ -29,7 +22,6 @@ $loop = 0;
 
 // NB this array was prepared in print_directory or print_scholar_directory
 
-
 foreach ($scholars as $scholar) {
 
     $scholar['position'] = weedout_alt_nulls($scholar['position']) ;
@@ -41,12 +33,37 @@ foreach ($scholars as $scholar) {
         set_time_limit(20);
     }
     $loop+=1;
-    $content.= '<div class="row">
-                <div class="span12">
-                    <div class="row">
-                        <div class="span9" align="justify">';
-    $content .= '<div>';
 
+    // Entry structure:
+    // ----------------
+    // <div class="row">
+    //     <div class="span3" align="justify">
+    //         <!-- picture -->
+    //     </div>
+    //     <div class="span9" align="justify">
+    //         <div class="container inner">
+    //             <div class="row">
+    //                 <div class="span6" align="justify">
+    //                     <!-- name and affiliations -->
+    //                 </div>
+    //                 <div class="span3" align="justify">
+    //                     <!-- keywords -->
+    //                 </div>
+    //             </div>
+    //             <div class="row">
+    //                 <div class="span12" align="justify">
+    //                     <!-- interests text -->
+    //                 </div>
+    //             </div>
+    //         </div>
+    //     </div>
+    // </div>
+    $content .= "\n";
+
+    $content.= '<div class="row">';
+
+    // picture <=> left column
+    $content.= '  <div class="span3" align="justify">';
     // remote pictures url 'http://some.org/path/blabla.png'
     //            or local '/data/shared_user_img/blabla.png'
     if ($scholar['pic_src'] != null) {
@@ -54,39 +71,52 @@ foreach ($scholars as $scholar) {
         if ($_SERVER['REQUEST_SCHEME'] == 'https') {
             $pic_src = preg_replace('/^http:/i', 'https:', $pic_src) ;
         }
-        $content .= '<img style="margin: 7px 10px 10px 0px" src="'. $pic_src . '" width="' . $imsize . 'px" align="left">';
+        $content .= '<img class="pic-of-scholar" src="'. $pic_src . '" width="' . $imsize . 'px" align="left">';
     }
     else {
         if (count($scholars) < 2000) {
             $im_id = floor(rand(0, 11));
-            $content .= '<img style="margin: 7px 10px 10px 0px" src="static/img/' . $im_id . '.png" width="' . $imsize . 'px" align="left">';
+            $content .= '<img class="pic-of-scholar" src="static/img/' . $im_id . '.png" width="' . $imsize . 'px" align="left">';
         }
     }
+    $content.= '  </div><!-- close pic -->';
 
+
+    // right part :
+    // ---8---|--4-  innerrow1
+    // ------12----  innerrow2
+    $content .= '  <div class="span9" align="justify">';
+    // innercontainer
+    $content .= '    <div class="container inner">';
+    // innerrow1
+    $content .= '    <div class="row">';
+    // name and affiliations
+    $content .= '      <div class="span6" align="justify">';
     $content .= '<h2 >' . $scholar['title'] . ' ' . $scholar['first_name'] . ' ' . $scholar['mid_initial'] . ' ' . $scholar['last_name'] .
             ' <small> - ' . $scholar['country'] . '</small></h2>';
 
-
-    if (($scholar['position'] != null)||count($scholar['labs'])||count($scholar['institutions'])) {
+    if (($scholar['position'] != null)
+         || $scholar['homepage'] != null
+         || count($scholar['labs'])
+         || count($scholar['institutions'])) {
        $content .= '<dl>';
     }
 
     if ($scholar['position'] != null) {
         $content .= '<dt>' . $scholar['position'] . '</dt>';
     }
+
     $lab = '';
 
-    // new way: list of org.label values
+    // list of org.label values
     if (count($scholar['labs'])) {
         $labs_html = implode(
                     '<br>',
                     array_map(
                         "clean_exp",
-                        array_map("esc_html",
-                            array_map(
+                        array_map(
                                 "weedout_alt_nulls",
                                 $scholar['labs']
-                            )
                         )
                     )
                 );
@@ -98,14 +128,15 @@ foreach ($scholars as $scholar) {
         # because we already have $lab_counts (per id)
     }
 
-    // new way: list of org.label values
+    // list of org.label values
     if (count($scholar['institutions'])) {
         $institutions_html = implode(
                     '<br>',
                     array_map(
                         "clean_exp",
-                        array_map("esc_html",
-                            $scholar['institutions']
+                        array_map(
+                                "weedout_alt_nulls",
+                                $scholar['institutions']
                         )
                     )
                 );
@@ -118,46 +149,59 @@ foreach ($scholars as $scholar) {
     }
 
 
-    // POSS: url of lab as link, if filled in DB
+    if ($scholar['homepage'] != null) {
+        $www = homepage_to_alink($scholar['homepage']);
+        $content .= '<dd class="url-of-scholar"><i class="icon-home"></i>'.$www.'</dd>';
+    }
 
     if (($scholar['position'] != null)
-        ||count($scholar['labs'])
-        ||count($scholar['institutions'])
+        || $scholar['homepage'] != null
+        || count($scholar['labs'])
+        || count($scholar['institutions'])
         ) {
        $content .= '</dl>';
     }
 
-
-    $content .= '</div>';
-
-
-    if ($scholar['interests'] != null) {
-
-        $htmlsafe_interests = str_replace('%%%', '<br/>',
-                                htmlspecialchars($scholar['interests'],
-                                                 ENT_HTML5, 'UTF-8')
-                              );
-        $content .= '<div>';
-        $content .= '<h4>Research</h4>';
-        $content .= '<p>' . $htmlsafe_interests . '</p>';
-        $content .= '</div>';
-    }
-
-    $content .= '</div>';
-
+    $content .= '      </div>';   // close span6
 
     if ($scholar['keywords'] != null) {
         $content .= '<div class="span3" align="left">';
 
-        if ($scholar['keywords'] != null){
-                 $content .= '<i class="icon-tags"></i> ' . clean_exp($scholar['keywords']). '.<br/><br/>';
-        }
-        $content .= '</div>';
-    }
-$content .= '</div>';
+        $content .= '  <div class="keywords-of-scholar">
+                       <i class="icon-tags"></i> ' . clean_exp($scholar['keywords']). '
+                       </div>';
 
-    $content .= '</div>';
-    $content .= '</div>';
+        $content .= "\n";
+        $content .= '</div>';  // close span3
+        $content .= "\n";
+    }
+
+
+    $content .= '</div>'; // close innerrow1
+    $content .= "\n";
+
+    if ($scholar['interests'] != null) {
+        // second row is undivided
+        $content .= "\n";
+        $content .= '<div class="row">
+        <div class="span9" align=justify>';
+        $content .= "\n";
+        $content .= '<div class="interests-of-scholar">';
+        $content .= '<dl><dt>Research</dt></dl>';
+        $content .= '<p>' . $scholar['interests'] . '</p>';
+        $content .= '</div>';
+        $content .= "\n";
+        $content .= '</div></div>';  // closing full span and innerrow2
+        $content .= "\n";
+    }
+
+    $content .= "\n";
+    $content .= '</div>'; // closing inner container
+    $content .= "\n";
+    $content .= '</div>'; // closing outer span12
+    $content .= "\n";
+    $content .= '</div>'; // closing outer row
+    $content .= "\n";
 
     $content .= '
 <center><img src="static/img/bar.png"></center>';
@@ -222,21 +266,23 @@ for($i = 0; $i < $n_steps; $i++) {
             AS related_insts
     FROM orgs
     LEFT JOIN (
-        SELECT sch_org.orgid AS src_orgid,
-              sch_org2.orgid AS tgt_orgid,
-              count(*) AS tgt_freq
-        FROM sch_org
-        LEFT JOIN sch_org AS sch_org2
-            ON sch_org.uid = sch_org2.uid
-        JOIN orgs AS orgs2
-            ON sch_org2.orgid = orgs2.orgid
-        WHERE orgs2.class = 'inst'
-        AND  sch_org.orgid != sch_org2.orgid
-        GROUP BY sch_org.orgid, sch_org2.orgid
-        ) AS lab_relationship_to_inst_via_scholars ON src_orgid = orgs.orgid
+        SELECT * FROM (
+            SELECT sch_org.orgid AS src_orgid,
+                  sch_org2.orgid AS tgt_orgid,
+                  count(sch_org.uid) AS tgt_freq
+            FROM sch_org
+            LEFT JOIN sch_org AS sch_org2
+                ON sch_org.uid = sch_org2.uid
+            JOIN orgs AS orgs2
+                ON sch_org2.orgid = orgs2.orgid
+            WHERE orgs2.class = 'inst'
+            AND  sch_org.orgid != sch_org2.orgid
+            GROUP BY sch_org.orgid, sch_org2.orgid
+            ) AS lab_relationship_to_inst_via_scholars
+        WHERE tgt_freq > 1
+    ) lab_relationship_filtered ON src_orgid = orgs.orgid
     WHERE orgs.orgid IN ( {$ids_str} )
     AND orgs.name != '_NULL'
-    AND tgt_freq > 1
     GROUP BY orgs.orgid
     ORDER BY orgs.name, orgs.acro
 LABSQLEXTENDED;

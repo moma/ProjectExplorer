@@ -40,8 +40,8 @@ $missing_country = 0;
 $missing_title = 0;
 $missing_position = 0;
 
-$missing_labs = $lab_counts[''] || 0;
-$missing_insts = $inst_counts[''] || 0;
+$missing_labs = array_key_exists('', $lab_counts) ? $lab_counts[''] : 0;
+$missing_insts = array_key_exists('', $inst_counts) ? $inst_counts[''] : 0;
 
 
 

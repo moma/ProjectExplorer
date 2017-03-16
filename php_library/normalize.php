@@ -75,6 +75,7 @@ function split_join_keywords_for_html($str_value) {
     $mod_arr = [];
 
     foreach ($arr as $kw) {
+        $kw = esc_html($kw);
         if (strlen(str_replace(' ', '', $kw))) {
             $mod_kw = str_replace(' ', '&nbsp;', $kw) ;
             array_push($mod_arr, $mod_kw);

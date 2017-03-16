@@ -166,10 +166,10 @@ HERE_QUERY;
         $info = array();
         $info['unique_id'] = $row['luid'];
         $info['doors_uid'] = $row['doors_uid'];
-        $info['first_name'] = $row['first_name'];
+        $info['first_name'] = esc_html($row['first_name']);
         $info['mid_initial'] = (strlen($row['middle_name']) ? substr($row['middle_name'],0,1)."." : "");
-        $info['last_name'] = $row['last_name'];
-        $info['initials'] = $row['initials'];
+        $info['last_name'] = esc_html($row['last_name']);
+        $info['initials'] = esc_html($row['initials']);
 
         // retrieved from secondary table and GROUP_CONCATenated
         $info['keywords_ids'] = explode(',', $row['keywords_ids']);
@@ -179,21 +179,25 @@ HERE_QUERY;
         // $info['status'] = $row['status'];
         $info['record_status'] = $row['record_status'];  // TODO use this one
 
-        $info['country'] = $row['country'];
+        $info['country'] = esc_html($row['country']);
         $info['homepage'] = $row['home_url'];
 
         // recreated arrays
-        $info['labs'] = explode('%%%', $row['labs_list'] ?? "") ;
-        $info['institutions'] = explode('%%%', $row['insts_list'] ?? "") ;
-
+        $info['labs'] = array_map("esc_html",
+                            explode('%%%', $row['labs_list'] ?? "")
+                        ) ;
+        $info['institutions'] = array_map("esc_html",
+                            explode('%%%', $row['insts_list'] ?? "")
+                        ) ;
         $info['labs_ids'] = explode(',', $row['labs_ids'] ?? "") ;
         $info['insts_ids'] = explode(',', $row['insts_ids'] ?? "") ;
 
-
-        $info['title'] = $row['hon_title'];
-        $info['position'] = $row['position'];
+        $info['title'] = esc_html($row['hon_title']);
+        $info['position'] = esc_html($row['position']);
         $info['pic_src'] = $row['pic_fname'] ? '/data/shared_user_img/'.$row['pic_fname'] : $row['pic_url']  ;
-        $info['interests'] = $row['interests_text'];
+        $info['interests'] = str_replace('%%%', '<br/>',
+                            esc_html($row['interests_text'])
+                          );
         // $info['address'] = $row['address'];
         // $info['city'] = $row['city'];
         // $info['postal_code'] = $row['postal_code'];
@@ -353,8 +357,13 @@ echo  '<h2>Sorry, '.$target_name.' did not mention any keywords ... we cannot pr
     If you are '.$target_name.', you can  <a href="/services/user/profile"  target="_BLANK">modify your profile</a> and see your
         network in few minutes.';
 }else{
-echo $header;
-echo $content;
+    echo '<body>
+          <div class="container full-directory">
+          <div class="hero-unit">';
+
+    echo $header;
+    echo '';
+    echo $content;
 }
 exit(0);
 

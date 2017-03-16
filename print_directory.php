@@ -143,6 +143,7 @@ if ($tags) {
         $i++;
     }
     $f .= ")  ";
+    $query_details .= "</li>";
 }
 
 if ($keywords) {
@@ -172,6 +173,8 @@ if ($keywords) {
         $i++;
     }
     $f .= ")  ";
+
+    $query_details .= "</li>";
 }
 
 
@@ -195,6 +198,7 @@ if ($countries) {
         $i++;
     }
     $f .= ")  ";
+    $query_details .= "</li>";
 }
 
 if ($laboratories) {
@@ -215,6 +219,7 @@ if ($laboratories) {
         $i++;
     }
     $f .= ")  ";
+    $query_details .= "</li>";
 }
 
 if ($organizations) {
@@ -237,6 +242,7 @@ if ($organizations) {
         $i++;
     }
     $f .= ")  ";
+    $query_details .= "</li>";
 }
 
 $query_details.='</ul>';
@@ -351,10 +357,10 @@ foreach ($base->query($sql) as $row) {
     $info = array();
     $info['unique_id'] = $row['luid'];
     $info['doors_uid'] = $row['doors_uid'];
-    $info['first_name'] = $row['first_name'];
+    $info['first_name'] = esc_html($row['first_name']);
     $info['mid_initial'] = (strlen($row['middle_name']) ? substr($row['middle_name'],0,1)."." : "");
-    $info['last_name'] = $row['last_name'];
-    $info['initials'] = $row['initials'];
+    $info['last_name'] = esc_html($row['last_name']);
+    $info['initials'] = esc_html($row['initials']);
 
     // retrieved from secondary table and GROUP_CONCATenated
     // $info['keywords_ids'] = explode(',', $row['keywords_ids']);
@@ -365,21 +371,25 @@ foreach ($base->query($sql) as $row) {
     // $info['status'] = $row['status'];
     $info['record_status'] = $row['record_status'];  // TODO use this one
 
-    $info['country'] = $row['country'];
+    $info['country'] = esc_html($row['country']);
     $info['homepage'] = $row['home_url'];
 
     // recreated arrays
-    $info['labs'] = explode('%%%', $row['labs_list'] ?? "") ;
-    $info['institutions'] = explode('%%%', $row['insts_list'] ?? "") ;
-
+    $info['labs'] = array_map("esc_html",
+                        explode('%%%', $row['labs_list'] ?? "")
+                        ) ;
+    $info['institutions'] = array_map("esc_html",
+                        explode('%%%', $row['insts_list'] ?? "")
+                        ) ;
     $info['labs_ids'] = explode(',', $row['labs_ids'] ?? "") ;
     $info['insts_ids'] = explode(',', $row['insts_ids'] ?? "") ;
 
-
-    $info['title'] = $row['hon_title'];
-    $info['position'] = $row['position'];
+    $info['title'] = esc_html($row['hon_title']);
+    $info['position'] = esc_html($row['position']);
     $info['pic_src'] = $row['pic_fname'] ? '/data/shared_user_img/'.$row['pic_fname'] : $row['pic_url']  ;
-    $info['interests'] = $row['interests_text'];
+    $info['interests'] = str_replace('%%%', '<br/>',
+                        esc_html($row['interests_text'])
+                      );
 
     // $info['address'] = $row['address'];
     // $info['city'] = $row['city'];
@@ -432,6 +442,7 @@ foreach ($base->query($sql) as $row) {
 // both our stats have been filled
 // var_dump($lab_counts) ;
 // var_dump($inst_counts) ;
+// var_dump($org_id_to_label) ;
 
 // creates js for stats visualisations and counts (we re-use the orgs counts)
 include ("php_library/stat-prep_from_array.php");
@@ -445,8 +456,7 @@ include ("php_library/directory_content.php");
 
 
 $content .= '</div>';
-$content .= '</div>
-            <footer style="color:white">
+$content .= '<footer style="color:white">
                 <!-- This directory is maintained by the <a href="http://cssociety.org" target="blank">Complex Systems Society</a>
                      and the <a href="http://iscpif.fr" target="blank">Complex Systems Institute of Paris Ile-de-France</a>.<br/>-->
                 <center>
@@ -484,15 +494,16 @@ $content .= '</div>
 </html>';
 
 //////// Header
-$header = '<div class="row" id="welcome">
+$header = '
+<div class="row" id="welcome">
     <div class="span12" align="justify">
-<img src="static/img/RegistryBanner.png" align="center">
-<br/><br/>
-<h1>Complex Systems Scholars</h1>
-<br/>
-<br/>
-<p>
-This directory presents the profiles of <a href="#scholars">'.  count($scholars).' scholars</a>, <a href="#labs">'.  count($labs).' labs</a> and <a href="#orga">'.$orga_count.' organizations</a> in the field of Complex Systems';
+        <img src="static/img/RegistryBanner.png" align="center">
+        <br/><br/>
+        <h1>Complex Systems Scholars</h1>
+        <br/>
+        <br/>
+        <p>
+        This directory presents the profiles of <a href="#scholars">'.  count($scholars).' scholars</a>, <a href="#labs">'.  count($labs).' labs</a> and <a href="#orga">'.$orga_count.' organizations</a> in the field of Complex Systems';
 
 
 
@@ -508,13 +519,12 @@ science,   as well as  to increase their visibility at the international scale.<
 <ul>
 <li><b><i>This directory is open</i></b>. Anybody can have her profile included
 provided it is related to Complex Systems science and Complexity science. Personal data are given on a
-voluntary basis and people are responsible for the validity and integrity of their data.
+voluntary basis and people are responsible for the validity and integrity of their data.</li>
 <li>This directory is edited by the ISCPIF. This initiative is supported by the <i>Complex Systems
 Society</i> (<a href="http://cssociety.org">http://cssociety.org</a>).
 Contributions and ideas are welcome to improve this directory.
-<a href="mailto:sysop AT iscpif.fr">Please feedback</a></p>
+<a href="mailto:sysop AT iscpif.fr">Please feedback</a></li>
 </ul>
-</p>
 
 <br/>
 <br/>
@@ -538,7 +548,12 @@ Contributions and ideas are welcome to improve this directory.
 </div>';
 
 echo $meta.' '.$stats.'</head>';
+echo '<body>
+      <div class="container full-directory">
+      <div class="hero-unit">';
+
 echo $header;
+echo '';
 echo $content;
 exit(0)
 

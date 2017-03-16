@@ -4,7 +4,7 @@
  * Common utility functions
  */
 
-function clean_exp($string){
+function clean_exp($string) {
     // enlève les comma trainantes
     if (strcmp(substr(trim($string),-1),',')==0){
         return substr(trim($string),0,-1);
@@ -13,8 +13,8 @@ function clean_exp($string){
     }
 }
 
-function esc_html($string){
-    return htmlspecialchars($string,ENT_HTML5, 'UTF-8') ;
+function esc_html($string) {
+    return htmlspecialchars($string,ENT_HTML5|ENT_QUOTES, 'UTF-8') ;
 }
 
 // -----------------------------8<------------------

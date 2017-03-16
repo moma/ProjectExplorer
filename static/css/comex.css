@@ -346,16 +346,38 @@ div.ccsection-footer {
 }
 
 /*in directory view*/
+.full-directory {
+    margin: 0 25;
+}
+.container.inner {
+    width: 100%;
+}
+.scholars-list {
+}
+.interests-of-scholar p {
+    font-size: 1.2em !important;
+    line-height: 1.3em !important;
+    margin-top: -.5em;
+}
+.keywords-of-scholar {
+}
+.url-of-scholar {
+    margin-top: .5em;
+}
+
+.pic-of-scholar {
+    /*margin: 7px 25px 15px 0px;*/
+}
 .labs-of-scholar {
     font-style: italic;
 }
 .institutions-of-scholar {
-    font-variant: small-caps;
-    font-style: italic;
+    /*font-variant: small-caps;*/
+    font-family: sans;
 }
 
 .rel-inst-locname {
-    font-size: 75%;
+    font-size: 90%;
 }
 
 
