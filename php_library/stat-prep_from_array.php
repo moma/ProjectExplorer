@@ -8,14 +8,14 @@
 
 // parameters : threshold to display orgs (labs / institutions) diagrams
 $MIN_DISTINCT_LABS = 1 ;
-$MIN_DISTINCT_LABS_SCHOLARS_SHARE = .25;
+$MIN_DISTINCT_LABS_SCHOLARS_SHARE = .15;
 
 $MIN_DISTINCT_INSTS = 1 ;
-$MIN_DISTINCT_INSTS_SCHOLARS_SHARE = .20;
+$MIN_DISTINCT_INSTS_SCHOLARS_SHARE = .05;
 
 // always the same colors for "others" and "missing" categories
-$COLOR_OTHERS="grey";
-$COLOR_MISSING="darkgrey";
+$COLOR_OTHERS="darkgrey";
+$COLOR_MISSING="grey";
 
 // all the other available color-scheme
 $COLOR_SCHEME = '["#4572A7", "#AA4643", "#89A54E", "#80699B", "#3D96AE",
@@ -39,8 +39,10 @@ $other_insts = 0;
 $missing_country = 0;
 $missing_title = 0;
 $missing_position = 0;
-$missing_labs = 0;
-$missing_insts = 0;
+
+$missing_labs = $lab_counts[''] || 0;
+$missing_insts = $inst_counts[''] || 0;
+
 
 
 // données des pays

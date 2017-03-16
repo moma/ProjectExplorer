@@ -236,6 +236,7 @@ for($i = 0; $i < $n_steps; $i++) {
         ) AS lab_relationship_to_inst_via_scholars ON src_orgid = orgs.orgid
     WHERE orgs.orgid IN ( {$ids_str} )
     AND orgs.name != '_NULL'
+    AND tgt_freq > 1
     GROUP BY orgs.orgid
     ORDER BY orgs.name, orgs.acro
 LABSQLEXTENDED;
@@ -261,13 +262,14 @@ LABSQLEXTENDED;
         // keywords : POSS with an org <=> keywords map
         // cf. doc/data_mining_exemples/correlated_kws.sql
         // $info['keywords'] = $row['keywords'];
+        $info['keywords'] = null;
 
-        // most frequent parent orgs (max = 3)
-        $related_insts_ids = array_slice(explode(',', $row['related_insts'] ?? ""),0,3) ;
-        $info['related_insts'] = array_filter($related_insts_ids);
+        // most frequent parent orgs (max = 2)
+        $related_insts_ids = array_filter(array_slice(explode(',', $row['related_insts'] ?? ""),0,2)) ;
+        $info['related_insts'] = $related_insts_ids;
 
         // also add them to orga_list
-        $additional_insts_ids[] = $related_insts_ids;
+        $additional_insts_ids = array_merge($additional_insts_ids,$related_insts_ids);
 
         $info['admin'] = ucwords($row['contact_name'] ?? '');
         if ($row['contact_email']) {
@@ -292,43 +294,54 @@ LABSQLEXTENDED;
 /// liste des organismes / affiliations institutionnelles ///
 /////////////////////////////////////////////////////////////
 
+
+// print_r("<br>0<br>") ;
+// print_r($inst_counts) ;
+
 // all direct institutions' orgids except ''
-$inst_ids = array_filter(array_keys($inst_counts));
+$insts_ids = array_filter(array_keys($inst_counts));
 
 // any other institutions we want
-// $insts_ids[] = $additional_insts_ids;
-sort($inst_ids);
+$insts_ids = array_merge($insts_ids, $additional_insts_ids);
+sort($insts_ids);
 $insts_ids = array_unique($insts_ids);
 
-// all org with infos to retrieve
-$organiz = array();
+// all institutions with infos to retrieve
+$institutions = array();
 
-// debug
-// $content .= var_dump($inst_ids) ;
+$ids_str = implode(',', $insts_ids);
 
-foreach ($inst_ids as $inst_id) {
-    $sql = "SELECT * FROM orgs WHERE orgid='" . $inst_id. "'";
+$sql = "SELECT * FROM orgs WHERE orgid IN (" . $ids_str. ") ORDER BY label";
 
-    foreach ($base->query($sql) as $row) {
-        $info = array();
-        $info['unique_id'] = $inst_id;
-        $info['name'] = $row['name'];
+foreach ($base->query($sql) as $row) {
+    if ($row['name'] == "_NULL")  continue ;
 
-        $info['acronym'] = $row['acro'] ?? '';
-        $info['homepage'] = $row['url'] ?? '';
-        $info['inst_type'] = $row['inst_type'] ?? '';
-        $info['locname'] = $row['locname'] ?? '';     // ex: 'Barcelona, Spain'
-                                                      //     'London, UK'
-                                                      //     'UK'
+    $info = array();
+    $info['unique_id'] = $row['orgid'];
+    $info['name'] = $row['name'];
 
+    $info['acronym'] = $row['acro'] ?? '';
+    $info['homepage'] = $row['url'] ?? '';
+    $info['inst_type'] = $row['inst_type'] ?? '';
+    $info['locname'] = $row['locname'] ?? '';     // ex: 'Barcelona, Spain'
+                                                  //     'London, UK'
+                                                  //     'UK'
+    // TODO ADD keywords
+    // $info['keywords'] = $row['keywords'];
+    $info['keywords'] = null;
+    // cf. doc/data_mining_exemples/correlated_kws.sql
 
-        // TODO RESTORE keywords and contact
-        // $info['keywords'] = $row['keywords'];
-        // $info['admin'] = $row['admin'];
-        $organiz[$inst_id] = $info;
+    $info['admin'] = ucwords($row['contact_name'] ?? '');
+    if ($row['contact_email']) {
+        $safe_contact_email = safe_email($row['contact_email']);
+        $info['admin'] .= '<br><span class=code>'.$safe_contact_email.'</span>';
     }
+
+    $institutions[$row['orgid']] = $info;
 }
 
+// debug
+// $content .= var_dump($institutions) ;
 
 
 ///////////////////////////////////////////////////////////////

@@ -347,11 +347,15 @@ div.ccsection-footer {
 
 /*in directory view*/
 .labs-of-scholar {
-    font-family: Georgia, Cambria, serif;
+    font-style: italic;
 }
 .institutions-of-scholar {
-    font-family: Georgia, Cambria, serif;
-    font-weight: bold;
+    font-variant: small-caps;
+    font-style: italic;
+}
+
+.rel-inst-locname {
+    font-size: 75%;
 }
 
 

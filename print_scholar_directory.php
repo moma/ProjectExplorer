@@ -215,8 +215,6 @@ HERE_QUERY;
             $idkey = $cat[1];
             $counthash_ref = &$cat[2];
 
-            // £TODO_ORGS we'll need a missing_labs
-
             $j = -1 ;
             foreach ($info[$idkey] as $org_id) {
 

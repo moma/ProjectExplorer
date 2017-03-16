@@ -10,9 +10,9 @@ $content .='<br/>
 $orga_count = 0;
 
 // debug
-$content .= var_dump($organiz) ;
+// $content .= var_dump($institutions) ;
 
-foreach ($organiz as $orga) {
+foreach ($institutions as $orga) {
 
     if ($loop % 100){
         set_time_limit(20);
@@ -58,25 +58,25 @@ foreach ($organiz as $orga) {
 
             $content .= '<dl><dd><span class="glyphicon glyphicon-home"></span>'.$www.'</dd></dl>';
         }
-
-
         $content .= '</div>';
 
 
-        if ((trim($orga['fields']) != null)) {
-            $content .= '<div><p>';
-            //echo $orga['fields'].'<br/>';
-            $fields=trim(str_replace('Other','',clean_exp($orga['fields'])));
-
-            if (strcmp(',', substr($fields,-1,1))==0){
-                $fields=substr($fields,0,-1);
-            }
-            $fields=str_replace('%%%', ', ',$fields);
-            $content .= '<i>Fields: </i> ' . str_replace(", , ", ", ", $fields). '.<br/><br/>';
-
-            $content .= '</p></div>';
-        }
+        // if ((trim($orga['fields']) != null)) {
+        //     $content .= '<div><p>';
+        //     //echo $orga['fields'].'<br/>';
+        //     $fields=trim(str_replace('Other','',clean_exp($orga['fields'])));
+        //
+        //     if (strcmp(',', substr($fields,-1,1))==0){
+        //         $fields=substr($fields,0,-1);
+        //     }
+        //     $fields=str_replace('%%%', ', ',$fields);
+        //     $content .= '<i>Fields: </i> ' . str_replace(", , ", ", ", $fields). '.<br/><br/>';
+        //
+        //     $content .= '</p></div>';
+        // }
         $content .= '</div>';
+
+
 
         if (($orga['keywords'] != null) || ($orga['admin'] != null)) {
             $content .= '<div class="span3" align="justify">';

@@ -1,5 +1,6 @@
 <?php
 include ("php_library/comex_library.php");
+include ("php_library/js_elements.php");
 include ("php_library/parametres.php");
 include ("php_library/normalize.php");
 
@@ -40,6 +41,8 @@ $meta = '<!DOCTYPE html>
           })();
         </script>
             ';
+
+$meta .= $rm_ads_snippet;
 
 define('_is_utf8_split', 5000);
 
@@ -399,8 +402,6 @@ foreach ($base->query($sql) as $row) {
         $idkey = $cat[1];
         $counthash_ref = &$cat[2];
 
-        // £TODO_ORGS we'll need a missing_labs
-
         $j = -1 ;
         foreach ($info[$idkey] as $org_id) {
 
@@ -414,7 +415,8 @@ foreach ($base->query($sql) as $row) {
                 $org_label = weedout_alt_nulls($org_label);
             }
 
-            // all non-values are there as null
+            // all non-values are there as null => the key becomes ""
+            // (useful for missing labs)
             $org_id_to_label[$org_id] = $org_label;
 
 
@@ -538,7 +540,6 @@ Contributions and ideas are welcome to improve this directory.
 echo $meta.' '.$stats.'</head>';
 echo $header;
 echo $content;
-
 exit(0)
 
 
