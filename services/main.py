@@ -894,7 +894,7 @@ def save_form(clean_records, update_flag=False, previous_user_info=None):
                 dbcrud.get_or_create_org(declared_orgs[oclass], oclass, reg_db)
             )
 
-    mlog('DEBUG', 'save_form: found ids for orgs =', orgid)
+    mlog('DEBUG', 'save_form: found ids for orgs =', orgids)
 
     # B4) save the org <=> org mappings TODO LATER (not a priority)
     # dbcrud.record_org_org_link(src_orgid, tgt_orgid, reg_db)

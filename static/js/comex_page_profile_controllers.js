@@ -32,6 +32,11 @@ function setupSavedItems(uinfo) {
             var colName = cmxClt.COLS[i][0]
             var chosenV = uinfo[colName]
 
+            // special case
+            if (colName == 'inst_type' && uinfo.insts.length) {
+                chosenV = uinfo.insts[0].inst_type
+            }
+
             // console.log('setupSavedItems', colName, '('+colType+')' , 'with', chosenV)
 
             // if the value is none => there's nothing to do
@@ -41,7 +46,7 @@ function setupSavedItems(uinfo) {
                 if (tgtElt != null) {
                     // d <=> convert to YY/MM/DD from iso string YYYY-MM-DD
                     if (colType == 'd') {
-                        console.log('setting date', colName, 'with', chosenV)
+                        // console.log('setting date', colName, 'with', chosenV)
                         tgtElt.value = chosenV.replace(/-/g,'/')
                         tgtElt.dispatchEvent(new CustomEvent('change'))
                     }

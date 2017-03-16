@@ -626,6 +626,8 @@ def record_sch_org_link(luid, orgid, cmx_db = None):
     db_c.execute(
         'INSERT INTO sch_org(uid,orgid) VALUES (%i,%i)' % (luid, orgid)
     )
+    cmx_db.commit()
+
     if not cmx_db:
         db.close()
 
