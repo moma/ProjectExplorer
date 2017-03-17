@@ -76,11 +76,32 @@
                        </li>
                        <li>
                            <b>Country: </b>{{ current_user.info.country }}<br>
+
+                           {% if current_user.info.position %}
                            <b>Position: </b>{{ current_user.info.position }}<br>
+                           {% endif %}
+
+                           {% set n_affs = (current_user.info.labs | length) + (current_user.info.insts | length) %}
+                           {% if n_affs == 1 %}
+                            <b>Affiliation:</b> {% for lab in current_user.info.labs %}<i>{{ lab.label }}</i>{% endfor %}
+                               {% for inst in current_user.info.insts %}{{ inst.label }}{% endfor %}
+                            {% elif n_affs > 1 %}
+                            <b>Affiliations:</b>
+                                {% for lab in current_user.info.labs %}
+                                <br> - <i>{{ lab.label }}</i>
+                                {% endfor %}
+                                {% for inst in current_user.info.insts %}
+                                <br> - {{ inst.label }}
+                                {% endfor %}
+                           {% endif %}
+                           <br>
                            <b>Keywords: </b>{{ current_user.info.keywords|join(', ') }}<br>
+
+                           {% if current_user.info.home_url %}
                            [ <a href="{{ current_user.info.home_url }}" target="blank">
                                View homepage
                            </a>]
+                           {% endif %}
                            <br>
                        </li>
                    </ul>
