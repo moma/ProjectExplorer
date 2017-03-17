@@ -52,6 +52,7 @@ function changeType() {
     if(swclickActual=="sociosemantic") {
 
     	if(swMacro) {
+            // £TODO_TINAREFAC: expose this mode more from the start (macro-sociosemantic)
     		changeToMacro("sociosemantic");
 	        pushSWClick("sociosemantic");
 	        RefreshState("AaBb")
