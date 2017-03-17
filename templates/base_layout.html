@@ -141,12 +141,19 @@
                 <li class="comex-nav-item">
                     <a class="topbarlink" id="generate" href="#"> <i class="icon-arrow-right icon-white"></i> <strong>MAP</strong></a>
                 </li>
-
               </ul>
 
 
-
               <ul class="white nav navbar-nav navbar-right">
+                {% if current_user and not current_user.is_anonymous %}
+                  <li class="comex-nav-item">
+                      <a class="topbarlink" href='/explorerjs.html?type="uid"&amp;nodeidparam="{{ current_user.uid }}"'> Your Map </a>
+                  </li>
+                  <li class="comex-nav-item">
+                      <a class="topbarlink" href='/print_scholar_directory.php?query={{ current_user.uid }}'> Your Directory </a>
+                  </li>
+                {% endif %}
+
                 <!-- USER TOOLBARS (LOGIN/REGISTER/PROFILE/ETC) -->
                 <li class="dropdown">
                   <a href="#" class="navlink dropdown-toggle"
@@ -167,15 +174,9 @@
                               <a href="/services/user/profile"> Your Profile </a>
                           </li>
                           <li>
-                              <a href='/explorerjs.html?type="uid"&nodeidparam="{{ current_user.uid }}"'> Your Map </a>
-                          </li>
-                          <li>
-                              <a href='/print_scholar_directory.php?query={{ current_user.uid }}'> Your Neighboor Stats </a>
+                              <a href='/services/user/logout/'> Logout </a>
                           </li>
                           {% endif %}
-                      <li>
-                          <a href='/services/user/logout/'> Logout </a>
-                      </li>
                       {% else %}
                       <li>
                           <div class="dropdown-a-like" id="poplogin"
