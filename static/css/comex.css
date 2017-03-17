@@ -285,6 +285,11 @@ h2.oldstyle {
   font-weight: bold;
 }
 
+
+h2.oldstyle.maintitle {
+  margin-left: -.5em;
+}
+
 /* "accordeon": collapsible formcats */
 div.ccsection-wrap {
     margin-top: 0 ;
@@ -344,6 +349,11 @@ div.ccsection-footer {
     padding: 0 ;
 }
 
+
+/* main DIRECTORY MAP actions */
+.actions {
+    display: block;
+}
 
 /* "carte de visite" */
 .our-vcard {
