@@ -252,5 +252,13 @@
   {% block last_imports %}
   {% endblock %}
 
+  <script type="text/javascript">
+      // shown once: a cookie warning
+      if (! localStorage['comex_cookie_warning_done']) {
+          cmxClt.elts.box.addCookieBox()
+      }
+
+  </script>
+
 </body>
 </html>

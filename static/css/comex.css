@@ -152,6 +152,27 @@ div.my-centering-box > * {
   color: #910;
 }
 
+/* cookie panel */
+.cookie-panel {
+    bottom: 0;
+    width: 100%;
+    position: fixed;
+    margin-bottom: 0;
+    display: block;
+    opacity: 1;
+    -webkit-transition: opacity .2s ease-out;
+    z-index: 3;
+    /*-webkit-transition: height .2s ease-out;*/
+    /*overflow: visible;*/
+}
+
+.framed-text {
+    padding: 3px 3px 2px 3px;
+    border: solid 1.25px #333;
+    border-radius: 2px;
+}
+
+
 /* operation buttons for instance add middle name, remove box, etc */
 .operation {
   color: #ffc ;

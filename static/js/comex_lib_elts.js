@@ -117,7 +117,8 @@ var cmxClt = (function(cC) {
     }
 
     // our self-made modal open/close function
-    cC.elts.box.toggleBox = function(boxId) {
+    // optional dontOpacifyPage (default false)
+    cC.elts.box.toggleBox = function(boxId, dontOpacifyPage) {
         var laBox = document.getElementById(boxId)
         if (laBox) {
             if (laBox.style.display == 'none') {
@@ -126,7 +127,7 @@ var cmxClt = (function(cC) {
                 laBox.style.opacity = 1
 
                 // opacify .page element
-                if (cC.elts.elPage) cC.elts.elPage.style.opacity = .2
+                if (cC.elts.elPage && !dontOpacifyPage) cC.elts.elPage.style.opacity = .2
             }
             else {
                 // remove box
@@ -134,7 +135,7 @@ var cmxClt = (function(cC) {
                 setTimeout(function(){laBox.style.display = 'none'}, 300)
 
                 // show .page
-                if (cC.elts.elPage) cC.elts.elPage.style.opacity = ''
+                if (cC.elts.elPage && !dontOpacifyPage) cC.elts.elPage.style.opacity = ''
             }
         }
         else {
@@ -347,7 +348,53 @@ var cmxClt = (function(cC) {
         okBtn.onclick = functionOnOk
     }
 
-    // /generic message box ------------------------------------------------
+    // cookie warning ------------------------------------------------------
+
+    // NB we use localStorage (kept "forever") to not re-display to same browser
+    // POSS use sessionStorage instead
+
+    cC.elts.box.closeCookieOnceForAll = function () {
+        cmxClt.elts.box.toggleBox('cookie-div', true)
+        localStorage['comex_cookie_warning_done'] = 1
+    }
+
+    // to create an html message panel with the legal cookie warning
+    // no params (FIXME div id is hard-coded)
+    //
+    cC.elts.box.addCookieBox = function() {
+
+        // in a new div
+        var myDiv = document.createElement('div')
+        myDiv.innerHTML = `
+        <div id="cookie-div" class="panel panel-success cookie-panel" role="dialog">
+            <div class="panel-body">
+              <h4 class="center">
+                This website uses cookies to adapt the display to your navigation.
+              </h4>
+              <p class="center">
+                Press <span class="framed-text">SPACE</span> to accept or click here:
+                <button type="button" class="btn btn-primary"
+                        onclick="cmxClt.elts.box.closeCookieOnceForAll()">
+                    OK
+                </button>
+              </p>
+            </div>
+        </div>`
+
+        // append on body (no positioning: fixed overlay)
+        var body = document.querySelector('body')
+        body.insertBefore(myDiv, body.lastChild)
+
+        // add a closing action to spacebar
+        window.onkeydown = function(evt) {
+            if (!localStorage['comex_cookie_warning_done']) {
+                if (evt.keyCode == 32) {
+                    cmxClt.elts.box.closeCookieOnceForAll()
+                    // console.log('space toggleBox')
+                }
+            }
+        }
+    }
 
     return cC
 
