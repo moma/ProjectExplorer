@@ -11,8 +11,8 @@
          - ../../data/shared_mysql_data:/var/lib/mysql
 
       comex_test:
-        container_name: comex_test
-        image: comex2_services:testing
+        container_name: comex_services
+        image: comex2_services:latest
         build: ./comex2_services
         # logs will show all that's printed to STDOUT with tty:true
         tty: true

@@ -44,16 +44,12 @@ RUN git clone https://github.com/moma/comex2.git
 # main CMD to start the app
 WORKDIR /comex2
 
-# flask dev server
-# CMD python3 server_comex_registration.py
-
 # start nginx inner wrapper and gunicorn production server
-CMD bash comex-run.sh
+CMD bash comex-run.sh -p
 
 # ports -----------------------------------------------------------------------
 
 # nginx server (redirecting to php AND services)
 EXPOSE 80
 
-# https test
-EXPOSE 443
+# https is actually handled outside by proxy layer
