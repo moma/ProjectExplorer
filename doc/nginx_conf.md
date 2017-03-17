@@ -1,6 +1,6 @@
 ## Outer Nginx configuration
 
-The comex app is in 2 parts that are unified inside docker via an [inner nginx](https://github.com/moma/comex2/blob/master/setup/dockers/comex2_services/comex2_php_and_services.nginx.conf). However on the deployment machine (host machine that runs the dockers), we may want to have a webserver to redirect everything inside. This is the **outer** nginx exemple.
+The comex app is in 2 parts that are unified inside docker via an [inner nginx](https://github.com/moma/comex2/blob/master/setup/dockers/comex2_services/comex2_php_and_services.nginx.conf). However on the deployment machine (host machine that runs the dockers), we usually want to have a webserver to redirect everything inside. This is this **outer** nginx exemple.
 
 
 ### 1) Install nginx
@@ -24,36 +24,43 @@ sudo nano comex2_outer.conf
 ```
 
 This below is a full config exemple you can paste in nano:
-  - it serves the comex app (legacy php), in `/`
-  - it also serves registration app, in `/services/user/register`  
+  - it serves the comex php, in `/*.php`
+  - it also serves services (user, api), in `/services/.*` via python  
 
 
 ```nginxconf
-# Full server config: php comex as root and api + reg as services subpath
-# ========================================================================
+# Full server config: docker comex (php + python server) on 8080
+# ==============================================================
+# rewrite http to https
 server {
     listen 80 ;
     listen [::]:80 ;
+    # change to communityexplorer.org in *finaldeployment*
+    server_name dev.communityexplorer.org ;
+    # server_name communityexplorer.org;
+    return         301 https://$host$request_uri;
+}
+
+server {
     listen 443 ssl;
     listen [::]:443 ssl;
     # SSL certificates
-        # self-signed certificates
+        # self-signed certificates for the moment
         include snippets/snakeoil.conf;
 
-        # uncomment if certificates for https://your-domain.org
-        # ssl_certificate /etc/ssl/cert/ssl-for_your_domain.pem;
-        # ssl_certificate_key /etc/ssl/private/ssl-for_your_domain.key;
+        # uncomment future certificates for https://communityexplorer.org
+        # ssl_certificate /etc/ssl/cert/ssl-future-comex.pem;
+        # ssl_certificate_key /etc/ssl/private/ssl-future-comex.key;
 
-    # server_name your-domain.org;
+    # change to communityexplorer.org in *finaldeployment*
+    server_name dev.communityexplorer.org ;
+    # server_name communityexplorer.org;
 
-    # get the logs in a custom place
-    # (adapt paths)
-    access_log /home/somewhere/outer_nginx_access.log ;
-    error_log /home/somewhere/outer_nginx_error.log ;
+    # get the logs in a custom place (adapt paths)
+    access_log /home/ubuntu/active_webapps/outer_nginx_access.log ;
+    error_log /home/ubuntu/active_webapps/outer_nginx_error.log ;
 
-    # proxy pointing to the docker app with its own inner nginx serving:
-    #     the php root on '/'
-    #     the python server on 'services/'
+    # proxy => local bridge => docker serving comex2
     location / {
         proxy_pass http://0.0.0.0:8080;
         proxy_redirect     off;
@@ -67,7 +74,7 @@ server {
 
     # faster shortcut to static files w/o docker
     location /static {
-        alias  /path/to/your/install/of/comex2/static;
+        alias  /home/ubuntu/active_webapps/comex2/static;
     }
 }
 ```
@@ -80,4 +87,5 @@ sudo ln -s ../sites-available/comex2_outer.conf
 ```
 
 **NB:**   
-If you use this configuration without changing anything else than the paths, then *remove* all other confs from `sites-enabled` (because this one is written to be standalone)
+If you use this configuration without changing anything else than the paths, then *remove* all other confs from `sites-enabled` (because this one is written to be standalone).
+If you have several apps already then add the server entries (especially the proxy to 8080) beside your previous `server{}` sections.
