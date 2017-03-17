@@ -24,6 +24,39 @@ WHERE orgs.orgid IN ( {$ids_str} )
 AND orgs.name != '_NULL'
 GROUP BY orgs.orgid
 ORDER BY orgs.name, orgs.acro
+
+
+
+
+
+-- same but without last agregation for analysis of the freqs
+SELECT src_orgid,
+       orgs.label AS src_label,
+       tgt_orgid,
+       tgt_label,
+       tgt_freq,  -- COOC
+       scholar_ids
+        AS related_insts
+FROM orgs
+LEFT JOIN (
+    SELECT sch_org.orgid AS src_orgid,
+          sch_org2.orgid AS tgt_orgid,
+          orgs2.label AS tgt_label,
+          count(*) AS tgt_freq,
+          GROUP_CONCAT(sch_org.uid) AS scholar_ids
+    FROM sch_org
+    LEFT JOIN sch_org AS sch_org2
+        ON sch_org.uid = sch_org2.uid
+    JOIN orgs AS orgs2
+        ON sch_org2.orgid = orgs2.orgid
+    WHERE orgs2.class = 'inst'
+    AND  sch_org.orgid != sch_org2.orgid
+    GROUP BY sch_org.orgid, sch_org2.orgid
+    ) AS lab_relationship_to_inst_via_scholars ON src_orgid = orgs.orgid
+WHERE orgs.orgid IN ( 3668 )
+AND orgs.name != '_NULL'
+AND tgt_freq > 1
+ORDER BY orgs.name, orgs.acro
 ;
 
 
