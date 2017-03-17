@@ -881,11 +881,8 @@ def save_form(clean_records, update_flag=False, previous_user_info=None):
 
     mlog('DEBUG', 'save_form: declared values for org =', declared_orgs)
 
-    # B2) check our constraint (cf. also E.)
-    if (declared_orgs['lab'] is None and declared_orgs['inst'] is None):
-        raise ValueError("At least 1 org (lab or institution) must be filled")
-
-    # B3) for each, read/fill the orgs table to get associated id(s) in DB
+    # B2) for each optional declared org,
+    #      read/fill the orgs table to get associated id(s) in DB
     orgids = []
     for oclass in ['lab', 'inst']:
 
@@ -896,7 +893,7 @@ def save_form(clean_records, update_flag=False, previous_user_info=None):
 
     mlog('DEBUG', 'save_form: found ids for orgs =', orgids)
 
-    # B4) save the org <=> org mappings TODO LATER (not a priority)
+    # B3) save the org <=> org mappings TODO LATER (not a priority)
     # dbcrud.record_org_org_link(src_orgid, tgt_orgid, reg_db)
 
     # C) create/update record into the primary user table

@@ -51,7 +51,7 @@ var cmxClt = (function() {
         ["last_name",              true,       "plsfill", "t",  "basic_infos"],
         ["country",                true,       "plsfill", "t",  "basic_infos"],
         ["initials",               true,       "pref",    "t",  null],
-        ["position",               true,       "plsfill", "t",  "org_infos"],
+        ["position",               true,       "pref",    "t",  "org_infos"],
         ["interests_text",        false,       "pref",    "t",  "other_infos"],
         ["gender",                false,       "plsfill", "m",  "other_infos"],
         ["job_looking",           false,       "pref"   , "m",  "map_infos"],

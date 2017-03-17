@@ -6,7 +6,7 @@
 <!-- lab or team and details -->
 <div class="question">
     <div class="input-group">
-     <label for="lab_label" class="smlabel input-group-addon">* Lab / Team / Dept</label>
+     <label for="lab_label" class="smlabel input-group-addon">Lab / Team / Dept</label>
      <input id="lab_label" name="lab_label" maxlength="250"
             type="text" class="form-control" placeholder="More detailed affiliation, if relevant"
             value="{{ current_user.info.labs[0].label if current_user.info.labs|length > 0 }}">
