@@ -277,6 +277,12 @@ var cmxClt = (function(cC) {
         var body = document.querySelector('body')
         body.insertBefore(myDiv, body.lastChild)
 
+        // add an enter action like classic submit but ignored when email is focused (because email often has browser's own completion)
+        myDiv.onkeydown = function(evt) {
+            if (evt.keyCode == 13 && evt.target.id != 'menu_email')
+                cmxClt.elts.box.postAuthBox('auth_box')
+        }
+
         // save a ref to it
         cC.elts.box.authBox = document.getElementById('auth_modal')
     }
