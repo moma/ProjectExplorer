@@ -17,7 +17,7 @@
  var teamCityDiv = document.getElementById('lab_locname_div')
  var otherInstDiv = document.getElementById('other_inst_div')
  // TODO make relative to inst_type and move inline snippet to extended form obj
- var otherOrgTypeInput = document.getElementById('other_inst_type')
+ var otherInstTypeInput = document.getElementById('other_inst_type')
 
 // reselecting current_user's info choices
 function setupSavedItems(uinfo) {
@@ -121,6 +121,31 @@ var deleteUser = document.getElementById('delete_user')
 deleteUser.checked = false
 
 setupSavedItems(uinfo)
+
+// monitor inst label (if any), so if label changes => reset inst_type (if any)
+var instLabelInput = document.getElementById('inst_label')
+var instTypeInput = document.getElementById('inst_type')
+var instLabelPreviousVal = instLabelInput.value
+instLabelInput.onblur = function () {
+    console.log("hello onblur")
+    if (instTypeInput.value) {
+        if (instLabelPreviousVal != ""
+           && (   !instLabelInput.value
+               || (instLabelInput.value != instLabelPreviousVal))) {
+            // we reset all inst_type block
+            instTypeInput.value = ''
+            otherInstDiv.style.display='none';
+            otherInstTypeInput.value='';
+        }
+    }
+    instLabelPreviousVal = instLabelInput.value
+    // NB don't use uinfo because user may have already changed the form
+}
+
+instTypeInput.onblur = function() {
+    instLabelPreviousVal = instLabelInput.value
+}
+
 
 // open middlename if there is one
 if (uinfo.middle_name != null
