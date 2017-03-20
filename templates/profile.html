@@ -289,13 +289,10 @@
 
                <div class="question">
                  <div class="input-group tagbox-container">
-                   <label for="keywords" class="smlabel input-group-addon">* Key subjects</label>
+                   <label for="keywords" class="smlabel input-group-addon tagbox-label">* Key subjects</label>
                    <input id="keywords" name="keywords" maxlength="350"
                           type="text" class="form-control autocomp" placeholder="Add a keyword here"
                           value="{{ current_user.info.keywords }}">
-                    <!-- <div class="input-group-addon operation-dark">
-                        <span class="glyphicon glyphicon-plus" onclick="TODO DEPRECATED mtiPopOneTag['keywords']"></span>
-                    </div> -->
                  </div>
                  <p class="legend">Please enter at least 5 keywords (press TAB or ENTER after each)</p>
                </div>
@@ -328,7 +325,7 @@
                <div class="question">
                  <p class="legend">Hashtags for community interest groups (seminars, mailing lists, events...)</p>
                  <div class="input-group tagbox-container">
-                   <label for="hashtags" class="smlabel input-group-addon">Interest groups</label>
+                   <label for="hashtags" class="smlabel input-group-addon tagbox-label">Interest groups</label>
                    <input id="hashtags" name="hashtags" maxlength="350"
                           type="text" class="form-control" placeholder="eg #dataviz, #networks, #rochebrune2018"
                           value="{{ current_user.info.hashtags }}">

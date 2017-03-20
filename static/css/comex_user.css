@@ -178,7 +178,7 @@ input.readonly {
     -webkit-transition: opacity .3s ease-in;
     letter-spacing: .02em;
     font-weight: bold;
-    font-size: .8em;
+    font-size: 1em;
 }
 .box-highlight-close {
   font-size: .7em;
@@ -189,15 +189,20 @@ input.readonly {
   right: 0px;
   color: #eed;
   /*background-color: #333;*/
-  padding: .5em;
+  padding: .7em;
 }
 
 .tagbox-container {
     background-color:#eee ;
-    border-bottom: 3px solid #ccc;
+    border: 1.25px solid #ccc;
+    border-radius: 4px;
     min-width: 50em;
 }
-
+.tagbox-label {
+    background-color:#eee ;
+    border: none;
+    border-right: 1.25px solid #ccc !important;
+}
 
 /* form categories: like form sections etc. */
 h3.formcat {
