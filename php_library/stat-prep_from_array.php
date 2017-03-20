@@ -49,19 +49,19 @@ $missing_insts = array_key_exists('', $inst_counts) ? $inst_counts[''] : 0;
 foreach ($scholars as $row) {
 
     if (strlen(trim($row["country"]))>1){
-    if (array_key_exists($row["country"], $country_list)) {
-        $country_list[$row["country"]]+=1;
-    } else {
-        $country_list[$row["country"]] = 1;
-    }
+        if (array_key_exists($row["country"], $country_list)) {
+            $country_list[$row["country"]]+=1;
+        } else {
+            $country_list[$row["country"]] = 1;
+        }
     }
     // traitement des postes
     // TODO supprimer, l'essentiel est fait/à faire en amont à l'enregistrement
     $position = strtolower(trim($row["position"]));
     if (strcmp($position, "prof.") == 0) {
-        $position = "";
+        $position = "professor";
     } elseif (strcmp($position, "prof") == 0) {
-        $position = "";
+        $position = "professor";
     } elseif (strcmp($position, "ph.d. student") == 0) {
         $position = "phd student";
     } elseif (strcmp($position, "directeur de recherche") == 0) {
@@ -328,6 +328,7 @@ $(document).ready(function() {
 			pie: {
 				allowPointSelect: true,
 				cursor: "pointer",
+                size: "75%",
 				dataLabels: {
 					enabled: true,
 					color: "#000000",
@@ -335,7 +336,8 @@ $(document).ready(function() {
 					formatter: function() {
 						return "<b>"+ this.point.name +"</b>: "+ Math.floor(10*this.percentage)/10 +" %";
 					}
-				}
+				},
+                useHTML: true
 			}
 		},
 		series: [{
@@ -365,6 +367,7 @@ $(document).ready(function() {
 			pie: {
 				allowPointSelect: true,
 				cursor: "pointer",
+                size: "75%",
 				dataLabels: {
 					enabled: true,
 					color: "#000000",
@@ -372,7 +375,8 @@ $(document).ready(function() {
 					formatter: function() {
 						return "<b>"+ this.point.name +"</b>: "+ Math.floor(10*this.percentage)/10 +" %";
 					}
-				}
+				},
+                useHTML: true
 			}
 		},
 		series: [{
@@ -401,6 +405,7 @@ $(document).ready(function() {
 			pie: {
 				allowPointSelect: true,
 				cursor: "pointer",
+                size: "75%",
 				dataLabels: {
 					enabled: true,
 					color: "#000000",
@@ -408,7 +413,8 @@ $(document).ready(function() {
 					formatter: function() {
 						return "<b>"+ this.point.name +"</b>: "+ Math.floor(10*this.percentage)/10 +" %";
 					}
-				}
+				},
+                useHTML: true
 			}
 		},
 		series: [{
@@ -445,6 +451,7 @@ $(document).ready(function() {
     			pie: {
     				allowPointSelect: true,
     				cursor: "pointer",
+                    size: "75%",
     				dataLabels: {
     					enabled: true,
     					color: "#000000",
@@ -452,7 +459,8 @@ $(document).ready(function() {
     					formatter: function() {
     						return "<b>"+ this.point.name +"</b>: "+ Math.floor(10*this.percentage)/10 +" %";
     					}
-    				}
+    				},
+                    useHTML: true
     			}
     		},
     		series: [{
@@ -491,13 +499,15 @@ $(document).ready(function() {
     			pie: {
     				allowPointSelect: true,
     				cursor: "pointer",
+                    size: "75%",
     				dataLabels: {
     					enabled: true,
     					color: "#000000",
     					connectorColor: "#000000",
     					formatter: function() {
     						return "<b>"+ this.point.name +"</b>: "+ Math.floor(10*this.percentage)/10 +" %";
-    					}
+    					},
+                        useHTML: true
     				}
     			}
     		},
