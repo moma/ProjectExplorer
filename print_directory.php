@@ -445,15 +445,32 @@ Contributions and ideas are welcome to improve this directory.
 </div>
 <br/>
 <h2 class="oldstyle">Global statistics</h2>
-<div id="country" style="width: 800px; height: 300px; margin: 0 auto"></div>
-<div id="title" style="width: 800px; height: 300px; margin: 0 auto"></div>
-<div id="position" style="width: 800px; height: 300px; margin: 0 auto"></div>
 
-<!-- these two are displayed only if the distribution has
-     at least 3 big groups (cf. n_shown in stats-prep) -->
-<div id="labs_div" style="width: 800px; height: 300px; margin: 0 auto"></div>
-<div id="insts_div" style="width: 800px; height: 300px; margin: 0 auto"></div>
-
+<div class="container-fluid">
+    <div class="row chart-row">
+        <div class="col-lg-5 col-md-5 col-sm-12">
+            <div id="country" class="directory-piechart"></div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <div id="title" class="directory-piechart"></div>
+        </div>
+    </div>
+    <div class="row chart-row">
+        <div class="col-lg-5 col-md-5 col-sm-12">
+            <div id="position" class="directory-piechart"></div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <!-- conditional display (cf. n_shown in stats-prep) -->
+            <div id="labs_div" class="directory-piechart"></div>
+        </div>
+    </div>
+    <div class="row chart-row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <!-- conditional display (idem) -->
+            <div id="insts_div" class="directory-piechart"></div>
+        </div>
+    </div>
+</div>
 
 <br/>
 <br/> <A NAME="scholars"> </A>

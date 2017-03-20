@@ -86,4 +86,26 @@ function split_join_keywords_for_html($str_value) {
     return join(', ', $mod_arr);
 }
 
+function shorter_html_label($label) {
+    $calibre = 17;
+    // shorter label via acro extraction
+    // if POSSible: use orgs.toarray to avoid matching
+    $matches = array();
+    preg_match_all('/^([^(]+\()([^)]+)(\).*)$/U', $label, $matches);
+    if (count($matches)) {
+        $label = $matches[2][0];
+        $lhs = substr($matches[1][0], 0, -1) ;    // rm opening paren
+        $rhs = substr($matches[3][0], 1);         // rm closing paren
+        $remainder = $lhs.' '.$rhs;
+        if (strlen($remainder) > $calibre) {
+            $remainder = substr($lhs.' '.$rhs, 0,$calibre-3).'...';
+        }
+        $label .= ' <span style="font-size:8px">'.$remainder.'</span>';
+    }
+    else {
+        $label = '<span style="font-size:8px">'.substr($label, 0, $calibre.'...').'</span>';
+    }
+    return $label;
+}
+
 ?>

@@ -226,14 +226,17 @@ $n_shown_labs = 0 ;
 $tot_shown_labs = 0;
 $labs_total_responses = 0;
 foreach ($lab_counts as $key => $value) {
+
         // $key is the orgid, but we need the name
         $label = $org_id_to_label[$key];
+
         $thresh = min(9, $n_labs / 15);
 
         if (!$label || $label == "_NULL") {
             $missing_labs += $value;
         }
         elseif ($value > $thresh) {
+            $label = shorter_html_label($label);
             $labs_data.='["' . addslashes($label) . '",' . $value . '],';
             $n_shown_labs += 1;
             $tot_shown_labs += $value;
@@ -328,7 +331,7 @@ $(document).ready(function() {
 			pie: {
 				allowPointSelect: true,
 				cursor: "pointer",
-                size: "75%",
+                size: "45%",
 				dataLabels: {
 					enabled: true,
 					color: "#000000",
@@ -367,7 +370,7 @@ $(document).ready(function() {
 			pie: {
 				allowPointSelect: true,
 				cursor: "pointer",
-                size: "75%",
+                size: "45%",
 				dataLabels: {
 					enabled: true,
 					color: "#000000",
@@ -405,7 +408,7 @@ $(document).ready(function() {
 			pie: {
 				allowPointSelect: true,
 				cursor: "pointer",
-                size: "75%",
+                size: "45%",
 				dataLabels: {
 					enabled: true,
 					color: "#000000",
@@ -440,7 +443,7 @@ $(document).ready(function() {
                 colors: '.$COLOR_SCHEME.'
     		},
     		title: {
-    			text: "Laboratories affiliations"
+    			text: "Labs"
     		},
     		tooltip: {
     			formatter: function() {
@@ -451,7 +454,7 @@ $(document).ready(function() {
     			pie: {
     				allowPointSelect: true,
     				cursor: "pointer",
-                    size: "75%",
+                    size: "45%",
     				dataLabels: {
     					enabled: true,
     					color: "#000000",
@@ -499,7 +502,7 @@ $(document).ready(function() {
     			pie: {
     				allowPointSelect: true,
     				cursor: "pointer",
-                    size: "75%",
+                    size: "45%",
     				dataLabels: {
     					enabled: true,
     					color: "#000000",

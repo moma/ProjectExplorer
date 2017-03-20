@@ -424,6 +424,15 @@ div.ccsection-footer {
 }
 
 
+.chart-row {
+    margin: 0 0 35px 0;
+}
+.directory-piechart {
+    /*width: 70%;*/
+    height: 300px;
+    margin: 0 auto;
+}
+
 /**/
 .bigger {
     font-size: 150%;
