@@ -9,11 +9,13 @@
 // to autoselect current whoswho filters
 // NB: uses global value $data
 $auto_popfilters_snippet = '<script type="text/javascript">' ;
-foreach ($data as $filter => $array_vals) {
-    foreach ($array_vals as $val) {
-        $auto_popfilters_snippet .= '
-        whoswho.popfilter("'.$filter.'", {"prefill":"'.$val.'"});
-        ';
+if (isset($data) && $data) {
+    foreach ($data as $filter => $array_vals) {
+        foreach ($array_vals as $val) {
+            $auto_popfilters_snippet .= '
+            whoswho.popfilter("'.$filter.'", {"prefill":"'.$val.'"});
+            ';
+        }
     }
 }
 $auto_popfilters_snippet .= '</script>';

@@ -355,36 +355,41 @@ $insts_ids = array_unique($insts_ids);
 // all institutions with infos to retrieve
 $institutions = array();
 
-$ids_str = implode(',', $insts_ids);
 
-$sql = "SELECT * FROM orgs WHERE orgid IN (" . $ids_str. ") ORDER BY label";
 
-foreach ($base->query($sql) as $row) {
-    if ($row['name'] == "_NULL")  continue ;
+if (count($insts_ids)) {
+    $ids_str = implode(',', $insts_ids);
 
-    $info = array();
-    $info['unique_id'] = $row['orgid'];
-    $info['name'] = $row['name'];
+    $sql = "SELECT * FROM orgs WHERE orgid IN (" . $ids_str. ") ORDER BY label";
 
-    $info['acronym'] = $row['acro'] ?? '';
-    $info['homepage'] = $row['url'] ?? '';
-    $info['inst_type'] = $row['inst_type'] ?? '';
-    $info['locname'] = $row['locname'] ?? '';     // ex: 'Barcelona, Spain'
-                                                  //     'London, UK'
-                                                  //     'UK'
-    // TODO ADD keywords
-    // $info['keywords'] = $row['keywords'];
-    $info['keywords'] = null;
-    // cf. doc/data_mining_exemples/correlated_kws.sql
+    foreach ($base->query($sql) as $row) {
+        if ($row['name'] == "_NULL")  continue ;
 
-    $info['admin'] = ucwords($row['contact_name'] ?? '');
-    if ($row['contact_email']) {
-        $safe_contact_email = safe_email($row['contact_email']);
-        $info['admin'] .= '<br><span class=code>'.$safe_contact_email.'</span>';
+        $info = array();
+        $info['unique_id'] = $row['orgid'];
+        $info['name'] = $row['name'];
+
+        $info['acronym'] = $row['acro'] ?? '';
+        $info['homepage'] = $row['url'] ?? '';
+        $info['inst_type'] = $row['inst_type'] ?? '';
+        $info['locname'] = $row['locname'] ?? '';     // ex: 'Barcelona, Spain'
+                                                      //     'London, UK'
+                                                      //     'UK'
+        // TODO ADD keywords
+        // $info['keywords'] = $row['keywords'];
+        $info['keywords'] = null;
+        // cf. doc/data_mining_exemples/correlated_kws.sql
+
+        $info['admin'] = ucwords($row['contact_name'] ?? '');
+        if ($row['contact_email']) {
+            $safe_contact_email = safe_email($row['contact_email']);
+            $info['admin'] .= '<br><span class=code>'.$safe_contact_email.'</span>';
+        }
+
+        $institutions[$row['orgid']] = $info;
     }
-
-    $institutions[$row['orgid']] = $info;
 }
+
 
 // debug
 // $content .= var_dump($institutions) ;

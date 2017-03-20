@@ -14,6 +14,10 @@ $meta = $html_head_inner;
 $userid = $_GET['query'];
 
 
+// get param for current user (allows customize user menus w/o looking at cookie)
+$logged = $_GET['u'];
+
+
 // $base = new PDO("sqlite:" . $dbname);
 $base = new PDO($dsn, $user, $pass, $opt);
 
@@ -70,7 +74,6 @@ if ($userid) {
     FROM (
         SELECT
             scholars_and_labs.*,
-            -- GROUP_CONCAT(insts.orgid SEPARATOR ',') AS insts_ids,
             GROUP_CONCAT(insts.label SEPARATOR '%%%') AS insts_list
 
             FROM (
@@ -99,7 +102,6 @@ if ($userid) {
                 GROUP BY luid
     ) AS scholars_and_orgs
 
-    -- expansion (+kw info)
     LEFT JOIN sch_kw AS second_level
         ON second_level.uid = scholars_and_orgs.luid
     JOIN sch_kw ON sch_kw.kwid = second_level.kwid
@@ -112,6 +114,10 @@ if ($userid) {
     ORDER BY count(sch_kw.kwid) DESC, second_level.uid != {$userid} ASC;
 
 HERE_QUERY;
+
+
+    // print_r('=== print_scholar_directory query ===<br>');
+    // print_r($sql);
 
     foreach ($base->query($sql) as $row) {
         $info = array();
@@ -197,16 +203,29 @@ HERE_QUERY;
     }
 }
 
+// if no keywords matched, the previous select is empty
+if (count($scholars)==0){
+    $sqlsingle = "SELECT hon_title, first_name, middle_name, last_name FROM scholars WHERE luid =".$userid ;
 
-// we keep the query-ed user's details
-$target_name_elements = array(
-    $scholars[$userid]['title'],
-    $scholars[$userid]['first_name'],
-    $scholars[$userid]['mid_initial'],
-    $scholars[$userid]['last_name']
-);
-
-$target_name = implode(' ', array_filter($target_name_elements) );
+    $target_name = "";
+    foreach ($base->query($sqlsingle) as $row) {
+        $target_name = name_string(
+            $row['hon_title'],
+            $row['first_name'],
+            $row['middle_name'],
+            $row['last_name']
+        );
+    }
+}
+// otherwise we keep the query-ed user's details
+else {
+    $target_name = name_string(
+        $scholars[$userid]['title'],
+        $scholars[$userid]['first_name'],
+        $scholars[$userid]['mid_initial'],
+        $scholars[$userid]['last_name']
+    );
+}
 
 // both our stats have been filled
 // var_dump($lab_counts) ;
@@ -275,9 +294,9 @@ Contributions and ideas are welcome to improve this directory.
 if (count($scholars)==0){
 
 // TODO message in modal panel
-echo  '<h2>Sorry, '.$target_name.' did not mention any keywords ... we cannot process its network.</h2><br/>
-    If you are '.$target_name.', you can  <a href="/services/user/profile"  target="_BLANK">modify your profile</a> and see your
-        network in few minutes.';
+    echo  '<h2>Sorry, '.$target_name.' did not mention any keywords ... we cannot process the network.</h2><br/>
+        If you are '.$target_name.', you can  <a href="/services/user/profile"  target="_BLANK">modify your profile</a> and see your
+            network in few minutes.';
 }else{
     echo $html_declaration;
     echo '<head>';

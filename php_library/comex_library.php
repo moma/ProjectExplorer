@@ -4,6 +4,16 @@
  * Common utility functions
  */
 
+
+// canonical person name label
+function name_string($title, $first_name, $mid_name, $last_name) {
+    $mid_initial = (strlen($mid_name) ? substr($mid_name,0,1)."." : "");
+
+    return implode(' ', array_filter(
+        array($title, $first_name, $mid_initial, $last_name)
+    ));
+}
+
 function clean_exp($string) {
     // enlève les comma trainantes
     if (strcmp(substr(trim($string),-1),',')==0){
