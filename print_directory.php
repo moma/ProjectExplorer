@@ -10,9 +10,9 @@ $meta = $html_head_inner;
 
 $data = json_decode($_GET['query']);
 
-print_r('query here<br>');
-print_r($data);
-print_r('/query here<br>');
+// print_r('query here<br>');
+// print_r($data);
+// print_r('/query here<br>');
 
 // this one after we got query data
 include ("php_library/js_elements.php");

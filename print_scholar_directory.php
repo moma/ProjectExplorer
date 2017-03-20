@@ -197,6 +197,17 @@ HERE_QUERY;
     }
 }
 
+
+// we keep the query-ed user's details
+$target_name_elements = array(
+    $scholars[$userid]['title'],
+    $scholars[$userid]['first_name'],
+    $scholars[$userid]['mid_initial'],
+    $scholars[$userid]['last_name']
+);
+
+$target_name = implode(' ', array_filter($target_name_elements) );
+
 // both our stats have been filled
 // var_dump($lab_counts) ;
 // var_dump($inst_counts) ;
@@ -221,8 +232,10 @@ $header = '<div class="row" id="welcome">
 <p>
 This directory presents the profiles of <a href="#scholars">'.  count($scholars).' scholars</a>, <a href="#labs">'.  count($labs).' labs</a> and <a href="#orga">'.$orga_count.' organizations</a> in the field of Complex Systems
 <br/>
-Scholars have been selected from the complex systems directory when sharing common keywords with '.$target_name.'
-
+Scholars have been selected from the complex systems directory when sharing common keywords with:
+<ul>
+<li class="small-item"><strong>Scholar: </strong> '.$target_name.'</li>
+</ul>
 </p>
 <h4>About the complex systems directory</h4>
 <p>
