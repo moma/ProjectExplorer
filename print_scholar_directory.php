@@ -8,7 +8,6 @@ include ("php_library/baselayout_topbar_template.php");
 include ("php_library/baselayout_tail_template.php");
 
 $meta = $html_head_inner;
-$meta .= $rm_ads_snippet;
 
 //phpinfo();
 //echo $_GET['query']."<br/>";
@@ -284,6 +283,7 @@ echo  '<h2>Sorry, '.$target_name.' did not mention any keywords ... we cannot pr
     // echo '</div>';
     echo '</div>';
     echo $html_tail_imports;
+    echo $rm_ads_snippet;
     echo '</body>
     </html>';
     exit(0);

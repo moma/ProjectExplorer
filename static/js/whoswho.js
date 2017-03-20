@@ -18,14 +18,110 @@ jQuery.fn.disableTextSelect = function() {
   });
 };
 
+
 ids = 0;
 
 completion = {};
 
 gexf = "";
 
+// module fragment to expose selected functions
+var whoswho = {};
+
+whoswho = (function(ww) {
+
+    // filter type => label
+    ww.filters = {
+        'countries': "in",
+        'institutions': "from",
+        'laboratories': "working at",
+        'keywords': "working on",
+        'tags': "tagged"
+    }
+
+    // autocomplete
+    ww.popfilter = function(type, options) {
+        var label, footer, header, id, id1, id2, input, closebox, labelization;
+
+        if (!options) {
+            options = {}
+        }
+
+        if (! options.prefill) {
+            options['prefill']=''
+        }
+
+        label = ww.filters[type];
+        id = ids++;
+        id1 = "filter" + id;
+        id2 = "combo" + id;
+        id3 = "close" + id;
+        header = "<li id=\"" + id1 + "\" class=\"comex-nav-item filter\" style=\"padding-top: 5px;\">";
+        labelization = "<span style=\"color: #fff;\">&nbsp; " + label + " </span>";
+        input = "<input type=\"text\" id=\"" + id2 + "\" class=\"medium filter" + type + "\" placeholder=\"" + type + "\" / value=\""+options['prefill']+"\">";
+        closebox = "<div id=\""+id3+"\" for=\""+id1+"\" class=\"filter-close operation-light\">x</div>"
+        footer = "</li>;";
+        $(header + labelization + input + closebox + footer).insertBefore("#refine");
+        $('#' + id3).click(whoswho.closeThisBox)
+
+        // debug
+        console.log("whoswho.popfilter: adding autocomplete menu", $("#" + id1))
+
+        $("#" + id2).autocomplete({
+            source: function (req, resp) {
+                $.ajax({
+                    dataType: "json",
+                    type: "GET",
+                    // url: "/search_filter.php",
+                    url: "/services/api/aggs",
+                    data: {
+                        "field": type,
+                        "like": req.term,
+                    },
+                    success: function(data){
+                        resp(data.map(function(info) {
+                            return {
+                                'label': info.x,
+                                'score': info.n
+                            }
+                        }))
+                    },
+                    error: function(response) {
+                        console.log("ERROR from search_filter AJAX", response)
+                    }
+                }) ;
+            },
+            minLength: 2
+        })
+
+        $("" + id1).hide();
+        show("#" + id1);
+        $("#" + id2).focus();
+        return false;
+    };
+
+    // small filter closing function
+    ww.closeThisBox = function() {
+      var targetId = this.getAttribute("for")
+      if (targetId) {
+          var tgtBox = document.getElementById(targetId)
+          // start transition
+          tgtBox.style.opacity = 0
+          // remove box
+          setTimeout(function(){tgtBox.remove()}, 500)
+          return true
+      }
+      else {
+          console.warn('closeThisBox: no @for attribute!')
+          return false
+      }
+    }
+
+    return ww;
+})(whoswho);
+
 $(document).ready(function() {
-  var cache, closeBox, collectFilters, loadGraph, popfilter, xhrs;
+  var cache, closeBox, collectFilters, loadGraph;
   log("document ready.. installing whoswho");
   loadGraph = function(g) {
     gexf = g;
@@ -38,74 +134,6 @@ $(document).ready(function() {
     }
   };
 
-
-  // small filter closing function
-  closeThisBox = function() {
-    var targetId = this.getAttribute("for")
-    if (targetId) {
-        var tgtBox = document.getElementById(targetId)
-        // start transition
-        tgtBox.style.opacity = 0
-        // remove box
-        setTimeout(function(){tgtBox.remove()}, 500)
-        return true
-    }
-    else {
-        console.warn('closeThisBox: no @for attribute!')
-        return false
-    }
-  }
-
-  // autocomplete
-  popfilter = function(label, type, options) {
-    var footer, header, id, id1, id2, input, closebox, labelization;
-    id = ids++;
-    id1 = "filter" + id;
-    id2 = "combo" + id;
-    id3 = "close" + id;
-    header = "<li id=\"" + id1 + "\" class=\"comex-nav-item filter\" style=\"padding-top: 5px;\">";
-    labelization = "<span style=\"color: #fff;\">&nbsp; " + label + " </span>";
-    input = "<input type=\"text\" id=\"" + id2 + "\" class=\"medium filter" + type + "\" placeholder=\"" + type + "\" />";
-    closebox = "<div id=\""+id3+"\" for=\""+id1+"\" class=\"filter-close operation-light\">x</div>"
-    footer = "</li>;";
-    $(header + labelization + input + closebox + footer).insertBefore("#refine");
-    $('#' + id3).click(closeThisBox)
-
-    // debug
-    console.log("whoswho.popfilter: adding autocomplete menu", $("#" + id1))
-
-    $("#" + id2).autocomplete({
-        source: function (req, resp) {
-            $.ajax({
-                dataType: "json",
-                type: "GET",
-                // url: "/search_filter.php",
-                url: "/services/api/aggs",
-                data: {
-                    "field": type,
-                    "like": req.term,
-                },
-                success: function(data){
-                    resp(data.map(function(info) {
-                        return {
-                            'label': info.x,
-                            'score': info.n
-                        }
-                    }))
-                },
-                error: function(response) {
-                    console.log("ERROR from search_filter AJAX", response)
-                }
-            }) ;
-        },
-        minLength: 2
-    })
-
-    $("" + id1).hide();
-    show("#" + id1);
-    $("#" + id2).focus();
-    return false;
-  };
   // jQuery(".unselectable").disableTextSelect();
   jQuery(".unselectable").disableSelection();
   $(".unselectable").hover((function() {
@@ -125,26 +153,22 @@ $(document).ready(function() {
   });
 
   $("#addfiltercountry").click(function() {
-    return popfilter("in", "countries", []);
+    return whoswho.popfilter("countries");
   });
   // $("#addfilterorganization").click(function() {
-  //   return popfilter("from", "organizations", []);
+  //   return whoswho.popfilter("organizations");
   // });
   $("#addfilterinstitution").click(function() {
-    return popfilter("from", "institutions", []);
+    return whoswho.popfilter("institutions");
   });
   $("#addfilterlaboratory").click(function() {
-    var prefix;
-    prefix = "working";
-    return popfilter("" + prefix + " at", "laboratories", []);
+    return whoswho.popfilter("laboratories");
   });
   $("#addfilterkeyword").click(function() {
-    var prefix;
-    prefix = "working";
-    return popfilter("" + prefix + " on", "keywords", []);
+    return whoswho.popfilter("keywords");
   });
   $("#addfiltertag").click(function() {
-    return popfilter("tagged", "tags", []);
+    return whoswho.popfilter("tags");
   });
   $("#register").click(function() {
     return window.open("/services/user/register/");

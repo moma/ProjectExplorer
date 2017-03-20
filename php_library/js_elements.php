@@ -5,6 +5,20 @@
  * TODO use more eg for charts
  */
 
+
+// to autoselect current whoswho filters
+// NB: uses global value $data
+$auto_popfilters_snippet = '<script type="text/javascript">' ;
+foreach ($data as $filter => $array_vals) {
+    foreach ($array_vals as $val) {
+        $auto_popfilters_snippet .= '
+        whoswho.popfilter("'.$filter.'", {"prefill":"'.$val.'"});
+        ';
+    }
+}
+$auto_popfilters_snippet .= '</script>';
+
+
 // exemple snippet this one is to use in html context
 $rm_ads_snippet = <<< ENDHTML
 <script type="text/javascript">

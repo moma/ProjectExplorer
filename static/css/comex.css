@@ -383,7 +383,7 @@ div.ccsection-footer {
 
 /*in directory view*/
 .full-directory {
-    margin: 0 25;
+    margin: 70 25 0 25;
 }
 .container.inner {
     width: 100%;

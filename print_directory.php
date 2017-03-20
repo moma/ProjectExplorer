@@ -1,6 +1,5 @@
 <?php
 include ("php_library/comex_library.php");
-include ("php_library/js_elements.php");
 include ("php_library/parametres.php");
 include ("php_library/normalize.php");
 include ("php_library/baselayout_head_template.php");
@@ -8,9 +7,17 @@ include ("php_library/baselayout_topbar_template.php");
 include ("php_library/baselayout_tail_template.php");
 
 $meta = $html_head_inner;
-$meta .= $rm_ads_snippet;
 
 $data = json_decode($_GET['query']);
+
+print_r('query here<br>');
+print_r($data);
+print_r('/query here<br>');
+
+// this one after we got query data
+include ("php_library/js_elements.php");
+
+
 
 function objectToArray($d) {
         if (is_object($d)) {
@@ -473,6 +480,8 @@ echo $footer;
 // echo '</div>';
 echo '</div>';
 echo $html_tail_imports;
+echo $rm_ads_snippet;
+echo $auto_popfilters_snippet;
 echo '</body>
 </html>';
 exit(0);
