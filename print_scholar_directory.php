@@ -1,63 +1,15 @@
 <?php
 include ("php_library/comex_library.php");
+include ("php_library/js_elements.php");
 include ("php_library/parametres.php");
 include ("php_library/normalize.php");
+include ("php_library/baselayout_head_template.php");
+include ("php_library/baselayout_topbar_template.php");
+include ("php_library/baselayout_tail_template.php");
 
-$meta = '<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>Complex Systems Scholars</title>
-        <meta name="description" content="">
-        <meta name="author" content="">
+$meta = $html_head_inner;
+$meta .= $rm_ads_snippet;
 
-        <!-- Le styles -->
-        <link type="text/css" href="https://fonts.googleapis.com/css?family=Droid%20Sans" rel="stylesheet">
-        <link type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
-        <link type="text/css" href="static/css/whoswho.css" rel="stylesheet">
-        <link type="text/css" href="static/css/comex.css" rel="stylesheet">
-        <link type="text/css" href="static/css/bootstrap_directory.css" rel="stylesheet">
-
-        <!-- ## fonts ## -->
-        <link type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
-        <link type="text/css" href="https://fonts.googleapis.com/css?family=Droid%20Sans" rel="stylesheet">
-
-        <!-- updated versions as of 2016-2017 -->
-        <script type="text/javascript" src="static/js/jquery/jquery-3.1.1.min.js"></script>
-        <script type="text/javascript" src="static/js/jquery-ui-1.12.1/jquery-ui.min.js"></script>
-        <script type="text/javascript" src="static/js/highcharts-5.0.js"></script>
-
-        <script type="text/javascript">
-          var _gaq = _gaq || [];
-          _gaq.push([\'_setAccount\', \'UA-30062222-1\']);
-          _gaq.push([\'_setDomainName\', \'communityexplorer.org\']);
-          _gaq.push([\'_trackPageview\']);
-
-          (function() {
-            var ga = document.createElement(\'script\'); ga.type = \'text/javascript\'; ga.async = true;
-            ga.src = (\'https:\' == document.location.protocol ? \'https://ssl\' : \'http://www\') + \'.google-analytics.com/ga.js\';
-            var s = document.getElementsByTagName(\'script\')[0]; s.parentNode.insertBefore(ga, s);
-          })();
-        </script>
-            ';
-
-define('_is_utf8_split', 5000);
-
-function is_utf8($string) {
-
-    // From http://w3.org/International/questions/qa-forms-utf-8.html
-    return preg_match('%^(?:
-          [\x09\x0A\x0D\x20-\x7E]            # ASCII
-        | [\xC2-\xDF][\x80-\xBF]             # non-overlong 2-byte
-        |  \xE0[\xA0-\xBF][\x80-\xBF]        # excluding overlongs
-        | [\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}  # straight 3-byte
-        |  \xED[\x80-\x9F][\x80-\xBF]        # excluding surrogates
-        |  \xF0[\x90-\xBF][\x80-\xBF]{2}     # planes 1-3
-        | [\xF1-\xF3][\x80-\xBF]{3}          # planes 4-15
-        |  \xF4[\x80-\x8F][\x80-\xBF]{2}     # plane 16
-    )*$%xs', $string);
-
-}
 //phpinfo();
 //echo $_GET['query']."<br/>";
 $userid = $_GET['query'];
@@ -260,54 +212,13 @@ include ("php_library/stat-prep_from_array.php");
 include ("php_library/directory_content.php");
 
 
-
-$content .= '</div>';
-$content .= '</div>
-            <footer style="color:white">
-                <!-- This directory is maintained by the <a href="http://cssociety.org" target="blank">Complex Systems Society</a>
-                     and the <a href="http://iscpif.fr" target="blank">Complex Systems Institute of Paris Ile-de-France</a>.<br/>-->
-                <center>
-                    <a href="/about.html"><span class="glyphicon glyphicon-question-sign"></span> About</a> -
-                    <!-- <a href="http://moma.csregistry.org/feedback" target="BLANK"><span class="glyphicon glyphicon-repeat"></span> Feedback</a> - -->
-                    <a href="/about/privacy"> <span class="glyphicon glyphicon-list-alt"></span> Privacy</a>
-                    <br>
-                      Directory maintained by the <a href="http://iscpif.fr/" target="blank">Complex Systems Institute of Paris Ile-de-France</a> (<a href="http://www.cnrs.fr/fr/recherche/index.htm" target="_BLANK">CNRS</a> UPS 3611) in partnership with the <a href="http://cssociety.org/" target="blank"> Complex Systems Society</a>.
-                    <br>
-
-                    <a href="http://iscpif.fr/">
-                      <img src="/static/img/logo_m_bleu-header.png" title="Institut des Systèmes Complexes de Paris Ile-de-France"
-                         style="border: none; margin: 3px 0 -6px 0; height:30px;">
-                    </a>
-                    &nbsp;&nbsp;
-                    <a href="http://cssociety.org/" target="_BLANK">
-                      <img src="/static/img/logo_cssociety_no_legend.png" alt="http://cssociety.org"
-                           style="border: none; margin: 3px 0 -6px 0; height:30px;"
-                           title="Complex systems society">
-                    </a>
-                    &nbsp;&nbsp;
-                    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="blank">
-                      <img alt="Creative Commons License" style="border: none; margin: 3px 0 -6px 0; height:30px;" src="/static/img/cc.png">
-                    </a>
-                    &nbsp;&nbsp;
-                    <a href="http://www.cnrs.fr/" target="blank">
-                      <img alt="CNRS" style="border: none; margin: 3px 0 -6px 0; height:30px;" src="/static/img/logo_cnrs.png">
-                    </a>
-                    <!-- <a href="http://moma.csregistry.org/" target="_BLANK"> MOMA</a> -  -->
-                </center>
-                <p>&nbsp;</p>
-            </footer>
-        </div>
-</body>
-</html>';
-
 //////// Header
 $header = '<div class="row" id="welcome">
     <div class="span12" align="justify">
-<img src="static/img/RegistryBanner.png" align="center">
-<br/><br/>
-<h1>Complex Systems Scholars</h1>
-<br/>
-<br/>
+        <br/>
+        <h2 class="oldstyle maintitle">Complex Systems Scholars</h2>
+        <br/>
+        <div class="mini-hero">
 <p>
 This directory presents the profiles of <a href="#scholars">'.  count($scholars).' scholars</a>, <a href="#labs">'.  count($labs).' labs</a> and <a href="#orga">'.$orga_count.' organizations</a> in the field of Complex Systems
 <br/>
@@ -327,9 +238,9 @@ Contributions and ideas are welcome to improve this directory.
 </ul>
 </p>
 
+</div>
 <br/>
-<br/>
-<h2>Global statistics</h2>
+<h2 class="oldstyle">Global statistics</h2>
 <div id="country" style="width: 800px; height: 300px; margin: 0 auto"></div>
 <div id="title" style="width: 800px; height: 300px; margin: 0 auto"></div>
 <div id="position" style="width: 800px; height: 300px; margin: 0 auto"></div>
@@ -342,14 +253,13 @@ Contributions and ideas are welcome to improve this directory.
 
 <br/>
 <br/> <A NAME="scholars"> </A>
-<h2>Scholars sorted by number of common keywords with '.$target_name.'</h2>
+<h2 class="oldstyle">Scholars sorted by number of common keywords with '.$target_name.'</h2>
 <br/>
 <br/>
 </div>
 </div>';
 
 
-echo $meta.' '.$stats.'</head>';
 if (count($scholars)==0){
 
 // TODO message in modal panel
@@ -357,13 +267,26 @@ echo  '<h2>Sorry, '.$target_name.' did not mention any keywords ... we cannot pr
     If you are '.$target_name.', you can  <a href="/services/user/profile"  target="_BLANK">modify your profile</a> and see your
         network in few minutes.';
 }else{
-    echo '<body>
-          <div class="container full-directory">
-          <div class="hero-unit">';
-
+    echo $html_declaration;
+    echo '<head>';
+    echo $meta;
+    echo $stats;
+    echo '</head>';
+    echo '<body>';
+    echo $doors_connect_params;
+    echo $topbar;
+    echo '<div class="container full-directory">';
+    // echo '<div class="hero-unit">';
     echo $header;
     echo '';
     echo $content;
+    echo $footer;
+    // echo '</div>';
+    echo '</div>';
+    echo $html_tail_imports;
+    echo '</body>
+    </html>';
+    exit(0);
 }
 exit(0);
 

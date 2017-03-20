@@ -1,4 +1,4 @@
-/* =============================== MAIN COMEX STYLESHEET =============================== */
+/* ====================== MAIN COMEX STYLESHEET ====================== */
 
 
 @media all{
@@ -103,6 +103,10 @@ div.my-centering-box > * {
 .sub-hero {
   margin-top: 2em;
   line-height: 110%;
+}
+
+.small-item {
+    font-size: 13px;
 }
 
 /* div, for message main text */
@@ -288,6 +292,7 @@ h2.oldstyle {
 
 h2.oldstyle.maintitle {
   margin-left: -.5em;
+  font-size: 27px;
 }
 
 /* "accordeon": collapsible formcats */
@@ -383,7 +388,11 @@ div.ccsection-footer {
 .container.inner {
     width: 100%;
 }
-.scholars-list {
+.scholar-row {
+    margin: 0 0 22px 0;
+}
+.org-row {
+    margin: 0 0 15px 0;
 }
 .interests-of-scholar p {
     font-size: 1.2em !important;
@@ -391,6 +400,9 @@ div.ccsection-footer {
     margin-top: -.5em;
 }
 .keywords-of-scholar {
+    /*margin-top: 10px; (aligned with name)*/
+    /*margin-top: 38px; (aligned with jobtitle)*/
+    margin-top: 17px;  /*(middle)*/
 }
 .url-of-scholar {
     margin-top: .5em;

@@ -20,7 +20,7 @@ foreach ($institutions as $orga) {
     $loop+=1;
     if ($orga['name'] != null) {
         $orga_count+=1;
-        $content.= '<div class="row">
+        $content.= '<div class="row org-row">
                 <div class="span12">
                     <div class="row">
                         <div class="span9" align="justify">';

@@ -51,7 +51,7 @@ foreach ($scholars as $scholar) {
     //                 </div>
     //             </div>
     //             <div class="row">
-    //                 <div class="span12" align="justify">
+    //                 <div class="span8" align="justify">
     //                     <!-- interests text -->
     //                 </div>
     //             </div>
@@ -60,7 +60,7 @@ foreach ($scholars as $scholar) {
     // </div>
     $content .= "\n";
 
-    $content.= '<div class="row">';
+    $content.= '<div class="row scholar-row">';
 
     // picture <=> left column
     $content.= '  <div class="span3" align="justify">';
@@ -71,12 +71,12 @@ foreach ($scholars as $scholar) {
         if ($_SERVER['REQUEST_SCHEME'] == 'https') {
             $pic_src = preg_replace('/^http:/i', 'https:', $pic_src) ;
         }
-        $content .= '<img class="pic-of-scholar" src="'. $pic_src . '" width="' . $imsize . 'px" align="left">';
+        $content .= '<img alt="scholar picture" class="pic-of-scholar" src="'. $pic_src . '" style="width:' . $imsize . 'px;" align="left">';
     }
     else {
         if (count($scholars) < 2000) {
             $im_id = floor(rand(0, 11));
-            $content .= '<img class="pic-of-scholar" src="static/img/' . $im_id . '.png" width="' . $imsize . 'px" align="left">';
+            $content .= '<img alt="scholar picture" class="pic-of-scholar" src="static/img/' . $im_id . '.png" style="width:' . $imsize . 'px;" align="left">';
         }
     }
     $content.= '  </div><!-- close pic -->';
@@ -204,7 +204,7 @@ foreach ($scholars as $scholar) {
     $content .= "\n";
 
     $content .= '
-<center><img src="static/img/bar.png"></center>';
+<center><img alt="horizontal separator" src="static/img/bar.png"></center>';
     $content .= '<br/>';
     $content .= '<br/>';
     // fin du profil
@@ -395,7 +395,7 @@ foreach ($base->query($sql) as $row) {
 ///////////////////////////////////////////////////////////////
 
 $content .='<br/> <A NAME="labs"> </A>
-<h1>Labs by alphabetical order</h1>
+<h2 class="oldstyle">Labs by alphabetical order</h2>
 <p><i>List of teams or labs mentioned by the scholars</i></p>';
 
 include('labs_list.php');
@@ -405,7 +405,7 @@ include('labs_list.php');
 /// affichage des organismes / affiliations institutionnelles ///
 /////////////////////////////////////////////////////////////////
 $content .= '<br/> <A NAME="orga"> </A>
-<h1>Institutions by alphabetical order</h1>
+<h2 class="oldstyle">Institutions by alphabetical order</h2>
 <br/>
 <p><i>List of institutions to which scholars are affiliated</i></p>';
 include('orga_list.php');

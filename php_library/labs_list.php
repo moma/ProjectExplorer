@@ -17,10 +17,10 @@ foreach ($labs as $lab) {
         continue;
     }
 
-    $content.= '<div class="row">
+    $content.= '<div class="row org-row">
                 <div class="span12">
                     <div class="row">
-                        <div class="span9" align="justify">';
+                        <div class="span10" align="justify">';
     $content .= '<div>';
 
     $content .= '<h2 >';
@@ -70,7 +70,7 @@ foreach ($labs as $lab) {
     $has_admin = array_key_exists('admin', $lab) && strlen($lab['admin']);
     $has_kws = array_key_exists('keywords', $lab) && strlen($lab['keywords']);
     if ($n_related_insts || $has_admin || $has_kws) {
-        $content .= '<div class="span3" align="justify">';
+        $content .= '<div class="span2" align="justify">';
         if ($has_kws) {
             $content .= '<i class="icon-tags"></i> ' . $lab['keywords'] . '<br/><br/>';
         }

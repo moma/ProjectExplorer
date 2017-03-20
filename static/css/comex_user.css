@@ -195,6 +195,7 @@ input.readonly {
 .tagbox-container {
     background-color:#eee ;
     border-bottom: 3px solid #ccc;
+    min-width: 50em;
 }
 
 

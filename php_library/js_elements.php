@@ -12,9 +12,14 @@ $rm_ads_snippet = <<< ENDHTML
       setTimeout( function() {
           var ads = document.getElementsByClassName("highcharts-credits")
           for (var ad of ads) {
-              ad.innerHTML = ""
+              ad.style.WebkitTransition = 'opacity 1s';
+              ad.style.MozTransition = 'opacity 1s';
+              ad.style.opacity = 0;
+              setTimeout (function() {
+                  ad.innerHTML = ""
+              }, 1000)
           }
-      }, 2000)
+      }, 5000)
   })
 </script>
 ENDHTML;
