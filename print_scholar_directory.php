@@ -64,57 +64,37 @@ if ($userid) {
     // +--------+------------+-----------+
 
 
-    // implementation with all details and infos to retrieve
+
+
+    // re-implementation with separated matching and full retrieval
+    // NB: we need the sch_kw mapping 3 times
+    //        - one for the retrieval with all keywords
+    //        - 2 for matching
+    //            - one sch_kw for source scholar
+    //            - one sch_kw for target scholar
+    //  1) and matching <=> 2 x left join keywords
+    //  2) full retrieval <=> full_scholars_info
     $sql = <<< HERE_QUERY
     SELECT
-        scholars_and_orgs.*,
-        COUNT(keywords.kwid) AS keywords_nb,
-        GROUP_CONCAT(keywords.kwid) AS keywords_ids,
-        GROUP_CONCAT(kwstr) AS keywords_list
+        matched.uid,
+        matched.sim,
+        full_scholars_info.*
     FROM (
         SELECT
-            scholars_and_labs.*,
-            GROUP_CONCAT(insts.label SEPARATOR '%%%') AS insts_list
+          tgt.uid,
+          count(*) AS sim
+        FROM sch_kw AS src
+        LEFT JOIN sch_kw AS tgt ON tgt.kwid = src.kwid
+        WHERE src.uid = {$userid}
+        GROUP BY src.uid, tgt.uid
+        ORDER BY sim DESC, tgt.uid != src.uid ASC
+    ) AS matched
 
-            FROM (
-                SELECT
-                    scholars.*,
-                    GROUP_CONCAT(labs.orgid SEPARATOR ',') AS labs_ids,
-                    GROUP_CONCAT(labs.label SEPARATOR '%%%') AS labs_list
-                FROM scholars
-                LEFT JOIN sch_org AS map_labs
-                        ON map_labs.uid = luid
-                    LEFT JOIN (
-                        SELECT * FROM orgs WHERE class='lab'
-                    ) AS labs
-                         ON map_labs.orgid = labs.orgid
-                    WHERE (record_status = 'active'
-                            OR (record_status = 'legacy' AND valid_date >= NOW()))
-                    GROUP BY luid
-                    ) AS scholars_and_labs
-                LEFT JOIN sch_org AS map_insts
-                    ON map_insts.uid = luid
-                LEFT JOIN (
-                    SELECT * FROM orgs WHERE class='inst'
-                ) AS insts
-                    ON map_insts.orgid = insts.orgid
+    JOIN (
+            ${sql_full_scholar_select}
 
-                GROUP BY luid
-    ) AS scholars_and_orgs
-
-    LEFT JOIN sch_kw AS second_level
-        ON second_level.uid = scholars_and_orgs.luid
-    JOIN sch_kw ON sch_kw.kwid = second_level.kwid
-    JOIN keywords
-        ON sch_kw.kwid = keywords.kwid
-
-    WHERE sch_kw.uid = {$userid}
-    GROUP BY luid
-
-    ORDER BY count(sch_kw.kwid) DESC, second_level.uid != {$userid} ASC;
-
+    ) AS full_scholars_info ON luid = matched.uid;
 HERE_QUERY;
-
 
     // print_r('=== print_scholar_directory query ===<br>');
     // print_r($sql);
