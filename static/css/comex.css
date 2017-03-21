@@ -281,6 +281,23 @@ h2.catfirst {
   color: #910;
 }
 
+/* like a green stamp */
+.stamp {
+  font-family: Courier, "Courier 10 Pitch", "Courier Code", "Nimbus Mono L", "Liberation Mono", monospace;
+  transform: rotate(15deg);
+  font-weight: bolder;
+  color: white;
+  /*background-color: #004C26;*/
+  /*background-color: #6395DF;*/
+  background-color: #449D44;
+  font-size: 16px;
+  padding: .5em;
+  border: 1px solid rgba(0, 0, 0, .5);
+  border-radius: .4em;
+  margin-top: -60px;
+  opacity: 0.75;
+}
+
 
 /* page sections: style snippets from old bootstrap h2 */
 h2.oldstyle {
