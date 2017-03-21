@@ -87,12 +87,16 @@ function split_join_keywords_for_html($str_value) {
 }
 
 function shorter_html_label($label) {
-    $calibre = 17;
+    $calibre = 20;
     // shorter label via acro extraction
     // if POSSible: use orgs.toarray to avoid matching
     $matches = array();
     preg_match_all('/^([^(]+\()([^)]+)(\).*)$/U', $label, $matches);
-    if (count($matches)) {
+    if (count($matches)
+        && isset($matches[1]) && isset($matches[1][0])
+        && isset($matches[2]) && isset($matches[2][0])
+        && isset($matches[3]) && isset($matches[3][0])
+        ) {
         $label = $matches[2][0];
         $lhs = substr($matches[1][0], 0, -1) ;    // rm opening paren
         $rhs = substr($matches[3][0], 1);         // rm closing paren
@@ -103,7 +107,7 @@ function shorter_html_label($label) {
         $label .= ' <span style="font-size:8px">'.$remainder.'</span>';
     }
     else {
-        $label = '<span style="font-size:8px">'.substr($label, 0, $calibre.'...').'</span>';
+        $label = '<span style="font-size:8px">'.substr($label, 0, $calibre).'...'.'</span>';
     }
     return $label;
 }

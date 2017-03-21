@@ -269,13 +269,13 @@ Contributions and ideas are welcome to improve this directory.
         </div>
         <div class="col-lg-6 col-md-6 col-sm-12">
             <!-- conditional display (cf. n_shown in stats-prep) -->
-            <div id="labs_div" class="directory-piechart"></div>
+            <div id="insts_div" class="directory-piechart"></div>
         </div>
     </div>
     <div class="row chart-row">
         <div class="col-lg-12 col-md-12 col-sm-12">
             <!-- conditional display (idem) -->
-            <div id="insts_div" class="directory-piechart"></div>
+            <div id="labs_div" class="directory-piechart"></div>
         </div>
     </div>
 </div>

@@ -8,7 +8,7 @@
 
 // parameters : threshold to display orgs (labs / institutions) diagrams
 $MIN_DISTINCT_LABS = 1 ;
-$MIN_DISTINCT_LABS_SCHOLARS_SHARE = .15;
+$MIN_DISTINCT_LABS_SCHOLARS_SHARE = .10;
 
 $MIN_DISTINCT_INSTS = 1 ;
 $MIN_DISTINCT_INSTS_SCHOLARS_SHARE = .05;
@@ -276,6 +276,7 @@ foreach ($inst_counts as $key => $value) {
             $missing_insts += $value;
         }
         elseif ($value > $thresh) {
+            $label = shorter_html_label($label);
             $insts_data.='["' . addslashes($label) . '",' . $value . '],';
             $n_shown_insts += 1;
             $tot_shown_insts += $value;
@@ -448,7 +449,8 @@ $(document).ready(function() {
     		tooltip: {
     			formatter: function() {
     				return "<b>"+ this.point.name +"</b>: "+ Math.floor(10*this.percentage)/10 +" %";
-    			}
+    			},
+                useHTML: true
     		},
     		plotOptions: {
     			pie: {
@@ -496,7 +498,8 @@ $(document).ready(function() {
     		tooltip: {
     			formatter: function() {
     				return "<b>"+ this.point.name +"</b>: "+ Math.floor(10*this.percentage)/10 +" %";
-    			}
+                },
+                useHTML: true
     		},
     		plotOptions: {
     			pie: {
@@ -508,10 +511,12 @@ $(document).ready(function() {
     					color: "#000000",
     					connectorColor: "#000000",
     					formatter: function() {
-    						return "<b>"+ this.point.name +"</b>: "+ Math.floor(10*this.percentage)/10 +" %";
-    					},
-                        useHTML: true
-    				}
+                            console.log("point:",this.point)
+                            var truc = "<b>"+ this.point.name +"</b>: "+ Math.floor(10*this.percentage)/10 +" %"
+    						return truc;
+    					}
+    				},
+                    useHTML: true
     			}
     		},
     		series: [{
