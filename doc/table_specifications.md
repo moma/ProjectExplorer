@@ -42,7 +42,8 @@ CREATE TABLE scholars (
 
     INDEX duid_index_sch (doors_uid),
     INDEX country_index_sch (country),
-    INDEX rstatus_index_sch (record_status)
+    INDEX rstatus_index_sch (record_status),
+    INDEX vdate_index_sch (valid_date)
 ) ;
 
 
