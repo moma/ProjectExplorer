@@ -585,58 +585,58 @@ class BipartiteExtractor:
         # mlog("DEBUG", "MySQL extract scholar_array:", scholar_array)
         # scholar_array = list(scholar_array.keys())[0:3]
 
-        # TODO loop could be after SELECT
-        for scholar_id in scholar_array:
-            sql3='''
+
+        sql3='''
+            SELECT
+                scholars_and_orgs.*,
+                COUNT(keywords.kwid) AS keywords_nb,
+                GROUP_CONCAT(keywords.kwid) AS keywords_ids,
+                GROUP_CONCAT(kwstr) AS keywords_list
+            FROM (
                 SELECT
-                    scholars_and_orgs.*,
-                    COUNT(keywords.kwid) AS keywords_nb,
-                    GROUP_CONCAT(keywords.kwid) AS keywords_ids,
-                    GROUP_CONCAT(kwstr) AS keywords_list
+                    scholars_and_insts.*,
+                    -- small serializations here to avoid 2nd query
+                    GROUP_CONCAT(
+                      JSON_ARRAY(labs.name, labs.acro, labs.locname)
+                    ) AS labs_list
                 FROM (
                     SELECT
-                        scholars_and_insts.*,
-                        -- small serializations here to avoid 2nd query
+                        scholars.*,
                         GROUP_CONCAT(
-                          JSON_ARRAY(labs.name, labs.acro, labs.locname)
-                        ) AS labs_list
-                    FROM (
-                        SELECT
-                            scholars.*,
-                            GROUP_CONCAT(
-                              JSON_ARRAY(insts.name, insts.acro, insts.locname)
-                            ) AS insts_list
-                        FROM
-                            scholars
-                            LEFT JOIN sch_org ON luid = sch_org.uid
-                            LEFT JOIN (
-                                SELECT * FROM orgs WHERE class = 'inst'
-                            ) AS insts ON sch_org.orgid = insts.orgid
-                        WHERE (record_status = 'active'
-                            OR (record_status = 'legacy' AND valid_date >= NOW()))
-                        GROUP BY luid
-                    ) AS scholars_and_insts
-                    LEFT JOIN sch_org ON luid = sch_org.uid
-                    LEFT JOIN (
-                        SELECT * FROM orgs WHERE class = 'lab'
-                    ) AS labs ON sch_org.orgid = labs.orgid
+                          JSON_ARRAY(insts.name, insts.acro, insts.locname)
+                        ) AS insts_list
+                    FROM
+                        scholars
+                        LEFT JOIN sch_org ON luid = sch_org.uid
+                        LEFT JOIN (
+                            SELECT * FROM orgs WHERE class = 'inst'
+                        ) AS insts ON sch_org.orgid = insts.orgid
+                    WHERE (record_status = 'active'
+                        OR (record_status = 'legacy' AND valid_date >= NOW()))
                     GROUP BY luid
-                ) AS scholars_and_orgs
+                ) AS scholars_and_insts
+                LEFT JOIN sch_org ON luid = sch_org.uid
+                LEFT JOIN (
+                    SELECT * FROM orgs WHERE class = 'lab'
+                ) AS labs ON sch_org.orgid = labs.orgid
+                GROUP BY luid
+            ) AS scholars_and_orgs
 
-                LEFT JOIN sch_kw
-                    ON sch_kw.uid = scholars_and_orgs.luid
-                LEFT JOIN keywords
-                    ON sch_kw.kwid = keywords.kwid
-                WHERE luid = %s
-                GROUP BY luid ;
-            ''' % scholar_id
+            LEFT JOIN sch_kw
+                ON sch_kw.uid = scholars_and_orgs.luid
+            LEFT JOIN keywords
+                ON sch_kw.kwid = keywords.kwid
+            WHERE luid IN %s
+            GROUP BY luid ;
+        ''' %  ('('+','.join(map(str, list(scholar_array.keys())))+')')
 
-            # debug
-            # mlog("DEBUG", "db.extract: sql3="+sql3)
+        # debug
+        mlog("DEBUG", "db.extract: sql3="+sql3)
 
-            try:
-                self.cursor.execute(sql3)
-                res3=self.cursor.fetchone()
+        try:
+            self.cursor.execute(sql3)
+
+            for res3 in self.cursor:
                 info = {};
 
                 # semantic short ID
@@ -696,15 +696,14 @@ class BipartiteExtractor:
                 if info['keywords_nb']>0:
                     self.scholars[ide] = info;
 
-            except Exception as error:
-                mlog("ERROR", "=====  extract ERROR ====")
-                mlog("ERROR", "extract on scholar no %s" % str(scholar_id))
-                if sql3 != None:
-                    mlog("ERROR", "extract attempted SQL query:\t"+sql3)
-                mlog("ERROR", repr(error) + "("+error.__doc__+")")
-                mlog("ERROR", "stack (\n\t"+"\t".join(format_tb(error.__traceback__))+"\n)")
-                mlog("ERROR", "===== /extract ERROR ====")
-
+        except Exception as error:
+            mlog("ERROR", "=====  extract ERROR ====")
+            mlog("ERROR", "extract on scholar no %s" % str(scholar_id))
+            if sql3 != None:
+                mlog("ERROR", "extract attempted SQL query:\t"+sql3)
+            mlog("ERROR", repr(error) + "("+error.__doc__+")")
+            mlog("ERROR", "stack (\n\t"+"\t".join(format_tb(error.__traceback__))+"\n)")
+            mlog("ERROR", "===== /extract ERROR ====")
 
 
         # génère le gexf
