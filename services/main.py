@@ -246,7 +246,7 @@ def graph_api():
         if scholars and len(scholars):
             # Data Extraction
             # (getting details for selected scholars into graph object)
-            # TODO do it along with previous step getScholarsList
+            # when filtering, TODO do it along with previous step getScholarsList
             # (less modular but a lot faster)
             graphdb.extract(scholars)
 
@@ -736,7 +736,7 @@ def register():
             backend_error = False,
             message = """
               You can now visit elements of the members section:
-              <ul style="list-style-type: none;">
+              <ul style="list-style-type: none; font-size:140%%;">
                   <li>
                       <span class="glyphicon glyphicon glyphicon-education"></span>&nbsp;&nbsp;
                       <a href="/services/user/profile"> Your Profile </a>
@@ -747,7 +747,7 @@ def register():
                   </li>
                   <li>
                       <span class="glyphicon glyphicon glyphicon-stats"></span>&nbsp;&nbsp;
-                      <a href='/print_scholar_directory.php?query=%(luid)i'> Your Neighboor Stats </a>
+                      <a href='/print_scholar_directory.php?query=%(luid)i'> Your Neighbor Directory and Stats </a>
                   </li>
               </ul>
             """ % {'luid': luid })
@@ -809,17 +809,22 @@ def parse_affiliation_records(clean_records):
                                 r'([^\(]+)(?: *\(([^\)]{1,30})\))?',
                                 clean_input
                               )
-            if test_two_groups:
+            if (test_two_groups
+                and test_two_groups.groups()[0]
+                and test_two_groups.groups()[1]):
                 # ex 'Centre National de la Recherche Scientifique (CNRS)'
                 #         vvvvvvvvvvvvvvvv                          vvvv
                 #               name                                acro
-                new_org_info['name'] = test_two_groups.groups()[0].strip()
-                new_org_info['acro'] = test_two_groups.groups()[1].strip()
+                name_candidate = test_two_groups.groups()[0]
+                acro_candidate = test_two_groups.groups()[1]
+
+                new_org_info['name'] = name_candidate.strip()
+                new_org_info['acro'] = acro_candidate.strip()
 
                 mlog("DEBUG", "parse_affiliation_records found name='%s' and acro='%s'" % (new_org_info['name'], new_org_info['acro']))
             else:
                 len_input = len(clean_input)
-                test_uppercase = sub(r'[^0-9A-ZÉ\.]', '')
+                test_uppercase = sub(r'[^0-9A-ZÉ\.]', '', clean_input)
                 uppercase_rate = len(test_uppercase) / len_input
 
                 # special case short and mostly uppercase => just acro
