@@ -525,7 +525,7 @@ class BipartiteExtractor:
                             ) AS scholars_and_orgs
                             LEFT JOIN sch_ht
                                 ON uid = luid
-                            JOIN hashtags
+                            LEFT JOIN hashtags
                                 ON sch_ht.htid = hashtags.htid
                             GROUP BY luid
                         ) AS sch_org_n_tags
@@ -533,6 +533,7 @@ class BipartiteExtractor:
                         -- two step JOIN for keywords
                         LEFT JOIN sch_kw
                             ON uid = luid
+                        -- we directly exclude scholars with no keywords here
                         JOIN keywords
                             ON sch_kw.kwid = keywords.kwid
 
@@ -557,6 +558,9 @@ class BipartiteExtractor:
                 scholar_rows=self.cursor.fetchall()
                 for row in scholar_rows:
                     scholar_array[ row['luid'] ] = 1
+
+
+            # mlog("DEBUG", "getScholarsList: total scholars in subset = ", len(scholar_array))
 
             return scholar_array
 
@@ -660,10 +664,8 @@ class BipartiteExtractor:
                         lambda arr: Org(arr, org_class='insts'),
                         loads('['+res3['insts_list']+']')
                 ))
-                mlog("DEBUGSQL", "main lab:", labs[0])
-                mlog("DEBUGSQL", "main inst:", insts[0])
-                # each lab is an array [name, acronym, location]
-
+                # mlog("DEBUGSQL", "res main lab:", labs[0].label)
+                # mlog("DEBUGSQL", "res main inst:", insts[0].label)
 
                 # all detailed node data
                 ide="D::"+res3['initials']+("/%05i"%int(res3['luid']));
