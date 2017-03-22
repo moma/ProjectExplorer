@@ -1196,6 +1196,7 @@ function hoverNodeEffectWhileFA2(selectionRadius) {
         var nodeID = event.content;
         if(nodeID.length>0) {
 
+            console.log("hoverNodeEffectWhileFA2: node", Nodes[nodeID])
             pr("\t\t\t\t"+nodeID+" -> "+Nodes[nodeID].label);
             pr(getn(nodeID))
 
@@ -1907,7 +1908,7 @@ function saveGraph() {
         saveGEXF ( getVisibleNodes() , getVisibleEdges(), atts )
     }
 
-    $("#closesavemodal").click();
+    $("#savemodal").hide();
 }
 
 function saveGEXF(nodes,edges,atts){

@@ -17,6 +17,7 @@ text-align: center;
 line-height: 8px;
 font-size: 8px;
 font-family: "Lucida Grande", "Trebuchet MS";
+padding: 13px 0 0 0;
 }
 .fsslider > * {
 position: absolute;

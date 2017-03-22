@@ -10,6 +10,8 @@ $( window ).resize(function() {
 
 
 mainfile = (isUndef(ourGetUrlParam.file))?false:true;
+
+
 //  === [what to do at start] === //
 if (mainfile) {
 
@@ -123,9 +125,10 @@ function bringTheNoise(sourceinfo,type){
 
         changeType();
 
-        $.doTimeout(500,function (){
-            $('.etabs a[href="#tabs1"]').trigger('click');
-        });
+        // FIXME not defined (what purpose?)
+        // $.doTimeout(500,function (){
+        //     $('.etabs a[href="#tabs1"]').trigger('click');
+        // });
 
 		// printStates()
     	pr(" ############  / changeTYPE click");
@@ -252,12 +255,12 @@ function bringTheNoise(sourceinfo,type){
 
         partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8).draw(2,2,2);
         theListeners();
-        $("#closeloader").click();
+        $('#modalloader').hide();
 
     } else {
         var theurl,thedata,thename;
 
-        $('#modalloader').modal('show');
+        $('#modalloader').show();
 
         console.warn("===> PASSING ON QUERY (type "+type+") TO BRIDGE <===")
         if(type=="uid") {
@@ -340,7 +343,8 @@ function bringTheNoise(sourceinfo,type){
 function theListeners(){
     pr("in THELISTENERS");
     // leftPanel("close");
-    $("#closeloader").click();//modal.hide doesnt work :c
+
+    $('#modalloader').hide();
 
     cancelSelection(false);
     $("#tips").html(getTips());
@@ -353,9 +357,6 @@ function theListeners(){
     updateMap();
     updateDownNodeEvent(false);
     partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8).draw(2,2,2);
-    $("#saveAs").click(function() {
-        $('#savemodal').modal('show');
-    });
 
         /******************* /SEARCH ***********************/
     $.ui.autocomplete.prototype._renderItem = function(ul, item) {
@@ -792,7 +793,7 @@ function SigmaLayouting( URL, DATA, NAME) {
                             cut2_ = snbnodes.length;
                             pr("cut1 sem: "+cut1_)
                             pr("cut2 sem: "+cut2_)
-                            iterationsFA2_ = Math.round(iterationsFA2/(cut1_/cut2_))
+                            iterationsFA2_ = Math.round(iterationsFA2/(5*cut1_/cut2_))
                         }
                         if(nbnodes>=1000) iterationsFA2_ = 150;
                         pr("iterationsFA2 sem: "+iterationsFA2_)
