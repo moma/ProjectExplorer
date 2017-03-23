@@ -81,12 +81,16 @@ if(!isUndef(getUrlParam.mode)) { // if {db|api}.json
     });
     file = (Array.isArray(TW.mainfile))?TW.mainfile[0]:TW.mainfile;
 }
+
+// RES == { OK: true, format: "json", data: Object }
 var RES = AjaxSync({ URL: file });
 
 if(RES["OK"]) {
 
     var fileparam;// = { db|api.json , somefile.json|gexf }
     var the_data = RES["data"];
+
+    console.log('RES', RES)
 
 
     var the_file = "";
@@ -112,13 +116,13 @@ if(RES["OK"]) {
         var files_selector = '<select onchange="jsActionOnGexfSelector(this.value , true);">'
 
         for( var path in the_data ) {
-            pr("\t"+path+" has:")
-            pr(the_data[path])
+            console.log("\t"+path+" has:")
+            console.log(the_data[path])
             var the_gexfs = the_data[path]["gexfs"]
-            pr("\t\tThese are the available  Gexfs:")
+            console.log("\t\tThese are the available  Gexfs:")
             for(var gexf in the_gexfs) {
                 var gexfBasename = gexf.replace(/\.gexf$/, "") // more human-readable in the menu
-                pr("\t\t\t"+gexf+ "   -> table:" +the_gexfs[gexf]["semantic"]["table"] )
+                console.log("\t\t\t"+gexf+ "   -> table:" +the_gexfs[gexf]["semantic"]["table"] )
                 TW.field[path+"/"+gexf] = the_gexfs[gexf]["semantic"]["table"]
                 TW.gexfDict[path+"/"+gexf] = gexf
 
@@ -133,19 +137,19 @@ if(RES["OK"]) {
 
 
 
-        pr("\n============================\n")
-        pr(TW.field)
-        pr(TW.gexfDict)
+        console.log("\n============================\n")
+        console.log(TW.field)
+        console.log(TW.gexfDict)
         var sub_RES = AjaxSync({ URL: fileparam });
         the_data = sub_RES["data"]
         fileparam = sub_RES["format"]
-        pr(the_data.length)
-        pr(fileparam)
+        console.log(the_data.length)
+        console.log(fileparam)
 
         getUrlParam.file=the_file;
         console.log(" .  .. . -. - .- . - -.")
         console.log(getUrlParam.file)
-        pr("\n============================\n")
+        console.log("\n============================\n")
 
 
 
@@ -164,8 +168,8 @@ if(RES["OK"]) {
 
     start = new ParseCustom(  fileparam , the_data );
     categories = start.scanFile(); //user should choose the order of categories
-    pr("Categories: ")
-    pr(categories)
+    console.log("Categories: ")
+    console.log(categories)
 
     var possibleStates = makeSystemStates( categories )
     var initialState = buildInitialState( categories ) //[true,false]//
@@ -177,8 +181,8 @@ if(RES["OK"]) {
 
     TW.nodes1 = dicts.n1;//not used
     var catDict = dicts.catDict
-    pr("CategoriesDict: ")
-    pr(catDict)
+    console.log("CategoriesDict: ")
+    console.log(catDict)
 
     TW.categoriesIndex = categories;//to_remove
     TW.catSoc = categories[0];//to_remove
@@ -200,11 +204,31 @@ if(RES["OK"]) {
 
     // [ Poblating the Sigma-Graph ]
     var sigma_utils = new SigmaUtils();
-    TW.partialGraph = sigma.init(document.getElementById('sigma-example'))
-        .drawingProperties(sigmaJsDrawingProperties)
-        .graphProperties(sigmaJsGraphProperties)
-        .mouseProperties(sigmaJsMouseProperties);
-    TW.partialGraph = sigma_utils.FillGraph(  initialState , catDict  , dicts.nodes , dicts.edges , TW.partialGraph );
+    console.warn("sigma :", sigma)
+
+
+    // TW.partialGraph = sigma.init(document.getElementById('sigma-example'))
+    //     .drawingProperties(sigmaJsDrawingProperties)
+    //     .graphProperties(sigmaJsGraphProperties)
+    //     .mouseProperties(sigmaJsMouseProperties);
+
+
+
+
+
+    TW.graphData = {nodes: [], edges: []}
+
+    TW.graphData = sigma_utils.FillGraph(  initialState , catDict  , dicts.nodes , dicts.edges , TW.graphData );
+
+
+    // ==================================================================
+    // sigma js library invocation (https://github.com/jacomyal/sigma.js)
+    // ==================================================================
+    TW.partialGraph = new sigma({
+        graph: TW.graphData,
+        container: 'sigma-example'
+    });
+
     TW.partialGraph.states = []
     TW.partialGraph.states[0] = false;
     TW.partialGraph.states[1] = TW.SystemStates;
@@ -336,7 +360,16 @@ if(RES["OK"]) {
         }
     }).index();
 
-    TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8).draw();
+
+    // REFA FIXME
+    // TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8).draw();
+
+
+    // TW.partialGraph.zoomTo(
+    //     TW.partialGraph._core.width / 2,
+    //     TW.partialGraph._core.height / 2, 0.8
+    // ).draw();
+
 
     // fa2enabled=true; TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8).draw();
     // $.doTimeout(1,function(){
