@@ -97,6 +97,7 @@ whoswho = (function(ww) {
         $("" + id1).hide();
         show("#" + id1);
         $("#" + id2).focus();
+        whoswho.shiftPage()
         return false;
     };
 
@@ -108,12 +109,28 @@ whoswho = (function(ww) {
           // start transition
           tgtBox.style.opacity = 0
           // remove box
-          setTimeout(function(){tgtBox.remove()}, 500)
+          setTimeout(function(){tgtBox.remove(); whoswho.shiftPage();}, 500)
           return true
       }
       else {
           console.warn('closeThisBox: no @for attribute!')
           return false
+      }
+    }
+
+    // call it to adjust page position if topbar becomes thick
+    ww.shiftPage = function() {
+        console.log("SHIFT PAGE")
+      var topbar = document.getElementsByClassName('topbar')[0]
+      var page = document.getElementsByClassName('page')[0]
+      if (!page) {
+          page = document.getElementsByClassName('full-directory')[0]
+      }
+      if (topbar && page) {
+          var topContainer = topbar.querySelector('.container-fluid')
+          if (topContainer && topContainer.offsetHeight) {
+              page.style.marginTop = topContainer.offsetHeight
+          }
       }
     }
 
