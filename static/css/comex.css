@@ -461,6 +461,10 @@ div.ccsection-footer {
   height: 2em;
 }
 
+.mediumspacerrow {
+  height: 4em;
+}
+
 .spacerrow {
   height: 8em;
 }

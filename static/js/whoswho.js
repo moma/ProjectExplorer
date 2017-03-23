@@ -65,7 +65,7 @@ whoswho = (function(ww) {
         $('#' + id3).click(whoswho.closeThisBox)
 
         // debug
-        console.log("whoswho.popfilter: adding autocomplete menu", $("#" + id1))
+        // console.log("whoswho.popfilter: adding autocomplete menu", $("#" + id1))
 
         $("#" + id2).autocomplete({
             source: function (req, resp) {
@@ -120,7 +120,7 @@ whoswho = (function(ww) {
 
     // call it to adjust page position if topbar becomes thick
     ww.shiftPage = function() {
-        console.log("SHIFT PAGE")
+      // console.log("SHIFT PAGE")
       var topbar = document.getElementsByClassName('topbar')[0]
       var page = document.getElementsByClassName('page')[0]
       if (!page) {
