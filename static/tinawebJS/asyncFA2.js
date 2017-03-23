@@ -394,7 +394,8 @@ var ForceAtlas2 = function(graph) {
       this.p.jitterTolerance = 0.1;
     }
     if (graph.nodes.length >= 1000) {
-      this.p.barnesHutOptimize = true;
+      // can't use barnesHutOptimize because buildSubRegions is broken
+      this.p.barnesHutOptimize = false;
     } else {
       this.p.barnesHutOptimize = false;
     }
@@ -846,7 +847,8 @@ var ForceAtlas2 = function(graph) {
 };
 
 
-
+// TODO "this" is undefined here => can't barnesHut
+//      ( pass as argument this_graph = ForceAtlas2.this)
 var updateMassAndGeometry = function() {
   if (this.nodes.length > 1) {
     // Compute Mass
@@ -899,6 +901,9 @@ var Region = function(nodes, depth) {
 }
 
 
+
+// TODO "this" is undefined here => can't barnesHut
+//      ( pass as argument this_graph = ForceAtlas2.this)
 var buildSubRegions = function() {
   if (this.nodes.length > 1) {
     var leftNodes = [];
