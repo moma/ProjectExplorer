@@ -520,9 +520,10 @@ def update_scholar_cols(selected_safe_recs, cmx_db, where_luid=None):
 def save_pairs_sch_tok(pairings_list, cmx_db, map_table='sch_kw'):
     """
     Simply save all pairings (luid, kwid) or (luid, htid) in the list
+    @pairings_list: list of tuples
     """
     db_cursor = cmx_db.cursor()
-    for id_pair in pairings_list:
+    for id_pair in set(pairings_list):
         db_cursor.execute('INSERT INTO %s VALUES %s' % (map_table, str(id_pair)))
         cmx_db.commit()
         mlog("DEBUG", "%s: saved %s pair" % (map_table, str(id_pair)))
