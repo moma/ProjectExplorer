@@ -112,7 +112,7 @@ function changeType() {
             }
     	}
 
-        return;
+        return swclickActual;
     }
 }
 

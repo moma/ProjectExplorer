@@ -87,6 +87,7 @@ var sigmaJsDrawingProperties = {
     //defaultBorderView: "always"
 };
 var sigmaJsGraphProperties = {
+    scalingMode: 'outside',     // less precise graph centering but more natural
     minEdgeSize: 2,
     maxEdgeSize: 2
 };

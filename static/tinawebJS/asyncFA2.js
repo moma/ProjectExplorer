@@ -1,5 +1,7 @@
 // Mathieu Jacomy @ Sciences Po Médialab & WebAtlas
 
+var tinaGraphType = null
+
 var ForceAtlas2 = function(graph) {
   var self = this;
   this.graph = graph;
@@ -7,24 +9,42 @@ var ForceAtlas2 = function(graph) {
   // NB some settings are rewritten in setAutoSettings
   //                                   ---------------
   this.p = {
-    linLogMode: false,
-    outboundAttractionDistribution: false,
-    adjustSizes: true,     // imho <=> overlap prevention ? TODO check more
-    edgeWeightInfluence: 1,
-    scalingRatio: 1,
+    // global behavior ------------
+    linLogMode : true,
+    edgeWeightInfluence: .5,
+    gravity: 4,
     strongGravityMode: false,
-    gravity: 1,
-    jitterTolerance: 1,
-    barnesHutOptimize: false,
-    barnesHutTheta: 1.2,
-    speed: 20,
-    outboundAttCompensation: 1,
-    totalSwinging: 0,
+
+    scalingRatio: 1,
+    // adjustSizes: false,     // ~ messy but perhaps overlap prevention
+    // banderita: false,
+    // /global behavior -----------
+
+    // adapting speed -------------
+    simpleIntervals: 20,
+    complexIntervals: 3,
+    jitterTolerance: 3 ,   // 3 is a lot visually but it
+                           // helps when layout has a lot of
+                           // long-distance migrations to do
+                           // => reduce for small graphs
+
+    speed: 2,
+    totalEffectiveTraction: 100,
+    totalSwinging: 200,
     swingVSnode1: 0,
-    banderita: false,
-    totalEffectiveTraction: 0,
-    complexIntervals: 500,
-    simpleIntervals: 1000
+    // /adapting speed ------------
+
+    // favor global centrality
+    // (but rather not needed when data already shows topic-centered
+    //  node groups and/nor when preferential attachment type of data)
+    outboundAttractionDistribution: false
+    // outboundAttCompensation: 1.5,    // should >0 if outAttrDist
+
+    // zone-optimization (but broken)
+    // barnesHutOptimize: false,
+    // barnesHutTheta: 1.2
+
+    // see also this.setAutoSettings function
   };
 
   // The state tracked from one atomic "go" to another
@@ -356,50 +376,39 @@ var ForceAtlas2 = function(graph) {
   // Auto Settings
   this.setAutoSettings = function() {
     var graph = this.graph;
+    if (tinaGraphType == "social") {
+        this.p.linLogMode = false
+    }
 
     // Tuning
-    // if (graph.nodes.length >= 100) {
-    //   this.p.scalingRatio = 2.0;
-    // } else {
-    //   this.p.scalingRatio = 10.0;
-    // }
-
-    this.p.scalingRatio = 100 / Math.sqrt(graph.nodes.length)
-    console.warn ("this p scalingRatio", this.p.scalingRatio, "for length:", graph.nodes.length)
-
-
-    // POSS: trying proportional scaling instead of if
-    // NB: *smaller* scaling ratio improves non overlap of close neighboors
-    // this.p.scalingRatio = 1 / 3 * Math.sqrt(graph.nodes.length)
-    // console.log("scalingRatio", this.p.scalingRatio)
-
-    this.p.strongGravityMode = false;
-    this.p.gravity = 1;
-
-    // TODO user selected layout should be much slower than initial layout
-    // this.p.speed = 10;
-
-    // Behavior
-    this.p.outboundAttractionDistribution = true;
-    this.p.linLogMode = false;
-    this.p.adjustSizes = true;
-    this.p.edgeWeightInfluence = 1;
-
-    // Performance
-    if (graph.nodes.length >= 50000) {
-      this.p.jitterTolerance = 10;
-    } else if (graph.nodes.length >= 5000) {
-      this.p.jitterTolerance = 1;
-    } else {
-      this.p.jitterTolerance = 0.1;
+    if (graph.nodes.length <= 300) {
+        this.p.speed = .5
+        this.p.simpleIntervals= 160
+        this.p.complexIntervals= 24
+        this.p.jitterTolerance = 1
+        this.p.gravity = 2
+        if (graph.nodes.length <= 100) {
+          this.p.simpleIntervals= 200
+          this.p.complexIntervals= 30
+          this.p.gravity = 1
+          this.p.outboundAttractionDistribution = true
+          this.p.outboundAttCompensation = 10
+          this.p.jitterTolerance = .5
+          this.p.edgeWeightInfluence = 1
+        //   this.p.totalEffectiveTraction = 0
+          if (graph.nodes.length <= 20) {
+              this.p.linLogMode = false
+              this.p.edgeWeightInfluence = 2
+              this.p.speed = .01
+              this.p.simpleIntervals= 400
+              this.p.complexIntervals= 60
+              this.p.outboundAttCompensation = .05
+          }
+        }
     }
-    if (graph.nodes.length >= 1000) {
-      // can't use barnesHutOptimize because buildSubRegions is broken
-      this.p.barnesHutOptimize = false;
-    } else {
-      this.p.barnesHutOptimize = false;
-    }
-    this.p.barnesHutTheta = 1.2;
+
+    console.warn ("asyncFA2 parameters:", this.p, "for graph size:", graph.nodes.length, "and type:", tinaGraphType, ", and local type", graph.tinaGraphType)
+
 
     return this;
   }

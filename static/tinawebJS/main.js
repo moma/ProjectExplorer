@@ -103,6 +103,8 @@ function bringTheNoise(sourceinfo,type){
     .graphProperties(sigmaJsGraphProperties)
     .mouseProperties(sigmaJsMouseProperties);
 
+    partialGraph._core.graph.tinaGraphType = swclickActual
+
     //dummy graph (semantic layouting in background)
     otherGraph = sigma.init(document.getElementById('sigma-othergraph'));
 
@@ -123,7 +125,7 @@ function bringTheNoise(sourceinfo,type){
     	pr(" ############  changeTYPE click");
 		printStates()
 
-        changeType();
+        partialGraph._core.graph.tinaGraphType = changeType();
 
         // FIXME not defined (what purpose?)
         // $.doTimeout(500,function (){
@@ -449,9 +451,19 @@ function theListeners(){
 
     // button CENTER
     $("#lensButton").click(function () {
+        // for precision we'll use scalingMode inside temporarily
+        partialGraph._core.graph.p.scalingMode = "inside"
         partialGraph.position(0,0,1);
         partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
         partialGraph.refresh();
+
+        // in consideration of auto layout algos we'll restore "outside"
+        window.setTimeout (
+            function() {
+                partialGraph._core.graph.p.scalingMode = "outside"
+            },
+            502
+        )
         // partialGraph.startForceAtlas2();
     });
 
@@ -758,7 +770,8 @@ function SigmaLayouting( URL, DATA, NAME) {
                     ForceAtlas2.postMessage({
                         "nodes": partialGraph._core.graph.nodes,
                         "edges": partialGraph._core.graph.edges,
-                        "it":iterationsFA2
+                        "it":iterationsFA2,
+                        "graph_type": swclickActual
                     });
                     ForceAtlas2.addEventListener('message', function(e) {
                         iterations=e.data.it;
@@ -805,7 +818,8 @@ function SigmaLayouting( URL, DATA, NAME) {
                         ForceAtlas2_.postMessage({
                             "nodes": otherGraph._core.graph.nodes,
                             "edges": otherGraph._core.graph.edges,
-                            "it":iterationsFA2_
+                            "it":iterationsFA2,
+                            "graph_type": swclickActual  // test usage_
                         });
                         ForceAtlas2_.addEventListener('message', function(e) {
                             iterations=e.data.it;

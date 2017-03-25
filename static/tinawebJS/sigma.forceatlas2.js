@@ -28,24 +28,42 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
   this.R = 100;
 
   this.p = {
-    linLogMode: false,
-    outboundAttractionDistribution: false,
-    adjustSizes: false,
-    edgeWeightInfluence: 0,
-    scalingRatio: 1,
+    // global behavior ------------
+    linLogMode : true,
+    edgeWeightInfluence: .5,
+    gravity: 4,
     strongGravityMode: false,
-    gravity: 1,
-    jitterTolerance: 1,
-    barnesHutOptimize: false,
-    barnesHutTheta: 1.2,
-    speed: 20,
-    outboundAttCompensation: 1,
-    totalSwinging: 0,
-    swingVSnode1: 0,
-    banderita: false,
-    totalEffectiveTraction: 0,
-    complexIntervals: 500,
-    simpleIntervals: 1000
+
+    scalingRatio: 1,
+    // adjustSizes: false,     // ~ messy but perhaps overlap prevention
+    // banderita: false,
+    // /global behavior -----------
+
+    // adapting speed -------------
+    simpleIntervals: 20,
+    complexIntervals: 3,
+    jitterTolerance: 3 ,   // 3 is a lot visually but it
+                           // helps when layout has a lot of
+                           // long-distance migrations to do
+                           // => reduce for small graphs
+
+    speed: 2,
+    totalEffectiveTraction: 100,
+    totalSwinging: 200,
+    // swingVSnode1: 0,
+    // /adapting speed ------------
+
+    // favor global centrality
+    // (but rather not needed when data already shows topic-centered
+    //  node groups and/nor when preferential attachment type of data)
+    outboundAttractionDistribution: false
+    // outboundAttCompensation: 1.5,    // should >0 if outAttrDist
+
+    // zone-optimization (but broken)
+    // barnesHutOptimize: false,
+    // barnesHutTheta: 1.2
+
+    // see also this.setAutoSettings function
   };
 
   // The state tracked from one atomic "go" to another
@@ -148,7 +166,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
           }
 
          } else {
-          
+
           if( self.firstit ) {
             n.x = self.Ox + self.R*Math.cos(Math.PI*self.stepDeg*mult);
             n.y = self.Oy + self.R*Math.sin(Math.PI*self.stepDeg*mult);
@@ -157,7 +175,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
           }
 
          }
-         
+
         });
 
         self.firstit = false ;
@@ -273,21 +291,21 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
         if (self.p.edgeWeightInfluence == 0) {
           while (i < edges.length && i < self.state.index + cInt) {
             var e = edges[i++];
-            if(!e.hidden) { 
+            if(!e.hidden) {
               Attraction.apply_nn(e.source, e.target, 1);
             }
           }
         } else if (self.p.edgeWeightInfluence == 1) {
           while (i < edges.length && i < self.state.index + cInt) {
             var e = edges[i++];
-            if(!e.hidden) { 
+            if(!e.hidden) {
               Attraction.apply_nn(e.source, e.target, e.weight || 1);
             }
           }
         } else {
           while (i < edges.length && i < self.state.index + cInt) {
             var e = edges[i++];
-            if(!e.hidden) { 
+            if(!e.hidden) {
               Attraction.apply_nn(
                 e.source, e.target,
                 Math.pow(e.weight || 1, self.p.edgeWeightInfluence)
@@ -324,7 +342,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
             totalSwinging += n.fa2.mass * swinging;
             swingingSum += swinging;
             promdxdy += (Math.abs(n.fa2.dx)+Math.abs(n.fa2.dy))/2; /**/
-            
+
             totalEffectiveTraction += n.fa2.mass *
                                       0.5 *
                                       Math.sqrt(
@@ -333,16 +351,16 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
                                       );
           }
         });
-        
+
         self.p.totalSwinging = totalSwinging;
-        
+
         var convg= ((Math.pow(nodes.length,2))/promdxdy);    /**/
         var swingingVSnodes_length = swingingSum/nodes.length;     /**/
-        if(stopcriteria && (convg > swingingVSnodes_length)){ 
+        if(stopcriteria && (convg > swingingVSnodes_length)){
             pr("i've applied the stopcriteria: "+self.count)
-            partialGraph.stopForceAtlas2(); 
+            partialGraph.stopForceAtlas2();
         }
-        
+
         self.p.totalEffectiveTraction = totalEffectiveTraction;
 
         // We want that swingingMovement < tolerance * convergenceMovement
@@ -361,7 +379,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
 
         // Save old coordinates
         nodes.forEach(function(n) {
-          if(!n.hidden && n.degree>0) { 
+          if(!n.hidden && n.degree>0) {
             n.old_x = +n.x;
             n.old_y = +n.y;
           }
@@ -402,7 +420,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
             }
           }
 
-          
+
             if(self.isolated>0 && self.count%50 == 0) {
               nodes.forEach(function(n) {
                 if(n.degree>0) {
@@ -504,35 +522,40 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
   this.setAutoSettings = function() {
     var graph = this.graph;
 
-    // Tuning
-    if (graph.nodes.length >= 100) {
-      this.p.scalingRatio = 2.0;
-    } else {
-      this.p.scalingRatio = 10.0;
-    }
-    this.p.strongGravityMode = false;
-    this.p.gravity = 1;
 
-    // Behavior
-    this.p.outboundAttractionDistribution = false;
-    this.p.linLogMode = false;
-    this.p.adjustSizes = false;
-    this.p.edgeWeightInfluence = 1;
+        if (swclickActual == "social") {
+            this.p.linLogMode = false
+        }
 
-    // Performance
-    if (graph.nodes.length >= 50000) {
-      this.p.jitterTolerance = 10;
-    } else if (graph.nodes.length >= 5000) {
-      this.p.jitterTolerance = 1;
-    } else {
-      this.p.jitterTolerance = 0.1;
-    }
-    if (graph.nodes.length >= 1000) {
-      this.p.barnesHutOptimize = true;
-    } else {
-      this.p.barnesHutOptimize = false;
-    }
-    this.p.barnesHutTheta = 1.2;
+        // Tuning
+        if (graph.nodes.length <= 300) {
+            this.p.speed = .5
+            this.p.simpleIntervals= 160
+            this.p.complexIntervals= 24
+            this.p.jitterTolerance = .3
+            this.p.gravity = 2
+            if (graph.nodes.length <= 100) {
+              this.p.simpleIntervals= 200
+              this.p.complexIntervals= 30
+              this.p.gravity = 1
+              this.p.outboundAttractionDistribution = true
+              this.p.outboundAttCompensation = 10
+              this.p.jitterTolerance = .1
+              this.p.edgeWeightInfluence = 1
+            //   this.p.totalEffectiveTraction = 0
+              if (graph.nodes.length <= 20) {
+                  this.p.linLogMode = false
+                  this.p.jitterTolerance = .02
+                  this.p.edgeWeightInfluence = 2
+                  this.p.speed = .01
+                  this.p.simpleIntervals= 400
+                  this.p.complexIntervals= 60
+                  this.p.outboundAttCompensation = .05
+              }
+            }
+        }
+
+    console.warn ("sigma.forceatlas2 parameters:", this.p, "for graph size:", graph.nodes.length, ", and type:", swclickActual, ", and local type", graph.tinaGraphType)
 
     return this;
   }
@@ -993,7 +1016,7 @@ sigma.forceatlas2.Region = function(nodes, depth) {
     massCenterX: 0,
     massCenterY: 0
   };
-  
+
   this.updateMassAndGeometry();
 }
 
@@ -1129,7 +1152,7 @@ sigma.publicPrototype.startForceAtlas2 = function() {
     if(isolatedBCauseFilter==ene) {
       partialGraph.stopForceAtlas2();
       return;
-    } 
+    }
 
 
     $("#overviewzone").hide();
@@ -1146,7 +1169,7 @@ sigma.publicPrototype.startForceAtlas2 = function() {
         return;
       }
     });
-    
+
   }
 };
 
