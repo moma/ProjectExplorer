@@ -1,7 +1,7 @@
 
 
 function cancelSelection (fromTagCloud) {
-    pr("\t***in cancelSelection");
+    console.log("\t***in cancelSelection");
     highlightSelectedNodes(false); //Unselect the selected ones :D
     opossites = [];
     selections = [];
@@ -13,8 +13,9 @@ function cancelSelection (fromTagCloud) {
 
     //Nodes colors go back to normal
     overNodes=false;
-    e = TW.partialGraph._core.graph.edges;
+    e = TW.partialGraph.graph.edges();
     for(i=0;i<e.length;i++){
+            console.log(e)
             e[i].color = e[i].attr['grey'] ? e[i].attr['true_color'] : e[i].color;
             e[i].attr['grey'] = 0;
     }
@@ -58,7 +59,7 @@ function cancelSelection (fromTagCloud) {
 }
 
 function highlightSelectedNodes(flag){
-    pr("\t***methods.js:highlightSelectedNodes(flag)"+flag+" selEmpty:"+is_empty(selections))
+    console.log("\t***methods.js:highlightSelectedNodes(flag)"+flag+" selEmpty:"+is_empty(selections))
     if(!is_empty(selections)){
         for(var i in selections) {
             if(TW.Nodes[i].type==TW.catSoc && swclickActual=="social"){
@@ -93,7 +94,7 @@ function alertCheckBox(eventCheck){
 // AaBb: Socio-Semantic
 function RefreshState(newNOW){
 
-    pr("\t\t\tin RefreshState newNOW:_"+newNOW+"_.")
+    console.log("\t\t\tin RefreshState newNOW:_"+newNOW+"_.")
 
 	if (newNOW!="") {
 	    PAST = NOW;
@@ -122,7 +123,7 @@ function RefreshState(newNOW){
         var N=( Object.keys(TW.Nodes).filter(function(n){return TW.Nodes[n].type==TW.catSoc}) ).length
         var k=Object.keys(getNeighs(Object.keys(selections),nodes1)).length
         var s=Object.keys(selections).length
-        pr("in social N: "+N+" - k: "+k+" - s: "+s)
+        console.log("in social N: "+N+" - k: "+k+" - s: "+s)
         if(NOW=="A"){
             if( (s==0 || k>=(N-1)) ) {
                 LevelButtonDisable(true);
@@ -143,7 +144,7 @@ function RefreshState(newNOW){
         var N=( Object.keys(TW.Nodes).filter(function(n){return TW.Nodes[n].type==TW.catSem}) ).length
         var k=Object.keys(getNeighs(Object.keys(selections),nodes2)).length
         var s=Object.keys(selections).length
-        pr("in semantic N: "+N+" - k: "+k+" - s: "+s)
+        console.log("in semantic N: "+N+" - k: "+k+" - s: "+s)
         if(NOW=="B") {
             if( (s==0 || k>=(N-1)) ) {
                 LevelButtonDisable(true);
@@ -210,7 +211,7 @@ function htmlfied_alternodes(elems) {
 }
 
 function manualForceLabel(nodeid,active) {
-	// pr("manual|"+nodeid+"|"+active)
+	// console.log("manual|"+nodeid+"|"+active)
 	TW.partialGraph._core.graph.nodesIndex[nodeid].active=active;
 	TW.partialGraph.draw();
 }
@@ -317,7 +318,7 @@ function htmlfied_tagcloud(elems , limit) {
 //missing: getTopPapers for both node types
 //considering complete graphs case! <= maybe i should mv it
 function updateLeftPanel_fix( sels , oppos ) {
-    pr("updateLeftPanel() corrected version** ")
+    console.log("updateLeftPanel() corrected version** ")
     var namesDIV=''
     var alterNodesDIV=''
     var informationDIV=''
@@ -377,15 +378,15 @@ function updateLeftPanel_fix( sels , oppos ) {
 }
 
 function printStates() {
-	pr("\t\t\t\t---------"+getClientTime()+"---------")
-	pr("\t\t\t\tswMacro: "+swMacro)
-	pr("\t\t\t\tswActual: "+swclickActual+" |  swPrev: "+swclickPrev)
-	pr("\t\t\t\tNOW: "+NOW+" |  PAST: "+PAST)
-	pr("\t\t\t\tselections: ")
-	pr(Object.keys(selections))
-	pr("\t\t\t\topposites: ")
-	pr(Object.keys(opossites))
-	pr("\t\t\t\t------------------------------------")
+	console.log("\t\t\t\t---------"+getClientTime()+"---------")
+	console.log("\t\t\t\tswMacro: "+swMacro)
+	console.log("\t\t\t\tswActual: "+swclickActual+" |  swPrev: "+swclickPrev)
+	console.log("\t\t\t\tNOW: "+NOW+" |  PAST: "+PAST)
+	console.log("\t\t\t\tselections: ")
+	console.log(Object.keys(selections))
+	console.log("\t\t\t\topposites: ")
+	console.log(Object.keys(opossites))
+	console.log("\t\t\t\t------------------------------------")
 }
 
 //	just css
@@ -397,7 +398,7 @@ function LevelButtonDisable( TF ){
 
 //Fixed! apres: refactor!
 function graphTagCloudElem(nodes) {
-    pr("in graphTagCloudElem, nodae_id: "+nodes);
+    console.log("in graphTagCloudElem, nodae_id: "+nodes);
     cancelSelection();
     TW.partialGraph.emptyGraph();
 
@@ -550,7 +551,7 @@ function graphResetColor(){
 }
 
 function hideEverything(){
-    pr("\thiding all");
+    console.log("\thiding all");
     nodeslength=0;
     for(var n in TW.partialGraph._core.graph.nodesIndex){
         TW.partialGraph._core.graph.nodesIndex[n].hidden=true;
@@ -559,7 +560,7 @@ function hideEverything(){
         TW.partialGraph._core.graph.edgesIndex[e].hidden=true;
     }
     overNodes=false;//magic line!
-    pr("\tall hidded");
+    console.log("\tall hidded");
     //Remember that this function is the analogy of EmptyGraph
     //"Saving node positions" should be applied in this function, too.
 }

@@ -38,23 +38,23 @@ ParseCustom.prototype.scanFile = function() {
 
     switch (this.format) {
         case "api.json":
-            pr("scanFile: "+this.format)
+            console.log("scanFile: "+this.format)
             break;
         case "db.json":
-            pr("scanFile: "+this.format)
+            console.log("scanFile: "+this.format)
             break;
         case "json":
-            pr("scanFile: "+this.format)
+            console.log("scanFile: "+this.format)
             categories = this.getJSONCategories( this.data );
             return categories;
             break;
         case "gexf":
-            pr("scanFile: "+this.format)
+            console.log("scanFile: "+this.format)
             categories = this.getGEXFCategories( this.data );
             return categories;
             break;
         default:
-            pr("scanFile   jsaispas: "+this.format)
+            console.log("scanFile   jsaispas: "+this.format)
             break;
     }
 };
@@ -64,23 +64,23 @@ ParseCustom.prototype.makeDicts = function(categories) {
 
     switch (this.format) {
         case "api.json":
-            pr("makeDicts: "+this.format)
+            console.log("makeDicts: "+this.format)
             break;
         case "db.json":
-            pr("makeDicts: "+this.format)
+            console.log("makeDicts: "+this.format)
             break;
         case "json":
-            pr("makeDicts: "+this.format)
+            console.log("makeDicts: "+this.format)
             dictionaries = this.parseJSON( categories );
             return dictionaries;
             break;
         case "gexf":
-            pr("makeDicts: "+this.format)
+            console.log("makeDicts: "+this.format)
             dictionaries = this.parseGEXF( categories );
             return dictionaries;
             break;
         default:
-            pr("makeDicts   jsaispas: "+this.format)
+            console.log("makeDicts   jsaispas: "+this.format)
             break;
     }
 };
@@ -240,7 +240,7 @@ function dictfyGexf( gexf , categories ){
             var color;
             if(colorNodes.length>0){
                 colorNode = colorNodes[0];
-                color = '#'+sigma.tools.rgbToHex(parseFloat(colorNode.getAttribute('r')),
+                color = '#'+sigmaTools.rgbToHex(parseFloat(colorNode.getAttribute('r')),
                     parseFloat(colorNode.getAttribute('g')),
                     parseFloat(colorNode.getAttribute('b')));
             }// [ / get Colour ]

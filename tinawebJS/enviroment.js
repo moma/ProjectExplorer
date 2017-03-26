@@ -71,7 +71,7 @@ function changeType() {
     var nodes_2_colour = {}
     var edges_2_colour = {}
 
-    pr("CHanging the TYpE!!: "+present.level)
+    console.log("CHanging the TYpE!!: "+present.level)
 
     if(present.level) { //If level=Global, fill all {X}-component
 
@@ -85,18 +85,18 @@ function changeType() {
         }
     } else /* Local level, change to previous or alter component*/ {
         if(sels.length==0) {
-            pr(" * * * * * * * * * * * * * * ")
-            pr("the past: ")
-            pr(past.type.map(Number)+" , "+past.level)
-            pr(past)
+            console.log(" * * * * * * * * * * * * * * ")
+            console.log("the past: ")
+            console.log(past.type.map(Number)+" , "+past.level)
+            console.log(past)
 
-            pr("the present: ")
-            pr(present.type.map(Number)+" , "+present.level)
-            pr(present)
+            console.log("the present: ")
+            console.log(present.type.map(Number)+" , "+present.level)
+            console.log(present)
 
-            pr("str_type_t0: "+str_type_t0)
-            pr("str_type_t1: "+str_type_t1)
-            pr("str_nextState: "+str_nextState)
+            console.log("str_type_t0: "+str_type_t0)
+            console.log("str_type_t1: "+str_type_t1)
+            console.log("str_nextState: "+str_nextState)
 
             var newsels = {}
             var sumpastcat = type_t0.map(Number).reduce(function(a, b){return a+b;})
@@ -139,7 +139,7 @@ function changeType() {
             if(sumpastcat==2) {
 
             }
-            pr(" * * * * * * * * * * * * * * ")
+            console.log(" * * * * * * * * * * * * * * ")
         }
     }
 
@@ -396,7 +396,7 @@ function changeLevel() {
 //	EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
 function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 	// if ($(sliderDivID).html()!="") {
-	// 	pr("\t\t\t\t\t\t[[ algorithm not applied "+sliderDivID+" ]]")
+	// 	console.log("\t\t\t\t\t\t[[ algorithm not applied "+sliderDivID+" ]]")
 	// 	return;
 	// }
 
@@ -424,8 +424,8 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
     }
 
     var filterparams = AlgorithmForSliders ( TW.Edges , type_attrb , type , criteria) //OK
-    pr("EdgeWeightFilter: "+type)
-    pr(filterparams)
+    console.log("EdgeWeightFilter: "+type)
+    console.log(filterparams)
     var steps = filterparams["steps"]
     var finalarray = filterparams["finalarray"]
     if(steps<3) {
@@ -466,7 +466,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
                 $.doTimeout( sliderDivID+"_"+filtervalue,300,function () {
 
-                    pr("\nprevious value "+lastvalue+" | current value "+filtervalue)
+                    console.log("\nprevious value "+lastvalue+" | current value "+filtervalue)
 
                     // [ Stopping FA2 ]
                     TW.partialGraph.stopForceAtlas2();
@@ -483,11 +483,11 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                     if(mint0!=mint1) {
                         if(mint0<mint1) {
                             delflag = true;
-                            pr("cotainferior   --||>--------||   a la derecha")
+                            console.log("cotainferior   --||>--------||   a la derecha")
                         }
                         if(mint0>mint1) {
                             addflag = true;
-                            pr("cotainferior   --<||--------||   a la izquierda")
+                            console.log("cotainferior   --<||--------||   a la izquierda")
                         }
                         iterarr = calc_range(mint0,mint1).sort(compareNumbers);
                     }
@@ -495,11 +495,11 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                     if(maxt0!=maxt1) {
                         if(maxt0<maxt1) {
                             addflag = true;
-                            pr("cotasuperior   ||--------||>--   a la derecha")
+                            console.log("cotasuperior   ||--------||>--   a la derecha")
                         }
                         if(maxt0>maxt1) {
                             delflag = true;
-                            pr("cotasuperior   ||--------<||--   a la izquierda")
+                            console.log("cotasuperior   ||--------<||--   a la izquierda")
                         }
                         iterarr = calc_range(maxt0,maxt1).sort(compareNumbers);
                     }
@@ -512,16 +512,16 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
                         if(i>=low && i<=high) {
                             if(addflag) {
-                                // pr("adding "+ids.join())
+                                // console.log("adding "+ids.join())
                                 for(var id in ids) {
                                     ID = ids[id]
                                     TW.Edges[ID].lock = false;
 
                                     if(present.level) {
-                                        // pr("\tADD "+ID)
+                                        // console.log("\tADD "+ID)
                                         // n = ID.split(";")
                                         // if(n.length>1)
-                                        //     pr("\t\tsource:("+TW.Nodes[n[0]].x+","+TW.Nodes[n[0]].y+") ||| target:("+TW.Nodes[n[1]].x+","+TW.Nodes[n[1]].y+")")
+                                        //     console.log("\t\tsource:("+TW.Nodes[n[0]].x+","+TW.Nodes[n[0]].y+") ||| target:("+TW.Nodes[n[1]].x+","+TW.Nodes[n[1]].y+")")
                                         add1Elem(ID)
                                     } else {
                                         for (var n in TW.partialGraph._core.graph.nodesIndex) {
@@ -531,7 +531,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                                                 if(isUndef(getn(sid))) unHide(sid)
                                                 if(isUndef(getn(tid))) unHide(tid)
                                                 add1Elem(ID)
-                                                // pr("\tADD "+ID)
+                                                // console.log("\tADD "+ID)
                                             }
                                         }
                                     }
@@ -541,16 +541,16 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
                         } else {
                             if(delflag) {
-                                // pr("deleting "+ids.join())
+                                // console.log("deleting "+ids.join())
                                 for(var id in ids) {
                                     ID = ids[id]
                                     if(!isUndef(gete(ID))) {
                                         TW.partialGraph.dropEdge(ID)
                                         TW.Edges[ID].lock = true;
-                                        // pr("\tDEL "+ID)
+                                        // console.log("\tDEL "+ID)
                                         // n = ID.split(";")
                                         // if(n.length>1)
-                                        //     pr("\t\tsource:("+TW.Nodes[n[0]].x+","+TW.Nodes[n[0]].y+") ||| target:("+TW.Nodes[n[1]].x+","+TW.Nodes[n[1]].y+")")
+                                        //     console.log("\t\tsource:("+TW.Nodes[n[0]].x+","+TW.Nodes[n[0]].y+") ||| target:("+TW.Nodes[n[1]].x+","+TW.Nodes[n[1]].y+")")
                                     }
                                 }
                             }
@@ -586,7 +586,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  criteria) {
 
 	// if ($(sliderDivID).html()!="") {
-	// 	pr("\t\t\t\t\t\t[[ algorithm not applied "+sliderDivID+" ]]")
+	// 	console.log("\t\t\t\t\t\t[[ algorithm not applied "+sliderDivID+" ]]")
 	// 	return;
 	// }
 
@@ -616,8 +616,8 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
     }
 
     var filterparams = AlgorithmForSliders ( TW.Nodes , type , type_attrb , criteria)
-    pr("NodeWeightFilter: "+type)
-    pr(filterparams)
+    console.log("NodeWeightFilter: "+type)
+    console.log(filterparams)
 
     var steps = filterparams["steps"]
     var finalarray = filterparams["finalarray"]
@@ -727,10 +727,10 @@ function AlgorithmForSliders( elements , type_attrb , type , criteria) {
         e = elems[i]
         id = e.id
         elem_attrb[id]=e[criteria]
-        // pr(id+"\t:\t"+e[criteria])
+        // console.log(id+"\t:\t"+e[criteria])
     }
-    // pr("{ id : size|weight } ")
-    // pr(elem_attrb)
+    // console.log("{ id : size|weight } ")
+    // console.log(elem_attrb)
 
     // //  ( 3 )
     // // order dict edges_weight by edge weight | nodes_size by node size
@@ -738,16 +738,16 @@ function AlgorithmForSliders( elements , type_attrb , type , criteria) {
         return a-b
         //ASCENDENT
     });
-    // pr(result.length)
+    // console.log(result.length)
     // // ( 4 )
     // // printing ordered ASC by weigth
     // for (var i in result) {
     //     r = result[i]
     //     idid = r.key
     //     elemattrb = r.value
-    //     pr(idid+"\t:\t"+elemattrb)
+    //     console.log(idid+"\t:\t"+elemattrb)
     //     // e = result[i]
-    //     // pr(e[criteria])
+    //     // console.log(e[criteria])
     // }
     var N = result.length
     // var magnitude = (""+N).length //order of magnitude of edges|nodes
@@ -760,24 +760,24 @@ function AlgorithmForSliders( elements , type_attrb , type , criteria) {
     var steps =  Math.round( Math.sqrt( N ) );
     var stepsize = Math.round( N / steps );
 
-    // pr("-----------------------------------")
-    // pr("number of visible nodes|edges: "+N);
+    // console.log("-----------------------------------")
+    // console.log("number of visible nodes|edges: "+N);
 
-    // pr("number of steps : "+steps)
-    // pr("size of one step : "+stepsize)
-    // pr("-----------------------------------")
+    // console.log("number of steps : "+steps)
+    // console.log("size of one step : "+stepsize)
+    // console.log("-----------------------------------")
 
 
     var finalarray = []
     var counter=0
     for(var i = 0; i < steps*2; i++) {
-        // pr(i)
+        // console.log(i)
         var IDs = []
         for(var j = 0; j < stepsize; j++)  {
             if(!isUndef(result[counter])) {
                 k = result[counter].key
                 // w = result[counter].value
-                // pr("\t["+counter+"] : "+w)
+                // console.log("\t["+counter+"] : "+w)
                 IDs.push(k)
             }
             counter++;
@@ -786,7 +786,7 @@ function AlgorithmForSliders( elements , type_attrb , type , criteria) {
 
         finalarray[i] = (edgeflag)? IDs : IDs.map(Number);
     }
-    // pr("finalarray: ")
+    // console.log("finalarray: ")
     return {"steps":finalarray.length,"finalarray":finalarray}
 }
 //=========================== </ FILTERS-SLIDERS > ===========================//

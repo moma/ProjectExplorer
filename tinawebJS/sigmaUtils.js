@@ -13,20 +13,22 @@ SigmaUtils = function () {
             var n = nodes[i];
 
             if(initialState[catDict[n.type]]) {
-                var node = ({
+                var node = {
                     id : n.id,
                     label : n.label,
                     size : n.size,
                     color : n.color,
-                    type : n.type,
                     x : n.x,
-                    y : n.y
-                })
+                    y : n.y,
+                    type : n.type
+                }
                 if(n.shape) node.shape = n.shape;
                 // console.log(node)
 
                 if(Number(n.id)==287) console.log("coordinates of node 287: ( "+n.x+" , "+n.y+" ) ")
-                graph.addNode( n.id , node);
+
+                // REFA new way => no separate id
+                graph.nodes.push( node);
 
                 // fill the "labels" global variable
                 updateSearchLabels( n.id , n.label , n.type);
@@ -42,15 +44,23 @@ SigmaUtils = function () {
                 e = TW.Edges[s+";"+t]
                 if(e) {
                     if(e.source != e.target) {
-                        var edge = ({
+                        var edge = {
+
+                            // sigma mandatory properties
                             id : e.id,
+                            // REFA was: sourceID, targetID
+                            source : e.source,
+                            target : e.target,
+                            weight : e.weight,
+                            // size : e.weight,   // REFA s/weight/size/ ?
+
                             hidden : false,
-                            sourceID : e.source,
-                            targetID : e.target,
-                            type : e.type,
-                            weight : e.weight
-                        })
-                        graph.addEdge( e.id , e.source , e.target , edge);
+                            // twjs additional properties
+                            type : e.type
+                        }
+
+                        // REFA new way
+                        graph.edges.push( edge);
                     }
                 }
             }
@@ -309,7 +319,7 @@ function clustersBy(daclass) {
 
         var newval_size = Math.round( ( Min_size+(NodeID_Val[i]["round"]-real_min)*((Max_size-Min_size)/(real_max-real_min)) ) );
         TW.partialGraph._core.graph.nodesIndex[i].size = newval_size;
-        // pr("real:"+ NodeID_Val[i]["real"] + " | newvalue: "+newval_size)
+        // console.log("real:"+ NodeID_Val[i]["real"] + " | newvalue: "+newval_size)
 
         TW.partialGraph._core.graph.nodesIndex[i].label = "("+NodeID_Val[i]["real"].toFixed(min_pow)+") "+TW.Nodes[i].label
     }
@@ -448,13 +458,13 @@ function colorsRelByBins(daclass) {
 
 function colorsBy(daclass) {
 
-    pr("")
-    pr(" = = = = = = = = = = = = = = = = = ")
-    pr(" = = = = = = = = = = = = = = = = = ")
-    pr("colorsBy (    "+daclass+"    )")
-    pr(" = = = = = = = = = = = = = = = = = ")
-    pr(" = = = = = = = = = = = = = = = = = ")
-    pr("")
+    console.log("")
+    console.log(" = = = = = = = = = = = = = = = = = ")
+    console.log(" = = = = = = = = = = = = = = = = = ")
+    console.log("colorsBy (    "+daclass+"    )")
+    console.log(" = = = = = = = = = = = = = = = = = ")
+    console.log(" = = = = = = = = = = = = = = = = = ")
+    console.log("")
 
     if(daclass=="clust_louvain") {
         if(!TW.partialGraph.states.slice(-1)[0].LouvainFait) {

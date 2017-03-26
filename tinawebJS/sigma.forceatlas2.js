@@ -110,7 +110,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
 
     switch (self.state.step) {
       case 0: // Pass init
-        // pr("case0 - "+"the self.count: "+self.count)
+        // console.log("case0 - "+"the self.count: "+self.count)
         // Initialise layout data
         self.count++;
 
@@ -185,7 +185,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
         break;
 
       case 1: // Repulsion
-        // pr("case1 - "+"the self.count: "+self.count)
+        // console.log("case1 - "+"the self.count: "+self.count)
         var Repulsion = self.ForceFactory.buildRepulsion(
           self.p.adjustSizes,
           self.p.scalingRatio
@@ -230,7 +230,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
         break;
 
       case 2: // Gravity
-        // pr("case2 - "+"the self.count: "+self.count)
+        // console.log("case2 - "+"the self.count: "+self.count)
         var Gravity = (self.p.strongGravityMode) ?
                       (self.ForceFactory.getStrongGravity(
                         self.p.scalingRatio
@@ -260,7 +260,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
         break;
 
       case 3: // Attraction
-        // pr("case3 - "+"the self.count: "+self.count)
+        // console.log("case3 - "+"the self.count: "+self.count)
         var Attraction = self.ForceFactory.buildAttraction(
           self.p.linLogMode,
           self.p.outboundAttractionDistribution,
@@ -308,7 +308,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
         break;
 
       case 4: // Auto adjust speed
-        // pr("case4 - "+"the self.count: "+self.count)
+        // console.log("case4 - "+"the self.count: "+self.count)
         var totalSwinging = 0;  // How much irregular movement
         var totalEffectiveTraction = 0;  // Hom much useful movement
         var swingingSum=0;
@@ -340,7 +340,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
         var convg= ((Math.pow(nodes.length,2))/promdxdy);    /**/
         var swingingVSnodes_length = swingingSum/nodes.length;     /**/
         if(stopcriteria && (convg > swingingVSnodes_length)){
-            pr("i've applied the stopcriteria: "+self.count)
+            console.log("i've applied the stopcriteria: "+self.count)
             TW.partialGraph.stopForceAtlas2();
         }
 
@@ -373,7 +373,7 @@ sigma.forceatlas2.ForceAtlas2 = function(graph , V , E) {
         break;
 
       case 5: // Apply forces
-        // pr("case5 - "+"the self.count: "+self.count)
+        // console.log("case5 - "+"the self.count: "+self.count)
         var i = self.state.index;
         if (self.p.adjustSizes) {
           var speed = self.p.speed;
@@ -1120,7 +1120,7 @@ sigma.publicPrototype.startForceAtlas2 = function() {
     this.forceatlas2.init();
 
     this.forceatlas2.active=true;
-    // pr("\t\t\t\t\tFA2 Started")
+    // console.log("\t\t\t\t\tFA2 Started")
     var ene = this._core.graph.nodes.length;
     var isolatedBCauseFilter = 0;
     for (var i in this._core.graph.nodesIndex) {
@@ -1143,7 +1143,7 @@ sigma.publicPrototype.startForceAtlas2 = function() {
     // fixing anomaly in forceatlas2
     $.doTimeout(250,function (){
       if( !present.level && TW.partialGraph.forceatlas2.active && TW.partialGraph.forceatlas2.count==0) {
-        pr("SUPER JUTSU!!")
+        console.log("SUPER JUTSU!!")
         TW.partialGraph.startForceAtlas2();
         return;
       }
@@ -1156,7 +1156,7 @@ sigma.publicPrototype.stopForceAtlas2 = function() {
   var present = TW.partialGraph.states.slice(-1)[0]
   if(this.forceatlas2) {
     if(this.forceatlas2.count) {
-      pr("\t\t\t\t\tFA2 Stopped: "+this.forceatlas2.count)
+      console.log("\t\t\t\t\tFA2 Stopped: "+this.forceatlas2.count)
       if(present.level && this.forceatlas2.count>2) {
         // not-save-positions if an edge-filter is ON
         first_state = present.type;
@@ -1186,7 +1186,7 @@ sigma.publicPrototype.stopForceAtlas2 = function() {
 
   if(first_time) {
     $.doTimeout(100,function (){
-      pr("\t\t\t\t\tFirst time FA2 Stopped")
+      console.log("\t\t\t\t\tFirst time FA2 Stopped")
       for(var i in TW.partialGraph._core.graph.nodesIndex){
         TW.Nodes[i].x = TW.partialGraph._core.graph.nodesIndex[i].x;
         TW.Nodes[i].y = TW.partialGraph._core.graph.nodesIndex[i].y;

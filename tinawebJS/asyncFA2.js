@@ -64,7 +64,7 @@ var ForceAtlas2 = function(graph) {
     switch (self.state.step) {
       case 0: // Pass init
         // Initialise layout data
-        //        pr("caso 0")
+        //        console.log("caso 0")
         nodes.forEach(function(n) {
           if(n.fa2) {
             n.fa2.mass = 1 + n.degree;
@@ -103,7 +103,7 @@ var ForceAtlas2 = function(graph) {
         break;
 
       case 1: // Repulsion
-        //        pr("caso 1")
+        //        console.log("caso 1")
         var Repulsion = self.ForceFactory.buildRepulsion(
           self.p.adjustSizes,
           self.p.scalingRatio
@@ -148,7 +148,7 @@ var ForceAtlas2 = function(graph) {
         break;
 
       case 2: // Gravity
-        //        pr("caso 2")
+        //        console.log("caso 2")
         var Gravity = (self.p.strongGravityMode) ?
                       (self.ForceFactory.getStrongGravity(
                         self.p.scalingRatio
@@ -178,7 +178,7 @@ var ForceAtlas2 = function(graph) {
         break;
 
       case 3: // Attraction
-        //        pr("caso 3")
+        //        console.log("caso 3")
         var Attraction = self.ForceFactory.buildAttraction(
           self.p.linLogMode,
           self.p.outboundAttractionDistribution,
@@ -220,7 +220,7 @@ var ForceAtlas2 = function(graph) {
         break;
 
       case 4: // Auto adjust speed
-        //        pr("caso 4")
+        //        console.log("caso 4")
         var totalSwinging = 0;  // How much irregular movement
         var totalEffectiveTraction = 0;  // Hom much useful movement
         var swingingSum=0;
@@ -282,7 +282,7 @@ var ForceAtlas2 = function(graph) {
         break;
 
       case 5: // Apply forces
-        //        pr("caso 5")
+        //        console.log("caso 5")
         var i = self.state.index;
         if (self.p.adjustSizes) {
           var speed = self.p.speed;
@@ -964,12 +964,12 @@ var applyForce = function(n, Force, theta) {
 
   // 01. Return the values to MainContext when spatialization is finished
   var startForceAtlas2 = function(graph,limit_it) {
-      //    pr("inside FA2")
+      //    console.log("inside FA2")
       ////  if(!this.forceatlas2) {
-      //    pr(graph);
-      //    pr(graph.nodes[0].x)
-      //    pr(graph.nodes[0].y)
-      //    pr("--------")
+      //    console.log(graph);
+      //    console.log(graph.nodes[0].x)
+      //    console.log(graph.nodes[0].y)
+      //    console.log("--------")
 
       // nodes = graph.nodes;
       // for(var n in nodes) {
@@ -1001,8 +1001,8 @@ var applyForce = function(n, Force, theta) {
           count++;
           if(flag||count>limit_it) break;
       }
-      //    pr(forceatlas2.graph.nodes[0].x)
-      //    pr(forceatlas2.graph.nodes[0].y)
+      //    console.log(forceatlas2.graph.nodes[0].x)
+      //    console.log(forceatlas2.graph.nodes[0].y)
       //    console.log("\titerations: "+count)
       result={
           "nodes":forceatlas2.graph.nodes,

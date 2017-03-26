@@ -460,8 +460,8 @@ sigma.classes.Cascade = function() {
 
         // Interaction listeners:
         this.mousecaptor.bind('drag interpolate', function(e) {
-            //pr("drag stuff");
-            //pr("click dragging");
+            //console.log("drag stuff");
+            //console.log("click dragging");
             self.draw(
                 self.p.auto ? 2 : self.p.drawNodes,
                 self.p.auto ? 0 : self.p.drawEdges,
@@ -477,7 +477,7 @@ sigma.classes.Cascade = function() {
                 );
         }).bind('move', function() {
             //Detects any movement of the cursor
-            //pr("move");
+            //console.log("move");
                 self.domElements.hover.getContext('2d').clearRect(
                     0,
                     0,
@@ -489,7 +489,7 @@ sigma.classes.Cascade = function() {
                 drawActive();
 
             //            if(cursor_size>0){
-            //                pr("moving with mouse-circle ON");
+            //                console.log("moving with mouse-circle ON");
             //            }
         });
 
@@ -1090,7 +1090,7 @@ sigma.classes.Cascade = function() {
                 tmp = b.replace("rgba(","").replace(")","").split(",")
                 b = rgbToHex( parseFloat( tmp[0] ) , parseFloat( tmp[1] ) , parseFloat( tmp[2] ) );
             }
-            // pr(source+" : "+a+"\t|\t"+target+" : "+b)
+            // console.log(source+" : "+a+"\t|\t"+target+" : "+b)
             a = hex2rga(a);
             b = hex2rga(b);
             var r = (a[0] + b[0]) >> 1;
@@ -1099,7 +1099,7 @@ sigma.classes.Cascade = function() {
             // var color = '#'+sigma.tools.rgbToHex(parseFloat(r),parseFloat(g),parseFloat(b))
             var color = "rgba( "+r+", "+g+" , "+b+" ,0.5)";
 
-            //pr(params.label);
+            //console.log(params.label);
             // if(params.label=="nodes1") {
             //     color = "#cedc75";
             // }
@@ -1281,31 +1281,31 @@ sigma.classes.Cascade = function() {
 
             self.nodes = [];
             if(self.nodes.length>0) {
-                pr("splicing nodes")
+                console.log("splicing nodes")
                 self.nodes.splice(0, self.nodes.length);
             }
 
             self.nodesIndex = {};
             if(self.nodesIndex.length>0) {
-                pr("splicing nodesIndex")
+                console.log("splicing nodesIndex")
                 self.nodesIndex.splice(0, self.nodesIndex.length);
             }
 
             self.edges = [];
             if(self.edges.length>0) {
-                pr("splicing edges")
+                console.log("splicing edges")
                 self.edges.splice(0, self.edges.length);
             }
 
             self.edgesIndex = {};
             if(self.edgesIndex.length>0) {
-                pr("splicing edgesIndex")
+                console.log("splicing edgesIndex")
                 self.edgesIndex.splice(0, self.edgesIndex.length);
             }
 
             labels = [];
             if(labels.length>0) {
-                pr("splicing labels")
+                console.log("splicing labels")
                 labels.splice(0, labels.length);
             }
 

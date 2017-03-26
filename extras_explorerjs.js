@@ -86,7 +86,7 @@ function ChangeGraphAppearanceByAtt( manualflag ) {
         if(att_s == "age") the_method = "colorsRelByBins"
 
         div_info += '<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+att_s+'('+att_c+')'+'</a></li>'
-        pr('<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+att_s+'('+att_c+')'+'</a></li>')
+        console.log('<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+att_s+'('+att_c+')'+'</a></li>')
     }
     div_info += '  </ul>'
     div_info += ' </li>'
@@ -151,7 +151,7 @@ function SomeEffect( ClusterCode ) {
         n.forceLabel = false;
         var node = TW.Nodes[n.id]
         if ( node.type==Type && !isUndef(node.attributes[Cluster]) && node.attributes[Cluster]==clstID ) {
-            // pr( n.id + " | " + Cluster + " : " + node.attributes[Cluster] )
+            // console.log( n.id + " | " + Cluster + " : " + node.attributes[Cluster] )
             nodes_2_colour[n.id] = n.degree;
         }
     }
@@ -185,7 +185,7 @@ function SomeEffect( ClusterCode ) {
     for(var i in edges_2_colour) {
         an_edge = TW.partialGraph._core.graph.edgesIndex[i]
         if(!isUndef(an_edge) && !an_edge.hidden){
-            // pr(an_edge)
+            // console.log(an_edge)
             an_edge.color = an_edge.attr['true_color'];
             an_edge.attr['grey'] = 0;
         }
@@ -289,11 +289,11 @@ function getTopPapers(type){
             //contentType: "application/json",
             //dataType: 'json',
             success : function(data){
-                pr(TW.APINAME+'info_div.php?'+"type="+type+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+TW.field[getUrlParam.file]);
+                console.log(TW.APINAME+'info_div.php?'+"type="+type+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+TW.field[getUrlParam.file]);
                 $("#topPapers").html(data);
             },
             error: function(){
-                pr('Page Not found: getTopPapers');
+                console.log('Page Not found: getTopPapers');
             }
         });
     }
@@ -302,7 +302,7 @@ function getTopPapers(type){
 
 //FOR UNI-PARTITE
 function selectionUni(currentNode){
-    pr("\tin selectionUni:"+currentNode.id);
+    console.log("\tin selectionUni:"+currentNode.id);
     if(checkBox==false && cursor_size==0) {
         highlightSelectedNodes(false);
         opossites = [];
