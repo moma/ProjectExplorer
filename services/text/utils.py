@@ -1,5 +1,6 @@
 from sqlite3  import connect, Row
 from re       import sub, match
+from urllib.parse import quote, urlparse, urlunparse
 
 if __package__ == "services.text":
     from services.tools import mlog
@@ -32,7 +33,12 @@ def sanitize(value, specific_type=None):
         # NB san_val_bool = bool(san_val)
 
     elif specific_type == "surl":
-        san_val = sub(r'[^\w@\.: /~_+$?=&%-\'"]', '_', str_val)
+        try:
+            san_val = urlunparse(map(quote,list(urlparse(str_val))))
+        except:
+            mlog("WARNING", "sanitize via urllib couldn't parse url '%s', using regexp sanitize instead" % str_val)
+            san_val = sub(r'[^\w@\.: /~_+$?=&%-]', '_', str_val)
+
     elif specific_type == "sdate":
         san_val = sub(r'[^0-9/-:]', '_', str_val)
 
