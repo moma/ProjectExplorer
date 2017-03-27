@@ -452,9 +452,19 @@ cmxClt = (function(cC) {
             console.error('uauth:callUserApi unsupported apiOp:', apiOperation)
         }
         else {
-            var urlArgs = new URLSearchParams();
-            urlArgs.append('op', "exists");
-            urlArgs.append('email', theEmail);
+            var urlArgsStr = ''
+            if (URLSearchParams) {
+                var urlArgs = new URLSearchParams();
+
+                urlArgs.append('op', "exists");
+                urlArgs.append('email', theEmail);
+
+                urlArgsStr = urlArgs.toString()
+            }
+            // eg safari
+            else {
+                urlArgsStr = ['op=exists', 'email='+theEmail].join('&')
+            }
         }
 
         if (!callback) {
@@ -462,7 +472,7 @@ cmxClt = (function(cC) {
         }
 
         if (window.fetch) {
-            fetch('/services/api/user?' + urlArgs)
+            fetch('/services/api/user?' + urlArgsStr)
             // 1st then() over promise
             .then(function(response) {
                 if(response.ok) {
