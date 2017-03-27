@@ -32,7 +32,7 @@ def sanitize(value, specific_type=None):
         # NB san_val_bool = bool(san_val)
 
     elif specific_type == "surl":
-        san_val = sub(r'[^\w@\.: -/]', '_', str_val)
+        san_val = sub(r'[^\w@\.: /~_+$?=&%-\'"]', '_', str_val)
     elif specific_type == "sdate":
         san_val = sub(r'[^0-9/-:]', '_', str_val)
 
