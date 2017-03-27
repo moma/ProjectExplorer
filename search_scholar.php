@@ -17,7 +17,7 @@ $base = new PDO($dsn, $user, $pass, $opt);
 $login = trim(strtolower($_GET['login']));
 $q = "%".sanitize_input($login)."%";
 
-$query = 'concat(first_name, " ", IFNULL(middle_name,""), " ", last_name) LIKE "%'.$q.'%"';
+$query = 'concat(first_name, " ", IFNULL(concat(middle_name, " "),""), last_name) LIKE "%'.$q.'%"';
 
 $status_constraint = "(record_status = 'active' OR (record_status = 'legacy' AND valid_date >= NOW()))";
 
