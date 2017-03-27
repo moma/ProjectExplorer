@@ -498,7 +498,7 @@ cmxClt = (function(cC) {
             $.ajax({
                 type: 'GET',
                 dataType: "json",
-                url: '/services/api/user?' + urlArgs,
+                url: '/services/api/user?' + urlArgsStr,
                 success: function(data) {
                     // ex: {'exists': true}
                     callback(data[apiOperation])
