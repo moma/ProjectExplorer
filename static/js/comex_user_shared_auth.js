@@ -453,7 +453,7 @@ cmxClt = (function(cC) {
         }
         else {
             var urlArgsStr = ''
-            if (URLSearchParams) {
+            if (typeof(URLSearchParams) != "undefined") {
                 var urlArgs = new URLSearchParams();
 
                 urlArgs.append('op', "exists");
