@@ -151,10 +151,6 @@ if(RES["OK"]) {
         console.log(getUrlParam.file)
         console.log("\n============================\n")
 
-
-
-
-
     }
 
     if (file=="api.json") {
@@ -229,6 +225,14 @@ if(RES["OK"]) {
     )
 
     console.log("customSettings", customSettings)
+
+
+    // custom rendering
+    if (customSettings['twNodeRendBorder']) {
+      // overriding the def is simplest
+      // (could also do it by type)
+      sigma.canvas.nodes.def = sigma_utils.twRender.canvas.nodes.withBorders
+    }
 
     // ==================================================================
     // sigma js library invocation (https://github.com/jacomyal/sigma.js)

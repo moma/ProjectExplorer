@@ -113,6 +113,12 @@ var sigmaJsDrawingProperties = {
     borderSize: 2.5,//Something other than 0 (works only for hovered nodes)
     defaultNodeBorderColor: "black",
     nodeBorderColor: "default",  // vs. node
+
+    // for custom TW node renderer with borders
+    // (if twNodeRendBorder, triggers overriding sigma.canvas.nodes.def)
+    twNodeRendBorder: true,
+    twNodeRendBorderSize: 1,
+    twNodeRendBorderColor: "#222"
 };
 var sigmaJsGraphProperties = {
     minEdgeSize: 2,

@@ -83,6 +83,54 @@ SigmaUtils = function () {
         return graph;
     }// output = sigma graph
 
+
+
+
+    // ================= alternative rendering =====================
+    // alternative subrenderers for canvas rendering of sigma instances
+
+    // cf. http://yomguithereal.github.io/articles/node-border-renderer/
+
+    // same hierarchy as in sigma.canvas
+    this.twRender = {canvas: {nodes: {}}}
+
+    // node rendering with borders
+    this.twRender.canvas.nodes.withBorders = function(node, context, settings) {
+        var prefix = settings('prefix') || '';
+
+        if (settings('twNodeRendBorderSize') > 0) {
+          context.beginPath();
+          context.fillStyle = settings('twNodeRendBorderColor') || "#000"
+          context.arc(
+            node[prefix + 'x'],
+            node[prefix + 'y'],
+            node[prefix + 'size'] + settings('twNodeRendBorderSize'),
+            0,
+            Math.PI * 2,
+            true
+          );
+          context.closePath();
+          context.fill();
+        }
+
+        context.fillStyle = node.color || settings('defaultNodeColor');
+        context.beginPath();
+        context.arc(
+          node[prefix + 'x'],
+          node[prefix + 'y'],
+          node[prefix + 'size'],
+          0,
+          Math.PI * 2,
+          true
+        );
+        context.closePath();
+        context.fill();
+      };
+
+
+
+    // ================ /alternative rendering =====================
+
 }
 
 
