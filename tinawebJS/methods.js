@@ -7,27 +7,38 @@ function cancelSelection (fromTagCloud) {
     selections = [];
     //selections.length = 0;
     selections.splice(0, selections.length);
-    TW.partialGraph.refresh();
 
     TW.partialGraph.states.slice(-1)[0].selections=[]
 
     //Nodes colors go back to normal
     overNodes=false;
-    e = TW.partialGraph.graph.edges();
-    for(i=0;i<e.length;i++){
-            console.log(e)
-            e[i].color = e[i].attr['grey'] ? e[i].attr['true_color'] : e[i].color;
-            e[i].attr['grey'] = 0;
-    }
-    TW.partialGraph.draw(2,1,2);
 
-    TW.partialGraph.iterNodes(function(n){
-            n.active=false;
-            n.color = n.attr['grey'] ? n.attr['true_color'] : n.color;
-            n.attr['grey'] = 0;
-    }).draw(2,1,2);
+    if (TW.partialGraph.settings('drawEdges')) {
+      e = TW.partialGraph.graph.edges();
+      for(i=0;i<e.length;i++){
+              // console.log("cancelSelection: edge", e[i])
+              if (e[i]) {
+                  // e[i].color = e[i].customAttrs['grey'] ? e[i].customAttrs['true_color'] : e[i].color;
+                  e[i].color = e[i].customAttrs['true_color'];
+                  e[i].customAttrs['grey'] = 0;
+              }
+      }
+    }
+
+    n = TW.partialGraph.graph.nodes()
+    for(j=0;j<n.length;j++){
+        if (n[j]) {
+            // console.log("cancelSelection: node", n[j])
+            n[j].active = false;
+            // n[j].color = n[j].customAttrs['grey'] ? n[j].customAttrs['true_color'] : n.color;
+            n[j].color = n[j].customAttrs['true_color'];
+            n[j].customAttrs['grey'] = 0
+        }
+    }
     //Nodes colors go back to normal
 
+    // new sigma.js redraw
+    TW.partialGraph.refresh({ skipIndexation: true });
 
 
     if(fromTagCloud==false){
@@ -45,9 +56,9 @@ function cancelSelection (fromTagCloud) {
     $('#searchinput').trigger("tw:eraseNodeSet");
 
     for(var i in deselections){
-        if( !isUndef(TW.partialGraph._core.graph.nodesIndex[i]) ) {
-            TW.partialGraph._core.graph.nodesIndex[i].forceLabel=false;
-            TW.partialGraph._core.graph.nodesIndex[i].neighbour=false;
+        if( !isUndef(TW.partialGraph.graph.nodes(i)) ) {
+            TW.partialGraph.graph.nodes(i).forceLabel=false;
+            TW.partialGraph.graph.nodes(i).neighbour=false;
         }
     }
     deselections={};
@@ -55,7 +66,8 @@ function cancelSelection (fromTagCloud) {
     if(TW.partialGraph.states.slice(-1)[0].level)
         LevelButtonDisable(true);
 
-    TW.partialGraph.draw();
+    // new sigma.js redraw
+    TW.partialGraph.refresh({ skipIndexation: true });
 }
 
 function highlightSelectedNodes(flag){
@@ -63,15 +75,15 @@ function highlightSelectedNodes(flag){
     if(!is_empty(selections)){
         for(var i in selections) {
             if(TW.Nodes[i].type==TW.catSoc && swclickActual=="social"){
-                node = TW.partialGraph._core.graph.nodesIndex[i];
+                node = TW.partialGraph.graph.nodes(i);
                 node.active = flag;
             }
             else if(TW.Nodes[i].type==TW.catSem && swclickActual=="semantic") {
-                node = TW.partialGraph._core.graph.nodesIndex[i];
+                node = TW.partialGraph.graph.nodes(i);
                 node.active = flag;
             }
             else if(swclickActual=="sociosemantic") {
-                node = TW.partialGraph._core.graph.nodesIndex[i];
+                node = TW.partialGraph.graph.nodes(i);
                 node.active = flag;
             }
             else break;
@@ -212,7 +224,7 @@ function htmlfied_alternodes(elems) {
 
 function manualForceLabel(nodeid,active) {
 	// console.log("manual|"+nodeid+"|"+active)
-	TW.partialGraph._core.graph.nodesIndex[nodeid].active=active;
+	TW.partialGraph.graph.nodes(nodeid).active=active;
 	TW.partialGraph.draw();
 }
 
@@ -503,61 +515,74 @@ function graphTagCloudElem(nodes) {
     ChangeGraphAppearanceByAtt(true)
 }
 
+
+// new sigma.js: is this at all used?
 function greyEverything(){
 
-    nds = TW.partialGraph._core.graph.nodes.filter(function(n) {
+    nds = TW.partialGraph.graph.nodes().filter(function(n) {
                             return !n['hidden'];
                         });
     for(var i in nds){
-            if(!nds[i].attr['grey']){
-                nds[i].attr['true_color'] = nds[i].color;
+            if(!nds[i].customAttrs['grey']){
+                nds[i].customAttrs['true_color'] = nds[i].color;
                 alphacol = "rgba("+hex2rga(nds[i].color)+",0.5)";
                 nds[i].color = alphacol;
             }
-            nds[i].attr['grey'] = 1;
+            nds[i].customAttrs['grey'] = 1;
     }
 
-    eds = TW.partialGraph._core.graph.edges.filter(function(e) {
-                            return !e['hidden'];
-                        });
-    for(var i in eds){
-            if(!eds[i].attr['grey']){
-                eds[i].attr['true_color'] = eds[i].color;
-                eds[i].color = greyColor;
-            }
-            eds[i].attr['grey'] = 1;
+    if (TW.partialGraph.settings('drawEdges')) {
+      eds = TW.partialGraph.graph.edges().filter(function(e) {
+                              return !e['hidden'];
+                          });
+
+      for(var i in eds){
+              if(!eds[i].customAttrs['grey']){
+                  eds[i].customAttrs['true_color'] = eds[i].color;
+                  eds[i].color = greyColor;
+              }
+              eds[i].customAttrs['grey'] = 1;
+      }
     }
 }
 
+// new sigma.js: is this at all used?
 function graphResetColor(){
-    nds = TW.partialGraph._core.graph.nodes.filter(function(x) {
+    nds = TW.partialGraph.graph.nodes().filter(function(x) {
                             return !x['hidden'];
           });
-    eds = TW.partialGraph._core.graph.edges.filter(function(x) {
+    eds = TW.partialGraph.graph.edges().filter(function(x) {
                             return !x['hidden'];
           });
 
     for(var x in nds){
         n=nds[x];
-        n.attr["grey"] = 0;
-        n.color = n.attr["true_color"];
+        n.customAttrs["grey"] = 0;
+        n.color = n.customAttrs["true_color"];
     }
 
-    for(var x in eds){
-        e=eds[x];
-        e.attr["grey"] = 0;
-        e.color = e.attr["true_color"];
+    if (TW.partialGraph.settings('drawEdges')) {
+      for(var x in eds){
+          e=eds[x];
+          e.customAttrs["grey"] = 0;
+          e.color = e.customAttrs["true_color"];
+      }
     }
 }
 
 function hideEverything(){
     console.log("\thiding all");
     nodeslength=0;
-    for(var n in TW.partialGraph._core.graph.nodesIndex){
-        TW.partialGraph._core.graph.nodesIndex[n].hidden=true;
+
+    var nodes = TW.partialGraph.nodes()
+    for(var j in nodes){
+        nodes[j].hidden=true;
     }
-    for(var e in TW.partialGraph._core.graph.edgesIndex){
-        TW.partialGraph._core.graph.edgesIndex[e].hidden=true;
+    if (TW.partialGraph.settings('drawEdges')) {
+      var edges = TW.partialGraph.edges()
+      for(var i in edges){
+          edges[i].hidden=true;
+      }
     }
     overNodes=false;//magic line!
     console.log("\tall hidded");
@@ -565,12 +590,13 @@ function hideEverything(){
     //"Saving node positions" should be applied in this function, too.
 }
 
-function add1Elem(id) {
 
+// use case: slider re-add nodes
+function add1Elem(id) {
     id = ""+id;
     if(id.split(";").length==1) { // i've received a NODE
         id = parseInt(id)
-        if(!isUndef(getn(id))) return;
+        if(!isUndef(TW.partialGraph.graph.nodes(id))) return;
 
         if(TW.Nodes[id]) {
             var anode = {}
@@ -594,7 +620,7 @@ function add1Elem(id) {
             return;
         }
     } else { // It's an edge!
-        if(!isUndef(gete(id))) return;
+        if(!isUndef(TW.partialGraph.graph.edges(id))) return;
         if(TW.Edges[id] && !TW.Edges[id].lock){
             // var present = TW.partialGraph.states.slice(-1)[0];
             var anedge = {

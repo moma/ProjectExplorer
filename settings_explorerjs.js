@@ -100,16 +100,19 @@ var greyColor = "#9b9e9e";
 
 var sigmaJsDrawingProperties = {
     defaultLabelColor: 'black',
-    defaultLabelSize: 10,//in fact I'm using it as minLabelSize'
-    defaultLabelBGColor: '#fff',
-    defaultLabelHoverColor: '#000',
-    labelThreshold: 6,
+    defaultLabelSize: 20,//in fact I'm using it as minLabelSize'
+
+    labelThreshold: 5,
     defaultEdgeType: 'curve',
 
-    borderSize: 2.5,//Something other than 0
-    nodeBorderColor: "default",//exactly like this
-    defaultNodeBorderColor: "black"//,//Any color of your choice
-    //defaultBorderView: "always"
+    defaultBorderView: "always",
+
+    // new sigma.js only for hover + new settingnames
+    defaultHoverLabelBGColor: '#fff',
+    defaultHoverLabelColor: '#000',
+    borderSize: 2.5,//Something other than 0 (works only for hovered nodes)
+    defaultNodeBorderColor: "black",
+    nodeBorderColor: "default",  // vs. node
 };
 var sigmaJsGraphProperties = {
     minEdgeSize: 2,

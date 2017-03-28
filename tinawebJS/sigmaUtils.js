@@ -16,16 +16,23 @@ SigmaUtils = function () {
                 var node = {
                     id : n.id,
                     label : n.label,
-                    size : n.size,
+                    // 3 decimals is way more tractable
+                    // and quite enough in precision !!
+                    size : Math.round(n.size*1000)/1000,
                     color : n.color,
                     x : n.x,
                     y : n.y,
-                    type : n.type
+                    type : n.type,
+                    // new setup (TODO rm the old at TinaWebJS nodes_2_colour)
+                    customAttrs : {
+                      grey: 0,
+                      true_color : n.color
+                    }
                 }
                 if(n.shape) node.shape = n.shape;
-                // console.log(node)
+                // console.log("FillGraph, created new node:", node)
 
-                if(Number(n.id)==287) console.log("coordinates of node 287: ( "+n.x+" , "+n.y+" ) ")
+                if(Number(n.id)==287) console.log("node 287:", n, node)
 
                 // REFA new way => no separate id
                 graph.nodes.push( node);
@@ -54,10 +61,18 @@ SigmaUtils = function () {
                             weight : e.weight,
                             // size : e.weight,   // REFA s/weight/size/ ?
 
+                            color : sigmaTools.edgeColor(e.source, e.target, nodes),
+
                             hidden : false,
                             // twjs additional properties
-                            type : e.type
+                            type : e.type,
+                            customAttrs : {
+                              grey: 0,
+                              true_color : n.color
+                            }
                         }
+
+                        // console.log("edge.color", edge.color)
 
                         // REFA new way
                         graph.edges.push( edge);
@@ -81,14 +96,18 @@ function showMeSomeLabels(N){
         maxIn=0,
         minOut=50,
         maxOut=0;
-        TW.partialGraph.iterNodes(function(n){
+
+        // new sigma.js accessor
+        allNodes = TW.partialGraph.graph.nodes()
+        for( j=0 ; j < allNodes.length ; j++ ) {
+            n = allNodes[j]
             if(n.hidden==false){
                 if(parseInt(n.inDegree) < minIn) minIn= n.inDegree;
                 if(parseInt(n.inDegree) > maxIn) maxIn= n.inDegree;
                 if(parseInt(n.outDegree) < minOut) minOut= n.outDegree;
                 if(parseInt(n.outDegree) > maxOut) maxOut= n.outDegree;
             }
-        });
+        }
         counter=0;
         n = getVisibleNodes();
         for(i=0;i<n.length;i++) {
@@ -112,34 +131,39 @@ function showMeSomeLabels(N){
                 if(counter==N) break;
             }
         }
-        TW.partialGraph.draw()
+        // new sigma.js
+        TW.partialGraph.refresh({ skipIndexation: true });
         /*======= Show some labels at the beginning =======*/
 }
 
+
+// new sigma.js accessors
 function getnodes(){
-    return TW.partialGraph._core.graph.nodes;
+    return TW.partialGraph.graph.nodes();
 }
 
-function getnodesIndex(){
-    return TW.partialGraph._core.graph.nodesIndex;
-}
+// new sigma.js : use graph.nodes(node_id) and graph.edges(edge_id)
+// function getnodesIndex()
+// function getedgesIndex()
+// function getn(id)
+//
+// function gete(id){
+//     return TW.partialGraph._core.graph.edgesIndex[id];
+// }
+
 
 function getedges(){
-    return TW.partialGraph._core.graph.edges;
-}
-
-function getedgesIndex(){
-    return TW.partialGraph._core.graph.edgesIndex;
+    return TW.partialGraph.graph.edges();
 }
 
 function getVisibleEdges() {
-	return TW.partialGraph._core.graph.edges.filter(function(e) {
+	return TW.partialGraph.graph.edges().filter(function(e) {
                 return !e['hidden'];
     });
 }
 
 function getVisibleNodes() {
-    return TW.partialGraph._core.graph.nodes.filter(function(n) {
+    return TW.partialGraph.graph.nodes().filter(function(n) {
                 return !n['hidden'];
     });
 }
@@ -151,20 +175,13 @@ function getNodesByAtt(att) {
     });
 }
 
-function getn(id){
-    return TW.partialGraph._core.graph.nodesIndex[id];
-}
 
-function gete(id){
-    return TW.partialGraph._core.graph.edgesIndex[id];
-}
-
-
+// new sigma.js
 function find(lquery){
     var results=[];
     if (typeof lquery == 'string' && lquery.length > 0) {
         lquery=lquery.toLowerCase() ;
-        var nds=getnodesIndex();
+        var nds = getnodes()
         for(var i in nds){
             var n=nds[i];
             if(n.hidden==false){
@@ -180,7 +197,7 @@ function find(lquery){
 }
 
 function exactfind(label) {
-    nds=getnodesIndex();
+    nds=getnodes();
     if (typeof lquery == 'string' && lquery.length > 0) {
         for(var i in nds){
             n=nds[i];
@@ -315,19 +332,18 @@ function clustersBy(daclass) {
 
         var newval_color = Math.round( ( Min_color+(NodeID_Val[i]["round"]-real_min)*((Max_color-Min_color)/(real_max-real_min)) ) );
         var hex_color = rgbToHex(255, (255-newval_color) , 0)
-        TW.partialGraph._core.graph.nodesIndex[i].color = hex_color
+        TW.partialGraph.graph.nodes(i).color = hex_color
 
         var newval_size = Math.round( ( Min_size+(NodeID_Val[i]["round"]-real_min)*((Max_size-Min_size)/(real_max-real_min)) ) );
-        TW.partialGraph._core.graph.nodesIndex[i].size = newval_size;
+        TW.partialGraph.graph.nodes(i).size = newval_size;
         // console.log("real:"+ NodeID_Val[i]["real"] + " | newvalue: "+newval_size)
 
-        TW.partialGraph._core.graph.nodesIndex[i].label = "("+NodeID_Val[i]["real"].toFixed(min_pow)+") "+TW.Nodes[i].label
+        TW.partialGraph.graph.nodes(i).label = "("+NodeID_Val[i]["real"].toFixed(min_pow)+") "+TW.Nodes[i].label
     }
     //    [ / Scaling node colours(0-255) and sizes(3-5) ]
 
 
-    TW.partialGraph.refresh();
-    TW.partialGraph.draw();
+    TW.partialGraph.refresh({skipIndexation: true});
 
 
     //    [ Edge-colour by source-target nodes-colours combination ]
@@ -341,7 +357,7 @@ function clustersBy(daclass) {
         var r = (a[0] + b[0]) >> 1;
         var g = (a[1] + b[1]) >> 1;
         var b = (a[2] + b[2]) >> 1;
-        TW.partialGraph._core.graph.edgesIndex[e_id].color = "rgba("+[r,g,b].join(",")+",0.5)";
+        TW.partialGraph.graph.edges(e_id).color = "rgba("+[r,g,b].join(",")+",0.5)";
     }
     //    [ / Edge-colour by source-target nodes-colours combination ]
 
@@ -479,7 +495,7 @@ function colorsBy(daclass) {
     if (daclass=="clust_default") {
         for(var i in v_nodes) {
           var original_node_color = TW.Nodes[ v_nodes[i].id ].color
-          TW.partialGraph._core.graph.nodesIndex[v_nodes[i].id].color = original_node_color
+          TW.partialGraph.graph.nodes(v_nodes[i].id).color = original_node_color
         }
     }
     else {
@@ -489,11 +505,9 @@ function colorsBy(daclass) {
       for(var i in v_nodes) {
           var the_node = TW.Nodes[ v_nodes[i].id ]
           var attval = ( isUndef(the_node.attributes) || isUndef(the_node.attributes[daclass]) )? v_nodes[i][daclass]: the_node.attributes[daclass];
-          TW.partialGraph._core.graph.nodesIndex[v_nodes[i].id].color = randomColorList[ attval ]
+          TW.partialGraph.graph.nodes(v_nodes[i].id).color = randomColorList[ attval ]
       }
     }
-
-    TW.partialGraph.draw();
 
     //    [ Edge-colour by source-target nodes-colours combination ]
     var v_edges = getVisibleEdges();
@@ -507,13 +521,12 @@ function colorsBy(daclass) {
             var r = (a[0] + b[0]) >> 1;
             var g = (a[1] + b[1]) >> 1;
             var b = (a[2] + b[2]) >> 1;
-            TW.partialGraph._core.graph.edgesIndex[e_id].color = "rgba("+[r,g,b].join(",")+",0.5)";
+            TW.partialGraph.graph.edges(e_id).color = "rgba("+[r,g,b].join(",")+",0.5)";
         }
     }
     //    [ / Edge-colour by source-target nodes-colours combination ]
     set_ClustersLegend ( daclass )
-    TW.partialGraph.refresh();
-    TW.partialGraph.draw();
+    TW.partialGraph.refresh({skipIndexation: true});
 }
 
 //just for fun

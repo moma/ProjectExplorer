@@ -58,8 +58,8 @@ function changeType() {
         anedge = TW.partialGraph._core.graph.edgesIndex[i];
         if(anedge) {
             prevedges[i] = true;
-            if(anedge.attr) {
-                if(anedge.attr["grey"]==0) {
+            if(anedge.customAttrs) {
+                if(anedge.customAttrs["grey"]==0) {
                     links_sels[i] = true;
                 }
             }
@@ -410,7 +410,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 	// type_attrb = "type"
 	// criteria = "size"
 
-    if(TW.partialGraph._core.graph.edges.length<3) {
+    if(TW.partialGraph.nEdges<3) {
         $(sliderDivID).freshslider({
             range: true,
             step:1,
@@ -528,8 +528,8 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                                             sid = TW.Edges[ID].sourceID
                                             tid = TW.Edges[ID].targetID
                                             if (sid==n || tid==n) {
-                                                if(isUndef(getn(sid))) unHide(sid)
-                                                if(isUndef(getn(tid))) unHide(tid)
+                                                if(TW.partialGraph.graph.nodes(sid).hidden) unHide(sid)
+                                                if(TW.partialGraph.graph.nodes(tid).hidden) unHide(tid)
                                                 add1Elem(ID)
                                                 // console.log("\tADD "+ID)
                                             }
@@ -544,7 +544,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                                 // console.log("deleting "+ids.join())
                                 for(var id in ids) {
                                     ID = ids[id]
-                                    if(!isUndef(gete(ID))) {
+                                    if(!isUndef(TW.partialGraph.graph.edges(ID))) {
                                         TW.partialGraph.dropEdge(ID)
                                         TW.Edges[ID].lock = true;
                                         // console.log("\tDEL "+ID)
@@ -557,8 +557,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                         }
                     }
 
-                    TW.partialGraph.refresh()
-                    TW.partialGraph.draw()
+                    TW.partialGraph.refresh({skipIndexation: true})
 
                     // console.log("\t\tedgesfilter:")
                     // console.log("\t\t[ Starting FA2 ]")
@@ -600,7 +599,7 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
 	// type_attrb = "type"
 	// criteria = "size"
 
-    if(TW.partialGraph._core.graph.nodes.length<3) {
+    if(TW.partialGraph.graph.nodes().length < 3) {
 
         $(sliderDivID).freshslider({
             range: true,
@@ -661,22 +660,21 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
                         for(var id in ids) {
                             ID = ids[id]
                             TW.Nodes[ID].lock = false;
-                            if(TW.partialGraph._core.graph.nodesIndex[ID])
-                                TW.partialGraph._core.graph.nodesIndex[ID].hidden = false;
+                            if(TW.partialGraph.graph.nodes(ID))
+                                TW.partialGraph.graph.nodes(ID).hidden = false;
                         }
                     } else {
                         for(var id in ids) {
                             ID = ids[id]
                             TW.Nodes[ID].lock = true;
-                            if(TW.partialGraph._core.graph.nodesIndex[ID])
-                                TW.partialGraph._core.graph.nodesIndex[ID].hidden = true;
+                            if(TW.partialGraph.graph.nodes(ID))
+                                TW.partialGraph.graph.nodes(ID).hidden = true;
                         }
                     }
                 }
                 pushFilterValue(sliderDivID,filtervalue)
 
                 TW.partialGraph.refresh()
-                TW.partialGraph.draw()
 
                 // [ Starting FA2 ]
                 $.doTimeout(10,function(){
@@ -692,9 +690,10 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
     });
 }
 
-function getGraphElement(elem) {
-    if(elem.split(";").length==1) return TW.partialGraph._core.graph.nodesIndex[elem];
-    else return TW.partialGraph._core.graph.edgesIndex[elem]
+// new sigma.js nodesIndex and edgesIndex are private attributes so we use getters
+function getGraphElement(elemId) {
+    if(elemId.split(";").length==1) return TW.partialGraph.graph.nodes(elemId);
+    else return TW.partialGraph.graph.nodes(elemId)
 }
 //   Execution modes:
 // AlgorithmForSliders ( TW.partialGraph._core.graph.edges , "label" , "nodes1" , "weight")

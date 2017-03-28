@@ -176,8 +176,8 @@ function SomeEffect( ClusterCode ) {
     for(var i in nodes_2_colour) {
         n = TW.partialGraph._core.graph.nodesIndex[i]
         if(n) {
-            n.color = n.attr['true_color'];
-            n.attr['grey'] = 0;
+            n.color = n.customAttrs['true_color'];
+            n.customAttrs['grey'] = 0;
         }
     }
 
@@ -186,8 +186,8 @@ function SomeEffect( ClusterCode ) {
         an_edge = TW.partialGraph._core.graph.edgesIndex[i]
         if(!isUndef(an_edge) && !an_edge.hidden){
             // console.log(an_edge)
-            an_edge.color = an_edge.attr['true_color'];
-            an_edge.attr['grey'] = 0;
+            an_edge.color = an_edge.customAttrs['true_color'];
+            an_edge.customAttrs['grey'] = 0;
         }
     }
 
@@ -319,8 +319,8 @@ function selectionUni(currentNode){
         currentNode.active=false;
     }
     //highlightOpossites(nodes1[currentNode.id].neighbours);
-    //        currentNode.color = currentNode.attr['true_color'];
-    //        currentNode.attr['grey'] = 0;
+    //        currentNode.color = currentNode.customAttrs['true_color'];
+    //        currentNode.customAttrs['grey'] = 0;
     //
     //
 
@@ -428,55 +428,67 @@ function draw1Circle(ctx , x , y , color) {
 }
 
 
-function trackMouse() {
+
+// new sigma.js: could be replaced by default _moveHandler with bindings ?
+//   => atm rewrote entire function with new values (check if not needed recentering coords)
+function trackMouse(e) {
     if(!shift_key) {
         // $.doTimeout(300,function (){
-            var ctx = TW.partialGraph._core.domElements.mouse.getContext('2d');
-            ctx.globalCompositeOperation = "source-over";
-            ctx.clearRect(0, 0, TW.partialGraph._core.domElements.nodes.width, TW.partialGraph._core.domElements.nodes.height);
+            // var ctx = TW.partialGraph._core.domElements.mouse.getContext('2d');
 
-            x = TW.partialGraph._core.mousecaptor.mouseX;
-            y = TW.partialGraph._core.mousecaptor.mouseY;
+            // new sigma.js 2D mouse context
+            var ctx = TW.partialGraph.renderers[0].contexts.mouse;
+            ctx.globalCompositeOperation = "source-over";
+            // ctx.clearRect(0, 0, TW.partialGraph._core.domElements.nodes.width, TW.partialGraph._core.domElements.nodes.height);
+            ctx.clearRect(0, 0,
+                          TW.partialGraph.renderers[0].container.offsetWidth,
+                          TW.partialGraph.renderers[0].container.offsetHeight);
+
+            x = sigma.utils.getX(e);
+            y = sigma.utils.getY(e);
 
             ctx.strokeStyle = '#000';
             ctx.lineWidth = 1;
-            ctx.fillStyle = "#71C3FF";
+            // ctx.fillStyle = "#71C3FF";
+            ctx.fillStyle = "#F20";
             ctx.globalAlpha = 0.5;
             ctx.beginPath();
 
-            if(TW.partialGraph._core.mousecaptor.ratio>showLabelsIfZoom){
-                for(var i in TW.partialGraph._core.graph.nodesIndex){
-                        n=TW.partialGraph._core.graph.nodesIndex[i];
+            // labels appear
+            var nds = TW.partialGraph.graph.nodes()
+            if(TW.partialGraph.camera.ratio>showLabelsIfZoom){
+                for(var i in nds){
+                        n=nds[i];
                         if(n.hidden==false){
                             distance = Math.sqrt(
                                 Math.pow((x-parseInt(n.displayX)),2) +
                                 Math.pow((y-parseInt(n.displayY)),2)
                                 );
                             if(parseInt(distance)<=cursor_size) {
-                                TW.partialGraph._core.graph.nodesIndex[i].forceLabel=true;
+                                n.forceLabel=true;
                             } else {
                                 if(typeof(n.neighbour)!=="undefined") {
-                                    if(!n.neighbour) TW.partialGraph._core.graph.nodesIndex[i].forceLabel=false;
-                                } else TW.partialGraph._core.graph.nodesIndex[i].forceLabel=false;
+                                    if(!n.neighbour) n.forceLabel=false;
+                                } else n.forceLabel=false;
                             }
                         }
                 }
                 if(TW.partialGraph.forceatlas2 && TW.partialGraph.forceatlas2.count<=1) {
-                    TW.partialGraph.draw(2,2,2);
+                    TW.partialGraph.refresh({skipIndexation:true})
                 }
             } else {
-                for(var i in TW.partialGraph._core.graph.nodesIndex){
-                    n=TW.partialGraph._core.graph.nodesIndex[i];
+                for(var i in nds){
+                    n=nds[i];
                     if(!n.hidden){
-                        TW.partialGraph._core.graph.nodesIndex[i].forceLabel=false;
+                        n.forceLabel=false;
                         if(typeof(n.neighbour)!=="undefined") {
-                            if(!n.neighbour) TW.partialGraph._core.graph.nodesIndex[i].forceLabel=false;
-                            else TW.partialGraph._core.graph.nodesIndex[i].forceLabel=true;
-                        } else TW.partialGraph._core.graph.nodesIndex[i].forceLabel=false;
+                            if(!n.neighbour) n.forceLabel=false;
+                            else n.forceLabel=true;
+                        } else n.forceLabel=false;
                     }
                 }
                 if(TW.partialGraph.forceatlas2 && TW.partialGraph.forceatlas2.count<=1) {
-                    TW.partialGraph.draw(2,2,2);
+                    TW.partialGraph.refresh({skipIndexation:true})
                 }
             }
             ctx.arc(x, y, cursor_size, 0, Math.PI * 2, true);

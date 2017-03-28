@@ -196,7 +196,11 @@ if(RES["OK"]) {
     // [ Initiating Sigma-Canvas ]
     var twjs_ = new TinaWebJS('#sigma-example');
     console.log( twjs_.AdjustSigmaCanvas() );
-    $( window ).resize(function() { console.log(twjs_.AdjustSigmaCanvas()) });
+
+
+
+    // new sigma.js REFA TODO uncomment and optimize
+    // $( window ).resize(function() { console.log(twjs_.AdjustSigmaCanvas()) });
     // [ / Initiating Sigma-Canvas ]
 
     console.log("categories: "+categories)
@@ -204,30 +208,46 @@ if(RES["OK"]) {
 
     // [ Poblating the Sigma-Graph ]
     var sigma_utils = new SigmaUtils();
-    console.warn("sigma :", sigma)
 
 
-    // TW.partialGraph = sigma.init(document.getElementById('sigma-example'))
-    //     .drawingProperties(sigmaJsDrawingProperties)
-    //     .graphProperties(sigmaJsGraphProperties)
-    //     .mouseProperties(sigmaJsMouseProperties);
-
-
-
-
-
+    // preparing the data and settings
     TW.graphData = {nodes: [], edges: []}
-
     TW.graphData = sigma_utils.FillGraph(  initialState , catDict  , dicts.nodes , dicts.edges , TW.graphData );
 
+
+    var customSettings = Object.assign(
+        {
+            drawEdges: false,
+            drawNodes: true,
+            drawLabels: true,
+
+            labelSize: "proportional"
+        },
+        sigmaJsDrawingProperties,
+        sigmaJsGraphProperties,
+        sigmaJsMouseProperties
+    )
+
+    console.log("customSettings", customSettings)
 
     // ==================================================================
     // sigma js library invocation (https://github.com/jacomyal/sigma.js)
     // ==================================================================
     TW.partialGraph = new sigma({
         graph: TW.graphData,
-        container: 'sigma-example'
+        container: 'sigma-example',
+        renderers: [{
+            container: document.getElementById('sigma-example'),
+            type: sigma.renderers.canvas
+        }],
+        settings: customSettings
     });
+
+    // useful
+    TW.partialGraph.nNodes = TW.partialGraph.graph.nodes().length
+    TW.partialGraph.nEdges = TW.partialGraph.graph.edges().length
+
+
 
     TW.partialGraph.states = []
     TW.partialGraph.states[0] = false;
@@ -361,13 +381,14 @@ if(RES["OK"]) {
     }).index();
 
 
-    // REFA FIXME
-    // TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8).draw();
+    // REFA new sigma.js
+    TW.partialGraph.camera.goTo({x:0, y:0, ratio:.8, angle: 0})
+    // TW.partialGraph.goTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, .8).draw();
 
 
     // TW.partialGraph.zoomTo(
     //     TW.partialGraph._core.width / 2,
-    //     TW.partialGraph._core.height / 2, 0.8
+    //     TW.partialGraph._core.height / 2, TW.partialGraph.camera.ratio
     // ).draw();
 
 

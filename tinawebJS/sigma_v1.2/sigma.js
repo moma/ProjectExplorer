@@ -226,7 +226,7 @@
     // Deal with resize:
     window.addEventListener('resize', function() {
       if (_self.settings)
-        _self.refresh();
+        _self.refresh({skipIndexation: true});
     });
   };
 

@@ -22,6 +22,7 @@
 );
 
 // for new SigmaUtils
+// new sigma.js: POSS to use autoResize global setting
 function sigmaLimits( sigmacanvas ) {
     pw=$( sigmacanvas ).width();
     ph=$( sigmacanvas ).height();
@@ -59,7 +60,7 @@ SelectionEngine = function() {
         if(cursorsize>0) {
             clickedNodes = this.SelectThis2( area )
         } else {
-            clickedNodes = TW.partialGraph._core.graph.nodes.filter(function(n) {
+            clickedNodes = TW.partialGraph.graph.nodes().filter(function(n) {
                             return !!n['hover'];
                         }).map(function(n) {
                             return n.id;
@@ -134,7 +135,7 @@ SelectionEngine = function() {
             if(cursorsize>0) {
                 targeted = this.SelectThis2( area )
             } else {
-                targeted = TW.partialGraph._core.graph.nodes.filter(function(n) {
+                targeted = TW.partialGraph.graph.nodes().filter(function(n) {
                                 return !!n['hover'];
                             }).map(function(n) {
                                 return n.id;
@@ -248,7 +249,7 @@ SelectionEngine = function() {
             TW.lastQuery = string ;
             $("input#searchinput").val("");
             $("input#searchinput").autocomplete( "close" );
-            TW.partialGraph.draw();
+            TW.partialGraph.refresh({ skipIndexation: true });
 
             return targeted.length
         }
@@ -351,10 +352,10 @@ SelectionEngine = function() {
 
         for(var i in nodes_2_colour) {
             if(i) {
-                n = TW.partialGraph._core.graph.nodesIndex[i]
+                n = TW.partialGraph.graph.nodes(i)
                 if(n) {
-                    n.color = n.attr['true_color'];
-                    n.attr['grey'] = 0;
+                    n.color = n.customAttrs['true_color'];
+                    n.customAttrs['grey'] = 0;
                     if(nodes_2_colour[i]) {
                         n.active = nodes_2_colour[i];
                         selections[i]=1
@@ -363,10 +364,10 @@ SelectionEngine = function() {
             }
         }
         for(var i in edges_2_colour) {
-            an_edge = TW.partialGraph._core.graph.edgesIndex[i]
+            an_edge = TW.partialGraph.edges(i)
             if(!isUndef(an_edge) && !an_edge.hidden){
-                an_edge.color = an_edge.attr['true_color'];
-                an_edge.attr['grey'] = 0;
+                an_edge.color = an_edge.customAttrs['true_color'];
+                an_edge.customAttrs['grey'] = 0;
             }
         }
 
@@ -719,108 +720,173 @@ TinaWebJS = function ( sigmacanvas ) {
 
         // button CENTER
         $("#lensButton").click(function () {
-            partialGraph.position(0,0,1);
-            partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
-            partialGraph.refresh();
-            // partialGraph.startForceAtlas2();
+            // new sigma.js
+            partialGraph.camera.goTo({x:0, y:0, ratio:1})
         });
+
+
+
+        // new sigma.js: attempt to use sigma events  bindings
+
+
+            // TODO
+            TW.partialGraph.bind('click', function(e) {
+              console.log("===click===");
+              console.log("e", e);
+            })
+            TW.partialGraph.bind('clickNode', function(e) {
+              console.log("===clickNode===");
+              console.log("e", e);
+            })
+            TW.partialGraph.bind('downgraph upgraph', function(e) {
+              console.log("===downgraph upgraph===");
+              console.log("e", e);
+            })
+
+
+            // --------------------------------------------fragment from v1.customized
+            // }).bind('mousedown mouseup', function(e) {
+            // var targeted = self.graph.nodes.filter(function(n) {
+            //     return !!n['hover'];
+            // }).map(function(n) {
+            //     return n.id;
+            // });
+            //
+            // self.dispatch(
+            //     e['type'] == 'mousedown' ?
+            //     'downgraph' :
+            //     'upgraph'
+            //     );
+            //
+            // if (targeted.length) {
+            //     self.dispatch(
+            //         e['type'] == 'mousedown' ?
+            //         'downnodes' :
+            //         'upnodes',
+            //         targeted
+            //         );
+            // }
+            // }).bind('move', function() {
+            // -------------------------------------------/fragment from v1.customized
+
 
 
         // Double Click
         //  external usage: SelectorEngine_part01() and SelectorEngine_part02()
-        $('#sigma-example').dblclick(function(event) {// using SelectionEngine
-            var area = {}
-            area.x1 = partialGraph._core.mousecaptor.mouseX;
-            area.y1 = partialGraph._core.mousecaptor.mouseY;
 
-            targeted = SelInst.SelectorEngine_part01({
-                            cursorsize:cursor_size,
-                            area:area
-                        })
+        TW.partialGraph.bind('doubleClickNode', function(e) {
+          console.log("===doubleClickNode===");
+          console.log("e", e);
+        })
 
-            if(targeted.length>0) {
-                var finalSelection = SelInst.SelectorEngine_part02( {
-                                            addvalue:checkBox ,
-                                            clicktype:(checkBox)?"simple":"double",
-                                            prevsels:selections,
-                                            currsels:targeted
-                                        });
-                cancelSelection(false);
-                SelInst.MultipleSelection2( {nodes:finalSelection} )
 
-            } else cancelSelection(false);
-
-            partialGraph.draw();
-            trackMouse();
-        });
+        // $('#sigma-example').dblclick(function(event) {// using SelectionEngine
+        //     var area = {}
+        //
+        //     // TODO replace
+        //     console.log("customdoubleclick", event)
+        //     area.x1 = partialGraph._core.mousecaptor.mouseX;
+        //     area.y1 = partialGraph._core.mousecaptor.mouseY;
+        //
+        //     targeted = SelInst.SelectorEngine_part01({
+        //                     cursorsize:cursor_size,
+        //                     area:area
+        //                 })
+        //
+        //     if(targeted.length>0) {
+        //         var finalSelection = SelInst.SelectorEngine_part02( {
+        //                                     addvalue:checkBox ,
+        //                                     clicktype:(checkBox)?"simple":"double",
+        //                                     prevsels:selections,
+        //                                     currsels:targeted
+        //                                 });
+        //         cancelSelection(false);
+        //         SelInst.MultipleSelection2( {nodes:finalSelection} )
+        //
+        //     } else cancelSelection(false);
+        //
+        //     partialGraph.draw();
+        //     trackMouse(event);
+        // });
 
         // Simple Click
         //  external usage: SelectorEngine()
-        $("#sigma-example")
-            .mousemove(function(){
-                if(!isUndef(partialGraph)) {
-                    if(cursor_size>0) trackMouse();
-                }
-            })
-            .contextmenu(function(){
-                return false;
-            })
-            .mousedown(function(e) { // using SelectionEngine
-                //left click!<- normal click
-                if(e.which==1){
-                    partialGraph.dispatch(
-                        e['type'] == 'mousedown' ?
-                        'downgraph' :
-                        'upgraph'
-                    );
-                    var area = {}
-                    area.x1 = partialGraph._core.mousecaptor.mouseX;
-                    area.y1 = partialGraph._core.mousecaptor.mouseY;
-                    var targeted = SelInst.SelectorEngine( {
-                                        cursorsize:cursor_size,
-                                        area:area,
-                                        addvalue:checkBox,
-                                        clicktype:"simple",
-                                        prevsels:selections
-                                    } )
-                    if(targeted.length>0) {
-                        cancelSelection(false);
-                        SelInst.MultipleSelection2( {nodes:targeted} )
-                    }
-                    partialGraph.draw();
-                    trackMouse();
-                }
-            });
+        // $("#sigma-example")
+        //     .mousemove(function(event){
+        //         if(!isUndef(partialGraph)) {
+        //             if(cursor_size>0) trackMouse(event);
+        //         }
+        //     })
+        //     .contextmenu(function(){
+        //         return false;
+        //     })
+        //     .mousedown(function(e) { // using SelectionEngine
+        //         //left click!<- normal click
+        //         if(e.which==1){
+        //             console.warn('new sigma.js FIX event bindings for downgraph, upgraph')
+        //             partialGraph.dispatchEvent(
+        //                 e['type'] == 'mousedown' ?
+        //                 'downgraph' :
+        //                 'upgraph'
+        //             );
+        //             var area = {}
+        //
+        //
+        //             // new sigma.js: (x,y) from event -- TODO check if convert coords
+        //             area.x1 = sigma.utils.getX(e);
+        //             area.y1 = sigma.utils.getY(e);
+        //
+        //             // old version
+        //             // area.x1 = partialGraph._core.mousecaptor.mouseX;
+        //             // area.y1 = partialGraph._core.mousecaptor.mouseY;
+        //
+        //             var targeted = SelInst.SelectorEngine( {
+        //                                 cursorsize:cursor_size,
+        //                                 area:area,
+        //                                 addvalue:checkBox,
+        //                                 clicktype:"simple",
+        //                                 prevsels:selections
+        //                             } )
+        //             if(targeted.length>0) {
+        //                 cancelSelection(false);
+        //                 SelInst.MultipleSelection2( {nodes:targeted} )
+        //             }
+        //             partialGraph.refresh({skipIndexation:true});
+        //             trackMouse(e);
+        //         }
+        //     });
 
 
 
         $("#zoomSlider").slider({
             orientation: "vertical",
-            value: partialGraph.position().ratio,
+
+            // new sigma.js current zoom ratio
+            value: partialGraph.camera.ratio,
             min: sigmaJsMouseProperties.minRatio,
             max: sigmaJsMouseProperties.maxRatio,
             range: "min",
             step: 0.1,
             slide: function( event, ui ) {
-                // console.log("*******lalala***********")
-                // console.log(partialGraph.position().ratio)
-                // console.log(sigmaJsMouseProperties.minRatio)
-                // console.log(sigmaJsMouseProperties.maxRatio)
+                console.log("*******lalala***********")
+                console.log(partialGraph.camera.ratio)
+                console.log(sigmaJsMouseProperties.minRatio)
+                console.log(sigmaJsMouseProperties.maxRatio)
                 partialGraph.zoomTo(
-                    partialGraph._core.width / 2,
-                    partialGraph._core.height / 2,
+                    TW.partialGraph.renderers[0].width / 2,
+                    TW.partialGraph.renderers[0].height / 2,
                     ui.value);
             }
         });
 
         $("#zoomPlusButton").click(function () {
-            partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, partialGraph._core.mousecaptor.ratio * 1.5);
+            partialGraph.zoomTo(TW.partialGraph.renderers[0].width / 2, TW.partialGraph.renderers[0].height / 2, partialGraph._core.mousecaptor.ratio * 1.5);
             $("#zoomSlider").slider("value",partialGraph.position().ratio);
             return false;
         });
 
         $("#zoomMinusButton").click(function () {
-            partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, partialGraph._core.mousecaptor.ratio * 0.5);
+            partialGraph.zoomTo(TW.partialGraph.renderers[0].width / 2, TW.partialGraph.renderers[0].height / 2, partialGraph._core.mousecaptor.ratio * 0.5);
             $("#zoomSlider").slider("value",partialGraph.position().ratio);
             return false;
         });
@@ -831,7 +897,7 @@ TinaWebJS = function ( sigmacanvas ) {
 
                 if(partialGraph.forceatlas2.active) {
                     partialGraph.stopForceAtlas2();
-                    partialGraph.draw();
+                    partialGraph.refresh({ skipIndexation: true });
                     return;
                 } else {
                     partialGraph.startForceAtlas2();
@@ -859,17 +925,19 @@ TinaWebJS = function ( sigmacanvas ) {
             bgcolor:"#27c470",
             onchange:function(value){
                 $.doTimeout(100,function (){
-                       // sigma permet qu'on lui passe une fonction
-                       // à effectuer sur l'itérateur
-                       partialGraph.iterNodes(function (n) {
-                           // TODO fonction un peu lourde dans le profilage
-                           if(TW.Nodes[n.id].type==TW.catSoc) {
-                               var newval = parseFloat(TW.Nodes[n.id].size) + parseFloat((value-1))*0.3
-                               n.size = (newval<1.0)?1:newval;
-                               sizeMult[TW.catSoc] = parseFloat(value-1)*0.3;
-                           }
-                       });
-                       partialGraph.draw();
+                   // new sigma.js loop on nodes POSS optimize
+                   nds  = TW.partialGraph.graph.nodes()
+                   console.log("init: slider resize")
+                   for(j=0 ; j<TW.partialGraph.nNodes ; j++){
+                       if (nds[j]
+                        && nds[j].type == TW.catSoc) {
+                            var n = nds[j]
+                            var newval = parseFloat(TW.Nodes[n.id].size) + parseFloat((value-1))*0.3
+                            n.size = (newval<1.0)?1:newval;
+                            sizeMult[TW.catSoc] = parseFloat(value-1)*0.3;
+                       }
+                   }
+                   partialGraph.refresh({skipIndexation:true})
                 });
             }
         });
@@ -883,14 +951,19 @@ TinaWebJS = function ( sigmacanvas ) {
             bgcolor:"#FFA500",
             onchange:function(value){
                 $.doTimeout(100,function (){
-                       partialGraph.iterNodes(function (n) {
-                           if(TW.Nodes[n.id].type==TW.catSem) {
-                               var newval = parseFloat(TW.Nodes[n.id].size) + parseFloat((value-1))*0.3
-                               n.size = (newval<1.0)?1:newval;
-                               sizeMult[TW.catSem] = parseFloat(value-1)*0.3;
-                           }
-                       });
-                       partialGraph.draw();
+                    // new sigma.js loop on nodes POSS optimize
+                    nds  = TW.partialGraph.graph.nodes()
+                    console.log("init: slider resize")
+                    for(j=0 ; j<TW.partialGraph.nNodes ; j++){
+                        if (nds[j]
+                         && nds[j].type == TW.catSem) {
+                             var n = nds[j]
+                             var newval = parseFloat(TW.Nodes[n.id].size) + parseFloat((value-1))*0.3
+                             n.size = (newval<1.0)?1:newval;
+                             sizeMult[TW.catSem] = parseFloat(value-1)*0.3;
+                        }
+                    }
+                    partialGraph.refresh({skipIndexation:true})
                 });
             }
         });
@@ -904,7 +977,7 @@ TinaWebJS = function ( sigmacanvas ) {
             onchange:function(value){
                 // console.log("en cursorsize: "+value);
                 cursor_size=value;
-                if(cursor_size==0) partialGraph.draw();
+                if(cursor_size==0) partialGraph.refresh({skipIndexation:true});
             }
         });
 

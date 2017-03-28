@@ -887,7 +887,7 @@ sigma.classes.Cascade = function() {
                 'label': id.toString(),
                 'id': id.toString(),
                 // Custom attributes :
-                'attr': {}
+                'customAttrs': {}
             };
 
             for (var k in params) {
@@ -912,7 +912,7 @@ sigma.classes.Cascade = function() {
                         n[k] = params[k];
                         break;
                     default:
-                        n['attr'][k] = params[k];
+                        n['customAttrs'][k] = params[k];
                 }
             }
 
@@ -947,7 +947,7 @@ sigma.classes.Cascade = function() {
                 'active': node['active'],
                 'hidden': node['hidden'],
                 'forceLabel': node['forceLabel'],
-                'attr': node['attr']
+                'customAttrs': node['customAttrs']
             };
         };
 
@@ -964,7 +964,7 @@ sigma.classes.Cascade = function() {
             for (var k in copy) {
                 switch (k) {
                     case 'id':
-                    case 'attr':
+                    case 'customAttrs':
                     case 'degree':
                     case 'inDegree':
                     case 'outDegree':
@@ -989,8 +989,10 @@ sigma.classes.Cascade = function() {
                     case 'shape':
                         node[k] = (copy[k] || '').toString();
                         break;
-                    default:
-                        node['attr'][k] = copy[k];
+
+                    // REFA: turned off meaning & usage unclear
+                    // default:
+                    //     node['customAttrs'][k] = copy[k];
                 }
             }
 
@@ -1121,7 +1123,7 @@ sigma.classes.Cascade = function() {
                 'label': id.toString(),
                 'id': id.toString(),
                 'hidden': false,
-                'attr': {}
+                'customAttrs': {}
             };
             e['source']['degree']++;
             e['source']['outDegree']++;
@@ -1152,18 +1154,18 @@ sigma.classes.Cascade = function() {
                         break;
 
                     default:
-                        e['attr'][k] = params[k];
+                        e['customAttrs'][k] = params[k];
                 }
             }
 
             // var colS = self.nodesIndex[source].color
             // var colT = self.nodesIndex[target].color
 
-            // e.attr['true_color'] = color
-            // e.attr['grey'] = 0
+            // e.customAttrs['true_color'] = color
+            // e.customAttrs['grey'] = 0
             // // if node source and target are inactive, grey edge
             // if ( colS==greyColor || colT==greyColor ) {
-            //     e.attr['grey'] = 1
+            //     e.customAttrs['grey'] = 1
             //     e.color = greyColor
             // }
 
@@ -1190,7 +1192,7 @@ sigma.classes.Cascade = function() {
                 'label': edge['label'],
                 'hidden': edge['hidden'],
                 'id': edge['id'],
-                'attr': edge['attr'],
+                'customAttrs': edge['customAttrs'],
                 'color': edge['color']
             };
         };
@@ -1227,7 +1229,7 @@ sigma.classes.Cascade = function() {
                         edge[k] = (copy[k] || '').toString();
                         break;
                     default:
-                        edge['attr'][k] = copy[k];
+                        edge['customAttrs'][k] = copy[k];
                 }
             }
 
