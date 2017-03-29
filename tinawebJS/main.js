@@ -358,14 +358,17 @@ if(RES["OK"]) {
             bgcolor:"#FFA500",
             onchange:function(value){
                 $.doTimeout(100,function (){
-                       TW.partialGraph.iterNodes(function (n) {
-                           if(TW.Nodes[n.id].type==TW.catSem) {
-                               var newval = parseFloat(TW.Nodes[n.id].size) + parseFloat((value-1))*0.3
-                               n.size = (newval<1.0)?1:newval;
-                               sizeMult[TW.catSem] = parseFloat(value-1)*0.3;
-                           }
-                       });
-                       TW.partialGraph.draw();
+                       // POSS: custom index by n.type
+                       var nds = TW.partialGraph.graph.nodes()
+                       for (var j in nds) {
+                         var n = nds[j]
+                         if(TW.Nodes[n.id].type==TW.catSem) {
+                           var newval = parseFloat(TW.Nodes[n.id].size) + parseFloat((value-1))*0.3
+                           n.size = (newval<1.0)?1:newval;
+                           sizeMult[TW.catSem] = parseFloat(value-1)*0.3;
+                         }
+                       }
+                       TW.partialGraph.refresh({skipIndexation:true});
                 });
             }
         });

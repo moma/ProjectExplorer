@@ -54,6 +54,10 @@ function sigmaLimits( sigmacanvas ) {
 // will be instanciated as SelInst
 SelectionEngine = function() {
 
+
+    // TODO REFA this block was used for area selection
+    // (!at least partly replaceable by getNodes from new sigma.misc.bindEvents)
+    // ----------------------------------------------------------8<-------------
     // Selection Engine!! finally...
     this.SelectorEngine_part01 = (function(cursorsize, area ) {
         var clickedNodes = []
@@ -126,6 +130,7 @@ SelectionEngine = function() {
 
         return targeted;
     }).index();
+    // ----------------------------------------------------------8<-------------
 
     this.SelectorEngine = (function( cursorsize , area , addvalue , clicktype , prevsels , currsels ) {
         var targeted = []
@@ -311,7 +316,7 @@ SelectionEngine = function() {
     this.MultipleSelection2 = (function(nodes,nodesDict,edgesDict) {
 
         console.log("IN SelectionEngine.MultipleSelection2:")
-        // console.log(nodes)
+        console.log("nodes", nodes)
         greyEverything();
 
         // TW.partialGraph.states.slice(-1)[0] is the present graph state
@@ -364,7 +369,7 @@ SelectionEngine = function() {
             }
         }
         for(var i in edges_2_colour) {
-            an_edge = TW.partialGraph.edges(i)
+            an_edge = TW.partialGraph.graph.edges(i)
             if(!isUndef(an_edge) && !an_edge.hidden){
                 an_edge.color = an_edge.customAttrs['true_color'];
                 an_edge.customAttrs['grey'] = 0;
@@ -409,7 +414,7 @@ SelectionEngine = function() {
 
         overNodes=true;
 
-        TW.partialGraph.draw();
+        TW.partialGraph.refresh({skipIndexation:true});
 
         updateLeftPanel_fix( selections , oppos );
 
@@ -418,6 +423,10 @@ SelectionEngine = function() {
 
     }).index()
 };
+
+// REFA tempo expose selectionEngine and methods
+var SelInst
+
 
 TinaWebJS = function ( sigmacanvas ) {
     this.sigmacanvas = sigmacanvas;
@@ -440,7 +449,9 @@ TinaWebJS = function ( sigmacanvas ) {
 
     this.SearchListeners = function () {
 
-        var SelInst = new SelectionEngine();
+        // REFA tempo expose
+        // var SelInst = new SelectionEngine();
+        SelInst = new SelectionEngine();
 
         //~ $.ui.autocomplete.prototype._renderItem = function(ul, item) {
             //~ var searchVal = $("#searchinput").val();
@@ -724,33 +735,43 @@ TinaWebJS = function ( sigmacanvas ) {
             partialGraph.camera.goTo({x:0, y:0, ratio:1})
         });
 
+        // new sigma.js: attempt to use sigma events bindings
 
+        // cases:
+        // [DONE] - simple click, one node
+        // [TODO] - simple click, area
 
-        // new sigma.js: attempt to use sigma events  bindings
-
+        // one node:
+        TW.partialGraph.bind('clickNode', function(e, node) {
+          // new sigma.js gives easy access to clicked node!
+          theNodeId = e.data.node.id
+          cancelSelection(false);
+          SelInst.MultipleSelection2({nodes:[theNodeId]})
+        })
 
             // TODO
-            TW.partialGraph.bind('click', function(e) {
-              console.log("===click===");
-              console.log("e", e);
-            })
-            TW.partialGraph.bind('clickNode', function(e) {
-              console.log("===clickNode===");
-              console.log("e", e);
-            })
-            TW.partialGraph.bind('downgraph upgraph', function(e) {
-              console.log("===downgraph upgraph===");
-              console.log("e", e);
-            })
+            // TW.partialGraph.bind('click', function(e) {
+            //   console.log("===click===");
+            //   console.log("e", e);
+            // })
+
+            // TW.partialGraph.bind('downgraph upgraph', function(e) {
+            //   console.log("===downgraph upgraph===");
+            //   console.log("e", e);
+            // })
 
 
             // --------------------------------------------fragment from v1.customized
-            // }).bind('mousedown mouseup', function(e) {
-            // var targeted = self.graph.nodes.filter(function(n) {
-            //     return !!n['hover'];
-            // }).map(function(n) {
-            //     return n.id;
-            // });
+            // TW.partialGraph.bind('mousedown mouseup', function(e) {
+            //
+            //   console.log("---------- event", e)
+            //   var targeted = self.graph.nodes.filter(function(n) {
+            //       return !!n['hover'];
+            //   }).map(function(n) {
+            //       return n.id;
+            //   });
+            //   console.log("---------- targeted by hover check loop", targeted)
+            // })
             //
             // self.dispatch(
             //     e['type'] == 'mousedown' ?
@@ -765,8 +786,8 @@ TinaWebJS = function ( sigmacanvas ) {
             //         'upnodes',
             //         targeted
             //         );
+            //  }
             // }
-            // }).bind('move', function() {
             // -------------------------------------------/fragment from v1.customized
 
 
