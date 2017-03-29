@@ -513,6 +513,86 @@ function trackMouse(e) {
     }
 }
 
+
+// debouncing
+var timeoutId = null
+function fastTrackMouseWithQuadNodes(e) {
+  if (! timeoutId) {
+    timeoutId = setTimeout(function() {
+      trackMouseWithQuadNodes(e)
+    }, 200)
+  }
+  else {
+    clearTimeout(timeoutId)
+    timeoutId = null
+  }
+}
+
+
+function trackMouseWithQuadNodes(e) {
+    var camX, camY, clientX, clientY
+
+    // new sigma.js 2D mouse context
+    var ctx = TW.partialGraph.renderers[0].contexts.mouse;
+    ctx.globalCompositeOperation = "source-over";
+    // clear zone each time to prevent repeated frame artifacts
+    ctx.clearRect(0, 0,
+                  TW.partialGraph.renderers[0].container.offsetWidth,
+                  TW.partialGraph.renderers[0].container.offsetHeight);
+    // testing with overNode event
+    if (e.type == "overNode") {
+      console.log("event>>", e)
+      camX = e.data.node['read_cam0:x']
+      camY = e.data.node['read_cam0:y']
+      clientX = e.data.node['renderer1:x']
+      clientY = e.data.node['renderer1:y']
+    }
+    else {
+      clientX = sigma.utils.getX(e);
+      clientY = sigma.utils.getY(e);
+      var sigmaCoords = sigma.utils.mouseCoords(e, clientX, clientY)
+      var camCoords = TW.partialGraph.camera.cameraPosition(sigmaCoords.x,sigmaCoords.y)
+      camX = camCoords.x
+      camY = camCoords.y
+    }
+
+    console.log("trackMouseWithQuadNodes: camX", camX, "camY", camY)
+
+    // clear any previous hover selections
+    highlightSelectedNodes(false);
+
+    // quadtree neighborhood adjusted for label right-side drift
+    var neighNodes = TW.partialGraph.camera.quadtree.point(camX-15,camY)
+
+    // simili-selection...
+    selections = {}
+    for (var i in neighNodes) {
+      selections[neighNodes[i].id] = 1
+    }
+
+    // ...or for real selection with all downstream handlers (tagcloud, ajax...)
+    // SelInst.MultipleSelection2({
+    //               nodes:neighNodes.map( function(n) {return n.id})
+    // })
+
+    console.log("sels:", selections)
+
+    highlightSelectedNodes(true)
+    TW.partialGraph.refresh({skipIndexation:true})
+
+    // Draw the circle
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 1;
+    ctx.fillStyle = "#FFC371";  // like a flashlight
+    ctx.globalAlpha = 0.5;
+    ctx.beginPath();
+    ctx.arc(clientX, clientY, cursor_size, 0, Math.PI * 2, true);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+}
+
 // BASIC MODULARITY
 // =================
 // ProcessDivsFlags is for adding/removing features from TinawebJS

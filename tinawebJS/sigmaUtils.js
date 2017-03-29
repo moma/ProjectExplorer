@@ -113,7 +113,7 @@ SigmaUtils = function () {
         settings('labelSizeRatio') * size;
 
       // we also boost size of active nodes
-      if (activeFlag)  fontSize *= 3
+      if (activeFlag)  fontSize *= 2
 
 
       context.font = (settings('fontStyle') ? settings('fontStyle') + ' ' : '') +

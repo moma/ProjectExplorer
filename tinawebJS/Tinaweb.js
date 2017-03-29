@@ -808,21 +808,23 @@ TinaWebJS = function ( sigmacanvas ) {
         //     trackMouse(event);
         // });
 
-        // Simple Click
-        //  external usage: SelectorEngine()
-        $("#sigma-example")
+        // follow node hover rendering all neighbor labels
+        TW.partialGraph.bind('overNode', function(e) {
+          if(!isUndef(partialGraph)) {
+              if(cursor_size>0) trackMouseWithQuadNodes(e);
+          }
+        })
 
-            .mousemove(function(event){
-                if(!isUndef(partialGraph)) {
-                    if(cursor_size>0) trackMouse(event);
-                }
-            })
 
-            // TW.partialGraph.bind('overNode', function(e) {
-            //   if(!isUndef(partialGraph)) {
-            //       if(cursor_size>0) trackMouse(event);
-            //   }
-            // })
+        // follow mouse rendering all neighbor labels
+        // $("#sigma-example")
+        // .mousemove(function(e){
+        //     if(!isUndef(partialGraph)) {
+        //         if(cursor_size>0) {
+        //           fastTrackMouseWithQuadNodes(e)
+        //         }
+        //     }
+        // })
 
             // TW.partialGraph.bind('overNodes', function(e) {
             //   if(!isUndef(partialGraph)) {
