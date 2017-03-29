@@ -167,7 +167,7 @@ if(RES["OK"]) {
     if ( file!="db.json" && file!="api.json" )
         fileparam = RES["format"];
 
-
+    console.log("parsing the data")
     start = new ParseCustom(  fileparam , the_data );
     categories = start.scanFile(); //user should choose the order of categories
     console.log("Categories: ")
@@ -219,11 +219,14 @@ if(RES["OK"]) {
 
     var customSettings = Object.assign(
         {
-            drawEdges: false,
+            drawEdges: false,   // fixme edgetype curve
             drawNodes: true,
             drawLabels: true,
-
-            labelSize: "proportional"
+            // nodesPowRatio: .5,
+            labelSize: "proportional",
+            font: "Ubuntu Condensed",
+            // labelColor: "node",
+            fontStyle: "bold"
         },
         sigmaJsDrawingProperties,
         sigmaJsGraphProperties,

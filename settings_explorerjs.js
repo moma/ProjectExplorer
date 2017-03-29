@@ -100,7 +100,8 @@ var greyColor = "#9b9e9e";
 
 var sigmaJsDrawingProperties = {
     defaultLabelColor: 'black',
-    defaultLabelSize: 20,//in fact I'm using it as minLabelSize'
+    defaultLabelSize: 30, // in fact usually overridden by node data...
+    labelSizeRatio: 2,   // ...but this ratio allows truly adjusting the sizes
 
     labelThreshold: 5,
     defaultEdgeType: 'curve',
@@ -110,15 +111,16 @@ var sigmaJsDrawingProperties = {
     // new sigma.js only for hover + new settingnames
     defaultHoverLabelBGColor: '#fff',
     defaultHoverLabelColor: '#000',
-    borderSize: 2.5,//Something other than 0 (works only for hovered nodes)
+    borderSize: 2.5, // (only for hovered nodes)
     defaultNodeBorderColor: "black",
     nodeBorderColor: "default",  // vs. node
 
     // for custom TW node renderer with borders
     // (if twNodeRendBorder, triggers overriding sigma.canvas.nodes.def)
     twNodeRendBorder: true,
-    twNodeRendBorderSize: 1,
-    twNodeRendBorderColor: "#222"
+    twNodeRendBorderSize: 1,   // (for all normal nodes, iff twNodeRendBorder)
+    twNodeRendBorderColor: "#222",
+    // twNodeRendBorderColor: "#eee",
 };
 var sigmaJsGraphProperties = {
     minEdgeSize: 2,
