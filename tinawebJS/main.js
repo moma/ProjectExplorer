@@ -236,12 +236,17 @@ if(RES["OK"]) {
     console.log("customSettings", customSettings)
 
 
-    // custom rendering
+    // custom nodes rendering
     if (customSettings['twNodeRendBorder']) {
       // overriding the def is simplest
       // (could also do it by type)
       sigma.canvas.nodes.def = sigma_utils.twRender.canvas.nodes.withBorders
     }
+
+    // custom labels rendering
+    //  - based on the normal one sigma.canvas.labels.def
+    //  - additionnaly supports 'forcelabel' node property
+    sigma.canvas.labels.def = sigma_utils.twRender.canvas.labels.def
 
     // ==================================================================
     // sigma js library invocation (https://github.com/jacomyal/sigma.js)

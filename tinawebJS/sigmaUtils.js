@@ -92,7 +92,42 @@ SigmaUtils = function () {
     // cf. http://yomguithereal.github.io/articles/node-border-renderer/
 
     // same hierarchy as in sigma.canvas
-    this.twRender = {canvas: {nodes: {}}}
+    this.twRender = {canvas: {nodes: {}, labels: {}}}
+
+    this.twRender.canvas.labels.def = function(node, context, settings) {
+      var fontSize,
+          prefix = settings('prefix') || '',
+          size = node[prefix + 'size'];
+          activeFlag = node['active'] || node['forceLabel']
+          // NB active is used in all TW selections
+          //    forceLabel is seldom used
+
+      if (!activeFlag && size < settings('labelThreshold'))
+        return;
+
+      if (!node.label || typeof node.label !== 'string')
+        return;
+
+      fontSize = (settings('labelSize') === 'fixed') ?
+        settings('defaultLabelSize') :
+        settings('labelSizeRatio') * size;
+
+      // we also boost size of active nodes
+      if (activeFlag)  fontSize *= 3
+
+
+      context.font = (settings('fontStyle') ? settings('fontStyle') + ' ' : '') +
+        fontSize + 'px ' + settings('font');
+      context.fillStyle = (settings('labelColor') === 'node') ?
+        (node.color || settings('defaultNodeColor')) :
+        settings('defaultLabelColor');
+
+      context.fillText(
+        node.label,
+        Math.round(node[prefix + 'x'] + size + 3),
+        Math.round(node[prefix + 'y'] + fontSize / 3)
+      );
+    };
 
     // node rendering with borders
     this.twRender.canvas.nodes.withBorders = function(node, context, settings) {
