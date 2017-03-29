@@ -20,7 +20,6 @@ function cancelSelection (fromTagCloud) {
               // console.log("cancelSelection: edge", e[i])
               if (e[i]) {
                   e[i].color = e[i].customAttrs['grey'] ? e[i].customAttrs['true_color'] : e[i].color;
-                  // e[i].color = e[i].customAttrs['true_color'];
                   e[i].customAttrs['grey'] = 0;
               }
 
@@ -541,7 +540,7 @@ function greyEverything(){
       for(var i in eds){
               if(!eds[i].customAttrs['grey']){
                   eds[i].customAttrs['true_color'] = eds[i].color;
-                  eds[i].color = greyColor;
+                  eds[i].color = TW.edgeGreyColor ;
               }
               eds[i].customAttrs['grey'] = 1;
       }

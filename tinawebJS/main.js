@@ -219,7 +219,7 @@ if(RES["OK"]) {
 
     var customSettings = Object.assign(
         {
-            drawEdges: false,   // fixme edgetype curve
+            drawEdges: true,   // fixme edgetype curve
             drawNodes: true,
             drawLabels: true,
             // nodesPowRatio: .5,
@@ -249,10 +249,10 @@ if(RES["OK"]) {
     TW.partialGraph = new sigma({
         graph: TW.graphData,
         container: 'sigma-example',
-        renderers: [{
+        renderer: {
             container: document.getElementById('sigma-example'),
             type: sigma.renderers.canvas
-        }],
+        },
         settings: customSettings
     });
 

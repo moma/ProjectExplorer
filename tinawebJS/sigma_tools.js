@@ -44,7 +44,7 @@ sigmaTools = (function(stools) {
       var g = (a[1] + b[1]) >> 1;
       var b = (a[2] + b[2]) >> 1;
       // var color = '#'+sigma.tools.rgbToHex(parseFloat(r),parseFloat(g),parseFloat(b))
-      var color = "rgba( "+r+", "+g+" , "+b+" ,0.5)";
+      var color = "rgba( "+r+", "+g+" , "+b+" , "+TW.edgeDefaultOpacity+")";
 
       return color
     }

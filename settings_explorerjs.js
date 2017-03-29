@@ -93,8 +93,12 @@ var seed=999999999;//defaultseed
 var semanticConverged=false;
 
 
+// ============ < / DEVELOPER OPTIONS > ============
 var showLabelsIfZoom=1.0;
-var greyColor = "#9b9e9e";
+TW.edgeDefaultOpacity = 0.3  // opacity when true_color
+TW.edgeGreyColor = "rgba(200, 200, 200, 0.5)";
+// ============ < / DEVELOPER OPTIONS > ============
+
 
 // ============ < SIGMA.JS PROPERTIES > ============
 
@@ -132,8 +136,6 @@ var sigmaJsMouseProperties = {
 };
 // ============ < / SIGMA.JS PROPERTIES > ============
 
-
-// ============ < / DEVELOPER OPTIONS > ============
 
 
 
