@@ -1,4 +1,6 @@
 
+// TODO REFA longterm refactoring: scanXX and dictifyXX is doing double work
+//   (for instance loop on full gexf in scanGexf then again in dictfyGexf)
 
 // Level-01
 ParseCustom = function ( format , data ) {
@@ -35,7 +37,6 @@ ParseCustom = function ( format , data ) {
 
 // Level-02
 ParseCustom.prototype.scanFile = function() {
-
     switch (this.format) {
         case "api.json":
             console.log("scanFile: "+this.format)
@@ -61,7 +62,6 @@ ParseCustom.prototype.scanFile = function() {
 
 // Level-02
 ParseCustom.prototype.makeDicts = function(categories) {
-
     switch (this.format) {
         case "api.json":
             console.log("makeDicts: "+this.format)
@@ -88,6 +88,7 @@ ParseCustom.prototype.makeDicts = function(categories) {
 
 // Level-00
 function scanGexf(gexf) {
+  console.log("ParseCustom : scanGexf")
     var categoriesDict={}, categories=[];
     nodesNodes = gexf.getElementsByTagName('nodes');
     for(i=0; i<nodesNodes.length; i++){
@@ -136,6 +137,8 @@ function scanGexf(gexf) {
 // Level-00
 // for {1,2}partite graphs
 function dictfyGexf( gexf , categories ){
+
+  console.warn("ParseCustom gexf 2nd loop, main data extraction")
 
 
     var catDict = {}
@@ -197,6 +200,12 @@ function dictfyGexf( gexf , categories ){
     maxNodeSize=0.001;
     numberOfDocs=0;
     numberOfNGrams=0;
+
+    // debug: for local stats
+    let allSizes = []
+    let sumSizes = 0
+    let sizeStats = {'mean':null, 'median':null, 'max':0, 'min':1000000000}
+
     for(i=0; i<nodesNodes.length; i++) {
         var nodesNode = nodesNodes[i];  // Each xml node 'nodes' (plural)
         var nodeNodes = nodesNode.getElementsByTagName('node'); // The list of xml nodes 'node' (no 's')
@@ -219,6 +228,14 @@ function dictfyGexf( gexf , categories ){
             if(sizeNodes.length>0){
               sizeNode = sizeNodes[0];
               size = parseFloat(sizeNode.getAttribute('value'));
+
+              // debug: for stats  ---------------------------
+              allSizes.push(size)
+              sumSizes += size
+              if (size < sizeStats.min)  sizeStats.min = size
+              if (size > sizeStats.max)  sizeStats.max = size
+              // --------------------------------------------
+
             }// [ / get Size ]
 
             // [ get Coordinates ]
@@ -232,7 +249,7 @@ function dictfyGexf( gexf , categories ){
                 y = parseFloat(positionNode.getAttribute('y'));
             }// [ / get Coordinates ]
             // x = x*-1
-            y = y*-1
+            y = y*-1   // aka -y
 
             // [ get Colour ]
             var colorNodes = nodeNode.getElementsByTagName('color');
@@ -292,6 +309,15 @@ function dictfyGexf( gexf , categories ){
 
         }
     }
+
+    // -------------- debug: for local stats ----------------
+    allSizes.sort();
+    let N = allSizes.length
+    sizeStats.median = allSizes[Math.round(N/2)]
+    sizeStats.mean = Math.round(sumSizes/N * 100)/100
+
+    console.log("parseCustom(gexf) sizeStats:", sizeStats)
+    // ------------- /debug: for local stats ----------------
 
     var attention = false
     if( TW.Clusters.length == 0 ) {
