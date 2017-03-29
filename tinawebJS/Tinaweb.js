@@ -1,25 +1,3 @@
-// Function.prototype.index
-(function(reComments, reParams, reNames) {
-  Function.prototype.index = function(arrParamNames) {
-    var fnMe = this;
-    arrParamNames = arrParamNames
-      || (((fnMe + '').replace(reComments, '')
-           .match(reParams)[1] || '')
-          .match(reNames) || []);
-    return function(namedArgs) {
-      var args = [], i = arrParamNames.length;
-      args[i] = namedArgs;
-      while(i--) {
-        args[i] = namedArgs[arrParamNames[i]];
-      }
-      return fnMe.apply(this, args);
-    };
-  };
-})(
-  /\/\*[\s\S]*?\*\/|\/\/.*?[\r\n]/g,
-  /\(([\s\S]*?)\)/,
-  /[$\w]+/g
-);
 
 // for new SigmaUtils
 // new sigma.js: POSS to use autoResize global setting

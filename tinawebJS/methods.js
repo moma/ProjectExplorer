@@ -16,12 +16,14 @@ function cancelSelection (fromTagCloud) {
     if (TW.partialGraph.settings('drawEdges')) {
       e = TW.partialGraph.graph.edges();
       for(i=0;i<e.length;i++){
+
               // console.log("cancelSelection: edge", e[i])
               if (e[i]) {
-                  // e[i].color = e[i].customAttrs['grey'] ? e[i].customAttrs['true_color'] : e[i].color;
-                  e[i].color = e[i].customAttrs['true_color'];
+                  e[i].color = e[i].customAttrs['grey'] ? e[i].customAttrs['true_color'] : e[i].color;
+                  // e[i].color = e[i].customAttrs['true_color'];
                   e[i].customAttrs['grey'] = 0;
               }
+
       }
     }
 
@@ -225,7 +227,7 @@ function htmlfied_alternodes(elems) {
 function manualForceLabel(nodeid,active) {
 	// console.log("manual|"+nodeid+"|"+active)
 	TW.partialGraph.graph.nodes(nodeid).active=active;
-	TW.partialGraph.draw();
+	TW.partialGraph.refresh({skipIndexation:true});
 }
 
 function htmlfied_samenodes(elems) {
@@ -579,7 +581,7 @@ function hideEverything(){
         nodes[j].hidden=true;
     }
     if (TW.partialGraph.settings('drawEdges')) {
-      var edges = TW.partialGraph.edges()
+      var edges = TW.partialGraph.graph.edges()
       for(var i in edges){
           edges[i].hidden=true;
       }

@@ -86,7 +86,7 @@ function ChangeGraphAppearanceByAtt( manualflag ) {
         if(att_s == "age") the_method = "colorsRelByBins"
 
         div_info += '<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+att_s+'('+att_c+')'+'</a></li>'
-        console.log('<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+att_s+'('+att_c+')'+'</a></li>')
+        // console.log('<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+att_s+'('+att_c+')'+'</a></li>')
     }
     div_info += '  </ul>'
     div_info += ' </li>'

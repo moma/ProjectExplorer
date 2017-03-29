@@ -1,5 +1,11 @@
-
 // Function.prototype.index
+// ---
+// 'decorator'
+// (used here and in Tinaweb.js for MultipleSelection2)
+// ---
+// transforms calls like foobar({arg1:a, arg2:b})
+//      into  calls like foobar(a, b)
+
 (function(reComments, reParams, reNames) {
   Function.prototype.index = function(arrParamNames) {
     var fnMe = this;
@@ -390,14 +396,6 @@ if(RES["OK"]) {
 
     // REFA new sigma.js
     TW.partialGraph.camera.goTo({x:0, y:0, ratio:.8, angle: 0})
-    // TW.partialGraph.goTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, .8).draw();
-
-
-    // TW.partialGraph.zoomTo(
-    //     TW.partialGraph._core.width / 2,
-    //     TW.partialGraph._core.height / 2, TW.partialGraph.camera.ratio
-    // ).draw();
-
 
     // fa2enabled=true; TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8).draw();
     // $.doTimeout(1,function(){
