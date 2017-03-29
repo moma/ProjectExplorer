@@ -75,21 +75,8 @@ function highlightSelectedNodes(flag){
     console.log("\t***methods.js:highlightSelectedNodes(flag)"+flag+" selEmpty:"+is_empty(selections))
     if(!is_empty(selections)){
         for(var i in selections) {
-            if(TW.Nodes[i].type==TW.catSoc && swclickActual=="social"){
-                node = TW.partialGraph.graph.nodes(i);
-                node.active = flag;
-            }
-            else if(TW.Nodes[i].type==TW.catSem && swclickActual=="semantic") {
-                node = TW.partialGraph.graph.nodes(i);
-                node.active = flag;
-            }
-            else if(swclickActual=="sociosemantic") {
-                node = TW.partialGraph.graph.nodes(i);
-                node.active = flag;
-            }
-            else break;
+          TW.partialGraph.graph.nodes(i).active = flag
         }
-
     }
 }
 
