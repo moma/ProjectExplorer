@@ -810,12 +810,27 @@ TinaWebJS = function ( sigmacanvas ) {
 
         // Simple Click
         //  external usage: SelectorEngine()
-        // $("#sigma-example")
-        //     .mousemove(function(event){
-        //         if(!isUndef(partialGraph)) {
-        //             if(cursor_size>0) trackMouse(event);
-        //         }
-        //     })
+        $("#sigma-example")
+
+            .mousemove(function(event){
+                if(!isUndef(partialGraph)) {
+                    if(cursor_size>0) trackMouse(event);
+                }
+            })
+
+            // TW.partialGraph.bind('overNode', function(e) {
+            //   if(!isUndef(partialGraph)) {
+            //       if(cursor_size>0) trackMouse(event);
+            //   }
+            // })
+
+            // TW.partialGraph.bind('overNodes', function(e) {
+            //   if(!isUndef(partialGraph)) {
+            //       if(cursor_size>0) trackMouse(event);
+            //   }
+            // })
+
+
         //     .contextmenu(function(){
         //         return false;
         //     })

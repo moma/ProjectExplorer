@@ -428,69 +428,82 @@ function draw1Circle(ctx , x , y , color) {
 }
 
 
-
+// show Selector circle
+// --------------------
 // new sigma.js: could be replaced by default _moveHandler with bindings ?
-//   => atm rewrote entire function with new values (check if not needed recentering coords)
+//   => atm rewrote entire function with new values
 function trackMouse(e) {
     if(!shift_key) {
         // $.doTimeout(300,function (){
-            // var ctx = TW.partialGraph._core.domElements.mouse.getContext('2d');
-
             // new sigma.js 2D mouse context
             var ctx = TW.partialGraph.renderers[0].contexts.mouse;
             ctx.globalCompositeOperation = "source-over";
-            // ctx.clearRect(0, 0, TW.partialGraph._core.domElements.nodes.width, TW.partialGraph._core.domElements.nodes.height);
+
+            // clear zone each time to prevent repeated frame artifacts
             ctx.clearRect(0, 0,
                           TW.partialGraph.renderers[0].container.offsetWidth,
                           TW.partialGraph.renderers[0].container.offsetHeight);
 
-            x = sigma.utils.getX(e);
-            y = sigma.utils.getY(e);
+            // testing with overNodes event
+            // cf. https://github.com/jacomyal/sigma.js/wiki/Events-API
+            if (e.type == "overNodes") {
+              x = e.data.captor.clientX
+              y = e.data.captor.clientY
+            }
+            // classic mousemove event or other similar events
+            else {
+              x = sigma.utils.getX(e);
+              y = sigma.utils.getY(e);
+            }
+
+            // console.log("trackMouse mod: x", x, "y", y)
 
             ctx.strokeStyle = '#000';
             ctx.lineWidth = 1;
-            // ctx.fillStyle = "#71C3FF";
-            ctx.fillStyle = "#F20";
+            ctx.fillStyle = "#71C3FF";
             ctx.globalAlpha = 0.5;
             ctx.beginPath();
 
             // labels appear
             var nds = TW.partialGraph.graph.nodes()
-            if(TW.partialGraph.camera.ratio>showLabelsIfZoom){
-                for(var i in nds){
-                        n=nds[i];
-                        if(n.hidden==false){
-                            distance = Math.sqrt(
-                                Math.pow((x-parseInt(n.displayX)),2) +
-                                Math.pow((y-parseInt(n.displayY)),2)
-                                );
-                            if(parseInt(distance)<=cursor_size) {
-                                n.forceLabel=true;
-                            } else {
-                                if(typeof(n.neighbour)!=="undefined") {
-                                    if(!n.neighbour) n.forceLabel=false;
-                                } else n.forceLabel=false;
-                            }
-                        }
-                }
-                if(TW.partialGraph.forceatlas2 && TW.partialGraph.forceatlas2.count<=1) {
-                    TW.partialGraph.refresh({skipIndexation:true})
-                }
-            } else {
-                for(var i in nds){
-                    n=nds[i];
-                    if(!n.hidden){
-                        n.forceLabel=false;
-                        if(typeof(n.neighbour)!=="undefined") {
-                            if(!n.neighbour) n.forceLabel=false;
-                            else n.forceLabel=true;
-                        } else n.forceLabel=false;
-                    }
-                }
-                if(TW.partialGraph.forceatlas2 && TW.partialGraph.forceatlas2.count<=1) {
-                    TW.partialGraph.refresh({skipIndexation:true})
-                }
-            }
+
+            // TODO replace by a hover binding (and POSS use quadtree zone)
+            //
+            // if(TW.partialGraph.camera.ratio>showLabelsIfZoom){
+            //     for(var i in nds){
+            //             n=nds[i];
+            //             if(n.hidden==false){
+            //                 distance = Math.sqrt(
+            //                     Math.pow((x-parseInt(n.displayX)),2) +
+            //                     Math.pow((y-parseInt(n.displayY)),2)
+            //                     );
+            //                 if(parseInt(distance)<=cursor_size) {
+            //                     n.forceLabel=true;
+            //                 } else {
+            //                     if(typeof(n.neighbour)!=="undefined") {
+            //                         if(!n.neighbour) n.forceLabel=false;
+            //                     } else n.forceLabel=false;
+            //                 }
+            //             }
+            //     }
+            //     if(TW.partialGraph.forceatlas2 && TW.partialGraph.forceatlas2.count<=1) {
+            //         TW.partialGraph.refresh({skipIndexation:true})
+            //     }
+            // } else {
+            //     for(var i in nds){
+            //         n=nds[i];
+            //         if(!n.hidden){
+            //             n.forceLabel=false;
+            //             if(typeof(n.neighbour)!=="undefined") {
+            //                 if(!n.neighbour) n.forceLabel=false;
+            //                 else n.forceLabel=true;
+            //             } else n.forceLabel=false;
+            //         }
+            //     }
+            //     if(TW.partialGraph.forceatlas2 && TW.partialGraph.forceatlas2.count<=1) {
+            //         TW.partialGraph.refresh({skipIndexation:true})
+            //     }
+            // }
             ctx.arc(x, y, cursor_size, 0, Math.PI * 2, true);
             //ctx.arc(TW.partialGraph._core.width/2, TW.partialGraph._core.height/2, 4, 0, 2 * Math.PI, true);/*todel*/
             ctx.closePath();
