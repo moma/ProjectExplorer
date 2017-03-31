@@ -13,13 +13,13 @@
 .loader{
     text-align:center;
     transform: translate(0, 50%) !important;
-    -ms-transform: translate(0, 50%) !important;  /*IE 9*/ 
+    -ms-transform: translate(0, 50%) !important;  /*IE 9*/
     -webkit-transform: translate(0, 50%) !important;  /*Safari and Chrome */
 }
 
 
 
-.navbar { 
+.navbar {
 	margin-bottom:1px;
 }
 
@@ -34,7 +34,7 @@
 
 /* searchnav gets same padding as bootstrap's .navbar-nav > li > a */
 #defaultop div#searchnav {
-    padding-top: 13px; 
+    padding-top: 13px;
     padding-bottom: 9px;
 }
 
@@ -49,41 +49,53 @@
 }
 
 
-#sigma-example {
+#sigma-contnr {
     width: 100%;
     height: 300px;
-    position:relative;
+    position:absolute;
     float:left;
+    z-index: 1;
 }
 
-.clusters_legend {
+.legend_for_clusters {
     position:absolute;
     bottom:1px;
     left:1px;
     border:solid 1px red;
     font-size:xx-small;
 }
+/*  any block over the graph (legend, histogram...) */
+.over-panels {
+  z-index: 5 ; /* over the graph */
+  padding: 5px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  -border-radius: 3px;
+  -moz-box-shadow: 0px 2px 6px #000;
+  -webkit-box-shadow: 0px 2px 6px #000;
+  box-shadow: 0px 2px 6px #000;
+}
 
+
+
+/*
+.my-legend * {
+  position: relative;
+  z-index: 5;
+}*/
 .my-legend {
     position:fixed;
-    /* width: we set it smaller than #leftcolumn container's width */
-    width:16%;
+    z-index: 5;
+    /* width: we set it equal or smaller than #lefttopbox width */
+    width:18%;
     max-height: 40%;
     overflow-y:scroll;
     bottom:5px;
     left:5px;
-
     background-color:white;
     opacity: 0.8;
     color:#250587;
     margin: 7px;
-    padding: 5px;
-    -moz-border-radius: 3px;
-    -webkit-border-radius: 3px;
-    -border-radius: 3px;
-    -moz-box-shadow: 0px 2px 6px #000;
-    -webkit-box-shadow: 0px 2px 6px #000;
-    box-shadow: 0px 2px 6px #000;
 }
 
 .my-legend .legend-title {
@@ -187,10 +199,10 @@
 /*.selection-item{
     display:inline-block;
     border:solid 1px;
-    -moz-border-radius: 6px; 
-    -webkit-border-radius: 6px; 
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
     -khtml-border-radius: 6px;'+
-    border-color:#BDBDBD; 
+    border-color:#BDBDBD;
     padding:0px 2px 0px 2px;
     margin:1px 0px 1px 0px;
     cursor: pointer;
@@ -217,10 +229,10 @@
     display:inline-block;
     border:solid 1px;
     /*box-shadow: 0px 0px 0px 1px rgba(0,0,0,0.3); */
-    -moz-border-radius: 6px; 
-    -webkit-border-radius: 6px; 
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
     -khtml-border-radius: 6px;'+
-    border-color:#BDBDBD; 
+    border-color:#BDBDBD;
     padding:0px 2px 0px 2px;
     margin:1px 0px 1px 0px;
     cursor: pointer;
@@ -266,7 +278,7 @@
 }
 
 .gradient {
-    background-color: #f0f0f8; 
+    background-color: #f0f0f8;
     background-image: -webkit-radial-gradient(#ffffff, #d8d8e0); background-image: -moz-radial-gradient(#ffffff, #d8d8e0);
     /*background-color: #434343;*/
     /*background-image: linear-gradient(#434343, #282828);*/
@@ -376,23 +388,24 @@
     float: right; width: 100%; height: 100%; background-image: url("../img2/chat.png");
 }
 
-/* GESTION DE LA BARRE DE GAUCHE */
-.newleftbar {
-    /* TODO choix fond noir ou fond clair via variables less*/
-    background-color: inherit;
+
+/* GESTION DES PAVES DE GAUCHE (conteneur encore vide)*/
+#lefttopbox {
     position:fixed;
+    z-index: 5 ;   /* over the graph */
     left:0 ;
-    width:18% ;
-    height: 100%;
-    overflow: auto;
+    width:20% ;
+
+    /* hauteur ~ 200px (juste assez pour emballer la selection sans couvrir le graphe en dessous) */
+    height: auto;
+    overflow: hidden;
     text-align:center;
-    z-index: 100 ;   /* over the graph ? */
-    padding-top: .3em;
-    padding-bottom: 0;
-    padding-right: 1em;
-    padding-left: 1em;
+    padding: .3em 1em 1em 1em;
 }
 
+#current-selection {
+    width: 100%;  /* 100% within lefttopbox */
+}
 
 .leftarrow {
     background-position: -12px 0;
@@ -418,7 +431,7 @@
 }
 #tips ul{
     /*list-style:none;*/
-    padding-left:10%;    
+    padding-left:10%;
 }
 
 

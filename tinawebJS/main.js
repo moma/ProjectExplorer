@@ -196,7 +196,7 @@ if(RES["OK"]) {
     }
 
     // [ Initiating Sigma-Canvas ]
-    var twjs_ = new TinaWebJS('#sigma-example');
+    var twjs_ = new TinaWebJS('#sigma-contnr');
     console.log( twjs_.AdjustSigmaCanvas() );
 
 
@@ -253,9 +253,9 @@ if(RES["OK"]) {
     // ==================================================================
     TW.partialGraph = new sigma({
         graph: TW.graphData,
-        container: 'sigma-example',
+        container: 'sigma-contnr',
         renderer: {
-            container: document.getElementById('sigma-example'),
+            container: document.getElementById('sigma-contnr'),
             type: sigma.renderers.canvas
         },
         settings: customSettings

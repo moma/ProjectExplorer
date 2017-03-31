@@ -217,40 +217,11 @@
 <!-- £TODO wtf    </div> -->
     <div id="wrapper">
 
-      <!-- Sidebar left, new css -->
-      <div id="leftcolumn" class="newleftbar">
-
-        <!-- selected nodes -->
-        <div class="row">
-            <button id="unselectbutton"
-                style="color: #900;font-weight: bold;font-size: 70%;text-transform: uppercase;float:right;margin-right:.5em"
-                onClick='cancelSelection(false);'
-                title="Unselect these terms">
-              <span class="glyphicon glyphicon-remove" alt="X"></span>
-            </button>
-            <div id="names"></div>
-        </div>
-
-        <!-- histogram of selected nodes -->
-        <div class="row histogramModule">
-          <!-- filled by query (user search value) to wos api -->
-          <div id="search_histogram_wrapper" class="col-md-12">
-            <div id="search_histogram"></div>
-          </div>
-        </div><!-- /row -->
-
-
-        <!-- class="my-legend" (absolute position bottom) -->
-        <div id="legend_for_clusters"></div>
-      </div>
-
-
-
       <div id="zonecentre">
 
 
           <!-- Page content -->
-          <div id="sigma-example"></div>
+          <div id="sigma-contnr"></div>
 
           <div style="visibility: hidden;" id="sigma-othergraph"></div>
 
@@ -309,6 +280,39 @@
                   </li>
           </ul>
       </div>
+
+
+
+
+      <!-- inline *after* zonecentre for better overlay positioning -->
+          <!-- Sidebar top left -->
+          <div id="lefttopbox">
+
+            <!-- selected nodes -->
+            <div id="tw-current-selection">
+                <button id="unselectbutton"
+                    style="color: #900;font-weight: bold;font-size: 70%;text-transform: uppercase;float:right;margin-right:.5em"
+                    onclick='cancelSelection(false);'
+                    title="Unselect these terms">
+                  <span class="glyphicon glyphicon-remove" alt="X"></span>
+                </button>
+                <div id="names"></div>
+            </div>
+
+            <!-- histogram of selected nodes -->
+            <div class="histogramModule">
+              <!-- filled by query (user search value) to wos api -->
+              <div id="search_histogram" class="over-panels"></div>
+            </div><!-- /row -->
+          </div>
+
+
+          <!-- class="my-legend" (absolute position bottom left) -->
+          <div id="legend_for_clusters" class="over-panels"></div>
+
+
+
+
 
       <!-- Sidebar right, old css -->
       <div id="rightcolumn">

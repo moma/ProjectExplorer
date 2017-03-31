@@ -660,8 +660,8 @@ TinaWebJS = function ( sigmacanvas ) {
                         "right": (sidebar.width()+10)+"px"
                 }, { duration: 400, queue: false });
 
-                // $('#sigma-example').width(fullwidth-sidebar.width());
-                $('#sigma-example').animate({
+                // $('#sigma-contnr').width(fullwidth-sidebar.width());
+                $('#sigma-contnr').animate({
                         "width": fullwidth-sidebar.width()+"px"
                 }, { duration: 400, queue: false });
                 setTimeout(function() {
@@ -680,8 +680,8 @@ TinaWebJS = function ( sigmacanvas ) {
                         "right": "0px"
                 }, { duration: 400, queue: false });
 
-                    // $('#sigma-example').width(fullwidth);
-                $('#sigma-example').animate({
+                    // $('#sigma-contnr').width(fullwidth);
+                $('#sigma-contnr').animate({
                         "width": fullwidth+"px"
                 },{ duration: 400, queue: false });
                 setTimeout(function() {
@@ -779,7 +779,7 @@ TinaWebJS = function ( sigmacanvas ) {
         })
 
 
-        // $('#sigma-example').dblclick(function(event) {// using SelectionEngine
+        // $('#sigma-contnr').dblclick(function(event) {// using SelectionEngine
         //     var area = {}
         //
         //     // TODO replace
@@ -810,7 +810,7 @@ TinaWebJS = function ( sigmacanvas ) {
 
         // Simple Click
         //  external usage: SelectorEngine()
-        $("#sigma-example")
+        $("#sigma-contnr")
 
             .mousemove(function(event){
                 if(!isUndef(partialGraph)) {
