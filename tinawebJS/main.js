@@ -261,6 +261,10 @@ if(RES["OK"]) {
         settings: customSettings
     });
 
+    // shortcuts to the renderer and camera
+    TW.rend = TW.partialGraph.renderers[0]
+    TW.cam  = TW.partialGraph.camera
+
     // useful
     TW.partialGraph.nNodes = TW.partialGraph.graph.nodes().length
     TW.partialGraph.nEdges = TW.partialGraph.graph.edges().length

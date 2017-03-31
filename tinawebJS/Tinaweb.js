@@ -720,7 +720,8 @@ TinaWebJS = function ( sigmacanvas ) {
         // [TODO] - simple click, area
 
         // one node:
-        TW.partialGraph.bind('clickNode', function(e, node) {
+        TW.partialGraph.bind('clickNode', function(e) {
+          console.log("clickNode event node", e.data.node)
           // new sigma.js gives easy access to clicked node!
           theNodeId = e.data.node.id
           cancelSelection(false);
@@ -808,8 +809,30 @@ TinaWebJS = function ( sigmacanvas ) {
         //     trackMouse(event);
         // });
 
-        // Simple Click
-        //  external usage: SelectorEngine()
+
+
+        // goTo (move/zoom) events
+        var zoomTimeoutId = null
+        TW.cam.bind('coordinatesUpdated', function(e) {
+          // debounce
+          if (zoomTimeoutId) {
+            window.clearTimeout(zoomTimeoutId)
+            zoomTimeoutId = null
+            // console.log("forget last auto cursor, new one is coming")
+          }
+          // schedule next
+          zoomTimeoutId = window.setTimeout(
+            // make zoom slider cursor follow scroll
+            function(){
+              $("#zoomSlider").slider("value",1/TW.cam.ratio)
+              // console.log('auto cursor on val', 1/TW.cam.ratio , "( ratio:", TW.cam.ratio,")" )
+            },
+            250
+          )
+        })
+
+
+        // raw events (non-sigma): handlers attached to the container
         $("#sigma-contnr")
 
             .mousemove(function(event){
@@ -872,37 +895,41 @@ TinaWebJS = function ( sigmacanvas ) {
 
 
 
+
         $("#zoomSlider").slider({
             orientation: "vertical",
 
             // new sigma.js current zoom ratio
             value: partialGraph.camera.ratio,
-            min: sigmaJsMouseProperties.minRatio,
-            max: sigmaJsMouseProperties.maxRatio,
-            range: "min",
-            step: 0.1,
+            min: 1 / sigmaJsMouseProperties.maxRatio,
+            max: 1 / sigmaJsMouseProperties.minRatio,
+            // range: true,
+            step: 1,
+            value: 1,
             slide: function( event, ui ) {
-                console.log("*******lalala***********")
-                console.log(partialGraph.camera.ratio)
-                console.log(sigmaJsMouseProperties.minRatio)
-                console.log(sigmaJsMouseProperties.maxRatio)
-                partialGraph.zoomTo(
-                    TW.partialGraph.renderers[0].width / 2,
-                    TW.partialGraph.renderers[0].height / 2,
-                    ui.value);
+                partialGraph.camera.goTo({
+                    // POSS: make a transform to increase detail around x = 1
+                    ratio: 1 / ui.value
+                });
             }
         });
 
         $("#zoomPlusButton").click(function () {
-            partialGraph.zoomTo(TW.partialGraph.renderers[0].width / 2, TW.partialGraph.renderers[0].height / 2, partialGraph._core.mousecaptor.ratio * 1.5);
-            $("#zoomSlider").slider("value",partialGraph.position().ratio);
-            return false;
+            var newRatio = TW.cam.ratio * .75
+            if (newRatio >= sigmaJsMouseProperties.minRatio) {
+              // triggers coordinatesUpdated which sets the slider cursor
+              partialGraph.camera.goTo({ratio: newRatio});
+              return false;
+            }
         });
 
         $("#zoomMinusButton").click(function () {
-            partialGraph.zoomTo(TW.partialGraph.renderers[0].width / 2, TW.partialGraph.renderers[0].height / 2, partialGraph._core.mousecaptor.ratio * 0.5);
-            $("#zoomSlider").slider("value",partialGraph.position().ratio);
+          var newRatio = TW.cam.ratio * 1.25
+          if (newRatio <= sigmaJsMouseProperties.maxRatio) {
+            // triggers coordinatesUpdated which sets the slider cursor
+            partialGraph.camera.goTo({ratio: newRatio});
             return false;
+          }
         });
 
         $("#edgesButton").click(function () {
