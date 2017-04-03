@@ -490,28 +490,31 @@ TinaWebJS = function ( sigmacanvas ) {
                     for(j=0;j<matches.length;j++){
                         coincidences.push(matches[j].id)
                     }
-                    $.doTimeout(30,function (){
-                        targeted = SelInst.SelectorEngine( {
-                                        addvalue:checkBox,
-                                        clicktype:"double",
-                                        prevsels:selections,
-                                        currsels:coincidences
-                                    } )
+                    setTimeout(
+                      function (){
+                          targeted = SelInst.SelectorEngine( {
+                                          addvalue:checkBox,
+                                          clicktype:"double",
+                                          prevsels:selections,
+                                          currsels:coincidences
+                                      } )
 
-                        // tricky stuff for simulating a multiple selection D:
-                        // ... to be improved in the future ...
-                        var prev_cursor_size = cursor_size;
-                        if(targeted.length>0) {
-                            cursor_size = (cursor_size==0)? 1 : cursor_size;
-                            cancelSelection(false);
-                            SelInst.MultipleSelection2({nodes:targeted});
-                            cursor_size = prev_cursor_size;
-                        }
-                        TW.partialGraph.draw();
+                          // tricky stuff for simulating a multiple selection D:
+                          // ... to be improved in the future ...
+                          var prev_cursor_size = cursor_size;
+                          if(targeted.length>0) {
+                              cursor_size = (cursor_size==0)? 1 : cursor_size;
+                              cancelSelection(false);
+                              SelInst.MultipleSelection2({nodes:targeted});
+                              cursor_size = prev_cursor_size;
+                          }
+                          TW.partialGraph.draw();
 
-                        $("input#searchinput").val("");
-                        $("input#searchinput").autocomplete( "close" );
-                    });
+                          $("input#searchinput").val("");
+                          $("input#searchinput").autocomplete( "close" );
+                      },
+                      30
+                    )
                     //$("input#searchinput").trigger('autocompleteclose');
                 }
 
@@ -535,23 +538,25 @@ TinaWebJS = function ( sigmacanvas ) {
                 var exfnd = exactfind( $("#searchinput").val() )
                 if (exfnd!=null) {
                     console.log("search KEY UP");
-                    $.doTimeout(30,function (){
+                    setTimeout(
+                      function() {
+                        targeted = SelInst.SelectorEngine( {
+                                    addvalue:checkBox,
+                                    clicktype:"double",
+                                    prevsels:selections,
+                                    currsels:[exfnd.id]
+                                } )
+                        if(targeted.length>0) {
+                            cancelSelection(false);
+                            SelInst.MultipleSelection2({nodes:targeted});
+                        }
+                        TW.partialGraph.draw();
 
-                            targeted = SelInst.SelectorEngine( {
-                                        addvalue:checkBox,
-                                        clicktype:"double",
-                                        prevsels:selections,
-                                        currsels:[exfnd.id]
-                                    } )
-                            if(targeted.length>0) {
-                                cancelSelection(false);
-                                SelInst.MultipleSelection2({nodes:targeted});
-                            }
-                            TW.partialGraph.draw();
-
-                            $("input#searchinput").val("");
-                            $("input#searchinput").autocomplete( "close" );
-                    });
+                        $("input#searchinput").val("");
+                        $("input#searchinput").autocomplete( "close" );
+                      },
+                      30
+                    )
                 }
             }
         });
@@ -571,10 +576,13 @@ TinaWebJS = function ( sigmacanvas ) {
         body.style.paddingTop="41px";
 
         $('.etabs').click(function(){
-            $.doTimeout(500,function () {
+            setTimeout(
+              function() {
                 $("#opossiteNodes").readmore({maxHeight:200});
                 $("#sameNodes").readmore({maxHeight:200});
-            });
+              },
+              500
+            )
         });
 
         $("#changetype").click(function(){
@@ -583,9 +591,9 @@ TinaWebJS = function ( sigmacanvas ) {
             partialGraph.stopForceAtlas2();
             changeType();
 
-            $.doTimeout(500,function (){
-                $('.etabs a[href="#tabs1"]').trigger('click');
-            });
+            setTimeout(function(){
+              $('.etabs a[href="#tabs1"]').trigger('click');
+            },500)
             ChangeGraphAppearanceByAtt(true)
             console.log(" ############  / changeTYPE click");
             console.log("")
@@ -924,7 +932,7 @@ TinaWebJS = function ( sigmacanvas ) {
             value:0,
             bgcolor:"#27c470",
             onchange:function(value){
-                $.doTimeout(100,function (){
+                setTimeout(function (){
                    // new sigma.js loop on nodes POSS optimize
                    nds  = TW.partialGraph.graph.nodes()
                    console.log("init: slider resize")
@@ -938,7 +946,8 @@ TinaWebJS = function ( sigmacanvas ) {
                        }
                    }
                    partialGraph.refresh({skipIndexation:true})
-                });
+                },
+                100);
             }
         });
 
@@ -950,7 +959,7 @@ TinaWebJS = function ( sigmacanvas ) {
             value:0,
             bgcolor:"#FFA500",
             onchange:function(value){
-                $.doTimeout(100,function (){
+                setTimeout(function (){
                     // new sigma.js loop on nodes POSS optimize
                     nds  = TW.partialGraph.graph.nodes()
                     console.log("init: slider resize")
@@ -964,7 +973,8 @@ TinaWebJS = function ( sigmacanvas ) {
                         }
                     }
                     partialGraph.refresh({skipIndexation:true})
-                });
+                },
+                100);
             }
         });
 

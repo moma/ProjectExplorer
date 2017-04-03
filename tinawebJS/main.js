@@ -371,7 +371,7 @@ if(RES["OK"]) {
             value:0,
             bgcolor:"#FFA500",
             onchange:function(value){
-                $.doTimeout(100,function (){
+                setTimeout(function (){
                        // POSS: custom index by n.type
                        var nds = TW.partialGraph.graph.nodes()
                        for (var j in nds) {
@@ -383,7 +383,8 @@ if(RES["OK"]) {
                          }
                        }
                        TW.partialGraph.refresh({skipIndexation:true});
-                });
+                },
+                100);
             }
         });
 
@@ -418,9 +419,12 @@ if(RES["OK"]) {
     if( categories.length==1 ) {
         $("#changetype").hide();
         $("#taboppos").remove();
-        $.doTimeout(500,function () {
-            $('.etabs a[href="#tabs2"]').trigger('click');
-        });
+
+        if (TW.catSem && TW.catSoc) {
+          setTimeout(function () {
+              document.querySelector('.etabs a[href="#tabs2"]').click()
+          }, 500);
+        }
     }
 
     ChangeGraphAppearanceByAtt(true)

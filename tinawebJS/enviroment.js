@@ -462,9 +462,12 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
             if(filtervalue!=lastFilter[sliderDivID]["last"]) {
 
-                $.doTimeout(sliderDivID+"_"+lastFilter[sliderDivID]["last"]);
+                // ? new sigma js: can't port this line because usage unclear ?
+                // $.doTimeout(sliderDivID+"_"+lastFilter[sliderDivID]["last"]);
 
-                $.doTimeout( sliderDivID+"_"+filtervalue,300,function () {
+
+                // sliderDivID+"_"+filtervalue
+                setTimeout(function () {
 
                     console.log("\nprevious value "+lastvalue+" | current value "+filtervalue)
 
@@ -562,19 +565,20 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                     // console.log("\t\tedgesfilter:")
                     // console.log("\t\t[ Starting FA2 ]")
                     // [ Starting FA2 ]
-                    $.doTimeout(10,function(){
+                    setTimeout(function(){
                         fa2enabled=true; TW.partialGraph.startForceAtlas2();
-                        // $.doTimeout(10,function(){
-                        //     TW.partialGraph.stopForceAtlas2();
-                        // });
-                    });
+                        setTimeout(function(){
+                            TW.partialGraph.stopForceAtlas2();
+                        },
+                        5000);
+                    },
+                    10,);
                     // [ / Starting FA2 ]
 
                     lastvalue = filtervalue;
-                });
+                }, 300);
                 pushFilterValue( sliderDivID , filtervalue )
             }
-
         }
     });
 }
@@ -677,12 +681,14 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
                 TW.partialGraph.refresh()
 
                 // [ Starting FA2 ]
-                $.doTimeout(10,function(){
-                    fa2enabled=true; TW.partialGraph.startForceAtlas2();
-                    // $.doTimeout(10,function(){
-                    //     TW.partialGraph.stopForceAtlas2();
-                    // });
-                });
+                setTimeout(function() {
+                  fa2enabled = true
+                  TW.partialGraph.startForceAtlas2()
+                  setTimeout(function() {
+                    TW.partialGraph.stopForceAtlas2()
+                    fa2enabled = false
+                  }, 5000)
+                }, 10)
                 // [ / Starting FA2 ]
             }
 

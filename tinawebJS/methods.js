@@ -158,11 +158,10 @@ function RefreshState(newNOW){
         if ( semanticConverged ) {
             $("#semLoader").hide();
             $("#category-B").show();
-            $.doTimeout(30,function (){
-                EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
-                NodeWeightFilter ( "#sliderBNodeWeight"  , "NGram", "type" , "size");
-
-            });
+            setTimeout(function(){
+              EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
+              NodeWeightFilter ( "#sliderBNodeWeight"  , "NGram", "type" , "size");
+            },30)
         } else {
             $("#semLoader").css('visibility', 'visible');
             $("#semLoader").show();
