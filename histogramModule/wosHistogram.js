@@ -41,6 +41,7 @@ var $search_histogram = $("#search_histogram")
 
 //method for calling the ISC-API and get pubs-distribution of the suggested term
 function search_proposed_terms_and_draw( the_queries ) {
+
     // console.log("search_proposed_terms_and_draw:\n"
     //            +"i'm searching:\n"
     //            +JSON.stringify(the_queries)) ;
@@ -94,8 +95,8 @@ function search_proposed_terms_and_draw( the_queries ) {
         },
 
         error: function(exception) {
-            console.log("search_proposed_terms_and_draw:exception"
-                        + JSON.stringify(exception))
+            // console.log("search_proposed_terms_and_draw:exception"
+            //             + JSON.stringify(exception))
             $search_histogram
                 .html('<p class="micromessage">'
                      +'<b>No histogram</b>: too many nodes selected</b>'
@@ -106,7 +107,7 @@ function search_proposed_terms_and_draw( the_queries ) {
 
 // gotNodeSet event when Tinawab did main search behavior (select nodes)
 $("#searchinput").on("tw:gotNodeSet", function(e) {
-    // console.log("event 'nodes' --> the event's nodes: " + JSON.stringify(e.nodeIds)) ;
+    // console.warn("event 'nodes' --> the event's nodes: " + JSON.stringify(e.nodeIds)) ;
     clean_histogram() ;
 
     // now we may want to do other things (draw histogram, suggest term)
@@ -116,13 +117,14 @@ $("#searchinput").on("tw:gotNodeSet", function(e) {
 
 // eraseNodeSet event when Tinawab canceled the previous selections
 $("#searchinput").on("tw:eraseNodeSet", function(e) {
-    // console.log("event 'erase'") ;
+    // console.warn("event 'erase'") ;
     clean_histogram() ;
     $search_histogram.hide() ;
 });
 
 // emptyNodeSet event when Tinaweb search found nothing
 $("#searchinput").on("tw:emptyNodeSet", function(e) {
+    // console.warn("event 'not found'") ;
     clean_histogram() ;
     $search_histogram.hide() ;
 });

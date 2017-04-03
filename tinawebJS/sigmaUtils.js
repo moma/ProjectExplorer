@@ -270,9 +270,10 @@ function find(lquery){
     if (typeof lquery == 'string' && lquery.length > 0) {
         lquery=lquery.toLowerCase() ;
         var nds = getnodes()
+        // console.log("FIND: looking among nodes", nds)
         for(var i in nds){
             var n=nds[i];
-            if(n.hidden==false){
+            if(! n.hidden){
                 var possiblematch=n.label.toLowerCase()
                 // string.indexOf(substring) faster than search/match
                 if (possiblematch.indexOf(lquery)!==-1) {
