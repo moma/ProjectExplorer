@@ -64,41 +64,23 @@ function ChangeGraphAppearanceByAtt( manualflag ) {
     // console.log( AttsDict_sorted )
 
 
-    var div_info = "";
+    var color_menu_info = "";
 
-    if( $( ".colorgraph_div" ).length>0 )
-        div_info += '<ul id="colorGraph" class="nav navbar-nav navbar-right">'
+    if( $( "#colorgraph-menu" ).length>0 ){
+      for (var i in AttsDict_sorted) {
+          var att_s = AttsDict_sorted[i].key;
+          var att_c = AttsDict_sorted[i].value;
+          var the_method = "clustersBy"
 
-    div_info += ' <li class="dropdown">'
-    div_info += '<a href="#" class="dropdown-toggle" data-toggle="dropdown">'
-    div_info += '        <img title="Set Colors" src="libs/img2/colors.png" width="20px"><b class="caret"></b></img>'
-    div_info += '</a>'
-    div_info += '  <ul class="dropdown-menu">'
+          // variants
+          if(att_s.indexOf("clust")>-1) the_method = "colorsBy"
+          if(att_s == "growth_rate") the_method = "colorsRelByBins"
+          if(att_s == "age") the_method = "colorsRelByBins"
 
-    for (var i in AttsDict_sorted) {
-        var att_s = AttsDict_sorted[i].key;
-        var att_c = AttsDict_sorted[i].value;
-        var the_method = "clustersBy"
-
-        // variants
-        if(att_s.indexOf("clust")>-1) the_method = "colorsBy"
-        if(att_s == "growth_rate") the_method = "colorsRelByBins"
-        if(att_s == "age") the_method = "colorsRelByBins"
-
-        div_info += '<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+att_s+'('+att_c+')'+'</a></li>'
-        // console.log('<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+att_s+'('+att_c+')'+'</a></li>')
-    }
-    div_info += '  </ul>'
-    div_info += ' </li>'
-
-    console.log('$( ".colorgraph_div" ).length')
-    console.log($( ".colorgraph_div" ).length)
-    if( $( ".colorgraph_div" ).length>0 )   {
-        div_info += '</ul>'
-        $( div_info ).insertAfter(".colorgraph_div");
-        $( ".colorgraph_div" ).remove();
-    } else {
-        $("#colorGraph").html(div_info)
+          color_menu_info += '<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+att_s+'('+att_c+')'+'</a></li>'
+          // console.log('<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+att_s+'('+att_c+')'+'</a></li>')
+      }
+      $("#colorgraph-menu").html(color_menu_info)
     }
 }
 

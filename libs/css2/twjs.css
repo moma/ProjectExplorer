@@ -65,7 +65,7 @@ html, body {
 }
 
 .navbar-higher {
-  padding-top: 5px !important;
+  padding-top: 12px !important;
 }
 .navbar-lower {
   padding-top: 15px !important;
@@ -217,7 +217,7 @@ p.micromessage{
 /* SIDEBAR CONTENT */
 
 #sidebar {
-  padding: 0 5px;
+  padding: 5px 0 0 5px;
 }
 
 #tips{
