@@ -447,7 +447,7 @@ function trackMouse(e) {
             ctx.beginPath();
 
             // labels appear
-            var nds = TW.partialGraph.graph.nodes()
+            // var nds = TW.partialGraph.graph.nodes()
 
             // TODO replace by a hover binding (and POSS use quadtree zone)
             //

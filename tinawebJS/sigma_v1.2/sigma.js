@@ -11431,7 +11431,7 @@
 
         self.dispatchEvent('click', e.data);
 
-        nodes = getNodes(e);
+        nodes = getNodes(e); /// <----------- cf. classic tina "targeted"
         edges = getEdges(e);
 
         if (nodes.length) {

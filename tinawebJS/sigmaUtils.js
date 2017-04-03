@@ -163,14 +163,18 @@ SigmaUtils = function () {
       };
 
 
+      this.toggleEdges = function() {
+        var now_flag = TW.partialGraph.settings('drawEdges')
+        TW.partialGraph.settings('drawEdges', !now_flag)
+        TW.partialGraph.refresh({skipIndexation:true})
+      }
+
+
+
 
     // ================ /alternative rendering =====================
 
 }
-
-
-
-
 
 //for socialgraph
 function showMeSomeLabels(N){
@@ -240,24 +244,25 @@ function getedges(){
 }
 
 function getVisibleEdges() {
-	return TW.partialGraph.graph.edges().filter(function(e) {
+  // new sigma js POSS custom index to avoid loop
+  return TW.partialGraph.graph.edges().filter(function(e) {
                 return !e['hidden'];
-    });
+  });
 }
 
 function getVisibleNodes() {
-    return TW.partialGraph.graph.nodes().filter(function(n) {
-                return !n['hidden'];
-    });
+  // new sigma js POSS custom index to avoid loop
+  return TW.partialGraph.graph.nodes().filter(function(n) {
+              return !n['hidden'];
+  });
 }
 
 
 function getNodesByAtt(att) {
-    return TW.partialGraph._core.graph.nodes.filter(function(n) {
+    return TW.partialGraph.graph.nodes().filter(function(n) {
                 return n['type']==att;
     });
 }
-
 
 // new sigma.js
 function find(lquery){
@@ -426,28 +431,15 @@ function clustersBy(daclass) {
     //    [ / Scaling node colours(0-255) and sizes(3-5) ]
 
 
-    TW.partialGraph.refresh({skipIndexation: true});
 
 
     //    [ Edge-colour by source-target nodes-colours combination ]
-    var v_edges = getVisibleEdges();
-    for(var e in v_edges) {
-        var e_id = v_edges[e].id;
-        var a = v_edges[e].source.color;
-        var b = v_edges[e].target.color;
-        a = hex2rga(a);
-        b = hex2rga(b);
-        var r = (a[0] + b[0]) >> 1;
-        var g = (a[1] + b[1]) >> 1;
-        var b = (a[2] + b[2]) >> 1;
-        TW.partialGraph.graph.edges(e_id).color = "rgba("+[r,g,b].join(",")+",0.5)";
-    }
+    repaintEdges()
     //    [ / Edge-colour by source-target nodes-colours combination ]
 
     set_ClustersLegend ( null )
 
-    TW.partialGraph.refresh();
-    TW.partialGraph.draw();
+    TW.partialGraph.refresh({skipIndexation: true});
 }
 
 
@@ -455,6 +447,22 @@ function clustersBy(daclass) {
 var totalsPerBinMin = {
     '-1000000':0, '-75':0, '-50':0, '-25':0, '-10':0, '10':0, '25':0, '50':0, '75':0, '100':0, '125':0, '150':0
   }
+
+// Edge-colour by source-target nodes-colours combination
+function repaintEdges() {
+  var v_edges = getVisibleEdges();
+  for(var e in v_edges) {
+      var e_id = v_edges[e].id;
+      var a = TW.partialGraph.graph.nodes(v_edges[e].source).color;
+      var b = TW.partialGraph.graph.nodes(v_edges[e].target).color;
+      a = hex2rga(a);
+      b = hex2rga(b);
+      var r = (a[0] + b[0]) >> 1;
+      var g = (a[1] + b[1]) >> 1;
+      var b = (a[2] + b[2]) >> 1;
+      TW.partialGraph.graph.edges(e_id).color = "rgba("+[r,g,b].join(",")+",0.5)";
+  }
+}
 
 // rewrite of clustersBy with binning and for attributes that can have negative float values
 function colorsRelByBins(daclass) {
@@ -528,29 +536,14 @@ function colorsRelByBins(daclass) {
         }
     }
 
-    TW.partialGraph.refresh();
-    TW.partialGraph.draw();
-
 
     //    [ Edge-colour by source-target nodes-colours combination ]
-    var v_edges = getVisibleEdges();
-    for(var e in v_edges) {
-        var e_id = v_edges[e].id;
-        var a = v_edges[e].source.color;
-        var b = v_edges[e].target.color;
-        a = hex2rga(a);
-        b = hex2rga(b);
-        var r = (a[0] + b[0]) >> 1;
-        var g = (a[1] + b[1]) >> 1;
-        var b = (a[2] + b[2]) >> 1;
-        TW.partialGraph._core.graph.edgesIndex[e_id].color = "rgba("+[r,g,b].join(",")+",0.5)";
-    }
+    repaintEdges()
     //    [ / Edge-colour by source-target nodes-colours combination ]
 
     set_ClustersLegend ( null )
 
-    TW.partialGraph.refresh();
-    TW.partialGraph.draw();
+    TW.partialGraph.refresh({skipIndexation: true});
 }
 
 

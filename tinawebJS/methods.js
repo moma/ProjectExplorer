@@ -174,7 +174,7 @@ function RefreshState(newNOW){
         $("#category-B").show();
     }
 
-    TW.partialGraph.draw();
+    TW.partialGraph.refresh({skipIndexation: true});
 
 }
 

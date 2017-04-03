@@ -22,65 +22,65 @@ SelectionEngine = function() {
 
         return clickedNodes.map(Number);
     }).index();
-
-    this.SelectorEngine_part02 = (function( addvalue , clicktype , prevsels , currsels ) {
-
-        console.log("Add[]:")
-        console.log(addvalue)
-        console.log("clicktype:")
-        console.log(clicktype)
-        console.log("prevsels:")
-        console.log(prevsels)
-        console.log("currsels:")
-        console.log(currsels)
-        console.log(" - - - - - - ")
-
-        var buffer = Object.keys(prevsels).map(Number).sort(this.sortNumber);
-        var targeted = currsels.map(Number).sort(this.sortNumber);
-
-        if(clicktype=="double" && targeted.length==0) return [];
-
-        // if(targeted.length>0) {
-        if(buffer.length>0) {
-            if(JSON.stringify(buffer)==JSON.stringify(targeted)) {
-                // this is just effective for Add[ ] ...
-                // If previous selection is equal to the current one, you've nothing :D
-                cancelSelection(false);
-                return [];
-            }
-            var inter = this.intersect_safe(buffer,targeted)
-            if(inter.length>0) {
-                var blacklist = {} , whitelist = {};
-                for(var i in inter) blacklist[inter[i]]=true;
-                for(var i in buffer){
-                    e = buffer[i]
-                    if(!blacklist[e]) {
-                        whitelist[e] = true;
-                    }
-                }
-                for(var i in targeted){
-                    e = targeted[i]
-                    if(!blacklist[e]) {
-                        whitelist[e] = true;
-                    }
-                }
-                targeted = Object.keys(whitelist).map(Number);
-            } else {// inter = 0 ==> click in other portion of the graph (!= current selection)
-                // Union!
-                if(addvalue) {
-                    targeted = targeted.concat(buffer.filter(function (item) {
-                        return targeted.indexOf(item) < 0;
-                    }));
-                }
-                return targeted;
-            }
-        } else return targeted;
-        // }
-
-        return targeted;
-    }).index();
+    //
+    // this.SelectorEngine_part02 = (function( addvalue , clicktype , prevsels , currsels ) {
+    //
+    //     console.log("Add[]:")
+    //     console.log(addvalue)
+    //     console.log("clicktype:")
+    //     console.log(clicktype)
+    //     console.log("prevsels:")
+    //     console.log(prevsels)
+    //     console.log("currsels:")
+    //     console.log(currsels)
+    //     console.log(" - - - - - - ")
+    //
+    //     var buffer = Object.keys(prevsels).map(Number).sort(this.sortNumber);
+    //     var targeted = currsels.map(Number).sort(this.sortNumber);
+    //
+    //     if(clicktype=="double" && targeted.length==0) return [];
+    //
+    //     // if(targeted.length>0) {
+    //     if(buffer.length>0) {
+    //         if(JSON.stringify(buffer)==JSON.stringify(targeted)) {
+    //             // this is just effective for Add[ ] ...
+    //             // If previous selection is equal to the current one, you've nothing :D
+    //             cancelSelection(false);
+    //             return [];
+    //         }
+    //         var inter = this.intersect_safe(buffer,targeted)
+    //         if(inter.length>0) {
+    //             var blacklist = {} , whitelist = {};
+    //             for(var i in inter) blacklist[inter[i]]=true;
+    //             for(var i in buffer){
+    //                 e = buffer[i]
+    //                 if(!blacklist[e]) {
+    //                     whitelist[e] = true;
+    //                 }
+    //             }
+    //             for(var i in targeted){
+    //                 e = targeted[i]
+    //                 if(!blacklist[e]) {
+    //                     whitelist[e] = true;
+    //                 }
+    //             }
+    //             targeted = Object.keys(whitelist).map(Number);
+    //         } else {// inter = 0 ==> click in other portion of the graph (!= current selection)
+    //             // Union!
+    //             if(addvalue) {
+    //                 targeted = targeted.concat(buffer.filter(function (item) {
+    //                     return targeted.indexOf(item) < 0;
+    //                 }));
+    //             }
+    //             return targeted;
+    //         }
+    //     } else return targeted;
+    //     // }
+    //
+    //     return targeted;
+    // }).index();
     // ----------------------------------------------------------8<-------------
-
+    //
     this.SelectorEngine = (function( cursorsize , area , addvalue , clicktype , prevsels , currsels ) {
         var targeted = []
         var buffer = Object.keys(prevsels).map(Number).sort(this.sortNumber);
@@ -150,6 +150,7 @@ SelectionEngine = function() {
 
         return targeted;
     }).index();
+
 
     // uses: SelectorEngine() and MultipleSelection2()
     // we assume string is normalized
@@ -508,7 +509,7 @@ TinaWebJS = function ( sigmacanvas ) {
                               SelInst.MultipleSelection2({nodes:targeted});
                               cursor_size = prev_cursor_size;
                           }
-                          TW.partialGraph.draw();
+                          TW.partialGraph.refresh({skipIndexation: true});
 
                           $("input#searchinput").val("");
                           $("input#searchinput").autocomplete( "close" );
@@ -550,7 +551,7 @@ TinaWebJS = function ( sigmacanvas ) {
                             cancelSelection(false);
                             SelInst.MultipleSelection2({nodes:targeted});
                         }
-                        TW.partialGraph.draw();
+                        TW.partialGraph.refresh({skipIndexation: true});
 
                         $("input#searchinput").val("");
                         $("input#searchinput").autocomplete( "close" );
@@ -692,10 +693,18 @@ TinaWebJS = function ( sigmacanvas ) {
           // new sigma.js gives easy access to clicked node!
           theNodeId = e.data.node.id
           cancelSelection(false);
-          SelInst.MultipleSelection2({nodes:[theNodeId]})
+
+          if (cursor_size == 0) {
+            // sigma already provided us the target
+            SelInst.MultipleSelection2({nodes:[theNodeId]})
+          }
+          // case with a selector circle cursor
+          else {
+            // cf TODO mousedown
+          }
         })
 
-            // TODO
+            // TODO re-connect area click
             // TW.partialGraph.bind('click', function(e) {
             //   console.log("===click===");
             //   console.log("e", e);
@@ -734,48 +743,46 @@ TinaWebJS = function ( sigmacanvas ) {
             //         );
             //  }
             // }
+            //
+            // FOLLOW UP in v1 customized:
+            // ===========================
+            //     .mousedown(function(e) { // using SelectionEngine
+            //         //left click!<- normal click
+            //         if(e.which==1){
+            //             console.warn('new sigma.js FIX event bindings for downgraph, upgraph')
+            //             partialGraph.dispatchEvent(
+            //                 e['type'] == 'mousedown' ?
+            //                 'downgraph' :
+            //                 'upgraph'
+            //             );
+            //             var area = {}
+            //
+            //
+            //             // new sigma.js: (x,y) from event -- TODO check if convert coords
+            //             area.x1 = sigma.utils.getX(e);
+            //             area.y1 = sigma.utils.getY(e);
+            //
+            //             // old version
+            //             // area.x1 = partialGraph._core.mousecaptor.mouseX;
+            //             // area.y1 = partialGraph._core.mousecaptor.mouseY;
+            //
+            //             var targeted = SelInst.SelectorEngine( {
+            //                                 cursorsize:cursor_size,
+            //                                 area:area,
+            //                                 addvalue:checkBox,
+            //                                 clicktype:"simple",
+            //                                 prevsels:selections
+            //                             } )
+            //             if(targeted.length>0) {
+            //                 cancelSelection(false);
+            //                 SelInst.MultipleSelection2( {nodes:targeted} )
+            //             }
+            //             partialGraph.refresh({skipIndexation:true});
+            //             trackMouse(e);
+            //         }
+            //     });
+
             // -------------------------------------------/fragment from v1.customized
-
-
-
-        // Double Click
-        //  external usage: SelectorEngine_part01() and SelectorEngine_part02()
-
-        TW.partialGraph.bind('doubleClickNode', function(e) {
-          console.log("===doubleClickNode===");
-          console.log("e", e);
-        })
-
-
-        // $('#sigma-contnr').dblclick(function(event) {// using SelectionEngine
-        //     var area = {}
-        //
-        //     // TODO replace
-        //     console.log("customdoubleclick", event)
-        //     area.x1 = partialGraph._core.mousecaptor.mouseX;
-        //     area.y1 = partialGraph._core.mousecaptor.mouseY;
-        //
-        //     targeted = SelInst.SelectorEngine_part01({
-        //                     cursorsize:cursor_size,
-        //                     area:area
-        //                 })
-        //
-        //     if(targeted.length>0) {
-        //         var finalSelection = SelInst.SelectorEngine_part02( {
-        //                                     addvalue:checkBox ,
-        //                                     clicktype:(checkBox)?"simple":"double",
-        //                                     prevsels:selections,
-        //                                     currsels:targeted
-        //                                 });
-        //         cancelSelection(false);
-        //         SelInst.MultipleSelection2( {nodes:finalSelection} )
-        //
-        //     } else cancelSelection(false);
-        //
-        //     partialGraph.draw();
-        //     trackMouse(event);
-        // });
-
 
 
         // goTo (move/zoom) events
@@ -800,69 +807,24 @@ TinaWebJS = function ( sigmacanvas ) {
 
 
         // raw events (non-sigma): handlers attached to the container
+        // ==========
         $("#sigma-contnr")
 
             .mousemove(function(event){
                 if(!isUndef(partialGraph)) {
+                    // when selector circle cursor
                     if(cursor_size>0) trackMouse(event);
                 }
             })
 
-            // TW.partialGraph.bind('overNode', function(e) {
-            //   if(!isUndef(partialGraph)) {
-            //       if(cursor_size>0) trackMouse(event);
-            //   }
-            // })
 
-            // TW.partialGraph.bind('overNodes', function(e) {
-            //   if(!isUndef(partialGraph)) {
-            //       if(cursor_size>0) trackMouse(event);
-            //   }
-            // })
-
-
+        // POSSible for the future: add tools to contextmenu
         //     .contextmenu(function(){
         //         return false;
         //     })
-        //     .mousedown(function(e) { // using SelectionEngine
-        //         //left click!<- normal click
-        //         if(e.which==1){
-        //             console.warn('new sigma.js FIX event bindings for downgraph, upgraph')
-        //             partialGraph.dispatchEvent(
-        //                 e['type'] == 'mousedown' ?
-        //                 'downgraph' :
-        //                 'upgraph'
-        //             );
-        //             var area = {}
-        //
-        //
-        //             // new sigma.js: (x,y) from event -- TODO check if convert coords
-        //             area.x1 = sigma.utils.getX(e);
-        //             area.y1 = sigma.utils.getY(e);
-        //
-        //             // old version
-        //             // area.x1 = partialGraph._core.mousecaptor.mouseX;
-        //             // area.y1 = partialGraph._core.mousecaptor.mouseY;
-        //
-        //             var targeted = SelInst.SelectorEngine( {
-        //                                 cursorsize:cursor_size,
-        //                                 area:area,
-        //                                 addvalue:checkBox,
-        //                                 clicktype:"simple",
-        //                                 prevsels:selections
-        //                             } )
-        //             if(targeted.length>0) {
-        //                 cancelSelection(false);
-        //                 SelInst.MultipleSelection2( {nodes:targeted} )
-        //             }
-        //             partialGraph.refresh({skipIndexation:true});
-        //             trackMouse(e);
-        //         }
-        //     });
 
-
-
-
+        // sliders events
+        // ==============
         $("#zoomSlider").slider({
             orientation: "vertical",
 
