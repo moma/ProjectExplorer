@@ -1,0 +1,39 @@
+/* main grid: graph + panels & bars
+ * --------------------------------
+ *  html, body
+ *  #topbar
+ *  #toolbar
+ *  #sidebar
+ *  #graph-zone
+ *  #graph-panels
+ *  #graph-div
+ *  #hidden-elements
+ */
+
+#hidden-elements {
+  display: none;
+}
+
+#graph-div {
+  background-color: #22e;
+}
+
+#graph-zone {
+  background-color: #44b;
+}
+
+#right-sidebar {
+  background-color: #2e2;
+}
+
+#toolbar {
+  background-color: #e22;
+}
+
+#topbar {
+  background-color: #c94;
+}
+
+html, body {
+   background-color: #eee;
+}

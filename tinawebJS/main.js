@@ -115,8 +115,6 @@ if(RES["OK"]) {
             the_file = first_path+"/"+getUrlParam.file
         }
 
-        TW.getAdditionalInfo = true;
-
         fileparam = the_file;
 
         var files_selector = '<select onchange="jsActionOnGexfSelector(this.value , true);">'
@@ -197,13 +195,7 @@ if(RES["OK"]) {
 
     // [ Initiating Sigma-Canvas ]
     var twjs_ = new TinaWebJS('#sigma-contnr');
-    console.log( twjs_.AdjustSigmaCanvas() );
-
-
-
-    // new sigma.js REFA TODO uncomment and optimize
-    // $( window ).resize(function() { console.log(twjs_.AdjustSigmaCanvas()) });
-    // [ / Initiating Sigma-Canvas ]
+    // NB new sigma.js: autoResize (no need for AdjustSigmaCanvas + sigmaLimits)
 
     console.log("categories: "+categories)
     console.log("initial state: "+initialState)
@@ -222,11 +214,15 @@ if(RES["OK"]) {
             drawEdges: true,   // fixme edgetype curve
             drawNodes: true,
             drawLabels: true,
-            // nodesPowRatio: .5,
+            // nodesPowRatio: 1,
             labelSize: "proportional",
             font: "Ubuntu Condensed",
             // labelColor: "node",
-            fontStyle: "bold"
+            fontStyle: "bold",
+
+            autoResize: true,
+            mouseEnabled: true,
+            touchEnabled: false
         },
         sigmaJsDrawingProperties,
         sigmaJsGraphProperties,
@@ -436,6 +432,9 @@ if(RES["OK"]) {
 
 // load optional modules
 ProcessDivsFlags() ;
+
+// show any already existing panel
+document.getElementById("graph-panels").style.display = "block"
 
 // grey message in the search bar from settings
 $("#searchinput").attr('placeholder', TW.strSearchBar) ;

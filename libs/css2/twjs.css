@@ -1,0 +1,240 @@
+/* fixed TWJS grid: graph + bars
+ * -----------------------------
+ *  html, body
+ *  #topbar
+ *  #toolbar
+ *  #sidebar
+ *  #sigma-contnr (graph zone)
+ */
+
+html, body {
+  height: 100%;
+  width: 100%;
+  background-color: #eee;
+}
+
+#sigma-contnr {
+  position: fixed;
+  top: 105px;
+  bottom: 0;
+  left: 0;
+  right: 250px;
+  z-index: 1;
+}
+
+#sidebar {
+  position: fixed;
+  top: 105px;
+  bottom: 0;
+  right: 0;
+  width: 250px;
+  z-index: 2;
+  border-left: 1px #222 solid;
+  overflow-y: scroll;
+}
+
+#toolbar {
+  position: fixed;
+  top: 35px;
+  left: 0;
+  z-index: 2;
+  height: 70px;
+  width: 100%;
+  border-bottom: 1px #222 solid;
+  font-size: 9px;
+  line-height: 10px;
+}
+
+#topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  height: 35px;
+  width: 100%;
+  border-bottom: 1px #222 solid;
+}
+
+
+/* toolbar contents */
+
+/* searchnav gets same padding as bootstrap's .navbar-nav > li > a */
+
+#defaultop {
+  padding-top: 8px;
+}
+
+.navbar-higher {
+  padding-top: 5px !important;
+}
+.navbar-lower {
+  padding-top: 15px !important;
+}
+
+#defaultop .nav {
+  margin-left: 15px !important;
+}
+
+#defaultop div#searchnav {
+  padding-top: 13px;
+  padding-bottom: 9px;
+}
+
+#defaultop .weight-selectors {
+  width: 135px !important;
+  padding-top: 15px;
+  margin: 0 25px !important;
+}
+
+#defaultop .weight-selectors td {
+  width: 135px !important;
+  padding: 0 0 10px 0 !important;
+}
+
+#defaultop .slider-legend {
+    margin: 10px 0 0 0 ;
+}
+#defaultop .settingslider {
+    max-width: 120px !important;
+    display: inline-block ;
+}
+
+#graph-panels {
+  display: none; /*not shown at init*/
+}
+
+
+/* VARIAE */
+
+#selectionsBox{
+    text-align:center;
+    background-color:white;
+    color:#250587;
+    margin: 7px;
+    padding: 3px;
+    border: 1px solid #666;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -border-radius: 3px;
+    -moz-box-shadow: 0px 2px 6px #000;
+    -webkit-box-shadow: 0px 2px 6px #000;
+    box-shadow: 0px 2px 6px #000;
+}
+
+#opossitesBox{
+    display: none;
+    margin: 7px;
+    padding: 10px;
+    border-style:solid;
+    background-color:white;
+    margin: 7px;
+    border: 1px solid #666;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -border-radius: 3px;
+    -moz-box-shadow: 0px 2px 6px #000;
+    -webkit-box-shadow: 0px 2px 6px #000;
+    box-shadow: 0px 2px 6px #000;
+}
+
+
+.tagcloud-item{
+    display:inline-block;
+    border:solid 1px;
+    /*box-shadow: 0px 0px 0px 1px rgba(0,0,0,0.3); */
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    -khtml-border-radius: 6px;'+
+    border-color:#BDBDBD;
+    padding:0px 2px 0px 2px;
+    margin:1px 0px 1px 0px;
+    cursor: pointer;
+}
+
+
+#topPapers{
+    display: none;
+    margin: 7px;
+    padding: 10px 0px 10px 10px;
+    border-style:solid;
+    background-color:white;
+    color:black;
+    margin: 7px;
+    border: 1px solid #666;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -border-radius: 3px;
+    -moz-box-shadow: 0px 2px 6px #000;
+    -webkit-box-shadow: 0px 2px 6px #000;
+    box-shadow: 0px 2px 6px #000;
+}
+
+
+#topProposals{
+    display: none;
+    margin: 7px;
+    padding: 10px 0px 10px 10px;
+    border-style:solid;
+    background-color:white;
+    color:black;
+    margin: 7px;
+    border: 1px solid #666;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -border-radius: 3px;
+    -moz-box-shadow: 0px 2px 6px #000;
+    -webkit-box-shadow: 0px 2px 6px #000;
+    box-shadow: 0px 2px 6px #000;
+}
+
+
+.grey {
+    color: #cccccc; font-style: italic;
+}
+
+/* small messages */
+p.micromessage{
+  font-size: 85%;
+  color: #707070 ;
+}
+
+.btn-sm:hover {
+	font-weight: bold;
+}
+
+/* Example Styles for Demo */
+.etabs { margin: 0; padding: 0; }
+.tab { display: inline-block; zoom:1; *display:inline; background: #eee; border: solid 1px #999; border-bottom: none; -moz-border-radius: 4px 4px 0 0; -webkit-border-radius: 4px 4px 0 0; }
+.tab a { font-size: 12px; line-height: 2em; display: block; padding: 0 10px; outline: none; }
+.tab a:hover { text-decoration: underline; }
+.tab.active { background: #fff; padding-top: 6px; position: relative; top: 1px; border-color: #666; }
+.tab a.active { font-weight: bold; }
+.tab-container .panel-container { background: #fff; border: solid #666 1px; padding: 10px; -moz-border-radius: 0 4px 4px 4px; -webkit-border-radius: 0 4px 4px 4px; }
+.panel-container { margin-bottom: 10px; }
+
+
+
+/* SIDEBAR CONTENT */
+
+#sidebar {
+  padding: 0 5px;
+}
+
+#tips{
+    padding-left: 5%;
+    padding-right: 5%;
+    font-size:80%;
+}
+#tips ul{
+    /*list-style:none;*/
+    padding-left:10%;
+}
+
+#information {
+    font-size:80%;
+}
+
+#information ul {
+    list-style:none;
+    padding-left:5%;
+}​

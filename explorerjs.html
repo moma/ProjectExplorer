@@ -1,417 +1,434 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>Mapping risk research</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta charset="utf-8">
+  <meta charset="utf-8">
+  <meta name="language" content='EN'>
+  <meta name="language" content='FR'>
+  <meta name="keywords"  content="dataviz, graph, data exploration, sigmajs, tinawebjs">
+  <meta name="copyright" content="ISCPIF - UPS 3611 CNRS - 2017">
+  <meta name="revised"   content="2017-04-01/rloth">
+  <meta name="viewport"  content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-    <link rel="stylesheet" href="libs/jquery/jquery-ui.css" media="screen">
-    <link rel="stylesheet" href="libs/bootstrap/css/bootstrap.css" media="screen">
-    <link rel="stylesheet" href="libs/css2/freshslider.css" media="screen">
-    <link rel="stylesheet" href="libs/css2/custom.css" media="screen">
-    <link rel="stylesheet" href="libs/css2/sidebar.css" media="screen">
-    <link rel="stylesheet" href="libs/css2/font.css" type="text/css">
+  <!--   ========================     -->
+  <title>TinaWebJS Graph Explorer</title>
+  <!--   ========================     -->
 
+  <!-- CSS -->
+  <link rel="stylesheet" href="libs/css2/twjs.css">
+  <link rel="stylesheet" href="libs/css2/selection-panels.css">
+  <link rel="stylesheet" href="libs/jquery/jquery-ui.css" media="screen">
+  <link rel="stylesheet" href="libs/bootstrap/css/bootstrap.css" media="screen">
+  <!-- <link rel="stylesheet" href="libs/bootstrap-3/css/bootstrap.min.css"> -->
+  <!-- NB bs2/3 not used for main grid (graph + bars) but inside the bars -->
+  <link rel="stylesheet" href="libs/css2/freshslider.css" media="screen">
+
+  <!-- JS -->
+  <!-- <script src="script.js"></script> -->
 </head>
 
-  <body class="gradient">
-    <!-- this is the topbar -->
-    <div id="fixedtop" class="navbar navbar-default navbar-fixed-top">
-      <div class="container">
 
-        <div class="navbar-header">
-          <a href="../index.html" class="navbar-brand"> <img width="20px" src="libs/img2/home.png"></img>Mapping Risk Research</a>
-          <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-        </div>
+<body>
+  <div id="topbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
 
-        <div class="navbar-collapse collapse" id="navbar-main">
-          <ul class="nav navbar-nav">
+      <div class="navbar-header">
+        <a href="#" class="navbar-brand"> <img width="20px" src="libs/img2/home.png">Mapping Risk Research</a>
+      </div>
 
-            <li class="disabled">
-              <a>
-                <span class="label label-default label-lg">MAP: </span>
-              </a>
-            </li>
+      <div class="navbar-collapse collapse" id="navbar-main">
+        <ul class="nav navbar-nav">
 
-            <li>
-              <a>
-                <span id="network" ></span>
-              </a>
-            </li>
+          <li class="disabled">
+            <a>
+              <span class="label label-default label-lg">MAP: </span>
+            </a>
+          </li>
+
+          <li>
+            <a class="navbar-higher">
+              <span id="network" ></span>
+            </a>
+          </li>
 
 
-            <li>
-              <div id="log"></div>
-            </li>
+          <li>
+            <div id="log"></div>
+          </li>
 
-            <li><a>.</a></li>
+          <li><a>.</a></li>
 
-            <li>
-              <a>
-                <div id="gexfs"></div>
-              </a>
-            </li>
+          <li>
+            <a>
+              <div id="gexfs"></div>
+            </a>
+          </li>
 
-          </ul>
+        </ul>
 
-          <ul class="nav navbar-nav navbar-right">
-            <li><a href="http://www.cnrs.fr" target="_blank" title="CNRS"><img src="libs/img2/logo_cnrs_transparent.gif" height="23"></a></li>
-            <li><a href="http://iscpif.fr" target="_blank" title="ISC-PIF"><img src="libs/img2/logo_ISCPIF_small.svg"height="23"></a></li>
-          </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="http://www.cnrs.fr" target="_blank"
+                class="navbar-higher"
+                title="CNRS">
+                <img src="libs/img2/logo_cnrs_transparent.gif" height="23"></a></li>
+          <li><a href="http://iscpif.fr" target="_blank"
+                class="navbar-higher"
+                title="ISC-PIF">
+                <img src="libs/img2/logo_ISCPIF_small.svg"height="23"></a></li>
+        </ul>
 
-        </div><!--navbar-main-->
-      </div><!--container-->
-    </div><!--navbar-fixed-top-->
+      </div><!--navbar-main-->
+    </div><!--container-->
+  </div><!--navbar-fixed-top-->
 
 
-    <!-- this is the tweakbar -->
-    <div class="container-fluid navbar-default">
-      <div id="defaultop" class="row">
-            <div id="left" class="col-sm-8 col-md-8 col-lg-6" >
+  <!-- ex-defaultop -->
+  <div id="toolbar" class="navbar navbar-default navbar-fixed-top">
+    <div id="defaultop" class="container">
 
-                <ul class="nav navbar-nav navbar-right">
+        <div id="left" class="navbar-collapse collapse">
 
-                <!--
-                <li>
-                   <a>
-                    <select id="aselector" onchange="console.log('salut monde')" class="selectpicker"  data-style="btn btn-success btn-sm"  data-width="auto">
-                      <option value="Document" selected>Scholars</option>
-                      <option value="NGram">Keywords</option>
-                    </select>
-                   </a>
-                </li>
-                -->
-
-                <li>
-                   <a>
-                    <button type="button" id="changetype" class="btn btn-success btn-sm">Change Type</button>
-                   </a>
-                </li>
-
-                <li>
-                   <a>
-                    <button type="button" id="changelevel" class="btn btn-info btn-sm" disabled>Change Level</button>
-                   </a>
-                </li>
-
-                <li><a>
-                  Selector size<br>
-                  <div id="unranged-value" class="settingslider"></div>
-                </a></li>
-
-                <li><a>
-                  <!-- TODO fix: category0 -> category1 switching -->
-                  Label size<br>
-                  <div id="slidercat0nodessize" class="settingslider"></div>
-                </a></li>
-
-                 <li><a>
-                   Colors<div class="colorgraph_div"></div>
-                 </a></li>
-
-                <!--
-                <li>
-                   <a>
-                    <button type="button" onclick="partialGraph.stopForceAtlas2();" class="btn btn-sm">wu</button>
-                   </a>
-                </li>
-                -->
-
-                <!-- TODO fix: category0 -> category1 switching -->
-                <li><a>
-                  Create a subgraph
-                  <ul id="category0" class="nav">
-                        <li><small>Nodes</small> <div id="slidercat0nodesweight" class="settingslider"></div></li>
-                        <li><small>Edges</small> <div id="slidercat0edgesweight" class="settingslider"></div></li>
-                  </ul>
-                  <ul id="category1" class="nav">
-                        <li><small>Nodes</small> <div id="slidercat1nodesweight" class="settingslider"></div></li>
-                        <li><small>Edges</small> <div id="slidercat1edgesweight" class="settingslider"></div></li>
-                  </ul>
-                </a></li>
-              </ul>
-
-            </div><!-- /div#left -->
-
-            <div id="right" class="col-sm-3 col-md-4 col-lg-6" >
-
-                   <div class='row' id="searchnav">
-                       <!-- the smaller the viewport, the larger the relative search box size -->
-                     <div class="col-sm-9 col-md-9 col-lg-6" >
-                       <div id="search_input_group" class="input-group input-group-sm">
-                          <span class="input-group-btn crowdsourcingModule">
-                            <button id="savesuggestion"
-                                    disabled
-                                    title="Save this topic as a new suggestion"
-                                    class="btn btn-default"
-                                    type="button">
-                              <span class="glyphicon glyphicon-save"
-                                     id="saveicon">
-                              </span>
-                            </button>
-                          </span>
-
-                          <span class="input-group-btn">
-                            <button id="searchbutton"
-                                    title="Search the topic in the map"
-                                    class="btn btn-info"
-                                    type="button">
-                              <span class="glyphicon glyphicon-search">
-                              </span>
-                            </button>
-                          </span>
-
-                          <!-- ########## THE SEARCH BAR ########## -->
-
-                          <input id="searchinput"
-                                  type="text"
-                                  class="form-control"
-                                  placeholder="Select node(s)" />
-
-                          <!-- strSearchBar will replace placeholder value -->
-
-                          <!-- #################################### -->
-
-                       </div>
-
-                       <!-- messages below the search bar -->
-                       <!-- say thanks for the suggestion, etc. -->
-                       <div id="crowdsourcing_answer" class="crowdsourcingModule"></div>
-                    </div>
-
-                    <div class="col-sm-3 col-md-3 col-lg-5">
-                            <input id="checkboxdiv"  onclick="alertCheckBox(this);"
-                                    title="Add next search results to current selection"
-                                    class="btn btn-info"
-                                    type="checkbox"></input>
-                            <p style="font-size:75%; line-height:90%">Add to selection</p>
-                    </div>
-
-                  </div>
+          <ul class="nav navbar-nav navbar-left">
 
             <!--
-            <ul class="nav navbar-nav navbar-right">
-              <li><a href="#">Link</a></li>
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
-                <ul class="dropdown-menu">
-                  <li><a href="#">Action</a></li>
-                  <li><a href="#">Another action</a></li>
-                  <li><a href="#">Something else here</a></li>
-                  <li class="divider"></li>
-                  <li><a href="#">Separated link</a></li>
-                </ul>
-              </li>
-            </ul>
+            <li>
+               <a>
+                <select id="aselector" onchange="console.log('salut monde')" class="selectpicker"  data-style="btn btn-success btn-sm"  data-width="auto">
+                  <option value="Document" selected>Scholars</option>
+                  <option value="NGram">Keywords</option>
+                </select>
+               </a>
+            </li>
             -->
-            </div>
 
-      </div><!-- /.row#defaultop -->
-    </div><!-- /.container.fluid -->
-<!-- £TODO wtf    </div> -->
-    <div id="wrapper">
+            <li>
+               <a>
+                <button type="button" id="changetype" class="btn btn-success btn-sm">Change Type</button>
+               </a>
+            </li>
 
-      <div id="zonecentre">
+            <li>
+               <a>
+                <button type="button" id="changelevel" class="btn btn-info btn-sm" disabled>Change Level</button>
+               </a>
+            </li>
+
+            <li><a>
+              Selector size<br>
+              <div id="unranged-value" class="settingslider"></div>
+            </a></li>
+
+            <li><a>
+              <!-- TODO fix: category0 -> category1 switching -->
+              Label size<br>
+              <div id="slidercat0nodessize" class="settingslider"></div>
+            </a></li>
+
+             <li><a>
+               Colors<div class="colorgraph_div"></div>
+             </a></li>
+
+            <!--
+            <li>
+               <a>
+                <button type="button" onclick="partialGraph.stopForceAtlas2();" class="btn btn-sm">wu</button>
+               </a>
+            </li>
+            -->
+
+            <!-- TODO fix: category0 -> category1 switching -->
+            <li class="weight-selectors">
+              <!-- <a> -->
+              <!-- Create a subgraph -->
+              <table>
+                <tr>
+                  <td class="slider-legend">
+                    Nodes
+                  </td>
+                  <td id="slidercat0nodesweight" class="settingslider">
+                  </td>
+                </tr>
+                <tr>
+                  <td class="slider-legend">
+                    Edges
+                  </td>
+                  <td id="slidercat0edgesweight" class="settingslider">
+                  </td>
+                </tr>
+              </table>
+            </li>
+            <!-- <li class="weight-selectors">
+              <table>
+                <tr class="weight-selector">
+                  <td class="slider-legend">
+                    Nodes
+                  </td>
+                  <td id="slidercat1nodesweight" class="settingslider">
+                  </td>
+                </tr>
+                <tr class="weight-selector">
+                  <td class="slider-legend">
+                    Edges
+                  </td>
+                  <td id="slidercat1edgesweight" class="settingslider">
+                  </td>
+                </tr>
+              </table>
+            </li> -->
+          <!-- </ul>
 
 
-          <!-- Page content -->
-          <div id="sigma-contnr"></div>
-
-          <div style="visibility: hidden;" id="sigma-othergraph"></div>
-
-          <img id="semLoader" style="position:absolute; top:50%; left:40%; width:80px;" src="libs/img2/loading-bar.gif"></img>
-
-          <ul id="ctlzoom">
-
-                <!-- <div class="content-header">
-                        <button id="menu-toggle">X</button>
-                </div> -->
-                   <li>
-                      <div id="unfold">
-                          <a href="#" id="aUnfold" class="rightarrow"></a>
-                      </div>
-                  </li>
-                  <!--
-                   <li>
-                      <a href="#" id="geomapicon" onclick="$('#geomapmodal').modal('show'); callGeomapADEME();">
-                        <img title="World Map Distribution" width="34px" src="libs/img2/world.png"></img>
-                      </a>
-                  </li>
-                  -->
 
 
-                   <li>
-                      <a href="#" id="snapicon" onclick="saveGraphIMG();" >
-                        <img title="Take a photo!" width="34px" src="libs/img2/camera.png"></img>
-                      </a>
-                  </li>
+            <ul id="searchnav" class='nav navbar-nav'> -->
 
-                   <li>
-                      <a href="#" id="saveAs">
-                        <img width="30px" title="Save As..." src="libs/img2/save.png"></img>
-                      </a>
-                  </li>
-
-                  <li>
-                      <a href="#" id="zoomPlusButton" title="S'approcher"> </a>
-                  </li>
-
-                  <li id="zoomSliderzone">
-                      <div id="zoomSlider"></div>
-                  </li>
-
-                  <li>
-                      <a href="#" id="zoomMinusButton" title="S'éloigner"> </a>
-                  </li>
+            <li class="nav navbar-lower">
 
 
-                  <li>
-                      <a href="#" id="lensButton"> </a>
-                  </li>
+              <li class="nav navbar-lower">
+                <div id="search_input_group" class="input-group input-group-sm">
+                  <span class="input-group-btn crowdsourcingModule">
+                    <button id="savesuggestion"
+                            disabled
+                            title="Save this topic as a new suggestion"
+                            class="btn btn-default"
+                            type="button">
+                      <span class="glyphicon glyphicon-save"
+                             id="saveicon">
+                      </span>
+                    </button>
+                  </span>
 
-                  <li>
-                      <a href="#" id="edgesButton"> </a>
-                  </li>
-          </ul>
+                  <span class="input-group-btn">
+                    <button id="searchbutton"
+                            title="Search the topic in the map"
+                            class="btn btn-info"
+                            type="button">
+                      <span class="glyphicon glyphicon-search">
+                      </span>
+                    </button>
+                  </span>
+
+                  <!-- ########## THE SEARCH BAR ########## -->
+
+                  <input id="searchinput"
+                          type="text"
+                          class="form-control"
+                          placeholder="Select node(s)" />
+
+                  <!-- strSearchBar will replace placeholder value -->
+
+                  <!-- #################################### -->
+
+                </div>
+              </li>
+
+              <!-- messages below the search bar -->
+              <!-- say thanks for the suggestion, etc. -->
+              <li id="crowdsourcing_answer" class="nav crowdsourcingModule navbar-lower"></li>
+
+              <li class="nav navbar-lower">
+
+                <input id="checkboxdiv" onclick="alertCheckBox(this);"
+                      title="Add next search results to current selection"
+                      class="nav btn btn-info"
+                      type="checkbox"></input>
+                <p style="font-size:75%; line-height:90%">Add to selection</p>
+
+              </li> <!-- /checkbox group -->
+            </ul> <!-- /searchnav -->
+
+
+        </div><!-- /div#left -->
+
+
+    </div>  <!-- /#defaultop -->
+  </div> <!-- /toolbar -->
+
+
+  </div>
+  <div id="sigma-contnr">
+    <div id="graph-panels">
+
+      <ul id="ctlzoom">
+
+            <!-- <div class="content-header">
+                    <button id="menu-toggle">X</button>
+            </div> -->
+               <li>
+                  <div id="unfold">
+                      <a href="#" id="aUnfold" class="rightarrow"></a>
+                  </div>
+              </li>
+              <!--
+               <li>
+                  <a href="#" id="geomapicon" onclick="$('#geomapmodal').modal('show'); callGeomapADEME();">
+                    <img title="World Map Distribution" width="34px" src="libs/img2/world.png"></img>
+                  </a>
+              </li>
+              -->
+
+
+               <li>
+                  <a href="#" id="snapicon" onclick="saveGraphIMG();" class="zoombarbuttons">
+                    <img title="Take a photo!" style="width:30px" src="libs/img2/camera.png"></img>
+                  </a>
+              </li>
+
+               <li>
+                  <a href="#" id="saveAs" class="zoombarbuttons">
+                    <img style="width:28px" title="Save As..." src="libs/img2/save.png"></img>
+                  </a>
+              </li>
+
+              <li>
+                  <a href="#" id="zoomPlusButton" title="S'approcher"> </a>
+              </li>
+
+              <li id="zoomSliderzone">
+                  <div id="zoomSlider"></div>
+              </li>
+
+              <li>
+                  <a href="#" id="zoomMinusButton" title="S'éloigner"> </a>
+              </li>
+
+
+              <li>
+                  <a href="#" id="lensButton" class="zoombarbuttons">
+                    <img src="libs/img2/target.png" style="width:32px">
+                  </a>
+              </li>
+
+              <li>
+                  <a href="#" id="edgesButton" class="zoombarbuttons">
+                    <img src="libs/img2/edges.png" style="width:32px">
+                  </a>
+              </li>
+      </ul>
+
+      <!-- inline *after* sigma-contnr for better overlay positioning -->
+      <!-- Sidebar top left -->
+      <div id="lefttopbox">
+
+        <!-- selected nodes -->
+        <div id="tw-current-selection">
+            <button id="unselectbutton" class="btn-xs"
+                onclick='cancelSelection(false);'
+                title="Unselect these terms">
+              <span class="glyphicon glyphicon-remove" alt="X"></span>
+            </button>
+            <div id="names"></div>
+        </div>
+
+        <!-- histogram of selected nodes -->
+        <div class="histogramModule">
+          <!-- filled by query (user search value) to wos api -->
+          <div id="search_histogram" class="over-panels"></div>
+        </div><!-- /row -->
       </div>
 
 
+      <!-- class="my-legend" (absolute position bottom left) -->
+      <div id="legend_for_clusters" class="over-panels"></div>
 
+    </div>
+  </div>
+  <div id="sidebar">
+    <div id="tab-container" class='tab-container' style="display: none;">
 
-      <!-- inline *after* zonecentre for better overlay positioning -->
-          <!-- Sidebar top left -->
-          <div id="lefttopbox">
+       <ul class='etabs'>
+         <!-- for related elements from the combined graph (eg soc => sem) -->
+         <li id="taboppos" class='tab'><a href="#tabs1">Opposite-Neighbors</a></li>
+         <!-- for neighbors within this graph -->
+         <li id="tabneigh" class='tab'><a href="#tabs2">Related</a></li>
+       </ul>
 
-            <!-- selected nodes -->
-            <div id="tw-current-selection">
-                <button id="unselectbutton"
-                    style="color: #900;font-weight: bold;font-size: 70%;text-transform: uppercase;float:right;margin-right:.5em"
-                    onclick='cancelSelection(false);'
-                    title="Unselect these terms">
-                  <span class="glyphicon glyphicon-remove" alt="X"></span>
-                </button>
-                <div id="names"></div>
-            </div>
-
-            <!-- histogram of selected nodes -->
-            <div class="histogramModule">
-              <!-- filled by query (user search value) to wos api -->
-              <div id="search_histogram" class="over-panels"></div>
-            </div><!-- /row -->
+       <div class='panel-container'>
+          <div id="tabs1">
+            <div id="opossiteNodes"></div>
           </div>
+          <div id="tabs2">
+            <div id="sameNodes"></div>
+          </div>
+       </div>
+    </div>
+
+    <div id="topPapers"></div>
+
+    <div id="information"></div>
+
+    <!--
+      bottom right column as panels
+
+      open/close panel from: jsfiddle.net/KyleMit/kcpma
+    -->
+    <div class="panel-group" id="accordion">
 
 
-          <!-- class="my-legend" (absolute position bottom left) -->
-          <div id="legend_for_clusters" class="over-panels"></div>
-
-
-
-
-
-      <!-- Sidebar right, old css -->
-      <div id="rightcolumn">
-
-        <div id="tab-container" class='tab-container' style="display: none;">
-
-           <ul class='etabs'>
-             <!-- for related elements from the combined graph (eg soc => sem) -->
-             <li id="taboppos" class='tab'><a href="#tabs1">Opposite-Neighbors</a></li>
-             <!-- for neighbors within this graph -->
-             <li id="tabneigh" class='tab'><a href="#tabs2">Related</a></li>
-           </ul>
-
-           <div class='panel-container'>
-              <div id="tabs1">
-                <div id="opossiteNodes"></div>
-              </div>
-              <div id="tabs2">
-                <div id="sameNodes"></div>
-              </div>
-           </div>
+      <div class="panel panel-default" id="video_explanation">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-target="#le_tutorial"
+                                             href="#">
+              <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+              &nbsp;Tutorial video
+            </a>
+          </h4>
         </div>
 
-        <div id="topPapers" style="display: none;"></div>
-
-        <div id="information"></div>
-
-        <!--
-          bottom right column as panels
-
-          open/close panel from: jsfiddle.net/KyleMit/kcpma
-        -->
-        <div class="panel-group" id="accordion">
-
-
-          <div class="panel panel-default" id="video_explanation">
-            <div class="panel-heading">
-              <h4 class="panel-title">
-                <a data-toggle="collapse" data-target="#le_tutorial"
-                                                 href="#">
-                  <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
-                  &nbsp;Tutorial video
-                </a>
-              </h4>
-            </div>
-
-            <div class="panel-collapse collapse" id="le_tutorial">
-              <!-- TODO: outcloud the video for better stream+player -->
-              <video width="100%"
-                src="video/AXA2015.mp4" controls=""  frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></video>
-            </div>
-          </div>
-
-          <div class="panel panel-default" id="tips_panel">
-            <div class="panel-heading">
-              <h4 class="panel-title">
-                <a data-toggle="collapse" data-target="#tips"
-                                                 href="#">
-                  <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-                  &nbsp;Tips
-                </a>
-              </h4>
-            </div>
-
-            <div class="panel-collapse collapse in" id="tips"></div>
-          </div>
-
-          <div class="panel panel-default" id="credits_panel">
-            <div class="panel-heading">
-              <h4 class="panel-title">
-                <a data-toggle="collapse" data-target="#credits"
-                                                 href="#">
-                  <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
-                  &nbsp;Credits
-                </a>
-              </h4>
-            </div>
-
-            <div class="panel-collapse collapse" id="credits">
-              <a href="https://bigdata.iscpif.fr/" target="_blank">
-                  <img src="https://bigdata.iscpif.fr/images/logos/BIGDATA-Logo-PoweredBy-light.jpg"
-                  alt="Powered by Big Data at ISCPIF"
-                  style="width:85%; ">
-              </a>
-              <a href="https://github.com/moma" target="_blank">
-                  <img src="libs/img2/moma.png"
-                  alt="Sciencemapping"
-                  style="width:85%; ">
-              </a>
-            </div>
-
-          </div>
+        <div class="panel-collapse collapse" id="le_tutorial">
+          <!-- TODO: outcloud the video for better stream+player -->
+          <video width="100%"
+            src="video/AXA2015.mp4" controls=""  frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></video>
         </div>
-
-        <br><br><br><br><br><br>
       </div>
 
+      <div class="panel panel-default" id="tips_panel">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-target="#tips"
+                                             href="#">
+              <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+              &nbsp;Tips
+            </a>
+          </h4>
+        </div>
 
+        <div class="panel-collapse collapse in" id="tips"></div>
+      </div>
 
+      <div class="panel panel-default" id="credits_panel">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-target="#credits"
+                                             href="#">
+              <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+              &nbsp;Credits
+            </a>
+          </h4>
+        </div>
+
+        <div class="panel-collapse collapse" id="credits">
+          <a href="https://bigdata.iscpif.fr/" target="_blank">
+              <img src="https://bigdata.iscpif.fr/images/logos/BIGDATA-Logo-PoweredBy-light.jpg"
+              alt="Powered by Big Data at ISCPIF"
+              style="width:85%; ">
+          </a>
+          <a href="https://github.com/moma" target="_blank">
+              <img src="libs/img2/moma.png"
+              alt="Sciencemapping"
+              style="width:85%; ">
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <br><br>
+  </div>
+  <div id="hidden-elements">
     <div id="savemodal" class="modal fade">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -498,60 +515,55 @@
     </div>
 
     <div id="heatgraph"></div>
-    <!-- <div id="twittertimeline_div"></div> -->
 
-    <script src="libs/jquery/jquery-1.10.2.js" type="text/javascript"></script>
-    <script src="libs/jquery/jquery-ui.js" type="text/javascript"></script>
-    <script src="libs/jquery/jquery.ba-dotimeout.min.js" type="text/javascript"></script>
-    <script src="libs/jquery/jquery.mousewheel.min.js" type="text/javascript"></script>
+  </div>
 
-    <script type="text/javascript" src="libs/freshslider.1.0.js"></script>
-    <script src="libs/readmore.js" type="text/javascript"></script>
-    <script src="libs/jquery/jquery.easytabs.min.js" type="text/javascript"></script>
+  <!--         SCRIPTS        -->
+  <script src="libs/jquery/jquery-1.10.2.js" type="text/javascript"></script>
+  <script src="libs/jquery/jquery-ui.js" type="text/javascript"></script>
+  <script src="libs/jquery/jquery.ba-dotimeout.min.js" type="text/javascript"></script>
+  <script src="libs/jquery/jquery.mousewheel.min.js" type="text/javascript"></script>
 
-    <script src="libs/bootstrap/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="libs/freshslider.1.0.js"></script>
+  <script src="libs/readmore.js" type="text/javascript"></script>
+  <script src="libs/jquery/jquery.easytabs.min.js" type="text/javascript"></script>
 
-    <script src="libs/bootstrap/js/bootstrap-modal.js" type="text/javascript"></script>
-    <script src="libs/bootstrap/js/bootstrap-hover-dropdown.min.js" type="text/javascript"></script>
+  <script src="libs/bootstrap/js/bootstrap.min.js"></script>
 
-
-    <script src="tinawebJS/globalUtils.js" type="text/javascript"></script>
-
-    <!--
-	<script src="geomap/js/raphael/raphael-min.js" charset="utf-8" ></script>
-	<script src="geomap/js/jquery.mapael.js" charset="utf-8" ></script>
-	<script src="geomap/js/maps/world_countries.js" charset="utf-8" ></script>
-	<script src="geomap/examples.js" charset="utf-8" ></script>
-        <link rel="stylesheet" type="text/css" href="geomap/css/geo.css" />
-    -->
-    <!--<script src="geomap/js/countries_iso3166.js" charset="utf-8" ></script>-->
-
-    <!-- new sigma 1.2  imports -->
-    <script src="tinawebJS/sigma_v1.2/sigma.js" type="text/javascript" language="javascript"></script>
-    <script src="tinawebJS/sigma_v1.2/plugins/sigma.layout.forceAtlas2/supervisor.js"></script>
-    <script src="tinawebJS/sigma_v1.2/plugins/sigma.layout.forceAtlas2/worker.js"></script>
+  <script src="libs/bootstrap/js/bootstrap-modal.js" type="text/javascript"></script>
+  <script src="libs/bootstrap/js/bootstrap-hover-dropdown.min.js" type="text/javascript"></script>
 
 
-    <!-- new sigma (1.0c => 1.2) compatibility imports -->
-    <script src="tinawebJS/sigma_tools.js"></script>
+  <script src="tinawebJS/globalUtils.js" type="text/javascript"></script>
 
-    <!-- classic tinawebJS imports -->
-    <script type="text/javascript" src="tinawebJS/jLouvain.js"></script>
-    <!-- <script src="tinawebJS/sigma.v1.customized.js" type="text/javascript" language="javascript"></script> -->
-    <!-- <script src="tinawebJS/sigma.forceatlas2.js" type="text/javascript" language="javascript"></script> -->
-    <script src="settings_explorerjs.js" type="text/javascript" language="javascript"></script>
-    <script src="tinawebJS/sigma.parseCustom.js" type="text/javascript" language="javascript"></script>
-    <script src="extras_explorerjs.js" type="text/javascript" language="javascript"></script>
-    <script src="tinawebJS/sigmaUtils.js" type="text/javascript" language="javascript"></script>
-    <script src="tinawebJS/methods.js" type="text/javascript" language="javascript"></script>
-    <script src="tinawebJS/enviroment.js" type="text/javascript" language="javascript"></script>
-    <!-- <script src="tinawebJS/asyncFA2.js" type="text/javascript" language="javascript"></script> -->
-    <script src="tinawebJS/Tinaweb.js" type="text/javascript" language="javascript"></script>
-    <script src="tinawebJS/main.js" type="text/javascript" language="javascript"></script>
+  <!-- new sigma 1.2  imports -->
+  <script src="tinawebJS/sigma_v1.2/sigma.js" type="text/javascript" language="javascript"></script>
+  <script src="tinawebJS/sigma_v1.2/plugins/sigma.layout.forceAtlas2/supervisor.js"></script>
+  <script src="tinawebJS/sigma_v1.2/plugins/sigma.layout.forceAtlas2/worker.js"></script>
+
+
+  <!-- new sigma (1.0c => 1.2) compatibility imports -->
+  <script src="tinawebJS/sigma_tools.js"></script>
+
+  <!-- classic tinawebJS imports -->
+  <script type="text/javascript" src="tinawebJS/jLouvain.js"></script>
+  <!-- <script src="tinawebJS/sigma.v1.customized.js" type="text/javascript" language="javascript"></script> -->
+  <!-- <script src="tinawebJS/sigma.forceatlas2.js" type="text/javascript" language="javascript"></script> -->
+  <script src="settings_explorerjs.js" type="text/javascript" language="javascript"></script>
+  <script src="tinawebJS/sigma.parseCustom.js" type="text/javascript" language="javascript"></script>
+  <script src="extras_explorerjs.js" type="text/javascript" language="javascript"></script>
+  <script src="tinawebJS/sigmaUtils.js" type="text/javascript" language="javascript"></script>
+  <script src="tinawebJS/methods.js" type="text/javascript" language="javascript"></script>
+  <script src="tinawebJS/enviroment.js" type="text/javascript" language="javascript"></script>
+  <!-- <script src="tinawebJS/asyncFA2.js" type="text/javascript" language="javascript"></script> -->
+  <script src="tinawebJS/Tinaweb.js" type="text/javascript" language="javascript"></script>
+  <script src="tinawebJS/main.js" type="text/javascript" language="javascript"></script>
 
   <script type="text/javascript">
-      $('#tab-container').easytabs({updateHash:false});
-      $('#tab-container-top').easytabs({updateHash:false});
+    $('#tab-container').easytabs({updateHash:false});
+    $('#tab-container-top').easytabs({updateHash:false});
   </script>
+  <!--        /SCRIPTS        -->
 </body>
+
 </html>

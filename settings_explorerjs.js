@@ -53,6 +53,9 @@ var TW = {}
     TW.catSoc = "Document";
     TW.catSem = "NGram";
 
+    // to get ajax topPapers via info_div.php
+    TW.getAdditionalInfo = false;
+
     TW.strSearchBar = "Select or suggest topics";
 
 var ParseCustom = function () {};

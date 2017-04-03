@@ -1,33 +1,4 @@
 
-// for new SigmaUtils
-// new sigma.js: POSS to use autoResize global setting
-function sigmaLimits( sigmacanvas ) {
-    pw=$( sigmacanvas ).width();
-    ph=$( sigmacanvas ).height();
-
-    sidebar=$('#rightcolumn').width();
-    anchototal=$('#fixedtop').width();
-    altototal=$('#rightcolumn').height();
-    altofixtop=$('#fixedtop').height()
-    altodeftop=$('#defaultop').height()
-    $( sigmacanvas ).width(anchototal-sidebar);
-    $( sigmacanvas ).height(altototal-altofixtop-altodeftop-4);
-
-
-    // todo take into account leftcolumn
-        //sidebar_left=$('#leftcolumn').width();
-        //sidebar_right=$('#rightcolumn').width();
-        //$( sigmacanvas ).width(anchototal-sidebar_right-sidebar_left);
-
-
-    pw=$( sigmacanvas ).width();
-    ph=$( sigmacanvas ).height();
-    return "new canvas! w:"+pw+" , h:"+ph;
-}
-
-
-
-
 
 // will be instanciated as SelInst
 SelectionEngine = function() {
@@ -411,18 +382,6 @@ TinaWebJS = function ( sigmacanvas ) {
 
     this.init = function () {
         console.log("hola mundo")
-    }
-
-    this.getSigmaCanvas = function () {
-        return this.sigmacanvas;
-    }
-
-    this.AdjustSigmaCanvas = function ( sigmacanvas ) {
-        var canvasdiv = "";
-        if( sigmacanvas ) canvasdiv = sigmacanvas;
-        else canvasdiv = this.sigmacanvas;
-
-        return sigmaLimits( canvasdiv );
     }
 
     this.SearchListeners = function () {
