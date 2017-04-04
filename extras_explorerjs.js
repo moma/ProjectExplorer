@@ -414,7 +414,7 @@ function draw1Circle(ctx , x , y , color) {
 // --------------------
 // new sigma.js: could be replaced by default _moveHandler with bindings ?
 //   => atm rewrote entire function with new values
-function trackMouse(e) {
+function circleTrackMouse(e) {
     if(!shift_key) {
         // $.doTimeout(300,function (){
             // new sigma.js 2D mouse context
@@ -426,17 +426,9 @@ function trackMouse(e) {
                           TW.partialGraph.renderers[0].container.offsetWidth,
                           TW.partialGraph.renderers[0].container.offsetHeight);
 
-            // testing with overNodes event
-            // cf. https://github.com/jacomyal/sigma.js/wiki/Events-API
-            if (e.type == "overNodes") {
-              x = e.data.captor.clientX
-              y = e.data.captor.clientY
-            }
-            // classic mousemove event or other similar events
-            else {
-              x = sigma.utils.getX(e);
-              y = sigma.utils.getY(e);
-            }
+            // classic mousemove event or other similar non-sigma events
+            x = sigma.utils.getX(e);
+            y = sigma.utils.getY(e);
 
             // console.log("trackMouse mod: x", x, "y", y)
 
@@ -446,46 +438,33 @@ function trackMouse(e) {
             ctx.globalAlpha = 0.5;
             ctx.beginPath();
 
-            // labels appear
-            // var nds = TW.partialGraph.graph.nodes()
+            // convert (TODO CHECK IN THIS CONTEXT)
+            var camCoords = TW.cam.cameraPosition(x,y)
 
-            // TODO replace by a hover binding (and POSS use quadtree zone)
+            var exactNodeset = circleGetAreaNodes(
+              camCoords.x,
+              camCoords.y
+            )
+            // TODO REFA UNCOMMENT pseudo hover
+            // labels appear
             //
-            // if(TW.partialGraph.camera.ratio>showLabelsIfZoom){
-            //     for(var i in nds){
-            //             n=nds[i];
-            //             if(n.hidden==false){
-            //                 distance = Math.sqrt(
-            //                     Math.pow((x-parseInt(n.displayX)),2) +
-            //                     Math.pow((y-parseInt(n.displayY)),2)
-            //                     );
-            //                 if(parseInt(distance)<=cursor_size) {
-            //                     n.forceLabel=true;
-            //                 } else {
-            //                     if(typeof(n.neighbour)!=="undefined") {
-            //                         if(!n.neighbour) n.forceLabel=false;
-            //                     } else n.forceLabel=false;
-            //                 }
-            //             }
-            //     }
-            //     if(TW.partialGraph.forceatlas2 && TW.partialGraph.forceatlas2.count<=1) {
-            //         TW.partialGraph.refresh({skipIndexation:true})
-            //     }
-            // } else {
-            //     for(var i in nds){
-            //         n=nds[i];
-            //         if(!n.hidden){
-            //             n.forceLabel=false;
-            //             if(typeof(n.neighbour)!=="undefined") {
-            //                 if(!n.neighbour) n.forceLabel=false;
-            //                 else n.forceLabel=true;
-            //             } else n.forceLabel=false;
-            //         }
-            //     }
-            //     if(TW.partialGraph.forceatlas2 && TW.partialGraph.forceatlas2.count<=1) {
-            //         TW.partialGraph.refresh({skipIndexation:true})
-            //     }
+            // if(TW.partialGraph.camera.ratio > showLabelsIfZoom){
+            //   for n of exactNodeset
+            //   n.forceLabel=true;
             // }
+            // else {
+            //   for(var i in exactNodeset){
+            //     n.forceLabel=false;
+            //     if(typeof(n.neighbour)!=="undefined") {
+            //         if(!n.neighbour) n.forceLabel=false;
+            //         else n.forceLabel=true;
+            //     } else n.forceLabel=false;
+            //   }
+            //   if(TW.partialGraph.forceatlas2 && TW.partialGraph.forceatlas2.count<=1) {
+            //     TW.partialGraph.refresh({skipIndexation:true})
+            //   }
+            // }
+
             ctx.arc(x, y, cursor_size, 0, Math.PI * 2, true);
             //ctx.arc(TW.partialGraph._core.width/2, TW.partialGraph._core.height/2, 4, 0, 2 * Math.PI, true);/*todel*/
             ctx.closePath();
@@ -493,6 +472,105 @@ function trackMouse(e) {
             ctx.stroke();
         // });
     }
+}
+
+
+// exact subset of nodes under circle
+function circleGetAreaNodes(camX0, camY0) {
+
+  // leverage quadtree to get a neighborhood
+  var slightlyLargerNodeset = circleLocalSubset(
+    camX0,
+    camY0,
+    cursor_size * TW.cam.ratio // cursor_size to cam units
+  )
+
+  var exactNodeset = []
+
+      for(var i in slightlyLargerNodeset){
+              n = slightlyLargerNodeset[i];
+              if(n.hidden==false){
+                  distance = Math.sqrt(
+                      Math.pow((x-parseInt(n.displayX)),2) +
+                      Math.pow((y-parseInt(n.displayY)),2)
+                      );
+                  if(parseInt(distance)<=cursor_size) {
+                      exactNodeset.push.
+                  } else {
+                      if(typeof(n.neighbour)!=="undefined") {
+                          if(!n.neighbour) n.forceLabel=false;
+                      } else n.forceLabel=false;
+                  }
+              }
+      }
+      if(TW.partialGraph.forceatlas2 && TW.partialGraph.forceatlas2.count<=1) {
+          TW.partialGraph.refresh({skipIndexation:true})
+      }
+
+  return exactNodeset
+}
+
+
+// returns set of nodes in the quad subzones around a square
+//         that is containing the circle centered on x0, y0
+// (use case: reduce number of nodes before exact check)
+function circleLocalSubset(camX0, camY0 , camRay) {
+y
+  var P0 = {x:camX0, y:camY0}
+
+  // to use quadtree.area, we consider the square
+  // in which our circle is inscribed
+
+  //                y-
+  //
+  //        P1 x----------x P2
+  //           |          |
+  // <= x-     |    P0    | 2r      x+ =>
+  //           |          |
+  //           x----------x
+  //
+  //                y+
+
+
+  var P1 = {x: P0.x - camRay , y: P0.y - camRay }  // top left
+  var P2 = {x: P0.x + camRay , y: P0.y - camRay }  // top right
+
+  var areaNodes = TW.cam.quadtree.area({
+                        height: 2 * camRay,
+                        x1:P1.x,  y1:P1.y,
+                        x2:P2.x,  y2:P2.y
+                      })
+
+  // neighborhood guaranteed a bit larger than the square
+  // console.log('got ',areaNodes.length, 'nodes:', areaNodes)
+
+  return areaNodes
+}
+
+
+// not used but useful to quickly make visible any nodes[]
+function flashNodesArray (nodesArray) {
+  // for diagnostic
+  var minX = 1000000
+  var minY = 1000000
+  var maxX = 0
+  var maxY = 0
+  for (var j in nodesArray) {
+    var n = nodesArray[j]
+
+    if (minX > n.x)   minX = n.x
+    if (minY > n.y)   minY = n.y
+    if (maxX < n.x)   maxX = n.x
+    if (maxY < n.y)   maxY = n.y
+
+    n.size = 300
+    n.label = "> " + n.label + "< "
+    n.color = "yellow"
+
+  }
+
+  console.log("nodesArray encompassed by:", minX, minY,';', maxX, maxY)
+  TW.partialGraph.refresh()
 }
 
 // BASIC MODULARITY

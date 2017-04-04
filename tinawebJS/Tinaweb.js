@@ -682,110 +682,85 @@ TinaWebJS = function ( sigmacanvas ) {
         });
 
         // new sigma.js: attempt to use sigma events bindings
+        // cf. https://github.com/jacomyal/sigma.js/wiki/Events-API
 
         // cases:
-        // [DONE] - simple click, one node
-        // [TODO] - simple click, area
+        // 'click'    - simple click, early event
+        //              used for area (with global: cursor_size)
+        // 'clickNode'- simple click, second event if one node
 
-        // one node:
+        // POSS easy in new sigma.js:
+        //       add doubleClick to select node + neighboors
+
+
+        // when circle area select
+        // ========================
+        // 1st event, even before we know if there are nodes
+        TW.partialGraph.bind('click', function(e) {
+          // console.log("sigma click event e", e)
+
+          // case with a selector circle cursor handled here
+          if (cursor_size > 0) {
+            // actual click position, but in graph coords
+            var x = e.data.x
+            var y = e.data.y
+
+            // convert
+            var camCoords = TW.cam.cameraPosition(x,y)
+
+            // retrieve area nodes, using indexed quadtree and global cursor_size
+            var circleNodes = circleGetAreaNodes(
+              camCoords.x,
+              camCoords.y
+            )
+
+            // TODO 1) use SelectorEngine prevsels iff 'Add'
+            // circleNodes += prevsels
+
+            // 2) show selection + do all related effects
+            SelInst.MultipleSelection2({nodes:circleNodes})
+          }
+        })
+
+        // when one node and normal click
+        // ===============================
         TW.partialGraph.bind('clickNode', function(e) {
-          console.log("clickNode event node", e.data.node)
+          // console.log("clickNode event e", e.data.node)
+
           // new sigma.js gives easy access to clicked node!
           theNodeId = e.data.node.id
           cancelSelection(false);
 
           if (cursor_size == 0) {
-            // sigma already provided us the target
             SelInst.MultipleSelection2({nodes:[theNodeId]})
           }
-          // case with a selector circle cursor
-          else {
-            // cf TODO mousedown
-          }
+          // case with a selector circle cursor handled
+          // just before, at click event
         })
 
-            // TODO re-connect area click
-            // TW.partialGraph.bind('click', function(e) {
-            //   console.log("===click===");
-            //   console.log("e", e);
-            // })
+        // -------------------------------------------fragment from v1.customized
+        // FOLLOW UP in v1 customized
+        // =========
+        // (last non-reimplemented bit that was using SelectorEngine)
+        //
+        //             var targeted = SelInst.SelectorEngine( {
+        //                                 cursorsize:cursor_size,
+        //                                 area:area,
+        //                                 addvalue:checkBox,
+        //                                 clicktype:"simple",
+        //                                 prevsels:selections
+        //                             } )
+        //             if(targeted.length>0) {
+        //                 cancelSelection(false);
+        //                 SelInst.MultipleSelection2( {nodes:targeted} )
+        //             }
+        //             partialGraph.refresh({skipIndexation:true});
+        //             trackMouse(e);
 
-            // TW.partialGraph.bind('downgraph upgraph', function(e) {
-            //   console.log("===downgraph upgraph===");
-            //   console.log("e", e);
-            // })
-
-
-            // --------------------------------------------fragment from v1.customized
-            // TW.partialGraph.bind('mousedown mouseup', function(e) {
-            //
-            //   console.log("---------- event", e)
-            //   var targeted = self.graph.nodes.filter(function(n) {
-            //       return !!n['hover'];
-            //   }).map(function(n) {
-            //       return n.id;
-            //   });
-            //   console.log("---------- targeted by hover check loop", targeted)
-            // })
-            //
-            // self.dispatch(
-            //     e['type'] == 'mousedown' ?
-            //     'downgraph' :
-            //     'upgraph'
-            //     );
-            //
-            // if (targeted.length) {
-            //     self.dispatch(
-            //         e['type'] == 'mousedown' ?
-            //         'downnodes' :
-            //         'upnodes',
-            //         targeted
-            //         );
-            //  }
-            // }
-            //
-            // FOLLOW UP in v1 customized:
-            // ===========================
-            //     .mousedown(function(e) { // using SelectionEngine
-            //         //left click!<- normal click
-            //         if(e.which==1){
-            //             console.warn('new sigma.js FIX event bindings for downgraph, upgraph')
-            //             partialGraph.dispatchEvent(
-            //                 e['type'] == 'mousedown' ?
-            //                 'downgraph' :
-            //                 'upgraph'
-            //             );
-            //             var area = {}
-            //
-            //
-            //             // new sigma.js: (x,y) from event -- TODO check if convert coords
-            //             area.x1 = sigma.utils.getX(e);
-            //             area.y1 = sigma.utils.getY(e);
-            //
-            //             // old version
-            //             // area.x1 = partialGraph._core.mousecaptor.mouseX;
-            //             // area.y1 = partialGraph._core.mousecaptor.mouseY;
-            //
-            //             var targeted = SelInst.SelectorEngine( {
-            //                                 cursorsize:cursor_size,
-            //                                 area:area,
-            //                                 addvalue:checkBox,
-            //                                 clicktype:"simple",
-            //                                 prevsels:selections
-            //                             } )
-            //             if(targeted.length>0) {
-            //                 cancelSelection(false);
-            //                 SelInst.MultipleSelection2( {nodes:targeted} )
-            //             }
-            //             partialGraph.refresh({skipIndexation:true});
-            //             trackMouse(e);
-            //         }
-            //     });
-
-            // -------------------------------------------/fragment from v1.customized
+        // -------------------------------------------/fragment from v1.customized
 
 
-        // goTo (move/zoom) events
+        // for all goTo (move/zoom) events
         var zoomTimeoutId = null
         TW.cam.bind('coordinatesUpdated', function(e) {
           // debounce
@@ -796,12 +771,12 @@ TinaWebJS = function ( sigmacanvas ) {
           }
           // schedule next
           zoomTimeoutId = window.setTimeout(
-            // make zoom slider cursor follow scroll
             function(){
+              // make zoom slider cursor follow scroll
               $("#zoomSlider").slider("value",1/TW.cam.ratio)
               // console.log('auto cursor on val', 1/TW.cam.ratio , "( ratio:", TW.cam.ratio,")" )
             },
-            250
+            500
           )
         })
 
@@ -810,13 +785,12 @@ TinaWebJS = function ( sigmacanvas ) {
         // ==========
         $("#sigma-contnr")
 
-            .mousemove(function(event){
+            .mousemove(function(e){
                 if(!isUndef(partialGraph)) {
-                    // when selector circle cursor
-                    if(cursor_size>0) trackMouse(event);
+                    // show/move selector circle cursor
+                    if(cursor_size>0) circleTrackMouse(e);
                 }
             })
-
 
         // POSSible for the future: add tools to contextmenu
         //     .contextmenu(function(){
@@ -941,6 +915,8 @@ TinaWebJS = function ( sigmacanvas ) {
         });
 
         //Cursor Size slider
+        // + reindexation when size is settled (=> updates the quadtree)
+        var reindexTimeout = null
         $("#unranged-value").freshslider({
             step: 1,
             min:cursor_size_min,
@@ -950,9 +926,21 @@ TinaWebJS = function ( sigmacanvas ) {
                 // console.log("en cursorsize: "+value);
                 cursor_size=value;
                 if(cursor_size==0) partialGraph.refresh({skipIndexation:true});
+
+                // have reindex ready to go for when user stops moving slider
+                if (reindexTimeout) {
+                  // (debounced)
+                  clearTimeout(reindexTimeout)
+                  reindexTimeout = null
+                }
+                reindexTimeout = setTimeout(function() {
+                  TW.partialGraph.refresh({skipIndexation: false})
+                  //                                       =====
+                  console.log("graph quadtree reindexed for cursor")
+                }, 500)
             }
         });
 
-    }
+    } // finish initListeners
 
 };

@@ -14,15 +14,11 @@
   display: none;
 }
 
-#graph-div {
-  background-color: #22e;
-}
-
-#graph-zone {
+#sigma-contnr {
   background-color: #44b;
 }
 
-#right-sidebar {
+#sidebar {
   background-color: #2e2;
 }
 

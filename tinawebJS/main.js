@@ -258,8 +258,11 @@ if(RES["OK"]) {
     });
 
     // shortcuts to the renderer and camera
-    TW.rend = TW.partialGraph.renderers[0]
     TW.cam  = TW.partialGraph.camera
+    TW.rend = TW.partialGraph.renderers[0]
+
+    // NB : camera positions are fix if the node is fixed => they only depend on layout
+    //      renderer position depend on viewpoint/zoom (like ~ html absolute positions of the node in the div)
 
     // useful
     TW.partialGraph.nNodes = TW.partialGraph.graph.nodes().length

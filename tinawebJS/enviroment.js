@@ -66,7 +66,7 @@ function changeType() {
         }
     }
 
-    TW.partialGraph.emptyGraph();
+    TW.partialGraph.graph.clear();
 
     var nodes_2_colour = {}
     var edges_2_colour = {}
@@ -296,7 +296,7 @@ function changeLevel() {
     }
     var str_nextState = nextState.map(Number).join("|")
 
-    TW.partialGraph.emptyGraph();
+    TW.partialGraph.graph.clear();
 
     var voisinage = {}
     // Dictionaries of: selection+neighbors

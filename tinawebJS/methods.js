@@ -399,7 +399,7 @@ function LevelButtonDisable( TF ){
 function graphTagCloudElem(nodes) {
     console.log("in graphTagCloudElem, nodae_id: "+nodes);
     cancelSelection();
-    TW.partialGraph.emptyGraph();
+    TW.partialGraph.graph.clear();
 
 
     var ndsids=[]
@@ -603,7 +603,7 @@ function add1Elem(id) {
                 updateSearchLabels(id,TW.Nodes[id].label,TW.Nodes[id].type);
                 nodeslength++;
             }
-            TW.partialGraph.addNode(id,anode);
+            TW.partialGraph.graph.addNode(anode);
             return;
         }
     } else { // It's an edge!
@@ -621,7 +621,7 @@ function add1Elem(id) {
                 weight: TW.Edges[id].weight
             };
 
-            TW.partialGraph.addEdge(id , anedge.sourceID , anedge.targetID , anedge);
+            TW.partialGraph.graph.addEdge(anedge);
             return;
         }
     }
