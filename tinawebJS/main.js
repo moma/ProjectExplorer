@@ -211,7 +211,7 @@ if(RES["OK"]) {
 
     var customSettings = Object.assign(
         {
-            drawEdges: true,   // fixme edgetype curve
+            drawEdges: true,
             drawNodes: true,
             drawLabels: true,
             // nodesPowRatio: 1,
@@ -219,6 +219,7 @@ if(RES["OK"]) {
             font: "Ubuntu Condensed",
             // labelColor: "node",
             fontStyle: "bold",
+            batchEdgesDrawing: false,
 
             autoResize: true,
             mouseEnabled: true,
@@ -238,6 +239,9 @@ if(RES["OK"]) {
       // (could also do it by type)
       sigma.canvas.nodes.def = sigma_utils.twRender.canvas.nodes.withBorders
     }
+
+    // custom edges rendering registered under 'curve'
+    sigma.canvas.edges.curve = sigma_utils.twRender.canvas.edges.curve
 
     // custom labels rendering
     //  - based on the normal one sigma.canvas.labels.def

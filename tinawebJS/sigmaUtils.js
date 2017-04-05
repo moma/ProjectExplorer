@@ -92,7 +92,7 @@ SigmaUtils = function () {
     // cf. http://yomguithereal.github.io/articles/node-border-renderer/
 
     // same hierarchy as in sigma.canvas
-    this.twRender = {canvas: {nodes: {}, labels: {}}}
+    this.twRender = {canvas: {nodes: {}, edges: {}, labels: {}}}
 
     this.twRender.canvas.labels.def = function(node, context, settings) {
       var fontSize,
@@ -127,6 +127,46 @@ SigmaUtils = function () {
         Math.round(node[prefix + 'x'] + size + 3),
         Math.round(node[prefix + 'y'] + fontSize / 3)
       );
+    };
+
+    // source: github.com/jacomyal/sigma.js/commit/25e2153
+    // POSS: modify to incorporate mix colors
+    this.twRender.canvas.edges.curve = function(edge, source, target, context, settings) {
+      var color = edge.color,
+        prefix = settings('prefix') || '',
+        edgeColor = settings('edgeColor'),
+        defaultNodeColor = settings('defaultNodeColor'),
+        defaultEdgeColor = settings('defaultEdgeColor');
+
+      if (!color)
+        switch (edgeColor) {
+          case 'source':
+            color = source.color || defaultNodeColor;
+            break;
+          case 'target':
+            color = target.color || defaultNodeColor;
+            break;
+          default:
+            color = defaultEdgeColor;
+            break;
+        }
+
+      context.strokeStyle = color;
+      context.lineWidth = edge[prefix + 'size'] || 1;
+      context.beginPath();
+      context.moveTo(
+        source[prefix + 'x'],
+        source[prefix + 'y']
+      );
+      context.quadraticCurveTo(
+        (source[prefix + 'x'] + target[prefix + 'x']) / 2 +
+          (target[prefix + 'y'] - source[prefix + 'y']) / 4,
+        (source[prefix + 'y'] + target[prefix + 'y']) / 2 +
+          (source[prefix + 'x'] - target[prefix + 'x']) / 4,
+        target[prefix + 'x'],
+        target[prefix + 'y']
+      );
+      context.stroke();
     };
 
     // node rendering with borders
