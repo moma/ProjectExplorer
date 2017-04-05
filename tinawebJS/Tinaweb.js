@@ -260,7 +260,7 @@ SelectionEngine = function() {
     /**
      * Main function for any selecting action
      *
-     * @nodes: eg targeted array
+     * @nodes: eg targeted array (only ids)
      */
     //  external usage : partialGraph , updateLeftPanel_fix();
     this.MultipleSelection2 = (function(nodes,nodesDict,edgesDict) {
@@ -681,7 +681,12 @@ TinaWebJS = function ( sigmacanvas ) {
             partialGraph.camera.goTo({x:0, y:0, ratio:1})
         });
 
-        // new sigma.js: attempt to use sigma events bindings
+
+
+        //               ---------------------
+        // new sigma.js: sigma events bindings
+        //               ---------------------
+
         // cf. https://github.com/jacomyal/sigma.js/wiki/Events-API
 
         // cases:
@@ -718,7 +723,11 @@ TinaWebJS = function ( sigmacanvas ) {
             // circleNodes += prevsels
 
             // 2) show selection + do all related effects
-            SelInst.MultipleSelection2({nodes:circleNodes})
+            cancelSelection()
+
+            if (circleNodes.length) {
+              SelInst.MultipleSelection2({nodes:circleNodes})
+            }
           }
         })
 

@@ -438,23 +438,29 @@ function circleTrackMouse(e) {
             ctx.globalAlpha = 0.5;
             ctx.beginPath();
 
-            // convert (TODO CHECK IN THIS CONTEXT)
-            var camCoords = TW.cam.cameraPosition(x,y)
+            // // labels appear on circle hover : OFF
 
-            var exactNodeset = circleGetAreaNodes(
-              camCoords.x,
-              camCoords.y
-            )
-            // TODO REFA UNCOMMENT pseudo hover
-            // labels appear
+            // convert (TODO CHECK IN THIS CONTEXT)
+            // var camCoords = TW.cam.cameraPosition(x,y)
             //
-            // if(TW.partialGraph.camera.ratio > showLabelsIfZoom){
-            //   for n of exactNodeset
-            //   n.forceLabel=true;
+            // var exactNodeset = circleGetAreaNodes(
+            //   camCoords.x,
+            //   camCoords.y
+            // )
+            // // using settings_explorerjs.showLabelsIfZoom as cam.ratio threshold
+            // if(TW.partialGraph.camera.ratio < showLabelsIfZoom){
+            //   for (var k of exactNodeset) {
+            //     // if (! exactNodeset[k].hidden) {
+            //       exactNodeset[k].forceLabel=true;
+            //     // }
+            //   }
             // }
             // else {
-            //   for(var i in exactNodeset){
+            //   for(var k in exactNodeset){
+            //     n = exactNodeset[k]
             //     n.forceLabel=false;
+            //
+            //     // ?deprecated?
             //     if(typeof(n.neighbour)!=="undefined") {
             //         if(!n.neighbour) n.forceLabel=false;
             //         else n.forceLabel=true;
@@ -478,34 +484,42 @@ function circleTrackMouse(e) {
 // exact subset of nodes under circle
 function circleGetAreaNodes(camX0, camY0) {
 
-  // leverage quadtree to get a neighborhood
+  var cursor_ray = cursor_size * TW.cam.ratio // cursor_size to cam units
+
+  // prepare an approximate neighborhood
   var slightlyLargerNodeset = circleLocalSubset(
-    camX0,
-    camY0,
-    cursor_size * TW.cam.ratio // cursor_size to cam units
+    camX0, camY0,
+    cursor_ray
   )
+
+  console.log('slightlyLargerNodeset', slightlyLargerNodeset)
 
   var exactNodeset = []
 
-      for(var i in slightlyLargerNodeset){
-              n = slightlyLargerNodeset[i];
-              if(n.hidden==false){
-                  distance = Math.sqrt(
-                      Math.pow((x-parseInt(n.displayX)),2) +
-                      Math.pow((y-parseInt(n.displayY)),2)
-                      );
-                  if(parseInt(distance)<=cursor_size) {
-                      exactNodeset.push.
-                  } else {
-                      if(typeof(n.neighbour)!=="undefined") {
-                          if(!n.neighbour) n.forceLabel=false;
-                      } else n.forceLabel=false;
-                  }
-              }
+  for(var i in slightlyLargerNodeset){
+    n = slightlyLargerNodeset[i];
+    if(!n.hidden){
+      distance = Math.sqrt(
+                  Math.pow((camX0-parseInt(n['read_cam0:x'])),2) +
+                  Math.pow((camY0-parseInt(n['read_cam0:y'])),2)
+      );
+
+      // console.log('D[P0,'+n.label+'] =', distance)
+
+      if( distance <= cursor_ray) {
+        exactNodeset.push(n.id)
       }
-      if(TW.partialGraph.forceatlas2 && TW.partialGraph.forceatlas2.count<=1) {
-          TW.partialGraph.refresh({skipIndexation:true})
+      else {
+            // ?deprecated?
+            if(typeof(n.neighbour)!=="undefined") {
+            if(!n.neighbour) n.forceLabel=false;
+            } else n.forceLabel=false;
       }
+    }
+  }
+  if(TW.partialGraph.forceatlas2 && TW.partialGraph.forceatlas2.count<=1) {
+      TW.partialGraph.refresh({skipIndexation:true})
+  }
 
   return exactNodeset
 }
