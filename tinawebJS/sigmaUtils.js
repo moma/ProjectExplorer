@@ -206,7 +206,7 @@ SigmaUtils = function () {
       this.toggleEdges = function() {
         var now_flag = TW.partialGraph.settings('drawEdges')
         TW.partialGraph.settings('drawEdges', !now_flag)
-        TW.partialGraph.refresh({skipIndexation:true})
+        TW.partialGraph.render()
       }
 
 
@@ -259,7 +259,7 @@ function showMeSomeLabels(N){
             }
         }
         // new sigma.js
-        TW.partialGraph.refresh({ skipIndexation: true });
+        TW.partialGraph.render();
         /*======= Show some labels at the beginning =======*/
 }
 
@@ -480,7 +480,7 @@ function clustersBy(daclass) {
 
     set_ClustersLegend ( null )
 
-    TW.partialGraph.refresh({skipIndexation: true});
+    TW.partialGraph.render();
 }
 
 
@@ -584,7 +584,7 @@ function colorsRelByBins(daclass) {
 
     set_ClustersLegend ( null )
 
-    TW.partialGraph.refresh({skipIndexation: true});
+    TW.partialGraph.render();
 }
 
 
@@ -643,7 +643,7 @@ function colorsBy(daclass) {
     }
     //    [ / Edge-colour by source-target nodes-colours combination ]
     set_ClustersLegend ( daclass )
-    TW.partialGraph.refresh({skipIndexation: true});
+    TW.partialGraph.render();
 }
 
 //just for fun

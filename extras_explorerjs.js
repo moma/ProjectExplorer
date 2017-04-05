@@ -289,7 +289,7 @@ function selectionUni(currentNode){
         highlightSelectedNodes(false);
         opossites = [];
         selections = [];
-        TW.partialGraph.refresh();
+        TW.partialGraph.render();
     }
 
     if((typeof selections[currentNode.id])=="undefined"){
@@ -308,7 +308,7 @@ function selectionUni(currentNode){
 
 
     TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8);
-    TW.partialGraph.refresh();
+    TW.partialGraph.render();
 }
 
 //JUST ADEME
@@ -467,7 +467,7 @@ function circleTrackMouse(e) {
             //     } else n.forceLabel=false;
             //   }
             //   if(TW.partialGraph.forceatlas2 && TW.partialGraph.forceatlas2.count<=1) {
-            //     TW.partialGraph.refresh({skipIndexation:true})
+            //     TW.partialGraph.render()
             //   }
             // }
 
@@ -492,7 +492,7 @@ function circleGetAreaNodes(camX0, camY0) {
     cursor_ray
   )
 
-  console.log('slightlyLargerNodeset', slightlyLargerNodeset)
+  // console.log('slightlyLargerNodeset', slightlyLargerNodeset)
 
   var exactNodeset = []
 
@@ -518,7 +518,7 @@ function circleGetAreaNodes(camX0, camY0) {
     }
   }
   if(TW.partialGraph.forceatlas2 && TW.partialGraph.forceatlas2.count<=1) {
-      TW.partialGraph.refresh({skipIndexation:true})
+      TW.partialGraph.render()
   }
 
   return exactNodeset
@@ -584,7 +584,7 @@ function flashNodesArray (nodesArray) {
   }
 
   console.log("nodesArray encompassed by:", minX, minY,';', maxX, maxY)
-  TW.partialGraph.refresh()
+  TW.partialGraph.render()
 }
 
 // BASIC MODULARITY

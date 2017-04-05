@@ -204,7 +204,7 @@ SelectionEngine = function() {
             TW.lastQuery = string ;
             $("input#searchinput").val("");
             $("input#searchinput").autocomplete( "close" );
-            TW.partialGraph.refresh({ skipIndexation: true });
+            TW.partialGraph.render();
 
             return targeted.length
         }
@@ -364,7 +364,7 @@ SelectionEngine = function() {
 
         overNodes=true;
 
-        TW.partialGraph.refresh({skipIndexation:true});
+        TW.partialGraph.render();
 
         updateLeftPanel_fix( selections , oppos );
 
@@ -509,7 +509,7 @@ TinaWebJS = function ( sigmacanvas ) {
                               SelInst.MultipleSelection2({nodes:targeted});
                               cursor_size = prev_cursor_size;
                           }
-                          TW.partialGraph.refresh({skipIndexation: true});
+                          TW.partialGraph.render();
 
                           $("input#searchinput").val("");
                           $("input#searchinput").autocomplete( "close" );
@@ -551,7 +551,7 @@ TinaWebJS = function ( sigmacanvas ) {
                             cancelSelection(false);
                             SelInst.MultipleSelection2({nodes:targeted});
                         }
-                        TW.partialGraph.refresh({skipIndexation: true});
+                        TW.partialGraph.render();
 
                         $("input#searchinput").val("");
                         $("input#searchinput").autocomplete( "close" );
@@ -568,6 +568,8 @@ TinaWebJS = function ( sigmacanvas ) {
     this.initListeners = function (categories, partialGraph) {
 
         var SelInst = new SelectionEngine();
+
+        document.getElementById('edges-switch').checked = customSettings.drawEdges
 
         $("#semLoader").hide();
 
@@ -604,7 +606,7 @@ TinaWebJS = function ( sigmacanvas ) {
             console.log("")
             console.log(" ############  changeLEVEL click");
 
-            changeLevel(); // <- est-ce que ça fait quelquechose ?
+            changeLevel();
             // $("#tabs1").click()
             ChangeGraphAppearanceByAtt(true)  // cf. extras_explorer
             console.log(" ############  / changeLEVEL click");
@@ -634,7 +636,7 @@ TinaWebJS = function ( sigmacanvas ) {
                 }, { duration: 400, queue: false });
                 setTimeout(function() {
                       partialGraph.resize();
-                      partialGraph.refresh();
+                      partialGraph.render();
                 }, 400);
             }
             else {
@@ -654,7 +656,7 @@ TinaWebJS = function ( sigmacanvas ) {
                 },{ duration: 400, queue: false });
                 setTimeout(function() {
                       partialGraph.resize();
-                      partialGraph.refresh();
+                      partialGraph.render();
                 }, 400);
             }
         });
@@ -678,7 +680,7 @@ TinaWebJS = function ( sigmacanvas ) {
         // button CENTER
         $("#lensButton").click(function () {
             // new sigma.js
-            partialGraph.camera.goTo({x:0, y:0, ratio:1})
+            partialGraph.camera.goTo({x:0, y:0, ratio:1.2})
         });
 
 
@@ -762,7 +764,7 @@ TinaWebJS = function ( sigmacanvas ) {
         //                 cancelSelection(false);
         //                 SelInst.MultipleSelection2( {nodes:targeted} )
         //             }
-        //             partialGraph.refresh({skipIndexation:true});
+        //             partialGraph.render();
         //             trackMouse(e);
 
         // -------------------------------------------/fragment from v1.customized
@@ -849,7 +851,7 @@ TinaWebJS = function ( sigmacanvas ) {
 
                 if(partialGraph.forceatlas2.active) {
                     partialGraph.stopForceAtlas2();
-                    partialGraph.refresh({ skipIndexation: true });
+                    partialGraph.render();
                     return;
                 } else {
                     partialGraph.startForceAtlas2();
@@ -875,61 +877,52 @@ TinaWebJS = function ( sigmacanvas ) {
 
         //finished
         $("#slidercat0nodessize").freshslider({
-            step:1,
-            min:-20,
-            max:20,
-            value:0,
+            step:.25,
+            min:0,
+            max:5,
+            value: TW.partialGraph.settings('labelSizeRatio'),
             bgcolor:"#27c470",
             onchange:function(value){
-                setTimeout(function (){
-                   // new sigma.js loop on nodes POSS optimize
-                   nds  = TW.partialGraph.graph.nodes()
-                   console.log("init: slider resize")
-                   for(j=0 ; j<TW.partialGraph.nNodes ; j++){
-                       if (nds[j]
-                        && nds[j].type == TW.catSoc) {
-                            var n = nds[j]
-                            var newval = parseFloat(TW.Nodes[n.id].size) + parseFloat((value-1))*0.3
-                            n.size = (newval<1.0)?1:newval;
-                            sizeMult[TW.catSoc] = parseFloat(value-1)*0.3;
-                       }
-                   }
-                   partialGraph.refresh({skipIndexation:true})
-                },
-                100);
+
+              var adaptedLabelThreshold = (5 - value) + 1
+              // console.log("value", value, "thres", adaptedLabelThreshold)
+
+              TW.partialGraph.settings('labelSizeRatio', value)
+              TW.partialGraph.settings('labelThreshold', adaptedLabelThreshold)
+              TW.partialGraph.render()
             }
         });
 
-        //finished
-        $("#slidercat1nodessize").freshslider({
-            step:1,
-            min:-20,
-            max:20,
-            value:0,
-            bgcolor:"#FFA500",
-            onchange:function(value){
-                setTimeout(function (){
-                    // new sigma.js loop on nodes POSS optimize
-                    nds  = TW.partialGraph.graph.nodes()
-                    console.log("init: slider resize")
-                    for(j=0 ; j<TW.partialGraph.nNodes ; j++){
-                        if (nds[j]
-                         && nds[j].type == TW.catSem) {
-                             var n = nds[j]
-                             var newval = parseFloat(TW.Nodes[n.id].size) + parseFloat((value-1))*0.3
-                             n.size = (newval<1.0)?1:newval;
-                             sizeMult[TW.catSem] = parseFloat(value-1)*0.3;
-                        }
-                    }
-                    partialGraph.refresh({skipIndexation:true})
-                },
-                100);
-            }
-        });
+        // //finished
+        // $("#slidercat1nodessize").freshslider({
+        //     step:1,
+        //     min:-20,
+        //     max:20,
+        //     value:0,
+        //     bgcolor:"#FFA500",
+        //     onchange:function(value){
+        //         setTimeout(function (){
+        //             // new sigma.js loop on nodes POSS optimize
+        //             nds  = TW.partialGraph.graph.nodes()
+        //             console.log("init: slider resize")
+        //             for(j=0 ; j<TW.partialGraph.nNodes ; j++){
+        //                 if (nds[j]
+        //                  && nds[j].type == TW.catSem) {
+        //                      var n = nds[j]
+        //                      var newval = parseFloat(TW.Nodes[n.id].size) + parseFloat((value-1))*0.3
+        //                      n.size = (newval<1.0)?1:newval;
+        //                      sizeMult[TW.catSem] = parseFloat(value-1)*0.3;
+        //                 }
+        //             }
+        //             partialGraph.render()
+        //         },
+        //         100);
+        //     }
+        // });
 
         //Cursor Size slider
         // + reindexation when size is settled (=> updates the quadtree)
-        var reindexTimeout = null
+        // var reindexTimeout = null
         $("#unranged-value").freshslider({
             step: 1,
             min:cursor_size_min,
@@ -938,21 +931,35 @@ TinaWebJS = function ( sigmacanvas ) {
             onchange:function(value){
                 // console.log("en cursorsize: "+value);
                 cursor_size=value;
-                if(cursor_size==0) partialGraph.refresh({skipIndexation:true});
+                if(cursor_size==0) partialGraph.render();
 
                 // have reindex ready to go for when user stops moving slider
-                if (reindexTimeout) {
-                  // (debounced)
-                  clearTimeout(reindexTimeout)
-                  reindexTimeout = null
-                }
-                reindexTimeout = setTimeout(function() {
-                  TW.partialGraph.refresh({skipIndexation: false})
-                  //                                       =====
-                  console.log("graph quadtree reindexed for cursor")
-                }, 500)
+                // if (reindexTimeout) {
+                //   // (debounced)
+                //   clearTimeout(reindexTimeout)
+                //   reindexTimeout = null
+                // }
+                // reindexTimeout = setTimeout(function() {
+                //   TW.partialGraph.render()
+                //   //                                       =====
+                //   console.log("graph quadtree reindexed for cursor")
+                // }, 500)
             }
         });
+
+        // costly entire refresh (~400ms) only after stopped resizing for 3s
+        // NB: rescale middleware already reacted and except for large win size changes it handles the resize fine
+        //     (so this fragment is only to accomodate the large changes)
+        var winResizeTimeout = null
+        window.addEventListener('resize', function(){
+          if (winResizeTimeout) {
+            clearTimeout(winResizeTimeout)
+          }
+          winResizeTimeout = setTimeout(function() {
+            console.log('did refresh')
+            TW.partialGraph.refresh()
+          }, 3000)
+        }, true)
 
     } // finish initListeners
 

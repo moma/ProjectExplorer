@@ -39,7 +39,7 @@ function cancelSelection (fromTagCloud) {
     //Nodes colors go back to normal
 
     // new sigma.js redraw
-    TW.partialGraph.refresh({ skipIndexation: true });
+    TW.partialGraph.render();
 
 
     if(fromTagCloud==false){
@@ -68,7 +68,7 @@ function cancelSelection (fromTagCloud) {
         LevelButtonDisable(true);
 
     // new sigma.js redraw
-    TW.partialGraph.refresh({ skipIndexation: true });
+    TW.partialGraph.render();
 }
 
 function highlightSelectedNodes(flag){
@@ -174,7 +174,7 @@ function RefreshState(newNOW){
         $("#category-B").show();
     }
 
-    TW.partialGraph.refresh({skipIndexation: true});
+    TW.partialGraph.render();
 
 }
 
@@ -212,7 +212,7 @@ function htmlfied_alternodes(elems) {
 function manualForceLabel(nodeid,active) {
 	// console.log("manual|"+nodeid+"|"+active)
 	TW.partialGraph.graph.nodes(nodeid).active=active;
-	TW.partialGraph.refresh({skipIndexation:true});
+	TW.partialGraph.render();
 }
 
 function htmlfied_samenodes(elems) {

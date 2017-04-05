@@ -214,13 +214,13 @@ if(RES["OK"]) {
             drawEdges: true,
             drawNodes: true,
             drawLabels: true,
-            // nodesPowRatio: 1,
+            // nodesPowRatio: .1,
             labelSize: "proportional",
             font: "Ubuntu Condensed",
             // labelColor: "node",
-            fontStyle: "bold",
-            batchEdgesDrawing: false,
-
+            // fontStyle: "bold",
+            batchEdgesDrawing: true,
+            singleHover: true,
             autoResize: true,
             mouseEnabled: true,
             touchEnabled: false
@@ -271,8 +271,6 @@ if(RES["OK"]) {
     // useful
     TW.partialGraph.nNodes = TW.partialGraph.graph.nodes().length
     TW.partialGraph.nEdges = TW.partialGraph.graph.edges().length
-
-
 
     TW.partialGraph.states = []
     TW.partialGraph.states[0] = false;
@@ -368,33 +366,6 @@ if(RES["OK"]) {
                 EdgeWeightFilter("#slidercat0edgesweight", "label" , "nodes1", "weight");
             }
             set_ClustersLegend ( "clust_default" )
-        } else {
-
-        //finished
-        $("#slidercat1nodessize").freshslider({
-            step:1,
-            min:-20,
-            max:20,
-            value:0,
-            bgcolor:"#FFA500",
-            onchange:function(value){
-                setTimeout(function (){
-                       // POSS: custom index by n.type
-                       var nds = TW.partialGraph.graph.nodes()
-                       for (var j in nds) {
-                         var n = nds[j]
-                         if(TW.Nodes[n.id].type==TW.catSem) {
-                           var newval = parseFloat(TW.Nodes[n.id].size) + parseFloat((value-1))*0.3
-                           n.size = (newval<1.0)?1:newval;
-                           sizeMult[TW.catSem] = parseFloat(value-1)*0.3;
-                         }
-                       }
-                       TW.partialGraph.refresh({skipIndexation:true});
-                },
-                100);
-            }
-        });
-
         }
 
         if(typestring=="1|1") {
@@ -411,7 +382,7 @@ if(RES["OK"]) {
 
 
     // REFA new sigma.js
-    TW.partialGraph.camera.goTo({x:0, y:0, ratio:.8, angle: 0})
+    TW.partialGraph.camera.goTo({x:0, y:0, ratio:1.2, angle: 0})
 
     // fa2enabled=true; TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8).draw();
     // $.doTimeout(1,function(){

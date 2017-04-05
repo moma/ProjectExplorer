@@ -560,7 +560,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                         }
                     }
 
-                    TW.partialGraph.refresh({skipIndexation: true})
+                    TW.partialGraph.render()
 
                     // console.log("\t\tedgesfilter:")
                     // console.log("\t\t[ Starting FA2 ]")
@@ -678,7 +678,7 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
                 }
                 pushFilterValue(sliderDivID,filtervalue)
 
-                TW.partialGraph.refresh()
+                TW.partialGraph.render()
 
                 // [ Starting FA2 ]
                 setTimeout(function() {
