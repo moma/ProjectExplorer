@@ -29,44 +29,44 @@
 
 
 <body>
-  <div id="topbar" class="navbar navbar-default navbar-fixed-top">
+  <div id="topbar" class="navbar navbar-default">
     <div class="container">
 
-      <div class="navbar-header">
-        <a href="#" class="navbar-brand"><img style="width:20px;" src="libs/img2/home.png"></a>
-      </div>
-      <div class="navbar-header">
-        <a href="#" class="navbar-brand">Mapping Risk Research</a>
-      </div>
-
       <div class="navbar-collapse collapse" id="navbar-main">
-        <ul class="nav navbar-nav">
+        <ul class="nav navbar-nav navbar-left">
+          <li class="navbar-middle">
+            <img style="width:20px" src="libs/img2/home.png">
+          </li>
+          <li style="margin-left:10px;">
+            <a href="#" class="navbar-middle navbar-brand">
+              <span id="twbrand">Mapping Risk Research</span>
+            </a>
+          </li>
 
           <li class="disabled">
-            <a>
+            <a class="navbar-middle">
               <span class="label label-default label-lg">MAP: </span>
             </a>
           </li>
 
           <li>
-            <a class="navbar-higher">
+            <a class="navbar-middle">
               <span id="network" ></span>
             </a>
           </li>
+        </ul>
 
 
+        <ul class="nav navbar-nav">
           <li>
             <div id="log"></div>
           </li>
-
-          <li><a>.</a></li>
 
           <li>
             <a>
               <div id="gexfs"></div>
             </a>
           </li>
-
         </ul>
 
         <ul class="nav navbar-nav navbar-right">
@@ -78,6 +78,7 @@
                 class="navbar-higher"
                 title="ISC-PIF">
                 <img src="libs/img2/logo_ISCPIF_small.svg"height="23"></a></li>
+
         </ul>
 
       </div><!--navbar-main-->
@@ -86,12 +87,21 @@
 
 
   <!-- ex-defaultop -->
-  <div id="toolbar" class="navbar navbar-default navbar-fixed-top">
+  <div id="toolbar" class="navbar navbar-default">
     <div id="defaultop" class="container">
+
+      <div class="navbar-header">
+        <button id="toolbar-open" type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#left" aria-expanded="false" aria-controls="navbar">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
 
         <div id="left" class="navbar-collapse collapse">
 
-          <ul class="nav navbar-nav navbar-left">
+          <ul class="nav navbar-nav">
 
             <!--
             <li>
@@ -182,68 +192,68 @@
                 </tr>
               </table>
             </li> -->
-          <!-- </ul>
 
 
 
 
-            <ul id="searchnav" class='nav navbar-nav'> -->
-
-            <li class="nav navbar-lower">
+          </ul>
 
 
-              <li class="nav navbar-lower">
-                <div id="search_input_group" class="input-group input-group-sm">
-                  <span class="input-group-btn crowdsourcingModule">
-                    <button id="savesuggestion"
-                            disabled
-                            title="Save this topic as a new suggestion"
-                            class="btn btn-default"
-                            type="button">
-                      <span class="glyphicon glyphicon-save"
-                             id="saveicon">
-                      </span>
-                    </button>
-                  </span>
 
-                  <span class="input-group-btn">
-                    <button id="searchbutton"
-                            title="Search the topic in the map"
-                            class="btn btn-primary"
-                            type="button">
-                      <span class="glyphicon glyphicon-search">
-                      </span>
-                    </button>
-                  </span>
+          <ul id="searchnav" class='nav navbar-nav'>
+            <li class="navbar-lower">
+              <div id="search_input_group" class="input-group input-group-sm my-nav-input-group">
+                <span class="input-group-btn crowdsourcingModule">
+                  <button id="savesuggestion"
+                          disabled
+                          title="Save this topic as a new suggestion"
+                          class="btn btn-default"
+                          type="button">
+                    <span class="glyphicon glyphicon-save"
+                           id="saveicon">
+                    </span>
+                  </button>
+                </span>
 
-                  <!-- ########## THE SEARCH BAR ########## -->
+                <span class="input-group-btn">
+                  <button id="searchbutton"
+                          title="Search the topic in the map"
+                          class="btn btn-primary"
+                          type="button">
+                    <span class="glyphicon glyphicon-search">
+                    </span>
+                  </button>
+                </span>
 
-                  <input id="searchinput"
-                          type="text"
-                          class="form-control"
-                          placeholder="Select node(s)" />
+                <!-- ########## THE SEARCH BAR ########## -->
 
-                  <!-- strSearchBar will replace placeholder value -->
+                <input id="searchinput"
+                        type="text"
+                        class="form-control"
+                        placeholder="Select node(s)" />
 
-                  <!-- #################################### -->
+                <!-- strSearchBar will replace placeholder value -->
 
-                </div>
-              </li>
+                <!-- #################################### -->
 
-              <!-- messages below the search bar -->
-              <!-- say thanks for the suggestion, etc. -->
-              <li id="crowdsourcing_answer" class="nav crowdsourcingModule navbar-lower"></li>
+              </div>
+            </li>
 
-              <li class="nav navbar-lower">
+            <!-- messages below the search bar -->
+            <!-- say thanks for the suggestion, etc. -->
+            <li id="crowdsourcing_answer" class="nav crowdsourcingModule navbar-lower"></li>
 
-                <input id="checkboxdiv" onclick="alertCheckBox(this);"
-                      title="Add next search results to current selection"
-                      class="nav btn btn-info"
-                      type="checkbox">
-                <span style="position: relative; top: 4px; left: 5px;">Add to selection</span>
+            <li class="navbar-lower">
 
-              </li> <!-- /checkbox group -->
-            </ul> <!-- /searchnav -->
+              <input id="checkboxdiv" onclick="alertCheckBox(this);"
+                    title="Add next search results to current selection"
+                    class="nav btn btn-info"
+                    type="checkbox">
+              <span style="position: relative; top: 4px;">Add to selection</span>
+
+            </li> <!-- /checkbox group -->
+
+          </ul>
 
 
         </div><!-- /div#left -->

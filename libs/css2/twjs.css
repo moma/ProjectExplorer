@@ -1,3 +1,4 @@
+
 /* fixed TWJS grid: graph + bars
  * -----------------------------
  *  html, body
@@ -37,6 +38,7 @@ html, body {
   position: fixed;
   top: 35px;
   left: 0;
+  right: 0;
   z-index: 2;
   height: 70px;
   width: 100%;
@@ -49,6 +51,7 @@ html, body {
   position: fixed;
   top: 0;
   left: 0;
+  right: 0;
   z-index: 2;
   height: 35px;
   width: 100%;
@@ -56,39 +59,45 @@ html, body {
 }
 
 
+#twbrand {
+  width: 50px !important;
+}
+
 /* toolbar contents */
-
-/* searchnav gets same padding as bootstrap's .navbar-nav > li > a */
-
 #defaultop {
   padding-top: 8px;
 }
 
 .navbar-higher {
-  padding-top: 12px !important;
+  padding-top: 5px !important;
+}
+.navbar-middle {
+  padding-top: 8px !important;
 }
 .navbar-lower {
   padding-top: 15px !important;
 }
 
-#defaultop .nav {
-  margin-left: 15px !important;
+#defaultop #searchnav {
+  padding-left: 40px;
 }
-
-#defaultop div#searchnav {
-  padding-top: 13px;
-  padding-bottom: 9px;
+#defaultop .my-nav-input-group {
+  width: 2vw !important;
+}
+#searchinput {
+  min-width: 150px;
+  max-width: 300px;
 }
 
 #defaultop .weight-selectors {
   width: 135px !important;
   padding-top: 15px;
-  margin: 0 25px !important;
+  margin: 0 25px ;
 }
 
 #defaultop .weight-selectors td {
   width: 135px !important;
-  padding: 0 0 10px 0 !important;
+  padding: 0 0 10px 0 ;
 }
 
 #defaultop .slider-legend {
@@ -101,6 +110,12 @@ html, body {
 
 #graph-panels {
   display: none; /*not shown at init*/
+}
+
+/* override navbar toggle on right side when collapsed */
+#toolbar-open {
+  float:left !important;
+  margin-left: 15px !important;
 }
 
 
@@ -144,7 +159,7 @@ html, body {
     /*box-shadow: 0px 0px 0px 1px rgba(0,0,0,0.3); */
     -moz-border-radius: 6px;
     -webkit-border-radius: 6px;
-    -khtml-border-radius: 6px;'+
+    -khtml-border-radius: 6px;
     border-color:#BDBDBD;
     padding:0px 2px 0px 2px;
     margin:1px 0px 1px 0px;
@@ -188,6 +203,7 @@ html, body {
 }
 
 
+
 .grey {
     color: #cccccc; font-style: italic;
 }
@@ -214,6 +230,7 @@ p.micromessage{
 
 
 
+
 /* SIDEBAR CONTENT */
 
 #sidebar {
@@ -223,8 +240,9 @@ p.micromessage{
 #tips{
     padding-left: 5%;
     padding-right: 5%;
-    font-size:80%;
+    font-size: 80%;
 }
+
 #tips ul{
     /*list-style:none;*/
     padding-left:10%;
@@ -234,7 +252,35 @@ p.micromessage{
     font-size:80%;
 }
 
-#information ul {
-    list-style:none;
-    padding-left:5%;
-}​
+
+/* viewport-specific variants */
+
+/* collapsed variants */
+@media(max-width: 768px){
+
+  /* collapsed nav items don't need padding anymore */
+  #defaultop #searchnav {
+    padding-left: 15px !important;
+  }
+  #defaultop .weight-selectors {
+    padding-left: 15px !important;
+    margin-left: 0 !important;
+  }
+
+  /* collapsed menu styling */
+  #left {
+    max-width: 320px;
+    background-color: #ddd;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    z-index: 3;
+    padding: 5px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -border-radius: 3px;
+    -moz-box-shadow: 0px 2px 6px #000;
+    -webkit-box-shadow: 0px 2px 6px #000;
+    box-shadow: 0px 2px 6px #000;
+  }
+
+}
