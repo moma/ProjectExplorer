@@ -862,6 +862,11 @@ TinaWebJS = function ( sigmacanvas ) {
             }
         });
 
+
+        $("#edges-switch").click(function () {
+            sigma_utils.toggleEdges()
+        });
+
         NodeWeightFilter ( categories , "#slidercat0nodesweight" ,  categories[0],  "type" ,"size");
 
         EdgeWeightFilter("#slidercat0edgesweight", "label" , "nodes1", "weight");
