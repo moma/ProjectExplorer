@@ -572,7 +572,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                         },
                         5000);
                     },
-                    10,);
+                    10);
                     // [ / Starting FA2 ]
 
                     lastvalue = filtervalue;

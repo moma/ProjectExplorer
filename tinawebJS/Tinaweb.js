@@ -682,7 +682,6 @@ TinaWebJS = function ( sigmacanvas ) {
         });
 
 
-
         //               ---------------------
         // new sigma.js: sigma events bindings
         //               ---------------------
