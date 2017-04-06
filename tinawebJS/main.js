@@ -262,8 +262,14 @@ if(RES["OK"]) {
 
     // custom labels rendering
     //  - based on the normal one sigma.canvas.labels.def
-    //  - additionnaly supports 'forcelabel' node property
-    sigma.canvas.labels.def = sigma_utils.twRender.canvas.labels.def
+    //  - additionnaly supports 'active/forcelabel' node property (magnify x 3)
+    sigma.canvas.labels.def = sigma_utils.twRender.canvas.labels.largeractive
+
+    // custom hovers rendering
+    //  - based on the normal one sigma.canvas.hovers.def
+    //  - additionnaly magnifies all labels x 2
+    //  - additionnaly supports 'active/forcelabel' node property (magnify x 3)
+    sigma.canvas.hovers.def = sigma_utils.twRender.canvas.hovers.largerall
 
 
     // ==================================================================

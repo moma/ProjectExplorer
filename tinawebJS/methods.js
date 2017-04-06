@@ -205,25 +205,68 @@ function htmlfied_alternodes(elems) {
     return oppositesNodes
 }
 
-function manualForceLabel(nodeid,active) {
+function manualForceLabel(nodeid, active, justHover) {
 	// console.log("manual|"+nodeid+"|"+active)
-	TW.partialGraph.graph.nodes(nodeid).active=active;
+  var nd = TW.partialGraph.graph.nodes(nodeid)
+	nd.active=active;
 
-  // full redraw
-  // TODO try single node redraw
-  TW.partialGraph.render();
+  // console.log('justHover', justHover)
+  // var t0, t1
+
+  if (justHover) {
+    // using single node redraw in hover layer (much faster ~ 0.5ms)
+    redrawNodesInHoverLayer([nd])
+  }
+  else {
+    // using full redraw in permanent layers (slow ~ 70ms)
+    TW.partialGraph.render();
+  }
 }
+
+// Here we draw within hover layer instead of nodes layer, labels layer
+//
+// Explanation: it's perfect for temporary change cases because hover layer
+//              is *over* all other layers and contains nothing by default
+//              (this way step A can reset B avoiding whole graph refresh)
+function redrawNodesInHoverLayer(someNodes) {
+  var targetLayer = TW.rend.contexts.hover
+
+  // A - clear entire targetLayer
+  targetLayer.clearRect(
+    0, 0,
+    targetLayer.canvas.width,
+    targetLayer.canvas.height
+  )
+
+  var locSettings = TW.partialGraph.settings.embedObjects({prefix:'renderer1:'})
+
+  for (var k in someNodes) {
+    // B - we use our largerall renderer to write single nodes to overlay
+    sigma.canvas.hovers.def( someNodes[k], targetLayer, locSettings)
+  }
+}
+
+
+function clearHover() {
+  var hoverLayer = TW.rend.contexts.hover
+  hoverLayer.clearRect(
+    0, 0,
+    hoverLayer.canvas.width,
+    hoverLayer.canvas.height
+  )
+}
+
 
 function htmlfied_samenodes(elems) {
     var sameNodes=[]
-    js1=' onmouseover="manualForceLabel(this.id,true);" ';
-    js2=' onmouseout="manualForceLabel(this.id,true);" ';
+    js1=' onmouseover="manualForceLabel(this.id,true, true);" ';
+    js2=' onmouseout="manualForceLabel(this.id,true, true);" ';
     if(elems.length>0) {
         var A = getVisibleNodes()
         for (var a in A){
             n = A[a]
             if(!n.active && n.color.charAt(0)=="#" ) {
-                sameNodes.push('<li onmouseover="manualForceLabel(\''+n.id+'\',true)"  onmouseout="manualForceLabel(\''+n.id+'\',false)" ><a>'+ n.label+ '</a></li>')
+                sameNodes.push('<li onmouseover="manualForceLabel(\''+n.id+'\',true, true)"  onmouseout="manualForceLabel(\''+n.id+'\',false, true)" ><a>'+ n.label+ '</a></li>')
             }
         }
     }
@@ -306,7 +349,7 @@ function htmlfied_tagcloud(elems , limit) {
         if(!isUndef(TW.Nodes[id])){
             //          js1            js2
             // onclick="graphTagCloudElem('  ');
-            var jspart = ' onclick="manualSelectNode(\''+id+'\')" onmouseover="manualForceLabel(\''+id+'\',true)"  onmouseout="manualForceLabel(\''+id+'\',false)"'
+            var jspart = ' onclick="manualSelectNode(\''+id+'\')" onmouseover="manualForceLabel(\''+id+'\',true, true)"  onmouseout="manualForceLabel(\''+id+'\',false, true)"'
             htmlfied_alternode = '<span class="tagcloud-item" style="font-size:'+fontSize+'px;" '+jspart+'>'+ TW.Nodes[id].label+ '</span>';
             oppositesNodes.push(htmlfied_alternode)
         }
