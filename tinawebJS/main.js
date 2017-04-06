@@ -195,6 +195,15 @@ if(RES["OK"]) {
 
     // [ Initiating Sigma-Canvas ]
     var twjs_ = new TinaWebJS('#sigma-contnr');
+
+    // overriding pixelRatio is possible if we need very high definition
+    if (TW.overSampling) {
+      var realRatio = sigma.utils.getPixelRatio
+      sigma.utils.getPixelRatio = function() {
+        return 2 * realRatio()
+      }
+    }
+
     // NB new sigma.js: autoResize (no need for AdjustSigmaCanvas + sigmaLimits)
 
     console.log("categories: "+categories)
@@ -231,7 +240,6 @@ if(RES["OK"]) {
     )
 
     console.log("customSettings", customSettings)
-
 
     // custom nodes rendering
     if (customSettings['twNodeRendBorder']) {
