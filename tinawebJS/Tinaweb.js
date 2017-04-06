@@ -185,6 +185,7 @@ SelectionEngine = function() {
                 // got results
                 // -----------
                 this.MultipleSelection2({nodes:targeted});
+
             }
             else {
                 // no results
@@ -204,7 +205,6 @@ SelectionEngine = function() {
             TW.lastQuery = string ;
             $("input#searchinput").val("");
             $("input#searchinput").autocomplete( "close" );
-            TW.partialGraph.render();
 
             return targeted.length
         }
@@ -509,7 +509,6 @@ TinaWebJS = function ( sigmacanvas ) {
                               SelInst.MultipleSelection2({nodes:targeted});
                               cursor_size = prev_cursor_size;
                           }
-                          TW.partialGraph.render();
 
                           $("input#searchinput").val("");
                           $("input#searchinput").autocomplete( "close" );
@@ -551,7 +550,6 @@ TinaWebJS = function ( sigmacanvas ) {
                             cancelSelection(false);
                             SelInst.MultipleSelection2({nodes:targeted});
                         }
-                        TW.partialGraph.render();
 
                         $("input#searchinput").val("");
                         $("input#searchinput").autocomplete( "close" );
@@ -634,10 +632,6 @@ TinaWebJS = function ( sigmacanvas ) {
                 $('#sigma-contnr').animate({
                         "width": fullwidth-sidebar.width()+"px"
                 }, { duration: 400, queue: false });
-                setTimeout(function() {
-                      partialGraph.resize();
-                      partialGraph.render();
-                }, 400);
             }
             else {
                 //HIDE rightcolumn
@@ -654,10 +648,6 @@ TinaWebJS = function ( sigmacanvas ) {
                 $('#sigma-contnr').animate({
                         "width": fullwidth+"px"
                 },{ duration: 400, queue: false });
-                setTimeout(function() {
-                      partialGraph.resize();
-                      partialGraph.render();
-                }, 400);
             }
         });
 
@@ -931,7 +921,6 @@ TinaWebJS = function ( sigmacanvas ) {
             onchange:function(value){
                 // console.log("en cursorsize: "+value);
                 cursor_size=value;
-                if(cursor_size==0) partialGraph.render();
 
                 // have reindex ready to go for when user stops moving slider
                 // if (reindexTimeout) {
@@ -940,8 +929,7 @@ TinaWebJS = function ( sigmacanvas ) {
                 //   reindexTimeout = null
                 // }
                 // reindexTimeout = setTimeout(function() {
-                //   TW.partialGraph.render()
-                //   //                                       =====
+                //   TW.partialGraph.refresh()
                 //   console.log("graph quadtree reindexed for cursor")
                 // }, 500)
             }

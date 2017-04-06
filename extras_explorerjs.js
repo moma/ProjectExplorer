@@ -289,7 +289,6 @@ function selectionUni(currentNode){
         highlightSelectedNodes(false);
         opossites = [];
         selections = [];
-        TW.partialGraph.render();
     }
 
     if((typeof selections[currentNode.id])=="undefined"){

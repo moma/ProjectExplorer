@@ -38,10 +38,6 @@ function cancelSelection (fromTagCloud) {
     }
     //Nodes colors go back to normal
 
-    // new sigma.js redraw
-    TW.partialGraph.render();
-
-
     if(fromTagCloud==false){
         $("#names").html("");
         $("#topPapers").html(""); $("#topPapers").hide();
@@ -67,7 +63,7 @@ function cancelSelection (fromTagCloud) {
     if(TW.partialGraph.states.slice(-1)[0].level)
         LevelButtonDisable(true);
 
-    // new sigma.js redraw
+    // finally redraw
     TW.partialGraph.render();
 }
 
@@ -212,7 +208,10 @@ function htmlfied_alternodes(elems) {
 function manualForceLabel(nodeid,active) {
 	// console.log("manual|"+nodeid+"|"+active)
 	TW.partialGraph.graph.nodes(nodeid).active=active;
-	TW.partialGraph.render();
+
+  // full redraw
+  // TODO try single node redraw
+  TW.partialGraph.render();
 }
 
 function htmlfied_samenodes(elems) {
@@ -283,6 +282,7 @@ function manualSelectNode ( nodeid ) {
     cancelSelection(false);
     var SelInst = new SelectionEngine();
     SelInst.MultipleSelection2({nodes:[nodeid]});
+    // (MultipleSelection2 will do the re-rendering)
 }
 
 function htmlfied_tagcloud(elems , limit) {
