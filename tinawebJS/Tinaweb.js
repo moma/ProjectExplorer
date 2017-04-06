@@ -15,7 +15,6 @@ SelectionEngine = function() {
                 return currsels.indexOf(item) < 0;
             }));
         } else targeted = currsels;
-        return targeted;
 
         targeted = targeted.map(Number)
 
@@ -714,7 +713,7 @@ TinaWebJS = function ( sigmacanvas ) {
         $("#layoutButton").click(function () {
             if(TW.partialGraph.isForceAtlas2Running()) {
                 partialGraph.stopForceAtlas2();
-                partialGraph.render();
+                // partialGraph.render();
                 fa2enabled=false;
                 return;
             } else {
