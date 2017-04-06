@@ -241,7 +241,10 @@ if(RES["OK"]) {
             rescaleIgnoreSize: true,
 
             mouseEnabled: true,
-            touchEnabled: false
+            touchEnabled: false,
+
+            animationsTime:300,
+            mouseZoomDuration:500
         },
         sigmaJsDrawingProperties,
         sigmaJsGraphProperties,
@@ -284,6 +287,7 @@ if(RES["OK"]) {
         },
         settings: customSettings
     });
+    // ==================================================================
 
     // shortcuts to the renderer and camera
     TW.cam  = TW.partialGraph.camera
@@ -404,6 +408,29 @@ if(RES["OK"]) {
         }
     }).index();
 
+    // config for any future forceAtlas2 calls
+    TW.partialGraph.configForceAtlas2({
+      // adapting speed -------------
+      slowDown: 1,
+      startingIterations: 5,
+      iterationsPerRender: 3,
+      barnesHutOptimize: false,
+      barnesHutTheta: .5,
+
+      // global behavior -----------
+      linLogMode: true,
+      edgeWeightInfluence: .5,
+      gravity: 3,
+      strongGravityMode: false,
+      scalingRatio: 1,
+
+      adjustSizes: false,     // ~ messy but sort of in favor of overlap prevention
+
+      // favors global centrality
+      // (but rather not needed when data already shows topic-centered
+      //  node groups and/nor when preferential attachment type of data)
+      outboundAttractionDistribution: false
+    })
 
     // REFA new sigma.js
     TW.partialGraph.camera.goTo({x:0, y:0, ratio:1.2, angle: 0})

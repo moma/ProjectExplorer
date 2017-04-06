@@ -711,21 +711,15 @@ TinaWebJS = function ( sigmacanvas ) {
           }
         });
 
-        $("#edgesButton").click(function () {
-            fa2enabled=true;
-            if(!isUndef(partialGraph.forceatlas2)) {
-
-                if(partialGraph.forceatlas2.active) {
-                    partialGraph.stopForceAtlas2();
-                    partialGraph.render();
-                    return;
-                } else {
-                    partialGraph.startForceAtlas2();
-                    return;
-                }
-
+        $("#layoutButton").click(function () {
+            if(TW.partialGraph.isForceAtlas2Running()) {
+                partialGraph.stopForceAtlas2();
+                partialGraph.render();
+                fa2enabled=false;
+                return;
             } else {
                 partialGraph.startForceAtlas2();
+                fa2enabled=true;
                 return;
             }
         });
