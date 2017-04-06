@@ -130,7 +130,7 @@ SigmaUtils = function () {
     };
 
     // source: github.com/jacomyal/sigma.js/commit/25e2153
-    // POSS: modify to incorporate mix colors
+    // POSS: modify to incorporate mix colors (repaintEdges)
     this.twRender.canvas.edges.curve = function(edge, source, target, context, settings) {
       var color = edge.color,
         prefix = settings('prefix') || '',
@@ -202,6 +202,7 @@ SigmaUtils = function () {
         context.fill();
       };
 
+      // ================ /alternative rendering =====================
 
       this.toggleEdges = function() {
         var now_flag = TW.partialGraph.settings('drawEdges')
@@ -209,15 +210,12 @@ SigmaUtils = function () {
         TW.partialGraph.render()
       }
 
-
-
-
-    // ================ /alternative rendering =====================
-
-}
+} // /SigmaUtils object
 
 //for socialgraph
 function showMeSomeLabels(N){
+  // NB why is this not using methods.manualForceLabel ?!
+
         /*======= Show some labels at the beginning =======*/
         minIn=50,
         maxIn=0,

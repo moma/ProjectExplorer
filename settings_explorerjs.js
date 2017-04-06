@@ -100,7 +100,7 @@ var semanticConverged=false;
 var showLabelsIfZoom=1.0;
 TW.edgeDefaultOpacity = 0.3  // opacity when true_color
 TW.edgeGreyColor = "rgba(200, 200, 200, 0.5)";
-TW.overSampling = false     // costly hi-def rendering (true => pixelRatio x 2)
+TW.overSampling = true     // costly hi-def rendering (true => pixelRatio x 2)
 // ============ < / DEVELOPER OPTIONS > ============
 
 

@@ -217,20 +217,29 @@ if(RES["OK"]) {
     TW.graphData = {nodes: [], edges: []}
     TW.graphData = sigma_utils.FillGraph(  initialState , catDict  , dicts.nodes , dicts.edges , TW.graphData );
 
-
+    // cf github.com/jacomyal/sigma.js/wiki/Settings
     var customSettings = Object.assign(
         {
             drawEdges: true,
             drawNodes: true,
             drawLabels: true,
-            // nodesPowRatio: .1,
+
             labelSize: "proportional",
             font: "Ubuntu Condensed",
+            fontStyle: "bold",
             // labelColor: "node",
-            // fontStyle: "bold",
+
+            // nodesPowRatio: .3,
             batchEdgesDrawing: true,
+            hideEdgesOnMove: true,
+
+            enableHovering: true,
             singleHover: true,
+            enableEdgeHovering: false,
+
             autoResize: true,
+            rescaleIgnoreSize: true,
+
             mouseEnabled: true,
             touchEnabled: false
         },
@@ -255,6 +264,7 @@ if(RES["OK"]) {
     //  - based on the normal one sigma.canvas.labels.def
     //  - additionnaly supports 'forcelabel' node property
     sigma.canvas.labels.def = sigma_utils.twRender.canvas.labels.def
+
 
     // ==================================================================
     // sigma js library invocation (https://github.com/jacomyal/sigma.js)
