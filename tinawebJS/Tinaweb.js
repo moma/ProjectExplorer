@@ -3,149 +3,59 @@
 // will be instanciated as SelInst
 SelectionEngine = function() {
 
+    // creates the union of prevsels and currsels, if addvalue
+    this.SelectorEngine = (function(addvalue , prevsels , currsels ) {
 
-    // TODO REFA this block was used for area selection
-    // (!at least partly replaceable by getNodes from new sigma.misc.bindEvents)
-    // ----------------------------------------------------------8<-------------
-    // Selection Engine!! finally...
-    this.SelectorEngine_part01 = (function(cursorsize, area ) {
-        var clickedNodes = []
-        if(cursorsize>0) {
-            clickedNodes = this.SelectThis2( area )
-        } else {
-            clickedNodes = TW.partialGraph.graph.nodes().filter(function(n) {
-                            return !!n['hover'];
-                        }).map(function(n) {
-                            return n.id;
-                        });
-        }
-
-        return clickedNodes.map(Number);
-    }).index();
-    //
-    // this.SelectorEngine_part02 = (function( addvalue , clicktype , prevsels , currsels ) {
-    //
-    //     console.log("Add[]:")
-    //     console.log(addvalue)
-    //     console.log("clicktype:")
-    //     console.log(clicktype)
-    //     console.log("prevsels:")
-    //     console.log(prevsels)
-    //     console.log("currsels:")
-    //     console.log(currsels)
-    //     console.log(" - - - - - - ")
-    //
-    //     var buffer = Object.keys(prevsels).map(Number).sort(this.sortNumber);
-    //     var targeted = currsels.map(Number).sort(this.sortNumber);
-    //
-    //     if(clicktype=="double" && targeted.length==0) return [];
-    //
-    //     // if(targeted.length>0) {
-    //     if(buffer.length>0) {
-    //         if(JSON.stringify(buffer)==JSON.stringify(targeted)) {
-    //             // this is just effective for Add[ ] ...
-    //             // If previous selection is equal to the current one, you've nothing :D
-    //             cancelSelection(false);
-    //             return [];
-    //         }
-    //         var inter = this.intersect_safe(buffer,targeted)
-    //         if(inter.length>0) {
-    //             var blacklist = {} , whitelist = {};
-    //             for(var i in inter) blacklist[inter[i]]=true;
-    //             for(var i in buffer){
-    //                 e = buffer[i]
-    //                 if(!blacklist[e]) {
-    //                     whitelist[e] = true;
-    //                 }
-    //             }
-    //             for(var i in targeted){
-    //                 e = targeted[i]
-    //                 if(!blacklist[e]) {
-    //                     whitelist[e] = true;
-    //                 }
-    //             }
-    //             targeted = Object.keys(whitelist).map(Number);
-    //         } else {// inter = 0 ==> click in other portion of the graph (!= current selection)
-    //             // Union!
-    //             if(addvalue) {
-    //                 targeted = targeted.concat(buffer.filter(function (item) {
-    //                     return targeted.indexOf(item) < 0;
-    //                 }));
-    //             }
-    //             return targeted;
-    //         }
-    //     } else return targeted;
-    //     // }
-    //
-    //     return targeted;
-    // }).index();
-    // ----------------------------------------------------------8<-------------
-    //
-    this.SelectorEngine = (function( cursorsize , area , addvalue , clicktype , prevsels , currsels ) {
-        var targeted = []
         var buffer = Object.keys(prevsels).map(Number).sort(this.sortNumber);
 
-        if( isUndef(currsels) ) { // bunch of nodes from a click in the map
-            if(cursorsize>0) {
-                targeted = this.SelectThis2( area )
-            } else {
-                targeted = TW.partialGraph.graph.nodes().filter(function(n) {
-                                return !!n['hover'];
-                            }).map(function(n) {
-                                return n.id;
-                            });
-            }
-        } else { // OR one node from the tagcloud or a bunch of nodes from the searchbar
-            currsels = currsels.map(Number).sort(this.sortNumber);
-            if(addvalue) {
-                targeted = currsels.concat(buffer.filter(function (item) {
-                    return currsels.indexOf(item) < 0;
-                }));
-            } else targeted = currsels;
-            return targeted;
-        }
+        // currsels = bunch of nodes from a click in the map
+        currsels = currsels.map(Number).sort(this.sortNumber);
+        if(addvalue) {
+            targeted = currsels.concat(buffer.filter(function (item) {
+                return currsels.indexOf(item) < 0;
+            }));
+        } else targeted = currsels;
+        return targeted;
 
         targeted = targeted.map(Number)
 
-        if(clicktype=="double" && targeted.length==0) return [];
+        // NB new sigma: my REFA deprecated clicktype=="double"
+        if(targeted.length==0) return [];
 
         targeted = targeted.sort(this.sortNumber);
 
-        if(targeted.length>0) {
-            if(buffer.length>0) {
-                if(JSON.stringify(buffer)==JSON.stringify(targeted)) {
-                    // this is just effective for Add[ ] ...
-                    // If previous selection is equal to the current one, you've nothing :D
-                    cancelSelection(false);
-                    return [];
+        if(buffer.length>0) {
+            if(JSON.stringify(buffer)==JSON.stringify(targeted)) {
+                // this is just effective for Add[ ] ...
+                // If previous selection is equal to the current one, you've nothing :D
+                cancelSelection(false);
+                return [];
+            }
+            var inter = this.intersect_safe(buffer,targeted)
+            if(inter.length>0) {
+                var blacklist = {} , whitelist = {};
+                for(var i in inter) blacklist[inter[i]]=true;
+                for(var i in buffer){
+                    e = buffer[i]
+                    if(!blacklist[e]) {
+                        whitelist[e] = true;
+                    }
                 }
-                var inter = this.intersect_safe(buffer,targeted)
-                if(inter.length>0) {
-                    var blacklist = {} , whitelist = {};
-                    for(var i in inter) blacklist[inter[i]]=true;
-                    for(var i in buffer){
-                        e = buffer[i]
-                        if(!blacklist[e]) {
-                            whitelist[e] = true;
-                        }
+                for(var i in targeted){
+                    e = targeted[i]
+                    if(!blacklist[e]) {
+                        whitelist[e] = true;
                     }
-                    for(var i in targeted){
-                        e = targeted[i]
-                        if(!blacklist[e]) {
-                            whitelist[e] = true;
-                        }
-                    }
-                    targeted = Object.keys(whitelist).map(Number);
-                } else {// inter = 0 ==> click in other portion of the graph (!= current selection)
-                    // Union!
-                    if(addvalue) {
-                        targeted = targeted.concat(buffer.filter(function (item) {
-                            return targeted.indexOf(item) < 0;
-                        }));
-                    }
-                    return targeted;
                 }
-            } else return targeted;
+                targeted = Object.keys(whitelist).map(Number);
+            } else {// inter = 0 ==> click in other portion of the graph (!= current selection)
+                // Union!
+                if(addvalue) {
+                    targeted = targeted.concat(buffer.filter(function (item) {
+                        return targeted.indexOf(item) < 0;
+                    }));
+                }
+            }
         }
 
         return targeted;
@@ -176,7 +86,6 @@ SelectionEngine = function() {
             }
             var targeted = this.SelectorEngine( {
                             addvalue:checkBox,
-                            clicktype:"simple",
                             prevsels:selections,
                             currsels:coincd
                         } )
@@ -231,31 +140,6 @@ SelectionEngine = function() {
         }
         return result;
     }
-
-    // return Nodes-ids under the clicked Area
-    //  external usage : partialGraph
-    this.SelectThis2 = function( area ) {
-        var x1 = area.x1;
-        var y1 = area.y1;
-
-        //Multiple selection
-        var counter=0;
-        var actualSel=[];
-        TW.partialGraph.iterNodes(function(n){
-            if(!n.hidden){
-                distance = Math.sqrt(
-                    Math.pow((x1-parseInt(n.displayX)),2) +
-                    Math.pow((y1-parseInt(n.displayY)),2)
-                    );
-                if(parseInt(distance)<=cursor_size) {
-                    counter++;
-                    actualSel.push(n.id);
-                }
-            }
-        });
-        return actualSel;
-    }
-
 
     /**
      * Main function for any selecting action
@@ -673,8 +557,7 @@ TinaWebJS = function ( sigmacanvas ) {
             partialGraph.camera.goTo({x:0, y:0, ratio:1.2})
         });
 
-
-        //               ---------------------
+        // ---------------------------------------------------------------------
         // new sigma.js: sigma events bindings
         //               ---------------------
 
@@ -710,14 +593,18 @@ TinaWebJS = function ( sigmacanvas ) {
               camCoords.y
             )
 
-            // TODO 1) use SelectorEngine prevsels iff 'Add'
-            // circleNodes += prevsels
+            // 1) clear previous while keeping its list (useful iff 'Add' checkBox)
+            var previousSelection = selections
+            cancelSelection(false)
 
             // 2) show selection + do all related effects
-            cancelSelection()
-
-            if (circleNodes.length) {
-              SelInst.MultipleSelection2({nodes:circleNodes})
+            var targeted = SelInst.SelectorEngine( {
+                                addvalue:checkBox,
+                                currsels:circleNodes,
+                                prevsels:previousSelection
+                            } )
+            if(targeted.length>0) {
+              SelInst.MultipleSelection2( {nodes:targeted} )
             }
           }
         })
@@ -729,36 +616,24 @@ TinaWebJS = function ( sigmacanvas ) {
 
           // new sigma.js gives easy access to clicked node!
           theNodeId = e.data.node.id
+
+          // we keep the global selections and then clear it and all its effects
+          var previousSelection = selections
           cancelSelection(false);
 
           if (cursor_size == 0) {
-            SelInst.MultipleSelection2({nodes:[theNodeId]})
+            var targeted = SelInst.SelectorEngine( {
+                                addvalue:checkBox,
+                                currsels:[theNodeId],
+                                prevsels:previousSelection
+                            } )
+            if(targeted.length>0) {
+              SelInst.MultipleSelection2( {nodes:targeted} )
+            }
           }
           // case with a selector circle cursor handled
           // just before, at click event
         })
-
-        // -------------------------------------------fragment from v1.customized
-        // FOLLOW UP in v1 customized
-        // =========
-        // (last non-reimplemented bit that was using SelectorEngine)
-        //
-        //             var targeted = SelInst.SelectorEngine( {
-        //                                 cursorsize:cursor_size,
-        //                                 area:area,
-        //                                 addvalue:checkBox,
-        //                                 clicktype:"simple",
-        //                                 prevsels:selections
-        //                             } )
-        //             if(targeted.length>0) {
-        //                 cancelSelection(false);
-        //                 SelInst.MultipleSelection2( {nodes:targeted} )
-        //             }
-        //             partialGraph.render();
-        //             trackMouse(e);
-
-        // -------------------------------------------/fragment from v1.customized
-
 
         // for all goTo (move/zoom) events
         var zoomTimeoutId = null
@@ -780,6 +655,7 @@ TinaWebJS = function ( sigmacanvas ) {
           )
         })
 
+        // ---------------------------------------------------------------------
 
         // raw events (non-sigma): handlers attached to the container
         // ==========
@@ -867,7 +743,7 @@ TinaWebJS = function ( sigmacanvas ) {
 
         //finished
         $("#slidercat0nodessize").freshslider({
-            step:.25,
+            step:.5,
             min:0,
             max:5,
             value: TW.partialGraph.settings('labelSizeRatio'),
