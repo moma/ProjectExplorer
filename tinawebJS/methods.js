@@ -1,4 +1,4 @@
-
+'use strict';
 
 function cancelSelection (fromTagCloud) {
     console.log("\t***in cancelSelection");
@@ -14,30 +14,29 @@ function cancelSelection (fromTagCloud) {
     overNodes=false;
 
     if (TW.partialGraph.settings('drawEdges')) {
-      e = TW.partialGraph.graph.edges();
-      for(i=0;i<e.length;i++){
-
-              // console.log("cancelSelection: edge", e[i])
-              if (e[i]) {
-                  e[i].color = e[i].customAttrs['grey'] ? e[i].customAttrs['true_color'] : e[i].color;
-                  e[i].customAttrs['grey'] = 0;
-              }
-
+      for(let i=0;i<TW.nEdges;i++){
+        let e = TW.partialGraph.graph.edges(i)
+        // console.log("cancelSelection: edge", e)
+        if (e) {
+          e.color = e.customAttrs['grey'] ? e.customAttrs['true_color'] : e.color;
+          e.customAttrs['grey'] = 0;
+        }
       }
     }
 
-    n = TW.partialGraph.graph.nodes()
-    for(j=0;j<n.length;j++){
-        if (n[j]) {
-            // console.log("cancelSelection: node", n[j])
-            n[j].active = false;
-            // n[j].color = n[j].customAttrs['grey'] ? n[j].customAttrs['true_color'] : n.color;
-            n[j].color = n[j].customAttrs['true_color'];
-            n[j].customAttrs['grey'] = 0
-        }
-    }
     //Nodes colors go back to normal
+    for(let j=0;j<TW.nNodes;j++){
+      let n = TW.partialGraph.graph.nodes(j)
+      // console.log("cancelSelection: node", n)
+      if (n) {
+        n.active = false;
+        // n.color = n.customAttrs['grey'] ? n.customAttrs['true_color'] : n.color;
+        n.color = n.customAttrs['true_color'];
+        n.customAttrs['grey'] = 0
+      }
+    }
 
+    // hide all selection panels
     if(fromTagCloud==false){
         $("#names").html("");
         $("#topPapers").html(""); $("#topPapers").hide();
@@ -48,18 +47,20 @@ function cancelSelection (fromTagCloud) {
         $("#tips").html(getTips());
     }
 
-    // we send our "eraseNodeSet" event
-    // (signal for plugins that any selection behavior is finished)
+    // send "eraseNodeSet" event
     $('#searchinput').trigger("tw:eraseNodeSet");
+    // (signal for plugins that any selection behavior is finished)
 
     for(var i in deselections){
-        if( !isUndef(TW.partialGraph.graph.nodes(i)) ) {
-            TW.partialGraph.graph.nodes(i).forceLabel=false;
-            TW.partialGraph.graph.nodes(i).neighbour=false;
+      let n = TW.partialGraph.graph.nodes(i)
+        if( !isUndef(n) ) {
+            n.forceLabel=false;
+            n.neighbour=false;
         }
     }
+
     deselections={};
-    // leftPanel("close");
+
     if(TW.partialGraph.states.slice(-1)[0].level)
         LevelButtonDisable(true);
 
@@ -280,14 +281,14 @@ function htmlfied_nodesatts(elems){
     var semnodes=[]
     for(var i in elems) {
 
-        information=[]
+        var information=[]
 
         var id=elems[i]
         var node = TW.Nodes[id]
 
         if (TW.mainfile) {
             var addname = (node.attributes["name"])?node.attributes["name"]:"";
-            google='<a target="_blank" href="http://www.google.com/search?q='+addname+"+"+node.label.replace(" ","+")+'">';
+            var google='<a target="_blank" href="http://www.google.com/search?q='+addname+"+"+node.label.replace(" ","+")+'">';
             information += '<li><b>'+ google + node.label + '</a></b></li>';
             for (var i in node.attributes) {
                 if(i=="cluster_label")
@@ -331,26 +332,22 @@ function manualSelectNode ( nodeid ) {
 function htmlfied_tagcloud(elems , limit) {
     if(elems.length==0) return false;
     var oppositesNodes=[]
-    js1="" //'onclick="graphTagCloudElem(\'';
-    js2="" //"');\""
-    frecMAX=elems[0].value
+    var fontSize=desirableTagCloudFont_MIN
+    let frecMAX=elems[0].value
     for(var i in elems){
         if(i==limit)
             break
-        id=elems[i].key
-        frec=elems[i].value
-        if(frecMAX==1) fontSize=desirableTagCloudFont_MIN;
-        else {
-            fontSize=
+        let id=elems[i].key
+        let frec=elems[i].value
+        if(frecMAX > 1) {
+            let fontSize=
             desirableTagCloudFont_MIN+
             (frec-1)*
             ((desirableTagCloudFont_MAX-desirableTagCloudFont_MIN)/(frecMAX-1));
         }
         if(!isUndef(TW.Nodes[id])){
-            //          js1            js2
-            // onclick="graphTagCloudElem('  ');
             var jspart = ' onclick="manualSelectNode(\''+id+'\')" onmouseover="manualForceLabel(\''+id+'\',true, true)"  onmouseout="manualForceLabel(\''+id+'\',false, true)"'
-            htmlfied_alternode = '<span class="tagcloud-item" style="font-size:'+fontSize+'px;" '+jspart+'>'+ TW.Nodes[id].label+ '</span>';
+            let htmlfied_alternode = '<span class="tagcloud-item" style="font-size:'+fontSize+'px;" '+jspart+'>'+ TW.Nodes[id].label+ '</span>';
             oppositesNodes.push(htmlfied_alternode)
         }
     }
@@ -377,7 +374,7 @@ function updateLeftPanel_fix( sels , oppos ) {
 	    alterNodesDIV+= '</div>';
 	}
 
-    sameNodesDIV = "";
+    var sameNodesDIV = "";
     if(getNodeIDs(sels).length>0) {
         var temp_voisinage = {}
         var A = getVisibleNodes()
@@ -549,76 +546,72 @@ function graphTagCloudElem(nodes) {
 // new sigma.js: is this at all used?
 function greyEverything(){
 
-    nds = TW.partialGraph.graph.nodes().filter(function(n) {
-                            return !n['hidden'];
-                        });
-    for(var i in nds){
-            if(!nds[i].customAttrs['grey']){
-                nds[i].customAttrs['true_color'] = nds[i].color;
-                alphacol = "rgba("+hex2rga(nds[i].color)+",0.5)";
-                nds[i].color = alphacol;
-            }
-            nds[i].customAttrs['grey'] = 1;
+  for(let j=0 ; j<TW.nEdges ; j++){
+    let n = TW.partialGraph.graph.nodes(j)
+    if (n && !n.hidden && !n.customAttrs.grey) {
+      n.customAttrs.true_color = n.color
+      // TODO check if no simpler strategy than reinvoke hex2rga each time
+      n.color = "rgba("+hex2rga(n.color)+",0.5)"
+      n.customAttrs['grey'] = 1
     }
+  }
 
-    if (TW.partialGraph.settings('drawEdges')) {
-      eds = TW.partialGraph.graph.edges().filter(function(e) {
-                              return !e['hidden'];
-                          });
-
-      for(var i in eds){
-              if(!eds[i].customAttrs['grey']){
-                  eds[i].customAttrs['true_color'] = eds[i].color;
-                  eds[i].color = TW.edgeGreyColor ;
-              }
-              eds[i].customAttrs['grey'] = 1;
+  if (TW.partialGraph.settings('drawEdges')) {
+    for(let i=0;i<TW.nEdges;i++){
+      let e = TW.partialGraph.graph.edges(i)
+      if (e && !e.hidden && !e.customAttrs.grey) {
+        e.customAttrs.true_color = e.color
+        e.color = TW.edgeGreyColor
+        e.customAttrs.grey = 1
       }
     }
+  }
+
 }
 
 // new sigma.js: is this at all used?
-function graphResetColor(){
-    nds = TW.partialGraph.graph.nodes().filter(function(x) {
-                            return !x['hidden'];
-          });
-    eds = TW.partialGraph.graph.edges().filter(function(x) {
-                            return !x['hidden'];
-          });
-
-    for(var x in nds){
-        n=nds[x];
-        n.customAttrs["grey"] = 0;
-        n.color = n.customAttrs["true_color"];
-    }
-
-    if (TW.partialGraph.settings('drawEdges')) {
-      for(var x in eds){
-          e=eds[x];
-          e.customAttrs["grey"] = 0;
-          e.color = e.customAttrs["true_color"];
-      }
-    }
-}
-
-function hideEverything(){
-    console.log("\thiding all");
-    nodeslength=0;
-
-    var nodes = TW.partialGraph.nodes()
-    for(var j in nodes){
-        nodes[j].hidden=true;
-    }
-    if (TW.partialGraph.settings('drawEdges')) {
-      var edges = TW.partialGraph.graph.edges()
-      for(var i in edges){
-          edges[i].hidden=true;
-      }
-    }
-    overNodes=false;//magic line!
-    console.log("\tall hidded");
-    //Remember that this function is the analogy of EmptyGraph
-    //"Saving node positions" should be applied in this function, too.
-}
+// function graphResetColor(){
+//     nds = TW.partialGraph.graph.nodes().filter(function(x) {
+//                             return !x['hidden'];
+//           });
+//     eds = TW.partialGraph.graph.edges().filter(function(x) {
+//                             return !x['hidden'];
+//           });
+//
+//     for(var x in nds){
+//         n=nds[x];
+//         n.customAttrs["grey"] = 0;
+//         n.color = n.customAttrs["true_color"];
+//     }
+//
+//     if (TW.partialGraph.settings('drawEdges')) {
+//       for(var x in eds){
+//           e=eds[x];
+//           e.customAttrs["grey"] = 0;
+//           e.color = e.customAttrs["true_color"];
+//       }
+//     }
+// }
+//
+// function hideEverything(){
+//     console.log("\thiding all");
+//     nodeslength=0;
+//
+//     var nodes = TW.partialGraph.nodes()
+//     for(var j in nodes){
+//         nodes[j].hidden=true;
+//     }
+//     if (TW.partialGraph.settings('drawEdges')) {
+//       var edges = TW.partialGraph.graph.edges()
+//       for(var i in edges){
+//           edges[i].hidden=true;
+//       }
+//     }
+//     overNodes=false;//magic line!
+//     console.log("\tall hidded");
+//     //Remember that this function is the analogy of EmptyGraph
+//     //"Saving node positions" should be applied in this function, too.
+// }
 
 
 // use case: slider re-add nodes

@@ -1,5 +1,4 @@
-
-
+'use strict';
 
 SigmaUtils = function () {
     this.nbCats = 0;
@@ -45,10 +44,10 @@ SigmaUtils = function () {
         var typeNow = initialState.map(Number).join("|")
 
         for(var i in TW.Relations[typeNow]) {
-            s = i;
+            let s = i;
             for(var j in TW.Relations[typeNow][i]) {
-                t = TW.Relations[typeNow][i][j]
-                e = TW.Edges[s+";"+t]
+                let t = TW.Relations[typeNow][i][j]
+                let e = TW.Edges[s+";"+t]
                 if(e) {
                     if(e.source != e.target) {
                         var edge = {
@@ -95,12 +94,16 @@ SigmaUtils = function () {
     this.twRender = {canvas: {nodes: {}, edges: {}, labels: {}, hovers: {}}}
 
     this.twRender.canvas.labels.largeractive = function(node, context, settings) {
+
       var fontSize,
           prefix = settings('prefix') || '',
-          size = node[prefix + 'size'];
+          size = node[prefix + 'size'],
           activeFlag = node['active'] || node['forceLabel']
           // NB active is used in all TW selections
           //    forceLabel is seldom used
+
+      let X = node[prefix + 'x']
+      let Y = node[prefix + 'y']
 
       if (!activeFlag && size < settings('labelThreshold'))
         return;
@@ -112,9 +115,72 @@ SigmaUtils = function () {
         settings('defaultLabelSize') :
         settings('labelSizeRatio') * size;
 
-      // our only customization: we boost size of active nodes
-      if (activeFlag)  fontSize *= 3
+      // our customization: active nodes like zoom x2 post-its
+      if (activeFlag)  {
+        fontSize *= 2
 
+
+        // Label background (aligned on hover equivalent):
+        var x,y,w,h,e,
+        fontStyle = settings('hoverFontStyle') || settings('fontStyle'), // for label background
+
+        activeFlag = node['active'] || node['forceLabel']
+        // NB active is used in all TW selections
+        //    forceLabel is seldom used
+
+        context.font = (fontStyle ? fontStyle + ' ' : '') +
+          fontSize + 'px ' + (settings('hoverFont') || settings('font'));
+
+        context.beginPath();
+        context.fillStyle = "#F7E521"; // yellow
+
+        if (node.label && settings('labelHoverShadow')) {
+          context.shadowOffsetX = 0;
+          context.shadowOffsetY = 0;
+          context.shadowBlur = 8;
+          context.shadowColor = settings('labelHoverShadowColor');
+        }
+
+        if (node.label && typeof node.label === 'string') {
+          x = Math.round(X - fontSize / 2 - 2);
+          y = Math.round(Y - fontSize / 2 - 2);
+          w = Math.round(
+            context.measureText(node.label).width + fontSize / 2 + size + 12
+          );
+          h = Math.round(fontSize + 4);
+          e = Math.round(fontSize / 2 + 2);
+
+          context.moveTo(x, y + e);
+          context.arcTo(x, y, x + e, y, e);
+          context.lineTo(x + w, y);
+          context.lineTo(x + w, y + h);
+          context.lineTo(x + e, y + h);
+          context.arcTo(x, y + h, x, y + h - e, e);
+          context.lineTo(x, y + e);
+
+          context.closePath();
+          context.fill();
+
+          context.shadowOffsetX = 0;
+          context.shadowOffsetY = 0;
+          context.shadowBlur = 0;
+        }
+
+        // Node fill:
+        if (settings('borderSize') > 0) {
+          context.beginPath();
+          context.fillStyle = "#222";  // metro ticket
+          context.arc(
+            X,Y,
+            size + settings('borderSize'),
+            0,
+            Math.PI * 2,
+            true
+          );
+          context.closePath();
+          context.fill();
+        }
+      }
 
       context.font = (settings('fontStyle') ? settings('fontStyle') + ' ' : '') +
         fontSize + 'px ' + settings('font');
@@ -124,8 +190,8 @@ SigmaUtils = function () {
 
       context.fillText(
         node.label,
-        Math.round(node[prefix + 'x'] + size + 3),
-        Math.round(node[prefix + 'y'] + fontSize / 3)
+        Math.round(X + size + 3),
+        Math.round(Y + fontSize / 3)
       );
     };
 
@@ -172,13 +238,14 @@ SigmaUtils = function () {
     // node rendering with borders
     this.twRender.canvas.nodes.withBorders = function(node, context, settings) {
         var prefix = settings('prefix') || '';
+        let X = node[prefix + 'x']
+        let Y = node[prefix + 'y']
 
         if (settings('twNodeRendBorderSize') > 0) {
           context.beginPath();
           context.fillStyle = settings('twNodeRendBorderColor') || "#000"
           context.arc(
-            node[prefix + 'x'],
-            node[prefix + 'y'],
+            X,Y,
             node[prefix + 'size'] + settings('twNodeRendBorderSize'),
             0,
             Math.PI * 2,
@@ -191,8 +258,7 @@ SigmaUtils = function () {
         context.fillStyle = node.color || settings('defaultNodeColor');
         context.beginPath();
         context.arc(
-          node[prefix + 'x'],
-          node[prefix + 'y'],
+          X,Y,
           node[prefix + 'size'],
           0,
           Math.PI * 2,
@@ -203,7 +269,8 @@ SigmaUtils = function () {
     };
 
 
-    // hover rendering with size boost
+    // hover rendering with size boost,
+    // except when active because normally then active label has been rendered
     this.twRender.canvas.hovers.largerall = function(node, context, settings) {
         var x,
             y,
@@ -218,169 +285,175 @@ SigmaUtils = function () {
               settings('labelSizeRatio') * size;
 
         // largerall: our customized size boosts
-        if (node.active || node.forceLabel) {
-          fontSize *= 3
-        }
-        else {
-          fontSize *= 2
-        }
+        if (!node.active) {
+          fontSize *= 1.4
 
-        // Label background:
-        context.font = (fontStyle ? fontStyle + ' ' : '') +
-          fontSize + 'px ' + (settings('hoverFont') || settings('font'));
+          let X = node[prefix + 'x']
+          let Y = node[prefix + 'y']
 
-        context.beginPath();
-        context.fillStyle = settings('labelHoverBGColor') === 'node' ?
-          (node.color || settings('defaultNodeColor')) :
-          settings('defaultHoverLabelBGColor');
+          // Label background:
+          context.font = (fontStyle ? fontStyle + ' ' : '') +
+            fontSize + 'px ' + (settings('hoverFont') || settings('font'));
 
-        if (node.label && settings('labelHoverShadow')) {
-          context.shadowOffsetX = 0;
-          context.shadowOffsetY = 0;
-          context.shadowBlur = 8;
-          context.shadowColor = settings('labelHoverShadowColor');
-        }
-
-        if (node.label && typeof node.label === 'string') {
-          x = Math.round(node[prefix + 'x'] - fontSize / 2 - 2);
-          y = Math.round(node[prefix + 'y'] - fontSize / 2 - 2);
-          w = Math.round(
-            context.measureText(node.label).width + fontSize / 2 + size + 7
-          );
-          h = Math.round(fontSize + 4);
-          e = Math.round(fontSize / 2 + 2);
-
-          context.moveTo(x, y + e);
-          context.arcTo(x, y, x + e, y, e);
-          context.lineTo(x + w, y);
-          context.lineTo(x + w, y + h);
-          context.lineTo(x + e, y + h);
-          context.arcTo(x, y + h, x, y + h - e, e);
-          context.lineTo(x, y + e);
-
-          context.closePath();
-          context.fill();
-
-          context.shadowOffsetX = 0;
-          context.shadowOffsetY = 0;
-          context.shadowBlur = 0;
-        }
-
-        // Node border:
-        if (settings('borderSize') > 0) {
           context.beginPath();
-          context.fillStyle = settings('nodeBorderColor') === 'node' ?
+          context.fillStyle = settings('labelHoverBGColor') === 'node' ?
             (node.color || settings('defaultNodeColor')) :
-            settings('defaultNodeBorderColor');
-          context.arc(
-            node[prefix + 'x'],
-            node[prefix + 'y'],
-            size + settings('borderSize'),
-            0,
-            Math.PI * 2,
-            true
-          );
-          context.closePath();
-          context.fill();
-        }
+            settings('defaultHoverLabelBGColor');
 
-        // Node:
-        var nodeRenderer = sigma.canvas.nodes[node.type] || sigma.canvas.nodes.def;
-        nodeRenderer(node, context, settings);
+          if (node.label && settings('labelHoverShadow')) {
+            context.shadowOffsetX = 0;
+            context.shadowOffsetY = 0;
+            context.shadowBlur = 8;
+            context.shadowColor = settings('labelHoverShadowColor');
+          }
 
-        // Display the label:
-        if (node.label && typeof node.label === 'string') {
-          context.fillStyle = (settings('labelHoverColor') === 'node') ?
-            (node.color || settings('defaultNodeColor')) :
-            settings('defaultLabelHoverColor');
+          if (node.label && typeof node.label === 'string') {
+            x = Math.round(node[prefix + 'x'] - fontSize / 2 - 2);
+            y = Math.round(node[prefix + 'y'] - fontSize / 2 - 2);
+            w = Math.round(
+              context.measureText(node.label).width + fontSize / 2 + size + 7
+            );
+            h = Math.round(fontSize + 4);
+            e = Math.round(fontSize / 2 + 2);
 
-          context.fillText(
-            node.label,
-            Math.round(node[prefix + 'x'] + size + 3),
-            Math.round(node[prefix + 'y'] + fontSize / 3)
-          );
+            context.moveTo(x, y + e);
+            context.arcTo(x, y, x + e, y, e);
+            context.lineTo(x + w, y);
+            context.lineTo(x + w, y + h);
+            context.lineTo(x + e, y + h);
+            context.arcTo(x, y + h, x, y + h - e, e);
+            context.lineTo(x, y + e);
+
+            context.closePath();
+            context.fill();
+
+            context.shadowOffsetX = 0;
+            context.shadowOffsetY = 0;
+            context.shadowBlur = 0;
+          }
+
+          // Node border:
+          if (settings('borderSize') > 0) {
+            context.beginPath();
+            context.fillStyle = settings('nodeBorderColor') === 'node' ?
+              (node.color || settings('defaultNodeColor')) :
+              settings('defaultNodeBorderColor');
+            context.arc(
+              node[prefix + 'x'],
+              node[prefix + 'y'],
+              size + settings('borderSize'),
+              0,
+              Math.PI * 2,
+              true
+            );
+            context.closePath();
+            context.fill();
+          }
+
+          // Node:
+          var nodeRenderer = sigma.canvas.nodes[node.type] || sigma.canvas.nodes.def;
+          nodeRenderer(node, context, settings);
+
+          // Display the label:
+          if (node.label && typeof node.label === 'string') {
+            context.fillStyle = (settings('labelHoverColor') === 'node') ?
+              (node.color || settings('defaultNodeColor')) :
+              settings('defaultLabelHoverColor');
+
+            context.fillText(
+              node.label,
+              Math.round(node[prefix + 'x'] + size + 3),
+              Math.round(node[prefix + 'y'] + fontSize / 3)
+            );
+          }
         }
       };
 
       // ================ /alternative rendering =====================
 
-      this.toggleEdges = function() {
-        var now_flag = TW.partialGraph.settings('drawEdges')
-        TW.partialGraph.settings('drawEdges', !now_flag)
+      this.toggleEdges = function(optionalTargetFlag) {
+        var targetFlag
+        if (typeof optionalTargetFlag == "undefined") {
+          targetFlag = ! TW.partialGraph.settings('drawEdges')
+          // console.log('unprovided targetFlag:', targetFlag)
+        }
+        else {
+          targetFlag = optionalTargetFlag
+          // console.log('provided targetFlag:', targetFlag)
+        }
+        TW.partialGraph.settings('drawEdges', targetFlag)
         TW.partialGraph.render()
       }
 
 } // /SigmaUtils object
-
-//for socialgraph
-function showMeSomeLabels(N){
-  // NB why is this not using methods.manualForceLabel ?!
-
-        /*======= Show some labels at the beginning =======*/
-        minIn=50,
-        maxIn=0,
-        minOut=50,
-        maxOut=0;
-
-        // new sigma.js accessor
-        allNodes = TW.partialGraph.graph.nodes()
-        for( j=0 ; j < allNodes.length ; j++ ) {
-            n = allNodes[j]
-            if(n.hidden==false){
-                if(parseInt(n.inDegree) < minIn) minIn= n.inDegree;
-                if(parseInt(n.inDegree) > maxIn) maxIn= n.inDegree;
-                if(parseInt(n.outDegree) < minOut) minOut= n.outDegree;
-                if(parseInt(n.outDegree) > maxOut) maxOut= n.outDegree;
-            }
-        }
-        counter=0;
-        n = getVisibleNodes();
-        for(i=0;i<n.length;i++) {
-            if(n[i].hidden==false){
-                if(n[i].inDegree==minIn && n[i].forceLabel==false) {
-                    n[i].forceLabel=true;
-                    counter++;
-                }
-                if(n[i].inDegree==maxIn && n[i].forceLabel==false) {
-                    n[i].forceLabel=true;
-                    counter++;
-                }
-                if(n[i].outDegree==minOut && n[i].forceLabel==false) {
-                    n[i].forceLabel=true;
-                    counter++;
-                }
-                if(n[i].outDegree==maxOut && n[i].forceLabel==false) {
-                    n[i].forceLabel=true;
-                    counter++;
-                }
-                if(counter==N) break;
-            }
-        }
-        // new sigma.js
-        TW.partialGraph.render();
-        /*======= Show some labels at the beginning =======*/
-}
-
-
-// new sigma.js accessors
-function getnodes(){
-    return TW.partialGraph.graph.nodes();
-}
-
-// new sigma.js : use graph.nodes(node_id) and graph.edges(edge_id)
-// function getnodesIndex()
-// function getedgesIndex()
-// function getn(id)
 //
-// function gete(id){
-//     return TW.partialGraph._core.graph.edgesIndex[id];
+// //for socialgraph
+// function showMeSomeLabels(N){
+//   // NB why is this not using methods.manualForceLabel ?!
+//
+//         /*======= Show some labels at the beginning =======*/
+//         var minIn=50,
+//             maxIn=0,
+//             minOut=50,
+//             maxOut=0;
+//
+//         // new sigma.js accessor
+//         var allNodes = TW.partialGraph.graph.nodes()
+//         for( j=0 ; j < allNodes.length ; j++ ) {
+//             n = allNodes[j]
+//             if(n.hidden==false){
+//                 if(parseInt(n.inDegree) < minIn) minIn= n.inDegree;
+//                 if(parseInt(n.inDegree) > maxIn) maxIn= n.inDegree;
+//                 if(parseInt(n.outDegree) < minOut) minOut= n.outDegree;
+//                 if(parseInt(n.outDegree) > maxOut) maxOut= n.outDegree;
+//             }
+//         }
+//         counter=0;
+//         n = getVisibleNodes();
+//         for(i=0;i<n.length;i++) {
+//             if(n[i].hidden==false){
+//                 if(n[i].inDegree==minIn && n[i].forceLabel==false) {
+//                     n[i].forceLabel=true;
+//                     counter++;
+//                 }
+//                 if(n[i].inDegree==maxIn && n[i].forceLabel==false) {
+//                     n[i].forceLabel=true;
+//                     counter++;
+//                 }
+//                 if(n[i].outDegree==minOut && n[i].forceLabel==false) {
+//                     n[i].forceLabel=true;
+//                     counter++;
+//                 }
+//                 if(n[i].outDegree==maxOut && n[i].forceLabel==false) {
+//                     n[i].forceLabel=true;
+//                     counter++;
+//                 }
+//                 if(counter==N) break;
+//             }
+//         }
+//         // new sigma.js
+//         TW.partialGraph.render();
+//         /*======= Show some labels at the beginning =======*/
 // }
 
 
+// ===============================
+// GLOBAL-SCOPE (window) variables
+
+// (TODO REFA make them inside TW.- ns)
+
+// not often necessary, use TW.partialGraph.graph.nodes(j) as accessor
+function getnodes(){
+    // new sigma.js
+    return TW.partialGraph.graph.nodes();
+}
+
+// idem
 function getedges(){
     return TW.partialGraph.graph.edges();
 }
 
+// used for saving to gexf
 function getVisibleEdges() {
   // new sigma js POSS custom index to avoid loop
   return TW.partialGraph.graph.edges().filter(function(e) {
@@ -388,6 +461,7 @@ function getVisibleEdges() {
   });
 }
 
+// idem
 function getVisibleNodes() {
   // new sigma js POSS custom index to avoid loop
   return TW.partialGraph.graph.nodes().filter(function(n) {

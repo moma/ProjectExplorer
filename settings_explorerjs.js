@@ -1,3 +1,4 @@
+'use strict;'
 
 var TW = {}
     TW.geomap = false;
@@ -42,8 +43,8 @@ var TW = {}
     // flag name is div class to be removed if false
     //        *and* subdirectory to import if true
     // see also ProcessDivsFlags()
-    TW.DivsFlags["crowdsourcingModule"] = true ;
     TW.DivsFlags["histogramModule"] = true ;
+    TW.DivsFlags["crowdsourcingModule"] = true ;  // £TODO fix topPapers
 
     TW.SystemStates = {}
     TW.SystemStates.level = true;
@@ -86,12 +87,15 @@ var desirableScholarSize=6; //Remember that all scholars have the same size!
 
 /*
  *Three states:
- *  - true: fa2 running at start
+ *  - true: fa2 auto-running at start
  *  - false: fa2 stopped at start, button exists
  *  - "off": button doesn't exist, fa2 stopped forever
  **/ var fa2enabled=false;//"off";
 var stopcriteria = false;
-var iterationsFA2=1000;
+var fa2milliseconds=10000;  // for initial auto-run if fa2enabled and any
+                           // subsequent auto-runs if graph modified
+
+// deprecated ?
 var seed=999999999;//defaultseed
 var semanticConverged=false;
 
@@ -129,6 +133,9 @@ var sigmaJsDrawingProperties = {
     twNodeRendBorderSize: 1,   // (for all normal nodes, iff twNodeRendBorder)
     twNodeRendBorderColor: "#222",
     // twNodeRendBorderColor: "#eee",
+
+    // font: "Crete Round",
+    font: "Sahitya",
 };
 var sigmaJsGraphProperties = {
     minEdgeSize: 2,

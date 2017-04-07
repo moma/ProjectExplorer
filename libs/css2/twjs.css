@@ -12,6 +12,7 @@ html, body {
   height: 100%;
   width: 100%;
   background-color: #eee;
+  font-family: "Droid Sans", Calibri, "Helvetica Neue", Helvetica, sans-serif;
 }
 
 #sigma-contnr {
@@ -60,6 +61,8 @@ html, body {
 
 
 #twbrand {
+  font-family: "Gurajada" ;
+  font-size: 28px;
   width: 50px !important;
 }
 

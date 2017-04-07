@@ -1,11 +1,13 @@
+'use strict';
 
-
-// will be instanciated as SelInst
-SelectionEngine = function() {
+// this class will be instanciated once, as SelInst (and exposed)
+function SelectionEngine() {
 
     // creates the union of prevsels and currsels, if addvalue
     this.SelectorEngine = (function(addvalue , prevsels , currsels ) {
+        console.log("addvalue, prevsels, currsels",addvalue, prevsels, currsels)
 
+        var targeted = []
         var buffer = Object.keys(prevsels).map(Number).sort(this.sortNumber);
 
         // currsels = bunch of nodes from a click in the map
@@ -17,45 +19,46 @@ SelectionEngine = function() {
         } else targeted = currsels;
 
         targeted = targeted.map(Number)
+        console.log("targeted::", targeted)
 
         // NB new sigma: my REFA deprecated clicktype=="double"
         if(targeted.length==0) return [];
 
-        targeted = targeted.sort(this.sortNumber);
+        targeted = targeted.sort();
 
-        if(buffer.length>0) {
-            if(JSON.stringify(buffer)==JSON.stringify(targeted)) {
-                // this is just effective for Add[ ] ...
-                // If previous selection is equal to the current one, you've nothing :D
-                cancelSelection(false);
-                return [];
-            }
-            var inter = this.intersect_safe(buffer,targeted)
-            if(inter.length>0) {
-                var blacklist = {} , whitelist = {};
-                for(var i in inter) blacklist[inter[i]]=true;
-                for(var i in buffer){
-                    e = buffer[i]
-                    if(!blacklist[e]) {
-                        whitelist[e] = true;
-                    }
-                }
-                for(var i in targeted){
-                    e = targeted[i]
-                    if(!blacklist[e]) {
-                        whitelist[e] = true;
-                    }
-                }
-                targeted = Object.keys(whitelist).map(Number);
-            } else {// inter = 0 ==> click in other portion of the graph (!= current selection)
-                // Union!
-                if(addvalue) {
-                    targeted = targeted.concat(buffer.filter(function (item) {
-                        return targeted.indexOf(item) < 0;
-                    }));
-                }
-            }
-        }
+        // if(buffer.length>0) {
+        //     if(JSON.stringify(buffer)==JSON.stringify(targeted)) {
+        //         // this is just effective for Add[ ] ...
+        //         // If previous selection is equal to the current one, you've nothing :D
+        //         cancelSelection(false);
+        //         return [];
+        //     }
+        //     var inter = this.intersect_safe(buffer,targeted)
+        //     if(inter.length>0) {
+        //         var blacklist = {} , whitelist = {};
+        //         for(var k in inter) blacklist[inter[k]]=true;
+        //         for(var k in buffer){
+        //             let n = buffer[k]
+        //             if(!blacklist[n]) {
+        //                 whitelist[n] = true;
+        //             }
+        //         }
+        //         for(var k in targeted){
+        //             let n = targeted[k]
+        //             if(!blacklist[n]) {
+        //                 whitelist[n] = true;
+        //             }
+        //         }
+        //         targeted = Object.keys(whitelist).map(Number);
+        //     } else {// inter = 0 ==> click in other portion of the graph (!= current selection)
+        //         // Union!
+        //         if(addvalue) {
+        //             targeted = targeted.concat(buffer.filter(function (item) {
+        //                 return targeted.indexOf(item) < 0;
+        //             }));
+        //         }
+        //     }
+        // }
 
         return targeted;
     }).index();
@@ -119,11 +122,6 @@ SelectionEngine = function() {
     }
 
     //Util
-    this.sortNumber = function(a,b) {
-        return a - b;
-    }
-
-    //Util
     this.intersect_safe = function(a, b) {
         var ai=0, bi=0;
         var result = new Array();
@@ -171,10 +169,10 @@ SelectionEngine = function() {
             for(var i in ndsids) {
                 s = ndsids[i];
                 if(TW.Relations[typeNow] && TW.Relations[typeNow][s] ) {
-                    neigh = TW.Relations[typeNow][s]
+                    let neigh = TW.Relations[typeNow][s]
                     if(neigh) {
                         for(var j in neigh) {
-                            t = neigh[j]
+                            let t = neigh[j]
                             nodes_2_colour[t]=false;
                             edges_2_colour[s+";"+t]=true;
                             edges_2_colour[t+";"+s]=true;
@@ -202,7 +200,7 @@ SelectionEngine = function() {
             }
         }
         for(var i in edges_2_colour) {
-            an_edge = TW.partialGraph.graph.edges(i)
+            let an_edge = TW.partialGraph.graph.edges(i)
             if(!isUndef(an_edge) && !an_edge.hidden){
                 an_edge.color = an_edge.customAttrs['true_color'];
                 an_edge.customAttrs['grey'] = 0;
@@ -540,7 +538,9 @@ TinaWebJS = function ( sigmacanvas ) {
 
         $("#tips").html(getTips());
 
-        showMeSomeLabels(6);
+
+        // a bit costly, TODO make conditional or deprecated
+        // showMeSomeLabels(6);
 
         // updateDownNodeEvent(false);
 
@@ -614,7 +614,7 @@ TinaWebJS = function ( sigmacanvas ) {
           // console.log("clickNode event e", e.data.node)
 
           // new sigma.js gives easy access to clicked node!
-          theNodeId = e.data.node.id
+          var theNodeId = e.data.node.id
 
           // we keep the global selections and then clear it and all its effects
           var previousSelection = selections
@@ -634,24 +634,11 @@ TinaWebJS = function ( sigmacanvas ) {
           // just before, at click event
         })
 
-        // for all goTo (move/zoom) events
+        // for all TW.cam.goTo (move/zoom) events
+        //     ===============
         var zoomTimeoutId = null
         TW.cam.bind('coordinatesUpdated', function(e) {
-          // debounce
-          if (zoomTimeoutId) {
-            window.clearTimeout(zoomTimeoutId)
-            zoomTimeoutId = null
-            // console.log("forget last auto cursor, new one is coming")
-          }
-          // schedule next
-          zoomTimeoutId = window.setTimeout(
-            function(){
-              // make zoom slider cursor follow scroll
-              $("#zoomSlider").slider("value",1/TW.cam.ratio)
-              // console.log('auto cursor on val', 1/TW.cam.ratio , "( ratio:", TW.cam.ratio,")" )
-            },
-            500
-          )
+          $("#zoomSlider").slider("value",1/TW.cam.ratio)
         })
 
         // ---------------------------------------------------------------------
@@ -710,17 +697,33 @@ TinaWebJS = function ( sigmacanvas ) {
           }
         });
 
+
+
+        var fa2HadEdges = false
         $("#layoutButton").click(function () {
-            if(TW.partialGraph.isForceAtlas2Running()) {
-                partialGraph.stopForceAtlas2();
-                // partialGraph.render();
-                fa2enabled=false;
-                return;
-            } else {
-                partialGraph.startForceAtlas2();
-                fa2enabled=true;
-                return;
-            }
+
+          if(TW.partialGraph.isForceAtlas2Running()) {
+
+              partialGraph.stopForceAtlas2();
+
+              // restore edges if needed
+              if (fa2HadEdges) {
+                sigma_utils.toggleEdges(true)
+                fa2HadEdges = false
+              }
+              return;
+          }
+          else {
+              // hide edges during work for smaller cpu load
+              if (TW.partialGraph.settings('drawEdges')) {
+                sigma_utils.toggleEdges(false)
+                fa2HadEdges = true
+              }
+
+              partialGraph.startForceAtlas2();
+
+              return;
+          }
         });
 
 
@@ -790,22 +793,11 @@ TinaWebJS = function ( sigmacanvas ) {
             onchange:function(value){
                 // console.log("en cursorsize: "+value);
                 cursor_size=value;
-
-                // have reindex ready to go for when user stops moving slider
-                // if (reindexTimeout) {
-                //   // (debounced)
-                //   clearTimeout(reindexTimeout)
-                //   reindexTimeout = null
-                // }
-                // reindexTimeout = setTimeout(function() {
-                //   TW.partialGraph.refresh()
-                //   console.log("graph quadtree reindexed for cursor")
-                // }, 500)
             }
         });
 
         // costly entire refresh (~400ms) only after stopped resizing for 3s
-        // NB: rescale middleware already reacted and except for large win size changes it handles the resize fine
+        // NB: rescale middleware already reacted and, except for large win size changes, it handles the resize fine
         //     (so this fragment is only to accomodate the large changes)
         var winResizeTimeout = null
         window.addEventListener('resize', function(){

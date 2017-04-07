@@ -1,4 +1,4 @@
-
+'use strict;'
 
 //============================ < NEW BUTTONS > =============================//
 
@@ -682,12 +682,11 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
 
                 // [ Starting FA2 ]
                 setTimeout(function() {
-                  fa2enabled = true
                   TW.partialGraph.startForceAtlas2()
+                  // duration = settings_explorerjs.fa2milliseconds
                   setTimeout(function() {
                     TW.partialGraph.stopForceAtlas2()
-                    fa2enabled = false
-                  }, 5000)
+                  }, parseInt(fa2milliseconds) || 5000)
                 }, 10)
                 // [ / Starting FA2 ]
             }
@@ -701,7 +700,13 @@ function getGraphElement(elemId) {
     if(elemId.split(";").length==1) return TW.partialGraph.graph.nodes(elemId);
     else return TW.partialGraph.graph.nodes(elemId)
 }
-//   Execution modes:
+
+
+// creates graph subsets
+// ---------------------
+// TODO use a   type-based      index for elems subset
+// TODO use a size/weight-based index for elem_attrb
+//  4 Execution modes:
 // AlgorithmForSliders ( TW.partialGraph._core.graph.edges , "label" , "nodes1" , "weight")
 // AlgorithmForSliders ( TW.partialGraph._core.graph.edges , "label" , "nodes2" , "weight")
 // AlgorithmForSliders ( TW.partialGraph._core.graph.nodes , "type" ,  "Document" ,  "size")
@@ -712,6 +717,7 @@ function AlgorithmForSliders( elements , type_attrb , type , criteria) {
     if(isUndef(elements)) return {"steps":0 , "finalarray":[]};
 
     var elems = [];
+
     for(var e in elements) {
         if( elements[e][type_attrb]==type ) {
             if(getGraphElement(e)) {

@@ -1,3 +1,5 @@
+'use strict';
+
 // Function.prototype.index
 // ---
 // 'decorator'
@@ -41,7 +43,7 @@ var AjaxSync = (function(TYPE, URL, DATA, CT , DT) {
             dataType: DT,
             async: false,
             success : function(data, textStatus, jqXHR) {
-                header = jqXHR.getResponseHeader("Content-Type")
+                var header = jqXHR.getResponseHeader("Content-Type")
                 // console.log("AjaxSync("+URL+"):header="+header);
                 var format ;
                 if (!header || header == "application/octet-stream") {
@@ -166,7 +168,7 @@ if(RES["OK"]) {
         fileparam = RES["format"];
 
     console.log("parsing the data")
-    start = new ParseCustom(  fileparam , the_data );
+    var start = new ParseCustom(  fileparam , the_data );
     categories = start.scanFile(); //user should choose the order of categories
     console.log("Categories: ")
     console.log(categories)
@@ -225,7 +227,7 @@ if(RES["OK"]) {
             drawLabels: true,
 
             labelSize: "proportional",
-            font: "Ubuntu Condensed",
+            font: "Ubuntu Condensed",   // overridden by settings_explorer.js
             fontStyle: "bold",
             // labelColor: "node",
 
@@ -296,9 +298,9 @@ if(RES["OK"]) {
     // NB : camera positions are fix if the node is fixed => they only depend on layout
     //      renderer position depend on viewpoint/zoom (like ~ html absolute positions of the node in the div)
 
-    // useful
-    TW.partialGraph.nNodes = TW.partialGraph.graph.nodes().length
-    TW.partialGraph.nEdges = TW.partialGraph.graph.edges().length
+    // use for loops
+    TW.nNodes = TW.partialGraph.graph.nodes().length
+    TW.nEdges = TW.partialGraph.graph.edges().length
 
     TW.partialGraph.states = []
     TW.partialGraph.states[0] = false;
@@ -414,7 +416,7 @@ if(RES["OK"]) {
       slowDown: 1,
       startingIterations: 5,
       iterationsPerRender: 3,
-      barnesHutOptimize: false,
+      barnesHutOptimize: true,
       barnesHutTheta: .5,
 
       // global behavior -----------
@@ -435,15 +437,15 @@ if(RES["OK"]) {
     // REFA new sigma.js
     TW.partialGraph.camera.goTo({x:0, y:0, ratio:1.2, angle: 0})
 
-    // fa2enabled=true; TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8).draw();
-    // $.doTimeout(1,function(){
-    //     fa2enabled=true; TW.partialGraph.startForceAtlas2();
-    //     $.doTimeout(10,function(){
-    //         TW.partialGraph.stopForceAtlas2();
-    //     });
-    // });
-
     twjs_.initListeners( categories , TW.partialGraph);
+
+    // run fa2 if settings_explorerjs.fa2enabled == true
+    if (fa2enabled) {
+      TW.partialGraph.startForceAtlas2();
+      $.doTimeout(parseInt(fa2milliseconds) || 5000, function(){
+          TW.partialGraph.stopForceAtlas2();
+      });
+    }
 
     if( categories.length==1 ) {
         $("#changetype").hide();
