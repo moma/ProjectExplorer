@@ -410,22 +410,25 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 	// type_attrb = "type"
 	// criteria = "size"
 
-    if(TW.partialGraph.nEdges<3) {
-        $(sliderDivID).freshslider({
-            range: true,
-            step:1,
-            value:[10, 60],
-            enabled: false,
-            onchange:function(low, high){
-                console.log(low, high);
-            }
-        });
-        return;
-    }
+    // if(TW.partialGraph.nEdges<3) {
+    //     $(sliderDivID).freshslider({
+    //         range: true,
+    //         step:1,
+    //         value:[10, 60],
+    //         enabled: false,
+    //         onchange:function(low, high){
+    //             console.log(low, high);
+    //         }
+    //     });
+    //     return;
+    // }
 
     var filterparams = AlgorithmForSliders ( TW.Edges , type_attrb , type , criteria) //OK
-    console.log("EdgeWeightFilter: "+type)
-    console.log(filterparams)
+
+    // TODO make an index
+    // console.log("EdgeWeightFilter: "+type)
+    // console.log(filterparams)
+
     var steps = filterparams["steps"]
     var finalarray = filterparams["finalarray"]
     if(steps<3) {
@@ -435,7 +438,9 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
             value:[10, 60],
             enabled: false,
             onchange:function(low, high){
-                console.log(low, high);
+
+                // TODO REFA fix edge selector
+                // console.log(low, high);
             }
         });
         return;
@@ -618,9 +623,10 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
         return;
     }
 
+    // £TODO make this into a type_attrb index (eg weight index) instead of recalculating each time
     var filterparams = AlgorithmForSliders ( TW.Nodes , type , type_attrb , criteria)
-    console.log("NodeWeightFilter: "+type)
-    console.log(filterparams)
+    // console.log("NodeWeightFilter: "+type)
+    // console.log(filterparams)
 
     var steps = filterparams["steps"]
     var finalarray = filterparams["finalarray"]

@@ -7,7 +7,7 @@ SigmaUtils = function () {
     this.FillGraph = function( initialState , catDict  , nodes, edges , graph ) {
 
         console.log("Filling the graaaaph:")
-        console.log(catDict)
+        // console.log(catDict)
         for(var i in nodes) {
             var n = nodes[i];
 
@@ -31,7 +31,7 @@ SigmaUtils = function () {
                 if(n.shape) node.shape = n.shape;
                 // console.log("FillGraph, created new node:", node)
 
-                if(Number(n.id)==287) console.log("node 287:", n, node)
+                if(Number(n.id)==287) console.log("node 287:", node)
 
                 // REFA new way => no separate id
                 graph.nodes.push( node);

@@ -138,7 +138,7 @@ function scanGexf(gexf) {
 // for {1,2}partite graphs
 function dictfyGexf( gexf , categories ){
 
-  console.warn("ParseCustom gexf 2nd loop, main data extraction")
+  console.log("ParseCustom gexf 2nd loop, main data extraction")
 
 
     var catDict = {}
@@ -202,9 +202,9 @@ function dictfyGexf( gexf , categories ){
     numberOfNGrams=0;
 
     // debug: for local stats
-    let allSizes = []
-    let sumSizes = 0
-    let sizeStats = {'mean':null, 'median':null, 'max':0, 'min':1000000000}
+    // let allSizes = []
+    // let sumSizes = 0
+    // let sizeStats = {'mean':null, 'median':null, 'max':0, 'min':1000000000}
 
     for(i=0; i<nodesNodes.length; i++) {
         var nodesNode = nodesNodes[i];  // Each xml node 'nodes' (plural)
@@ -230,10 +230,10 @@ function dictfyGexf( gexf , categories ){
               size = parseFloat(sizeNode.getAttribute('value'));
 
               // debug: for stats  ---------------------------
-              allSizes.push(size)
-              sumSizes += size
-              if (size < sizeStats.min)  sizeStats.min = size
-              if (size > sizeStats.max)  sizeStats.max = size
+              // allSizes.push(size)
+              // sumSizes += size
+              // if (size < sizeStats.min)  sizeStats.min = size
+              // if (size > sizeStats.max)  sizeStats.max = size
               // --------------------------------------------
 
             }// [ / get Size ]
@@ -311,12 +311,12 @@ function dictfyGexf( gexf , categories ){
     }
 
     // -------------- debug: for local stats ----------------
-    allSizes.sort();
-    let N = allSizes.length
-    sizeStats.median = allSizes[Math.round(N/2)]
-    sizeStats.mean = Math.round(sumSizes/N * 100)/100
-
-    console.log("parseCustom(gexf) sizeStats:", sizeStats)
+    // allSizes.sort();
+    // let N = allSizes.length
+    // sizeStats.median = allSizes[Math.round(N/2)]
+    // sizeStats.mean = Math.round(sumSizes/N * 100)/100
+    //
+    // console.log("parseCustom(gexf) sizeStats:", sizeStats)
     // ------------- /debug: for local stats ----------------
 
     var attention = false

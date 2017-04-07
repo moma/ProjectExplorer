@@ -98,8 +98,7 @@ if(RES["OK"]) {
     var fileparam;// = { db|api.json , somefile.json|gexf }
     var the_data = RES["data"];
 
-    console.log('RES', RES)
-
+    // console.log('initial AjaxSync result RES', RES)
 
     var the_file = "";
     if ( !isUndef(getUrlParam.mode) && getUrlParam.mode=="db.json") {
@@ -122,20 +121,22 @@ if(RES["OK"]) {
         var files_selector = '<select onchange="jsActionOnGexfSelector(this.value , true);">'
 
         for( var path in the_data ) {
-            console.log("\t"+path+" has:")
-            console.log(the_data[path])
             var the_gexfs = the_data[path]["gexfs"]
             console.log("\t\tThese are the available  Gexfs:")
             for(var gexf in the_gexfs) {
                 var gexfBasename = gexf.replace(/\.gexf$/, "") // more human-readable in the menu
                 console.log("\t\t\t"+gexf+ "   -> table:" +the_gexfs[gexf]["semantic"]["table"] )
+
                 TW.field[path+"/"+gexf] = the_gexfs[gexf]["semantic"]["table"]
+                // ex : data/AXA/RiskV2PageRank5000.gexf:"ISItermsAxa_2015"
+
                 TW.gexfDict[path+"/"+gexf] = gexf
+                // ex : data/AXA/RiskV2PageRank1000.gexf:"RiskV2PageRank1000.gexf"
 
                 var selected = (the_file==(path+"/"+gexf))?"selected":""
                 files_selector += '<option '+selected+'>'+gexfBasename+'</option>'
             }
-            console.log( files_selector )
+            // console.log( files_selector )
             break;
         }
         files_selector += "</select>"
@@ -143,19 +144,19 @@ if(RES["OK"]) {
 
 
 
-        console.log("\n============================\n")
-        console.log(TW.field)
-        console.log(TW.gexfDict)
+        // console.log("\n============================\n")
+        // console.log(TW.field)
+        // console.log(TW.gexfDict)
         var sub_RES = AjaxSync({ URL: fileparam });
         the_data = sub_RES["data"]
         fileparam = sub_RES["format"]
-        console.log(the_data.length)
-        console.log(fileparam)
+        // console.log(the_data.length)
+        // console.log(fileparam)
 
         getUrlParam.file=the_file;
         console.log(" .  .. . -. - .- . - -.")
         console.log(getUrlParam.file)
-        console.log("\n============================\n")
+        // console.log("\n============================\n")
 
     }
 
@@ -170,8 +171,8 @@ if(RES["OK"]) {
     console.log("parsing the data")
     var start = new ParseCustom(  fileparam , the_data );
     categories = start.scanFile(); //user should choose the order of categories
-    console.log("Categories: ")
-    console.log(categories)
+    // console.log("Categories: ")
+    // console.log(categories)
 
     var possibleStates = makeSystemStates( categories )
     var initialState = buildInitialState( categories ) //[true,false]//
@@ -183,8 +184,8 @@ if(RES["OK"]) {
 
     TW.nodes1 = dicts.n1;//not used
     var catDict = dicts.catDict
-    console.log("CategoriesDict: ")
-    console.log(catDict)
+    // console.log("CategoriesDict: ")
+    // console.log(catDict)
 
     TW.categoriesIndex = categories;//to_remove
     TW.catSoc = categories[0];//to_remove
@@ -208,8 +209,8 @@ if(RES["OK"]) {
 
     // NB new sigma.js: autoResize (no need for AdjustSigmaCanvas + sigmaLimits)
 
-    console.log("categories: "+categories)
-    console.log("initial state: "+initialState)
+    // console.log("categories: "+categories)
+    // console.log("initial state: "+initialState)
 
     // [ Poblating the Sigma-Graph ]
     var sigma_utils = new SigmaUtils();
@@ -253,7 +254,7 @@ if(RES["OK"]) {
         sigmaJsMouseProperties
     )
 
-    console.log("customSettings", customSettings)
+    console.info("sigma settings", customSettings)
 
     // custom nodes rendering
     if (customSettings['twNodeRendBorder']) {
