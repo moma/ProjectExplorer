@@ -331,7 +331,7 @@ if(RES["OK"]) {
         console.log("level: "+level);
         console.log("selections: ");
         console.log(sels)
-        console.log("selections2: ");
+        console.log("selections len: ");
         console.log(sels.length)
         console.log("opposites: ");
         console.log(oppos)

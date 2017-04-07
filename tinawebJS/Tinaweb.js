@@ -634,12 +634,34 @@ TinaWebJS = function ( sigmacanvas ) {
           // just before, at click event
         })
 
+        // when click in the empty background
+        // ==================================
+        TW.partialGraph.bind('clickStage', function(e) {
+          // console.log("clickStage event e", e)
+
+          if (! e.data.captor.isDragging
+            && Object.keys(selections).length
+            && ! cursor_size) {
+
+            // we clear selections and all its effects
+            cancelSelection(false);
+          }
+        })
+
         // for all TW.cam.goTo (move/zoom) events
         //     ===============
         var zoomTimeoutId = null
         TW.cam.bind('coordinatesUpdated', function(e) {
           $("#zoomSlider").slider("value",1/TW.cam.ratio)
         })
+
+        // ---------------------------------------------------------------------
+
+        // POSS: bind to captors  (0=>mouse, 1=>touch)
+        // TW.rend.captors[0].bind('mousemove', function(e) {
+        //   console.log("mousemove event e", e.data.node)
+        //
+        // })
 
         // ---------------------------------------------------------------------
 
