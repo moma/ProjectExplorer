@@ -475,6 +475,7 @@ function circleTrackMouse(e) {
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
+            ctx.globalAlpha = 1
         // });
     }
 }

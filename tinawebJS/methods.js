@@ -44,6 +44,7 @@ function cancelSelection (fromTagCloud) {
         $("#information").html("");
         $("#searchinput").val("");
         $("#unselectbutton").hide();
+        $("#lefttopbox").hide();
         $("#tips").html(getTips());
     }
 
@@ -356,8 +357,7 @@ function htmlfied_tagcloud(elems , limit) {
 
 //missing: getTopPapers for both node types
 //considering complete graphs case! <= maybe i should mv it
-function updateLeftPanel_fix( sels , oppos ) {
-    console.log("updateLeftPanel() corrected version** ")
+function updateLeftPanel( sels , oppos ) {
     var namesDIV=''
     var alterNodesDIV=''
     var informationDIV=''
@@ -405,6 +405,7 @@ function updateLeftPanel_fix( sels , oppos ) {
     // and im commenting now because github is not
     // pushing my commit
     // because i need more lines, idk
+    $("#lefttopbox").show();
     $("#names").html(namesDIV).readmore({maxHeight:100});
     $("#tab-container").show();
     $("#opossiteNodes").html(alterNodesDIV).readmore({maxHeight:200});

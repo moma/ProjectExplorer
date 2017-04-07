@@ -247,7 +247,7 @@ function SelectionEngine() {
 
         TW.partialGraph.render();
 
-        updateLeftPanel_fix( selections , oppos );
+        updateLeftPanel( selections , oppos );
 
         for(var n in neighsDict)
             delete neighsDict[n]
