@@ -226,7 +226,7 @@
     // Deal with resize:
     window.addEventListener('resize', function() {
       if (_self.settings)
-        _self.refresh({skipIndexation: true});
+        _self.refresh();
     });
   };
 
@@ -11431,7 +11431,7 @@
 
         self.dispatchEvent('click', e.data);
 
-        nodes = getNodes(e); /// <----------- cf. classic tina "targeted"
+        nodes = getNodes(e);
         edges = getEdges(e);
 
         if (nodes.length) {
