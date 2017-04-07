@@ -180,6 +180,8 @@ if(RES["OK"]) {
     var dicts = start.makeDicts(categories);
     TW.Nodes = dicts.nodes;
     TW.Edges = dicts.edges;
+    TW.nodeIds = Object.keys(dicts.nodes)  // useful for loops
+    TW.edgeIds = Object.keys(dicts.edges)
     if (the_data.clusters) TW.Clusters = the_data.clusters
 
     TW.nodes1 = dicts.n1;//not used
@@ -228,8 +230,7 @@ if(RES["OK"]) {
             drawLabels: true,
 
             labelSize: "proportional",
-            font: "Ubuntu Condensed",   // overridden by settings_explorer.js
-            fontStyle: "bold",
+            // font: "Ubuntu Condensed",   // overridden by settings_explorer.js
             // labelColor: "node",
 
             // nodesPowRatio: .3,

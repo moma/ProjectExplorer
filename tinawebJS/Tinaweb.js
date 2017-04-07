@@ -186,22 +186,29 @@ function SelectionEngine() {
             }
         }
 
-        for(var i in nodes_2_colour) {
-            if(i) {
-                n = TW.partialGraph.graph.nodes(i)
+        for(var nid in nodes_2_colour) {
+            if(nid) {
+                n = TW.partialGraph.graph.nodes(nid)
                 if(n) {
                     n.color = n.customAttrs['true_color'];
                     n.customAttrs['grey'] = 0;
-                    if(nodes_2_colour[i]) {
-                        n.active = nodes_2_colour[i];
-                        selections[i]=1
+                    if(nodes_2_colour[nid]) {
+                        n.active = true;
+                        selections[nid]=1
                     }
                 }
             }
         }
-        for(var i in edges_2_colour) {
-            let an_edge = TW.partialGraph.graph.edges(i)
+        console.log('edges_2_colour', edges_2_colour)
+        for(var eid in edges_2_colour) {
+
+          // console.log(eid)
+
+            let an_edge = TW.partialGraph.graph.edges(eid)
             if(!isUndef(an_edge) && !an_edge.hidden){
+
+                // /!\ £TODO change only *flags* here, and then
+                //           make all color etc changes in renderers depending on flags
                 an_edge.color = an_edge.customAttrs['true_color'];
                 an_edge.customAttrs['grey'] = 0;
             }

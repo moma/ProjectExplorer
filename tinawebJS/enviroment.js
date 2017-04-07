@@ -623,6 +623,7 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
         return;
     }
 
+    // ids per weight level
     // £TODO make this into a type_attrb index (eg weight index) instead of recalculating each time
     var filterparams = AlgorithmForSliders ( TW.Nodes , type , type_attrb , criteria)
     // console.log("NodeWeightFilter: "+type)
@@ -630,6 +631,7 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
 
     var steps = filterparams["steps"]
     var finalarray = filterparams["finalarray"]
+
     if(steps<3) {
         $(sliderDivID).freshslider({
             range: true,

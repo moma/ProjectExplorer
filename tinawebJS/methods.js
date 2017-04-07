@@ -15,7 +15,7 @@ function cancelSelection (fromTagCloud) {
 
     if (TW.partialGraph.settings('drawEdges')) {
       for(let i=0;i<TW.nEdges;i++){
-        let e = TW.partialGraph.graph.edges(i)
+        let e = TW.partialGraph.graph.edges(TW.edgeIds[i])
         // console.log("cancelSelection: edge", e)
         if (e) {
           e.color = e.customAttrs['grey'] ? e.customAttrs['true_color'] : e.color;
@@ -26,7 +26,7 @@ function cancelSelection (fromTagCloud) {
 
     //Nodes colors go back to normal
     for(let j=0;j<TW.nNodes;j++){
-      let n = TW.partialGraph.graph.nodes(j)
+      let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
       // console.log("cancelSelection: node", n)
       if (n) {
         n.active = false;
@@ -52,11 +52,14 @@ function cancelSelection (fromTagCloud) {
     $('#searchinput').trigger("tw:eraseNodeSet");
     // (signal for plugins that any selection behavior is finished)
 
-    for(var i in deselections){
-      let n = TW.partialGraph.graph.nodes(i)
+    for(var nid in deselections){
+      let n = TW.partialGraph.graph.nodes(nid)
         if( !isUndef(n) ) {
             n.forceLabel=false;
             n.neighbour=false;
+            // like old graphResetColor but now rather graphResetFlags...
+            n.active=false;
+            n.grey=false
         }
     }
 
@@ -544,22 +547,24 @@ function graphTagCloudElem(nodes) {
 }
 
 
-// new sigma.js: is this at all used?
+// /!\ £TODO change only *flags* here, and then
+//           make all color etc changes in renderers depending on flags
 function greyEverything(){
 
-  for(let j=0 ; j<TW.nEdges ; j++){
-    let n = TW.partialGraph.graph.nodes(j)
+  for(let j=0 ; j<TW.nNodes ; j++){
+    let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
     if (n && !n.hidden && !n.customAttrs.grey) {
       n.customAttrs.true_color = n.color
       // TODO check if no simpler strategy than reinvoke hex2rga each time
-      n.color = "rgba("+hex2rga(n.color)+",0.5)"
+      // n.color = "rgba("+hex2rga(n.color)+",0.5)"
+      n.color = "rgba(15,15,15,0.5)"
       n.customAttrs['grey'] = 1
     }
   }
 
   if (TW.partialGraph.settings('drawEdges')) {
     for(let i=0;i<TW.nEdges;i++){
-      let e = TW.partialGraph.graph.edges(i)
+      let e = TW.partialGraph.graph.edges(TW.edgeIds[i])
       if (e && !e.hidden && !e.customAttrs.grey) {
         e.customAttrs.true_color = e.color
         e.color = TW.edgeGreyColor
@@ -570,7 +575,7 @@ function greyEverything(){
 
 }
 
-// new sigma.js: is this at all used?
+// new sigma.js: TODO change logic (the reverse of greyEverything is done by redraw for the colors, and cancelSelection for the flags...)
 // function graphResetColor(){
 //     nds = TW.partialGraph.graph.nodes().filter(function(x) {
 //                             return !x['hidden'];

@@ -442,7 +442,8 @@ SigmaUtils = function () {
 
 // (TODO REFA make them inside TW.- ns)
 
-// not often necessary, use TW.partialGraph.graph.nodes(j) as accessor
+// not often necessary + costly in mem because is a clone
+// => preferably use TW.partialGraph.graph.nodes(some_node_id) as accessor
 function getnodes(){
     // new sigma.js
     return TW.partialGraph.graph.nodes();
@@ -582,6 +583,8 @@ function getArrSubkeys(arr,id) {
 function clustersBy(daclass) {
 
     cancelSelection(false);
+
+    // TODO avoid this strategy and also double loop below
     var v_nodes = getVisibleNodes();
     var min_pow = 0;
     for(var i in v_nodes) {
@@ -629,17 +632,16 @@ function clustersBy(daclass) {
     var Max_color = 255;
     var Min_size = 2;
     var Max_size= 6;
-    for(var i in NodeID_Val) {
-
-        var newval_color = Math.round( ( Min_color+(NodeID_Val[i]["round"]-real_min)*((Max_color-Min_color)/(real_max-real_min)) ) );
+    for(var nid in NodeID_Val) {
+        var newval_color = Math.round( ( Min_color+(NodeID_Val[nid]["round"]-real_min)*((Max_color-Min_color)/(real_max-real_min)) ) );
         var hex_color = rgbToHex(255, (255-newval_color) , 0)
-        TW.partialGraph.graph.nodes(i).color = hex_color
+        TW.partialGraph.graph.nodes(nid).color = hex_color
 
-        var newval_size = Math.round( ( Min_size+(NodeID_Val[i]["round"]-real_min)*((Max_size-Min_size)/(real_max-real_min)) ) );
-        TW.partialGraph.graph.nodes(i).size = newval_size;
+        var newval_size = Math.round( ( Min_size+(NodeID_Val[nid]["round"]-real_min)*((Max_size-Min_size)/(real_max-real_min)) ) );
+        TW.partialGraph.graph.nodes(nid).size = newval_size;
         // console.log("real:"+ NodeID_Val[i]["real"] + " | newvalue: "+newval_size)
 
-        TW.partialGraph.graph.nodes(i).label = "("+NodeID_Val[i]["real"].toFixed(min_pow)+") "+TW.Nodes[i].label
+        TW.partialGraph.graph.nodes(nid).label = "("+NodeID_Val[nid]["real"].toFixed(min_pow)+") "+TW.Nodes[nid].label
     }
     //    [ / Scaling node colours(0-255) and sizes(3-5) ]
 

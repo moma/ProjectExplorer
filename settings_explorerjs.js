@@ -135,11 +135,12 @@ var sigmaJsDrawingProperties = {
     // twNodeRendBorderColor: "#eee",
 
     // font: "Crete Round",
-    font: "Sahitya",
+    // font: "Sahitya",
+    // fontStyle: "bold",
 };
 var sigmaJsGraphProperties = {
-    minEdgeSize: 2,
-    maxEdgeSize: 3
+    minEdgeSize: 1,
+    maxEdgeSize: 5
 };
 var sigmaJsMouseProperties = {
     minRatio: 0.1,
@@ -221,10 +222,10 @@ var leftright=true;
 var edgesTF=false;
 
 //This variables will be updated in sigma.parseCustom.js
-var minNodeSize=1.00;
-var maxNodeSize=5.00;
-var minEdgeWeight=5.0;
-var maxEdgeWeight=0.0;
+var minNodeSize=10000000;
+var maxNodeSize=0;
+// var minEdgeWeight=5.0;  // in fact never used...
+// var maxEdgeWeight=0.0;
 //---------------------------------------------------
 
 var bipartite=false;
