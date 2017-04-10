@@ -19,7 +19,8 @@ function cancelSelection (fromTagCloud) {
         // console.log("cancelSelection: edge", e)
         if (e) {
           e.color = e.customAttrs['grey'] ? e.customAttrs['true_color'] : e.color;
-          e.customAttrs['grey'] = 0;
+          e.customAttrs.grey = 0;
+          e.customAttrs.activeEdge = 0;
         }
       }
     }
@@ -32,7 +33,7 @@ function cancelSelection (fromTagCloud) {
         n.active = false;
         // n.color = n.customAttrs['grey'] ? n.customAttrs['true_color'] : n.color;
         n.color = n.customAttrs['true_color'];
-        n.customAttrs['grey'] = 0
+        n.customAttrs.grey = 0
       }
     }
 
@@ -67,6 +68,9 @@ function cancelSelection (fromTagCloud) {
 
     if(TW.partialGraph.states.slice(-1)[0].level)
         LevelButtonDisable(true);
+
+    // global flag
+    TW.selectionActive = false
 
     // finally redraw
     TW.partialGraph.render();
@@ -187,12 +191,14 @@ function pushSWClick(arg){
 //	tag cloud div
 function htmlfied_alternodes(elems) {
     var oppositesNodes=[]
-    js1='onclick="graphTagCloudElem(\'';
-    js2="');\""
-    frecMAX=elems[0].value
+    var js1='onclick="graphTagCloudElem(\'';
+    var js2="');\""
+    var frecMAX=elems[0].value
     for(var i in elems){
-        id=elems[i].key
-        frec=elems[i].value
+        var id=elems[i].key
+        var frec=elems[i].value
+        var fontSize
+        var htmlfied_alternode
         if(frecMAX==1) fontSize=desirableTagCloudFont_MIN;
         else {
             fontSize=
@@ -201,8 +207,7 @@ function htmlfied_alternodes(elems) {
             ((desirableTagCloudFont_MAX-desirableTagCloudFont_MIN)/(frecMAX-1));
         }
         if(!isUndef(TW.Nodes[id])){
-            //          js1            js2
-            // onclick="graphTagCloudElem('  ');
+
             htmlfied_alternode = '<span class="tagcloud-item" style="font-size:'+fontSize+'px;" '+js1+id+js2+'>'+ TW.Nodes[id].label+ '</span>';
             oppositesNodes.push(htmlfied_alternode)
         }
@@ -213,7 +218,9 @@ function htmlfied_alternodes(elems) {
 function manualForceLabel(nodeid, active, justHover) {
 	// console.log("manual|"+nodeid+"|"+active)
   var nd = TW.partialGraph.graph.nodes(nodeid)
-	nd.active=active;
+
+  // TODO harmonize with other status => bien re-distinguer neighbor et active
+  // nd.active=active;
 
   // console.log('justHover', justHover)
   // var t0, t1
@@ -261,22 +268,22 @@ function clearHover() {
   )
 }
 
-
-function htmlfied_samenodes(elems) {
-    var sameNodes=[]
-    js1=' onmouseover="manualForceLabel(this.id,true, true);" ';
-    js2=' onmouseout="manualForceLabel(this.id,true, true);" ';
-    if(elems.length>0) {
-        var A = getVisibleNodes()
-        for (var a in A){
-            n = A[a]
-            if(!n.active && n.color.charAt(0)=="#" ) {
-                sameNodes.push('<li onmouseover="manualForceLabel(\''+n.id+'\',true, true)"  onmouseout="manualForceLabel(\''+n.id+'\',false, true)" ><a>'+ n.label+ '</a></li>')
-            }
-        }
-    }
-    return sameNodes
-}
+// TODO rm ? function doesn't make sense, probably replaced by htmlfied_tagcloud
+// function htmlfied_samenodes(elems) {
+//     var sameNodes=[]
+//     js1=' onmouseover="manualForceLabel(this.id,true, true);" ';
+//     js2=' onmouseout="manualForceLabel(this.id,true, true);" ';
+//     if(elems.length>0) {
+//         var A = getVisibleNodes()
+//         for (var a in A){
+//             n = A[a]
+//             if(!n.active && n.color.charAt(0)=="#" ) {
+//                 sameNodes.push('<li onmouseover="manualForceLabel(\''+n.id+'\',true, true)"  onmouseout="manualForceLabel(\''+n.id+'\',false, true)" ><a>'+ n.label+ '</a></li>')
+//             }
+//         }
+//     }
+//     return sameNodes
+// }
 
 // nodes information div
 function htmlfied_nodesatts(elems){
@@ -344,11 +351,15 @@ function htmlfied_tagcloud(elems , limit) {
         let id=elems[i].key
         let frec=elems[i].value
         if(frecMAX > 1) {
-            let fontSize=
+            fontSize=
             desirableTagCloudFont_MIN+
             (frec-1)*
             ((desirableTagCloudFont_MAX-desirableTagCloudFont_MIN)/(frecMAX-1));
         }
+
+        // debug
+        // console.log('htmlfied_tagcloud (',id, TW.Nodes[id].label,') freq',frec,' fontSize', fontSize)
+
         if(!isUndef(TW.Nodes[id])){
             var jspart = ' onclick="manualSelectNode(\''+id+'\')" onmouseover="manualForceLabel(\''+id+'\',true, true)"  onmouseout="manualForceLabel(\''+id+'\',false, true)"'
             let htmlfied_alternode = '<span class="tagcloud-item" style="font-size:'+fontSize+'px;" '+jspart+'>'+ TW.Nodes[id].label+ '</span>';
@@ -360,7 +371,23 @@ function htmlfied_tagcloud(elems , limit) {
 
 //missing: getTopPapers for both node types
 //considering complete graphs case! <= maybe i should mv it
-function updateLeftPanel( sels , oppos ) {
+function updateRelatedNodesPanel( sels , same, oppos ) {
+
+    // debug
+    // neiLabls = []
+    // for (var l in same) {
+    //   var neiId = same[l].key
+    //   if (TW.Nodes[neiId]) {
+    //
+    //     neiLabls.push(TW.Nodes[neiId].label)
+    //   }
+    //   else {
+    //     console.warn("missing entry for neiId", neiId)
+    //   }
+    // }
+    // console.log("updateRelatedNodesPanel, same:",neiLabls)
+
+
     var namesDIV=''
     var alterNodesDIV=''
     var informationDIV=''
@@ -379,19 +406,8 @@ function updateLeftPanel( sels , oppos ) {
 
     var sameNodesDIV = "";
     if(getNodeIDs(sels).length>0) {
-        var temp_voisinage = {}
-        var A = getVisibleNodes()
-        for (var a in A){
-            var n = A[a]
-            if(!n.active && n.color.charAt(0)=="#" ) {
-                temp_voisinage[n.id] = Math.round(TW.Nodes[n.id].size)
-            }
-        }
-        var voisinage = ArraySortByValue(temp_voisinage, function(a,b){
-            return b-a
-        });
         sameNodesDIV+='<div id="sameNodes">';//tagcloud
-        var tagcloud_opposite_neigh = htmlfied_tagcloud( voisinage , TW.tagcloud_limit)
+        var tagcloud_opposite_neigh = htmlfied_tagcloud( same , TW.tagcloud_limit)
         sameNodesDIV+= (tagcloud_opposite_neigh!=false) ? tagcloud_opposite_neigh.join("\n")  : "No related terms.";
         sameNodesDIV+= '</div>';
     }
@@ -547,18 +563,23 @@ function graphTagCloudElem(nodes) {
 }
 
 
-// /!\ £TODO change only *flags* here, and then
-//           make all color etc changes in renderers depending on flags
-function greyEverything(){
+// edges greyish color for unselected, when we have a selection
+// case default: color is precomputed as node true_color + alpha .5
+// cases when coloredBy (ex: centrality): color must be recomputed here
+function greyEverything(notDefaultColors){
 
   for(let j=0 ; j<TW.nNodes ; j++){
     let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
     if (n && !n.hidden && !n.customAttrs.grey) {
-      n.customAttrs.true_color = n.color
-      // TODO check if no simpler strategy than reinvoke hex2rga each time
-      // n.color = "rgba("+hex2rga(n.color)+",0.5)"
-      n.color = "rgba(15,15,15,0.5)"
       n.customAttrs['grey'] = 1
+      n.customAttrs.true_color = n.color
+
+      // normal case handled by node renderers
+      // will see the n.customAttrs.grey flag => use n.customAttrs.defgrey_color
+
+      // special case after a coloredBy or clustersBy
+      if (notDefaultColors)
+        n.color = "rgba("+hex2rga(n.color)+",0.5)"
     }
   }
 
@@ -566,9 +587,8 @@ function greyEverything(){
     for(let i=0;i<TW.nEdges;i++){
       let e = TW.partialGraph.graph.edges(TW.edgeIds[i])
       if (e && !e.hidden && !e.customAttrs.grey) {
-        e.customAttrs.true_color = e.color
-        e.color = TW.edgeGreyColor
         e.customAttrs.grey = 1
+        e.customAttrs.true_color = e.color
       }
     }
   }
@@ -576,6 +596,7 @@ function greyEverything(){
 }
 
 // new sigma.js: TODO change logic (the reverse of greyEverything is done by redraw for the colors, and cancelSelection for the flags...)
+//               but this could be used for colorsBy menu
 // function graphResetColor(){
 //     nds = TW.partialGraph.graph.nodes().filter(function(x) {
 //                             return !x['hidden'];

@@ -24,9 +24,20 @@ SigmaUtils = function () {
                     type : n.type,
                     // new setup (TODO rm the old at TinaWebJS nodes_2_colour)
                     customAttrs : {
-                      grey: 0,
-                      true_color : n.color
-                    }
+                      grey: false,
+                      true_color : n.color,
+                      defgrey_color : "rgba("+hex2rga(n.color)+",.4)"
+                    },
+                    // £TODO gather all flags like this
+                    // customFlags : {
+                    //   // status flags
+                    //   grey: false,
+                    //   active: false,
+                    //   hidden: false,
+                    //   // forceLabel: false,
+                    //   neighbour: false,
+                    // }
+
                 }
                 if(n.shape) node.shape = n.shape;
                 // console.log("FillGraph, created new node:", node)
@@ -50,6 +61,8 @@ SigmaUtils = function () {
                 let e = TW.Edges[s+";"+t]
                 if(e) {
                     if(e.source != e.target) {
+
+                        var computedColorInfo = sigmaTools.edgeColor(e.source, e.target, nodes)
                         var edge = {
 
                             // sigma mandatory properties
@@ -58,16 +71,17 @@ SigmaUtils = function () {
                             source : e.source,
                             target : e.target,
                             weight : e.weight,
-                            // size : e.weight,   // REFA s/weight/size/ ?
+                            size : e.weight,   // REFA s/weight/size/ ?
 
-                            color : sigmaTools.edgeColor(e.source, e.target, nodes),
+                            color : computedColorInfo.res,
 
                             hidden : false,
                             // twjs additional properties
                             type : e.type,
                             customAttrs : {
                               grey: 0,
-                              true_color : n.color
+                              true_color : computedColorInfo.res,
+                              rgb : computedColorInfo.rgb_array
                             }
                         }
 
@@ -132,7 +146,11 @@ SigmaUtils = function () {
           fontSize + 'px ' + (settings('hoverFont') || settings('font'));
 
         context.beginPath();
-        context.fillStyle = "#F7E521"; // yellow
+
+        if (TW.selectedColor == "node")
+          context.fillStyle = node.color; // node's
+        else
+          context.fillStyle = "#F7E521"; // yellow
 
         if (node.label && settings('labelHoverShadow')) {
           context.shadowOffsetX = 0;
@@ -196,29 +214,37 @@ SigmaUtils = function () {
     };
 
     // source: github.com/jacomyal/sigma.js/commit/25e2153
-    // POSS: modify to incorporate mix colors (repaintEdges)
+    // + boosting edges with property edge.customAttrs.activeEdge
     this.twRender.canvas.edges.curve = function(edge, source, target, context, settings) {
-      var color = edge.color,
-        prefix = settings('prefix') || '',
-        edgeColor = settings('edgeColor'),
-        defaultNodeColor = settings('defaultNodeColor'),
-        defaultEdgeColor = settings('defaultEdgeColor');
+      var color, size,
+        prefix = settings('prefix') || ''
 
-      if (!color)
-        switch (edgeColor) {
-          case 'source':
-            color = source.color || defaultNodeColor;
-            break;
-          case 'target':
-            color = target.color || defaultNodeColor;
-            break;
-          default:
-            color = defaultEdgeColor;
-            break;
-        }
+
+      //debug
+      // console.warn("rendering edge", edge)
+
+      var rgb = edge.customAttrs.rgb
+      var defSize = edge[prefix + 'size'] || 1
+      if (edge.customAttrs.activeEdge) {
+        size = defSize * 1.5
+        // color with less opacity
+        // cf. sigmaTools.edgeColor
+        color = 'rgba('+rgb.join()+',.7)'
+      }
+      else if (edge.customAttrs.grey) {
+        color = TW.edgeGreyColor
+        size = 1
+      }
+      else {
+        // color = "rgba( "+rgb.join()+" , "+TW.edgeDefaultOpacity+")";
+        color = edge.customAttrs.true_color
+        size = defSize
+      }
 
       context.strokeStyle = color;
-      context.lineWidth = edge[prefix + 'size'] || 1;
+      context.lineWidth = size ;
+
+
       context.beginPath();
       context.moveTo(
         source[prefix + 'x'],
@@ -235,18 +261,44 @@ SigmaUtils = function () {
       context.stroke();
     };
 
-    // node rendering with borders
+    // node rendering with borders and sensitive to current selection mode
     this.twRender.canvas.nodes.withBorders = function(node, context, settings) {
         var prefix = settings('prefix') || '';
         let X = node[prefix + 'x']
         let Y = node[prefix + 'y']
 
+        var borderSize = node[prefix + 'size'] + settings('twNodeRendBorderSize')
+        var borderColor = settings('twNodeRendBorderColor') || "#000"
+        var nodeSize = node[prefix + 'size']
+        var nodeColor = node.color || settings('defaultNodeColor')
+
+        // mode variants
+        if (TW.selectionActive) {
+          // passive nodes should blend in the grey of TW.edgeGreyColor
+          if (node.customAttrs.grey) {
+            nodeColor = node.customAttrs.defgrey_color
+            borderColor = TW.nodesGreyBorderColor
+            // cf settings_explorerjs, defgrey_color and greyEverything()
+          }
+          // neighbor nodes should be more visible
+          else if(node.customAttrs.neighbor) {
+            // borderColor = "rgba(220, 220, 220, 0.7)"
+            nodeSize *= 1.4
+            borderSize *= 1.4
+          }
+          else if(node.active) {
+            borderColor = null
+            // the selected nodes: fill not important because label+background overlay
+          }
+        }
+
+        // actual drawing
         if (settings('twNodeRendBorderSize') > 0) {
+          context.fillStyle = borderColor
           context.beginPath();
-          context.fillStyle = settings('twNodeRendBorderColor') || "#000"
           context.arc(
             X,Y,
-            node[prefix + 'size'] + settings('twNodeRendBorderSize'),
+            borderSize,
             0,
             Math.PI * 2,
             true
@@ -255,11 +307,11 @@ SigmaUtils = function () {
           context.fill();
         }
 
-        context.fillStyle = node.color || settings('defaultNodeColor');
+        context.fillStyle = nodeColor;
         context.beginPath();
         context.arc(
           X,Y,
-          node[prefix + 'size'],
+          nodeSize,
           0,
           Math.PI * 2,
           true
@@ -675,7 +727,11 @@ function repaintEdges() {
       var r = (a[0] + b[0]) >> 1;
       var g = (a[1] + b[1]) >> 1;
       var b = (a[2] + b[2]) >> 1;
+
       TW.partialGraph.graph.edges(e_id).color = "rgba("+[r,g,b].join(",")+",0.5)";
+
+      // also keep components array (useful if we change opacity when selected)
+      TW.partialGraph.graph.edges(e_id).customAttrs.rgb = [r,g,b]
   }
 }
 

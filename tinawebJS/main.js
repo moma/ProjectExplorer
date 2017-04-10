@@ -182,9 +182,12 @@ if(RES["OK"]) {
     TW.Edges = dicts.edges;
     TW.nodeIds = Object.keys(dicts.nodes)  // useful for loops
     TW.edgeIds = Object.keys(dicts.edges)
+
+    TW.selectionActive = false  // changes rendering mode
+
     if (the_data.clusters) TW.Clusters = the_data.clusters
 
-    TW.nodes1 = dicts.n1;//not used
+    // TW.nodes1 = dicts.n1;//not used
     var catDict = dicts.catDict
     // console.log("CategoriesDict: ")
     // console.log(catDict)

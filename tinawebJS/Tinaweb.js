@@ -5,7 +5,7 @@ function SelectionEngine() {
 
     // creates the union of prevsels and currsels, if addvalue
     this.SelectorEngine = (function(addvalue , prevsels , currsels ) {
-        console.log("addvalue, prevsels, currsels",addvalue, prevsels, currsels)
+        // console.log("addvalue, prevsels, currsels",addvalue, prevsels, currsels)
 
         var targeted = []
         var buffer = Object.keys(prevsels).map(Number).sort(this.sortNumber);
@@ -19,7 +19,9 @@ function SelectionEngine() {
         } else targeted = currsels;
 
         targeted = targeted.map(Number)
-        console.log("targeted::", targeted)
+
+        // debug
+        // console.log("targeted::", targeted)
 
         // NB new sigma: my REFA deprecated clicktype=="double"
         if(targeted.length==0) return [];
@@ -142,15 +144,30 @@ function SelectionEngine() {
      * Main function for any selecting action
      *
      * @nodes: eg targeted array (only ids)
+     *
+     *  external usage : partialGraph.states,
+     *                   updateRelatedNodesPanel();
      */
-    //  external usage : partialGraph , updateLeftPanel_fix();
+     // ====================
     this.MultipleSelection2 = (function(nodes,nodesDict,edgesDict) {
+      //         =====
 
         console.log("IN SelectionEngine.MultipleSelection2:")
         console.log("nodes", nodes)
         greyEverything();
 
+        var sameSideNeighbors = {}
+        var oppositeSideNeighbors = {}
+
         // TW.partialGraph.states.slice(-1)[0] is the present graph state
+        // eg
+        // {categories: ["someNodeCat"]
+        // categoriesDict: {"someNodeCat":0}  // where val 0 or 1 is type sem or soc
+        // opposites:
+        // selections:
+        // type:[0]}
+
+
         var typeNow = TW.partialGraph.states.slice(-1)[0].type.map(Number).join("|")
         // console.log ("console.loging the Type:")
         // console.log (typeNow)
@@ -167,22 +184,31 @@ function SelectionEngine() {
             if(! $.isArray(nodes)) ndsids.push(nodes);
             else ndsids=nodes;
             for(var i in ndsids) {
-                s = ndsids[i];
+                var s = ndsids[i];
                 if(TW.Relations[typeNow] && TW.Relations[typeNow][s] ) {
-                    let neigh = TW.Relations[typeNow][s]
+                    var neigh = TW.Relations[typeNow][s]
                     if(neigh) {
                         for(var j in neigh) {
-                            let t = neigh[j]
-                            nodes_2_colour[t]=false;
+                            var t = neigh[j]
+                            // we add as neighbor to color it (except if already in targeted)
+                            if (!nodes_2_colour[t]) nodes_2_colour[t]=false;
                             edges_2_colour[s+";"+t]=true;
                             edges_2_colour[t+";"+s]=true;
+
+                            // since we're there we keep the info
+                            if (typeof sameSideNeighbors[t] == 'undefined') {
+                              sameSideNeighbors[t]=0
+                            }
+                            sameSideNeighbors[t]++
                         }
                     }
                 }
-            }
-            for(var i in ndsids) {
-                nodes_2_colour[ndsids[i]]=true;
-                selections[ndsids[i]]=1; // to delete please
+                // we make the selected (source) node active too
+                nodes_2_colour[s]=true;
+
+                // update GLOBAL selections dict
+                // (FIXME it's widely used but TW.SystemStates.selections has the same)
+                selections[ndsids[i]]=1;
             }
         }
 
@@ -194,16 +220,18 @@ function SelectionEngine() {
                     n.customAttrs['grey'] = 0;
                     if(nodes_2_colour[nid]) {
                         n.active = true;
-                        selections[nid]=1
+                        // selections[nid]=1
+                    }
+                    else {
+                        n.customAttrs.neighbor = true;
                     }
                 }
             }
         }
-        console.log('edges_2_colour', edges_2_colour)
+
         for(var eid in edges_2_colour) {
 
-          // console.log(eid)
-
+            // at this point all edges are grey b/c greyEverything() was called
             let an_edge = TW.partialGraph.graph.edges(eid)
             if(!isUndef(an_edge) && !an_edge.hidden){
 
@@ -211,6 +239,7 @@ function SelectionEngine() {
                 //           make all color etc changes in renderers depending on flags
                 an_edge.color = an_edge.customAttrs['true_color'];
                 an_edge.customAttrs['grey'] = 0;
+                an_edge.customAttrs['activeEdge'] = 1;
             }
         }
 
@@ -223,6 +252,9 @@ function SelectionEngine() {
 
         // alert("MultipleSelection2=======\nthe_new_sels:" + JSON.stringify(the_new_sels))
 
+        // global flag
+        TW.selectionActive = true
+
         // we send our "gotNodeSet" event
         // (signal for plugins that a search-selection was done or a new hand picked selection)
         $('#searchinput').trigger({
@@ -232,37 +264,49 @@ function SelectionEngine() {
         });
         // console.log("Event [gotNodeSet] sent from Tinaweb MultipleSelection2")
 
-
-        var neighsDict = {}
+        // TODO REFA this used for bipartite case but needs testing with correct typestring case
         if(TW.Relations["1|1"]) {
             for(var s in the_new_sels) {
-                var neighs = TW.Relations["1|1"][the_new_sels[s]];
+                var bipaNeighs = TW.Relations["1|1"][the_new_sels[s]];
                 for(var n in neighs) {
-                    if (!neighsDict[neighs[n]])
-                        neighsDict[neighs[n]] = 0;
-                    neighsDict[neighs[n]]++;
+                    if (typeof oppositeSideNeighbors[bipaNeighs[n]] == "undefined")
+                        oppositeSideNeighbors[bipaNeighs[n]] = 0;
+                    oppositeSideNeighbors[bipaNeighs[n]]++;
                 }
             }
         }
 
-        var oppos = ArraySortByValue(neighsDict, function(a,b){
+        // debug
+        // var neiLabls = []
+        // for (var neiId in sameSideNeighbors) {
+        //   neiLabls.push(TW.Nodes[neiId].label)
+        // }
+        // console.log('sameSideNeighbors labels', neiLabls)
+
+        // NB doesn't only sort by value but also
+        // rewrites dict[id]: val
+        //   as array[order]: {key:id, value:val}
+        var oppos = ArraySortByValue(oppositeSideNeighbors, function(a,b){
+            return b-a
+        });
+        var same = ArraySortByValue(sameSideNeighbors, function(a,b){
             return b-a
         });
 
+        // console.debug('oppos', oppos)
+        // console.debug('same', same)
+        //
 
         overNodes=true;
 
         TW.partialGraph.render();
 
-        updateLeftPanel( selections , oppos );
-
-        for(var n in neighsDict)
-            delete neighsDict[n]
+        updateRelatedNodesPanel( selections , same, oppos );
 
     }).index()
 };
 
-// REFA tempo expose selectionEngine and methods
+// TODO TW.SelInst
 var SelInst
 
 

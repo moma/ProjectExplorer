@@ -97,14 +97,14 @@ getUrlParam = (function () {
 
 function ArraySortByValue(array, sortFunc){
     var tmp = [];
-    oposMAX=0;
+    // oposMAX=0;
     for (var k in array) {
         if (array.hasOwnProperty(k)) {
             tmp.push({
                 key: k,
                 value:  array[k]
             });
-            if((array[k]) > oposMAX) oposMAX= array[k];
+            // if((array[k]) > oposMAX) oposMAX= array[k];
         }
     }
 

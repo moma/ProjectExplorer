@@ -20,6 +20,7 @@ sigmaTools = (function(stools) {
         '0123456789ABCDEF'.charAt(n % 16);
     };
 
+    // TODO check duplicate functionalities with repaintEdges
     stools.edgeColor = function(src_id, tgt_id, nodes) {
       //edge color will be the combination of the 2 node colors
       var a = nodes[src_id]['color'];
@@ -46,7 +47,7 @@ sigmaTools = (function(stools) {
       // var color = '#'+sigma.tools.rgbToHex(parseFloat(r),parseFloat(g),parseFloat(b))
       var color = "rgba( "+r+", "+g+" , "+b+" , "+TW.edgeDefaultOpacity+")";
 
-      return color
+      return {'res':color, 'rgb_array':[r,g,b]}
     }
 
     return stools

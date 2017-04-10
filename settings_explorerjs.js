@@ -5,7 +5,7 @@ var TW = {}
     TW.colorByAtt = false;
     TW.twittertimeline = false;
     TW.minimap=false;
-    TW.getAdditionalInfo=false;// True: Activate TopPapers feature.
+    TW.getAdditionalInfo=true;// True: Activate TopPapers feature.
     //TW.mainfile = ["db.json"];
     // // TW.mainfile = "api.json";
      TW.mainfile = [
@@ -43,7 +43,7 @@ var TW = {}
     // flag name is div class to be removed if false
     //        *and* subdirectory to import if true
     // see also ProcessDivsFlags()
-    TW.DivsFlags["histogramModule"] = true ;
+    TW.DivsFlags["histogramModule"] = false ;
     TW.DivsFlags["crowdsourcingModule"] = true ;  // £TODO fix topPapers
 
     TW.SystemStates = {}
@@ -102,8 +102,13 @@ var semanticConverged=false;
 
 // ============ < / DEVELOPER OPTIONS > ============
 var showLabelsIfZoom=1.0;
-TW.edgeDefaultOpacity = 0.3  // opacity when true_color
-TW.edgeGreyColor = "rgba(200, 200, 200, 0.5)";
+TW.edgeDefaultOpacity = 0.5  // opacity when true_color
+TW.edgeGreyColor = "rgba(150, 150, 150, 0.2)";
+TW.nodesGreyBorderColor = "rgba(100, 100, 100, 0.5)";
+
+TW.selectedColor = "node"  // "node" for a background like the node's color,
+                              // "default" for note-like yellow
+
 TW.overSampling = true     // costly hi-def rendering (true => pixelRatio x 2)
 // ============ < / DEVELOPER OPTIONS > ============
 
