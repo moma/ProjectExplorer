@@ -185,21 +185,33 @@ function SelectionEngine() {
             else ndsids=nodes;
             for(var i in ndsids) {
                 var s = ndsids[i];
+
                 if(TW.Relations[typeNow] && TW.Relations[typeNow][s] ) {
                     var neigh = TW.Relations[typeNow][s]
                     if(neigh) {
                         for(var j in neigh) {
                             var t = neigh[j]
-                            // we add as neighbor to color it (except if already in targeted)
-                            if (!nodes_2_colour[t]) nodes_2_colour[t]=false;
-                            edges_2_colour[s+";"+t]=true;
-                            edges_2_colour[t+";"+s]=true;
+                            // highlight edges (except if n hidden or e dropped (<=> lock))
+                            // POSS: use sigma's own index to avoid checking if edge dropped
+                            if (! TW.partialGraph.graph.nodes(t).hidden
+                                && (
+                                    (TW.Edges[s+";"+t] && !TW.Edges[s+";"+t].lock)
+                                      ||
+                                    (TW.Edges[t+";"+s] && !TW.Edges[t+";"+s].lock)
+                                )
+                              ) {
+                                edges_2_colour[s+";"+t]=true;
+                                edges_2_colour[t+";"+s]=true;
 
-                            // since we're there we keep the info
-                            if (typeof sameSideNeighbors[t] == 'undefined') {
-                              sameSideNeighbors[t]=0
+                                // we add as neighbor to color it (except if already in targeted)
+                                if (!nodes_2_colour[t]) nodes_2_colour[t]=false;
+
+                              // since we're there we keep the neighbors info
+                              if (typeof sameSideNeighbors[t] == 'undefined') {
+                                sameSideNeighbors[t]=0
+                              }
+                              sameSideNeighbors[t]++
                             }
-                            sameSideNeighbors[t]++
                         }
                     }
                 }

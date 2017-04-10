@@ -671,17 +671,25 @@ function add1Elem(id) {
         }
     } else { // It's an edge!
         if(!isUndef(TW.partialGraph.graph.edges(id))) return;
-        if(TW.Edges[id] && !TW.Edges[id].lock){
+        var e  = TW.Edges[id]
+        if(e && !e.lock){
+            var computedColorInfo = sigmaTools.edgeColor(e.source, e.target, TW.Nodes)
             // var present = TW.partialGraph.states.slice(-1)[0];
             var anedge = {
                 id:         id,
-                sourceID:   TW.Edges[id].source,
-                targetID:   TW.Edges[id].target,
+                source: e.source,
+                target: e.target,
                 lock : false,
-                label:      TW.Edges[id].label,
-                type:      TW.Edges[id].type,
-                categ:      TW.Edges[id].categ,
-                weight: TW.Edges[id].weight
+                hidden: false,
+                label:  e.label,
+                type:   e.type,
+                // categ:  e.categ,
+                weight: e.weight,
+                customAttrs : {
+                  grey: 0,
+                  true_color : computedColorInfo.res,
+                  rgb : computedColorInfo.rgb_array
+                }
             };
 
             TW.partialGraph.graph.addEdge(anedge);

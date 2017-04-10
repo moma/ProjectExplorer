@@ -107,7 +107,7 @@ html, body {
     margin: 10px 0 0 0 ;
 }
 #defaultop .settingslider {
-    max-width: 120px !important;
+    max-width: 90px !important;
     display: inline-block ;
 }
 
@@ -343,4 +343,18 @@ p.micromessage{
     box-shadow: 0px 2px 6px #000;
   }
 
+}
+
+
+/* freshslider right-side cursor positioning fix
+ * (cf. freshslider.js l. 125)
+ */
+.fss-right {
+  margin-left: 0 !important ;
+}
+
+/* to display wait cursor
+ */
+html.waiting {
+  cursor: wait;
 }

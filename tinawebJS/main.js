@@ -456,11 +456,11 @@ if(RES["OK"]) {
         $("#changetype").hide();
         $("#taboppos").remove();
 
-        if (TW.catSem && TW.catSoc) {
+        // if (TW.catSem && TW.catSoc) {
           setTimeout(function () {
               document.querySelector('.etabs a[href="#tabs2"]').click()
           }, 500);
-        }
+        // }
     }
 
     ChangeGraphAppearanceByAtt(true)
@@ -478,5 +478,10 @@ document.getElementById("graph-panels").style.display = "block"
 
 // grey message in the search bar from settings
 $("#searchinput").attr('placeholder', TW.strSearchBar) ;
+
+
+setTimeout( function() {
+  theHtml.classList.remove('waiting')
+}, 20)
 
 console.log("finish")
