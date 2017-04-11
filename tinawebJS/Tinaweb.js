@@ -71,7 +71,7 @@ function SelectionEngine() {
     this.search_n_select = function(string) {
 
         // alert("search is happening !")
-        cancelSelection(false);
+        cancelSelection(false, {norender:true});
 
         if (typeof string != "string") {
             return -1 ;
@@ -150,7 +150,8 @@ function SelectionEngine() {
      */
      // ====================
     this.MultipleSelection2 = (function(nodes,nodesDict,edgesDict) {
-      //         =====
+
+      var tMS2_deb = performance.now()
 
         console.log("IN SelectionEngine.MultipleSelection2:")
         console.log("nodes", nodes)
@@ -314,6 +315,9 @@ function SelectionEngine() {
         TW.partialGraph.render();
 
         updateRelatedNodesPanel( selections , same, oppos );
+
+        var tMS2_fin = performance.now()
+        console.log("end MultipleSelection2, own time:", tMS2_fin-tMS2_deb)
 
     }).index()
 };
@@ -681,7 +685,7 @@ TinaWebJS = function ( sigmacanvas ) {
 
           // we keep the global selections and then clear it and all its effects
           var previousSelection = selections
-          cancelSelection(false);
+          cancelSelection(false, {norender:true}); // no need to render before MS2
 
           if (cursor_size == 0) {
             var targeted = SelInst.SelectorEngine( {

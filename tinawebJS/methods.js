@@ -1,7 +1,11 @@
 'use strict';
 
-function cancelSelection (fromTagCloud) {
+
+// settings: {norender: Bool}
+function cancelSelection (fromTagCloud, settings) {
     console.log("\t***in cancelSelection");
+    if (!settings) settings = {}
+
     highlightSelectedNodes(false); //Unselect the selected ones :D
     opossites = [];
     selections = [];
@@ -72,8 +76,10 @@ function cancelSelection (fromTagCloud) {
     // global flag
     TW.selectionActive = false
 
-    // finally redraw
-    TW.partialGraph.render();
+    if (!settings.norender) {
+      // finally redraw
+      TW.partialGraph.render();
+    }
 }
 
 function highlightSelectedNodes(flag){
