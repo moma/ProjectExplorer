@@ -193,8 +193,9 @@ function SelectionEngine() {
                         for(var j in neigh) {
                             var t = neigh[j]
                             // highlight edges (except if n hidden or e dropped (<=> lock))
-                            // POSS: use sigma's own index to avoid checking if edge dropped
-                            if (! TW.partialGraph.graph.nodes(t).hidden
+                            // POSS: use sigma's own index to avoid checking if node exists or edge dropped
+                            if (TW.partialGraph.graph.nodes(t)
+                                && ! TW.partialGraph.graph.nodes(t).hidden
                                 && (
                                     (TW.Edges[s+";"+t] && !TW.Edges[s+";"+t].lock)
                                       ||

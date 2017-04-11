@@ -576,6 +576,7 @@ function greyEverything(notDefaultColors){
 
   for(let j=0 ; j<TW.nNodes ; j++){
     let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
+
     if (n && !n.hidden && !n.customAttrs.grey) {
       n.customAttrs['grey'] = 1
       n.customAttrs.true_color = n.color
@@ -647,7 +648,7 @@ function greyEverything(notDefaultColors){
 // }
 
 
-// use case: slider re-add nodes
+// use case: slider, changeLevel re-add nodes
 function add1Elem(id) {
     id = ""+id;
     if(id.split(";").length==1) { // i've received a NODE
@@ -655,16 +656,22 @@ function add1Elem(id) {
         if(!isUndef(TW.partialGraph.graph.nodes(id))) return;
 
         if(TW.Nodes[id]) {
+            var n = TW.Nodes[id]
             var anode = {}
-            anode.id=id;
-            anode.label=TW.Nodes[id].label;
-            anode.size=TW.Nodes[id].size;
-            anode.x=TW.Nodes[id].x;
-            anode.y=TW.Nodes[id].y;
-            anode.hidden=(TW.Nodes[id].lock)?true:false;
-            anode.type=TW.Nodes[id].type;
-            anode.color=TW.Nodes[id].color;
-            if( TW.Nodes[id].shape ) anode.shape = TW.Nodes[id].shape;
+            anode.id = n.id;
+            anode.label = n.label;
+            anode.size = n.size;
+            anode.x = n.x;
+            anode.y = n.y;
+            anode.hidden= n.lock ;
+            anode.type = n.type;   // TODO distinguish rendtype and twtype
+            anode.color = n.color;
+            if( n.shape ) n.shape = n.shape;
+            anode.customAttrs = {
+              grey: false,
+              true_color : n.color,
+              defgrey_color : "rgba("+hex2rga(n.color)+",.4)"
+            }
 
             if(Number(anode.id)==287) console.log("coordinates of node 287: ( "+anode.x+" , "+anode.y+" ) ")
 

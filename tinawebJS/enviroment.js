@@ -22,6 +22,13 @@ function changeType() {
 
     var selsbackup = present.selections.slice();
 
+
+    // type "grammar"
+    //     used to distinguish types in TW.Relations
+
+    // types eg [true]          <=> '1'
+    //          [true, true]    <=> '1|1'
+
     // Complement of the received state ~[X\Y] )
     var type_t1 = []
     for(var i in type_t0) type_t1[i] = !type_t0[i]
@@ -264,7 +271,17 @@ function changeType() {
     fa2enabled=true; TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8).draw();//.startForceAtlas2();
 }
 
-// Documentation Level: *****
+
+//
+// changeLevel :     macro selection SysSt = {level: true, type:XY}
+//                         ^
+//                         |
+//                         v
+//                   local selection SysSt = {level: false, type:XY}
+//
+//  where SysSt is the last state aka TW.partialGraph.states.slice(-1)[0]
+//    and SysSt.level is aka swMacro
+
 function changeLevel() {
     var present = TW.partialGraph.states.slice(-1)[0]; // Last
     var past = TW.partialGraph.states.slice(-2)[0] // avant Last
@@ -275,6 +292,13 @@ function changeLevel() {
     var sels = present.selections;//[144, 384, 543]//TW.partialGraph.states.selections;
     var catDict = present.categoriesDict;
 
+
+    // type "grammar"
+    //     used to distinguish types in TW.Relations
+
+    // types eg [true]          <=> '1'
+    //          [true, true]    <=> '1|1'
+
     var type_t0 = present.type;
     var str_type_t0 = type_t0.map(Number).join("|")
 
@@ -283,22 +307,8 @@ function changeLevel() {
     for(var i in type_t0) type_t1[i] = !type_t0[i]
     var str_type_t1 = type_t1.map(Number).join("|")
 
-    //
-    var binSumCats = []
-    for(var i in type_t0)
-        binSumCats[i] = (type_t0[i]||type_t1[i])
-    var str_binSumCats = binSumCats.map(Number).join("|")
+    // removed typing 2nd part (binSumCats) not useful for changeLevel
 
-    var nextState = []
-    if(level) nextState = type_t1;
-    else nextState = binSumCats;
-    if(!level && past!=false) {
-        var sum_past = past.type.map(Number).reduce(function(a, b){return a+b;})
-        if(sum_past>1) {
-            nextState = past.type;
-        }
-    }
-    var str_nextState = nextState.map(Number).join("|")
 
     TW.partialGraph.graph.clear();
 
@@ -306,6 +316,8 @@ function changeLevel() {
     // Dictionaries of: selection+neighbors
     var nodes_2_colour = {}
     var edges_2_colour = {}
+
+    // POSS: factorize with same strategy in MultipleSelection2 beginning
     for(var i in sels) {
         s = sels[i];
         neigh = TW.Relations[str_type_t0][s]
@@ -358,8 +370,7 @@ function changeLevel() {
         futurelevel = true;
     }
 
-
-
+    // console.log("enviroment changeLevel nodes_2_colour", nodes_2_colour)
 
     // Nodes Selection now:
     if(sels.length>0) {
@@ -388,7 +399,10 @@ function changeLevel() {
     TW.partialGraph.states[lastpos].categories = present.categories;//to_del
     TW.partialGraph.states[lastpos].categoriesDict = catDict;//to_del
 
-    fa2enabled=true; TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8).draw().startForceAtlas2();
+    TW.partialGraph.camera.goTo({x:0, y:0, ratio:1.2, angle: 0})
+    TW.partialGraph.refresh()
+
+    // TODO fix Fa2 in this context
 }
 //============================= </ NEW BUTTONS > =============================//
 
