@@ -248,9 +248,6 @@ function SelectionEngine() {
             let an_edge = TW.partialGraph.graph.edges(eid)
             if(!isUndef(an_edge) && !an_edge.hidden){
 
-                // /!\ £TODO change only *flags* here, and then
-                //           make all color etc changes in renderers depending on flags
-                an_edge.color = an_edge.customAttrs['true_color'];
                 an_edge.customAttrs['grey'] = 0;
                 an_edge.customAttrs['activeEdge'] = 1;
             }
