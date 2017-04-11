@@ -105,11 +105,11 @@ var showLabelsIfZoom=1.0;
 TW.edgeDefaultOpacity = 0.5  // opacity when true_color
 TW.edgeGreyColor = "rgba(150, 150, 150, 0.2)";
 TW.nodesGreyBorderColor = "rgba(100, 100, 100, 0.5)";
-
 TW.selectedColor = "node"  // "node" for a background like the node's color,
                               // "default" for note-like yellow
 
 TW.overSampling = true     // costly hi-def rendering (true => pixelRatio x 2)
+
 // ============ < / DEVELOPER OPTIONS > ============
 
 
@@ -121,7 +121,7 @@ var sigmaJsDrawingProperties = {
     labelSizeRatio: 2,   // ...but this ratio allows truly adjusting the sizes
 
     labelThreshold: 5,
-    defaultEdgeType: 'curve',
+    defaultEdgeType: 'curve',  // 'curve' or 'line'
 
     defaultBorderView: "always",
 
@@ -144,8 +144,8 @@ var sigmaJsDrawingProperties = {
     // fontStyle: "bold",
 };
 var sigmaJsGraphProperties = {
-    minEdgeSize: 1,
-    maxEdgeSize: 5
+    minEdgeSize: 2,
+    maxEdgeSize: 4
 };
 var sigmaJsMouseProperties = {
     minRatio: 0.1,

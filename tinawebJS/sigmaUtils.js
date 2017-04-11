@@ -250,11 +250,60 @@ SigmaUtils = function () {
         source[prefix + 'x'],
         source[prefix + 'y']
       );
+
+      // NB a little too slow
+      var sx = source[prefix + 'x']
+      var sy = source[prefix + 'y']
+      var tx = target[prefix + 'x']
+      var ty = target[prefix + 'y']
       context.quadraticCurveTo(
-        (source[prefix + 'x'] + target[prefix + 'x']) / 2 +
-          (target[prefix + 'y'] - source[prefix + 'y']) / 4,
-        (source[prefix + 'y'] + target[prefix + 'y']) / 2 +
-          (source[prefix + 'x'] - target[prefix + 'x']) / 4,
+        (sx + tx) / 2 +
+          (ty - sy) / 4,
+        (sy + ty) / 2 +
+          (sx - tx) / 4,
+        tx,
+        ty
+      );
+      context.stroke();
+    };
+
+
+    this.twRender.canvas.edges.line = function(edge, source, target, context, settings) {
+      var color, size,
+        prefix = settings('prefix') || ''
+
+
+      //debug
+      // console.warn("rendering edge", edge)
+
+      var rgb = edge.customAttrs.rgb
+      var defSize = edge[prefix + 'size'] || 1
+      if (edge.customAttrs.activeEdge) {
+        size = defSize * 1.5
+        // color with less opacity
+        // cf. sigmaTools.edgeColor
+        color = 'rgba('+rgb.join()+',.7)'
+      }
+      else if (edge.customAttrs.grey) {
+        color = TW.edgeGreyColor
+        size = 1
+      }
+      else {
+        // color = "rgba( "+rgb.join()+" , "+TW.edgeDefaultOpacity+")";
+        color = edge.customAttrs.true_color
+        size = defSize
+      }
+
+      context.strokeStyle = color;
+      context.lineWidth = size ;
+
+
+      context.beginPath();
+      context.moveTo(
+        source[prefix + 'x'],
+        source[prefix + 'y']
+      );
+      context.lineTo(
         target[prefix + 'x'],
         target[prefix + 'y']
       );

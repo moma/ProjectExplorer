@@ -269,6 +269,7 @@ if(RES["OK"]) {
 
     // custom edges rendering registered under 'curve'
     sigma.canvas.edges.curve = sigma_utils.twRender.canvas.edges.curve
+    sigma.canvas.edges.line = sigma_utils.twRender.canvas.edges.line
 
     // custom labels rendering
     //  - based on the normal one sigma.canvas.labels.def

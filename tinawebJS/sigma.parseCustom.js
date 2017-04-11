@@ -347,7 +347,6 @@ function dictfyGexf( gexf , categories ){
         // TW.partialGraph._core.graph.nodesIndex[it].size=Nodes[it].size;
     }
 
-
     var edgeId = 0;
     var edgesNodes = gexf.getElementsByTagName('edges');
     for(i=0; i<edgesNodes.length; i++) {
@@ -365,7 +364,7 @@ function dictfyGexf( gexf , categories ){
                 id: indice,
                 source: source,
                 target: target,
-                type : (type) ? type : "curve",
+                type : (type) ? type : sigmaJsDrawingProperties['defaultEdgeType'],
                 label: "",
                 categ: "",
                 attributes: []
