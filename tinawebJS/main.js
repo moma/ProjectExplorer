@@ -237,7 +237,7 @@ if(RES["OK"]) {
             // labelColor: "node",
 
             // nodesPowRatio: .3,
-            batchEdgesDrawing: true,
+            batchEdgesDrawing: false,
             hideEdgesOnMove: true,
 
             enableHovering: true,
@@ -250,8 +250,8 @@ if(RES["OK"]) {
             mouseEnabled: true,
             touchEnabled: false,
 
-            animationsTime:300,
-            mouseZoomDuration:500
+            animationsTime:150,
+            mouseZoomDuration:250
         },
         sigmaJsDrawingProperties,
         sigmaJsGraphProperties,
@@ -292,6 +292,7 @@ if(RES["OK"]) {
         renderer: {
             container: document.getElementById('sigma-contnr'),
             type: sigma.renderers.canvas
+            // type: sigma.renderers.webgl // POSS if write custom renderers
         },
         settings: customSettings
     });
@@ -366,8 +367,7 @@ if(RES["OK"]) {
         //     }
         // }
 
-        console.log("printing the typestring:")
-        console.log(typestring)
+        console.log("printing the typestring:", typestring)
 
         if(typestring=="0|1") {
             $("#category0").hide();
