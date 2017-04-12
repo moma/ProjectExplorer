@@ -824,6 +824,7 @@ TinaWebJS = function ( sigmacanvas ) {
         $("#category1").hide();
 
         //finished
+        var labelSizeTimeout = null
         $("#slidercat0nodessize").freshslider({
             step:.5,
             min:0,
@@ -831,13 +832,20 @@ TinaWebJS = function ( sigmacanvas ) {
             value: TW.partialGraph.settings('labelSizeRatio'),
             bgcolor:"#27c470",
             onchange:function(value){
+              if (labelSizeTimeout) {
+                clearTimeout(labelSizeTimeout)
+              }
+              labelSizeTimeout = setTimeout(function(){
+                if (TW.partialGraph.settings('labelSizeRatio') != value) {
+                  var adaptedLabelThreshold = (5 - value) + 1
+                  console.log("value", value, "thres", adaptedLabelThreshold)
 
-              var adaptedLabelThreshold = (5 - value) + 1
-              // console.log("value", value, "thres", adaptedLabelThreshold)
+                  TW.partialGraph.settings('labelSizeRatio', value)
+                  TW.partialGraph.settings('labelThreshold', adaptedLabelThreshold)
+                  TW.partialGraph.render()
+                }
+              }, 200)
 
-              TW.partialGraph.settings('labelSizeRatio', value)
-              TW.partialGraph.settings('labelThreshold', adaptedLabelThreshold)
-              TW.partialGraph.render()
             }
         });
 
