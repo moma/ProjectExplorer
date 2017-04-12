@@ -575,6 +575,10 @@ function graphTagCloudElem(nodes) {
 }
 
 
+function unHide(nodeId) {
+  TW.partialGraph.graph.nodes(nodeId).hidden=false
+}
+
 // edges greyish color for unselected, when we have a selection
 // case default: color is precomputed as node true_color + alpha .5
 // cases when coloredBy (ex: centrality): color must be recomputed here

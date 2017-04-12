@@ -538,7 +538,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
                 if(filtervalue!=lastFilter[sliderDivID]["last"]) {
 
-                  // ? new sigma js: can't port this line because usage unclear ?
+                  // TODO memoize the last filter value
                   // $.doTimeout(sliderDivID+"_"+lastFilter[sliderDivID]["last"]);
 
 
@@ -584,37 +584,53 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                   }
 
                   // do the important stuff
+                  // ex iterarr [0:0, 1:1...]
+                  // ex finalarray [0: [eid1,eid2], 1:[eid3,eid4,eid5]...]
                   for( var c in iterarr ) {
 
                       var i = iterarr[c];
-                      ids = finalarray[i]
+                      var eids = finalarray[i]
 
                       if(i>=low && i<=high) {
                           if(addflag) {
                               // console.log("adding "+ids.join())
-                              for(var id in ids) {
-                                  ID = ids[id]
-                                  TW.Edges[ID].lock = false;
+                              for(var i in eids) {
+                                  let eid = eids[i]
+                                  TW.Edges[eid].lock = false;
 
+                                  // global level case
                                   if(present.level) {
-                                      // console.log("\tADD "+ID)
-                                      // n = ID.split(";")
+                                      // console.log("\tADD "+eid)
+                                      // n = eid.split(";")
                                       // if(n.length>1)
                                       //     console.log("\t\tsource:("+TW.Nodes[n[0]].x+","+TW.Nodes[n[0]].y+") ||| target:("+TW.Nodes[n[1]].x+","+TW.Nodes[n[1]].y+")")
-                                      add1Elem(ID)
-                                  } else {
-                                      // this fragment broken
-                                      console.error("TODO Unimplemented after port to 1.2")
-                                      // for (var n in TW.partialGraph._core.graph.nodesIndex) {
-                                      //     sid = TW.Edges[ID].sourceID
-                                      //     tid = TW.Edges[ID].targetID
-                                      //     if (sid==n || tid==n) {
-                                      //         if(TW.partialGraph.graph.nodes(sid).hidden) unHide(sid)
-                                      //         if(TW.partialGraph.graph.nodes(tid).hidden) unHide(tid)
-                                      //         add1Elem(ID)
-                                      //         // console.log("\tADD "+ID)
-                                      //     }
-                                      // }
+                                      add1Elem(eid)
+                                  }
+
+
+                                  // local level case
+                                  // finalarray is full of edges that don't really exist at this point
+                                  else {
+
+                                    // NB we assume the sigma convention eid = "nid1;nid2"
+                                    let nidkeys = eid.split(';')
+                                    // console.log(nidkeys)
+
+                                    if (nidkeys.length != 2) {
+                                      console.error("invalid edge id:" + eid)
+                                    }
+                                    else {
+                                      let sid = nidkeys[0]
+                                      let tid = nidkeys[1]
+
+                                      // if nodes not removed by local view
+                                      if (   TW.partialGraph.graph.nodes(sid)
+                                          && TW.partialGraph.graph.nodes(tid)) {
+                                            if(TW.partialGraph.graph.nodes(sid).hidden) unHide(sid)
+                                            if(TW.partialGraph.graph.nodes(tid).hidden) unHide(tid)
+                                            add1Elem(eid)
+                                      }
+                                    }
                                   }
 
                               }
@@ -623,8 +639,8 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                       } else {
                           if(delflag) {
                               // console.log("deleting "+ids.join())
-                              for(var id in ids) {
-                                  ID = ids[id]
+                              for(var i in eids) {
+                                  ID = eids[i]
                                   if(!isUndef(TW.partialGraph.graph.edges(ID))) {
                                       var t0 = performance.now()
                                       TW.partialGraph.graph.dropEdge(ID)
@@ -673,7 +689,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                   theHtml.classList.remove('waiting')
                 }, 20)
 
-            }, 100) // debounce timeout
+            }, 700) // large-ish debounce timeout
 
 
 
