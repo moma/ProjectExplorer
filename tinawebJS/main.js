@@ -309,6 +309,8 @@ if(RES["OK"]) {
     TW.nNodes = TW.partialGraph.graph.nodes().length
     TW.nEdges = TW.partialGraph.graph.edges().length
 
+
+    // POSS make it TW.states
     TW.partialGraph.states = []
     TW.partialGraph.states[0] = false;
     TW.partialGraph.states[1] = TW.SystemStates;
@@ -416,14 +418,13 @@ if(RES["OK"]) {
         }
     }).index();
 
-    // config for any future forceAtlas2 calls
-    TW.partialGraph.configForceAtlas2({
+    TW.FA2Params = {
       // adapting speed -------------
       slowDown: 1,
       startingIterations: 5,
       iterationsPerRender: 3,
-      barnesHutOptimize: true,
-      barnesHutTheta: .5,
+      barnesHutOptimize: false,
+      // barnesHutTheta: .5,
 
       // global behavior -----------
       linLogMode: true,
@@ -438,7 +439,10 @@ if(RES["OK"]) {
       // (but rather not needed when data already shows topic-centered
       //  node groups and/nor when preferential attachment type of data)
       outboundAttractionDistribution: false
-    })
+    }
+
+    // init FA2 for any future forceAtlas2 calls
+    TW.partialGraph.configForceAtlas2(TW.FA2Params)
 
     // REFA new sigma.js
     TW.partialGraph.camera.goTo({x:0, y:0, ratio:1.2, angle: 0})

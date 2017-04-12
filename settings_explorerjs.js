@@ -92,7 +92,7 @@ var desirableScholarSize=6; //Remember that all scholars have the same size!
  *  - "off": button doesn't exist, fa2 stopped forever
  **/ var fa2enabled=false;//"off";
 var stopcriteria = false;
-var fa2milliseconds=10000;  // for initial auto-run if fa2enabled and any
+var fa2milliseconds=5000;  // for initial auto-run if fa2enabled and any
                            // subsequent auto-runs if graph modified
 
 // deprecated ?

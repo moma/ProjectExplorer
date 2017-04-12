@@ -283,126 +283,157 @@ function changeType() {
 //    and SysSt.level is aka swMacro
 
 function changeLevel() {
-    var present = TW.partialGraph.states.slice(-1)[0]; // Last
-    var past = TW.partialGraph.states.slice(-2)[0] // avant Last
-    var lastpos = TW.partialGraph.states.length-1;
-    var avantlastpos = lastpos-1;
+    // show waiting cursor
+    theHtml.classList.add('waiting');
 
-    var level = present.level;
-    var sels = present.selections;//[144, 384, 543]//TW.partialGraph.states.selections;
-    var catDict = present.categoriesDict;
+    // let the waiting cursor appear
+    setTimeout(function() {
+      var present = TW.partialGraph.states.slice(-1)[0]; // Last
+      var past = TW.partialGraph.states.slice(-2)[0] // avant Last
+      var lastpos = TW.partialGraph.states.length-1;
+      var avantlastpos = lastpos-1;
 
-
-    // type "grammar"
-    //     used to distinguish types in TW.Relations
-
-    // types eg [true]          <=> '1'
-    //          [true, true]    <=> '1|1'
-
-    var type_t0 = present.type;
-    var str_type_t0 = type_t0.map(Number).join("|")
-
-    // [X|Y]-change (NOT operation over the received state [X\Y] )
-    var type_t1 = []
-    for(var i in type_t0) type_t1[i] = !type_t0[i]
-    var str_type_t1 = type_t1.map(Number).join("|")
-
-    // removed typing 2nd part (binSumCats) not useful for changeLevel
+      var level = present.level;
+      var sels = present.selections;//[144, 384, 543]//TW.partialGraph.states.selections;
+      var catDict = present.categoriesDict;
 
 
-    TW.partialGraph.graph.clear();
+      // type "grammar"
+      //     used to distinguish types in TW.Relations
 
-    var voisinage = {}
-    // Dictionaries of: selection+neighbors
-    var nodes_2_colour = {}
-    var edges_2_colour = {}
+      // types eg [true]          <=> '1'
+      //          [true, true]    <=> '1|1'
 
-    // POSS: factorize with same strategy in MultipleSelection2 beginning
-    for(var i in sels) {
-        s = sels[i];
-        neigh = TW.Relations[str_type_t0][s]
-        if(neigh) {
-            for(var j in neigh) {
-                t = neigh[j]
-                nodes_2_colour[t]=false;
-                edges_2_colour[s+";"+t]=true;
-                edges_2_colour[t+";"+s]=true;
-                if( !selections[t]  )
-                    voisinage[ Number(t) ] = true;
-            }
+      var type_t0 = present.type;
+      var str_type_t0 = type_t0.map(Number).join("|")
+
+      // [X|Y]-change (NOT operation over the received state [X\Y] )
+      var type_t1 = []
+      for(var i in type_t0) type_t1[i] = !type_t0[i]
+      var str_type_t1 = type_t1.map(Number).join("|")
+
+      TW.partialGraph.graph.clear();
+
+      var voisinage = {}
+      // Dictionaries of: selection+neighbors
+      var nodes_2_colour = {}
+      var edges_2_colour = {}
+
+      // POSS: factorize with same strategy in MultipleSelection2 beginning
+      for(var i in sels) {
+          s = sels[i];
+          neigh = TW.Relations[str_type_t0][s]
+          if(neigh) {
+              for(var j in neigh) {
+                  t = neigh[j]
+                  nodes_2_colour[t]=false;
+                  edges_2_colour[s+";"+t]=true;
+                  edges_2_colour[t+";"+s]=true;
+                  if( !selections[t]  )
+                      voisinage[ Number(t) ] = true;
+              }
+          }
+      }
+      for(var i in sels)
+          nodes_2_colour[sels[i]]=true;
+
+
+
+      var futurelevel = []
+
+      if(present.level) { // [Change to Local] when level=Global(1)
+          for(var i in nodes_2_colour)
+              add1Elem(i)
+          for(var i in edges_2_colour)
+              add1Elem(i)
+
+          // Adding intra-neighbors edges O(voisinage²)
+          voisinage = Object.keys(voisinage)
+          for(var i=0;i<voisinage.length;i++) {
+              for(var j=1;j<voisinage.length;j++) {
+                  if( voisinage[i]!=voisinage[j] ) {
+                      // console.log( "\t" + voisinage[i] + " vs " + voisinage[j] )
+                      add1Elem( voisinage[i]+";"+voisinage[j] )
+                  }
+
+              }
+          }
+
+          futurelevel = false;
+          // Selection is unchanged, no need to call MultipleSelection2
+
+
+      } else { // [Change to Global] when level=Local(0)
+
+          // var t0 = performance.now()
+          for(var n in TW.Nodes) {
+              if(type_t0[catDict[TW.Nodes[n].type]])
+                  // we add 1 by 1
+                  add1Elem(n)
+          }
+          for(var e in TW.Edges) {
+              if(TW.Edges[e].categ==str_type_t0)
+                  add1Elem(e)
+          }
+
+          // var t1 = performance.now()
+          futurelevel = true;
+
+          // console.log("returning to global took:", t1-t0)
+
+          // Nodes Selection now:
+          if(sels.length>0) {
+              var SelInst = new SelectionEngine();
+              SelInst.MultipleSelection2({
+                          nodes:sels,
+                          nodesDict:nodes_2_colour,
+                          edgesDict:edges_2_colour
+                      });
+              overNodes=true;
+          }
+      }
+
+      // console.log("enviroment changeLevel nodes_2_colour", nodes_2_colour)
+
+
+      TW.partialGraph.states[avantlastpos] = {};
+      TW.partialGraph.states[avantlastpos].level = present.level;
+      TW.partialGraph.states[avantlastpos].selections = present.selections;
+      TW.partialGraph.states[avantlastpos].type = present.type;
+      TW.partialGraph.states[avantlastpos].opposites = present.opposites;
+      TW.partialGraph.states[avantlastpos].categories = present.categories;//to_del
+      TW.partialGraph.states[avantlastpos].categoriesDict = present.categoriesDict;//to_del
+
+      TW.partialGraph.states[lastpos].setState({
+          type: present.type,
+          level: futurelevel,
+          sels: Object.keys(selections).map(Number),
+          oppos: []
+      })
+      TW.partialGraph.states[lastpos].categories = present.categories;//to_del
+      TW.partialGraph.states[lastpos].categoriesDict = catDict;//to_del
+
+      TW.partialGraph.camera.goTo({x:0, y:0, ratio:1.2, angle: 0})
+      TW.partialGraph.refresh()
+
+      // recreate FA2 nodes array after you change the nodes
+      reInitFa2({
+        useSoftMethod: !futurelevel,
+        callback: function() {
+          theHtml.classList.remove('waiting');
+
+          // when going local, it's nice to see the selected nodes rearrange
+          if (!futurelevel) {
+            TW.partialGraph.startForceAtlas2();
+            setTimeout(function(){
+                TW.partialGraph.stopForceAtlas2();
+              },
+            fa2milliseconds)
+          }
         }
-    }
-    for(var i in sels)
-        nodes_2_colour[sels[i]]=true;
-
-
-
-    var futurelevel = []
-
-    if(present.level) { // [Change to Local] when level=Global(1)
-        for(var i in nodes_2_colour)
-            add1Elem(i)
-        for(var i in edges_2_colour)
-            add1Elem(i)
-
-        // Adding intra-neighbors edges O(voisinage²)
-        voisinage = Object.keys(voisinage)
-        for(var i=0;i<voisinage.length;i++) {
-            for(var j=1;j<voisinage.length;j++) {
-                if( voisinage[i]!=voisinage[j] ) {
-                    // console.log( "\t" + voisinage[i] + " vs " + voisinage[j] )
-                    add1Elem( voisinage[i]+";"+voisinage[j] )
-                }
-
-            }
-        }
-
-        futurelevel = false;
-    } else { // [Change to Global] when level=Local(0)
-        for(var n in TW.Nodes) {
-            if(type_t0[catDict[TW.Nodes[n].type]])
-                add1Elem(n)
-        }
-        for(var e in TW.Edges) {
-            if(TW.Edges[e].categ==str_type_t0)
-                add1Elem(e)
-        }
-        futurelevel = true;
-    }
-
-    // console.log("enviroment changeLevel nodes_2_colour", nodes_2_colour)
-
-    // Nodes Selection now:
-    if(sels.length>0) {
-        var SelInst = new SelectionEngine();
-        SelInst.MultipleSelection2({
-                    nodesDict:nodes_2_colour,
-                    edgesDict:edges_2_colour
-                });
-        overNodes=true;
-    }
-
-    TW.partialGraph.states[avantlastpos] = {};
-    TW.partialGraph.states[avantlastpos].level = present.level;
-    TW.partialGraph.states[avantlastpos].selections = present.selections;
-    TW.partialGraph.states[avantlastpos].type = present.type;
-    TW.partialGraph.states[avantlastpos].opposites = present.opposites;
-    TW.partialGraph.states[avantlastpos].categories = present.categories;//to_del
-    TW.partialGraph.states[avantlastpos].categoriesDict = present.categoriesDict;//to_del
-
-    TW.partialGraph.states[lastpos].setState({
-        type: present.type,
-        level: futurelevel,
-        sels: Object.keys(selections).map(Number),
-        oppos: []
-    })
-    TW.partialGraph.states[lastpos].categories = present.categories;//to_del
-    TW.partialGraph.states[lastpos].categoriesDict = catDict;//to_del
-
-    TW.partialGraph.camera.goTo({x:0, y:0, ratio:1.2, angle: 0})
-    TW.partialGraph.refresh()
-
-    // TODO fix Fa2 in this context
+      })
+    },500 // cursor waiting
+  )
 }
 //============================= </ NEW BUTTONS > =============================//
 
