@@ -183,6 +183,10 @@ if(RES["OK"]) {
     TW.nodeIds = Object.keys(dicts.nodes)  // useful for loops
     TW.edgeIds = Object.keys(dicts.edges)
 
+    // in-place: pre-compute all color/grey/size properties
+    prepareNodesRenderingProperties(TW.Nodes)
+    prepareEdgesRenderingProperties(TW.Edges)
+
     TW.selectionActive = false  // changes rendering mode
 
     if (the_data.clusters) TW.Clusters = the_data.clusters

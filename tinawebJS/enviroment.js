@@ -86,13 +86,13 @@ function changeType() {
 
     if(present.level) { //If level=Global, fill all {X}-component
 
-        for(var n in TW.Nodes) {
-            if(type_t1[catDict[TW.Nodes[n].type]])
-                add1Elem(n)
+        for(var nid in TW.Nodes) {
+            if(type_t1[catDict[TW.Nodes[nid].type]])
+                add1Elem(nid)
         }
-        for(var e in TW.Edges) {
-            if(TW.Edges[e].categ==str_type_t1)
-                add1Elem(e)
+        for(var eid in TW.Edges) {
+            if(TW.Edges[eid].categ==str_type_t1)
+                add1Elem(eid)
         }
     } else /* Local level, change to previous or alter component*/ {
         if(sels.length==0) {
@@ -138,10 +138,10 @@ function changeType() {
                     nodes_2_colour[i] = false;
                 }
 
-                for(var i in nodes_2_colour)
-                    add1Elem(i)
-                for(var i in edges_2_colour)
-                    add1Elem(i)
+                for(var nid in nodes_2_colour)
+                    add1Elem(nid)
+                for(var eid in edges_2_colour)
+                    add1Elem(eid)
 
                 nextState = type_t1;
 
@@ -235,10 +235,10 @@ function changeType() {
 
         // Adding just selection+neighs
         if(!present.level) {
-            for(var i in nodes_2_colour)
-                add1Elem(i)
-            for(var i in edges_2_colour)
-                add1Elem(i)
+            for(var nid in nodes_2_colour)
+                add1Elem(nid)
+            for(var eid in edges_2_colour)
+                add1Elem(eid)
         }
 
         var SelInst = new SelectionEngine();
@@ -342,10 +342,10 @@ function changeLevel() {
       var futurelevel = []
 
       if(present.level) { // [Change to Local] when level=Global(1)
-          for(var i in nodes_2_colour)
-              add1Elem(i)
-          for(var i in edges_2_colour)
-              add1Elem(i)
+          for(var nid in nodes_2_colour)
+              add1Elem(nid)
+          for(var eid in edges_2_colour)
+              add1Elem(eid)
 
           // Adding intra-neighbors edges O(voisinage²)
           voisinage = Object.keys(voisinage)
@@ -366,14 +366,14 @@ function changeLevel() {
       } else { // [Change to Global] when level=Local(0)
 
           // var t0 = performance.now()
-          for(var n in TW.Nodes) {
-              if(type_t0[catDict[TW.Nodes[n].type]])
+          for(var nid in TW.Nodes) {
+              if(type_t0[catDict[TW.Nodes[nid].type]])
                   // we add 1 by 1
-                  add1Elem(n)
+                  add1Elem(nid)
           }
-          for(var e in TW.Edges) {
-              if(TW.Edges[e].categ==str_type_t0)
-                  add1Elem(e)
+          for(var eid in TW.Edges) {
+              if(TW.Edges[eid].categ==str_type_t0)
+                  add1Elem(eid)
           }
 
           // var t1 = performance.now()

@@ -12,40 +12,25 @@ SigmaUtils = function () {
             var n = nodes[i];
 
             if(initialState[catDict[n.type]]) {
-                var node = {
-                    id : n.id,
-                    label : n.label,
-                    // 3 decimals is way more tractable
-                    // and quite enough in precision !!
-                    size : Math.round(n.size*1000)/1000,
-                    color : n.color,
-                    x : n.x,
-                    y : n.y,
-                    type : n.type,
-                    // new setup (TODO rm the old at TinaWebJS nodes_2_colour)
-                    customAttrs : {
-                      grey: false,
-                      true_color : n.color,
-                      defgrey_color : "rgba("+hex2rga(n.color)+",.4)"
-                    },
-                    // £TODO gather all flags like this
-                    // customFlags : {
-                    //   // status flags
-                    //   grey: false,
-                    //   active: false,
-                    //   hidden: false,
-                    //   // forceLabel: false,
-                    //   neighbour: false,
-                    // }
+                // var node = {
+                //     id : n.id,
+                //     label : n.label,
+                //     size : n.size,
+                //     color : n.color,
+                //     x : n.x,
+                //     y : n.y,
+                //     type : n.type,
+                //     customAttrs : n.customAttrs,
+                // }
+                // if(n.shape) node.shape = n.shape;
+                // // console.log("FillGraph, created new node:", node)
+                //
+                // graph.nodes.push( node);
 
-                }
-                if(n.shape) node.shape = n.shape;
-                // console.log("FillGraph, created new node:", node)
+                // no attributes to remove: I use n directly
+                graph.nodes.push(n);
 
-                if(Number(n.id)==287) console.log("node 287:", node)
-
-                // REFA new way => no separate id
-                graph.nodes.push( node);
+                if(Number(n.id)==287) console.log("node 287:", n)
 
                 // fill the "labels" global variable
                 updateSearchLabels( n.id , n.label , n.type);
@@ -61,34 +46,27 @@ SigmaUtils = function () {
                 let e = TW.Edges[s+";"+t]
                 if(e) {
                     if(e.source != e.target) {
-
-                        var computedColorInfo = sigmaTools.edgeColor(e.source, e.target, nodes)
-                        var edge = {
-
-                            // sigma mandatory properties
-                            id : e.id,
-                            // REFA was: sourceID, targetID
-                            source : e.source,
-                            target : e.target,
-                            weight : e.weight,
-                            size : e.weight,   // REFA s/weight/size/ ?
-
-                            color : computedColorInfo.res,
-
-                            hidden : false,
-                            // twjs additional properties
-                            type : e.type,
-                            customAttrs : {
-                              grey: 0,
-                              true_color : computedColorInfo.res,
-                              rgb : computedColorInfo.rgb_array
-                            }
-                        }
+                        // var edge = {
+                        //
+                        //     // sigma mandatory properties
+                        //     id : e.id,
+                        //     source : e.source,
+                        //     target : e.target,
+                        //
+                        //     // sigma optional properties
+                        //     hidden : false,
+                        //     color : e.color,
+                        //     weight : e.weight,
+                        //     // size : e.size,
+                        //
+                        //     // twjs additional properties
+                        //     type : e.type,
+                        //     customAttrs : e.customAttrs
+                        // }
 
                         // console.log("edge.color", edge.color)
 
-                        // REFA new way
-                        graph.edges.push( edge);
+                        graph.edges.push( e);
                     }
                 }
             }
@@ -223,13 +201,13 @@ SigmaUtils = function () {
       //debug
       // console.warn("rendering edge", edge)
 
-      var rgb = edge.customAttrs.rgb
+      var rgbStr = edge.customAttrs.rgb
       var defSize = edge[prefix + 'size'] || 1
       if (edge.customAttrs.activeEdge) {
         size = defSize * 1.5
         // color with less opacity
-        // cf. sigmaTools.edgeColor
-        color = 'rgba('+rgb.join()+',.7)'
+        // cf. sigmaTools.edgeRGB
+        color = 'rgba('+rgbStr+',.7)'
       }
       else if (edge.customAttrs.grey) {
         color = TW.edgeGreyColor

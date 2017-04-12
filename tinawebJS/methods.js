@@ -518,10 +518,10 @@ function graphTagCloudElem(nodes) {
         nodes_2_colour[sels[i]]=true;
 
 
-    for(var i in nodes_2_colour)
-        add1Elem(i)
-    for(var i in edges_2_colour)
-        add1Elem(i)
+    for(var nid in nodes_2_colour)
+        add1Elem(nid)
+    for(var eid in edges_2_colour)
+        add1Elem(eid)
 
 
 
@@ -654,6 +654,61 @@ function greyEverything(notDefaultColors){
 // }
 
 
+
+// Converts from read nodes (sigma.parseCustom )
+// Remarks:
+//  - modifies nodesDict in-place
+//  - run it once at init
+//  - it will be used by FillGraph and add1Elem
+function prepareNodesRenderingProperties(nodesDict) {
+  for (var nid in nodesDict) {
+    var n = nodesDict[nid]
+
+    // 3 decimals is way more tractable
+    // and quite enough in precision !!
+    n.size = Math.round(n.size*1000)/1000
+
+    // new setup (TODO rm the old at TinaWebJS nodes_2_colour)
+    n.customAttrs = {
+      grey: false,
+      true_color : n.color,
+      defgrey_color : "rgba("+hex2rga(n.color)+",.4)"
+    }
+
+    // POSS n.type: distinguish rendtype and twtype
+
+    // POSS flags like this
+    // // sigma's flags: active and hidden
+    // active: false,
+    // hidden: false,
+    // customFlags : {
+    //   // our status flags
+    //   grey: false,
+    //   neighbor: false,
+    //   // forceLabel: false,
+    // }
+  }
+}
+
+function prepareEdgesRenderingProperties(edgesDict) {
+  for (var eid in edgesDict) {
+    var e = edgesDict[eid]
+
+    e.weight = Math.round(e.weight*1000)/1000
+    // e.size = e.weight // REFA s/weight/size/ ?
+
+    var rgbStr = sigmaTools.edgeRGB(e.source, e.target)
+
+    e.color = "rgba("+rgbStr+","+TW.edgeDefaultOpacity+")"
+    e.customAttrs = {
+      grey: false,
+      true_color : e.color,
+      rgb : rgbStr
+    }
+  }
+}
+
+
 // use case: slider, changeLevel re-add nodes
 function add1Elem(id) {
     id = ""+id;
@@ -663,55 +718,47 @@ function add1Elem(id) {
 
         if(TW.Nodes[id]) {
             var n = TW.Nodes[id]
-            var anode = {}
-            anode.id = n.id;
-            anode.label = n.label;
-            anode.size = n.size;
-            anode.x = n.x;
-            anode.y = n.y;
-            anode.hidden= n.lock ;
-            anode.type = n.type;   // TODO distinguish rendtype and twtype
-            anode.color = n.color;
-            if( n.shape ) n.shape = n.shape;
-            anode.customAttrs = {
-              grey: false,
-              true_color : n.color,
-              defgrey_color : "rgba("+hex2rga(n.color)+",.4)"
-            }
+            // var anode = {}
+            // anode.id = n.id;
+            // anode.label = n.label;
+            // anode.size = n.size;
+            // anode.x = n.x;
+            // anode.y = n.y;
+            // anode.hidden= n.lock ;
+            // anode.type = n.type;
+            // anode.color = n.color;
+            // if( n.shape ) n.shape = n.shape;
+            // anode.customAttrs = n.customAttrs
 
-            if(Number(anode.id)==287) console.log("coordinates of node 287: ( "+anode.x+" , "+anode.y+" ) ")
+            // if(Number(anode.id)==287) console.log("coordinates of node 287: ( "+anode.x+" , "+anode.y+" ) ")
 
-            if(!TW.Nodes[id].lock) {
-                updateSearchLabels(id,TW.Nodes[id].label,TW.Nodes[id].type);
+            if(!n.lock) {
+                updateSearchLabels(id,n.label,n.type);
                 nodeslength++;
             }
-            TW.partialGraph.graph.addNode(anode);
+            // TW.partialGraph.graph.addNode(anode);
+            TW.partialGraph.graph.addNode(n);
             return;
         }
     } else { // It's an edge!
         if(!isUndef(TW.partialGraph.graph.edges(id))) return;
         var e  = TW.Edges[id]
         if(e && !e.lock){
-            var computedColorInfo = sigmaTools.edgeColor(e.source, e.target, TW.Nodes)
-            // var present = TW.partialGraph.states.slice(-1)[0];
-            var anedge = {
-                id:         id,
-                source: e.source,
-                target: e.target,
-                lock : false,
-                hidden: false,
-                label:  e.label,
-                type:   e.type,
-                // categ:  e.categ,
-                weight: e.weight,
-                customAttrs : {
-                  grey: 0,
-                  true_color : computedColorInfo.res,
-                  rgb : computedColorInfo.rgb_array
-                }
-            };
+            // var anedge = {
+            //     id:         id,
+            //     source: e.source,
+            //     target: e.target,
+            //     lock : false,
+            //     hidden: false,
+            //     label:  e.label,
+            //     type:   e.type,
+            //     // categ:  e.categ,
+            //     weight: e.weight,
+            //     customAttrs : e.customAttrs
+            // };
 
-            TW.partialGraph.graph.addEdge(anedge);
+            // TW.partialGraph.graph.addEdge(anedge);
+            TW.partialGraph.graph.addEdge(e);
             return;
         }
     }
