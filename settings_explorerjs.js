@@ -92,7 +92,7 @@ var desirableScholarSize=6; //Remember that all scholars have the same size!
  *  - "off": button doesn't exist, fa2 stopped forever
  **/ var fa2enabled=false;//"off";
 var stopcriteria = false;
-var fa2milliseconds=5000;  // for initial auto-run if fa2enabled and any
+var fa2milliseconds=7000;  // for initial auto-run if fa2enabled and any
                            // subsequent auto-runs if graph modified
 
 // deprecated ?
@@ -108,7 +108,7 @@ TW.nodesGreyBorderColor = "rgba(100, 100, 100, 0.5)";
 TW.selectedColor = "node"  // "node" for a background like the node's color,
                               // "default" for note-like yellow
 
-TW.overSampling = true     // costly hi-def rendering (true => pixelRatio x 2)
+TW.overSampling = false     // costly hi-def rendering (true => pixelRatio x 2)
 
 // ============ < / DEVELOPER OPTIONS > ============
 
@@ -118,7 +118,7 @@ TW.overSampling = true     // costly hi-def rendering (true => pixelRatio x 2)
 var sigmaJsDrawingProperties = {
     defaultLabelColor: 'black',
     defaultLabelSize: 30, // in fact usually overridden by node data...
-    labelSizeRatio: 2,   // ...but this ratio allows truly adjusting the sizes
+    labelSizeRatio: 1.5,   // ...but this ratio allows truly adjusting the sizes
 
     labelThreshold: 5,
     defaultEdgeType: 'curve',  // 'curve' or 'line'
@@ -140,8 +140,8 @@ var sigmaJsDrawingProperties = {
     // twNodeRendBorderColor: "#eee",
 
     // font: "Crete Round",
-    // font: "Sahitya",
-    // fontStyle: "bold",
+    font: "Ubuntu Condensed",
+    fontStyle: "bold",
 };
 var sigmaJsGraphProperties = {
     minEdgeSize: 2,

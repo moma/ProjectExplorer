@@ -8,6 +8,7 @@ function newPopup(url) {
 }
 
 
+// = = = = = = = = = = = [ Clusters Plugin ] = = = = = = = = = = = //
 // Execution:    ChangeGraphAppearanceByAtt( true )
 // It scans the existing node-attributes and t keeps only those which are Numeric.
 //  then, add the button in the html with the sigmaUtils.clustersBy(x) listener.
@@ -250,6 +251,7 @@ function set_ClustersLegend ( daclass ) {
     $("#legend_for_clusters").html( LegendDiv )
 }
 
+// = = = = = = = = = = = [ / Clusters Plugin ] = = = = = = = = = = = //
 
 //For CNRS
 function getTopPapers(type){
@@ -414,70 +416,65 @@ function draw1Circle(ctx , x , y , color) {
 // new sigma.js: could be replaced by default _moveHandler with bindings ?
 //   => atm rewrote entire function with new values
 function circleTrackMouse(e) {
-    if(!shift_key) {
-        // $.doTimeout(300,function (){
-            // new sigma.js 2D mouse context
-            var ctx = TW.partialGraph.renderers[0].contexts.mouse;
-            ctx.globalCompositeOperation = "source-over";
+    // new sigma.js 2D mouse context
+    var ctx = TW.partialGraph.renderers[0].contexts.mouse;
+    ctx.globalCompositeOperation = "source-over";
 
-            // clear zone each time to prevent repeated frame artifacts
-            ctx.clearRect(0, 0,
-                          TW.partialGraph.renderers[0].container.offsetWidth,
-                          TW.partialGraph.renderers[0].container.offsetHeight);
+    // clear zone each time to prevent repeated frame artifacts
+    ctx.clearRect(0, 0,
+                  TW.partialGraph.renderers[0].container.offsetWidth,
+                  TW.partialGraph.renderers[0].container.offsetHeight);
 
-            // classic mousemove event or other similar non-sigma events
-            x = sigma.utils.getX(e);
-            y = sigma.utils.getY(e);
+    // classic mousemove event or other similar non-sigma events
+    x = sigma.utils.getX(e);
+    y = sigma.utils.getY(e);
 
-            // console.log("trackMouse mod: x", x, "y", y)
+    // console.log("trackMouse mod: x", x, "y", y)
 
-            ctx.strokeStyle = '#000';
-            ctx.lineWidth = 1;
-            ctx.fillStyle = "#71C3FF";
-            ctx.globalAlpha = 0.5;
-            ctx.beginPath();
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 1;
+    ctx.fillStyle = "#71C3FF";
+    ctx.globalAlpha = 0.5;
+    ctx.beginPath();
 
-            // // labels appear on circle hover : OFF
+      // // labels appear on circle hover : OFF
 
-            // convert (TODO CHECK IN THIS CONTEXT)
-            // var camCoords = TW.cam.cameraPosition(x,y)
-            //
-            // var exactNodeset = circleGetAreaNodes(
-            //   camCoords.x,
-            //   camCoords.y
-            // )
-            // // using settings_explorerjs.showLabelsIfZoom as cam.ratio threshold
-            // if(TW.partialGraph.camera.ratio < showLabelsIfZoom){
-            //   for (var k of exactNodeset) {
-            //     // if (! exactNodeset[k].hidden) {
-            //       exactNodeset[k].forceLabel=true;
-            //     // }
-            //   }
-            // }
-            // else {
-            //   for(var k in exactNodeset){
-            //     n = exactNodeset[k]
-            //     n.forceLabel=false;
-            //
-            //     // ?deprecated?
-            //     if(typeof(n.neighbour)!=="undefined") {
-            //         if(!n.neighbour) n.forceLabel=false;
-            //         else n.forceLabel=true;
-            //     } else n.forceLabel=false;
-            //   }
-            //   if(TW.partialGraph.forceatlas2 && TW.partialGraph.forceatlas2.count<=1) {
-            //     TW.partialGraph.render()
-            //   }
-            // }
+      // convert (TODO CHECK IN THIS CONTEXT)
+      // var camCoords = TW.cam.cameraPosition(x,y)
+      //
+      // var exactNodeset = circleGetAreaNodes(
+      //   camCoords.x,
+      //   camCoords.y
+      // )
+      // // using settings_explorerjs.showLabelsIfZoom as cam.ratio threshold
+      // if(TW.partialGraph.camera.ratio < showLabelsIfZoom){
+      //   for (var k of exactNodeset) {
+      //     // if (! exactNodeset[k].hidden) {
+      //       exactNodeset[k].forceLabel=true;
+      //     // }
+      //   }
+      // }
+      // else {
+      //   for(var k in exactNodeset){
+      //     n = exactNodeset[k]
+      //     n.forceLabel=false;
+      //
+      //     // ?deprecated?
+      //     if(typeof(n.neighbour)!=="undefined") {
+      //         if(!n.neighbour) n.forceLabel=false;
+      //         else n.forceLabel=true;
+      //     } else n.forceLabel=false;
+      //   }
+      //   if(TW.partialGraph.forceatlas2 && TW.partialGraph.forceatlas2.count<=1) {
+      //     TW.partialGraph.render()
+      //   }
+      // }
 
-            ctx.arc(x, y, cursor_size, 0, Math.PI * 2, true);
-            //ctx.arc(TW.partialGraph._core.width/2, TW.partialGraph._core.height/2, 4, 0, 2 * Math.PI, true);/*todel*/
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-            ctx.globalAlpha = 1
-        // });
-    }
+  ctx.arc(x, y, cursor_size, 0, Math.PI * 2, true);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.globalAlpha = 1
 }
 
 
