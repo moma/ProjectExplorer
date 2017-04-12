@@ -323,7 +323,6 @@ function SelectionEngine() {
 // TODO TW.SelInst
 var SelInst
 
-
 TinaWebJS = function ( sigmacanvas ) {
     this.sigmacanvas = sigmacanvas;
 
@@ -870,9 +869,7 @@ TinaWebJS = function ( sigmacanvas ) {
         // });
 
         //Cursor Size slider
-        // + reindexation when size is settled (=> updates the quadtree)
-        // var reindexTimeout = null
-        $("#unranged-value").freshslider({
+        var cursorSlider = $("#unranged-value").freshslider({
             step: 1,
             min:cursor_size_min,
             max:cursor_size_max,
@@ -881,6 +878,11 @@ TinaWebJS = function ( sigmacanvas ) {
                 // console.log("en cursorsize: "+value);
                 cursor_size=value;
             }
+        });
+
+        // double click on cursor selector slider => set it to 0
+        $("#areacircle-size").dblclick(function(){
+            cursorSlider.setValue(0)
         });
 
         // general listener: shift key in the window <=> add to selection
