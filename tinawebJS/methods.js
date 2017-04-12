@@ -92,7 +92,13 @@ function highlightSelectedNodes(flag){
 }
 
 function alertCheckBox(eventCheck){
-    if(!isUndef(eventCheck.checked)) checkBox=eventCheck.checked;
+    // NB: we use 2 booleans to adapt to SHIFT checking
+    //      - var checkBox  ---------> has the real box state
+    //      - var manuallyChecked  --> remembers if it was changed here
+    if(!isUndef(eventCheck.checked)) {
+        checkBox=eventCheck.checked;
+        manuallyChecked = eventCheck.checked
+    }
 }
 
 // States:

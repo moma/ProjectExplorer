@@ -883,6 +883,15 @@ TinaWebJS = function ( sigmacanvas ) {
             }
         });
 
+        // general listener: shift key in the window <=> add to selection
+        $(document).on('keyup keydown', function(e){
+          // changes the global boolean ("add node to selection" status) if keydown and SHIFT
+          checkBox = manuallyChecked || e.shiftKey
+
+          // show it in the real checkbox too
+          $('#checkboxdiv').prop("checked", manuallyChecked || e.shiftKey)
+        } );
+
         // costly entire refresh (~400ms) only after stopped resizing for 3s
         // NB: rescale middleware already reacted and, except for large win size changes, it handles the resize fine
         //     (so this fragment is only to accomodate the large changes)
