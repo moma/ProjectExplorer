@@ -842,28 +842,12 @@ function saveGEXF(nodes,edges,atts){
 }
 
 function saveGraphIMG(){
-
-        var strDownloadMime = "image/octet-stream"
-
-        var nodesDiv = TW.partialGraph._core.domElements.nodes;
-        var nodesCtx = nodesDiv.getContext("2d");
-
-        var edgesDiv = TW.partialGraph._core.domElements.edges;
-        var edgesCtx = edgesDiv.getContext("2d");
-
-
-        var hoverDiv = TW.partialGraph._core.domElements.hover;
-        var hoverCtx = hoverDiv.getContext("2d");
-
-        var labelsDiv = TW.partialGraph._core.domElements.labels;
-        var labelsCtx = labelsDiv.getContext("2d");
-
-        nodesCtx.drawImage(hoverDiv,0,0);
-        nodesCtx.drawImage(labelsDiv,0,0);
-        edgesCtx.drawImage(nodesDiv,0,0);
-
-        var strData = edgesDiv.toDataURL("image/png");
-        document.location.href = strData.replace("image/png", strDownloadMime)
+    TW.rend.snapshot({
+      format:'png',
+      filename:'tinawebjs-graph.png',
+      background:'white',
+      download:'true'
+    });
 }
 
 
