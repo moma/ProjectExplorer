@@ -114,6 +114,10 @@ function RunLouvain() {
 function SomeEffect( ClusterCode ) {
     console.log( ClusterCode )
 
+    // ex: ISItermsriskV2_140 & ISItermsriskV2_140||clust_default||7
+    //       vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv          vvvvv      v
+    //                     type                      Cluster key  clstID
+
     var raw = ClusterCode.split("||")
     var Type=raw[0], Cluster=raw[1], clstID=Number(raw[2]);
 
@@ -129,22 +133,27 @@ function SomeEffect( ClusterCode ) {
     var edges_2_colour = {};
 
     var nodesV = getVisibleNodes()
-    for(var i in nodesV) {
-        var n = nodesV[i]
-        n.forceLabel = false;
-        var node = TW.Nodes[n.id]
-        if ( node.type==Type && !isUndef(node.attributes[Cluster]) && node.attributes[Cluster]==clstID ) {
-            // console.log( n.id + " | " + Cluster + " : " + node.attributes[Cluster] )
-            nodes_2_colour[n.id] = n.degree;
-        }
-    }
 
+    for(var j=0;j<TW.nNodes;j++) {
+      let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
+      if (n && !n.hidden) {
+        n.customAttrs.forceLabel = false
+
+        // we look also at the original gexf node to get access to gexf attributes like cluster
+        var gNode = TW.Nodes[n.id]
+        if (gNode.type = Type && !isUndef(gNode.attributes[Cluster]) && gNode.attributes[Cluster]==clstID) {
+          // console.log( n.id + " | " + Cluster + " : " + node.attributes[Cluster] )
+          // nodes_2_colour[n.id] = n.degree;
+          nodes_2_colour[n.id] = 1;
+        }
+      }
+    }
 
     for(var s in nodes_2_colour) {
         if(TW.Relations[str_type_t0] && TW.Relations[str_type_t0][s] ) {
             neigh = TW.Relations[str_type_t0][s]
             if(neigh) {
-                for(var j in neigh) {
+                for(j in neigh) {
                     t = neigh[j]
                     if( !isUndef(nodes_2_colour[t]) ) {
                         edges_2_colour[s+";"+t]=true;
@@ -156,25 +165,26 @@ function SomeEffect( ClusterCode ) {
     }
 
 
-    for(var i in nodes_2_colour) {
-        n = TW.partialGraph._core.graph.nodesIndex[i]
+    for(var nid in nodes_2_colour) {
+        n = TW.partialGraph.graph.nodes(nid)
         if(n) {
-            n.color = n.customAttrs['true_color'];
-            n.customAttrs['grey'] = 0;
+            // new sigma js: we change only flags, rendering will adapt color accordingly
+            n.customAttrs['grey'] = false;
+
+            // highlight (like neighbors but with no selection)
+            n.customAttrs['highlight'] = true;
         }
     }
 
 
-    for(var i in edges_2_colour) {
-        an_edge = TW.partialGraph._core.graph.edgesIndex[i]
+    for(var eid in edges_2_colour) {
+        an_edge = TW.partialGraph.graph.edges(eid)
         if(!isUndef(an_edge) && !an_edge.hidden){
-            // console.log(an_edge)
-            an_edge.color = an_edge.customAttrs['true_color'];
+            // new sigma js: we change only flags, rendering will adapt color accordingly
             an_edge.customAttrs['grey'] = 0;
+            an_edge.customAttrs['activeEdge'] = 1;
         }
     }
-
-
 
 
 
@@ -182,17 +192,19 @@ function SomeEffect( ClusterCode ) {
         return b-a
     });
 
-    for(var n in nodes_2_label) {
-        if(n==4)
+    // force 4 first labels
+    for(var j in nodes_2_label) {
+        if(j==4)
             break
-        var ID = nodes_2_label[n].key
-        TW.partialGraph._core.graph.nodesIndex[ID].forceLabel = true;
+        var ID = nodes_2_label[j].key
+        TW.partialGraph.graph.nodes(ID).customAttrs.forceLabel = true;
     }
 
+    TW.selectionActive=true;
 
 
-    overNodes=true;
-    TW.partialGraph.draw()
+    // TW.partialGraph.render()
+    TW.partialGraph.refresh()
 }
 
 
@@ -450,20 +462,14 @@ function circleTrackMouse(e) {
       // if(TW.partialGraph.camera.ratio < showLabelsIfZoom){
       //   for (var k of exactNodeset) {
       //     // if (! exactNodeset[k].hidden) {
-      //       exactNodeset[k].forceLabel=true;
+      //       exactNodeset[k].customAttrs.forceLabel=true;
       //     // }
       //   }
       // }
       // else {
       //   for(var k in exactNodeset){
       //     n = exactNodeset[k]
-      //     n.forceLabel=false;
-      //
-      //     // ?deprecated?
-      //     if(typeof(n.neighbour)!=="undefined") {
-      //         if(!n.neighbour) n.forceLabel=false;
-      //         else n.forceLabel=true;
-      //     } else n.forceLabel=false;
+      //     n.customAttrs.forceLabel=false;
       //   }
       //   if(TW.partialGraph.forceatlas2 && TW.partialGraph.forceatlas2.count<=1) {
       //     TW.partialGraph.render()
@@ -505,12 +511,6 @@ function circleGetAreaNodes(camX0, camY0) {
 
       if( distance <= cursor_ray) {
         exactNodeset.push(n.id)
-      }
-      else {
-            // ?deprecated?
-            if(typeof(n.neighbour)!=="undefined") {
-            if(!n.neighbour) n.forceLabel=false;
-            } else n.forceLabel=false;
       }
     }
   }

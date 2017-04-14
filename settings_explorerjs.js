@@ -43,7 +43,7 @@ var TW = {}
     // flag name is div class to be removed if false
     //        *and* subdirectory to import if true
     // see also ProcessDivsFlags()
-    TW.DivsFlags["histogramModule"] = false ;
+    TW.DivsFlags["histogramModule"] = true ;
     TW.DivsFlags["crowdsourcingModule"] = true ;  // £TODO fix topPapers
 
     TW.SystemStates = {}
@@ -108,7 +108,9 @@ TW.nodesGreyBorderColor = "rgba(100, 100, 100, 0.5)";
 TW.selectedColor = "node"  // "node" for a background like the node's color,
                               // "default" for note-like yellow
 
-TW.overSampling = false     // costly hi-def rendering (true => pixelRatio x 2)
+TW.overSampling = true     // costly hi-def rendering (true => pixelRatio x 2)
+
+TW.deselectOnclickStage = false // will a click on the background remove selection ? (except when dragging)
 
 // ============ < / DEVELOPER OPTIONS > ============
 
@@ -144,7 +146,7 @@ var sigmaJsDrawingProperties = {
     fontStyle: "bold",
 };
 var sigmaJsGraphProperties = {
-    minEdgeSize: 2,
+    minEdgeSize: 1,
     maxEdgeSize: 4
 };
 var sigmaJsMouseProperties = {

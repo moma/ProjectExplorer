@@ -232,12 +232,15 @@ function SelectionEngine() {
                 if(n) {
                     n.color = n.customAttrs['true_color'];
                     n.customAttrs['grey'] = 0;
+
+                    // it's a selected node
                     if(nodes_2_colour[nid]) {
                         n.active = true;
                         // selections[nid]=1
                     }
+                    // it's a neighbor
                     else {
-                        n.customAttrs.neighbor = true;
+                        n.customAttrs.highlight = true;
                     }
                 }
             }
@@ -550,8 +553,10 @@ TinaWebJS = function ( sigmacanvas ) {
             console.log(" ############  changeLEVEL click");
 
             changeLevel();
+
+            // FIXME intention unclear
             // $("#tabs1").click()
-            ChangeGraphAppearanceByAtt(true)  // cf. extras_explorer
+            // ChangeGraphAppearanceByAtt(true)  // cf. extras_explorer
             console.log(" ############  / changeLEVEL click");
             console.log("")
         });
@@ -700,17 +705,19 @@ TinaWebJS = function ( sigmacanvas ) {
 
         // when click in the empty background
         // ==================================
-        TW.partialGraph.bind('clickStage', function(e) {
-          // console.log("clickStage event e", e)
+        if (TW.deselectOnclickStage) {
+          TW.partialGraph.bind('clickStage', function(e) {
+            // console.log("clickStage event e", e)
 
-          if (! e.data.captor.isDragging
-            && Object.keys(selections).length
-            && ! cursor_size) {
+            if (! e.data.captor.isDragging
+              && Object.keys(selections).length
+              && ! cursor_size) {
 
-            // we clear selections and all its effects
-            cancelSelection(false);
-          }
-        })
+              // we clear selections and all its effects
+              cancelSelection(false);
+            }
+          })
+        }
 
         // for all TW.cam.goTo (move/zoom) events
         //     ===============

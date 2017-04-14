@@ -38,6 +38,7 @@ function cancelSelection (fromTagCloud, settings) {
         // n.color = n.customAttrs['grey'] ? n.customAttrs['true_color'] : n.color;
         n.color = n.customAttrs['true_color'];
         n.customAttrs.grey = 0
+        n.customAttrs.forceLabel = 0
       }
     }
 
@@ -60,11 +61,11 @@ function cancelSelection (fromTagCloud, settings) {
     for(var nid in deselections){
       let n = TW.partialGraph.graph.nodes(nid)
         if( !isUndef(n) ) {
-            n.forceLabel=false;
-            n.neighbour=false;
+            n.customAttrs.forceLabel = false;
+            n.customAttrs.highlight = false;
+            n.customAttrs.grey=false
             // like old graphResetColor but now rather graphResetFlags...
             n.active=false;
-            n.grey=false
         }
     }
 
@@ -580,19 +581,24 @@ function unHide(nodeId) {
 }
 
 // edges greyish color for unselected, when we have a selection
-// case default: color is precomputed as node true_color + alpha .5
+// case default: we just change the flags
+//                - greyish color was precomputed in prepareNodesRenderingProperties
+//                  as n.customAttrs.defgrey_color
+//                - renderer will see the flags and and handle the case accordingly
 // cases when coloredBy (ex: centrality): color must be recomputed here
 function greyEverything(notDefaultColors){
 
-  for(let j=0 ; j<TW.nNodes ; j++){
+  for(var j=0 ; j<TW.nNodes ; j++){
     let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
 
-    if (n && !n.hidden && !n.customAttrs.grey) {
-      n.customAttrs['grey'] = 1
-      n.customAttrs.true_color = n.color
-
+    if (n && !n.hidden) {
       // normal case handled by node renderers
       // will see the n.customAttrs.grey flag => use n.customAttrs.defgrey_color
+      n.customAttrs.grey=1
+
+      n.active = false
+      n.customAttrs.forceLabel = false;
+      n.customAttrs.highlight = false;
 
       // special case after a coloredBy or clustersBy
       if (notDefaultColors)
@@ -601,11 +607,14 @@ function greyEverything(notDefaultColors){
   }
 
   if (TW.partialGraph.settings('drawEdges')) {
-    for(let i=0;i<TW.nEdges;i++){
+    for(var i=0;i<TW.nEdges;i++){
       let e = TW.partialGraph.graph.edges(TW.edgeIds[i])
       if (e && !e.hidden && !e.customAttrs.grey) {
         e.customAttrs.grey = 1
-        e.customAttrs.true_color = e.color
+        e.customAttrs.activeEdge = 0
+
+        // new specification: coloredBy does not affect edges
+        // (ie no special case for notDefaultColors)
       }
     }
   }
@@ -672,9 +681,11 @@ function prepareNodesRenderingProperties(nodesDict) {
     // and quite enough in precision !!
     n.size = Math.round(n.size*1000)/1000
 
-    // new setup (TODO rm the old at TinaWebJS nodes_2_colour)
+    // new initial setup of properties
+    n.active = false
     n.customAttrs = {
       grey: false,
+      highlight: false,
       true_color : n.color,
       defgrey_color : "rgba("+hex2rga(n.color)+",.4)"
     }
@@ -706,6 +717,7 @@ function prepareEdgesRenderingProperties(edgesDict) {
     e.color = "rgba("+rgbStr+","+TW.edgeDefaultOpacity+")"
     e.customAttrs = {
       grey: false,
+      activeEdge : false,
       true_color : e.color,
       rgb : rgbStr
     }
@@ -722,6 +734,10 @@ function add1Elem(id) {
 
         if(TW.Nodes[id]) {
             var n = TW.Nodes[id]
+
+            // WE AVOIDED A COPY HERE BECAUSE properties are already complete
+            // ... however, TODO check if we shouldn't remove the n.attributes Obj
+
             // var anode = {}
             // anode.id = n.id;
             // anode.label = n.label;

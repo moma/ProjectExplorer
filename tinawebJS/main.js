@@ -69,7 +69,7 @@ function getGexfPath(v){
 
 function jsActionOnGexfSelector(gexfBasename , db_json){
     db_json = (db_json)?"&mode=db.json":""
-    gexfLegend = gexfBasename+".gexf"
+    let gexfLegend = gexfBasename+".gexf"
     if(getGexfPath[gexfLegend])
         window.location=window.location.origin+window.location.pathname+"?file="+encodeURIComponent(getGexfPath(gexfLegend))+db_json;
     else
@@ -170,10 +170,14 @@ if(RES["OK"]) {
 
     console.log("parsing the data")
     var start = new ParseCustom(  fileparam , the_data );
-    categories = start.scanFile(); //user should choose the order of categories
+    var categories = start.scanFile(); //user should choose the order of categories
     // console.log("Categories: ")
     // console.log(categories)
 
+    if (! categories) {
+      console.warn ('ParseCustom scanFile found no categories!!')
+      categories = []
+    }
     var possibleStates = makeSystemStates( categories )
     var initialState = buildInitialState( categories ) //[true,false]//
 

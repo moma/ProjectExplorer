@@ -90,9 +90,9 @@ SigmaUtils = function () {
       var fontSize,
           prefix = settings('prefix') || '',
           size = node[prefix + 'size'],
-          activeFlag = node['active'] || node['forceLabel']
+          activeFlag = node['active'] || node.customAttrs['forceLabel']
           // NB active is used in all TW selections
-          //    forceLabel is seldom used
+          //    forceLabel is used in cluster highlighting
 
       let X = node[prefix + 'x']
       let Y = node[prefix + 'y']
@@ -114,11 +114,7 @@ SigmaUtils = function () {
 
         // Label background (aligned on hover equivalent):
         var x,y,w,h,e,
-        fontStyle = settings('hoverFontStyle') || settings('fontStyle'), // for label background
-
-        activeFlag = node['active'] || node['forceLabel']
-        // NB active is used in all TW selections
-        //    forceLabel is seldom used
+        fontStyle = settings('hoverFontStyle') || settings('fontStyle') // for label background
 
         context.font = (fontStyle ? fontStyle + ' ' : '') +
           fontSize + 'px ' + (settings('hoverFont') || settings('font'));
@@ -201,13 +197,14 @@ SigmaUtils = function () {
       //debug
       // console.warn("rendering edge", edge)
 
-      var rgbStr = edge.customAttrs.rgb
-      var defSize = edge[prefix + 'size'] || 1
+      var defSize = edge[prefix + 'size'] || settings("minEdgeSize") || 1 ;
       if (edge.customAttrs.activeEdge) {
-        size = defSize * 1.5
-        // color with less opacity
+        size = defSize * 2
+        // color with no opacity
         // cf. sigmaTools.edgeRGB
-        color = 'rgba('+rgbStr+',.7)'
+        color = 'rgb('+edge.customAttrs.rgb+')'
+        // console.log("drawing activeEdge with size", size)
+        edge.customAttrs.activeEdge = false
       }
       else if (edge.customAttrs.grey) {
         color = TW.edgeGreyColor
@@ -307,8 +304,8 @@ SigmaUtils = function () {
             borderColor = TW.nodesGreyBorderColor
             // cf settings_explorerjs, defgrey_color and greyEverything()
           }
-          // neighbor nodes should be more visible
-          else if(node.customAttrs.neighbor) {
+          // neighbor nodes <=> (highlight flag AND selectionActive)
+          else if(node.customAttrs.highlight) {
             // borderColor = "rgba(220, 220, 220, 0.7)"
             nodeSize *= 1.4
             borderSize *= 1.4
@@ -317,6 +314,12 @@ SigmaUtils = function () {
             borderColor = null
             // the selected nodes: fill not important because label+background overlay
           }
+        }
+        // highlight AND (NOT selectionActive) => highlight just this one time
+        else if (node.customAttrs.highlight) {
+          nodeSize *= 1.4
+          borderSize *= 1.4
+          node.customAttrs.highlight = false
         }
 
         // actual drawing
@@ -491,20 +494,20 @@ SigmaUtils = function () {
 //         n = getVisibleNodes();
 //         for(i=0;i<n.length;i++) {
 //             if(n[i].hidden==false){
-//                 if(n[i].inDegree==minIn && n[i].forceLabel==false) {
-//                     n[i].forceLabel=true;
+//                 if(n[i].inDegree==minIn && n[i].customAttrs.forceLabel==false) {
+//                     n[i].customAttrs.forceLabel=true;
 //                     counter++;
 //                 }
-//                 if(n[i].inDegree==maxIn && n[i].forceLabel==false) {
-//                     n[i].forceLabel=true;
+//                 if(n[i].inDegree==maxIn && n[i].customAttrs.forceLabel==false) {
+//                     n[i].customAttrs.forceLabel=true;
 //                     counter++;
 //                 }
-//                 if(n[i].outDegree==minOut && n[i].forceLabel==false) {
-//                     n[i].forceLabel=true;
+//                 if(n[i].outDegree==minOut && n[i].customAttrs.forceLabel==false) {
+//                     n[i].customAttrs.forceLabel=true;
 //                     counter++;
 //                 }
-//                 if(n[i].outDegree==maxOut && n[i].forceLabel==false) {
-//                     n[i].forceLabel=true;
+//                 if(n[i].outDegree==maxOut && n[i].customAttrs.forceLabel==false) {
+//                     n[i].customAttrs.forceLabel=true;
 //                     counter++;
 //                 }
 //                 if(counter==N) break;
