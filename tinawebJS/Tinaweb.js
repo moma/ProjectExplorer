@@ -603,14 +603,14 @@ TinaWebJS = function ( sigmacanvas ) {
         $("#tips").html(getTips());
 
 
+
         // a bit costly, TODO make conditional or deprecated
         // showMeSomeLabels(6);
 
         // updateDownNodeEvent(false);
 
-        $("#saveAs").click(function() {
-            $('#savemodal').modal('show');
-        });
+
+        // #saveAs => toggle #savemodal initialized in html + bootstrap-native
 
         this.SearchListeners();
 

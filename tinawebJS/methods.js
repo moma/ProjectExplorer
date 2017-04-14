@@ -781,9 +781,9 @@ function pushFilterValue(filtername,arg){
 
 function saveGraph() {
 
-    size = getByID("check_size").checked
-    color = getByID("check_color").checked
-    atts = {"size":size,"color":color}
+    let size = getByID("check_size").checked
+    let color = getByID("check_color").checked
+    let atts = {"size":size,"color":color}
 
     if(getByID("fullgraph").checked) {
         saveGEXF ( getnodes() , getedges() , atts);
@@ -797,7 +797,7 @@ function saveGraph() {
 }
 
 function saveGEXF(nodes,edges,atts){
-    gexf = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    let gexf = '<?xml version="1.0" encoding="UTF-8"?>\n';
     gexf += '<gexf xmlns="http://www.gexf.net/1.1draft" xmlns:viz="http://www.gephi.org/gexf/viz" version="1.1">\n';
     gexf += '<graph defaultedgetype="undirected" type="static">\n';
     gexf += '<attributes class="node" type="static">\n';
@@ -829,7 +829,7 @@ function saveGEXF(nodes,edges,atts){
     }
     gexf += "\n</nodes>\n";
     gexf += "<edges>\n";
-    cont = 1;
+    let cont = 1;
     for(var e in edges){
         gexf += '<edge id="'+cont+'" source="'+edges[e].source.id+'"  target="'+edges[e].target.id+'" weight="'+edges[e].weight+'">\n';
         gexf += '<attvalues> <attvalue for="6" value="'+edges[e].label+'"/></attvalues>';
@@ -837,8 +837,8 @@ function saveGEXF(nodes,edges,atts){
         cont++;
     }
     gexf += "\n</edges>\n</graph>\n</gexf>";
-    uriContent = "data:application/octet-stream," + encodeURIComponent(gexf);
-    newWindow=window.open(uriContent, 'neuesDokument');
+    let uriContent = "data:application/octet-stream," + encodeURIComponent(gexf);
+    let newWindow=window.open(uriContent, 'neuesDokument');
 }
 
 function saveGraphIMG(){
