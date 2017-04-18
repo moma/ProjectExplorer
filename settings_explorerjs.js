@@ -143,8 +143,8 @@ var sigmaJsDrawingProperties = {
     twNodeRendBorderColor: "#222",
     // twNodeRendBorderColor: "#eee",
 
-    // font: "Crete Round",
-    font: "Ubuntu Condensed",
+    font: "Crete Round",
+    // font: "Ubuntu Condensed",
     fontStyle: "bold",
 };
 var sigmaJsGraphProperties = {

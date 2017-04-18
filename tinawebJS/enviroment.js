@@ -503,10 +503,6 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
     var steps = filterparams["steps"]
 
-    // TODO polito filterparams comes back like this {steps:0, finalarray:[]}
-    console.warn("overriding steps")
-    steps = 2
-
     var finalarray = filterparams["finalarray"]
     // if(steps<3) {
     //     $(sliderDivID).freshslider({

@@ -181,8 +181,8 @@ if(RES["OK"]) {
     console.log("parsing the data")
     var start = new ParseCustom(  fileparam , the_data );
     var categories = start.scanFile(); //user should choose the order of categories
-    console.error("Categories: ")
-    console.log(categories)
+    // console.log("Categories: ")
+    // console.log(categories)
 
     if (! categories) {
       console.warn ('ParseCustom scanFile found no categories!!')

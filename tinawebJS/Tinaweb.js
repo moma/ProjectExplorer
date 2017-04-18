@@ -845,7 +845,7 @@ TinaWebJS = function ( sigmacanvas ) {
               labelSizeTimeout = setTimeout(function(){
                 if (TW.partialGraph.settings('labelSizeRatio') != value) {
                   var adaptedLabelThreshold = (5 - value) + 1
-                  console.log("value", value, "thres", adaptedLabelThreshold)
+                  // console.log("value", value, "thres", adaptedLabelThreshold)
 
                   TW.partialGraph.settings('labelSizeRatio', value)
                   TW.partialGraph.settings('labelThreshold', adaptedLabelThreshold)
@@ -920,6 +920,7 @@ TinaWebJS = function ( sigmacanvas ) {
           winResizeTimeout = setTimeout(function() {
             console.log('did refresh')
             TW.partialGraph.refresh()
+            theHtml.classList.remove('waiting');
           }, 3000)
         }, true)
 

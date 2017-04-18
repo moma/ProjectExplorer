@@ -9,6 +9,10 @@
 			"ProgrammeDesCandidats.gexf": {
 				"social": {},
 				"semantic": {}
+			},
+			"ProgrammeDesCandidats.sans_outliers.gexf": {
+				"social": {},
+				"semantic": {}
 			}
 		}
 	},

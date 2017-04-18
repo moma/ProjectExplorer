@@ -409,7 +409,7 @@ function dictfyGexf( gexf , categories ){
         }
     }
 
-    console.warn ('parseCustom output nodes', nodes)
+    // console.warn ('parseCustom output nodes', nodes)
 
     // -------------- debug: for local stats ----------------
     // allSizes.sort();
@@ -492,7 +492,7 @@ function dictfyGexf( gexf , categories ){
             // console.debug('>>> tr: read edge', edge)
 
             if ( nodes[source] && nodes[target] ) {
-                console.debug('>>> tr: new edge has matching source and target nodes')
+                // console.debug('>>> tr: new edge has matching source and target nodes')
 
                 idS=nodes[source].type;
                 idT=nodes[target].type;

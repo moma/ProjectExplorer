@@ -8,8 +8,8 @@ SigmaUtils = function () {
 
         console.log("Filling the graaaaph:")
         console.log("FillGraph catDict",catDict)
-        console.log("FillGraph nodes",nodes)
-        console.log("FillGraph edges",edges)
+        // console.log("FillGraph nodes",nodes)
+        // console.log("FillGraph edges",edges)
         for(var i in nodes) {
             var n = nodes[i];
             // console.debug('tr >>> fgr node', n)
