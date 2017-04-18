@@ -3,6 +3,18 @@
 // always useful
 var theHtml = document.getElementsByTagName('html')[0]
 
+// overriding pixelRatio is possible if we need very high definition
+// var realRatio = sigma.utils.getPixelRatio
+// if (TW.overSampling) {
+//   sigma.utils.getPixelRatio = function() {
+//     return 2 * realRatio()
+//   }
+// }
+
+TW.anynodegoes = true
+// TW.anynodegoes = true
+
+
 
 //============================ < NEW BUTTONS > =============================//
 
@@ -449,6 +461,11 @@ function changeLevel() {
 // NB new sigma js: dropEdge is quite slow so we add a waiting cursor
 
 function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
+  console.log("EdgeWeightFilter")
+  console.log("sliderDivID", sliderDivID)
+  console.log("type_attrb", type_attrb)
+  console.log("type", type)
+  console.log("criteria", criteria)
   // if ($(sliderDivID).html()!="") {
 	// 	console.log("\t\t\t\t\t\t[[ algorithm not applied "+sliderDivID+" ]]")
 	// 	return;
@@ -480,10 +497,16 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
     var filterparams = AlgorithmForSliders ( TW.Edges , type_attrb , type , criteria) //OK
 
     // TODO make an index
-    // console.log("EdgeWeightFilter: "+type)
-    // console.log(filterparams)
+    console.log("EdgeWeightFilter: "+type)
+    console.log(filterparams)
+
 
     var steps = filterparams["steps"]
+
+    // TODO polito filterparams comes back like this {steps:0, finalarray:[]}
+    console.warn("overriding steps")
+    steps = 2
+
     var finalarray = filterparams["finalarray"]
     // if(steps<3) {
     //     $(sliderDivID).freshslider({

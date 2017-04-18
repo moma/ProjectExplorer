@@ -9,8 +9,8 @@ ParseCustom = function ( format , data ) {
     this.nbCats = 0;
 
     // input = GEXFstring
-    this.getGEXFCategories = function(gexf) {
-        this.data = $.parseXML(gexf)
+    this.getGEXFCategories = function(aGexfFile) {
+        this.data = $.parseXML(aGexfFile) // <===================== (XML parse)
         return scanGexf( this.data );
     }// output = [ "cat1" , "cat2" , ...]
 
@@ -86,26 +86,125 @@ ParseCustom.prototype.makeDicts = function(categories) {
 };
 
 
+
+
+function gexfCheckAttributesMap (someXMLContent) {
+
+    // excerpt from targeted XML:
+    // <graph defaultedgetype="undirected" mode="static">
+    // |  <attributes class="node" mode="static">
+    // |    <attribute id="0" title="category" type="string"></attribute>
+    // |    <attribute id="1" title="country" type="float"></attribute>
+    // |  </attributes>
+    //   (...)
+
+
+      // THIS SEGMENT USED TO BE IN dictifyGexf
+      // Census of the conversions between attr and some attr name
+      var i, j, k;
+      var nodesAttributes = [];   // The list of attributes of the nodes of the graph that we build in json
+      var edgesAttributes = [];   // The list of attributes of the edges of the graph that we build in json
+
+      // In the gexf (that is an xml), the list of xml nodes 'attributes' (note the plural 's')
+      var attributesNodes = someXMLContent.getElementsByTagName('attributes');
+
+      for(i = 0; i<attributesNodes.length; i++){
+          var attributesNode = attributesNodes[i];  // attributesNode is each xml node 'attributes' (plural)
+          if(attributesNode.getAttribute('class') == 'node'){
+              var attributeNodes = attributesNode.getElementsByTagName('attribute');  // The list of xml nodes 'attribute' (no 's')
+              for(j = 0; j<attributeNodes.length; j++){
+                  var attributeNode = attributeNodes[j];  // Each xml node 'attribute'
+
+                  var id = attributeNode.getAttribute('id'),
+                  title = attributeNode.getAttribute('title'),
+                  type = attributeNode.getAttribute('type');
+
+                  // ex:    id   = "in-degree"   or "3"  <= can be an int to be resolved into the title
+                  // ex:   title = "in-degree"
+                  // ex:   type  = "string"
+
+                  var attribute = {
+                      id:id,
+                      title:title,
+                      type:type
+                  };
+                  nodesAttributes.push(attribute);
+
+              }
+          } else if(attributesNode.getAttribute('class') == 'edge'){
+              var attributeNodes = attributesNode.getElementsByTagName('attribute');  // The list of xml nodes 'attribute' (no 's')
+              for(j = 0; j<attributeNodes.length; j++){
+                  var attributeNode = attributeNodes[j];  // Each xml node 'attribute'
+
+                  var id = attributeNode.getAttribute('id'),
+                  title = attributeNode.getAttribute('title'),
+                  type = attributeNode.getAttribute('type');
+
+                  var attribute = {
+                      id:id,
+                      title:title,
+                      type:type
+                  };
+                  edgesAttributes.push(attribute);
+
+              }
+          }
+      } //out: nodesAttributes Array
+
+      console.debug('>>> tr: nodesAttributes', nodesAttributes)
+      console.debug('>>> tr: edgesAttributes', edgesAttributes)
+
+      return {nAttrs: nodesAttributes, eAttrs: edgesAttributes}
+}
+
 // Level-00
-function scanGexf(gexf) {
-  console.log("ParseCustom : scanGexf")
+function scanGexf(gexfContent) {
+  console.log("ParseCustom : scanGexf ======= ")
     var categoriesDict={}, categories=[];
-    nodesNodes = gexf.getElementsByTagName('nodes');
-    for(i=0; i<nodesNodes.length; i++){
-        var nodesNode = nodesNodes[i];  // Each xml node 'nodes' (plural)
-        node = nodesNode.getElementsByTagName('node');
+
+
+    // adding gexfCheckAttributesMap call
+    // to create a map from nodes/node/@for values to declared attribute name (title)
+
+    var declaredAttrs = gexfCheckAttributesMap(gexfContent)
+
+    elsNodes = gexfContent.getElementsByTagName('nodes');
+    // console.debug('>>> tr: elsNodes', elsNodes) // <<<
+    for(i=0; i<elsNodes.length; i++){
+        var elNodes = elsNodes[i];  // Each xml node 'nodes' (plural)
+        node = elNodes.getElementsByTagName('node');
         for(j=0; j<node.length; j++){
             attvalueNodes = node[j].getElementsByTagName('attvalue');
             for(k=0; k<attvalueNodes.length; k++){
                 attvalueNode = attvalueNodes[k];
                 attr = attvalueNode.getAttribute('for');
                 val = attvalueNode.getAttribute('value');
+
+                // some attrs are gexf-local indices refering to an <attributes> declaration
+                // so if it matches declared we translate their integer in title
+                // FIXME use a dict by id in gexfCheckAttributesMap for loop rm
+                if(Number.isInteger(Number(attr))) {
+                  // mini loop inside declared node attrs (eg substitute 0 for 'centrality')
+                  for (var l=0;l<declaredAttrs.nAttrs.length;l++) {
+                    let declared = declaredAttrs.nAttrs[l]
+                    if (declared.id == attr) {
+                      attr = declared.title
+                    }
+                  }
+                }
+                // console.log('attr', attr)
+
+                // THIS WILL BECOME catDict (if ncats == 1 => monopart)
                 if (attr=="category") categoriesDict[val]=val;
             }
         }
     }
 
     for(var cat in categoriesDict)
+        // usually a just a few cats over entire node set
+        // ex: terms
+        // ex: ISItermsriskV2_140 & ISItermsriskV2_140
+        console.debug('>>> tr: cat', cat)
         categories.push(cat);
 
     var catDict = {}
@@ -138,8 +237,10 @@ function scanGexf(gexf) {
 // for {1,2}partite graphs
 function dictfyGexf( gexf , categories ){
 
-  console.log("ParseCustom gexf 2nd loop, main data extraction")
+  console.log("ParseCustom gexf 2nd loop, main data extraction, with categories", categories)
 
+
+    // var catDict = {'terms':"0"}
 
     var catDict = {}
     var catCount = {}
@@ -150,51 +251,17 @@ function dictfyGexf( gexf , categories ){
         nodes2={}, bipartiteD2N={}, bipartiteN2D={}
     }
 
-    var i, j, k;
-    var nodesAttributes = [];   // The list of attributes of the nodes of the graph that we build in json
-    var edgesAttributes = [];   // The list of attributes of the edges of the graph that we build in json
-    var attributesNodes = gexf.getElementsByTagName('attributes');  // In the gexf (that is an xml), the list of xml nodes 'attributes' (note the plural 's')
+    // --------------------8<-----------------------
+    // HERE REMOVED XML <attributes> parsing
+    //              b/c a priori useless at this point ?
+    //             (moved earlier to scanGexf)
+    //
+    // var atts = gexfCheckAttributesMap(gexf)
+    // var nodesAttributes = atts.nAttrs
+    // var edgesAttributes = atts.eAttrs
+    // --------------------8<-----------------------
 
-    for(i = 0; i<attributesNodes.length; i++){
-        var attributesNode = attributesNodes[i];  // attributesNode is each xml node 'attributes' (plural)
-        if(attributesNode.getAttribute('class') == 'node'){
-            var attributeNodes = attributesNode.getElementsByTagName('attribute');  // The list of xml nodes 'attribute' (no 's')
-            for(j = 0; j<attributeNodes.length; j++){
-                var attributeNode = attributeNodes[j];  // Each xml node 'attribute'
-
-                var id = attributeNode.getAttribute('id'),
-                title = attributeNode.getAttribute('title'),
-                type = attributeNode.getAttribute('type');
-
-                var attribute = {
-                    id:id,
-                    title:title,
-                    type:type
-                };
-                nodesAttributes.push(attribute);
-
-            }
-        } else if(attributesNode.getAttribute('class') == 'edge'){
-            var attributeNodes = attributesNode.getElementsByTagName('attribute');  // The list of xml nodes 'attribute' (no 's')
-            for(j = 0; j<attributeNodes.length; j++){
-                var attributeNode = attributeNodes[j];  // Each xml node 'attribute'
-
-                var id = attributeNode.getAttribute('id'),
-                title = attributeNode.getAttribute('title'),
-                type = attributeNode.getAttribute('type');
-
-                var attribute = {
-                    id:id,
-                    title:title,
-                    type:type
-                };
-                edgesAttributes.push(attribute);
-
-            }
-        }
-    } //out: nodesAttributes Array
-
-    var nodesNodes = gexf.getElementsByTagName('nodes') // The list of xml nodes 'nodes' (plural)
+    var elsNodes = gexf.getElementsByTagName('nodes') // The list of xml nodes 'nodes' (plural)
     labels = [];
     minNodeSize=999.00;
     maxNodeSize=0.001;
@@ -206,25 +273,30 @@ function dictfyGexf( gexf , categories ){
     // let sumSizes = 0
     // let sizeStats = {'mean':null, 'median':null, 'max':0, 'min':1000000000}
 
-    for(i=0; i<nodesNodes.length; i++) {
-        var nodesNode = nodesNodes[i];  // Each xml node 'nodes' (plural)
-        var nodeNodes = nodesNode.getElementsByTagName('node'); // The list of xml nodes 'node' (no 's')
+    // usually there is only 1 <nodes> element...
+    for(i=0; i<elsNodes.length; i++) {
+        var elNodes = elsNodes[i];  // Each xml element 'nodes' (plural)
+        var elsNode = elNodes.getElementsByTagName('node'); // The list of xml nodes 'node' (no 's')
 
-        for(j=0; j<nodeNodes.length; j++) {
+        for(j=0; j<elsNode.length; j++) {
 
-            var nodeNode = nodeNodes[j];  // Each xml node 'node' (no 's')
+            var elNode = elsNode[j];  // Each xml node 'node' (no 's')
 
-            window.NODE = nodeNode;
+            // window.NODE = elNode;
+
+            if (j == 0) {
+              console.debug('>>> tr: XML nodes/node (1 of'+elsNode.length+')', elNodes)
+            }
 
             // [ get ID ]
-            var id = nodeNode.getAttribute('id');
+            var id = elNode.getAttribute('id');
             // [ get Label ]
-            var label = nodeNode.getAttribute('label') || id;
+            var label = elNode.getAttribute('label') || id;
 
             // [ get Size ]
             var size=false;
-            sizeNodes = nodeNode.getElementsByTagName('size');
-            sizeNodes = sizeNodes.length ? sizeNodes : nodeNode.getElementsByTagName('viz:size');
+            sizeNodes = elNode.getElementsByTagName('size');
+            sizeNodes = sizeNodes.length ? sizeNodes : elNode.getElementsByTagName('viz:size');
             if(sizeNodes.length>0){
               sizeNode = sizeNodes[0];
               size = parseFloat(sizeNode.getAttribute('value'));
@@ -237,12 +309,13 @@ function dictfyGexf( gexf , categories ){
               // --------------------------------------------
 
             }// [ / get Size ]
+            // console.debug('>>> tr: node size', size)
 
             // [ get Coordinates ]
             var x = 100 - 200*Math.random();
             var y = 100 - 200*Math.random();
-            var positionNodes = nodeNode.getElementsByTagName('position');
-            positionNodes = positionNodes.length ? positionNodes : nodeNode.getElementsByTagNameNS('*','position');
+            var positionNodes = elNode.getElementsByTagName('position');
+            positionNodes = positionNodes.length ? positionNodes : elNode.getElementsByTagNameNS('*','position');
             if(positionNodes.length>0){
                 var positionNode = positionNodes[0];
                 x = parseFloat(positionNode.getAttribute('x'));
@@ -252,8 +325,8 @@ function dictfyGexf( gexf , categories ){
             y = y*-1   // aka -y
 
             // [ get Colour ]
-            var colorNodes = nodeNode.getElementsByTagName('color');
-            colorNodes = colorNodes.length ? colorNodes : nodeNode.getElementsByTagNameNS('*','color');
+            var colorNodes = elNode.getElementsByTagName('color');
+            colorNodes = colorNodes.length ? colorNodes : elNode.getElementsByTagNameNS('*','color');
             var color;
             if(colorNodes.length>0){
                 colorNode = colorNodes[0];
@@ -271,35 +344,61 @@ function dictfyGexf( gexf , categories ){
                 color:color
             });
 
+            // console.debug('>>> tr: read node', node)
+
+
             // Attribute values
             var attributes = []
-            var attvalueNodes = nodeNode.getElementsByTagName('attvalue');
+            var attvalueNodes = elNode.getElementsByTagName('attvalue');
             var atts={};
             for(k=0; k<attvalueNodes.length; k++){
                 var attvalueNode = attvalueNodes[k];
                 var attr = attvalueNode.getAttribute('for');
                 var val = attvalueNode.getAttribute('value');
+
+
+
+                // TODO use here nodesAttributes
+
+
+
+
+
+
+
+
+
+
                 if(catDict[val]) atts["category"] = val;
+
+
+
+
+
+
                 else atts[attr]=val;
                 attributes = atts;
             }
 
             // nodew=parseInt(attributes["weight"]);
             if ( attributes["category"] ) {
-                node_cat = attributes["category"];
-                node.type = node_cat;
-                if (!catCount[node_cat]) catCount[node_cat] = 0
-                catCount[node_cat]++;
-
-                // node.id = (node_cat==categories[0])? ("D:"+node.id) : ("N:"+node.id);
-                if(!node.size) console.log("node without size: "+node.id+" : "+node.label);
-
-                node.attributes = attributes;
-                nodes[node.id] = node
-
-
-                // console.log(node)
+              node_cat = attributes["category"];
             }
+            else {
+              node_cat = 0     // basic TW node type is 0 (~ terms)
+            }
+
+            node.type = node_cat;
+            if (!catCount[node_cat]) catCount[node_cat] = 0
+            catCount[node_cat]++;
+
+            // node.id = (node_cat==categories[0])? ("D:"+node.id) : ("N:"+node.id);
+            if(!node.size) console.log("node without size: "+node.id+" : "+node.label);
+
+            node.attributes = attributes;
+
+            // save record
+            nodes[node.id] = node
 
             if(parseInt(node.size) < parseInt(minNodeSize))
                 minNodeSize= node.size;
@@ -309,6 +408,8 @@ function dictfyGexf( gexf , categories ){
 
         }
     }
+
+    console.warn ('parseCustom output nodes', nodes)
 
     // -------------- debug: for local stats ----------------
     // allSizes.sort();
@@ -336,6 +437,9 @@ function dictfyGexf( gexf , categories ){
         if(attention) {
             var t_type = nodes[it].type
             var t_cnumber = nodes[it].attributes["cluster_index"]
+            if (!t_cnumber) {
+              t_cnumber = nodes[it].attributes[TW.nodeClusAtt]
+            }
             nodes[it].attributes["clust_default"] = t_cnumber;
             var t_label = (nodes[it].attributes["cluster_label"])?nodes[it].attributes["cluster_label"]:"cluster_"+nodes[it].attributes["cluster_index"]
             if(!TW.Clusters[t_type]) {
@@ -385,7 +489,10 @@ function dictfyGexf( gexf , categories ){
                 });
             }
 
+            // console.debug('>>> tr: read edge', edge)
+
             if ( nodes[source] && nodes[target] ) {
+                console.debug('>>> tr: new edge has matching source and target nodes')
 
                 idS=nodes[source].type;
                 idT=nodes[target].type;
@@ -518,12 +625,15 @@ function dictfyGexf( gexf , categories ){
         }
     }
 
+
+    // ------------------------------- resDict <<<
     resDict = {}
-    resDict.catDict = catDict;
-    resDict.catCount = catCount;
-    resDict.nodes = nodes;
+    // TODO unify catDict and catCount (dict is count.keys())
+    resDict.catDict = catDict;          // ex : {'ISIterms':0}
+    resDict.catCount = catCount;        // ex:  {'ISIterms':1877}  ie #nodes
+    resDict.nodes = nodes;              //  { nid1: {label:"...", size:"11.1", attributes:"...", color:"#aaa", etc}, nid2: ...}
     resDict.edges = edges;
-    resDict.n1 = nodes1;
+    resDict.n1 = nodes1;       // relations
     if(nodes2) resDict.n2 = nodes2;
     if(bipartiteD2N) resDict.D2N = bipartiteD2N;
     if(bipartiteN2D) resDict.N2D = bipartiteN2D;

@@ -101,7 +101,8 @@ var semanticConverged=false;
 
 
 // ============ < / DEVELOPER OPTIONS > ============
-var showLabelsIfZoom=1.0;
+TW.nodeClusAtt = "modularity_class"
+
 TW.edgeDefaultOpacity = 0.5  // opacity when true_color
 TW.edgeGreyColor = "rgba(150, 150, 150, 0.2)";
 TW.nodesGreyBorderColor = "rgba(100, 100, 100, 0.5)";
@@ -111,6 +112,7 @@ TW.selectedColor = "node"  // "node" for a background like the node's color,
 TW.overSampling = true     // costly hi-def rendering (true => pixelRatio x 2)
 
 TW.deselectOnclickStage = false // will a click on the background remove selection ? (except when dragging)
+var showLabelsIfZoom=1.0;
 
 // ============ < / DEVELOPER OPTIONS > ============
 
@@ -164,7 +166,7 @@ var twjs="tinawebJS/";
 TW.categories = {};
 TW.categoriesIndex = [];
 
-var gexf;
+var gexfFile;
 //var zoom=0;
 
 var checkBox=false;

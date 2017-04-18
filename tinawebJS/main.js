@@ -34,7 +34,7 @@ var AjaxSync = (function(TYPE, URL, DATA, CT , DT) {
     var Result = []
     TYPE = (!TYPE)?"GET":"POST"
     if(DT && (DT=="jsonp" || DT=="json")) CT="application/json";
-    // console.log(TYPE, URL, DATA, CT , DT)
+    console.log("---AjaxSync---\n", TYPE, URL, DATA, CT , DT, "\n--------------")
     $.ajax({
             type: TYPE,
             url: URL,
@@ -56,6 +56,7 @@ var AjaxSync = (function(TYPE, URL, DATA, CT , DT) {
                 Result = { "OK":true , "format":format , "data":data };
             },
             error: function(exception) {
+                console.log('now error')
                 Result = { "OK":false , "format":false , "data":exception.status };
             }
         });
@@ -93,20 +94,27 @@ if(!isUndef(getUrlParam.mode)) { // if {db|api}.json
 // RES == { OK: true, format: "json", data: Object }
 var RES = AjaxSync({ URL: file });
 
+console.log('RES', RES)
+
 if(RES["OK"]) {
 
     var fileparam;// = { db|api.json , somefile.json|gexf }
     var the_data = RES["data"];
 
-    // console.log('initial AjaxSync result RES', RES)
+    console.log('initial AjaxSync result RES', RES)
 
+    // ===================
     var the_file = "";
+    // ===================
+
     if ( !isUndef(getUrlParam.mode) && getUrlParam.mode=="db.json") {
 
         var first_file = "" , first_path = ""
         for( var path in the_data ) {
+            console.log("db.json path", path)
             first_file = the_data[path]["first"]
             first_path = path
+            console.log("db.json first_file", first_path, first_file)
             break;
         }
 
@@ -116,24 +124,23 @@ if(RES["OK"]) {
             the_file = first_path+"/"+getUrlParam.file
         }
 
-        fileparam = the_file;
-
         var files_selector = '<select onchange="jsActionOnGexfSelector(this.value , true);">'
 
         for( var path in the_data ) {
             var the_gexfs = the_data[path]["gexfs"]
             console.log("\t\tThese are the available  Gexfs:")
-            for(var gexf in the_gexfs) {
-                var gexfBasename = gexf.replace(/\.gexf$/, "") // more human-readable in the menu
-                console.log("\t\t\t"+gexf+ "   -> table:" +the_gexfs[gexf]["semantic"]["table"] )
+            console.log(the_gexfs)
+            for(var aGexf in the_gexfs) {
+                var gexfBasename = aGexf.replace(/\.gexf$/, "") // more human-readable in the menu
+                console.log("\t\t\t"+gexfBasename+ "   -> table:" +the_gexfs[aGexf]["semantic"]["table"] )
 
-                TW.field[path+"/"+gexf] = the_gexfs[gexf]["semantic"]["table"]
+                TW.field[path+"/"+aGexf] = the_gexfs[aGexf]["semantic"]["table"]
                 // ex : data/AXA/RiskV2PageRank5000.gexf:"ISItermsAxa_2015"
 
-                TW.gexfDict[path+"/"+gexf] = gexf
+                TW.gexfDict[path+"/"+aGexf] = aGexf
                 // ex : data/AXA/RiskV2PageRank1000.gexf:"RiskV2PageRank1000.gexf"
 
-                var selected = (the_file==(path+"/"+gexf))?"selected":""
+                var selected = (the_file==(path+"/"+aGexf))?"selected":""
                 files_selector += '<option '+selected+'>'+gexfBasename+'</option>'
             }
             // console.log( files_selector )
@@ -147,12 +154,15 @@ if(RES["OK"]) {
         // console.log("\n============================\n")
         // console.log(TW.field)
         // console.log(TW.gexfDict)
-        var sub_RES = AjaxSync({ URL: fileparam });
+        var sub_RES = AjaxSync({ URL: the_file });
         the_data = sub_RES["data"]
         fileparam = sub_RES["format"]
         // console.log(the_data.length)
         // console.log(fileparam)
 
+        console.warn('@the_file', sub_RES["OK"], the_file)
+
+        // why now ???
         getUrlParam.file=the_file;
         console.log(" .  .. . -. - .- . - -.")
         console.log(getUrlParam.file)
@@ -171,8 +181,8 @@ if(RES["OK"]) {
     console.log("parsing the data")
     var start = new ParseCustom(  fileparam , the_data );
     var categories = start.scanFile(); //user should choose the order of categories
-    // console.log("Categories: ")
-    // console.log(categories)
+    console.error("Categories: ")
+    console.log(categories)
 
     if (! categories) {
       console.warn ('ParseCustom scanFile found no categories!!')
@@ -181,7 +191,11 @@ if(RES["OK"]) {
     var possibleStates = makeSystemStates( categories )
     var initialState = buildInitialState( categories ) //[true,false]//
 
-    var dicts = start.makeDicts(categories);
+    // XML parsing from ParseCustom
+    var dicts = start.makeDicts(categories); // > parseGexf, dictfyGexf
+
+    console.warn("parsing result:", dicts)
+
     TW.Nodes = dicts.nodes;
     TW.Edges = dicts.edges;
     TW.nodeIds = Object.keys(dicts.nodes)  // useful for loops
@@ -195,10 +209,12 @@ if(RES["OK"]) {
 
     if (the_data.clusters) TW.Clusters = the_data.clusters
 
+    // relations already copied in TW.Relations at this point
     // TW.nodes1 = dicts.n1;//not used
+
     var catDict = dicts.catDict
-    // console.log("CategoriesDict: ")
-    // console.log(catDict)
+    console.log("CategoriesDict: ")
+    console.log(catDict)
 
     TW.categoriesIndex = categories;//to_remove
     TW.catSoc = categories[0];//to_remove
@@ -231,7 +247,40 @@ if(RES["OK"]) {
 
     // preparing the data and settings
     TW.graphData = {nodes: [], edges: []}
-    TW.graphData = sigma_utils.FillGraph(  initialState , catDict  , dicts.nodes , dicts.edges , TW.graphData );
+    TW.graphData = sigma_utils.FillGraph(  initialState , catDict  , TW.Nodes , TW.Edges , TW.graphData );
+
+
+
+        // // ----------- TEST stock parse gexf and use nodes to replace TW's ---------
+        // var gexfData = gexf.fetch('data/politoscope/ProgrammeDesCandidats.gexf')
+        //
+        // TW.graphData = sigmaTools.myGexfParserReplacement(
+        //     gexfData.nodes,
+        //     gexfData.edges
+        // )
+        // console.log ('ex in TW.graphData.nodes[0]', TW.graphData.nodes[0])
+        //
+        // // our holey id-indexed arrays
+        // TW.Nodes = {}
+        // TW.Edges = {}
+        // TW.nodeIds = []
+        // TW.edgeIds = []
+        // for (var j in TW.graphData.nodes) {
+        //   var nid = TW.graphData.nodes[j].id
+        //   TW.Nodes[nid] = TW.graphData.nodes[j]
+        //   TW.nodeIds.push(nid)
+        // }
+        // for (var i in TW.graphData.edges) {
+        //   var eid = TW.graphData.edges[i].id
+        //   TW.Edges[eid] = TW.graphData.edges[i]
+        //   TW.edgeIds.push(eid)
+        // }
+        //
+        //
+        // // -------------------------------------------------------------------------
+
+      if (TW.graphData.nodes.length == 0) console.error("empty graph")
+      if (TW.graphData.edges.length == 0) console.error("no edges in graph")
 
     // cf github.com/jacomyal/sigma.js/wiki/Settings
     var customSettings = Object.assign(
@@ -324,9 +373,16 @@ if(RES["OK"]) {
     TW.partialGraph.states[1] = TW.SystemStates;
     TW.partialGraph.states[1].categories = categories
     TW.partialGraph.states[1].categoriesDict = catDict;
+    console.log("!? initialState => states[1].type")
     TW.partialGraph.states[1].type = initialState;
     TW.partialGraph.states[1].LouvainFait = false;
     // [ / Poblating the Sigma-Graph ]
+
+
+    // ex called for new selections with args like:
+    //          (undefined, undefined, [268], undefined)
+    //             ^^^^
+    //          why type not used (monopart? deprecated?)
 
     TW.partialGraph.states[1].setState = (function( type , level , sels , oppos ) {
         var bistate=false, typestring=false;
@@ -342,7 +398,7 @@ if(RES["OK"]) {
         this.LouvainFait = false;
         console.log("")
         console.log(" % % % % % % % % % % ")
-        // console.log("type: "+thetype.map(Number));
+        console.log("setState type: ", type);
         console.log("bistate: "+bistate)
         console.log("level: "+level);
         console.log("selections: ");
@@ -476,7 +532,12 @@ if(RES["OK"]) {
         // }
     }
 
-    ChangeGraphAppearanceByAtt(true)
+    try {
+      ChangeGraphAppearanceByAtt(true)
+    }
+    catch (e) {
+      console.error(e)
+    }
 
     set_ClustersLegend ( "clust_default" )
 

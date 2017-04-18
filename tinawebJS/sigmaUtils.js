@@ -7,11 +7,14 @@ SigmaUtils = function () {
     this.FillGraph = function( initialState , catDict  , nodes, edges , graph ) {
 
         console.log("Filling the graaaaph:")
-        // console.log(catDict)
+        console.log("FillGraph catDict",catDict)
+        console.log("FillGraph nodes",nodes)
+        console.log("FillGraph edges",edges)
         for(var i in nodes) {
             var n = nodes[i];
+            // console.debug('tr >>> fgr node', n)
 
-            if(initialState[catDict[n.type]]) {
+            if(initialState[catDict[n.type]] || TW.anynodegoes) {
                 // var node = {
                 //     id : n.id,
                 //     label : n.label,
@@ -30,7 +33,7 @@ SigmaUtils = function () {
                 // no attributes to remove: I use n directly
                 graph.nodes.push(n);
 
-                if(Number(n.id)==287) console.log("node 287:", n)
+                if(i==2) console.log("node 2 ("+n.id+")", n)
 
                 // fill the "labels" global variable
                 updateSearchLabels( n.id , n.label , n.type);

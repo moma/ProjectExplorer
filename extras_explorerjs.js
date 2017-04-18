@@ -21,14 +21,12 @@ function ChangeGraphAppearanceByAtt( manualflag ) {
     // Seeing all the possible attributes!
     var AttsDict = {}
     var Atts_2_Exclude = {}
-    var v_nodes = getVisibleNodes();
-    for (var i in v_nodes) {
-        if(!v_nodes[i].hidden) {
-
-            var id = v_nodes[i].id;
-
-            for(var a in TW.Nodes[id].attributes) {
-                var someatt = TW.Nodes[id].attributes[a]
+    for (var j in TW.nodeIds) {
+        let nid = TW.nodeIds[j]
+        let n = TW.partialGraph.graph.nodes(nid)
+        if(!n.hidden) {
+            for(var a in TW.Nodes[nid].attributes) {
+                var someatt = TW.Nodes[nid].attributes[a]
 
                 // Identifying the attribute datatype: exclude strings and objects
                 if ( ( typeof(someatt)=="string" && isNaN(Number(someatt)) ) || typeof(someatt)=="object" ) {
@@ -38,10 +36,10 @@ function ChangeGraphAppearanceByAtt( manualflag ) {
             }
 
             var possible_atts = [];
-            if (!isUndef(TW.Nodes[id].attributes))
-                possible_atts = Object.keys(TW.Nodes[id].attributes)
+            if (!isUndef(TW.Nodes[nid].attributes))
+                possible_atts = Object.keys(TW.Nodes[nid].attributes)
 
-            if(!isUndef(v_nodes[i].degree))
+            if(!isUndef(n.degree))
                 possible_atts.push("degree")
             possible_atts.push("clust_louvain")
 
@@ -240,10 +238,15 @@ function set_ClustersLegend ( daclass ) {
             var Type = raw[0]
             var ClustType = raw[1]
             var ClustID = raw[2]
+            var legTxt = "N/A"
+            if (TW.Clusters && TW.Clusters[Type] && TW.Clusters[Type][ClustType] && TW.Clusters[Type][ClustType][ClustID]) {
+               legTxt = TW.Clusters[Type][ClustType][ClustID]
+            }
             var Color = ClustNB_CurrentColor[IDx]
-            pr ( Color+" : "+ TW.Clusters[Type][ClustType][ClustID] )
+            // console.log ( Color+" : ", Type, ClustType, ClustID )
+            pr ( Color+" : "+ legTxt )
             var ColorDiv = '<span style="background:'+Color+';"></span>'
-            LegendDiv += '<li onclick=\'SomeEffect("'+IDx+'")\'>'+ColorDiv+ TW.Clusters[Type][ClustType][ClustID]+"</li>"+"\n"
+            LegendDiv += '<li onclick=\'SomeEffect("'+IDx+'")\'>'+ColorDiv+ legTxt+"</li>"+"\n"
         }
     } else {
         for(var i in OrderedClustDicts) {
