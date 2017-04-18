@@ -69,8 +69,8 @@ function search_proposed_terms_and_draw( the_queries ) {
         },
 
         error: function(exception) {
-            // console.log("search_proposed_terms_and_draw:exception"
-            //             + JSON.stringify(exception))
+            console.log("search_proposed_terms_and_draw:exception"
+                        + JSON.stringify(exception))
             $search_histogram
                 .html('<p class="micromessage">'
                      +'<b>No histogram</b>: too many nodes selected</b>'

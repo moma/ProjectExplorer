@@ -269,32 +269,44 @@ function set_ClustersLegend ( daclass ) {
 // = = = = = = = = = = = [ / Clusters Plugin ] = = = = = = = = = = = //
 
 //For CNRS
+// function getTopPapers(type){
+//     if(TW.getAdditionalInfo){
+//         console.log("getTopPapers")
+//         jsonparams=JSON.stringify(getSelections());
+//         bi=(Object.keys(categories).length==2)?1:0;
+//         //jsonparams = jsonparams.replaceAll("&","__and__");
+//         jsonparams = jsonparams.split('&').join('__and__');
+//         //dbsPaths.push(getGlobalDBs());
+//         thisgexf=JSON.stringify(decodeURIComponent(getUrlParam.file));
+//         image='<img style="display:block; margin: 0px auto;" src="'+TW.APINAME+'img/ajax-loader.gif"></img>';
+//         $("#tab-container-top").show();
+//         $("#topPapers").show();
+//         $("#topPapers").html(image);
+//         $.ajax({
+//             type: 'GET',
+//             url: TW.APINAME+'info_div.php',
+//             data: "type="+type+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+TW.field[getUrlParam.file],
+//             //contentType: "application/json",
+//             //dataType: 'json',
+//             success : function(data){
+//                 console.log(TW.APINAME+'info_div.php?'+"type="+type+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+TW.field[getUrlParam.file]);
+//                 $("#topPapers").html(data);
+//             },
+//             error: function(){
+//                 console.log('Page Not found: getTopPapers');
+//             }
+//         });
+//     }
+// }
 function getTopPapers(type){
+  console.log("new getTopPapers")
     if(TW.getAdditionalInfo){
         jsonparams=JSON.stringify(getSelections());
-        bi=(Object.keys(categories).length==2)?1:0;
-        //jsonparams = jsonparams.replaceAll("&","__and__");
+
         jsonparams = jsonparams.split('&').join('__and__');
-        //dbsPaths.push(getGlobalDBs());
-        thisgexf=JSON.stringify(decodeURIComponent(getUrlParam.file));
-        image='<img style="display:block; margin: 0px auto;" src="'+TW.APINAME+'img/ajax-loader.gif"></img>';
-        $("#tab-container-top").show();
-        $("#topPapers").show();
-        $("#topPapers").html(image);
-        $.ajax({
-            type: 'GET',
-            url: TW.APINAME+'info_div.php',
-            data: "type="+type+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+TW.field[getUrlParam.file],
-            //contentType: "application/json",
-            //dataType: 'json',
-            success : function(data){
-                console.log(TW.APINAME+'info_div.php?'+"type="+type+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+TW.field[getUrlParam.file]);
-                $("#topPapers").html(data);
-            },
-            error: function(){
-                console.log('Page Not found: getTopPapers');
-            }
-        });
+
+        $("#topPapers").html("<p> jsonparams:"+jsonparams+" </p>");
+        $("#topPapers").show()
     }
 }
 

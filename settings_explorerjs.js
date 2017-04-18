@@ -5,7 +5,7 @@ var TW = {}
     TW.colorByAtt = false;
     TW.twittertimeline = false;
     TW.minimap=false;
-    TW.getAdditionalInfo=true;// True: Activate TopPapers feature.
+    TW.getAdditionalInfo = true;// True: Activate TopPapers feature.
     //TW.mainfile = ["db.json"];
     // // TW.mainfile = "api.json";
      TW.mainfile = [
@@ -21,7 +21,7 @@ var TW = {}
     // //     "data/example.json",
     // //     "data/Elisa__Omodei.gexf",
          ];
-    TW.APINAME = "LOCALDB/";
+    TW.APINAME = "LOCALDB/";  // TODO use in topPapers
     TW.tagcloud_limit = 50;
     TW.bridge={};
     TW.bridge["forFilteredQuery"] = "php/bridgeClientServer_filter.php";
@@ -55,9 +55,6 @@ var TW = {}
     TW.SystemStates.opposites = [];
     TW.catSoc = "Document";
     TW.catSem = "NGram";
-
-    // to get ajax topPapers via info_div.php
-    TW.getAdditionalInfo = false;
 
     TW.strSearchBar = "Select or suggest topics";
 

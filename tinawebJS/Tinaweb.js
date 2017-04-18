@@ -762,7 +762,7 @@ TinaWebJS = function ( sigmacanvas ) {
             min: 1 / sigmaJsMouseProperties.maxRatio,
             max: 1 / sigmaJsMouseProperties.minRatio,
             // range: true,
-            step: 1,
+            step: .2,
             value: 1,
             slide: function( event, ui ) {
                 partialGraph.camera.goTo({
