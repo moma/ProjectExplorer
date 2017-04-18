@@ -78,6 +78,9 @@ function jsActionOnGexfSelector(gexfBasename , db_json){
 }
 
 
+// show the custom name of the app
+writeBrand(TW.branding)
+
 var file =""
 if(!isUndef(getUrlParam.mode)) { // if {db|api}.json
     file = getUrlParam.mode

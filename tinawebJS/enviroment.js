@@ -14,7 +14,9 @@ var theHtml = document.getElementsByTagName('html')[0]
 TW.anynodegoes = true
 // TW.anynodegoes = true
 
-
+function writeBrand (brandString) {
+  document.getElementById('twbrand').innerHTML = brandString
+}
 
 //============================ < NEW BUTTONS > =============================//
 

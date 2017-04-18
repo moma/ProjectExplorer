@@ -769,6 +769,7 @@ function repaintEdges() {
 }
 
 // rewrite of clustersBy with binning and for attributes that can have negative float values
+// /!\ age and growth_rate attributes referred to by name
 function colorsRelByBins(daclass) {
 
     cancelSelection(false);

@@ -101,6 +101,7 @@ var semanticConverged=false;
 
 
 // ============ < / DEVELOPER OPTIONS > ============
+TW.branding = 'Politoscope: explorer les programmes'
 TW.nodeClusAtt = "modularity_class"
 
 TW.edgeDefaultOpacity = 0.5  // opacity when true_color
