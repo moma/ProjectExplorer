@@ -43,8 +43,10 @@ var TW = {}
     // flag name is div class to be removed if false
     //        *and* subdirectory to import if true
     // see also ProcessDivsFlags()
-    TW.DivsFlags["histogramModule"] = true ;
-    TW.DivsFlags["crowdsourcingModule"] = true ;  // £TODO fix topPapers
+    TW.DivsFlags["histogramModule"] = false ;
+    TW.DivsFlags["histogramDailyVariantModule"] = true ;
+    // TODO more generic module integrating the variants cf. experiments/histogramModule_STUB_GENERIQUE
+    TW.DivsFlags["crowdsourcingModule"] = true ;
 
     TW.SystemStates = {}
     TW.SystemStates.level = true;

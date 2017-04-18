@@ -614,7 +614,7 @@ function getNodeIDs(elems){
 
 
 function getSelections(){
-        params=[];
+        let params=[];
         for(var i in selections){
             params.push(TW.Nodes[i].label);
         }
