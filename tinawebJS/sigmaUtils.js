@@ -202,12 +202,12 @@ SigmaUtils = function () {
 
       var defSize = edge[prefix + 'size'] || settings("minEdgeSize") || 1 ;
       if (edge.customAttrs.activeEdge) {
-        size = defSize * 2
+        size = (defSize * 2) + 1
         // color with no opacity
         // cf. sigmaTools.edgeRGB
         color = 'rgb('+edge.customAttrs.rgb+')'
         // console.log("drawing activeEdge with size", size)
-        edge.customAttrs.activeEdge = false
+        // edge.customAttrs.activeEdge = false // for one-time
       }
       else if (edge.customAttrs.grey) {
         color = TW.edgeGreyColor
@@ -745,9 +745,7 @@ function clustersBy(daclass) {
 
 
 // for debug of colorsRelByBins
-var totalsPerBinMin = {
-    '-1000000':0, '-75':0, '-50':0, '-25':0, '-10':0, '10':0, '25':0, '50':0, '75':0, '100':0, '125':0, '150':0
-  }
+var totalsPerBinMin = {}
 
 // Edge-colour by source-target nodes-colours combination
 // TODO rm because duplicate with edgeRGB
@@ -775,6 +773,36 @@ function repaintEdges() {
 // /!\ age and growth_rate attributes referred to by name
 function colorsRelByBins(daclass) {
 
+  var nTicksParam = 12
+  // do first loop entirely to get percentiles => bins, then modify alt_color
+
+  // estimating ticks
+  let ticksArray = []
+  let valArray = []
+  for (var j=0 ; j < TW.nNodes ; j++) {
+    let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
+
+    if (
+        !n.hidden
+        && n.attributes
+        && n.attributes.category == 'terms'
+        && n.attributes[daclass] != undefined
+      ) {
+          valArray.push(Number(n.attributes[daclass]))
+    }
+  }
+
+  var len = valArray.length
+
+  for (var l=0 ; l < nTicksParam ; l++) {
+    let nthVal = Math.floor(len * l / nTicksParam)
+
+    ticksArray.push(valArray[nthVal])
+  }
+
+  console.info(`===|===|=== ${nTicksParam} color ticks ===|===|===\n`, ticksArray)
+
+
     cancelSelection(false);
     // 12 colors
     var binColors = [
@@ -798,15 +826,15 @@ function colorsRelByBins(daclass) {
 
     // £TODO put colors and thresholds as params or calculate thresholds like eg d3.histogram
     if (daclass == 'age') {
-        tickThresholds = [-1000000,1992,1994,1996,1998,2000,2002,2004,2006,2008,2010,2012,2014,1451606400000]
+        tickThresholds = ticksArray
         // and add a grey color for the first timeperiod
         binColors.unshift("#F9F7ED")
 
-        console.log("======> doing AGE")
+        // console.log("======> doing AGE")
     }
     else if (daclass == 'growth_rate') {
 
-      tickThresholds = [0,.001,.01,.1,.5,1,1.5,2,2.5,3,3.5,5, 1000000]
+      tickThresholds = ticksArray
       binColors[4] = ""
       binColors = [
           "#005197",  //blue    binMin -∞
@@ -826,46 +854,56 @@ function colorsRelByBins(daclass) {
     }
 
 
-    // new strategy
-    // do first loop entirely to get percentiles => bins, then modify alt_color
-
-
     // get the nodes
-    var v_nodes = getVisibleNodes();
-    for(var i in v_nodes) {
-        var theId = v_nodes[i].id
-        var theNode = TW.Nodes[ theId ]
-        var attval = ( isUndef(theNode.attributes) || isUndef(theNode.attributes[daclass]) )? v_nodes[i][daclass]: theNode.attributes[daclass];
-
-        var theVal = parseFloat(attval)
+    for (var j=0 ; j < TW.nNodes ; j++) {
+      let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
+      if (! n.hidden
+        && n.attributes
+        && n.attributes.category == 'terms'
+        && ! isUndef(n.attributes[daclass])
+      ) {
+        var theVal = parseFloat(n.attributes[daclass])
         var foundBin = false
-        console.log('theVal:',theVal)
+        // console.log('theVal:',theVal)
+
         if( !isNaN(theVal) ) { //is float
-            // iterate over bins
-            for(var j=0 ; j < tickThresholds.length-1; j++) {
-                var binMin = tickThresholds[j]
-                var binMax = tickThresholds[(j+1)]
-                if((theVal >= binMin) && (theVal < binMax)) {
-                    // TW.partialGraph._core.graph.nodesIndex[theId].binMin = binMin
-                    // TW.partialGraph._core.graph.nodesIndex[theId].color = binColors[j]
-                    TW.partialGraph.graph.nodes(theId).binMin = binMin
-                    TW.partialGraph.graph.nodes(theId).color = binColors[j]
-                    TW.partialGraph.graph.nodes(theId).customAttrs.alt_color = binColors[j]
+          // iterate over bins
+          for(var k=0 ; k < tickThresholds.length-1; k++) {
+            var binMin = tickThresholds[k]
+            var binMax = tickThresholds[(k+1)]
+            if((theVal >= binMin) && (theVal < binMax)) {
+                // TW.partialGraph._core.graph.nodesIndex[n.id].binMin = binMin
+                // TW.partialGraph._core.graph.nodesIndex[n.id].color = binColors[j]
+                TW.partialGraph.graph.nodes(n.id).binMin = binMin
+                TW.partialGraph.graph.nodes(n.id).color = binColors[k]
+                TW.partialGraph.graph.nodes(n.id).customAttrs.alt_color = binColors[k]
+                TW.partialGraph.graph.nodes(n.id).customAttrs.handpickedcolor = true
 
-                    foundBin = true
-                    totalsPerBinMin[binMin]++
-                    break
+                // £TODO handpickedcolor flag support in sigmaUtils subrenderers
+
+                foundBin = true
+                // console.log(`theVal ${theVal} => found its bin ${binMin} ... ${binColors[k]}`)
+
+                if (!totalsPerBinMin[binMin]) {
+                  totalsPerBinMin[binMin] = 1
                 }
+                else {
+                  totalsPerBinMin[binMin]++
+                }
+                break
             }
+          }
 
-            if (!foundBin) {
-              TW.partialGraph.graph.nodes(theId).binMin = null
-              TW.partialGraph.graph.nodes(theId).color = '#555'
-              TW.partialGraph.graph.nodes(theId).customAttrs.alt_color = '#555'
-            }
+          if (!foundBin) {
+            TW.partialGraph.graph.nodes(n.id).binMin = null
+            TW.partialGraph.graph.nodes(n.id).color = '#555'
+            TW.partialGraph.graph.nodes(n.id).customAttrs.alt_color = '#555'
+          }
         }
+      }
     }
 
+    console.info('coloring distribution per tick thresholds' , totalsPerBinMin[binMin])
 
     //    [ Edge-colour by source-target nodes-colours combination ]
     // repaintEdges()
