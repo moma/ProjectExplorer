@@ -920,7 +920,9 @@ TinaWebJS = function ( sigmacanvas ) {
           winResizeTimeout = setTimeout(function() {
             console.log('did refresh')
             TW.partialGraph.refresh()
-            theHtml.classList.remove('waiting');
+            if (theHtml.classList) {
+              theHtml.classList.remove('waiting');
+            }
           }, 3000)
         }, true)
 

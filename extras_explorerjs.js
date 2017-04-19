@@ -298,18 +298,152 @@ function set_ClustersLegend ( daclass ) {
 //         });
 //     }
 // }
+
+
+// a custom variant of twitter plugin written for politoscope
 function getTopPapers(type){
-  console.log("new getTopPapers")
     if(TW.getAdditionalInfo){
-        jsonparams=JSON.stringify(getSelections());
+        jsonparams=getSelections();
 
-        jsonparams = jsonparams.split('&').join('__and__');
 
-        $("#topPapers").html("<p> jsonparams:"+jsonparams+" </p>");
-        $("#topPapers").show()
+        // console.log(jsonparams)
+        // theHtml = "<p> jsonparams:"+jsonparams+" </p>"
+        //
+        $.ajax({
+            type: 'GET',
+            url: TW.APINAME,
+            data: {'query': jsonparams.join(' AND ')},
+            contentType: "application/json",
+            success : function(data){
+                // console.log(data);
+
+                var topTweetsHtml = ''
+
+                for (var k in data) {
+                  let tweetJson = data[k]
+                  topTweetsHtml += RenderTweet(tweetJson)
+                }
+
+                $("#topPapers").html(topTweetsHtml);
+                $("#topPapers").show()
+            },
+            error: function(){
+                console.log('Page Not found: getTopPapers');
+            }
+        });
+
+
+        // var theHtml = '<blockquote class="twitter-tweet"><p lang="fr" dir="ltr"><a href="https://twitter.com/hashtag/BuzzFeedHamon?src=hash">#BuzzFeedHamon</a> B. Hamon a une culture large de tous les domaines et est le seul candidat à maitriser tous les sujets et ne pas dire d&#39;intox!</p>&mdash; Nadine Badr Vovelle (@NadineVovelle) <a href="https://twitter.com/NadineVovelle/status/854322537198702592">April 18, 2017</a></blockquote><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>'
+        //
+        // $("#topPapers").html(theHtml);
+        // $("#topPapers").show()
     }
 }
 
+function clickInsideTweet(e, tweetSrcUrl) {
+    console.log('>>>>> event target tag', e.target.tag)
+    console.log("event")
+    console.log(e)
+    var tgt = e.target
+    if (tgt.tagName.toLowerCase() == "a")
+        window.open(tgt.href, "Link in tweet")
+    else
+        window.open(tweetSrcUrl, "Source Tweet")
+}
+
+function RenderTweet( tweet) {
+
+    var tweet_links = true
+
+    var author_url = "http://twitter.com/"+tweet["user"]["screen_name"];
+    var tweet_url = author_url+"/status/"+tweet["id_str"]
+    var image_normal = author_url+"/profile_image?size=original";
+    var image_bigger = "";
+    if( tweet["user"]["profile_image_url"] ) {
+        image_normal = tweet["user"]["profile_image_url"]
+        image_bigger = tweet["user"]["profile_image_url"].replace("_normal","_bigger")
+    }
+    var html = ""
+    html += '\t\t'+ '<blockquote onclick="clickInsideTweet(event, \''+tweet_url+'\')" class="Tweet h-entry tweet subject expanded" cite="'+tweet_url+'" data-tweet-id="'+tweet["id_str"]+'" data-scribe="section:subject">' + '\n';
+
+    html += '\t\t\t'+ '<div class="Tweet-header u-cf">' + '\n';
+
+    html += '\t\t\t\t'+ '<div class="Tweet-brand u-floatRight">' + '\n';
+
+    html += '\t\t\t\t'+ '<span class="Tweet-metadata dateline">' + '\n';
+
+    // TODO check datetime iso dates here
+    html += '\t\t\t\t\t'+ '<a target="_blank" class="u-linkBlend u-url customisable-highlight long-permalink" data-datetime="2012-12-03T18:51:11+000" data-scribe="element:full_timestamp" href="'+tweet_url+'">' + '\n';
+    html += '\t\t\t\t\t\t'+ '<time class="dt-updated" datetime="2012-12-03T18:51:11+0000" title="'+tweet["created_at"]+'">'+tweet["created_at"]+'</time>' + '\n';
+    html += '\t\t\t\t\t'+ '</a>' + '\n';
+    html += '\t\t\t\t'+ '</span>' + '\n';
+
+    html += '\t\t\t\t\t'+ '<span class="u-hiddenInWideEnv">' + '\n';
+    html += '\t\t\t\t\t\t'+ '<a target="_blank" href="'+tweet_url+'" data-scribe="element:logo">' + '\n';
+    html += '\t\t\t\t\t\t\t'+ '<div class="Icon Icon--twitter " aria-label="" title="" role="presentation"></div>' + '\n';
+    html += '\t\t\t\t\t\t'+ '</a>' + '\n';
+    html += '\t\t\t\t\t'+ '</span>' + '\n';
+    html += '\t\t\t\t'+ '</div>' + '\n';
+
+    html += '\t\t\t\t'+ '<div class="Tweet-author u-textTruncate h-card p-author" data-scribe="component:author">' + '\n';
+    html += '\t\t\t\t\t'+ '<a target="_blank" class="Tweet-authorLink Identity u-linkBlend" data-scribe="element:user_link" href="'+author_url+'">' + '\n';
+    html += '\t\t\t\t\t\t'+ '<span class="Tweet-authorAvatar Identity-avatar">' + '\n';
+    html += '\t\t\t\t\t\t\t'+ '<img class="Avatar u-photo" data-scribe="element:avatar" data-src-2x="'+image_bigger+'" src="'+image_normal+'">' + '\n';
+    html += '\t\t\t\t\t\t'+ '</span>' + '\n';
+    html += '\t\t\t\t\t\t'+ '<span class="Tweet-authorName Identity-name p-name customisable-highlight" data-scribe="element:name">'+tweet["user"]["name"]+'</span>' + '\n';
+    html += '\t\t\t\t\t\t'+ '<span class="Tweet-authorScreenName Identity-screenName p-nickname" data-scribe="element:screen_name">@'+tweet["user"]["screen_name"]+'</span>' + '\n';
+
+    html += '\t\t\t\t\t'+ '</a>' + '\n';
+    html += '\t\t\t\t'+ '</div>' + '\n';
+    html += '\t\t\t'+ '</div>' + '\n';
+
+    html += '\t\t\t'+ '<div class="Tweet-body e-entry-content" data-scribe="component:tweet">' + '\n';
+
+    html += '\t\t\t\t'+ '<p class="Tweet-text e-entry-title" lang="en" dir="ltr">' + tweet["text"] + '</p>' + '\n';
+
+    if( !isUndef(tweet["retweet_count"]) || !isUndef(tweet["favourites_count"])  ) {
+        html += '\t\t\t\t'+ '<ul class="Tweet-actions" data-scribe="component:actions" role="menu" aria-label="Tweet actions">' + '\n';
+        if(tweet_links) {
+            html += '\t\t\t\t\t'+ '<li class="Tweet-action">' + '\n';
+            html += '\t\t\t\t\t\t'+ '<a target="_blank" class="TweetAction TweetAction--reply web-intent" href="https://twitter.com/intent/tweet?in_reply_to='+tweet["id_str"]+""+'" data-scribe="element:reply">' + '\n';
+            html += '\t\t\t\t\t\t\t'+ '<div class="Icon Icon--reply TweetAction-icon" aria-label="Reply" title="Reply" role="img"></div>' + '\n';
+            html += '\t\t\t\t\t\t'+ '</a>' + '\n';
+            html += '\t\t\t\t\t'+ '</li>' + '\n';
+        }
+
+        if(!isUndef(tweet["retweet_count"])) {
+            html += '\t\t\t\t\t'+ '<li class="Tweet-action">' + '\n';
+            html += '\t\t\t\t\t\t'+ '<a target="_blank" class="TweetAction TweetAction--retweet web-intent" href="https://twitter.com/intent/retweet?tweet_id='+tweet["id_str"]+'" data-scribe="element:retweet">' + '\n';
+            html += '\t\t\t\t\t\t\t'+ '<div class="Icon Icon--retweet TweetAction-icon" aria-label="Retweet" title="Retweet" role="img"></div>' + '\n';
+            html += '\t\t\t\t\t\t\t'+ '<span class="TweetAction-stat" data-scribe="element:retweet_count" aria-hidden="true">'+tweet["retweet_count"]+'</span>' + '\n';
+            html += '\t\t\t\t\t\t\t'+ '<span class="u-hiddenVisually">'+tweet["retweet_count"]+' Retweets</span>' + '\n';
+            html += '\t\t\t\t\t\t'+ '</a>' + '\n';
+            html += '\t\t\t\t\t'+ '</li>' + '\n';
+        }
+
+        if(!isUndef(tweet["favourites_count"])) {
+            html += '\t\t\t\t\t'+ '<li class="Tweet-action">' + '\n';
+            html += '\t\t\t\t\t\t'+ '<a target="_blank" class="TweetAction TweetAction--favorite web-intent" href="https://twitter.com/intent/favorite?tweet_id='+tweet["id_str"]+'" data-scribe="element:favorite">' + '\n';
+            html += '\t\t\t\t\t\t\t'+ '<div class="Icon Icon--favorite TweetAction-icon" aria-label="Favorite" title="Favorite" role="img"></div>' + '\n';
+            html += '\t\t\t\t\t\t\t'+ '<span class="TweetAction-stat" data-scribe="element:favourites_count" aria-hidden="true">'+tweet["favourites_count"]+'</span>' + '\n';
+            html += '\t\t\t\t\t\t\t'+ '<span class="u-hiddenVisually">'+tweet["favourites_count"]+' favorites</span>' + '\n';
+            html += '\t\t\t\t\t\t'+ '</a>' + '\n';
+            html += '\t\t\t\t\t'+ '</li>' + '\n';
+        }
+
+        html += '\t\t\t\t'+ '</ul>' + '\n';
+    }
+
+
+    html += '\t\t\t'+ '</div>' + '\n';
+
+
+    html += '\t\t'+ '</blockquote>' + '\n';
+    // html += '\t\t'+ '<br>' + '\n';
+
+
+    return html;
+}
 
 //FOR UNI-PARTITE
 function selectionUni(currentNode){

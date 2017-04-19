@@ -132,7 +132,7 @@
 
 #ctlzoom {
     position: fixed;
-    right: 260px;
+    right: 410px;
     bottom: 0;
     list-style: none;
     padding: 0;
@@ -286,4 +286,11 @@
 
 #current-selection {
     width: 100%;  /* 100% within lefttopbox */
+}
+
+
+/* tweets inside topPapers */
+.EmbeddedTweet-tweet {
+  width: 295px;
+  max-width: 295px;
 }

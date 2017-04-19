@@ -17,6 +17,8 @@ function cancelSelection (fromTagCloud, settings) {
     //Nodes colors go back to normal
     overNodes=false;
 
+    // £TODO case with return to alternate colors
+
     if (TW.partialGraph.settings('drawEdges')) {
       for(let i=0;i<TW.nEdges;i++){
         let e = TW.partialGraph.graph.edges(TW.edgeIds[i])
@@ -584,7 +586,7 @@ function unHide(nodeId) {
 // case default: we just change the flags
 //                - greyish color was precomputed in prepareNodesRenderingProperties
 //                  as n.customAttrs.defgrey_color
-//                - renderer will see the flags and and handle the case accordingly
+//                - renderer will see the flags and handle the case accordingly
 // cases when coloredBy (ex: centrality): color must be recomputed here
 function greyEverything(notDefaultColors){
 

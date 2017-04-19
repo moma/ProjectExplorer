@@ -20,7 +20,7 @@ html, body {
   top: 105px;
   bottom: 0;
   left: 0;
-  right: 250px;
+  right: 400px;
   z-index: 1;
 
   /* non selectable: we've got our own events here */
@@ -35,7 +35,7 @@ html, body {
   top: 105px;
   bottom: 0;
   right: 0;
-  width: 250px;
+  width: 400px;
   z-index: 2;
   border-left: 1px #222 solid;
   overflow-y: scroll;
