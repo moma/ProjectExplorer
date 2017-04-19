@@ -794,6 +794,8 @@ function colorsRelByBins(daclass) {
 
   var len = valArray.length
 
+  valArray.sort() // important :)
+
   for (var l=0 ; l < nTicksParam ; l++) {
     let nthVal = Math.floor(len * l / nTicksParam)
 
