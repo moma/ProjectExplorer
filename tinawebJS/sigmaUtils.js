@@ -302,16 +302,29 @@ SigmaUtils = function () {
         // mode variants
         if (TW.selectionActive) {
           // passive nodes should blend in the grey of TW.edgeGreyColor
+          // cf settings_explorerjs, defgrey_color and greyEverything()
           if (node.customAttrs.grey) {
-            nodeColor = node.customAttrs.defgrey_color
+            if (! TW.handpickedcolor) {
+              nodeColor = node.customAttrs.defgrey_color
+            }
+            else {
+              // #C01O3 += alpha 55
+              //                     => #C01O355
+              nodeColor = node.customAttrs.alt_color+"55"
+
+              // old way:
+              // nodeColor = "rgba("+hex2rga(node.customAttrs.alt_color)+",0.5)"
+            }
+            // nice looking uniform grey
             borderColor = TW.nodesGreyBorderColor
-            // cf settings_explorerjs, defgrey_color and greyEverything()
           }
           // neighbor nodes <=> (highlight flag AND selectionActive)
           else if(node.customAttrs.highlight) {
-            // borderColor = "rgba(220, 220, 220, 0.7)"
             nodeSize *= 1.4
             borderSize *= 1.4
+            if (TW.handpickedcolor) {
+              nodeColor = node.customAttrs.alt_color
+            }
           }
           else if(node.active) {
             borderColor = null
@@ -669,6 +682,8 @@ function clustersBy(daclass) {
 
     cancelSelection(false);
 
+    TW.handpickedcolor = true
+
     // TODO avoid this strategy and also double loop below
     var v_nodes = getVisibleNodes();
     var min_pow = 0;
@@ -772,12 +787,17 @@ function repaintEdges() {
 // rewrite of clustersBy with binning and for attributes that can have negative float values
 // /!\ age and growth_rate attributes referred to by name
 function colorsRelByBins(daclass) {
+  cancelSelection(false);
+
+  var doModifyLabel = false
+
+  TW.handpickedcolor = true
 
   var nTicksParam = 12
   // do first loop entirely to get percentiles => bins, then modify alt_color
 
   // estimating ticks
-  let ticksArray = []
+  let tickThresholds = []
   let valArray = []
   for (var j=0 ; j < TW.nNodes ; j++) {
     let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
@@ -799,10 +819,10 @@ function colorsRelByBins(daclass) {
   for (var l=0 ; l < nTicksParam ; l++) {
     let nthVal = Math.floor(len * l / nTicksParam)
 
-    ticksArray.push(valArray[nthVal])
+    tickThresholds.push(valArray[nthVal])
   }
 
-  console.info(`===|===|=== ${nTicksParam} color ticks ===|===|===\n`, ticksArray)
+  console.info(`===|===|=== ${nTicksParam} color ticks ===|===|===\n`, tickThresholds)
 
 
     cancelSelection(false);
@@ -824,11 +844,10 @@ function colorsRelByBins(daclass) {
 
     // spare color 13 "#64e0f2",
 
-    var tickThresholds = [-1000000,-75,-50,-25,-15,15,25,50,75,100,125,150, 1000000]
+    // tickThresholds = [-1000000,-75,-50,-25,-15,15,25,50,75,100,125,150, 1000000]
 
     // £TODO put colors and thresholds as params or calculate thresholds like eg d3.histogram
     if (daclass == 'age') {
-        tickThresholds = ticksArray
         // and add a grey color for the first timeperiod
         binColors.unshift("#F9F7ED")
 
@@ -836,7 +855,8 @@ function colorsRelByBins(daclass) {
     }
     else if (daclass == 'growth_rate') {
 
-      tickThresholds = ticksArray
+      doModifyLabel = true
+
       binColors[4] = ""
       binColors = [
           "#005197",  //blue    binMin -∞
@@ -864,7 +884,14 @@ function colorsRelByBins(daclass) {
         && n.attributes.category == 'terms'
         && ! isUndef(n.attributes[daclass])
       ) {
-        var theVal = parseFloat(n.attributes[daclass])
+
+        var valSt = n.attributes[daclass]
+
+        if (doModifyLabel) {
+          n.label = `(${valSt}) ${n.label}`          
+        }
+
+        var theVal = parseFloat(valSt)
         var foundBin = false
         // console.log('theVal:',theVal)
 
@@ -879,10 +906,6 @@ function colorsRelByBins(daclass) {
                 TW.partialGraph.graph.nodes(n.id).binMin = binMin
                 TW.partialGraph.graph.nodes(n.id).color = binColors[k]
                 TW.partialGraph.graph.nodes(n.id).customAttrs.alt_color = binColors[k]
-                TW.partialGraph.graph.nodes(n.id).customAttrs.handpickedcolor = true
-
-                // £TODO handpickedcolor flag support in sigmaUtils subrenderers
-
                 foundBin = true
                 // console.log(`theVal ${theVal} => found its bin ${binMin} ... ${binColors[k]}`)
 
@@ -946,6 +969,9 @@ function colorsBy(daclass) {
           // reset the alt_color valflag
           TW.partialGraph.graph.nodes(v_nodes[i].id).customAttrs.alt_color = null
         }
+
+        // reset the global state
+        TW.handpickedcolor = false
     }
     else {
       // shuffle on entire array is better than random sorting function on each element
@@ -957,6 +983,8 @@ function colorsBy(daclass) {
           TW.partialGraph.graph.nodes(v_nodes[i].id).color = randomColorList[ attval ]
           TW.partialGraph.graph.nodes(v_nodes[i].id).customAttrs.alt_color = randomColorList[ attval ]
       }
+      // set the global state
+      TW.handpickedcolor = false
     }
 
 
@@ -977,6 +1005,8 @@ function colorsBy(daclass) {
         }
     }
     //    [ / Edge-colour by source-target nodes-colours combination ]
+
+    // £TODO fix ClustersLegend
     set_ClustersLegend ( daclass )
     TW.partialGraph.render();
 }

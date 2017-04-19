@@ -155,6 +155,7 @@ function SelectionEngine() {
 
         console.log("IN SelectionEngine.MultipleSelection2:")
         console.log("nodes", nodes)
+
         greyEverything();
 
         var sameSideNeighbors = {}

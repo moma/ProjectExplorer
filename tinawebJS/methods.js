@@ -17,28 +17,26 @@ function cancelSelection (fromTagCloud, settings) {
     //Nodes colors go back to normal
     overNodes=false;
 
-    // £TODO case with return to alternate colors
-
+    //Edges colors go back to normal
     if (TW.partialGraph.settings('drawEdges')) {
       for(let i=0;i<TW.nEdges;i++){
         let e = TW.partialGraph.graph.edges(TW.edgeIds[i])
         // console.log("cancelSelection: edge", e)
         if (e) {
-          e.color = e.customAttrs['grey'] ? e.customAttrs['true_color'] : e.color;
+          e.color = e.customAttrs['true_color'];
           e.customAttrs.grey = 0;
           e.customAttrs.activeEdge = 0;
         }
       }
     }
 
-    //Nodes colors go back to normal
+    //Nodes colors go back to previous
     for(let j=0;j<TW.nNodes;j++){
       let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
       // console.log("cancelSelection: node", n)
       if (n) {
         n.active = false;
-        // n.color = n.customAttrs['grey'] ? n.customAttrs['true_color'] : n.color;
-        n.color = n.customAttrs['true_color'];
+        n.color = TW.handpickedcolor ? n.customAttrs['alt_color'] : n.customAttrs['true_color'];
         n.customAttrs.grey = 0
         n.customAttrs.forceLabel = 0
       }
@@ -582,13 +580,11 @@ function unHide(nodeId) {
   TW.partialGraph.graph.nodes(nodeId).hidden=false
 }
 
+
 // edges greyish color for unselected, when we have a selection
-// case default: we just change the flags
-//                - greyish color was precomputed in prepareNodesRenderingProperties
-//                  as n.customAttrs.defgrey_color
-//                - renderer will see the flags and handle the case accordingly
-// cases when coloredBy (ex: centrality): color must be recomputed here
-function greyEverything(notDefaultColors){
+// NB: we just change the flags, not the colors
+//     - renderer will see the flags and handle the case accordingly
+function greyEverything(){
 
   for(var j=0 ; j<TW.nNodes ; j++){
     let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
@@ -603,8 +599,9 @@ function greyEverything(notDefaultColors){
       n.customAttrs.highlight = false;
 
       // special case after a coloredBy or clustersBy
-      if (notDefaultColors)
-        n.color = "rgba("+hex2rga(n.color)+",0.5)"
+      // if (TW.handpickedcolor) {
+      //   n.color = "rgba("+hex2rga(n.color)+",0.5)"
+      // }
     }
   }
 
@@ -623,30 +620,6 @@ function greyEverything(notDefaultColors){
 
 }
 
-// new sigma.js: TODO change logic (the reverse of greyEverything is done by redraw for the colors, and cancelSelection for the flags...)
-//               but this could be used for colorsBy menu
-// function graphResetColor(){
-//     nds = TW.partialGraph.graph.nodes().filter(function(x) {
-//                             return !x['hidden'];
-//           });
-//     eds = TW.partialGraph.graph.edges().filter(function(x) {
-//                             return !x['hidden'];
-//           });
-//
-//     for(var x in nds){
-//         n=nds[x];
-//         n.customAttrs["grey"] = 0;
-//         n.color = n.customAttrs["true_color"];
-//     }
-//
-//     if (TW.partialGraph.settings('drawEdges')) {
-//       for(var x in eds){
-//           e=eds[x];
-//           e.customAttrs["grey"] = 0;
-//           e.color = e.customAttrs["true_color"];
-//       }
-//     }
-// }
 //
 // function hideEverything(){
 //     console.log("\thiding all");

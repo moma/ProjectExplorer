@@ -63,7 +63,7 @@ function ChangeGraphAppearanceByAtt( manualflag ) {
     // console.log( AttsDict_sorted )
 
 
-    var color_menu_info = "";
+    var color_menu_info = '<li><a href="#" onclick="graphResetColor()">By Default</a></li>';
 
     if( $( "#colorgraph-menu" ).length>0 ){
       for (var i in AttsDict_sorted) {
@@ -110,6 +110,7 @@ function RunLouvain() {
 
 
 function SomeEffect( ClusterCode ) {
+    console.log( "SomeEffect" )
     console.log( ClusterCode )
 
     // ex: ISItermsriskV2_140 & ISItermsriskV2_140||clust_default||7
@@ -205,6 +206,30 @@ function SomeEffect( ClusterCode ) {
     TW.partialGraph.refresh()
 }
 
+function graphResetColor(){
+
+    // reset global var
+    TW.handpickedcolor = false
+
+    // reset each node's color and label
+    for (var j in TW.nodeIds) {
+      let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
+      n.color = n.customAttrs["true_color"];
+
+      n.label = TW.Nodes[n.id].label
+    }
+
+    // if (TW.partialGraph.settings('drawEdges')) {
+    //   for(var x in eds){
+    //       e=eds[x];
+    //       e.customAttrs["grey"] = 0;
+    //       e.color = e.customAttrs["true_color"];
+    //   }
+    // }
+
+    TW.partialGraph.render()
+}
+
 
 function set_ClustersLegend ( daclass ) {
     //TW.partialGraph.states.slice(-1)[0].LouvainFait = true
@@ -231,6 +256,8 @@ function set_ClustersLegend ( daclass ) {
     if (daclass=="clust_louvain")
         daclass = "louvain"
     OrderedClustDicts = Object.keys(ClustNB_CurrentColor).sort()
+
+    // TODO allow external cluster legends dict
     if( daclass.indexOf("clust")>-1 ) {
         for(var i in OrderedClustDicts) {
             var IDx = OrderedClustDicts[i]
