@@ -1,2 +1,2 @@
 python-twitter
-flask-cors
+#flask-cors

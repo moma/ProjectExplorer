@@ -17,8 +17,8 @@ import twitter
 from flask.ext.cors import CORS, cross_origin
 
 app = Flask(__name__)
-cors = CORS(app)
-app.config['CORS_HEADERS'] = 'Content-Type'
+#cors = CORS(app)
+#app.config['CORS_HEADERS'] = 'Content-Type'
 
 # ---- initialize twitter api with credentials ----
 keys_file = open("keys.json")
@@ -37,7 +37,7 @@ QCONTEXT = "(Fillon OR Macron OR JLM2017 OR Mélenchon OR #Marine2017 OR @MLP_of
 
 @app.route('/twitter_search')
 # @cross_origin(origin="twjs.org")
-@cross_origin()
+#@cross_origin()
 def searcher():
     if 'query' in request.args:
         # prepare query
