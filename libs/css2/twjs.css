@@ -121,6 +121,14 @@ html, body {
   display: none; /*not shown at init*/
 }
 
+/*thick buttons needs lift*/
+#changetype, #changelevel{
+  position: relative;
+  bottom: 2px;
+  font-size: 11px;
+  line-height: 12px;
+}
+
 /* override navbar toggle on right side when collapsed */
 #toolbar-open {
   float:left !important;
@@ -266,6 +274,14 @@ p.micromessage{
     font-size:80%;
 }
 
+.centered {
+  text-align: center;
+}
+
+.code {
+  font-family: "Fira Sans", "Courier", "Courier New", monospace;
+  color: '#222'
+}
 
 
 /* switch css -- generic (src: proto.io/freebies/onoff/)*/

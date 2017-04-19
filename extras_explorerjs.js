@@ -305,6 +305,7 @@ function getTopPapers(type){
     if(TW.getAdditionalInfo){
         jsonparams=getSelections();
 
+        var joined_q = jsonparams.map(function(w) {return '('+w+')'}).join(' AND ')
 
         // console.log(jsonparams)
         // theHtml = "<p> jsonparams:"+jsonparams+" </p>"
@@ -312,16 +313,21 @@ function getTopPapers(type){
         $.ajax({
             type: 'GET',
             url: TW.APINAME,
-            data: {'query': jsonparams.join(' AND ')},
+            data: {'query': joined_q},
             contentType: "application/json",
             success : function(data){
                 // console.log(data);
 
                 var topTweetsHtml = ''
 
-                for (var k in data) {
-                  let tweetJson = data[k]
-                  topTweetsHtml += RenderTweet(tweetJson)
+                if (data.length) {
+                  for (var k in data) {
+                    let tweetJson = data[k]
+                    topTweetsHtml += RenderTweet(tweetJson)
+                  }
+                }
+                else {
+                  topTweetsHtml = `<p class="micromessage centered">The query <span class=code>${joined_q}</span> delivers no results on Twitter with the topic #Presidentielles2017 and most related hashtags</p>`
                 }
 
                 $("#topPapers").html(topTweetsHtml);
@@ -331,12 +337,6 @@ function getTopPapers(type){
                 console.log('Page Not found: getTopPapers');
             }
         });
-
-
-        // var theHtml = '<blockquote class="twitter-tweet"><p lang="fr" dir="ltr"><a href="https://twitter.com/hashtag/BuzzFeedHamon?src=hash">#BuzzFeedHamon</a> B. Hamon a une culture large de tous les domaines et est le seul candidat à maitriser tous les sujets et ne pas dire d&#39;intox!</p>&mdash; Nadine Badr Vovelle (@NadineVovelle) <a href="https://twitter.com/NadineVovelle/status/854322537198702592">April 18, 2017</a></blockquote><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>'
-        //
-        // $("#topPapers").html(theHtml);
-        // $("#topPapers").show()
     }
 }
 
@@ -446,32 +446,32 @@ function RenderTweet( tweet) {
 }
 
 //FOR UNI-PARTITE
-function selectionUni(currentNode){
-    console.log("\tin selectionUni:"+currentNode.id);
-    if(checkBox==false && cursor_size==0) {
-        highlightSelectedNodes(false);
-        opossites = [];
-        selections = [];
-    }
-
-    if((typeof selections[currentNode.id])=="undefined"){
-        selections[currentNode.id] = 1;
-        currentNode.active=true;
-    }
-    else {
-        delete selections[currentNode.id];
-        currentNode.active=false;
-    }
-    //highlightOpossites(nodes1[currentNode.id].neighbours);
-    //        currentNode.color = currentNode.customAttrs['true_color'];
-    //        currentNode.customAttrs['grey'] = 0;
-    //
-    //
-
-
-    TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8);
-    TW.partialGraph.render();
-}
+// function selectionUni(currentNode){
+//     console.log("\tin selectionUni:"+currentNode.id);
+//     if(checkBox==false && cursor_size==0) {
+//         highlightSelectedNodes(false);
+//         opossites = [];
+//         selections = [];
+//     }
+//
+//     if((typeof selections[currentNode.id])=="undefined"){
+//         selections[currentNode.id] = 1;
+//         currentNode.active=true;
+//     }
+//     else {
+//         delete selections[currentNode.id];
+//         currentNode.active=false;
+//     }
+//     //highlightOpossites(nodes1[currentNode.id].neighbours);
+//     //        currentNode.color = currentNode.customAttrs['true_color'];
+//     //        currentNode.customAttrs['grey'] = 0;
+//     //
+//     //
+//
+//
+//     TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8);
+//     TW.partialGraph.render();
+// }
 
 //JUST ADEME
 function camaraButton(){
