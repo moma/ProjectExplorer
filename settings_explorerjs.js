@@ -152,7 +152,7 @@ var sigmaJsGraphProperties = {
     maxEdgeSize: 4
 };
 var sigmaJsMouseProperties = {
-    minRatio: 0.1,
+    minRatio: .03125,  // 1/32  pour permettre zoom x32
     maxRatio: 2
 };
 // ============ < / SIGMA.JS PROPERTIES > ============
@@ -193,11 +193,11 @@ var lastFilter = []
 TW.Filters = {}
 
 
-
-var overviewWidth = 200;
-var overviewHeight = 175;
-var overviewScale = 0.25;
-var overviewHover=false;
+//
+// var overviewWidth = 200;
+// var overviewHeight = 175;
+// var overviewScale = 0.25;
+// var overviewHover=false;
 var moveDelay = 80, zoomDelay = 2;
 //var Vecindad;
 TW.partialGraph;
@@ -210,9 +210,10 @@ var nodeslength=0;
 
 var labels = [];
 
-var numberOfDocs=0;
-var numberOfNGrams=0;
+var numberOfDocs=0;    // not used!
+var numberOfNGrams=0;  // not used, but cf TW.nNodes TW.nEdges
 
+// FIXME should become TW.*
 var selections = [];
 var deselections={};
 var opossites = {};

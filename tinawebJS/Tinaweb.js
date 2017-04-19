@@ -759,8 +759,8 @@ TinaWebJS = function ( sigmacanvas ) {
 
             // new sigma.js current zoom ratio
             value: partialGraph.camera.ratio,
-            min: 1 / sigmaJsMouseProperties.maxRatio,
-            max: 1 / sigmaJsMouseProperties.minRatio,
+            min: 1 / sigmaJsMouseProperties.maxRatio,   // ex x.5
+            max: 1 / sigmaJsMouseProperties.minRatio,   // ex x32
             // range: true,
             step: .2,
             value: 1,

@@ -3,14 +3,6 @@
 // always useful
 var theHtml = document.getElementsByTagName('html')[0]
 
-// overriding pixelRatio is possible if we need very high definition
-// var realRatio = sigma.utils.getPixelRatio
-// if (TW.overSampling) {
-//   sigma.utils.getPixelRatio = function() {
-//     return 2 * realRatio()
-//   }
-// }
-
 TW.anynodegoes = true
 // TW.anynodegoes = true
 
