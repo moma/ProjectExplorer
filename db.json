@@ -3,7 +3,7 @@
 		"dbname":null,
 		"title":"Politoscope",
 		"date":"2017",
-		"abstract":"hello woerld",
+		"abstract":"",
 		"first" : "ProgrammeDesCandidats.gexf",
 		"gexfs": {
 			"ProgrammeDesCandidats.gexf": {
@@ -11,6 +11,14 @@
 				"semantic": {}
 			},
 			"ProgrammeDesCandidats.sans_outliers.gexf": {
+				"social": {},
+				"semantic": {}
+			},
+			"out_growth_last_week.gexf": {
+				"social": {},
+				"semantic": {}
+			},
+			"out_age_and_growth.gexf": {
 				"social": {},
 				"semantic": {}
 			}
