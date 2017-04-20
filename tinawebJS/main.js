@@ -440,16 +440,7 @@ if(RES["OK"]) {
         console.log("printing the typestring:", typestring)
 
 
-        if (!TW.filterSliders) {
-
-          document.getElementsByClassName('weight-selectors')[0].style.display="none"
-
-          // document.getElementById('slidercat0nodesweight').style.display="none"
-          // document.getElementById('slidercat0edgesweight').style.display="none"
-          // document.getElementById('slidercat1nodesweight').style.display="none"
-          // document.getElementById('slidercat1edgesweight').style.display="none"
-        }
-        else {
+        if (TW.filterSliders) {
           if(typestring=="0|1") {
               $("#category0").hide();
               $("#category1").show();
@@ -499,9 +490,23 @@ if(RES["OK"]) {
 
     }).index();
 
+
+    if (!TW.filterSliders) {
+
+      var filterEls = document.getElementsByClassName('weight-selectors')
+
+      for (var k in filterEls) {
+        if (filterEls[k] && filterEls[k].style) filterEls[k].style.display="none"
+      }
+      // document.getElementById('slidercat0nodesweight').style.display="none"
+      // document.getElementById('slidercat0edgesweight').style.display="none"
+      // document.getElementById('slidercat1nodesweight').style.display="none"
+      // document.getElementById('slidercat1edgesweight').style.display="none"
+    }
+
     TW.FA2Params = {
       // adapting speed -------------
-      slowDown: 1,
+      slowDown: 1.5,
       startingIterations: 5,
       iterationsPerRender: 3,
       barnesHutOptimize: false,
@@ -510,7 +515,7 @@ if(RES["OK"]) {
       // global behavior -----------
       linLogMode: true,
       edgeWeightInfluence: .5,
-      gravity: 3,
+      gravity: 1,
       strongGravityMode: false,
       scalingRatio: 1,
 
