@@ -4,21 +4,13 @@
 		"title":"Politoscope",
 		"date":"2017",
 		"abstract":"",
-		"first" : "ProgrammeDesCandidats.gexf",
+		"first" : "ProgrammeDesCandidats.enrichi.gexf",
 		"gexfs": {
+			"ProgrammeDesCandidats.enrichi.gexf": {
+				"social": {},
+				"semantic": {}
+			},
 			"ProgrammeDesCandidats.gexf": {
-				"social": {},
-				"semantic": {}
-			},
-			"ProgrammeDesCandidats.sans_outliers.gexf": {
-				"social": {},
-				"semantic": {}
-			},
-			"out_growth_last_week.gexf": {
-				"social": {},
-				"semantic": {}
-			},
-			"out_age_and_growth.gexf": {
 				"social": {},
 				"semantic": {}
 			}
