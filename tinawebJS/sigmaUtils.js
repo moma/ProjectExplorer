@@ -738,6 +738,7 @@ function clustersBy(daclass) {
         var hex_color = rgbToHex(255, (255-newval_color) , 0)
         TW.partialGraph.graph.nodes(nid).color = hex_color
         TW.partialGraph.graph.nodes(nid).customAttrs.alt_color = hex_color
+        TW.partialGraph.graph.nodes(nid).customAttrs.altgrey_color = false
 
         var newval_size = Math.round( ( Min_size+(NodeID_Val[nid]["round"]-real_min)*((Max_size-Min_size)/(real_max-real_min)) ) );
         TW.partialGraph.graph.nodes(nid).size = newval_size;
@@ -888,8 +889,12 @@ function colorsRelByBins(daclass) {
 
         var valSt = n.attributes[daclass]
 
+        var originalLabel = TW.Nodes[n.id].label
         if (doModifyLabel) {
-          n.label = `(${valSt}) ${n.label}`
+          n.label = `(${valSt}) ${originalLabel}`
+        }
+        else {
+          n.label = originalLabel
         }
 
         var theVal = parseFloat(valSt)
@@ -907,6 +912,7 @@ function colorsRelByBins(daclass) {
                 TW.partialGraph.graph.nodes(n.id).binMin = binMin
                 TW.partialGraph.graph.nodes(n.id).color = binColors[k]
                 TW.partialGraph.graph.nodes(n.id).customAttrs.alt_color = binColors[k]
+                TW.partialGraph.graph.nodes(n.id).customAttrs.altgrey_color = false
                 foundBin = true
                 // console.log(`theVal ${theVal} => found its bin ${binMin} ... ${binColors[k]}`)
 
@@ -983,9 +989,10 @@ function colorsBy(daclass) {
           var attval = ( isUndef(the_node.attributes) || isUndef(the_node.attributes[daclass]) )? v_nodes[i][daclass]: the_node.attributes[daclass];
           TW.partialGraph.graph.nodes(v_nodes[i].id).color = randomColorList[ attval ]
           TW.partialGraph.graph.nodes(v_nodes[i].id).customAttrs.alt_color = randomColorList[ attval ]
+          TW.partialGraph.graph.nodes(v_nodes[i].id).customAttrs.altgrey_color = false
       }
       // set the global state
-      TW.handpickedcolor = false
+      TW.handpickedcolor = true
     }
 
     //    [ Edge-colour by source-target nodes-colours combination ]
