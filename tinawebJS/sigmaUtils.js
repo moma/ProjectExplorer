@@ -310,10 +310,11 @@ SigmaUtils = function () {
             else {
               // #C01O3 += alpha 55
               //                     => #C01O355
-              nodeColor = node.customAttrs.alt_color+"55"
 
-              // old way:
-              // nodeColor = "rgba("+hex2rga(node.customAttrs.alt_color)+",0.5)"
+              if (!node.customAttrs.altgrey_color) {
+                node.customAttrs.altgrey_color = "rgba("+(hex2rgba(node.customAttrs.alt_color).slice(0,3).join(','))+",0.4)"
+              }
+              nodeColor = node.customAttrs.altgrey_color
             }
             // nice looking uniform grey
             borderColor = TW.nodesGreyBorderColor
@@ -771,8 +772,8 @@ function repaintEdges() {
   //     var e_id = v_edges[e].id;
   //     var a = TW.partialGraph.graph.nodes(v_edges[e].source).color;
   //     var b = TW.partialGraph.graph.nodes(v_edges[e].target).color;
-  //     a = hex2rga(a);
-  //     b = hex2rga(b);
+  //     a = hex2rgba(a);
+  //     b = hex2rgba(b);
   //     var r = (a[0] + b[0]) >> 1;
   //     var g = (a[1] + b[1]) >> 1;
   //     var b = (a[2] + b[2]) >> 1;
@@ -888,7 +889,7 @@ function colorsRelByBins(daclass) {
         var valSt = n.attributes[daclass]
 
         if (doModifyLabel) {
-          n.label = `(${valSt}) ${n.label}`          
+          n.label = `(${valSt}) ${n.label}`
         }
 
         var theVal = parseFloat(valSt)
@@ -987,23 +988,21 @@ function colorsBy(daclass) {
       TW.handpickedcolor = false
     }
 
-
-    // £TODO remove another duplicate of edgeRGB
     //    [ Edge-colour by source-target nodes-colours combination ]
-    var v_edges = getVisibleEdges();
-    for(var e in v_edges) {
-        var e_id = v_edges[e].id;
-        var a = v_edges[e].source.color;
-        var b = v_edges[e].target.color;
-        if (a && b) {
-            a = hex2rga(a);
-            b = hex2rga(b);
-            var r = (a[0] + b[0]) >> 1;
-            var g = (a[1] + b[1]) >> 1;
-            var b = (a[2] + b[2]) >> 1;
-            TW.partialGraph.graph.edges(e_id).color = "rgba("+[r,g,b].join(",")+",0.5)";
-        }
-    }
+    // var v_edges = getVisibleEdges();
+    // for(var e in v_edges) {
+    //     var e_id = v_edges[e].id;
+    //     var a = v_edges[e].source.color;
+    //     var b = v_edges[e].target.color;
+    //     if (a && b) {
+    //         a = hex2rgba(a);
+    //         b = hex2rgba(b);
+    //         var r = (a[0] + b[0]) >> 1;
+    //         var g = (a[1] + b[1]) >> 1;
+    //         var b = (a[2] + b[2]) >> 1;
+    //         TW.partialGraph.graph.edges(e_id).color = "rgba("+[r,g,b].join(",")+",0.5)";
+    //     }
+    // }
     //    [ / Edge-colour by source-target nodes-colours combination ]
 
     // £TODO fix ClustersLegend

@@ -152,16 +152,19 @@ function getByID(elem) {
 }
 
 
-
-function hex2rga(sent_hex) {
+// hex can be RGB (3 or 6 chars after #) or RGBA (4 or 8 chars)
+function hex2rgba(sent_hex) {
+    if (!sent_hex) {
+      return [0,0,0,1]
+    }
     result = []
     hex = ( sent_hex.charAt(0) === "#" ? sent_hex.substr(1) : sent_hex );
     // check if 6 letters are provided
-    if (hex.length === 6) {
+    if (hex.length == 6 || hex.length == 8) {
         result = calculateFull(hex);
         return result;
     }
-    else if (hex.length === 3) {
+    else if (hex.length == 3 || hex.length == 3) {
         result = calculatePartial(hex);
         return result;
     }
@@ -171,7 +174,12 @@ function calculateFull(hex) {
     var r = parseInt(hex.substring(0, 2), 16);
     var g = parseInt(hex.substring(2, 4), 16);
     var b = parseInt(hex.substring(4, 6), 16);
-    return [r,g,b];
+
+    var a = 0
+    if (hex.substring(6, 8)) {
+      a = parseInt(hex.substring(6, 8), 16) / 255;
+    }
+    return [r,g,b, a];
 }
 
 
@@ -180,7 +188,12 @@ function calculatePartial(hex) {
     var r = parseInt(hex.substring(0, 1) + hex.substring(0, 1), 16);
     var g = parseInt(hex.substring(1, 2) + hex.substring(1, 2), 16);
     var b = parseInt(hex.substring(2, 3) + hex.substring(2, 3), 16);
-    return [r,g,b];
+    var a = 0
+    if (hex.substring(3, 4)) {
+      a = parseInt(hex.substring(3, 4), 16) / 255;
+    }
+
+    return [r,g,b, a];
 }
 
 function componentToHex(c) {

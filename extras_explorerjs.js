@@ -216,6 +216,9 @@ function graphResetColor(){
       let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
       n.color = n.customAttrs["true_color"];
 
+      n.customAttrs.alt_color = false
+      n.customAttrs.altgrey_color = false
+
       n.label = TW.Nodes[n.id].label
     }
 

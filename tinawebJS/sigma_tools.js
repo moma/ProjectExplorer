@@ -117,7 +117,7 @@ sigmaTools = (function(stools) {
           a = [parseFloat( tmp[0] ) , parseFloat( tmp[1] ) , parseFloat( tmp[2] )];
       }
       else {
-        a = hex2rga(a);
+        a = hex2rgba(a);
       }
 
       if(b.charAt(0)!="#") {
@@ -125,7 +125,7 @@ sigmaTools = (function(stools) {
           b = [parseFloat( tmp[0] ) , parseFloat( tmp[1] ) , parseFloat( tmp[2] )];
       }
       else {
-        b = hex2rga(b);
+        b = hex2rgba(b);
       }
       // console.log(source+" : "+a+"\t|\t"+target+" : "+b)
 

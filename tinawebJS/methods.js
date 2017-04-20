@@ -599,8 +599,9 @@ function greyEverything(){
       n.customAttrs.highlight = false;
 
       // special case after a coloredBy or clustersBy
+      // (now handled in renderer)
       // if (TW.handpickedcolor) {
-      //   n.color = "rgba("+hex2rga(n.color)+",0.5)"
+      //   n.color = "rgba("+hex2rgba(n.color+"55").join(','))"
       // }
     }
   }
@@ -662,7 +663,7 @@ function prepareNodesRenderingProperties(nodesDict) {
       grey: false,
       highlight: false,
       true_color : n.color,
-      defgrey_color : "rgba("+hex2rga(n.color)+",.4)"
+      defgrey_color : "rgba("+hex2rgba(n.color)+",.4)"
     }
 
     // POSS n.type: distinguish rendtype and twtype
@@ -809,8 +810,10 @@ function saveGEXF(nodes,edges,atts){
         gexf += ' <viz:position x="'+nodes[n].x+'"    y="'+nodes[n].y+'"  z="0" />\n';
         if(atts["color"]) gexf += ' <viz:size value="'+nodes[n].size+'" />\n';
         if(atts["color"]) {
-            col = hex2rga(nodes[n].color);
-            gexf += ' <viz:color r="'+col[0]+'" g="'+col[1]+'" b="'+col[2]+'" a="1"/>\n';
+            if (nodes[n].color && nodes[n].color.charAt(0) == '#') {
+              col = hex2rgba(nodes[n].color);
+              gexf += ' <viz:color r="'+col[0]+'" g="'+col[1]+'" b="'+col[2]+'" a='+col[3]+'/>\n';
+            }
         }
         gexf += ' <attvalues>\n';
         gexf += ' <attvalue for="0" value="'+nodes[n].type+'"/>\n';
