@@ -798,7 +798,7 @@ function colorsRelByBins(daclass) {
 
   TW.handpickedcolor = true
 
-  var nTicksParam = 12
+  var nTicksParam = (daclass == 'age') ? 6 : 12
   // do first loop entirely to get percentiles => bins, then modify alt_color
 
   // estimating ticks
@@ -851,8 +851,16 @@ function colorsRelByBins(daclass) {
 
     // tickThresholds = [-1000000,-75,-50,-25,-15,15,25,50,75,100,125,150, 1000000]
 
-    // £TODO put colors and thresholds as params or calculate thresholds like eg d3.histogram
     if (daclass == 'age') {
+      binColors = [
+          "#f9f008", //yel
+          "#f9da08",
+          "#fab207",
+          "#fa9607",
+          "#fa6e07",
+          "#fa4607" // red     binMin 125
+      ];
+
         // and add a grey color for the first timeperiod
         binColors.unshift("#F9F7ED")
 
