@@ -825,64 +825,70 @@ TinaWebJS = function ( sigmacanvas ) {
             sigma_utils.toggleEdges()
         });
 
-        NodeWeightFilter ( categories , "#slidercat0nodesweight" ,  categories[0],  "type" ,"size");
 
-        EdgeWeightFilter("#slidercat0edgesweight", "label" , "nodes1", "weight");
+        if (TW.filterSliders) {
 
-        $("#category1").hide();
+          NodeWeightFilter ( categories , "#slidercat0nodesweight" ,  categories[0],  "type" ,"size");
 
-        //finished
-        var labelSizeTimeout = null
-        $("#slidercat0nodessize").freshslider({
-            step:.5,
-            min:0,
-            max:5,
-            value: TW.partialGraph.settings('labelSizeRatio'),
-            bgcolor:"#27c470",
-            onchange:function(value){
-              if (labelSizeTimeout) {
-                clearTimeout(labelSizeTimeout)
-              }
-              labelSizeTimeout = setTimeout(function(){
-                if (TW.partialGraph.settings('labelSizeRatio') != value) {
-                  var adaptedLabelThreshold = 7 - value
-                  // console.log("value", value, "thres", adaptedLabelThreshold)
+          EdgeWeightFilter("#slidercat0edgesweight", "label" , "nodes1", "weight");
 
-                  TW.partialGraph.settings('labelSizeRatio', value)
-                  TW.partialGraph.settings('labelThreshold', adaptedLabelThreshold)
-                  TW.partialGraph.render()
+        }
+
+
+          $("#category1").hide();
+
+          //finished
+          var labelSizeTimeout = null
+          $("#slidercat0nodessize").freshslider({
+              step:.5,
+              min:0,
+              max:5,
+              value: TW.partialGraph.settings('labelSizeRatio'),
+              bgcolor:"#27c470",
+              onchange:function(value){
+                if (labelSizeTimeout) {
+                  clearTimeout(labelSizeTimeout)
                 }
-              }, 200)
+                labelSizeTimeout = setTimeout(function(){
+                  if (TW.partialGraph.settings('labelSizeRatio') != value) {
+                    var adaptedLabelThreshold = 7 - value
+                    // console.log("value", value, "thres", adaptedLabelThreshold)
 
-            }
-        });
+                    TW.partialGraph.settings('labelSizeRatio', value)
+                    TW.partialGraph.settings('labelThreshold', adaptedLabelThreshold)
+                    TW.partialGraph.render()
+                  }
+                }, 200)
 
-        // //finished
-        // $("#slidercat1nodessize").freshslider({
-        //     step:1,
-        //     min:-20,
-        //     max:20,
-        //     value:0,
-        //     bgcolor:"#FFA500",
-        //     onchange:function(value){
-        //         setTimeout(function (){
-        //             // new sigma.js loop on nodes POSS optimize
-        //             nds  = TW.partialGraph.graph.nodes()
-        //             console.log("init: slider resize")
-        //             for(j=0 ; j<TW.partialGraph.nNodes ; j++){
-        //                 if (nds[j]
-        //                  && nds[j].type == TW.catSem) {
-        //                      var n = nds[j]
-        //                      var newval = parseFloat(TW.Nodes[n.id].size) + parseFloat((value-1))*0.3
-        //                      n.size = (newval<1.0)?1:newval;
-        //                      sizeMult[TW.catSem] = parseFloat(value-1)*0.3;
-        //                 }
-        //             }
-        //             partialGraph.render()
-        //         },
-        //         100);
-        //     }
-        // });
+              }
+          });
+
+          // //finished
+          // $("#slidercat1nodessize").freshslider({
+          //     step:1,
+          //     min:-20,
+          //     max:20,
+          //     value:0,
+          //     bgcolor:"#FFA500",
+          //     onchange:function(value){
+          //         setTimeout(function (){
+          //             // new sigma.js loop on nodes POSS optimize
+          //             nds  = TW.partialGraph.graph.nodes()
+          //             console.log("init: slider resize")
+          //             for(j=0 ; j<TW.partialGraph.nNodes ; j++){
+          //                 if (nds[j]
+          //                  && nds[j].type == TW.catSem) {
+          //                      var n = nds[j]
+          //                      var newval = parseFloat(TW.Nodes[n.id].size) + parseFloat((value-1))*0.3
+          //                      n.size = (newval<1.0)?1:newval;
+          //                      sizeMult[TW.catSem] = parseFloat(value-1)*0.3;
+          //                 }
+          //             }
+          //             partialGraph.render()
+          //         },
+          //         100);
+          //     }
+          // });
 
         //Cursor Size slider
         var cursorSlider = $("#unranged-value").freshslider({

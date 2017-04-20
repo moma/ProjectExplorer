@@ -436,53 +436,67 @@ if(RES["OK"]) {
         //     }
         // }
 
+
         console.log("printing the typestring:", typestring)
 
-        if(typestring=="0|1") {
-            $("#category0").hide();
-            $("#category1").show();
 
-            if($("#slidercat1nodesweight").html()=="")
-                NodeWeightFilter( this.categories , "#slidercat1nodesweight" ,  this.categories[1],  "type" ,"size");
+        if (!TW.filterSliders) {
 
-            if($("#slidercat1edgesweight").html()=="")
-                EdgeWeightFilter("#slidercat1edgesweight", "label" , "nodes2", "weight");
+          document.getElementsByClassName('weight-selectors')[0].style.display="none"
+
+          // document.getElementById('slidercat0nodesweight').style.display="none"
+          // document.getElementById('slidercat0edgesweight').style.display="none"
+          // document.getElementById('slidercat1nodesweight').style.display="none"
+          // document.getElementById('slidercat1edgesweight').style.display="none"
+        }
+        else {
+          if(typestring=="0|1") {
+              $("#category0").hide();
+              $("#category1").show();
+
+              if($("#slidercat1nodesweight").html()=="")
+                  NodeWeightFilter( this.categories , "#slidercat1nodesweight" ,  this.categories[1],  "type" ,"size");
+
+              if($("#slidercat1edgesweight").html()=="")
+                  EdgeWeightFilter("#slidercat1edgesweight", "label" , "nodes2", "weight");
 
 
-            if(present.level!=past.level) {
-                NodeWeightFilter( this.categories , "#slidercat1nodesweight" ,  this.categories[1],  "type" ,"size");
-                EdgeWeightFilter("#slidercat1edgesweight", "label" , "nodes2", "weight");
-            }
-            set_ClustersLegend ( "clust_default" )
+              if(present.level!=past.level) {
+                  NodeWeightFilter( this.categories , "#slidercat1nodesweight" ,  this.categories[1],  "type" ,"size");
+                  EdgeWeightFilter("#slidercat1edgesweight", "label" , "nodes2", "weight");
+              }
+              set_ClustersLegend ( "clust_default" )
+          }
+
+          if(typestring=="1|0") {
+              $("#category0").show();
+              $("#category1").hide();
+
+              if($("#slidercat0nodesweight").html()=="")
+                  NodeWeightFilter( this.categories , "#slidercat0nodesweight" ,  this.categories[0],  "type" ,"size");
+
+              if($("#slidercat0edgesweight").html()=="")
+                  EdgeWeightFilter("#slidercat0edgesweight", "label" , "nodes1", "weight");
+
+              if(present.level!=past.level) {
+                  NodeWeightFilter( this.categories , "#slidercat0nodesweight" ,  this.categories[0],  "type" ,"size");
+                  EdgeWeightFilter("#slidercat0edgesweight", "label" , "nodes1", "weight");
+              }
+              set_ClustersLegend ( "clust_default" )
+          }
+
+          if(typestring=="1|1") {
+              $("#category0").show();
+              $("#category1").show();
+              // if(present.level!=past.level) {
+              NodeWeightFilter ( this.categories , "#slidercat0nodesweight" ,  this.categories[0],  "type" ,"size");
+              EdgeWeightFilter("#slidercat0edgesweight", "label" , "nodes1", "weight");
+              NodeWeightFilter( this.categories , "#slidercat1nodesweight" ,  this.categories[1],  "type" ,"size");
+              EdgeWeightFilter("#slidercat1edgesweight", "label" , "nodes2", "weight");
+              // }
+          }
         }
 
-        if(typestring=="1|0") {
-            $("#category0").show();
-            $("#category1").hide();
-
-            if($("#slidercat0nodesweight").html()=="")
-                NodeWeightFilter( this.categories , "#slidercat0nodesweight" ,  this.categories[0],  "type" ,"size");
-
-            if($("#slidercat0edgesweight").html()=="")
-                EdgeWeightFilter("#slidercat0edgesweight", "label" , "nodes1", "weight");
-
-            if(present.level!=past.level) {
-                NodeWeightFilter( this.categories , "#slidercat0nodesweight" ,  this.categories[0],  "type" ,"size");
-                EdgeWeightFilter("#slidercat0edgesweight", "label" , "nodes1", "weight");
-            }
-            set_ClustersLegend ( "clust_default" )
-        }
-
-        if(typestring=="1|1") {
-            $("#category0").show();
-            $("#category1").show();
-            // if(present.level!=past.level) {
-            NodeWeightFilter ( this.categories , "#slidercat0nodesweight" ,  this.categories[0],  "type" ,"size");
-            EdgeWeightFilter("#slidercat0edgesweight", "label" , "nodes1", "weight");
-            NodeWeightFilter( this.categories , "#slidercat1nodesweight" ,  this.categories[1],  "type" ,"size");
-            EdgeWeightFilter("#slidercat1edgesweight", "label" , "nodes2", "weight");
-            // }
-        }
     }).index();
 
     TW.FA2Params = {
