@@ -125,7 +125,7 @@ SigmaUtils = function () {
         context.beginPath();
 
         if (TW.selectedColor == "node")
-          context.fillStyle = node.color; // node's
+          context.fillStyle = TW.handpickedcolor? node.customAttrs.alt_color : node.color; // node's
         else
           context.fillStyle = "#F7E521"; // yellow
 
@@ -455,6 +455,7 @@ SigmaUtils = function () {
 
           // Display the label:
           if (node.label && typeof node.label === 'string') {
+
             context.fillStyle = (settings('labelHoverColor') === 'node') ?
               (node.color || settings('defaultNodeColor')) :
               settings('defaultLabelHoverColor');
