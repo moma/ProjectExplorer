@@ -220,6 +220,9 @@ function graphResetColor(){
       n.customAttrs.altgrey_color = false
 
       n.label = TW.Nodes[n.id].label
+
+      // some colorings also modified size
+      n.size = TW.Nodes[n.id].size
     }
 
     // if (TW.partialGraph.settings('drawEdges')) {
