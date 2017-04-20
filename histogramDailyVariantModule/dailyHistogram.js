@@ -7,7 +7,6 @@ var hg
 
 var $search_histogram = $("#search_histogram2")
 
-
 //method for calling the ISC-API and get pubs-distribution of the suggested term
 function search_proposed_terms_and_draw( the_queries ) {
 
@@ -44,19 +43,27 @@ function search_proposed_terms_and_draw( the_queries ) {
             // ES aggs response, for example
             // data = {"took":91,"total":121673,"aggs":{"publicationCount":{"buckets":[{"key":1989,"doc_count":880},{"key":1990,"doc_count":1088},...,{"key":2012,"doc_count":9543},{"key":2013,"doc_count":8832}]}},"hits":{"total":121673,"max_score":0,"hits":[]}}
 
-            console.log(">> incoming api data <<")
-            console.log(data)
+            // console.log(">> incoming api data <<")
+            // console.log(data)
 
             if(data.results.total==0) {
                 return false;
             }
             else {
+                var startRecordingFlag = false
                 for(var i in data.results.hits) {
                     var elem = data.results.hits[i]
                     var day = elem.key_as_string+""
                     var ndocs = elem.doc_count
 
-                    docs_days.push( [ day , ndocs] )
+                    if (! startRecordingFlag
+                      && ndocs > TW.histogramStartThreshold) {
+                      startRecordingFlag = true
+                    }
+
+                    if (startRecordingFlag) {
+                      docs_days.push( [ day , ndocs] )
+                    }
                 }
 
                 // docs_days is now an array of couples [["2016-01-04T00:00:00.000Z",25],["2016-01-05T00:00:00.000Z",28],...]

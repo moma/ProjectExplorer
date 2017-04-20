@@ -105,6 +105,8 @@ TW.nodeClusAtt = "modularity_class"
 
 TW.filterSliders = false
 
+TW.histogramStartThreshold = 10 ;
+
 TW.edgeDefaultOpacity = 0.5  // opacity when true_color
 TW.edgeGreyColor = "rgba(150, 150, 150, 0.2)";
 TW.nodesGreyBorderColor = "rgba(100, 100, 100, 0.5)";
