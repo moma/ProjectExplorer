@@ -356,26 +356,8 @@ function dictfyGexf( gexf , categories ){
                 var attr = attvalueNode.getAttribute('for');
                 var val = attvalueNode.getAttribute('value');
 
-
-
-                // TODO use here nodesAttributes
-
-
-
-
-
-
-
-
-
-
+                // POSS here check nodesAttributes from scanGexf
                 if(catDict[val]) atts["category"] = val;
-
-
-
-
-
-
                 else atts[attr]=val;
                 attributes = atts;
             }

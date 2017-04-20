@@ -755,7 +755,7 @@ function clustersBy(daclass) {
     // Edge precompute alt_rgb by new source-target nodes-colours combination
     repaintEdges()
 
-    set_ClustersLegend ( null )
+    // set_ClustersLegend ( null )
 
     TW.partialGraph.render();
 }
@@ -946,7 +946,7 @@ function colorsRelByBins(daclass) {
     // Edge precompute alt_rgb by new source-target nodes-colours combination
     repaintEdges()
 
-    set_ClustersLegend ( null )
+    // set_ClustersLegend ( null )
 
     TW.partialGraph.render();
 }
@@ -1004,7 +1004,7 @@ function colorsBy(daclass) {
     repaintEdges()
 
     // £TODO fix ClustersLegend
-    set_ClustersLegend ( daclass )
+    // set_ClustersLegend ( daclass )
     TW.partialGraph.render();
 }
 
