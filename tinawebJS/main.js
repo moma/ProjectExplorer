@@ -206,7 +206,7 @@ if(RES["OK"]) {
 
     // in-place: pre-compute all color/grey/size properties
     prepareNodesRenderingProperties(TW.Nodes)
-    prepareEdgesRenderingProperties(TW.Edges)
+    prepareEdgesRenderingProperties(TW.Edges, TW.Nodes)
 
     TW.selectionActive = false  // changes rendering mode
 

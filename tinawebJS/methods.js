@@ -583,7 +583,7 @@ function unHide(nodeId) {
 
 // edges greyish color for unselected, when we have a selection
 // NB: we just change the flags, not the colors
-//     - renderer will see the flags and handle the case accordingly
+//     renderer will see the flags and handle the case accordingly
 function greyEverything(){
 
   for(var j=0 ; j<TW.nNodes ; j++){
@@ -597,12 +597,6 @@ function greyEverything(){
       n.active = false
       n.customAttrs.forceLabel = false;
       n.customAttrs.highlight = false;
-
-      // special case after a coloredBy or clustersBy
-      // (now handled in renderer)
-      // if (TW.handpickedcolor) {
-      //   n.color = "rgba("+hex2rgba(n.color+"55").join(','))"
-      // }
     }
   }
 
@@ -612,9 +606,6 @@ function greyEverything(){
       if (e && !e.hidden && !e.customAttrs.grey) {
         e.customAttrs.grey = 1
         e.customAttrs.activeEdge = 0
-
-        // new specification: coloredBy does not affect edges
-        // (ie no special case for notDefaultColors)
       }
     }
   }
@@ -681,14 +672,14 @@ function prepareNodesRenderingProperties(nodesDict) {
   }
 }
 
-function prepareEdgesRenderingProperties(edgesDict) {
+function prepareEdgesRenderingProperties(edgesDict, nodesDict) {
   for (var eid in edgesDict) {
     var e = edgesDict[eid]
 
     e.weight = Math.round(e.weight*1000)/1000
     // e.size = e.weight // REFA s/weight/size/ ?
 
-    var rgbStr = sigmaTools.edgeRGB(e.source, e.target)
+    var rgbStr = sigmaTools.edgeRGB(nodesDict[e.source].color, nodesDict[e.target].color)
 
     e.color = "rgba("+rgbStr+","+TW.edgeDefaultOpacity+")"
     e.customAttrs = {

@@ -201,12 +201,17 @@ SigmaUtils = function () {
       // console.warn("rendering edge", edge)
 
       var defSize = edge[prefix + 'size'] || settings("minEdgeSize") || 1 ;
+
+      // precomputed color with no opacity
+      // cf. sigmaTools.edgeRGB
+      var baseRGB = TW.handpickedcolor ? edge.customAttrs.alt_rgb : edge.customAttrs.rgb
+
       if (edge.customAttrs.activeEdge) {
         size = (defSize * 2) + 1
-        // color with no opacity
-        // cf. sigmaTools.edgeRGB
-        color = 'rgb('+edge.customAttrs.rgb+')'
-        // console.log("drawing activeEdge with size", size)
+
+        // active edges look well with no opacity
+        color = `rgb(${baseRGB})`
+
         // edge.customAttrs.activeEdge = false // for one-time
       }
       else if (edge.customAttrs.grey) {
@@ -214,8 +219,7 @@ SigmaUtils = function () {
         size = 1
       }
       else {
-        // color = "rgba( "+rgb.join()+" , "+TW.edgeDefaultOpacity+")";
-        color = edge.customAttrs.true_color
+        color = "rgba( "+baseRGB+" , "+TW.edgeDefaultOpacity+")";
         size = defSize
       }
 
@@ -686,12 +690,10 @@ function clustersBy(daclass) {
 
     TW.handpickedcolor = true
 
-    // TODO avoid this strategy and also double loop below
-    var v_nodes = getVisibleNodes();
     var min_pow = 0;
-    for(var i in v_nodes) {
-        var the_node = TW.Nodes[ v_nodes[i].id ]
-        var attval = ( isUndef(the_node.attributes) || isUndef(the_node.attributes[daclass]) )? v_nodes[i][daclass]: the_node.attributes[daclass];
+    for(var j in TW.nodeIds) {
+        var the_node = TW.Nodes[ TW.nodeIds[j] ]
+        var attval = the_node.attributes[daclass];
         if( !isNaN(parseFloat(attval)) ) { //is float
             while(true) {
                 var themult = Math.pow(10,min_pow);
@@ -707,13 +709,14 @@ function clustersBy(daclass) {
     var real_min = 1000000;
     var real_max = -1;
     var themult = Math.pow(10,min_pow);
-    for(var i in v_nodes) {
-        var the_node = TW.Nodes[ v_nodes[i].id ]
-        var attval = ( isUndef(the_node.attributes) || isUndef(the_node.attributes[daclass]) )? v_nodes[i][daclass]: the_node.attributes[daclass];
+
+    for(var j in TW.nodeIds) {
+        var the_node = TW.Nodes[ TW.nodeIds[j] ]
+        var attval = the_node.attributes[daclass];
         var attnumber = Number(attval);
         var round_number = Math.round(  attnumber*themult ) ;
 
-        NodeID_Val[v_nodes[i].id] = { "round":round_number , "real":attnumber };
+        NodeID_Val[TW.nodeIds[j]] = { "round":round_number , "real":attnumber };
 
         if (round_number<real_min) real_min = round_number;
         if (round_number>real_max) real_max = round_number;
@@ -749,12 +752,8 @@ function clustersBy(daclass) {
     }
     //    [ / Scaling node colours(0-255) and sizes(3-5) ]
 
-
-
-
-    //    [ Edge-colour by source-target nodes-colours combination ]
+    // Edge precompute alt_rgb by new source-target nodes-colours combination
     repaintEdges()
-    //    [ / Edge-colour by source-target nodes-colours combination ]
 
     set_ClustersLegend ( null )
 
@@ -765,26 +764,29 @@ function clustersBy(daclass) {
 // for debug of colorsRelByBins
 var totalsPerBinMin = {}
 
-// Edge-colour by source-target nodes-colours combination
-// TODO rm because duplicate with edgeRGB
+// Edge-colour: precompute alt_rgb by source-target node.alt_color combination
 function repaintEdges() {
-  console.log('skipping repaintEdges')
-  // var v_edges = getVisibleEdges();
-  // for(var e in v_edges) {
-  //     var e_id = v_edges[e].id;
-  //     var a = TW.partialGraph.graph.nodes(v_edges[e].source).color;
-  //     var b = TW.partialGraph.graph.nodes(v_edges[e].target).color;
-  //     a = hex2rgba(a);
-  //     b = hex2rgba(b);
-  //     var r = (a[0] + b[0]) >> 1;
-  //     var g = (a[1] + b[1]) >> 1;
-  //     var b = (a[2] + b[2]) >> 1;
-  //
-  //     TW.partialGraph.graph.edges(e_id).color = "rgba("+[r,g,b].join(",")+",0.5)";
-  //
-  //     // also keep components array (useful if we change opacity when selected)
-  //     TW.partialGraph.graph.edges(e_id).customAttrs.rgb = [r,g,b]
-  // }
+
+  for (var i in TW.edgeIds) {
+    let eid = TW.edgeIds[i]
+
+    if (eid) {
+      let idPair = eid.split(';')
+      if (idPair.length != 2) {
+        console.warn('skipping invalid edgeId', eid)
+      }
+      else {
+        let e = TW.partialGraph.graph.edges(eid)
+        let src = TW.partialGraph.graph.nodes(idPair[0])
+        let tgt = TW.partialGraph.graph.nodes(idPair[1])
+
+        let src_color = src.customAttrs.alt_color || '#555'
+        let tgt_color = tgt.customAttrs.alt_color || '#555'
+        e.customAttrs.alt_rgb = sigmaTools.edgeRGB(src_color,tgt_color)
+        // we don't set e.color because opacity may vary if selected or not
+      }
+    }
+  }
 }
 
 // rewrite of clustersBy with binning and for attributes that can have negative float values
@@ -910,10 +912,11 @@ function colorsRelByBins(daclass) {
             if((theVal >= binMin) && (theVal < binMax)) {
                 // TW.partialGraph._core.graph.nodesIndex[n.id].binMin = binMin
                 // TW.partialGraph._core.graph.nodesIndex[n.id].color = binColors[j]
-                TW.partialGraph.graph.nodes(n.id).binMin = binMin
-                TW.partialGraph.graph.nodes(n.id).color = binColors[k]
-                TW.partialGraph.graph.nodes(n.id).customAttrs.alt_color = binColors[k]
-                TW.partialGraph.graph.nodes(n.id).customAttrs.altgrey_color = false
+
+                n.binMin = binMin
+                n.color = binColors[k]
+                n.customAttrs.alt_color = binColors[k]
+                n.customAttrs.altgrey_color = false
                 foundBin = true
                 // console.log(`theVal ${theVal} => found its bin ${binMin} ... ${binColors[k]}`)
 
@@ -926,21 +929,22 @@ function colorsRelByBins(daclass) {
                 break
             }
           }
+        }
 
-          if (!foundBin) {
-            TW.partialGraph.graph.nodes(n.id).binMin = null
-            TW.partialGraph.graph.nodes(n.id).color = '#555'
-            TW.partialGraph.graph.nodes(n.id).customAttrs.alt_color = '#555'
-          }
+        // case no val or no bin
+        if (!foundBin) {
+          // console.log('no val for', n.id)
+          n.binMin = null
+          n.color = '#555'
+          n.customAttrs.alt_color = '#555'
         }
       }
     }
 
-    console.info('coloring distribution per tick thresholds' , totalsPerBinMin[binMin])
+    console.info('coloring distribution per tick thresholds' , totalsPerBinMin)
 
-    //    [ Edge-colour by source-target nodes-colours combination ]
-    // repaintEdges()
-    //    [ / Edge-colour by source-target nodes-colours combination ]
+    // Edge precompute alt_rgb by new source-target nodes-colours combination
+    repaintEdges()
 
     set_ClustersLegend ( null )
 
@@ -996,22 +1000,8 @@ function colorsBy(daclass) {
       TW.handpickedcolor = true
     }
 
-    //    [ Edge-colour by source-target nodes-colours combination ]
-    // var v_edges = getVisibleEdges();
-    // for(var e in v_edges) {
-    //     var e_id = v_edges[e].id;
-    //     var a = v_edges[e].source.color;
-    //     var b = v_edges[e].target.color;
-    //     if (a && b) {
-    //         a = hex2rgba(a);
-    //         b = hex2rgba(b);
-    //         var r = (a[0] + b[0]) >> 1;
-    //         var g = (a[1] + b[1]) >> 1;
-    //         var b = (a[2] + b[2]) >> 1;
-    //         TW.partialGraph.graph.edges(e_id).color = "rgba("+[r,g,b].join(",")+",0.5)";
-    //     }
-    // }
-    //    [ / Edge-colour by source-target nodes-colours combination ]
+    // Edge precompute alt_rgb by new source-target nodes-colours combination
+    repaintEdges()
 
     // £TODO fix ClustersLegend
     set_ClustersLegend ( daclass )

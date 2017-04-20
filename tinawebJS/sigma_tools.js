@@ -44,7 +44,7 @@ sigmaTools = (function(stools) {
       for (var i in rawGexfEdges) {
         var rawEdge = rawGexfEdges[i]
 
-        var rgbStr = sigmaTools.edgeRGB(rawEdge.source, rawEdge.target, newNodes)
+        var rgbStr = sigmaTools.edgeRGB(newNodes[rawEdge.source].color, newNodes[rawEdge.target].color)
         var leColor = "rgba("+rgbStr+","+TW.edgeDefaultOpacity+")"
 
         var newEid = rawEdge.source+";"+rawEdge.target;
@@ -86,52 +86,35 @@ sigmaTools = (function(stools) {
     };
 
     // TODO check duplicate functionalities with repaintEdges
-    stools.edgeRGB = function(src_id, tgt_id, nodeIndex) {
-
-      if (!nodeIndex) {
-        nodeIndex = TW.Nodes
-      }
-
-      if (!Object.keys(nodeIndex).length) {
-        console.warn('empty nodeIndex')
-      }
-
-      // console.log('edgeRGB, src_id', src_id)
-      // console.log('edgeRGB, tgt_id', tgt_id)
-      //
-      if (!nodeIndex[src_id] || !nodeIndex[tgt_id]) {
-        return '0,0,0'
-      }
+    stools.edgeRGB = function(color_a, color_b) {
 
       //edge color will be the combination of the 2 node colors
-      var a = nodeIndex[src_id]['color'];
-      var b = nodeIndex[tgt_id]['color'];
-      var tmp
-      // console.log("color a", a)
-      // console.log("color b", b)
 
-      if(a.charAt(0)!="#") {
-          tmp = a.replace(/rgba?\(/,"").replace(")","").split(",")
+      // console.log("color a", color_a)
+      // console.log("color b", color_b)
+
+      var tmp
+
+      if(color_a.charAt(0)!="#") {
+          tmp = color_a.replace(/rgba?\(/,"").replace(")","").split(",")
 
           // rgb array
-          a = [parseFloat( tmp[0] ) , parseFloat( tmp[1] ) , parseFloat( tmp[2] )];
+          color_a = [parseFloat( tmp[0] ) , parseFloat( tmp[1] ) , parseFloat( tmp[2] )];
       }
       else {
-        a = hex2rgba(a);
+        color_a = hex2rgba(color_a);
       }
 
-      if(b.charAt(0)!="#") {
-          tmp = b.replace(/rgba?\(/,"").replace(")","").split(",")
-          b = [parseFloat( tmp[0] ) , parseFloat( tmp[1] ) , parseFloat( tmp[2] )];
+      if(color_b.charAt(0)!="#") {
+          tmp = color_b.replace(/rgba?\(/,"").replace(")","").split(",")
+          color_b = [parseFloat( tmp[0] ) , parseFloat( tmp[1] ) , parseFloat( tmp[2] )];
       }
       else {
-        b = hex2rgba(b);
+        color_b = hex2rgba(color_b);
       }
-      // console.log(source+" : "+a+"\t|\t"+target+" : "+b)
-
-      var r = (a[0] + b[0]) >> 1;
-      var g = (a[1] + b[1]) >> 1;
-      var b = (a[2] + b[2]) >> 1;
+      var r = (color_a[0] + color_b[0]) >> 1;
+      var g = (color_a[1] + color_b[1]) >> 1;
+      var b = (color_a[2] + color_b[2]) >> 1;
 
       return [r,g,b].join(',')
     }
