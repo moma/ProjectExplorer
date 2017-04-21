@@ -755,7 +755,7 @@ function clustersBy(daclass) {
     // Edge precompute alt_rgb by new source-target nodes-colours combination
     repaintEdges()
 
-    // set_ClustersLegend ( null )
+    // set_ClustersLegend ( daclass )
 
     TW.partialGraph.render();
 }
@@ -794,11 +794,13 @@ function repaintEdges() {
 function colorsRelByBins(daclass) {
   cancelSelection(false);
 
+  var binColors
   var doModifyLabel = false
 
   TW.handpickedcolor = true
 
-  var nTicksParam = (daclass == 'age') ? 6 : 12
+  // should be = binColors.length
+  var nTicksParam = (daclass == 'age') ? 8 : 12
   // do first loop entirely to get percentiles => bins, then modify alt_color
 
   // estimating ticks
@@ -819,7 +821,7 @@ function colorsRelByBins(daclass) {
 
   var len = valArray.length
 
-  valArray.sort() // important :)
+  valArray.sort(function(a, b) {return a - b;}) // important :)
 
   for (var l=0 ; l < nTicksParam ; l++) {
     let nthVal = Math.floor(len * l / nTicksParam)
@@ -827,50 +829,32 @@ function colorsRelByBins(daclass) {
     tickThresholds.push(valArray[nthVal])
   }
 
-  console.info(`===|===|=== ${nTicksParam} color ticks ===|===|===\n`, tickThresholds)
+  // also always add the max+1 as last tick (excluded upper bound of last bin)
+  tickThresholds.push((valArray[len-1])+1)
+
+  console.info(`[|===|=== ${nTicksParam} color ticks ===|===|]\n`, tickThresholds)
 
 
-    cancelSelection(false);
-    // 12 colors
-    var binColors = [
-        "#005197",  //blue    binMin -∞
-        "#3c76fb",        //  binMin -75
-        "#5c8af2",        //  binMin -50
-        "#64c5f2",        //  binMin -25
-        "#bae64f",//epsilon   binMin -10  binMin 10
-        "#f9f008",        //  binMin 10
-        "#f9da08",        //  binMin 25
-        "#fab207",        //  binMin 50
-        "#fa9607",        //  binMin 75
-        "#fa6e07",        //  binMin 100
-        "#fa4607", // red     binMin 125
-        "#991B1E"         //  binMin 150
+  cancelSelection(false);
+
+  if (daclass == 'age') {
+    // 9 colors
+    binColors = [
+        "#F9F588",//epsilon
+        "#f9f008", //yel
+        "#f9da08",
+        "#fab207",
+        "#fa9607",
+        "#fa6e07",
+        "#fa4607",
+        "#ff0000" // red     binMin 125
     ];
-
-    // spare color 13 "#64e0f2",
-
-    // tickThresholds = [-1000000,-75,-50,-25,-15,15,25,50,75,100,125,150, 1000000]
-
-    if (daclass == 'age') {
-      binColors = [
-          "#f9f008", //yel
-          "#f9da08",
-          "#fab207",
-          "#fa9607",
-          "#fa6e07",
-          "#fa4607" // red     binMin 125
-      ];
-
-        // and add a grey color for the first timeperiod
-        binColors.unshift("#F9F7ED")
-
-        // console.log("======> doing AGE")
     }
     else if (daclass == 'growth_rate') {
 
       doModifyLabel = true
 
-      binColors[4] = ""
+      // 12 colors
       binColors = [
           "#005197",  //blue    binMin -∞
           "#3c76fb",        //  binMin -75
@@ -886,6 +870,11 @@ function colorsRelByBins(daclass) {
           "#991B1E"         //  binMin 150
       ];
 
+    }
+
+    // verification
+    if (nTicksParam != binColors.length) {
+      console.warn (`colorsRelByBins setup mismatch: nTicksParam ${nTicksParam} should == nColors ${binColors.length}`)
     }
 
 
@@ -937,24 +926,34 @@ function colorsRelByBins(daclass) {
                 break
             }
           }
-        }
 
-        // case no val or no bin
-        if (!foundBin) {
+          // case no bin after loop (perhaps more ticks than colors-1 ??)
+          if (!foundBin) {
+            console.warn('no bin for theVal', theVal, n.id)
+            n.binMin = null
+            n.color = '#000'
+            n.customAttrs.alt_color = '#000'
+          }
+        }
+        else {
+          // case no val
           // console.log('no val for', n.id)
           n.binMin = null
           n.color = '#555'
           n.customAttrs.alt_color = '#555'
         }
+
       }
     }
+
+    // console.debug(valArray)
 
     console.info('coloring distribution per tick thresholds' , totalsPerBinMin)
 
     // Edge precompute alt_rgb by new source-target nodes-colours combination
     repaintEdges()
 
-    // set_ClustersLegend ( null )
+    // set_ClustersLegend ( daclass )
 
     TW.partialGraph.render();
 }
