@@ -54,7 +54,7 @@ var TW = {}
     TW.SystemStates.selections = [];
     TW.SystemStates.opposites = [];
     TW.catSoc = "Document";
-    TW.catSem = "NGram";
+    TW.catSem = "terms";
 
     TW.strSearchBar = "Select or suggest topics";
 
