@@ -20,6 +20,14 @@ function ChangeGraphAppearanceByAtt( manualflag ) {
 
     // Seeing all the possible attributes!
     var AttsDict = {}
+    var AttsTranslations = {
+      'clust_louvain': 'Groupes de voisins, méthode de Louvain',
+      'pageranks': 'Importance dans le réseau, méthode Google',
+      'age': 'Date initiale d\'apparition du terme dans le corpus',
+      'growth_rate': 'Tendances et oubliés de la semaine',
+      'modularity_class': 'Groupes de voisins, méthode des classes de modularité'
+    }
+
     var Atts_2_Exclude = {}
     for (var j in TW.nodeIds) {
         let nid = TW.nodeIds[j]
@@ -76,7 +84,13 @@ function ChangeGraphAppearanceByAtt( manualflag ) {
           if(att_s == "growth_rate") the_method = "colorsRelByBins"
           if(att_s == "age") the_method = "colorsRelByBins"
 
-          color_menu_info += '<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+att_s+'('+att_c+')'+'</a></li>'
+
+          // labels :)
+	  var lab_att_s ;
+          if (AttsTranslations[att_s])  lab_att_s = AttsTranslations[att_s]
+	  else lab_att_s = att_s
+
+          color_menu_info += '<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+lab_att_s+'('+att_c+')'+'</a></li>'
           // console.log('<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+att_s+'('+att_c+')'+'</a></li>')
       }
       $("#colorgraph-menu").html(color_menu_info)
