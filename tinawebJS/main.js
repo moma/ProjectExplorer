@@ -531,7 +531,7 @@ if(RES["OK"]) {
     TW.partialGraph.configForceAtlas2(TW.FA2Params)
 
     // REFA new sigma.js
-    TW.partialGraph.camera.goTo({x:0, y:0, ratio:1.2, angle: 0})
+    TW.partialGraph.camera.goTo({x:0, y:0, ratio:0.5, angle: 0})
 
     twjs_.initListeners( categories , TW.partialGraph);
 
