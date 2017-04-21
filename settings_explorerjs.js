@@ -115,7 +115,7 @@ TW.selectedColor = "node"  // "node" for a background like the node's color,
 
 TW.overSampling = true     // costly hi-def rendering (true => pixelRatio x 2)
 
-TW.deselectOnclickStage = false // will a click on the background remove selection ? (except when dragging)
+TW.deselectOnclickStage = true // will a click on the background remove selection ? (except when dragging)
 var showLabelsIfZoom=1.0;
 
 // ============ < / DEVELOPER OPTIONS > ============
