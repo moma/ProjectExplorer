@@ -12,14 +12,21 @@ function newPopup(url) {
 // Execution:    ChangeGraphAppearanceByAtt( true )
 // It scans the existing node-attributes and t keeps only those which are Numeric.
 //  then, add the button in the html with the sigmaUtils.clustersBy(x) listener.
-// [TODO: fonction un peu lourde dans le profilage]
+// [TODO: fonction un peu lourde dans le profilage => préparer la liste des attributs dès la lecture initiale des données dans parseCustom, ne faire que les conséquences ici]
 function ChangeGraphAppearanceByAtt( manualflag ) {
 
-    if ( !isUndef(manualflag) && !TW.colorByAtt ) TW.colorByAtt = manualflag;
-    if(!TW.colorByAtt) return;
+    if ( !isUndef(manualflag) && !TW.handpickedcolor ) TW.handpickedcolor = manualflag;
+    if(!TW.handpickedcolor) return;
 
     // Seeing all the possible attributes!
     var AttsDict = {}
+    var AttsTranslations = {
+      'clust_louvain': 'Groupes de voisins, méthode de Louvain',
+      'pageranks': 'Importance dans le réseau, méthode Google',
+      'age': 'Date initiale d\'apparition du terme dans le corpus',
+      'growth_rate': 'Tendances et oubliés de la semaine',
+      'modularity_class': 'Groupes de voisins, méthode des classes de modularité'
+    }
     var Atts_2_Exclude = {}
     for (var j in TW.nodeIds) {
         let nid = TW.nodeIds[j]
@@ -75,6 +82,9 @@ function ChangeGraphAppearanceByAtt( manualflag ) {
           if(att_s.indexOf("clust")>-1) the_method = "colorsBy"
           if(att_s == "growth_rate") the_method = "colorsRelByBins"
           if(att_s == "age") the_method = "colorsRelByBins"
+
+          // labels
+          if(AttsTranslations[att_s])  att_s = AttsTranslations[att_s]
 
           color_menu_info += '<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+att_s+'('+att_c+')'+'</a></li>'
           // console.log('<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+att_s+'('+att_c+')'+'</a></li>')
@@ -240,18 +250,38 @@ function graphResetColor(){
 function set_ClustersLegend ( daclass ) {
     //TW.partialGraph.states.slice(-1)[0].LouvainFait = true
 
+    console.log("set_ClustersLegend", daclass)
+
+    $("#legend_for_clusters").hide()
     $("#legend_for_clusters").removeClass( "my-legend" )
     $("#legend_for_clusters").html("")
     if(daclass==null) return;
 
     var ClustNB_CurrentColor = {}
     var nodesV = getVisibleNodes()
-    for(var i in nodesV) {
-        n = nodesV[i]
-        color = n.color
-        type = TW.Nodes[n.id].type
-        clstNB = TW.Nodes[n.id].attributes[daclass]
-        ClustNB_CurrentColor[type+"||"+daclass+"||"+clstNB] = color
+    for(var j in TW.nodeIds) {
+        n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
+        if (!n.hidden) {
+          color = n.color
+          type = TW.Nodes[n.id].type
+
+          if (daclass == 'clust_default' && TW.nodeClusAtt) {
+            clstNB = TW.Nodes[n.id].attributes[TW.nodeClusAtt]
+          }
+          else {
+            clstNB = TW.Nodes[n.id].attributes[daclass]
+          }
+
+          if (daclass == 'age' && (Number(clstNB) == clstNB)) {
+            //clstNB is probably in ms since epoch
+            // ex:    1451692800000
+            theDate = new Date(Number(clstNB))
+            clstNB = theDate.toDateString()
+          }
+
+          // TODO if ticks use them !
+          ClustNB_CurrentColor[type+"||"+daclass+"||"+clstNB] = color
+        }
     }
 
     LegendDiv = ""
@@ -295,6 +325,7 @@ function set_ClustersLegend ( daclass ) {
     LegendDiv += '    </div>'
 
 
+    $("#legend_for_clusters").show();
     $("#legend_for_clusters").addClass( "my-legend" );
     $("#legend_for_clusters").html( LegendDiv )
 }
@@ -631,6 +662,9 @@ function circleTrackMouse(e) {
     ctx.globalAlpha = 0.5;
     ctx.beginPath();
 
+
+
+
       // // labels appear on circle hover : OFF
 
       // convert (TODO CHECK IN THIS CONTEXT)
@@ -666,7 +700,9 @@ function circleTrackMouse(e) {
 }
 
 
-// exact subset of nodes under circle
+// ----------------------------------------
+// fast exact subset of nodes under circle
+// ---------------------------------------
 function circleGetAreaNodes(camX0, camY0) {
 
   var cursor_ray = cursor_size * TW.cam.ratio // cursor_size to cam units
