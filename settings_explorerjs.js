@@ -69,8 +69,6 @@ var sizeMult = [];
     sizeMult[TW.catSoc] = 0.0;
     sizeMult[TW.catSem] = 0.0;
 
-var inactiveColor = '#666';
-var startingNodeId = "1";
 var minLengthAutoComplete = 1;
 var maxSearchResults = 10;
 
@@ -82,6 +80,8 @@ var desirableTagCloudFont_MIN=12;
 var desirableTagCloudFont_MAX=20;
 var desirableNodeSizeMIN=1;
 var desirableNodeSizeMAX=12;
+
+// apparently not used ?
 var desirableScholarSize=6; //Remember that all scholars have the same size!
 
 /*
