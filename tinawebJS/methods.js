@@ -650,11 +650,15 @@ function prepareNodesRenderingProperties(nodesDict) {
 
     // new initial setup of properties
     n.active = false
+
+    var rgba = hex2rgba(n.color)
+    var rgbStr = rgba.splice(0, 3).join(',');
+
     n.customAttrs = {
       grey: false,
       highlight: false,
       true_color : n.color,
-      defgrey_color : "rgba("+hex2rgba(n.color)+",.4)"
+      defgrey_color : "rgba("+rgbStr+",.4)"
     }
 
     // POSS n.type: distinguish rendtype and twtype
