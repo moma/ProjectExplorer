@@ -93,9 +93,14 @@ SigmaUtils = function () {
       var fontSize,
           prefix = settings('prefix') || '',
           size = node[prefix + 'size'],
-          activeFlag = node['active'] || node.customAttrs['forceLabel']
+          activeFlag = node['active'] || node.customAttrs['forceLabel'],
+          neighborFlag = node.customAttrs['highlight'],
+          labelColor = (settings('labelColor') === 'node') ?
+            (node.color || settings('defaultNodeColor')) :
+            settings('defaultLabelColor') ;
           // NB active is used in all TW selections
           //    forceLabel is used in cluster highlighting
+          //    highlight is used for selection's neighbors or cluster highlighting
 
       let X = node[prefix + 'x']
       let Y = node[prefix + 'y']
@@ -176,12 +181,14 @@ SigmaUtils = function () {
           context.fill();
         }
       }
+      else if (neighborFlag) {
+        // larger neighbors or highlight
+        fontSize *= 1.4
+      }
 
       context.font = (settings('fontStyle') ? settings('fontStyle') + ' ' : '') +
         fontSize + 'px ' + settings('font');
-      context.fillStyle = (settings('labelColor') === 'node') ?
-        (node.color || settings('defaultNodeColor')) :
-        settings('defaultLabelColor');
+      context.fillStyle = labelColor;
 
       context.fillText(
         node.label,
