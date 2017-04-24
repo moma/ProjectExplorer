@@ -201,7 +201,8 @@ function pushSWClick(arg){
     swclickActual = arg;
 }
 
-//	tag cloud div
+// tag cloud div
+// [but not used in monopart case]
 function htmlfied_alternodes(elems) {
     var oppositesNodes=[]
     var js1='onclick="graphTagCloudElem(\'';
@@ -670,7 +671,7 @@ function prepareNodesRenderingProperties(nodesDict) {
     // customFlags : {
     //   // our status flags
     //   grey: false,
-    //   neighbor: false,
+    //   highlight: false,
     //   // forceLabel: false,
     // }
   }

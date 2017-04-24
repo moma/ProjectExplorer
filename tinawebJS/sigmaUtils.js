@@ -717,6 +717,8 @@ function clustersBy(daclass) {
     var real_max = -1;
     var themult = Math.pow(10,min_pow);
 
+    // console.log('themult', themult)
+
     for(var j in TW.nodeIds) {
         var the_node = TW.Nodes[ TW.nodeIds[j] ]
         var attval = the_node.attributes[daclass];
@@ -729,7 +731,7 @@ function clustersBy(daclass) {
         if (round_number>real_max) real_max = round_number;
     }
 
-
+    console.log("NodeID_Val", NodeID_Val)
 
     console.log(" - - - - - - - - -- - - ")
     console.log(real_min)
@@ -762,7 +764,7 @@ function clustersBy(daclass) {
     // Edge precompute alt_rgb by new source-target nodes-colours combination
     repaintEdges()
 
-    // set_ClustersLegend ( daclass )
+    set_ClustersLegend ( daclass )
 
     TW.partialGraph.render();
 }
@@ -988,12 +990,12 @@ function colorsBy(daclass) {
 
 
     if (daclass=="clust_default") {
-        for(var i in v_nodes) {
-          var original_node_color = TW.Nodes[ v_nodes[i].id ].color
-          TW.partialGraph.graph.nodes(v_nodes[i].id).color = original_node_color
+        for(var j in TW.nodeIds) {
+          var original_node_color = TW.Nodes[ TW.nodeIds[j] ].color
+          TW.partialGraph.graph.nodes(TW.nodeIds[j]).color = original_node_color
 
           // reset the alt_color valflag
-          TW.partialGraph.graph.nodes(v_nodes[i].id).customAttrs.alt_color = null
+          TW.partialGraph.graph.nodes(TW.nodeIds[j]).customAttrs.alt_color = null
         }
 
         // reset the global state
@@ -1003,12 +1005,12 @@ function colorsBy(daclass) {
       // shuffle on entire array is better than random sorting function on each element
       var randomColorList = shuffle(colorList)
 
-      for(var i in v_nodes) {
-          var the_node = TW.Nodes[ v_nodes[i].id ]
-          var attval = ( isUndef(the_node.attributes) || isUndef(the_node.attributes[daclass]) )? v_nodes[i][daclass]: the_node.attributes[daclass];
-          TW.partialGraph.graph.nodes(v_nodes[i].id).color = randomColorList[ attval ]
-          TW.partialGraph.graph.nodes(v_nodes[i].id).customAttrs.alt_color = randomColorList[ attval ]
-          TW.partialGraph.graph.nodes(v_nodes[i].id).customAttrs.altgrey_color = false
+      for(var j in TW.nodeIds) {
+          var the_node = TW.Nodes[ TW.nodeIds[j] ]
+          var attval = ( isUndef(the_node.attributes) || isUndef(the_node.attributes[daclass]) )? TW.partialGraph.graph.nodes(TW.nodeIds[j])[daclass]: the_node.attributes[daclass];
+          TW.partialGraph.graph.nodes(TW.nodeIds[j]).color = randomColorList[ attval ]
+          TW.partialGraph.graph.nodes(TW.nodeIds[j]).customAttrs.alt_color = randomColorList[ attval ]
+          TW.partialGraph.graph.nodes(TW.nodeIds[j]).customAttrs.altgrey_color = false
       }
       // set the global state
       TW.handpickedcolor = true
@@ -1017,8 +1019,7 @@ function colorsBy(daclass) {
     // Edge precompute alt_rgb by new source-target nodes-colours combination
     repaintEdges()
 
-    // £TODO fix ClustersLegend
-    // set_ClustersLegend ( daclass )
+    set_ClustersLegend ( daclass )
     TW.partialGraph.render();
 }
 

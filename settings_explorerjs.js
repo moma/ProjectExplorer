@@ -210,6 +210,18 @@ TW.Nodes = [];
 TW.Edges = [];
 TW.Clusters = [];
 
+// new TW.Clusters structure
+// --------------------------
+// was: built in separate loop from read of all attr values
+//      TW.Clusters[nodeType][clusterType][possibleValue] = clst_idx_of_possible_value
+
+// from now on (WIP):
+//      built in parseCustom (when reading all nodes attributes anyway)
+//      if discrete attrvalues with < 15 classes (colorsBy, clustersBy)
+//         => TW.Clusters[nodeType][clusterType][possibleValue] = number of nodes with this value
+//      if continuous or many possible values (clustersBy, colorsRelByBins)
+//         => TW.Clusters[nodeType][clusterType][interval] = number of nodes in interval
+
 var nodeslength=0;
 
 var labels = [];

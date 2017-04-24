@@ -456,7 +456,7 @@ if(RES["OK"]) {
                   NodeWeightFilter( this.categories , "#slidercat1nodesweight" ,  this.categories[1],  "type" ,"size");
                   EdgeWeightFilter("#slidercat1edgesweight", "label" , "nodes2", "weight");
               }
-              // set_ClustersLegend ( "clust_default" )
+              set_ClustersLegend ( "clust_default" )
           }
 
           if(typestring=="1|0") {
@@ -473,7 +473,7 @@ if(RES["OK"]) {
                   NodeWeightFilter( this.categories , "#slidercat0nodesweight" ,  this.categories[0],  "type" ,"size");
                   EdgeWeightFilter("#slidercat0edgesweight", "label" , "nodes1", "weight");
               }
-              // set_ClustersLegend ( "clust_default" )
+              set_ClustersLegend ( "clust_default" )
           }
 
           if(typestring=="1|1") {
@@ -561,7 +561,8 @@ if(RES["OK"]) {
       console.error(e)
     }
 
-    // set_ClustersLegend ( "clust_default" )
+    // set the default legend
+    set_ClustersLegend ( "clust_default" )
 
 } else alert("error: "+RES["data"])
 

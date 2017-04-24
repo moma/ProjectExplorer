@@ -20,6 +20,8 @@ function ChangeGraphAppearanceByAtt( manualflag ) {
 
     // Seeing all the possible attributes!
     var AttsDict = {}
+
+    // for GUI html: if present, rename raw attribute key by a proper label
     var AttsTranslations = {
       'clust_louvain': 'Groupes de voisins, méthode de Louvain',
       'pageranks': 'Importance dans le réseau, méthode Google',
@@ -259,12 +261,16 @@ function set_ClustersLegend ( daclass ) {
     if(daclass==null) return;
 
     var ClustNB_CurrentColor = {}
+
+    // TODO avoid this new loop by writing the census at coloring time in some var eg TW.Clusters.legends
     var nodesV = getVisibleNodes()
     for(var i in nodesV) {
         n = nodesV[i]
         color = n.color
         type = TW.Nodes[n.id].type
         clstNB = TW.Nodes[n.id].attributes[daclass]
+
+        // joining properties in a "ClusterCode"
         ClustNB_CurrentColor[type+"||"+daclass+"||"+clstNB] = color
     }
 
@@ -275,7 +281,21 @@ function set_ClustersLegend ( daclass ) {
 
     if (daclass=="clust_louvain")
         daclass = "louvain"
-    OrderedClustDicts = Object.keys(ClustNB_CurrentColor).sort()
+    OrderedClustDicts = Object.keys(ClustNB_CurrentColor).sort(function (a,b) {
+
+      // mostly joined properties of the form "terms||pageranks||9.494E-4"
+      var aInfos = a.split('||')
+      var bInfos = b.split('||')
+      var compared
+      if (aInfos.length == 3 && bInfos.length == 3)
+        compared = (Number(aInfos[2]-Number(bInfos[2])))
+      else
+        compared = a-b
+
+      return compared
+    })
+
+    // console.log("set_ClustersLegend: OrderedClustDicts", OrderedClustDicts)
 
     // TODO allow external cluster legends dict
     if( daclass.indexOf("clust")>-1 ) {
@@ -291,7 +311,7 @@ function set_ClustersLegend ( daclass ) {
             }
             var Color = ClustNB_CurrentColor[IDx]
             // console.log ( Color+" : ", Type, ClustType, ClustID )
-            pr ( Color+" : "+ legTxt )
+            console.log ( Color+" : "+ legTxt )
             var ColorDiv = '<span style="background:'+Color+';"></span>'
             LegendDiv += '<li onclick=\'SomeEffect("'+IDx+'")\'>'+ColorDiv+ legTxt+"</li>"+"\n"
         }

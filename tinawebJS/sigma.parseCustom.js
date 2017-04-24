@@ -213,7 +213,10 @@ function scanGexf(gexfContent) {
         catDict["Document"] = 0;
     }
     if(categories.length==1) {
+        // if we have only one category, it gets the same code 0 as Document
+        // but in practice it's more often terms. anyways doesn't affect much
         catDict[categories[0]] = 0;
+        // console.log("-----cat unique =>0")
     }
     if(categories.length>1) {
         var newcats = []
@@ -402,11 +405,14 @@ function dictfyGexf( gexf , categories ){
     // console.log("parseCustom(gexf) sizeStats:", sizeStats)
     // ------------- /debug: for local stats ----------------
 
-    var attention = false
+
+    console.warn('---> dictfyGexf <---\n, begin TW.Clusters :', TW.Clusters )
+
+    var gotClusters = false
     if( TW.Clusters.length == 0 ) {
         for( var i in nodes ) {
-            if( nodes[i].attributes["cluster_index"] ) {
-                attention = true;
+            if( nodes[i].attributes["cluster_index"] || nodes[i].attributes[TW.nodeClusAtt] ) {
+                gotClusters = true;
             }
             break
         }
@@ -415,15 +421,20 @@ function dictfyGexf( gexf , categories ){
     TW.Clusters = {}
     //New scale for node size: now, between 2 and 5 instead [1,70]
     for(var it in nodes){
+        console.log("dictfyGexf node", it)
         nodes[it].size =  desirableNodeSizeMIN+ (parseInt(nodes[it].size)-1)*((desirableNodeSizeMAX-desirableNodeSizeMIN) / (maxNodeSize-minNodeSize));
-        if(attention) {
+        if(gotClusters) {
+            console.warn('---> writing cluster labels <---')
             var t_type = nodes[it].type
-            var t_cnumber = nodes[it].attributes["cluster_index"]
-            if (!t_cnumber) {
+            var t_cnumber
+            if (TW.nodeClusAtt != undefined) {
               t_cnumber = nodes[it].attributes[TW.nodeClusAtt]
             }
+            else {
+              t_cnumber = nodes[it].attributes["cluster_index"]
+            }
             nodes[it].attributes["clust_default"] = t_cnumber;
-            var t_label = (nodes[it].attributes["cluster_label"])?nodes[it].attributes["cluster_label"]:"cluster_"+nodes[it].attributes["cluster_index"]
+            var t_label = (nodes[it].attributes["cluster_label"])?nodes[it].attributes["cluster_label"]:"cluster_"+t_cnumber
             if(!TW.Clusters[t_type]) {
                 TW.Clusters[t_type] = {}
                 TW.Clusters[t_type]["clust_default"] = {}
@@ -432,6 +443,8 @@ function dictfyGexf( gexf , categories ){
         }
         // TW.partialGraph._core.graph.nodesIndex[it].size=Nodes[it].size;
     }
+
+    console.warn('---> dictfyGexf <---\n, after TW.Clusters :', TW.Clusters )
 
     var edgeId = 0;
     var edgesNodes = gexf.getElementsByTagName('edges');
