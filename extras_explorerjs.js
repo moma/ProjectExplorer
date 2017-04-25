@@ -9,17 +9,13 @@ function newPopup(url) {
 
 
 // = = = = = = = = = = = [ Clusters Plugin ] = = = = = = = = = = = //
-// Execution:    ChangeGraphAppearanceByAtt( true )
-// It scans the existing node-attributes and t keeps only those which are Numeric.
-//  then, add the button in the html with the sigmaUtils.clustersBy(x) listener.
-// [TODO: fonction un peu lourde dans le profilage]
-function ChangeGraphAppearanceByAtt( manualflag ) {
+// Execution:    changeGraphAppearanceByFacets( true )
+// It reads scanned node-attributes and prepared legends in TW.Clusters
+//  to add the button in the html with the sigmaUtils.clustersBy(x) listener.
+function changeGraphAppearanceByFacets( manualflag ) {
 
     if ( !isUndef(manualflag) && !TW.colorByAtt ) TW.colorByAtt = manualflag;
     if(!TW.colorByAtt) return;
-
-    // Seeing all the possible attributes!
-    var AttsDict = {}
 
     // for GUI html: if present, rename raw attribute key by a proper label
     var AttsTranslations = {
@@ -30,73 +26,74 @@ function ChangeGraphAppearanceByAtt( manualflag ) {
       'modularity_class': 'Groupes de voisins, méthode des classes de modularité'
     }
 
-    var Atts_2_Exclude = {}
-    for (var j in TW.nodeIds) {
-        let nid = TW.nodeIds[j]
-        let n = TW.partialGraph.graph.nodes(nid)
-        if(!n.hidden) {
-            for(var a in TW.Nodes[nid].attributes) {
-                var someatt = TW.Nodes[nid].attributes[a]
 
-                // Identifying the attribute datatype: exclude strings and objects
-                if ( ( typeof(someatt)=="string" && isNaN(Number(someatt)) ) || typeof(someatt)=="object" ) {
-                    if (!Atts_2_Exclude[a]) Atts_2_Exclude[a]=0;
-                    Atts_2_Exclude[a]++;
-                }
-            }
+    // create colormenu
 
-            var possible_atts = [];
-            if (!isUndef(TW.Nodes[nid].attributes))
-                possible_atts = Object.keys(TW.Nodes[nid].attributes)
-
-            if(!isUndef(n.degree))
-                possible_atts.push("degree")
-            possible_atts.push("clust_louvain")
-
-            for(var a in possible_atts){
-                if ( !AttsDict[ possible_atts[a] ] )
-                    AttsDict[ possible_atts[a] ] = 0
-                AttsDict[ possible_atts[a] ] ++;
-            }
-
-        }
-    }
-
-    for(var i in Atts_2_Exclude)
-        delete AttsDict[i];
-
-    var AttsDict_sorted = ArraySortByValue(AttsDict, function(a,b){
-        return b-a
-    });
-
-    // console.log( "I AM IN ChangeGraphAppearanceByAtt( true )" )
-    // console.log( AttsDict_sorted )
-
+    var ty = getCurrentType()
 
     var color_menu_info = '<li><a href="#" onclick="graphResetColor()">By Default</a></li>';
 
     if( $( "#colorgraph-menu" ).length>0 ){
-      for (var i in AttsDict_sorted) {
-          var att_s = AttsDict_sorted[i].key;
-          var att_c = AttsDict_sorted[i].value;
-          var the_method = "clustersBy"
 
-          // variants
-          if(att_s.indexOf("clust")>-1) the_method = "colorsBy"
-          if(att_s == "growth_rate") the_method = "colorsRelByBins"
-          if(att_s == "age") the_method = "colorsRelByBins"
+      // each facet family or clustering type was already prepared
+      for (var att_s in TW.Clusters[ty]) {
 
+        // POSS here distinguish [ty][att_s].classes.length and ranges.length
+        var att_c = TW.Clusters[ty][att_s].length
+        var the_method = "clustersBy"
 
-          // labels :)
-	  var lab_att_s ;
-          if (AttsTranslations[att_s])  lab_att_s = AttsTranslations[att_s]
-	  else lab_att_s = att_s
+        // variants
+        if(att_s.indexOf("clust")>-1||att_s.indexOf("class")>-1) {
+          // for classes and clusters
+          the_method = "colorsBy"
+        }
+        if(att_s == "growth_rate") the_method = "colorsRelByBins"
+        if(att_s == "age") the_method = "colorsRelByBins"
 
-          color_menu_info += '<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+lab_att_s+'('+att_c+')'+'</a></li>'
-          // console.log('<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+att_s+'('+att_c+')'+'</a></li>')
+        // family label :)
+        var lab_att_s ;
+        if (AttsTranslations[att_s])  lab_att_s = AttsTranslations[att_s]
+        else lab_att_s = att_s
+        color_menu_info += '<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+lab_att_s+'('+att_c+')'+'</a></li>'
+
       }
       $("#colorgraph-menu").html(color_menu_info)
     }
+
+    // // 2) prepare legend slots
+    // console.warn ("classes_per_Att:", classes_per_Att)
+    // let nodeType = getCurrentType()
+    // for (var attr in classes_per_Att) {
+    //   let distinctVals = Object.keys(classes_per_Att[attr])
+    //
+    //   // ------------------------------------------------
+    //   if (distinctVals.length > TW.maxDiscreteValues) {
+    //     TW.Clusters[nodeType][attr] = {'ranges': {}}
+    //     // will be computed at changeColor FIXME could be now...
+    //   }
+    //   else {
+    //     TW.Clusters[nodeType][attr] = {'classes': {}}
+    //     for (var k_cls in distinctVals) {
+    //       TW.Clusters[nodeType][attr].classes[distinctVals[k_cls]] = []
+    //       // will become array of ids per subclass
+    //     }
+    //   }
+    // }
+
+}
+
+
+// creates TW.legendsBins bins
+// @sortedValues array, mandatory
+function intervalsInventory(sortedValues) {
+  var binmins = []
+  var len = sortedValues.length
+  for (var l=0 ; l < TW.legendsBins ; l++) {
+    let nthVal = Math.floor(len * l / TW.legendsBins)
+    binmins.push(sortedValues[nthVal])
+  }
+  // console.info("legendRefTicks", binmins)
+  return binmins
 }
 
 
@@ -125,60 +122,40 @@ function RunLouvain() {
 }
 
 
-function SomeEffect( ClusterCode ) {
-    console.log( "SomeEffect" )
-    console.log( ClusterCode )
 
-    // ex: ISItermsriskV2_140 & ISItermsriskV2_140||clust_default||7
-    //       vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv          vvvvv      v
-    //                     type                      Cluster key  clstID
-
-    var raw = ClusterCode.split("||")
-    var Type=raw[0], Cluster=raw[1], clstID=Number(raw[2]);
-
-    var present = TW.partialGraph.states.slice(-1)[0]; // Last
-    var type_t0 = present.type;
-    var str_type_t0 = type_t0.map(Number).join("|")
-    console.log( "\t"+str_type_t0)
-
+// Highlights nodes with given value using id map
+// previously: highlighted nodes with given value using loop on node values
+function SomeEffect( ValueclassCode ) {
+    console.debug("highlighting:", ValueclassCode )
 
     greyEverything();
 
     var nodes_2_colour = {};
     var edges_2_colour = {};
 
-    var nodesV = getVisibleNodes()
 
-    for(var j=0;j<TW.nNodes;j++) {
-      let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
-      if (n && !n.hidden) {
-        n.customAttrs.forceLabel = false
+    // ex: ISItermsriskV2_140 & ISItermsriskV2_140::clust_default::7
+    //       vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv          vvvvv      v
+    //                     type                      Cluster key  class iClu
+    //                                                (family)   (array index)
+    var raw = ValueclassCode.split("::")
+    var nodeType=raw[0],
+        cluType=raw[1],
+        iClu=Number(raw[2]);
 
-        // we look also at the original gexf node to get access to gexf attributes like cluster
-        var gNode = TW.Nodes[n.id]
-        if (gNode.type = Type && !isUndef(gNode.attributes[Cluster]) && gNode.attributes[Cluster]==clstID) {
-          // console.log( n.id + " | " + Cluster + " : " + node.attributes[Cluster] )
-          // nodes_2_colour[n.id] = n.degree;
-          nodes_2_colour[n.id] = 1;
-        }
-      }
+
+    // also get node type code from env (ie "1", "1|1", etc for TW.Relations lookup)
+    var present = TW.partialGraph.states.slice(-1)[0]; // Last
+    var type_t0 = present.type;
+    var str_type_t0 = type_t0.map(Number).join("|")
+    // console.log( "\t"+str_type_t0)
+
+    // we have our precomputed idmaps for nodes_2_colour
+    // -------------------------------------------------
+    for (var k in TW.Clusters[nodeType][cluType][iClu].nids) {
+      var nid = TW.Clusters[nodeType][cluType][iClu].nids[k]
+      nodes_2_colour[nid] = true
     }
-
-    for(var s in nodes_2_colour) {
-        if(TW.Relations[str_type_t0] && TW.Relations[str_type_t0][s] ) {
-            neigh = TW.Relations[str_type_t0][s]
-            if(neigh) {
-                for(j in neigh) {
-                    t = neigh[j]
-                    if( !isUndef(nodes_2_colour[t]) ) {
-                        edges_2_colour[s+";"+t]=true;
-                        edges_2_colour[t+";"+s]=true;
-                    }
-                }
-            }
-        }
-    }
-
 
     for(var nid in nodes_2_colour) {
         n = TW.partialGraph.graph.nodes(nid)
@@ -188,6 +165,19 @@ function SomeEffect( ClusterCode ) {
 
             // highlight (like neighbors but with no selection)
             n.customAttrs['highlight'] = true;
+        }
+
+        if(TW.Relations[str_type_t0] && TW.Relations[str_type_t0][nid] ) {
+            neigh = TW.Relations[str_type_t0][nid]
+            if(neigh) {
+                for(j in neigh) {
+                    tgt_nid = neigh[j]
+                    if( !isUndef(nodes_2_colour[tgt_nid]) ) {
+                        edges_2_colour[nid+";"+tgt_nid]=true;
+                        edges_2_colour[tgt_nid+";"+nid]=true;
+                    }
+                }
+            }
         }
     }
 
@@ -202,23 +192,16 @@ function SomeEffect( ClusterCode ) {
     }
 
 
-
-    var nodes_2_label = ArraySortByValue(nodes_2_colour, function(a,b){
-        return b-a
-    });
-
-    // force 4 first labels
-    for(var j in nodes_2_label) {
-        if(j==4)
-            break
-        var ID = nodes_2_label[j].key
-        TW.partialGraph.graph.nodes(ID).customAttrs.forceLabel = true;
-    }
+    // // force 3 first labels
+    // for(var j in nodes_2_label) {
+    //     if(j==3)
+    //         break
+    //     var ID = nodes_2_label[j].key
+    //     TW.partialGraph.graph.nodes(ID).customAttrs.forceLabel = true;
+    // }
 
     TW.selectionActive=true;
 
-
-    // TW.partialGraph.render()
     TW.partialGraph.refresh()
 }
 
@@ -253,81 +236,66 @@ function graphResetColor(){
 }
 
 
-function set_ClustersLegend ( daclass ) {
+// @daclass: the name of a numeric/categorical attribute from node.attributes
+// @groupingTicks: an optional threshold's array expressing ranges with their low/up bounds label and ref to matchin nodeIds
+function set_ClustersLegend ( daclass, groupedByTicks ) {
+
     //TW.partialGraph.states.slice(-1)[0].LouvainFait = true
 
     $("#legend_for_clusters").removeClass( "my-legend" )
     $("#legend_for_clusters").html("")
     if(daclass==null) return;
 
-    var ClustNB_CurrentColor = {}
-
-    // TODO avoid this new loop by writing the census at coloring time in some var eg TW.Clusters.legends
-    var nodesV = getVisibleNodes()
-    for(var i in nodesV) {
-        n = nodesV[i]
-        color = n.color
-        type = TW.Nodes[n.id].type
-        clstNB = TW.Nodes[n.id].attributes[daclass]
-
-        // joining properties in a "ClusterCode"
-        ClustNB_CurrentColor[type+"||"+daclass+"||"+clstNB] = color
-    }
-
-    LegendDiv = ""
-    LegendDiv += '    <div class="legend-title">Map Legend</div>'
+    var LegendDiv = ""
+    LegendDiv += `    <div class="legend-title">Map Legend <small>(${daclass})</small></div>`
     LegendDiv += '    <div class="legend-scale">'
     LegendDiv += '      <ul class="legend-labels">'
 
     if (daclass=="clust_louvain")
         daclass = "louvain"
-    OrderedClustDicts = Object.keys(ClustNB_CurrentColor).sort(function (a,b) {
 
-      // mostly joined properties of the form "terms||pageranks||9.494E-4"
-      var aInfos = a.split('||')
-      var bInfos = b.split('||')
-      var compared
-      if (aInfos.length == 3 && bInfos.length == 3)
-        compared = (Number(aInfos[2]-Number(bInfos[2])))
-      else
-        compared = a-b
+    // usually 'terms' or anything in categories[0]
+    var curType = getCurrentType()
 
-      return compared
-    })
+    // all infos in a bin array
+    var legendInfo = []
 
-    // console.log("set_ClustersLegend: OrderedClustDicts", OrderedClustDicts)
+    // sample node color
+    var ClustNB_CurrentColor = {}
 
-    // TODO allow external cluster legends dict
-    if( daclass.indexOf("clust")>-1 ) {
-        for(var i in OrderedClustDicts) {
-            var IDx = OrderedClustDicts[i]
-            var raw = IDx.split("||")
-            var Type = raw[0]
-            var ClustType = raw[1]
-            var ClustID = raw[2]
-            var legTxt = "N/A"
-            if (TW.Clusters && TW.Clusters[Type] && TW.Clusters[Type][ClustType] && TW.Clusters[Type][ClustType][ClustID]) {
-               legTxt = TW.Clusters[Type][ClustType][ClustID]
-            }
-            var Color = ClustNB_CurrentColor[IDx]
-            // console.log ( Color+" : ", Type, ClustType, ClustID )
-            console.log ( Color+" : "+ legTxt )
-            var ColorDiv = '<span style="background:'+Color+';"></span>'
-            LegendDiv += '<li onclick=\'SomeEffect("'+IDx+'")\'>'+ColorDiv+ legTxt+"</li>"+"\n"
-        }
-    } else {
-        for(var i in OrderedClustDicts) {
-            var IDx = OrderedClustDicts[i]
-            var Color = ClustNB_CurrentColor[IDx]
-            // pr ( Color+" : "+ TW.Clusters[Type][ClustType][ClustID] )
-            var ColorDiv = '<span style="background:'+Color+';"></span>'
-            LegendDiv += '<li onclick=\'SomeEffect("'+IDx+'")\'>'+ColorDiv+ IDx+"</li>"+"\n"
-        }
+    // passed as arg   or  prepared in parseCustom
+    if (!groupedByTicks && !TW.Clusters[curType][daclass]) {
+      console.error('class not prepared ??', daclass)
+    }
+    else {
+      var legendInfo = groupedByTicks || TW.Clusters[curType][daclass]
+
+      // valueclasses (values or intervals or classes) are already sorted in TW.Clusters
+      for (var l in legendInfo) {
+
+        // get a sample node color for each bin/class
+        var nMatchedNodes = legendInfo[l]['nids'].length
+        var midNid = legendInfo[l]['nids'][Math.floor(3*nMatchedNodes/4)]
+        var exampleColor = TW.partialGraph.graph.nodes(midNid).color
+
+        // create the legend item
+        var preparedLabel = legendInfo[l]['labl']
+        // console.log("preparedLabel", preparedLabel)
+
+        // all-in-one argument for SomeEffect
+        var valueclassId = `${curType}::${daclass}::${l}`
+
+        var colorBg = `<span style="background:${exampleColor};"></span>`
+
+        LegendDiv += `<li onclick='SomeEffect("${valueclassId}")'>`
+        LegendDiv += colorBg + preparedLabel
+        LegendDiv += "</li>\n"
+      }
 
     }
+
     LegendDiv += '      </ul>'
     LegendDiv += '    </div>'
-
 
     $("#legend_for_clusters").addClass( "my-legend" );
     $("#legend_for_clusters").html( LegendDiv )

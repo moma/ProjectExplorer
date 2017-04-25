@@ -151,8 +151,8 @@ function gexfCheckAttributesMap (someXMLContent) {
           }
       } //out: nodesAttributes Array
 
-      console.debug('>>> tr: nodesAttributes', nodesAttributes)
-      console.debug('>>> tr: edgesAttributes', edgesAttributes)
+      // console.debug('>>> tr: nodesAttributes', nodesAttributes)
+      // console.debug('>>> tr: edgesAttributes', edgesAttributes)
 
       return {nAttrs: nodesAttributes, eAttrs: edgesAttributes}
 }
@@ -254,15 +254,9 @@ function dictfyGexf( gexf , categories ){
         nodes2={}, bipartiteD2N={}, bipartiteN2D={}
     }
 
-    // --------------------8<-----------------------
-    // HERE REMOVED XML <attributes> parsing
-    //              b/c a priori useless at this point ?
-    //             (moved earlier to scanGexf)
-    //
-    // var atts = gexfCheckAttributesMap(gexf)
-    // var nodesAttributes = atts.nAttrs
-    // var edgesAttributes = atts.eAttrs
-    // --------------------8<-----------------------
+    var declaredAtts = gexfCheckAttributesMap(gexf)
+    var nodesAttributes = declaredAtts.nAttrs
+    // var edgesAttributes = declaredAtts.eAttrs
 
     var elsNodes = gexf.getElementsByTagName('nodes') // The list of xml nodes 'nodes' (plural)
     labels = [];
@@ -276,6 +270,13 @@ function dictfyGexf( gexf , categories ){
     // let sumSizes = 0
     // let sizeStats = {'mean':null, 'median':null, 'max':0, 'min':1000000000}
 
+    // if scanClusters, we'll also use:
+    var tmpVals = {}        // to build reverse index attval => nodes
+                            // (to inventory subclasses for a given attr)
+                            //   if < maxDiscreteValues: keep all in legend
+                            //   else:  show intervals in legend
+    var Atts_2_Exclude = {} // to exclude strings that don't convert to number
+
     // usually there is only 1 <nodes> element...
     for(i=0; i<elsNodes.length; i++) {
         var elNodes = elsNodes[i];  // Each xml element 'nodes' (plural)
@@ -287,9 +288,9 @@ function dictfyGexf( gexf , categories ){
 
             // window.NODE = elNode;
 
-            if (j == 0) {
-              console.debug('>>> tr: XML nodes/node (1 of'+elsNode.length+')', elNodes)
-            }
+            // if (j == 0) {
+            //   console.debug('>>> tr: XML nodes/node (1 of'+elsNode.length+')', elNodes)
+            // }
 
             // [ get ID ]
             var id = elNode.getAttribute('id');
@@ -359,18 +360,18 @@ function dictfyGexf( gexf , categories ){
                 var attr = attvalueNode.getAttribute('for');
                 var val = attvalueNode.getAttribute('value');
 
-                // POSS here check nodesAttributes from scanGexf
-                if(catDict[val]) atts["category"] = val;
+                if(nodesAttributes[attr]) attr = atts[nodesAttributes[attr]]=val
                 else atts[attr]=val;
-                attributes = atts;
             }
+            node.attributes = atts;
 
             // nodew=parseInt(attributes["weight"]);
-            if ( attributes["category"] ) {
-              node_cat = attributes["category"];
+            if ( atts["category"] ) {
+              node_cat = atts["category"];
             }
             else {
-              node_cat = 0     // basic TW node type is 0 (~ terms)
+              // basic TW type idx is 0 (~ terms if one type, doc if both types)
+              node_cat = categories[0]
             }
 
             node.type = node_cat;
@@ -380,7 +381,10 @@ function dictfyGexf( gexf , categories ){
             // node.id = (node_cat==categories[0])? ("D:"+node.id) : ("N:"+node.id);
             if(!node.size) console.log("node without size: "+node.id+" : "+node.label);
 
-            node.attributes = attributes;
+            // user-indicated default => copy for old default accessors
+            if (node.attributes[TW.nodeClusAtt]) {
+              node.attributes['clust_default'] = node.attributes[TW.nodeClusAtt]
+            }
 
             // save record
             nodes[node.id] = node
@@ -391,10 +395,33 @@ function dictfyGexf( gexf , categories ){
             if(parseInt(node.size) > parseInt(maxNodeSize))
                 maxNodeSize= node.size;
 
-        }
+            // console.debug("node.attributes", node.attributes)
+
+            if (TW.scanClusters) {
+              if (!tmpVals[node_cat])      tmpVals[node_cat]={}
+              for (var at in node.attributes) {
+                if (!tmpVals[node_cat][at])  tmpVals[node_cat][at]={'vals':[],'map':{}}
+
+                let someval = Number(node.attributes[at])
+                // Identifying the attribute datatype: exclude strings and objects
+                if ( isNaN(someval) ) {
+                    if (!Atts_2_Exclude[at]) Atts_2_Exclude[at]=true;
+                }
+                // numeric attr => build facets
+                else {
+                  if (!tmpVals[node_cat][at].map[someval]) tmpVals[node_cat][at].map[someval] = []
+
+                  tmpVals[node_cat][at].vals.push(someval)      // for ordered scale
+                  tmpVals[node_cat][at].map[someval].push(node.id)  // reverse index
+                }
+              }
+            }
+
+        } // finish nodes loop
     }
 
     // console.warn ('parseCustom output nodes', nodes)
+    // console.warn ('parseCustom reverse index: vals to ids', tmpVals)
 
     // -------------- debug: for local stats ----------------
     // allSizes.sort();
@@ -406,51 +433,198 @@ function dictfyGexf( gexf , categories ){
     // ------------- /debug: for local stats ----------------
 
 
-    console.warn('---> dictfyGexf <---\n, begin TW.Clusters :', TW.Clusters )
+    var classvalues_deb = performance.now()
+    // console.log('dictfyGexf: begin TW.Clusters')
 
     var gotClusters = false
-    if( TW.Clusters.length == 0 ) {
-        for( var i in nodes ) {
-            if( nodes[i].attributes["cluster_index"] || nodes[i].attributes[TW.nodeClusAtt] ) {
-                gotClusters = true;
-            }
-            break
-        }
+    for (var nodecat in tmpVals) {
+      gotClusters = gotClusters || (tmpVals[nodecat]['cluster_index'] || tmpVals[nodecat][TW.nodeClusAtt])
     }
 
+    // clusters and other facets => type => name => [{label,val/range,nodeids}]
     TW.Clusters = {}
-    //New scale for node size: now, between 2 and 5 instead [1,70]
-    for(var it in nodes){
-        console.log("dictfyGexf node", it)
-        nodes[it].size =  desirableNodeSizeMIN+ (parseInt(nodes[it].size)-1)*((desirableNodeSizeMAX-desirableNodeSizeMIN) / (maxNodeSize-minNodeSize));
-        if(gotClusters) {
-            console.warn('---> writing cluster labels <---')
-            var t_type = nodes[it].type
-            var t_cnumber
-            if (TW.nodeClusAtt != undefined) {
-              t_cnumber = nodes[it].attributes[TW.nodeClusAtt]
+
+    // sorting out properties in n.attributes
+    // --------------------------------------
+
+    if(gotClusters) {
+      // 1) default cluster properties "cluster_index" [, "cluster_label"]
+      for (var t_type in tmpVals) {
+        var t_clusname
+
+        // all distinct values to create labels
+        var t_cnumbers = []
+        var allTicks = []
+        if (TW.nodeClusAtt != undefined && tmpVals[t_type][TW.nodeClusAtt]) {
+          t_clusname = TW.nodeClusAtt
+        }
+        else if (tmpVals[t_type]["cluster_index"]) {
+          t_clusname = "cluster_index"
+        }
+        if (t_clusname) {
+          // values (we assume they are cluster numbers)
+          t_cnumbers = Object.keys(tmpVals[t_type][t_clusname].map)
+
+          // add label names (TODO use cluster_label if present
+          //                 £POSS, use maxsize node label if absent)
+          for (var l in t_cnumbers) {
+            var t_cnumber = t_cnumbers[l]
+
+            var newTick = {
+              'labl': `${t_type}||${t_clusname}||${t_cnumber}`,
+              'val': t_cnumber,
+              // val2ids: [nid5,nid27..]
+              'nids': tmpVals[t_type][TW.nodeClusAtt].map[t_cnumber]
+            }
+            allTicks.push(newTick)
+          }
+
+          TW.Clusters[t_type] = {}
+          TW.Clusters[t_type]["clust_default"] = allTicks
+        }
+      }
+    }
+
+
+    // 2) all scanned
+    for (var cat in tmpVals) {
+      if (!TW.Clusters[cat])    TW.Clusters[cat] = {}
+
+      for (var at in tmpVals[cat]) {
+        // console.log(`======= ${cat}::${at} =======`)
+
+
+        var allTicks = []
+        // skip non-numeric or already done
+        if (Atts_2_Exclude[at] || at == "clust_default") {
+          continue
+        }
+
+        // array of valueclass/interval/bin objects
+        TW.Clusters[cat][at] = []
+
+        // if n possible values doesn't need binify
+        if (Object.keys(tmpVals[cat][at].map).length <= TW.maxDiscreteValues) {
+          for (var pval in tmpVals[cat][at].map) {
+            TW.Clusters[cat][at].push({
+              'labl': `${cat}||${at}||${pval}`,
+              'val': pval,
+              // val2ids
+              'nids': tmpVals[cat][at].map[pval]
+            })
+          }
+        }
+        // if binify
+        else {
+          var len = tmpVals[cat][at].vals.length
+
+          // sort out vals
+          tmpVals[cat][at].vals.sort(function (a,b) {
+                 return Number(a)-Number(b)
+          })
+
+          // (enhanced intervalsInventory)
+          // => creates bin, binlabels, reverse index per bins
+          var legendRefTicks = []
+
+          // how many bins for this attribute ?
+          var nBins = 3
+          if (TW.customLegendsBins && TW.customLegendsBins[at]) {
+            nBins = TW.customLegendsBins[at]
+          }
+          else if (TW.legendsBins) {
+            nBins = TW.legendsBins
+          }
+
+          // create tick thresholds
+          for (var l=0 ; l < nBins ; l++) {
+            let nthVal = Math.floor(len * l / nBins)
+            legendRefTicks.push(tmpVals[cat][at].vals[nthVal])
+          }
+
+          console.debug("intervals for", at, legendRefTicks)
+
+          var nTicks = legendRefTicks.length
+          var sortedDistinctVals = Object.keys(tmpVals[cat][at].map).sort(function(a,b){return Number(a)-Number(b)})
+
+          var nDistinctVals = sortedDistinctVals.length
+          var lastCursor = 0
+
+          // create ticks objects with retrieved full info
+          for (var l in legendRefTicks) {
+            l = Number(l)
+
+            let lowThres = Number(legendRefTicks[l])
+            let hiThres = null
+            if (l < nTicks-1) {
+              hiThres = Number(legendRefTicks[l+1])
             }
             else {
-              t_cnumber = nodes[it].attributes["cluster_index"]
+              hiThres = Infinity
             }
-            nodes[it].attributes["clust_default"] = t_cnumber;
-            var t_label = (nodes[it].attributes["cluster_label"])?nodes[it].attributes["cluster_label"]:"cluster_"+t_cnumber
-            if(!TW.Clusters[t_type]) {
-                TW.Clusters[t_type] = {}
-                TW.Clusters[t_type]["clust_default"] = {}
+
+            var newTick = {
+              'labl':'',
+              'nids':[],
+              'range':[lowThres, hiThres]
             }
-            TW.Clusters[t_type]["clust_default"][t_cnumber] = t_label
+
+            // 1) union of idmaps
+            for (var k = lastCursor ; k <= nDistinctVals ; k++) {
+              var val = Number(sortedDistinctVals[k])
+              if (val < lowThres) {
+                console.error("mixup !!", val, lowThres, at)
+              }
+              else if ((val >= lowThres) && (val < hiThres)) {
+                if (!tmpVals[cat][at].map[val]) {
+                  console.error("unscanned val2ids mapping", val, at)
+                }
+                else {
+                  // eg bin2ids map for 2 <= val < 3
+                  //    will be U(val2ids maps for 2, 2.1, 2.2,...,2.9)
+                  for (var j in tmpVals[cat][at].map[val]) {
+                    newTick.nids.push(tmpVals[cat][at].map[val][j])
+                  }
+                }
+              }
+              // we're over the interval upper bound
+              // we just need to remember where we were for next interval
+              else if (val >= hiThres) {
+                lastCursor = k
+                break
+              }
+            }
+
+            // create label
+            // round %.6f for display
+            var labLowThres = Math.round(lowThres*1000000)/1000000
+            var labHiThres = (l==nTicks-1)? '+ ∞' : Math.round(hiThres*1000000)/1000000
+            newTick.labl = `${cat}||${at}||[${labLowThres} ; ${labHiThres}]`
+
+            // save these bins as the cluster index (aka faceting)
+            TW.Clusters[cat][at].push(newTick)
+          }
         }
-        // TW.partialGraph._core.graph.nodesIndex[it].size=Nodes[it].size;
+      }
     }
 
-    console.warn('---> dictfyGexf <---\n, after TW.Clusters :', TW.Clusters )
+    var classvalues_fin = performance.now()
+    console.log('dictfyGexf: end TW.Clusters, own time:', classvalues_fin-classvalues_deb)
+
+    //New scale for node size: now, between 2 and 5 instead [1,70]
+    for(var nid in nodes){
+        // console.log("dictfyGexf node", nid)
+        nodes[nid].size =  desirableNodeSizeMIN+ (parseInt(nodes[nid].size)-1)*((desirableNodeSizeMAX-desirableNodeSizeMIN) / (maxNodeSize-minNodeSize));
+    }
+
+
 
     var edgeId = 0;
     var edgesNodes = gexf.getElementsByTagName('edges');
     for(i=0; i<edgesNodes.length; i++) {
         var edgesNode = edgesNodes[i];
         var edgeNodes = edgesNode.getElementsByTagName('edge');
+        console.log("edgeNodes.length", edgeNodes.length)
         for(j=0; j<edgeNodes.length; j++) {
             var edgeNode = edgeNodes[j];
             var source = parseInt( edgeNode.getAttribute('source') );

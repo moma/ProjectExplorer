@@ -554,12 +554,9 @@ if(RES["OK"]) {
         // }
     }
 
-    try {
-      ChangeGraphAppearanceByAtt(true)
-    }
-    catch (e) {
-      console.error(e)
-    }
+
+    // TEST new strategy: TW.Clusters were prepared in parseCustom
+    changeGraphAppearanceByFacets(true)
 
     // set the default legend
     set_ClustersLegend ( "clust_default" )

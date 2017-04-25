@@ -67,8 +67,8 @@ html, body {
 
 
 #twbrand {
-  font-family: "Gurajada" ;
-  font-size: 28px;
+  font-family: "Gurajada", "Droid Sans", sans-serif ;
+  font-size: 24px;
   width: 50px !important;
 }
 

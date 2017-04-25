@@ -34,6 +34,7 @@ function changeType() {
 
     // types eg [true]          <=> '1'
     //          [true, true]    <=> '1|1'
+    //          [true, false]   <=> '1|0'
 
     // Complement of the received state ~[X\Y] )
     var type_t1 = []

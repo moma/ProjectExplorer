@@ -83,6 +83,27 @@ function cancelSelection (fromTagCloud, settings) {
     }
 }
 
+
+function getCurrentType() {
+  // type grammar overly complicated: it's absurd to have to do 10 lines
+  //                                  to retrieve the tina type when other times
+  //                                  there's so many window-scoped vars !!!
+  // TODO expose current type more accessibly
+  let currentTypeName
+  let currentTypeIdx
+  let typeIdxs = Object.keys(TW.partialGraph.states.slice(-1)[0].type)
+  for (var m in typeIdxs) {
+    if (TW.partialGraph.states.slice(-1)[0].type[m]) {
+      currentTypeIdx = m
+      break
+    }
+  }
+
+  currentTypeName = window.categories[currentTypeIdx]
+  return currentTypeName
+}
+
+
 function highlightSelectedNodes(flag){
     console.log("\t***methods.js:highlightSelectedNodes(flag)"+flag+" selEmpty:"+is_empty(selections))
     if(!is_empty(selections)){

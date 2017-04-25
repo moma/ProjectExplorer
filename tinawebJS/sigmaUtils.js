@@ -691,6 +691,7 @@ function getArrSubkeys(arr,id) {
     return result;
 }
 
+
 function clustersBy(daclass) {
 
     cancelSelection(false);
@@ -716,7 +717,6 @@ function clustersBy(daclass) {
     var real_min = 1000000;
     var real_max = -1;
     var themult = Math.pow(10,min_pow);
-
     // console.log('themult', themult)
 
     for(var j in TW.nodeIds) {
@@ -731,26 +731,28 @@ function clustersBy(daclass) {
         if (round_number>real_max) real_max = round_number;
     }
 
-    console.log("NodeID_Val", NodeID_Val)
+    // console.log("NodeID_Val", NodeID_Val)
 
-    console.log(" - - - - - - - - -- - - ")
-    console.log(real_min)
-    console.log(real_max)
-    console.log("10^"+min_pow)
-    console.log("the mult: "+themult)
-    console.log(" - - - - - - - - -- - - ")
+    // console.log(" - - - - - - - - -- - - ")
+    // console.log(real_min)
+    // console.log(real_max)
+    // console.log("10^"+min_pow)
+    // console.log("the mult: "+themult)
+    // console.log(" - - - - - - - - -- - - ")
 
 
-    //    [ Scaling node colours(0-255) and sizes(3-5) ]
+    //    [ Scaling node colours(0-255) and sizes(2-7) ]
     var Min_color = 0;
     var Max_color = 255;
-    var Min_size = 2;
-    var Max_size= 6;
+    var Min_size = 1;
+    var Max_size= 8;
     for(var nid in NodeID_Val) {
         var newval_color = Math.round( ( Min_color+(NodeID_Val[nid]["round"]-real_min)*((Max_color-Min_color)/(real_max-real_min)) ) );
         var hex_color = rgbToHex(255, (255-newval_color) , 0)
         TW.partialGraph.graph.nodes(nid).color = hex_color
         TW.partialGraph.graph.nodes(nid).customAttrs.alt_color = hex_color
+
+        // FIXME not used ?
         TW.partialGraph.graph.nodes(nid).customAttrs.altgrey_color = false
 
         var newval_size = Math.round( ( Min_size+(NodeID_Val[nid]["round"]-real_min)*((Max_size-Min_size)/(real_max-real_min)) ) );
@@ -759,19 +761,19 @@ function clustersBy(daclass) {
 
         TW.partialGraph.graph.nodes(nid).label = "("+NodeID_Val[nid]["real"].toFixed(min_pow)+") "+TW.Nodes[nid].label
     }
-    //    [ / Scaling node colours(0-255) and sizes(3-5) ]
+    //    [ / Scaling node colours(0-255) and sizes(2-7) ]
 
     // Edge precompute alt_rgb by new source-target nodes-colours combination
     repaintEdges()
 
-    set_ClustersLegend ( daclass )
+    // NB legend will group different possible values using
+    //    precomputed ticks from TW.Clusters.terms[daclass]
+    set_ClustersLegend ( daclass)
 
     TW.partialGraph.render();
 }
 
 
-// for debug of colorsRelByBins
-var totalsPerBinMin = {}
 
 // Edge-colour: precompute alt_rgb by source-target node.alt_color combination
 function repaintEdges() {
@@ -799,14 +801,123 @@ function repaintEdges() {
 }
 
 // rewrite of clustersBy with binning and for attributes that can have negative float values
-// /!\ age and growth_rate attributes referred to by name
+
+// NB - binning is done at parseCustom
+//    - number of bins can be specified by attribute name in TW.customLegendsBins
 function colorsRelByBins(daclass) {
+  var binColors
+  var doModifyLabel = false
+  var ty = getCurrentType()
+
+  // our binning
+  var tickThresholds = TW.Clusters[ty][daclass]
+
+  // for debug of colorsRelByBins
+  var totalsPerBinMin = {}
+
+  // let's go
+  cancelSelection(false);
+
+  // global flag
+  TW.handpickedcolor = true
+
+  if (daclass == 'age') {
+    // 9 colors
+    binColors = [
+        "#F9F588",//epsilon
+        "#f9f008", //yel
+        "#f9da08",
+        "#fab207",
+        "#fa9607",
+        "#fa6e07",
+        "#fa4607",
+        "#ff0000" // red     binMin 125
+    ];
+    }
+    else if (daclass == 'growth_rate') {
+
+      doModifyLabel = true
+
+      // 12 colors
+      binColors = [
+          "#005197",  //blue    binMin -∞
+          "#3c76fb",        //  binMin -75
+          "#5c8af2",        //  binMin -50
+          "#64c5f2",        //  binMin -25
+          "#F9F7ED",//epsilon   binMin -15
+          "#bae64f",        //  binMin 15
+          "#f9f008",        //  binMin 25
+          "#fab207",        //  binMin 50
+          "#fa9607",        //  binMin 75
+          "#fa6e07",        //  binMin 100
+          "#fa4607", // red     binMin 125
+          "#991B1E"         //  binMin 150
+      ];
+
+    }
+
+    // verification
+    if (tickThresholds.length != binColors.length) {
+      console.warn (`colorsRelByBins setup mismatch: TW.Clusters ticks ${tickThresholds} should == nColors ${binColors.length}`)
+    }
+
+
+    // use our valueclass => ids mapping
+    for (var k in tickThresholds) {
+
+      // console.debug('tick infos', tickThresholds[k])
+      // ex: {labl: "terms||growth_rate||[0 ; 0.583]", nids: Array(99), range: [0 ; 0.583210]}
+
+      totalsPerBinMin[tickThresholds[k].range[0]] = tickThresholds[k].nids.length
+
+      // color the referred nodes
+      for (var j in tickThresholds[k].nids) {
+        let n = TW.partialGraph.graph.nodes(tickThresholds[k].nids[j])
+
+        n.color = binColors[k]
+        n.customAttrs.alt_color = binColors[k]
+        n.customAttrs.altgrey_color = false
+
+        var originalLabel = TW.Nodes[n.id].label
+        if (doModifyLabel) {
+          var valSt = n.attributes[daclass]
+          n.label = `(${valSt}) ${originalLabel}`
+        }
+        else {
+          n.label = originalLabel
+        }
+
+      }
+    }
+
+    // console.debug(valArray)
+
+    console.info('coloring distribution per tick thresholds' , totalsPerBinMin)
+
+    // Edge precompute alt_rgb by new source-target nodes-colours combination
+    repaintEdges()
+
+    set_ClustersLegend ( daclass )
+
+    TW.partialGraph.render();
+}
+
+
+
+// KEPT FOR REFERENCE, BINNING NOW PRECOMPUTED in parseCustom
+// rewrite of clustersBy with binning and for attributes that can have negative float values
+// /!\ age and growth_rate attributes referred to by name
+function colorsRelByBins_old(daclass) {
   cancelSelection(false);
 
   var binColors
   var doModifyLabel = false
 
   TW.handpickedcolor = true
+
+  // for debug of colorsRelByBins
+  var totalsPerBinMin = {}
+
 
   // should be = binColors.length
   var nTicksParam = (daclass == 'age') ? 8 : 12

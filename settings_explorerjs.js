@@ -118,6 +118,14 @@ TW.overSampling = true     // costly hi-def rendering (true => pixelRatio x 2)
 TW.deselectOnclickStage = true // will a click on the background remove selection ? (except when dragging)
 var showLabelsIfZoom=1.0;
 
+// for continuous attrvalues/colors (cf. clustersBy), how many levels in legend?
+TW.legendsBins = 7 ;
+
+// some specific attributes may have other number of levels
+TW.customLegendsBins = {
+  'age': 8,
+  'growth_rate': 12
+}
 // ============ < / DEVELOPER OPTIONS > ============
 
 
@@ -147,7 +155,8 @@ var sigmaJsDrawingProperties = {
     twNodeRendBorderColor: "#222",
     // twNodeRendBorderColor: "#eee",
 
-    font: "Crete Round",
+    font: "Droid Sans",
+    // font: "Crete Round",
     // font: "Ubuntu Condensed",
     fontStyle: "bold",
 };
@@ -210,17 +219,22 @@ TW.Nodes = [];
 TW.Edges = [];
 TW.Clusters = [];
 
+
+// new dev properties
+TW.scanClusters = true   // build TW.Clusters in an (attr+val => nodes) reverse index (aka facets)
+TW.maxDiscreteValues = 40  // max discrete levels in facet legend (aka bins)
 // new TW.Clusters structure
 // --------------------------
 // was: built in separate loop from read of all attr values
 //      TW.Clusters[nodeType][clusterType][possibleValue] = clst_idx_of_possible_value
 
-// from now on (WIP):
-//      built in parseCustom (when reading all nodes attributes anyway)
-//      if discrete attrvalues with < 15 classes (colorsBy, clustersBy)
-//         => TW.Clusters[nodeType][clusterType][possibleValue] = number of nodes with this value
-//      if continuous or many possible values (clustersBy, colorsRelByBins)
-//         => TW.Clusters[nodeType][clusterType][interval] = number of nodes in interval
+// from now on:
+//      still built in ChangeGraphAppearanceByAtt
+//      POSS: build in parseCustom (when reading all nodes attributes anyway)
+//      if discrete attrvalues with <= 30 classes (colorsBy, clustersBy)
+//         => TW.Clusters[nodeType][clusterType].classes.[possibleValue] = list of ids with the value
+//      if continuous or many possible values (>30) (clustersBy, colorsRelByBins)
+//         => TW.Clusters[nodeType][clusterType].ranges.[interval] = list of ids in the interval
 
 var nodeslength=0;
 
