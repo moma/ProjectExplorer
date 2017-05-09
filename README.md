@@ -86,6 +86,7 @@ See the [detailed doc](https://github.com/moma/comex2/blob/master/doc/nginx_conf
  |------------------------------|
 ```
 
+In production, you may want to have the app run at boot. In that case, see the [startup script doc](https://github.com/moma/comex2/blob/master/doc/startup_script.md) on this subject.
 
 ## About the data
 
