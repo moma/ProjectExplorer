@@ -32,7 +32,7 @@
 
 var AjaxSync = (function(TYPE, URL, DATA, CT , DT) {
     var Result = []
-    TYPE = (!TYPE)?"GET":"POST"
+    TYPE = (!TYPE)?"GET":TYPE
     if(DT && (DT=="jsonp" || DT=="json")) CT="application/json";
     console.log("---AjaxSync---\n", TYPE, URL, DATA, CT , DT, "\n--------------")
     $.ajax({
@@ -56,7 +56,7 @@ var AjaxSync = (function(TYPE, URL, DATA, CT , DT) {
                 Result = { "OK":true , "format":format , "data":data };
             },
             error: function(exception) {
-                console.log('now error')
+                console.log('now error', exception)
                 Result = { "OK":false , "format":false , "data":exception.status };
             }
         });
@@ -81,111 +81,232 @@ function jsActionOnGexfSelector(gexfBasename , db_json){
 // show the custom name of the app
 writeBrand(TW.branding)
 
-var file =""
-if(!isUndef(getUrlParam.mode)) { // if {db|api}.json
-    file = getUrlParam.mode
-} else {
-    if( !isUndef(getUrlParam.file) )
-        TW.mainfile.unshift( getUrlParam.file );
 
+//  === [   what to do at start ] === //
+// --------------------- choosing the input ------------------------------------
+// various starting points (WIP: currently refactoring for simpler handling)
+
+var inFormat;            // = { db|api.json , somefile.json|gexf }
+var inData;              // = {nodes: [....], edges: [....], cats:...}
+
+
+// case (1) read from DB => one ajax to api eg /services/api/graph?q=filters...
+// this one is the API case
+// if (getUrlParam.mode && getUrlParam.mode == "api") {
+if (getUrlParam.type) {
+  console.warn("input case: @type [future: @mode=api], using TW.bridge")
+
+  // the only API format, cf. inData
+  inFormat = 'json'
+
+  // TODO-rename: s/nodeidparam/srcparams
+  var sourceinfo = getUrlParam.nodeidparam
+  var qtype = getUrlParam.type
+  if(isUndef(sourceinfo) || isUndef(qtype)) {
+      console.warn("missing nodes filter/id param");
+  }
+  else {
+      console.log("Received query of type:", qtype)
+      if(qtype == "filter" || qtype == "uid"){
+        var theurl,thedata,thename;
+
+        console.warn("===> PASSING ON QUERY (type "+qtype+") TO BRIDGE <===")
+        if(qtype=="uid") {
+            // pr("bring the noise, case: unique_id");
+            // pr(getClientTime()+" : DataExt Ini");
+            // < === DATA EXTRACTION === >
+            theurl = TW.bridge["forNormalQuery"]
+
+            // NB before also passed it for Fa2 iterations (useless?)
+            thedata = "qtype=uid&unique_id="+sourceinfo;
+            thename = "unique scholar";
+        }
+
+        if (qtype=="filter") {
+            // pr("bring the noise, case: multipleQuery");
+            // pr(getClientTime()+" : DataExt Ini");
+            theurl = TW.bridge["forFilteredQuery"];
+
+            // json is twice URI encoded by whoswho to avoid both '"' and '%22'
+            var json_constraints = decodeURIComponent(sourceinfo)
+
+            console.log("multipleQuery RECEIVED", json_constraints)
+
+            // safe parsing of the URL's untrusted JSON
+            var filteringKeyArrayPairs = JSON.parse( json_constraints)
+
+            // INPUT json: <= { keywords: ['complex systems', 'something'],
+            //                  countries: ['France', 'USA'], laboratories: []}
+
+            // we build 2 OUTPUT strings:
+
+            // => thedata (for comexAPI):
+            //   keywords[]="complex systems"&keywords[]="something"&countries="France"&countries[]="USA"
+
+            // => thename (for user display):
+            //   ("complex systems" or "something") and ("France" or "USA")
+
+            // console.log("decoded filtering query", filteringKeyArrayPairs)
+
+            var restParams = []
+            var nameElts = []
+            // build REST parameters from filtering arrays
+            // and name from each filter value
+            for (var fieldName in filteringKeyArrayPairs) {
+                var nameSubElts = []
+                for (var value of filteringKeyArrayPairs[fieldName]) {
+                    // exemple: "countries[]=France"
+                    restParams.push(fieldName+'[]='+encodeURIComponent(value))
+                    nameSubElts.push ('"'+value+'"')
+                }
+                nameElts.push("("+nameSubElts.join(" or ")+")")
+            }
+
+            if (restParams.length) {
+                thedata = "qtype=filters&" + restParams.join("&")
+                thename = nameElts.join(" and ")
+            }
+            else {
+                thedata = "qtype=filters&query=*"
+                thename = "(ENTIRE NETWORK)"
+            }
+        }
+
+        // Assigning name for the network
+        if (! thename) {
+            elements = []
+            queryarray = JSON.parse(ourGetUrlParam.nodeidparam)
+            for(var i in queryarray) {
+                item = queryarray[i]
+                if(Array.isArray(item) && item.length>0) {
+                    for(var j in item) elements.push(item[j])
+                }
+            }
+            thename = '"'+elements.join('" , "')+'"';
+        }
+
+        console.warn (thename, ":name not used anymore since refacto 10/05 could put on same level as inData as inMapname or smth")
+        console.log( "url", theurl , "data", thedata , "name", thename );
+        var bridgeRes = AjaxSync({ URL: theurl, DATA:thedata, TYPE:'GET', DT:'json' })
+
+        // should be a js object with 'nodes' and 'edges' properties
+        inData = bridgeRes.data
+      }
+      else {
+          console.warn ("=> unsupported query type !")
+      }
+  }
+}
+// case (2) gexf => in params or in preRes db.json, then 2nd ajax for a gexf file => covered here
+else {
+  console.warn("input case: @mode=db.json or @file=... [future: @mode=local], using local gexf(s)")
+  // subcases:
+  // -> gexf file path is already specified in TW.mainfile
+  // -> gexf file path is in the urlparam @file
+  // -> @mode is db.json, files are listed in db.json file
+  //                  --> if @file also in url, choose the db.json one matching
+  //                  --> otherwise, choose the "first_file" from db.json list
+
+  // ===================
+  var the_file = "";
+  // ===================
+
+  // direct urlparam file case
+  if( !isUndef(getUrlParam.file)  && (isUndef(getUrlParam.mode) || getUrlParam.mode != "db.json") ) {
+    the_file = getUrlParam.file
+  }
+  // indirect case
+  else if ( !isUndef(getUrlParam.mode) && getUrlParam.mode=="db.json") {
+
+      console.log("===>legacy db.json<===")
+
+      // we'll first retrieve the menu of available files in db.json, then get the real data in a second ajax
+      var infofile = getUrlParam.mode
+
+      var preRES = AjaxSync({ URL: infofile });
+
+      if (preRES['OK'] && preRES.data) {
+        console.log('initial AjaxSync result preRES', preRES)
+      }
+
+
+      var first_file = "" , first_path = ""
+      for( var path in preRES.data ) {
+          console.log("db.json path", path)
+          first_file = preRES.data[path]["first"]
+          first_path = path
+          console.log("db.json first_file", first_path, first_file)
+          break;
+      }
+
+      // the first or a specified one (ie both mode and file params are present)
+      if( isUndef(getUrlParam.file) ) {
+          the_file = first_path+"/"+first_file
+      } else {
+          the_file = first_path+"/"+getUrlParam.file
+      }
+
+      var files_selector = '<select onchange="jsActionOnGexfSelector(this.value , true);">'
+
+      for( var path in preRES.data ) {
+          var the_gexfs = preRES.data[path]["gexfs"]
+          console.log("\t\tThese are the available  Gexfs:")
+          console.log(the_gexfs)
+          for(var aGexf in the_gexfs) {
+              var gexfBasename = aGexf.replace(/\.gexf$/, "") // more human-readable in the menu
+              console.log("\t\t\t"+gexfBasename+ "   -> table:" +the_gexfs[aGexf]["semantic"]["table"] )
+
+              TW.field[path+"/"+aGexf] = the_gexfs[aGexf]["semantic"]["table"]
+              // ex : data/AXA/RiskV2PageRank5000.gexf:"ISItermsAxa_2015"
+
+              TW.gexfDict[path+"/"+aGexf] = aGexf
+              // ex : data/AXA/RiskV2PageRank1000.gexf:"RiskV2PageRank1000.gexf"
+
+              var selected = (the_file==(path+"/"+aGexf))?"selected":""
+              files_selector += '<option '+selected+'>'+gexfBasename+'</option>'
+          }
+          // console.log( files_selector )
+          break;
+      }
+      files_selector += "</select>"
+      $("#network").html(files_selector)
+
+      // console.log("\n============================\n")
+      // console.log(TW.field)
+      // console.log(TW.gexfDict)
+      var finalRes = AjaxSync({ URL: the_file });
+      inData = finalRes["data"]
+      inFormat = finalRes["format"]
+      console.log(inData.length)
+      console.log(inFormat)
+
+      console.warn('@the_file', finalRes["OK"], the_file)
+  }
+  // recreated fallback case: specified file in settings_explorer
+  else if (TW.mainfile) {
     var unique_mainfile = TW.mainfile.filter(function(item, pos) {
-        return TW.mainfile.indexOf(item) == pos;
+      return TW.mainfile.indexOf(item) == pos;
     });
-    file = (Array.isArray(TW.mainfile))?TW.mainfile[0]:TW.mainfile;
+    the_file = (Array.isArray(TW.mainfile))?TW.mainfile[0]:TW.mainfile;
+  }
 }
 
+//  === [ / what to do at start ] === //
+
+
 // RES == { OK: true, format: "json", data: Object }
-var RES = AjaxSync({ URL: file });
-
-console.log('RES', RES)
-
-if(RES["OK"]) {
-
-    var fileparam;// = { db|api.json , somefile.json|gexf }
-    var the_data = RES["data"];
-
-    console.log('initial AjaxSync result RES', RES)
-
-    // ===================
-    var the_file = "";
-    // ===================
-
-    if ( !isUndef(getUrlParam.mode) && getUrlParam.mode=="db.json") {
-
-        var first_file = "" , first_path = ""
-        for( var path in the_data ) {
-            console.log("db.json path", path)
-            first_file = the_data[path]["first"]
-            first_path = path
-            console.log("db.json first_file", first_path, first_file)
-            break;
-        }
-
-        if( isUndef(getUrlParam.file) ) {
-            the_file = first_path+"/"+first_file
-        } else {
-            the_file = first_path+"/"+getUrlParam.file
-        }
-
-        var files_selector = '<select onchange="jsActionOnGexfSelector(this.value , true);">'
-
-        for( var path in the_data ) {
-            var the_gexfs = the_data[path]["gexfs"]
-            console.log("\t\tThese are the available  Gexfs:")
-            console.log(the_gexfs)
-            for(var aGexf in the_gexfs) {
-                var gexfBasename = aGexf.replace(/\.gexf$/, "") // more human-readable in the menu
-                console.log("\t\t\t"+gexfBasename+ "   -> table:" +the_gexfs[aGexf]["semantic"]["table"] )
-
-                TW.field[path+"/"+aGexf] = the_gexfs[aGexf]["semantic"]["table"]
-                // ex : data/AXA/RiskV2PageRank5000.gexf:"ISItermsAxa_2015"
-
-                TW.gexfDict[path+"/"+aGexf] = aGexf
-                // ex : data/AXA/RiskV2PageRank1000.gexf:"RiskV2PageRank1000.gexf"
-
-                var selected = (the_file==(path+"/"+aGexf))?"selected":""
-                files_selector += '<option '+selected+'>'+gexfBasename+'</option>'
-            }
-            // console.log( files_selector )
-            break;
-        }
-        files_selector += "</select>"
-        $("#network").html(files_selector)
 
 
-
-        // console.log("\n============================\n")
-        // console.log(TW.field)
-        // console.log(TW.gexfDict)
-        var sub_RES = AjaxSync({ URL: the_file });
-        the_data = sub_RES["data"]
-        fileparam = sub_RES["format"]
-        // console.log(the_data.length)
-        // console.log(fileparam)
-
-        console.warn('@the_file', sub_RES["OK"], the_file)
-
-        // why now ???
-        getUrlParam.file=the_file;
-        console.log(" .  .. . -. - .- . - -.")
-        console.log(getUrlParam.file)
-        // console.log("\n============================\n")
-
-    }
-
-    if (file=="api.json") {
-        fileparam = file;
-    }
-
-    // Reading just a JSON|GEXF
-    if ( file!="db.json" && file!="api.json" )
-        fileparam = RES["format"];
-
+if (! inFormat || ! inData) {
+  alert("error on initial data load")
+}
+else {
     console.log("parsing the data")
-    var start = new ParseCustom(  fileparam , the_data );
+    var start = new ParseCustom(  inFormat , inData );
     var categories = start.scanFile(); //user should choose the order of categories
-    // console.log("Categories: ")
-    // console.log(categories)
+
+    console.log("Categories: ")
+    console.log(categories)
 
     if (! categories) {
       console.warn ('ParseCustom scanFile found no categories!!')
@@ -210,7 +331,7 @@ if(RES["OK"]) {
 
     TW.selectionActive = false  // changes rendering mode
 
-    if (the_data.clusters) TW.Clusters = the_data.clusters
+    if (inData.clusters) TW.Clusters = inData.clusters
 
     // relations already copied in TW.Relations at this point
     // TW.nodes1 = dicts.n1;//not used
@@ -561,8 +682,7 @@ if(RES["OK"]) {
     // set the default legend
     set_ClustersLegend ( "clust_default" )
 
-} else alert("error: "+RES["data"])
-
+}
 
 // load optional modules
 ProcessDivsFlags() ;

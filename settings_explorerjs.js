@@ -24,8 +24,8 @@ var TW = {}
     TW.APINAME = "http://127.0.0.1:5000/twitter_search";
     TW.tagcloud_limit = 50;
     TW.bridge={};
-    TW.bridge["forFilteredQuery"] = "php/bridgeClientServer_filter.php";
-    TW.bridge["forNormalQuery"] = "php/bridgeClientServer.php";
+    TW.bridge["forFilteredQuery"] = "services/api/graph";
+    TW.bridge["forNormalQuery"] = "services/api/graph";
 
     TW.gexfDict={};
     TW.gexfDictReverse={}
@@ -54,7 +54,7 @@ var TW = {}
     TW.SystemStates.selections = [];
     TW.SystemStates.opposites = [];
     TW.catSoc = "Document";
-    TW.catSem = "terms";
+    TW.catSem = "NGram";
 
     TW.strSearchBar = "Select or suggest topics";
 
@@ -174,7 +174,7 @@ var sigmaJsMouseProperties = {
 
 
 // ============ < VARIABLES.JS > ============
-//"http://webchat.freenode.net/?nick=Ademe&channels=#anoe"
+
 var twjs="tinawebJS/";
 TW.categories = {};
 TW.categoriesIndex = [];

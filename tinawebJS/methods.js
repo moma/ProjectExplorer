@@ -673,8 +673,32 @@ function prepareNodesRenderingProperties(nodesDict) {
     // new initial setup of properties
     n.active = false
 
-    var rgba = hex2rgba(n.color)
-    var rgbStr = rgba.splice(0, 3).join(',');
+    var rgba, rgbStr, invalidFormat = false;
+
+    if (n.color) {
+      // rgb[a] color string ex: "19,180,244"
+      if (/^\d{1,3},\d{1,3},\d{1,3}$/.test(n.color)) {
+        rgba = n.color.split(',')
+        if (rgba.length = 3) {
+          rgbStr = n.color
+          rgba.push(255)
+        }
+        else if (rgba.length == 4) {
+          rgbStr = rgba.splice(0, 3).join(',');
+        }
+        else {
+          invalidFormat = true
+        }
+      }
+      // hex color ex "#eee or #AA00AA"
+      else if (/^#[A-Fa-f0-1]{3,6}$/.test(n.color)) {
+        rgba = hex2rgba(n.color)
+        rgbStr = rgba.splice(0, 3).join(',');
+      }
+      else {
+        invalidFormat = true
+      }
+    }
 
     n.customAttrs = {
       grey: false,

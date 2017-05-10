@@ -218,6 +218,8 @@ function scanGexf(gexfContent) {
         catDict[categories[0]] = 0;
         // console.log("-----cat unique =>0")
     }
+
+    // £TODO here should use TW.catSem and TW.catSoc
     if(categories.length>1) {
         var newcats = []
         for(var i in categories) {
@@ -818,11 +820,13 @@ function scanJSON( data ) {
 
     for(var i in nodes) {
         n = nodes[i];
+        if (i<10)  console.log(n)
         if(n.type) categoriesDict[n.type]=n.type;
     }
 
     for(var cat in categoriesDict)
         categories.push(cat);
+
 
     var catDict = {}
     if(categories.length==0) {
@@ -832,6 +836,8 @@ function scanJSON( data ) {
     if(categories.length==1) {
         catDict[categories[0]] = 0;
     }
+
+    // £TODO here also should USE TW.catSem TW.catSoc
     if(categories.length>1) {
         var newcats = []
         for(var i in categories) {
@@ -854,7 +860,7 @@ function scanJSON( data ) {
 // Level-00
 // for {1,2}partite graphs
 function dictfyJSON( data , categories ) {
-
+    console.debug(`dictfyJSON, categories:${categories}, data:`, data)
     var catDict = {}
     var catCount = {}
     for(var i in categories)  catDict[categories[i]] = i;
@@ -868,8 +874,8 @@ function dictfyJSON( data , categories ) {
     for(var i in data.nodes) {
         n = data.nodes[i];
         node = {}
-        node.id = n.id;
-        node.label = (n.label)? n.label : ("node_"+n.id) ;
+        node.id = (n.id) ? n.id : i ; // use the key if no id
+        node.label = (n.label)? n.label : ("node_"+node.id) ;
         node.size = (n.size)? n.size : 3 ;
         node.type = (n.type)? n.type : "Document" ;
         node.x = (n.x)? n.x : Math.random();
@@ -880,10 +886,15 @@ function dictfyJSON( data , categories ) {
         node.type = (n.type)? n.type : categories[0] ;
         // node.shape = "square";
 
+        // £TODO generalize some alternate names in here and maybe gexf
+        if (node.term_occ) {
+          node.size = Number(node.term_occ)
+        }
+
         if (!catCount[node.type]) catCount[node.type] = 0
         catCount[node.type]++;
 
-        nodes[n.id] = node;
+        nodes[node.id] = node;
     }
 
     colorList.sort(function(){ return Math.random()-0.5; });
@@ -894,6 +905,7 @@ function dictfyJSON( data , categories ) {
         }
     }
 
+    // edges
     for(var i in data.links){
         e = data.links[i];
         edge = {}
@@ -905,15 +917,14 @@ function dictfyJSON( data , categories ) {
         var id=source+";"+target;
 
         edge.id = id;
-        edge.source = parseInt(source);
-        edge.target = parseInt(target);
+        edge.source = source;
+        edge.target = target;
         edge.weight = weight;
         edge.type = type;
 
         if (nodes[source] && nodes[target]) {
             idS=nodes[source].type;
             idT=nodes[target].type;
-
 
             // [ New Code! ]
             petitDict = {}

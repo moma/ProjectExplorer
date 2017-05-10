@@ -264,7 +264,7 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
     var ClustNB_CurrentColor = {}
 
     // passed as arg   or  prepared in parseCustom
-    if (!groupedByTicks && !TW.Clusters[curType][daclass]) {
+    if (!groupedByTicks && (!TW.Clusters[curType] || !TW.Clusters[curType][daclass])) {
       console.error('class not prepared ??', daclass)
     }
     else {
@@ -784,7 +784,15 @@ function ProcessDivsFlags() {
             // console.log("extras:ProcessDivsFlags: key is true: "+key)
             // load JS+CSS items corresponding to the flagname
             my_src_dir = key
-            loadJS(my_src_dir+"/init.js") ;
+
+            // HEAD check on local file presence
+            if (linkCheck(my_src_dir+"/init.js")) {
+              loadJS(my_src_dir+"/init.js") ;
+            }
+            else {
+              console.warn (`didn't find module dir ${key}`)
+              $("."+key).remove()
+            }
             // ex: for the flag = crowdsourcingTerms
             //     will load ==> JS    crowdsourcingTerms/init.js
             //               ==> other elements listed in init.js

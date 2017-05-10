@@ -626,9 +626,11 @@ function exactfind(label) {
 
 
 function getNodeLabels(elems){
+    console.log(elems)
     var labelss=[]
     for(var i in elems){
-        var id=(!isUndef(elems[i].key))?elems[i].key:i
+        console.log(elems[i])
+        var id=(!isUndef(elems[i].id))?elems[i].id:i
         labelss.push(TW.Nodes[id].label)
     }
     return labelss
