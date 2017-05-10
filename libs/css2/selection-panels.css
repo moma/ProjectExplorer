@@ -8,6 +8,15 @@
   -moz-box-shadow: 0px 2px 6px #000;
   -webkit-box-shadow: 0px 2px 6px #000;
   box-shadow: 0px 2px 6px #000;
+
+  /*non selectable*/
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+   -khtml-user-select: none; /* Konqueror HTML */
+     -moz-user-select: none; /* Firefox */
+      -ms-user-select: none; /* Internet Explorer/Edge */
+          user-select: none; /* Non-prefixed version, currently
+                                supported by Chrome and Opera */
 }
 
 #unselectbutton {
@@ -19,7 +28,7 @@
   margin-right:1em
 }
 
-
+""
 /* LEGEND PANEL */
 .legend_for_clusters {
     position:absolute;
@@ -40,7 +49,7 @@
     z-index: 5;
     /* width: we set it equal or smaller than #lefttopbox width */
     width:18%;
-    max-height: 40%;
+    max-height: 25%;
     overflow-y:scroll;
     bottom:5px;
     left:5px;
@@ -123,7 +132,7 @@
 
 #ctlzoom {
     position: fixed;
-    right: 260px;
+    right: 410px;
     bottom: 0;
     list-style: none;
     padding: 0;
@@ -140,9 +149,6 @@
 }
 
 #zoomSliderzone {
-    height: 100px;
-    top: -9px;
-    position: relative;
 }
 
 #edgesButton {
@@ -234,11 +240,11 @@
 }*/
 
 #unfold {
-    width: 12px; height: 12px; background: rgb(250, 250, 252); padding: 2px 2px 2px 0; border-top-right-radius: 5px; border-bottom-right-radius: 5px; box-shadow: 1px 1px 2px #808090;
+    display:none; width: 12px; height: 12px; background: rgb(250, 250, 252); padding: 2px 2px 2px 0; border-top-right-radius: 5px; border-bottom-right-radius: 5px; box-shadow: 1px 1px 2px #808090;
 }
 
 #aUnfold {
-    display: block; width: 12px; height: 12px; background-image: url("../img2/fleches-horiz.png");  margin: 0 auto;
+    display: none; width: 12px; height: 12px; background-image: url("../img2/fleches-horiz.png");  margin: 0 auto;
 }
 /*
 #saveAs {
@@ -249,7 +255,7 @@
 #zoomSlider {
     background:#fff;
     border:1px solid #aaa;
-    height: 120px; margin: 0 auto;
+    height: 90px; margin: 0 auto;
 }
 
 
@@ -280,4 +286,11 @@
 
 #current-selection {
     width: 100%;  /* 100% within lefttopbox */
+}
+
+
+/* tweets inside topPapers */
+.EmbeddedTweet-tweet {
+  width: 295px;
+  max-width: 295px;
 }

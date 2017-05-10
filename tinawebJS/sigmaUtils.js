@@ -7,11 +7,14 @@ SigmaUtils = function () {
     this.FillGraph = function( initialState , catDict  , nodes, edges , graph ) {
 
         console.log("Filling the graaaaph:")
-        // console.log(catDict)
+        console.log("FillGraph catDict",catDict)
+        // console.log("FillGraph nodes",nodes)
+        // console.log("FillGraph edges",edges)
         for(var i in nodes) {
             var n = nodes[i];
+            // console.debug('tr >>> fgr node', n)
 
-            if(initialState[catDict[n.type]]) {
+            if(initialState[catDict[n.type]] || TW.anynodegoes) {
                 // var node = {
                 //     id : n.id,
                 //     label : n.label,
@@ -30,7 +33,7 @@ SigmaUtils = function () {
                 // no attributes to remove: I use n directly
                 graph.nodes.push(n);
 
-                if(Number(n.id)==287) console.log("node 287:", n)
+                if(i==2) console.log("node 2 ("+n.id+")", n)
 
                 // fill the "labels" global variable
                 updateSearchLabels( n.id , n.label , n.type);
@@ -90,9 +93,14 @@ SigmaUtils = function () {
       var fontSize,
           prefix = settings('prefix') || '',
           size = node[prefix + 'size'],
-          activeFlag = node['active'] || node.customAttrs['forceLabel']
+          activeFlag = node['active'] || node.customAttrs['forceLabel'],
+          neighborFlag = node.customAttrs['highlight'],
+          labelColor = (settings('labelColor') === 'node') ?
+            (node.color || settings('defaultNodeColor')) :
+            settings('defaultLabelColor') ;
           // NB active is used in all TW selections
           //    forceLabel is used in cluster highlighting
+          //    highlight is used for selection's neighbors or cluster highlighting
 
       let X = node[prefix + 'x']
       let Y = node[prefix + 'y']
@@ -122,7 +130,7 @@ SigmaUtils = function () {
         context.beginPath();
 
         if (TW.selectedColor == "node")
-          context.fillStyle = node.color; // node's
+          context.fillStyle = TW.handpickedcolor? node.customAttrs.alt_color : node.color; // node's
         else
           context.fillStyle = "#F7E521"; // yellow
 
@@ -173,12 +181,14 @@ SigmaUtils = function () {
           context.fill();
         }
       }
+      else if (neighborFlag) {
+        // larger neighbors or highlight
+        fontSize *= 1.4
+      }
 
       context.font = (settings('fontStyle') ? settings('fontStyle') + ' ' : '') +
         fontSize + 'px ' + settings('font');
-      context.fillStyle = (settings('labelColor') === 'node') ?
-        (node.color || settings('defaultNodeColor')) :
-        settings('defaultLabelColor');
+      context.fillStyle = labelColor;
 
       context.fillText(
         node.label,
@@ -198,21 +208,25 @@ SigmaUtils = function () {
       // console.warn("rendering edge", edge)
 
       var defSize = edge[prefix + 'size'] || settings("minEdgeSize") || 1 ;
+
+      // precomputed color with no opacity
+      // cf. sigmaTools.edgeRGB
+      var baseRGB = TW.handpickedcolor ? edge.customAttrs.alt_rgb : edge.customAttrs.rgb
+
       if (edge.customAttrs.activeEdge) {
-        size = defSize * 2
-        // color with no opacity
-        // cf. sigmaTools.edgeRGB
-        color = 'rgb('+edge.customAttrs.rgb+')'
-        // console.log("drawing activeEdge with size", size)
-        edge.customAttrs.activeEdge = false
+        size = (defSize * 2) + 1
+
+        // active edges look well with no opacity
+        color = `rgb(${baseRGB})`
+
+        // edge.customAttrs.activeEdge = false // for one-time
       }
       else if (edge.customAttrs.grey) {
         color = TW.edgeGreyColor
         size = 1
       }
       else {
-        // color = "rgba( "+rgb.join()+" , "+TW.edgeDefaultOpacity+")";
-        color = edge.customAttrs.true_color
+        color = "rgba( "+baseRGB+" , "+TW.edgeDefaultOpacity+")";
         size = defSize
       }
 
@@ -299,16 +313,30 @@ SigmaUtils = function () {
         // mode variants
         if (TW.selectionActive) {
           // passive nodes should blend in the grey of TW.edgeGreyColor
+          // cf settings_explorerjs, defgrey_color and greyEverything()
           if (node.customAttrs.grey) {
-            nodeColor = node.customAttrs.defgrey_color
+            if (! TW.handpickedcolor) {
+              nodeColor = node.customAttrs.defgrey_color
+            }
+            else {
+              // #C01O3 += alpha 55
+              //                     => #C01O355
+
+              if (!node.customAttrs.altgrey_color) {
+                node.customAttrs.altgrey_color = "rgba("+(hex2rgba(node.customAttrs.alt_color).slice(0,3).join(','))+",0.4)"
+              }
+              nodeColor = node.customAttrs.altgrey_color
+            }
+            // nice looking uniform grey
             borderColor = TW.nodesGreyBorderColor
-            // cf settings_explorerjs, defgrey_color and greyEverything()
           }
           // neighbor nodes <=> (highlight flag AND selectionActive)
           else if(node.customAttrs.highlight) {
-            // borderColor = "rgba(220, 220, 220, 0.7)"
             nodeSize *= 1.4
             borderSize *= 1.4
+            if (TW.handpickedcolor) {
+              nodeColor = node.customAttrs.alt_color
+            }
           }
           else if(node.active) {
             borderColor = null
@@ -438,6 +466,7 @@ SigmaUtils = function () {
 
           // Display the label:
           if (node.label && typeof node.label === 'string') {
+
             context.fillStyle = (settings('labelHoverColor') === 'node') ?
               (node.color || settings('defaultNodeColor')) :
               settings('defaultLabelHoverColor');
@@ -611,7 +640,7 @@ function getNodeIDs(elems){
 
 
 function getSelections(){
-        params=[];
+        let params=[];
         for(var i in selections){
             params.push(TW.Nodes[i].label);
         }
@@ -662,16 +691,17 @@ function getArrSubkeys(arr,id) {
     return result;
 }
 
+
 function clustersBy(daclass) {
 
     cancelSelection(false);
 
-    // TODO avoid this strategy and also double loop below
-    var v_nodes = getVisibleNodes();
+    TW.handpickedcolor = true
+
     var min_pow = 0;
-    for(var i in v_nodes) {
-        var the_node = TW.Nodes[ v_nodes[i].id ]
-        var attval = ( isUndef(the_node.attributes) || isUndef(the_node.attributes[daclass]) )? v_nodes[i][daclass]: the_node.attributes[daclass];
+    for(var j in TW.nodeIds) {
+        var the_node = TW.Nodes[ TW.nodeIds[j] ]
+        var attval = the_node.attributes[daclass];
         if( !isNaN(parseFloat(attval)) ) { //is float
             while(true) {
                 var themult = Math.pow(10,min_pow);
@@ -687,37 +717,43 @@ function clustersBy(daclass) {
     var real_min = 1000000;
     var real_max = -1;
     var themult = Math.pow(10,min_pow);
-    for(var i in v_nodes) {
-        var the_node = TW.Nodes[ v_nodes[i].id ]
-        var attval = ( isUndef(the_node.attributes) || isUndef(the_node.attributes[daclass]) )? v_nodes[i][daclass]: the_node.attributes[daclass];
+    // console.log('themult', themult)
+
+    for(var j in TW.nodeIds) {
+        var the_node = TW.Nodes[ TW.nodeIds[j] ]
+        var attval = the_node.attributes[daclass];
         var attnumber = Number(attval);
         var round_number = Math.round(  attnumber*themult ) ;
 
-        NodeID_Val[v_nodes[i].id] = { "round":round_number , "real":attnumber };
+        NodeID_Val[TW.nodeIds[j]] = { "round":round_number , "real":attnumber };
 
         if (round_number<real_min) real_min = round_number;
         if (round_number>real_max) real_max = round_number;
     }
 
+    // console.log("NodeID_Val", NodeID_Val)
+
+    // console.log(" - - - - - - - - -- - - ")
+    // console.log(real_min)
+    // console.log(real_max)
+    // console.log("10^"+min_pow)
+    // console.log("the mult: "+themult)
+    // console.log(" - - - - - - - - -- - - ")
 
 
-    console.log(" - - - - - - - - -- - - ")
-    console.log(real_min)
-    console.log(real_max)
-    console.log("10^"+min_pow)
-    console.log("the mult: "+themult)
-    console.log(" - - - - - - - - -- - - ")
-
-
-    //    [ Scaling node colours(0-255) and sizes(3-5) ]
+    //    [ Scaling node colours(0-255) and sizes(2-7) ]
     var Min_color = 0;
     var Max_color = 255;
-    var Min_size = 2;
-    var Max_size= 6;
+    var Min_size = 1;
+    var Max_size= 8;
     for(var nid in NodeID_Val) {
         var newval_color = Math.round( ( Min_color+(NodeID_Val[nid]["round"]-real_min)*((Max_color-Min_color)/(real_max-real_min)) ) );
         var hex_color = rgbToHex(255, (255-newval_color) , 0)
         TW.partialGraph.graph.nodes(nid).color = hex_color
+        TW.partialGraph.graph.nodes(nid).customAttrs.alt_color = hex_color
+
+        // FIXME not used ?
+        TW.partialGraph.graph.nodes(nid).customAttrs.altgrey_color = false
 
         var newval_size = Math.round( ( Min_size+(NodeID_Val[nid]["round"]-real_min)*((Max_size-Min_size)/(real_max-real_min)) ) );
         TW.partialGraph.graph.nodes(nid).size = newval_size;
@@ -725,78 +761,84 @@ function clustersBy(daclass) {
 
         TW.partialGraph.graph.nodes(nid).label = "("+NodeID_Val[nid]["real"].toFixed(min_pow)+") "+TW.Nodes[nid].label
     }
-    //    [ / Scaling node colours(0-255) and sizes(3-5) ]
+    //    [ / Scaling node colours(0-255) and sizes(2-7) ]
 
-
-
-
-    //    [ Edge-colour by source-target nodes-colours combination ]
+    // Edge precompute alt_rgb by new source-target nodes-colours combination
     repaintEdges()
-    //    [ / Edge-colour by source-target nodes-colours combination ]
 
-    set_ClustersLegend ( null )
+    // NB legend will group different possible values using
+    //    precomputed ticks from TW.Clusters.terms[daclass]
+    set_ClustersLegend ( daclass)
 
     TW.partialGraph.render();
 }
 
 
-// for debug of colorsRelByBins
-var totalsPerBinMin = {
-    '-1000000':0, '-75':0, '-50':0, '-25':0, '-10':0, '10':0, '25':0, '50':0, '75':0, '100':0, '125':0, '150':0
-  }
 
-// Edge-colour by source-target nodes-colours combination
+// Edge-colour: precompute alt_rgb by source-target node.alt_color combination
 function repaintEdges() {
-  var v_edges = getVisibleEdges();
-  for(var e in v_edges) {
-      var e_id = v_edges[e].id;
-      var a = TW.partialGraph.graph.nodes(v_edges[e].source).color;
-      var b = TW.partialGraph.graph.nodes(v_edges[e].target).color;
-      a = hex2rga(a);
-      b = hex2rga(b);
-      var r = (a[0] + b[0]) >> 1;
-      var g = (a[1] + b[1]) >> 1;
-      var b = (a[2] + b[2]) >> 1;
 
-      TW.partialGraph.graph.edges(e_id).color = "rgba("+[r,g,b].join(",")+",0.5)";
+  for (var i in TW.edgeIds) {
+    let eid = TW.edgeIds[i]
 
-      // also keep components array (useful if we change opacity when selected)
-      TW.partialGraph.graph.edges(e_id).customAttrs.rgb = [r,g,b]
+    if (eid) {
+      let idPair = eid.split(';')
+      if (idPair.length != 2) {
+        console.warn('skipping invalid edgeId', eid)
+      }
+      else {
+        let e = TW.partialGraph.graph.edges(eid)
+        let src = TW.partialGraph.graph.nodes(idPair[0])
+        let tgt = TW.partialGraph.graph.nodes(idPair[1])
+
+        let src_color = src.customAttrs.alt_color || '#555'
+        let tgt_color = tgt.customAttrs.alt_color || '#555'
+        e.customAttrs.alt_rgb = sigmaTools.edgeRGB(src_color,tgt_color)
+        // we don't set e.color because opacity may vary if selected or not
+      }
+    }
   }
 }
 
 // rewrite of clustersBy with binning and for attributes that can have negative float values
+
+// NB - binning is done at parseCustom
+//    - number of bins can be specified by attribute name in TW.customLegendsBins
 function colorsRelByBins(daclass) {
+  var binColors
+  var doModifyLabel = false
+  var ty = getCurrentType()
 
-    cancelSelection(false);
-    // 12 colors
-    var binColors = [
-        "#005197",  //blue    binMin -∞
-        "#3c76fb",        //  binMin -75
-        "#5c8af2",        //  binMin -50
-        "#64c5f2",        //  binMin -25
-        "#bae64f",//epsilon   binMin -10  binMin 10
-        "#f9f008",        //  binMin 10
-        "#f9da08",        //  binMin 25
-        "#fab207",        //  binMin 50
-        "#fa9607",        //  binMin 75
-        "#fa6e07",        //  binMin 100
-        "#fa4607", // red     binMin 125
-        "#991B1E"         //  binMin 150
+  // our binning
+  var tickThresholds = TW.Clusters[ty][daclass]
+
+  // for debug of colorsRelByBins
+  var totalsPerBinMin = {}
+
+  // let's go
+  cancelSelection(false);
+
+  // global flag
+  TW.handpickedcolor = true
+
+  if (daclass == 'age') {
+    // 9 colors
+    binColors = [
+        "#F9F588",//epsilon
+        "#f9f008", //yel
+        "#f9da08",
+        "#fab207",
+        "#fa9607",
+        "#fa6e07",
+        "#fa4607",
+        "#ff0000" // red     binMin 125
     ];
-
-    // spare color 13 "#64e0f2",
-
-    var tickThresholds = [-1000000,-75,-50,-25,-15,15,25,50,75,100,125,150, 1000000]
-
-    // £TODO put colors and thresholds as params or calculate thresholds like eg d3.histogram
-    if (daclass == 'age') {
-        tickThresholds = [-1000000,1992,1994,1996,1998,2000,2002,2004,2006,2008,2010,2012,2014,2016]
-        // and add a grey color for the first timeperiod
-        binColors.unshift("#F9F7ED")
     }
     else if (daclass == 'growth_rate') {
-      binColors[4] = ""
+
+      doModifyLabel = true
+
+      // 12 colors
       binColors = [
           "#005197",  //blue    binMin -∞
           "#3c76fb",        //  binMin -75
@@ -814,35 +856,224 @@ function colorsRelByBins(daclass) {
 
     }
 
-    // get the nodes
-    var v_nodes = getVisibleNodes();
-    for(var i in v_nodes) {
-        var theId = v_nodes[i].id
-        var theNode = TW.Nodes[ theId ]
-        var attval = ( isUndef(theNode.attributes) || isUndef(theNode.attributes[daclass]) )? v_nodes[i][daclass]: theNode.attributes[daclass];
-        var theVal = parseFloat(attval)
-        if( !isNaN(theVal) ) { //is float
-            // iterate over bins
-            for(var j=0 ; j < tickThresholds.length-1; j++) {
-                var binMin = tickThresholds[j]
-                var binMax = tickThresholds[(j+1)]
-                if((theVal >= binMin) && (theVal < binMax)) {
-                    TW.partialGraph._core.graph.nodesIndex[theId].binMin = binMin
-                    TW.partialGraph._core.graph.nodesIndex[theId].color = binColors[j]
-
-                    totalsPerBinMin[binMin]++
-                    break
-                }
-            }
-        }
+    // verification
+    if (tickThresholds.length != binColors.length) {
+      console.warn (`colorsRelByBins setup mismatch: TW.Clusters ticks ${tickThresholds} should == nColors ${binColors.length}`)
     }
 
 
-    //    [ Edge-colour by source-target nodes-colours combination ]
-    repaintEdges()
-    //    [ / Edge-colour by source-target nodes-colours combination ]
+    // use our valueclass => ids mapping
+    for (var k in tickThresholds) {
 
-    set_ClustersLegend ( null )
+      // console.debug('tick infos', tickThresholds[k])
+      // ex: {labl: "terms||growth_rate||[0 ; 0.583]", nids: Array(99), range: [0 ; 0.583210]}
+
+      totalsPerBinMin[tickThresholds[k].range[0]] = tickThresholds[k].nids.length
+
+      // color the referred nodes
+      for (var j in tickThresholds[k].nids) {
+        let n = TW.partialGraph.graph.nodes(tickThresholds[k].nids[j])
+
+        n.color = binColors[k]
+        n.customAttrs.alt_color = binColors[k]
+        n.customAttrs.altgrey_color = false
+
+        var originalLabel = TW.Nodes[n.id].label
+        if (doModifyLabel) {
+          var valSt = n.attributes[daclass]
+          n.label = `(${valSt}) ${originalLabel}`
+        }
+        else {
+          n.label = originalLabel
+        }
+
+      }
+    }
+
+    // console.debug(valArray)
+
+    console.info('coloring distribution per tick thresholds' , totalsPerBinMin)
+
+    // Edge precompute alt_rgb by new source-target nodes-colours combination
+    repaintEdges()
+
+    set_ClustersLegend ( daclass )
+
+    TW.partialGraph.render();
+}
+
+
+
+// KEPT FOR REFERENCE, BINNING NOW PRECOMPUTED in parseCustom
+// rewrite of clustersBy with binning and for attributes that can have negative float values
+// /!\ age and growth_rate attributes referred to by name
+function colorsRelByBins_old(daclass) {
+  cancelSelection(false);
+
+  var binColors
+  var doModifyLabel = false
+
+  TW.handpickedcolor = true
+
+  // for debug of colorsRelByBins
+  var totalsPerBinMin = {}
+
+
+  // should be = binColors.length
+  var nTicksParam = (daclass == 'age') ? 8 : 12
+  // do first loop entirely to get percentiles => bins, then modify alt_color
+
+  // estimating ticks
+  let tickThresholds = []
+  let valArray = []
+  for (var j=0 ; j < TW.nNodes ; j++) {
+    let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
+
+    if (
+        !n.hidden
+        && n.attributes
+        && n.attributes.category == 'terms'
+        && n.attributes[daclass] != undefined
+      ) {
+          valArray.push(Number(n.attributes[daclass]))
+    }
+  }
+
+  var len = valArray.length
+
+  valArray.sort(function(a, b) {return a - b;}) // important :)
+
+  for (var l=0 ; l < nTicksParam ; l++) {
+    let nthVal = Math.floor(len * l / nTicksParam)
+
+    tickThresholds.push(valArray[nthVal])
+  }
+
+  // also always add the max+1 as last tick (excluded upper bound of last bin)
+  tickThresholds.push((valArray[len-1])+1)
+
+  console.info(`[|===|=== ${nTicksParam} color ticks ===|===|]\n`, tickThresholds)
+
+
+  cancelSelection(false);
+
+  if (daclass == 'age') {
+    // 9 colors
+    binColors = [
+        "#F9F588",//epsilon
+        "#f9f008", //yel
+        "#f9da08",
+        "#fab207",
+        "#fa9607",
+        "#fa6e07",
+        "#fa4607",
+        "#ff0000" // red     binMin 125
+    ];
+    }
+    else if (daclass == 'growth_rate') {
+
+      doModifyLabel = true
+
+      // 12 colors
+      binColors = [
+          "#005197",  //blue    binMin -∞
+          "#3c76fb",        //  binMin -75
+          "#5c8af2",        //  binMin -50
+          "#64c5f2",        //  binMin -25
+          "#F9F7ED",//epsilon   binMin -15
+          "#bae64f",        //  binMin 15
+          "#f9f008",        //  binMin 25
+          "#fab207",        //  binMin 50
+          "#fa9607",        //  binMin 75
+          "#fa6e07",        //  binMin 100
+          "#fa4607", // red     binMin 125
+          "#991B1E"         //  binMin 150
+      ];
+
+    }
+
+    // verification
+    if (nTicksParam != binColors.length) {
+      console.warn (`colorsRelByBins setup mismatch: nTicksParam ${nTicksParam} should == nColors ${binColors.length}`)
+    }
+
+
+    // get the nodes
+    for (var j=0 ; j < TW.nNodes ; j++) {
+      let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
+      if (! n.hidden
+        && n.attributes
+        && n.attributes.category == 'terms'
+        && ! isUndef(n.attributes[daclass])
+      ) {
+
+        var valSt = n.attributes[daclass]
+
+        var originalLabel = TW.Nodes[n.id].label
+        if (doModifyLabel) {
+          n.label = `(${valSt}) ${originalLabel}`
+        }
+        else {
+          n.label = originalLabel
+        }
+
+        var theVal = parseFloat(valSt)
+        var foundBin = false
+        // console.log('theVal:',theVal)
+
+        if( !isNaN(theVal) ) { //is float
+          // iterate over bins
+          for(var k=0 ; k < tickThresholds.length-1; k++) {
+            var binMin = tickThresholds[k]
+            var binMax = tickThresholds[(k+1)]
+            if((theVal >= binMin) && (theVal < binMax)) {
+                // TW.partialGraph._core.graph.nodesIndex[n.id].binMin = binMin
+                // TW.partialGraph._core.graph.nodesIndex[n.id].color = binColors[j]
+
+                n.binMin = binMin
+                n.color = binColors[k]
+                n.customAttrs.alt_color = binColors[k]
+                n.customAttrs.altgrey_color = false
+                foundBin = true
+                // console.log(`theVal ${theVal} => found its bin ${binMin} ... ${binColors[k]}`)
+
+                if (!totalsPerBinMin[binMin]) {
+                  totalsPerBinMin[binMin] = 1
+                }
+                else {
+                  totalsPerBinMin[binMin]++
+                }
+                break
+            }
+          }
+
+          // case no bin after loop (perhaps more ticks than colors-1 ??)
+          if (!foundBin) {
+            console.warn('no bin for theVal', theVal, n.id)
+            n.binMin = null
+            n.color = '#000'
+            n.customAttrs.alt_color = '#000'
+          }
+        }
+        else {
+          // case no val
+          // console.log('no val for', n.id)
+          n.binMin = null
+          n.color = '#555'
+          n.customAttrs.alt_color = '#555'
+        }
+
+      }
+    }
+
+    // console.debug(valArray)
+
+    console.info('coloring distribution per tick thresholds' , totalsPerBinMin)
+
+    // Edge precompute alt_rgb by new source-target nodes-colours combination
+    repaintEdges()
+
+    // set_ClustersLegend ( daclass )
 
     TW.partialGraph.render();
 }
@@ -870,38 +1101,35 @@ function colorsBy(daclass) {
 
 
     if (daclass=="clust_default") {
-        for(var i in v_nodes) {
-          var original_node_color = TW.Nodes[ v_nodes[i].id ].color
-          TW.partialGraph.graph.nodes(v_nodes[i].id).color = original_node_color
+        for(var j in TW.nodeIds) {
+          var original_node_color = TW.Nodes[ TW.nodeIds[j] ].color
+          TW.partialGraph.graph.nodes(TW.nodeIds[j]).color = original_node_color
+
+          // reset the alt_color valflag
+          TW.partialGraph.graph.nodes(TW.nodeIds[j]).customAttrs.alt_color = null
         }
+
+        // reset the global state
+        TW.handpickedcolor = false
     }
     else {
       // shuffle on entire array is better than random sorting function on each element
       var randomColorList = shuffle(colorList)
 
-      for(var i in v_nodes) {
-          var the_node = TW.Nodes[ v_nodes[i].id ]
-          var attval = ( isUndef(the_node.attributes) || isUndef(the_node.attributes[daclass]) )? v_nodes[i][daclass]: the_node.attributes[daclass];
-          TW.partialGraph.graph.nodes(v_nodes[i].id).color = randomColorList[ attval ]
+      for(var j in TW.nodeIds) {
+          var the_node = TW.Nodes[ TW.nodeIds[j] ]
+          var attval = ( isUndef(the_node.attributes) || isUndef(the_node.attributes[daclass]) )? TW.partialGraph.graph.nodes(TW.nodeIds[j])[daclass]: the_node.attributes[daclass];
+          TW.partialGraph.graph.nodes(TW.nodeIds[j]).color = randomColorList[ attval ]
+          TW.partialGraph.graph.nodes(TW.nodeIds[j]).customAttrs.alt_color = randomColorList[ attval ]
+          TW.partialGraph.graph.nodes(TW.nodeIds[j]).customAttrs.altgrey_color = false
       }
+      // set the global state
+      TW.handpickedcolor = true
     }
 
-    //    [ Edge-colour by source-target nodes-colours combination ]
-    var v_edges = getVisibleEdges();
-    for(var e in v_edges) {
-        var e_id = v_edges[e].id;
-        var a = v_edges[e].source.color;
-        var b = v_edges[e].target.color;
-        if (a && b) {
-            a = hex2rga(a);
-            b = hex2rga(b);
-            var r = (a[0] + b[0]) >> 1;
-            var g = (a[1] + b[1]) >> 1;
-            var b = (a[2] + b[2]) >> 1;
-            TW.partialGraph.graph.edges(e_id).color = "rgba("+[r,g,b].join(",")+",0.5)";
-        }
-    }
-    //    [ / Edge-colour by source-target nodes-colours combination ]
+    // Edge precompute alt_rgb by new source-target nodes-colours combination
+    repaintEdges()
+
     set_ClustersLegend ( daclass )
     TW.partialGraph.render();
 }

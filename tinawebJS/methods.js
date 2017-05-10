@@ -17,26 +17,26 @@ function cancelSelection (fromTagCloud, settings) {
     //Nodes colors go back to normal
     overNodes=false;
 
+    //Edges colors go back to normal
     if (TW.partialGraph.settings('drawEdges')) {
       for(let i=0;i<TW.nEdges;i++){
         let e = TW.partialGraph.graph.edges(TW.edgeIds[i])
         // console.log("cancelSelection: edge", e)
         if (e) {
-          e.color = e.customAttrs['grey'] ? e.customAttrs['true_color'] : e.color;
+          e.color = e.customAttrs['true_color'];
           e.customAttrs.grey = 0;
           e.customAttrs.activeEdge = 0;
         }
       }
     }
 
-    //Nodes colors go back to normal
+    //Nodes colors go back to previous
     for(let j=0;j<TW.nNodes;j++){
       let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
       // console.log("cancelSelection: node", n)
       if (n) {
         n.active = false;
-        // n.color = n.customAttrs['grey'] ? n.customAttrs['true_color'] : n.color;
-        n.color = n.customAttrs['true_color'];
+        n.color = TW.handpickedcolor ? n.customAttrs['alt_color'] : n.customAttrs['true_color'];
         n.customAttrs.grey = 0
         n.customAttrs.forceLabel = 0
       }
@@ -82,6 +82,27 @@ function cancelSelection (fromTagCloud, settings) {
       TW.partialGraph.render();
     }
 }
+
+
+function getCurrentType() {
+  // type grammar overly complicated: it's absurd to have to do 10 lines
+  //                                  to retrieve the tina type when other times
+  //                                  there's so many window-scoped vars !!!
+  // TODO expose current type more accessibly
+  let currentTypeName
+  let currentTypeIdx
+  let typeIdxs = Object.keys(TW.partialGraph.states.slice(-1)[0].type)
+  for (var m in typeIdxs) {
+    if (TW.partialGraph.states.slice(-1)[0].type[m]) {
+      currentTypeIdx = m
+      break
+    }
+  }
+
+  currentTypeName = window.categories[currentTypeIdx]
+  return currentTypeName
+}
+
 
 function highlightSelectedNodes(flag){
     console.log("\t***methods.js:highlightSelectedNodes(flag)"+flag+" selEmpty:"+is_empty(selections))
@@ -201,7 +222,8 @@ function pushSWClick(arg){
     swclickActual = arg;
 }
 
-//	tag cloud div
+// tag cloud div
+// [but not used in monopart case]
 function htmlfied_alternodes(elems) {
     var oppositesNodes=[]
     var js1='onclick="graphTagCloudElem(\'';
@@ -580,13 +602,11 @@ function unHide(nodeId) {
   TW.partialGraph.graph.nodes(nodeId).hidden=false
 }
 
+
 // edges greyish color for unselected, when we have a selection
-// case default: we just change the flags
-//                - greyish color was precomputed in prepareNodesRenderingProperties
-//                  as n.customAttrs.defgrey_color
-//                - renderer will see the flags and and handle the case accordingly
-// cases when coloredBy (ex: centrality): color must be recomputed here
-function greyEverything(notDefaultColors){
+// NB: we just change the flags, not the colors
+//     renderer will see the flags and handle the case accordingly
+function greyEverything(){
 
   for(var j=0 ; j<TW.nNodes ; j++){
     let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
@@ -599,10 +619,6 @@ function greyEverything(notDefaultColors){
       n.active = false
       n.customAttrs.forceLabel = false;
       n.customAttrs.highlight = false;
-
-      // special case after a coloredBy or clustersBy
-      if (notDefaultColors)
-        n.color = "rgba("+hex2rga(n.color)+",0.5)"
     }
   }
 
@@ -612,39 +628,12 @@ function greyEverything(notDefaultColors){
       if (e && !e.hidden && !e.customAttrs.grey) {
         e.customAttrs.grey = 1
         e.customAttrs.activeEdge = 0
-
-        // new specification: coloredBy does not affect edges
-        // (ie no special case for notDefaultColors)
       }
     }
   }
 
 }
 
-// new sigma.js: TODO change logic (the reverse of greyEverything is done by redraw for the colors, and cancelSelection for the flags...)
-//               but this could be used for colorsBy menu
-// function graphResetColor(){
-//     nds = TW.partialGraph.graph.nodes().filter(function(x) {
-//                             return !x['hidden'];
-//           });
-//     eds = TW.partialGraph.graph.edges().filter(function(x) {
-//                             return !x['hidden'];
-//           });
-//
-//     for(var x in nds){
-//         n=nds[x];
-//         n.customAttrs["grey"] = 0;
-//         n.color = n.customAttrs["true_color"];
-//     }
-//
-//     if (TW.partialGraph.settings('drawEdges')) {
-//       for(var x in eds){
-//           e=eds[x];
-//           e.customAttrs["grey"] = 0;
-//           e.color = e.customAttrs["true_color"];
-//       }
-//     }
-// }
 //
 // function hideEverything(){
 //     console.log("\thiding all");
@@ -683,11 +672,15 @@ function prepareNodesRenderingProperties(nodesDict) {
 
     // new initial setup of properties
     n.active = false
+
+    var rgba = hex2rgba(n.color)
+    var rgbStr = rgba.splice(0, 3).join(',');
+
     n.customAttrs = {
       grey: false,
       highlight: false,
       true_color : n.color,
-      defgrey_color : "rgba("+hex2rga(n.color)+",.4)"
+      defgrey_color : "rgba("+rgbStr+",.4)"
     }
 
     // POSS n.type: distinguish rendtype and twtype
@@ -699,20 +692,20 @@ function prepareNodesRenderingProperties(nodesDict) {
     // customFlags : {
     //   // our status flags
     //   grey: false,
-    //   neighbor: false,
+    //   highlight: false,
     //   // forceLabel: false,
     // }
   }
 }
 
-function prepareEdgesRenderingProperties(edgesDict) {
+function prepareEdgesRenderingProperties(edgesDict, nodesDict) {
   for (var eid in edgesDict) {
     var e = edgesDict[eid]
 
     e.weight = Math.round(e.weight*1000)/1000
     // e.size = e.weight // REFA s/weight/size/ ?
 
-    var rgbStr = sigmaTools.edgeRGB(e.source, e.target)
+    var rgbStr = sigmaTools.edgeRGB(nodesDict[e.source].color, nodesDict[e.target].color)
 
     e.color = "rgba("+rgbStr+","+TW.edgeDefaultOpacity+")"
     e.customAttrs = {
@@ -834,8 +827,10 @@ function saveGEXF(nodes,edges,atts){
         gexf += ' <viz:position x="'+nodes[n].x+'"    y="'+nodes[n].y+'"  z="0" />\n';
         if(atts["color"]) gexf += ' <viz:size value="'+nodes[n].size+'" />\n';
         if(atts["color"]) {
-            col = hex2rga(nodes[n].color);
-            gexf += ' <viz:color r="'+col[0]+'" g="'+col[1]+'" b="'+col[2]+'" a="1"/>\n';
+            if (nodes[n].color && nodes[n].color.charAt(0) == '#') {
+              col = hex2rgba(nodes[n].color);
+              gexf += ' <viz:color r="'+col[0]+'" g="'+col[1]+'" b="'+col[2]+'" a='+col[3]+'/>\n';
+            }
         }
         gexf += ' <attvalues>\n';
         gexf += ' <attvalue for="0" value="'+nodes[n].type+'"/>\n';

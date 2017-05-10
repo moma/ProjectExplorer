@@ -9,8 +9,8 @@ ParseCustom = function ( format , data ) {
     this.nbCats = 0;
 
     // input = GEXFstring
-    this.getGEXFCategories = function(gexf) {
-        this.data = $.parseXML(gexf)
+    this.getGEXFCategories = function(aGexfFile) {
+        this.data = $.parseXML(aGexfFile) // <===================== (XML parse)
         return scanGexf( this.data );
     }// output = [ "cat1" , "cat2" , ...]
 
@@ -86,26 +86,125 @@ ParseCustom.prototype.makeDicts = function(categories) {
 };
 
 
+
+
+function gexfCheckAttributesMap (someXMLContent) {
+
+    // excerpt from targeted XML:
+    // <graph defaultedgetype="undirected" mode="static">
+    // |  <attributes class="node" mode="static">
+    // |    <attribute id="0" title="category" type="string"></attribute>
+    // |    <attribute id="1" title="country" type="float"></attribute>
+    // |  </attributes>
+    //   (...)
+
+
+      // THIS SEGMENT USED TO BE IN dictifyGexf
+      // Census of the conversions between attr and some attr name
+      var i, j, k;
+      var nodesAttributes = [];   // The list of attributes of the nodes of the graph that we build in json
+      var edgesAttributes = [];   // The list of attributes of the edges of the graph that we build in json
+
+      // In the gexf (that is an xml), the list of xml nodes 'attributes' (note the plural 's')
+      var attributesNodes = someXMLContent.getElementsByTagName('attributes');
+
+      for(i = 0; i<attributesNodes.length; i++){
+          var attributesNode = attributesNodes[i];  // attributesNode is each xml node 'attributes' (plural)
+          if(attributesNode.getAttribute('class') == 'node'){
+              var attributeNodes = attributesNode.getElementsByTagName('attribute');  // The list of xml nodes 'attribute' (no 's')
+              for(j = 0; j<attributeNodes.length; j++){
+                  var attributeNode = attributeNodes[j];  // Each xml node 'attribute'
+
+                  var id = attributeNode.getAttribute('id'),
+                  title = attributeNode.getAttribute('title'),
+                  type = attributeNode.getAttribute('type');
+
+                  // ex:    id   = "in-degree"   or "3"  <= can be an int to be resolved into the title
+                  // ex:   title = "in-degree"
+                  // ex:   type  = "string"
+
+                  var attribute = {
+                      id:id,
+                      title:title,
+                      type:type
+                  };
+                  nodesAttributes.push(attribute);
+
+              }
+          } else if(attributesNode.getAttribute('class') == 'edge'){
+              var attributeNodes = attributesNode.getElementsByTagName('attribute');  // The list of xml nodes 'attribute' (no 's')
+              for(j = 0; j<attributeNodes.length; j++){
+                  var attributeNode = attributeNodes[j];  // Each xml node 'attribute'
+
+                  var id = attributeNode.getAttribute('id'),
+                  title = attributeNode.getAttribute('title'),
+                  type = attributeNode.getAttribute('type');
+
+                  var attribute = {
+                      id:id,
+                      title:title,
+                      type:type
+                  };
+                  edgesAttributes.push(attribute);
+
+              }
+          }
+      } //out: nodesAttributes Array
+
+      // console.debug('>>> tr: nodesAttributes', nodesAttributes)
+      // console.debug('>>> tr: edgesAttributes', edgesAttributes)
+
+      return {nAttrs: nodesAttributes, eAttrs: edgesAttributes}
+}
+
 // Level-00
-function scanGexf(gexf) {
-  console.log("ParseCustom : scanGexf")
+function scanGexf(gexfContent) {
+  console.log("ParseCustom : scanGexf ======= ")
     var categoriesDict={}, categories=[];
-    nodesNodes = gexf.getElementsByTagName('nodes');
-    for(i=0; i<nodesNodes.length; i++){
-        var nodesNode = nodesNodes[i];  // Each xml node 'nodes' (plural)
-        node = nodesNode.getElementsByTagName('node');
+
+
+    // adding gexfCheckAttributesMap call
+    // to create a map from nodes/node/@for values to declared attribute name (title)
+
+    var declaredAttrs = gexfCheckAttributesMap(gexfContent)
+
+    elsNodes = gexfContent.getElementsByTagName('nodes');
+    // console.debug('>>> tr: elsNodes', elsNodes) // <<<
+    for(i=0; i<elsNodes.length; i++){
+        var elNodes = elsNodes[i];  // Each xml node 'nodes' (plural)
+        node = elNodes.getElementsByTagName('node');
         for(j=0; j<node.length; j++){
             attvalueNodes = node[j].getElementsByTagName('attvalue');
             for(k=0; k<attvalueNodes.length; k++){
                 attvalueNode = attvalueNodes[k];
                 attr = attvalueNode.getAttribute('for');
                 val = attvalueNode.getAttribute('value');
+
+                // some attrs are gexf-local indices refering to an <attributes> declaration
+                // so if it matches declared we translate their integer in title
+                // FIXME use a dict by id in gexfCheckAttributesMap for loop rm
+                if(Number.isInteger(Number(attr))) {
+                  // mini loop inside declared node attrs (eg substitute 0 for 'centrality')
+                  for (var l=0;l<declaredAttrs.nAttrs.length;l++) {
+                    let declared = declaredAttrs.nAttrs[l]
+                    if (declared.id == attr) {
+                      attr = declared.title
+                    }
+                  }
+                }
+                // console.log('attr', attr)
+
+                // THIS WILL BECOME catDict (if ncats == 1 => monopart)
                 if (attr=="category") categoriesDict[val]=val;
             }
         }
     }
 
     for(var cat in categoriesDict)
+        // usually a just a few cats over entire node set
+        // ex: terms
+        // ex: ISItermsriskV2_140 & ISItermsriskV2_140
+        console.debug('>>> tr: cat', cat)
         categories.push(cat);
 
     var catDict = {}
@@ -114,7 +213,10 @@ function scanGexf(gexf) {
         catDict["Document"] = 0;
     }
     if(categories.length==1) {
+        // if we have only one category, it gets the same code 0 as Document
+        // but in practice it's more often terms. anyways doesn't affect much
         catDict[categories[0]] = 0;
+        // console.log("-----cat unique =>0")
     }
     if(categories.length>1) {
         var newcats = []
@@ -138,8 +240,10 @@ function scanGexf(gexf) {
 // for {1,2}partite graphs
 function dictfyGexf( gexf , categories ){
 
-  console.log("ParseCustom gexf 2nd loop, main data extraction")
+  console.log("ParseCustom gexf 2nd loop, main data extraction, with categories", categories)
 
+
+    // var catDict = {'terms':"0"}
 
     var catDict = {}
     var catCount = {}
@@ -150,51 +254,11 @@ function dictfyGexf( gexf , categories ){
         nodes2={}, bipartiteD2N={}, bipartiteN2D={}
     }
 
-    var i, j, k;
-    var nodesAttributes = [];   // The list of attributes of the nodes of the graph that we build in json
-    var edgesAttributes = [];   // The list of attributes of the edges of the graph that we build in json
-    var attributesNodes = gexf.getElementsByTagName('attributes');  // In the gexf (that is an xml), the list of xml nodes 'attributes' (note the plural 's')
+    var declaredAtts = gexfCheckAttributesMap(gexf)
+    var nodesAttributes = declaredAtts.nAttrs
+    // var edgesAttributes = declaredAtts.eAttrs
 
-    for(i = 0; i<attributesNodes.length; i++){
-        var attributesNode = attributesNodes[i];  // attributesNode is each xml node 'attributes' (plural)
-        if(attributesNode.getAttribute('class') == 'node'){
-            var attributeNodes = attributesNode.getElementsByTagName('attribute');  // The list of xml nodes 'attribute' (no 's')
-            for(j = 0; j<attributeNodes.length; j++){
-                var attributeNode = attributeNodes[j];  // Each xml node 'attribute'
-
-                var id = attributeNode.getAttribute('id'),
-                title = attributeNode.getAttribute('title'),
-                type = attributeNode.getAttribute('type');
-
-                var attribute = {
-                    id:id,
-                    title:title,
-                    type:type
-                };
-                nodesAttributes.push(attribute);
-
-            }
-        } else if(attributesNode.getAttribute('class') == 'edge'){
-            var attributeNodes = attributesNode.getElementsByTagName('attribute');  // The list of xml nodes 'attribute' (no 's')
-            for(j = 0; j<attributeNodes.length; j++){
-                var attributeNode = attributeNodes[j];  // Each xml node 'attribute'
-
-                var id = attributeNode.getAttribute('id'),
-                title = attributeNode.getAttribute('title'),
-                type = attributeNode.getAttribute('type');
-
-                var attribute = {
-                    id:id,
-                    title:title,
-                    type:type
-                };
-                edgesAttributes.push(attribute);
-
-            }
-        }
-    } //out: nodesAttributes Array
-
-    var nodesNodes = gexf.getElementsByTagName('nodes') // The list of xml nodes 'nodes' (plural)
+    var elsNodes = gexf.getElementsByTagName('nodes') // The list of xml nodes 'nodes' (plural)
     labels = [];
     minNodeSize=999.00;
     maxNodeSize=0.001;
@@ -206,25 +270,37 @@ function dictfyGexf( gexf , categories ){
     // let sumSizes = 0
     // let sizeStats = {'mean':null, 'median':null, 'max':0, 'min':1000000000}
 
-    for(i=0; i<nodesNodes.length; i++) {
-        var nodesNode = nodesNodes[i];  // Each xml node 'nodes' (plural)
-        var nodeNodes = nodesNode.getElementsByTagName('node'); // The list of xml nodes 'node' (no 's')
+    // if scanClusters, we'll also use:
+    var tmpVals = {}        // to build reverse index attval => nodes
+                            // (to inventory subclasses for a given attr)
+                            //   if < maxDiscreteValues: keep all in legend
+                            //   else:  show intervals in legend
+    var Atts_2_Exclude = {} // to exclude strings that don't convert to number
 
-        for(j=0; j<nodeNodes.length; j++) {
+    // usually there is only 1 <nodes> element...
+    for(i=0; i<elsNodes.length; i++) {
+        var elNodes = elsNodes[i];  // Each xml element 'nodes' (plural)
+        var elsNode = elNodes.getElementsByTagName('node'); // The list of xml nodes 'node' (no 's')
 
-            var nodeNode = nodeNodes[j];  // Each xml node 'node' (no 's')
+        for(j=0; j<elsNode.length; j++) {
 
-            window.NODE = nodeNode;
+            var elNode = elsNode[j];  // Each xml node 'node' (no 's')
+
+            // window.NODE = elNode;
+
+            // if (j == 0) {
+            //   console.debug('>>> tr: XML nodes/node (1 of'+elsNode.length+')', elNodes)
+            // }
 
             // [ get ID ]
-            var id = nodeNode.getAttribute('id');
+            var id = elNode.getAttribute('id');
             // [ get Label ]
-            var label = nodeNode.getAttribute('label') || id;
+            var label = elNode.getAttribute('label') || id;
 
             // [ get Size ]
             var size=false;
-            sizeNodes = nodeNode.getElementsByTagName('size');
-            sizeNodes = sizeNodes.length ? sizeNodes : nodeNode.getElementsByTagName('viz:size');
+            sizeNodes = elNode.getElementsByTagName('size');
+            sizeNodes = sizeNodes.length ? sizeNodes : elNode.getElementsByTagName('viz:size');
             if(sizeNodes.length>0){
               sizeNode = sizeNodes[0];
               size = parseFloat(sizeNode.getAttribute('value'));
@@ -237,12 +313,13 @@ function dictfyGexf( gexf , categories ){
               // --------------------------------------------
 
             }// [ / get Size ]
+            // console.debug('>>> tr: node size', size)
 
             // [ get Coordinates ]
             var x = 100 - 200*Math.random();
             var y = 100 - 200*Math.random();
-            var positionNodes = nodeNode.getElementsByTagName('position');
-            positionNodes = positionNodes.length ? positionNodes : nodeNode.getElementsByTagNameNS('*','position');
+            var positionNodes = elNode.getElementsByTagName('position');
+            positionNodes = positionNodes.length ? positionNodes : elNode.getElementsByTagNameNS('*','position');
             if(positionNodes.length>0){
                 var positionNode = positionNodes[0];
                 x = parseFloat(positionNode.getAttribute('x'));
@@ -252,8 +329,8 @@ function dictfyGexf( gexf , categories ){
             y = y*-1   // aka -y
 
             // [ get Colour ]
-            var colorNodes = nodeNode.getElementsByTagName('color');
-            colorNodes = colorNodes.length ? colorNodes : nodeNode.getElementsByTagNameNS('*','color');
+            var colorNodes = elNode.getElementsByTagName('color');
+            colorNodes = colorNodes.length ? colorNodes : elNode.getElementsByTagNameNS('*','color');
             var color;
             if(colorNodes.length>0){
                 colorNode = colorNodes[0];
@@ -271,35 +348,46 @@ function dictfyGexf( gexf , categories ){
                 color:color
             });
 
+            // console.debug('>>> tr: read node', node)
+
+
             // Attribute values
             var attributes = []
-            var attvalueNodes = nodeNode.getElementsByTagName('attvalue');
+            var attvalueNodes = elNode.getElementsByTagName('attvalue');
             var atts={};
             for(k=0; k<attvalueNodes.length; k++){
                 var attvalueNode = attvalueNodes[k];
                 var attr = attvalueNode.getAttribute('for');
                 var val = attvalueNode.getAttribute('value');
-                if(catDict[val]) atts["category"] = val;
+
+                if(nodesAttributes[attr]) attr = atts[nodesAttributes[attr]]=val
                 else atts[attr]=val;
-                attributes = atts;
             }
+            node.attributes = atts;
 
             // nodew=parseInt(attributes["weight"]);
-            if ( attributes["category"] ) {
-                node_cat = attributes["category"];
-                node.type = node_cat;
-                if (!catCount[node_cat]) catCount[node_cat] = 0
-                catCount[node_cat]++;
-
-                // node.id = (node_cat==categories[0])? ("D:"+node.id) : ("N:"+node.id);
-                if(!node.size) console.log("node without size: "+node.id+" : "+node.label);
-
-                node.attributes = attributes;
-                nodes[node.id] = node
-
-
-                // console.log(node)
+            if ( atts["category"] ) {
+              node_cat = atts["category"];
             }
+            else {
+              // basic TW type idx is 0 (~ terms if one type, doc if both types)
+              node_cat = categories[0]
+            }
+
+            node.type = node_cat;
+            if (!catCount[node_cat]) catCount[node_cat] = 0
+            catCount[node_cat]++;
+
+            // node.id = (node_cat==categories[0])? ("D:"+node.id) : ("N:"+node.id);
+            if(!node.size) console.log("node without size: "+node.id+" : "+node.label);
+
+            // user-indicated default => copy for old default accessors
+            if (node.attributes[TW.nodeClusAtt]) {
+              node.attributes['clust_default'] = node.attributes[TW.nodeClusAtt]
+            }
+
+            // save record
+            nodes[node.id] = node
 
             if(parseInt(node.size) < parseInt(minNodeSize))
                 minNodeSize= node.size;
@@ -307,8 +395,33 @@ function dictfyGexf( gexf , categories ){
             if(parseInt(node.size) > parseInt(maxNodeSize))
                 maxNodeSize= node.size;
 
-        }
+            // console.debug("node.attributes", node.attributes)
+
+            if (TW.scanClusters) {
+              if (!tmpVals[node_cat])      tmpVals[node_cat]={}
+              for (var at in node.attributes) {
+                if (!tmpVals[node_cat][at])  tmpVals[node_cat][at]={'vals':[],'map':{}}
+
+                let someval = Number(node.attributes[at])
+                // Identifying the attribute datatype: exclude strings and objects
+                if ( isNaN(someval) ) {
+                    if (!Atts_2_Exclude[at]) Atts_2_Exclude[at]=true;
+                }
+                // numeric attr => build facets
+                else {
+                  if (!tmpVals[node_cat][at].map[someval]) tmpVals[node_cat][at].map[someval] = []
+
+                  tmpVals[node_cat][at].vals.push(someval)      // for ordered scale
+                  tmpVals[node_cat][at].map[someval].push(node.id)  // reverse index
+                }
+              }
+            }
+
+        } // finish nodes loop
     }
+
+    // console.warn ('parseCustom output nodes', nodes)
+    // console.warn ('parseCustom reverse index: vals to ids', tmpVals)
 
     // -------------- debug: for local stats ----------------
     // allSizes.sort();
@@ -319,39 +432,199 @@ function dictfyGexf( gexf , categories ){
     // console.log("parseCustom(gexf) sizeStats:", sizeStats)
     // ------------- /debug: for local stats ----------------
 
-    var attention = false
-    if( TW.Clusters.length == 0 ) {
-        for( var i in nodes ) {
-            if( nodes[i].attributes["cluster_index"] ) {
-                attention = true;
-            }
-            break
-        }
+
+    var classvalues_deb = performance.now()
+    // console.log('dictfyGexf: begin TW.Clusters')
+
+    var gotClusters = false
+    for (var nodecat in tmpVals) {
+      gotClusters = gotClusters || (tmpVals[nodecat]['cluster_index'] || tmpVals[nodecat][TW.nodeClusAtt])
     }
 
+    // clusters and other facets => type => name => [{label,val/range,nodeids}]
     TW.Clusters = {}
-    //New scale for node size: now, between 2 and 5 instead [1,70]
-    for(var it in nodes){
-        nodes[it].size =  desirableNodeSizeMIN+ (parseInt(nodes[it].size)-1)*((desirableNodeSizeMAX-desirableNodeSizeMIN) / (maxNodeSize-minNodeSize));
-        if(attention) {
-            var t_type = nodes[it].type
-            var t_cnumber = nodes[it].attributes["cluster_index"]
-            nodes[it].attributes["clust_default"] = t_cnumber;
-            var t_label = (nodes[it].attributes["cluster_label"])?nodes[it].attributes["cluster_label"]:"cluster_"+nodes[it].attributes["cluster_index"]
-            if(!TW.Clusters[t_type]) {
-                TW.Clusters[t_type] = {}
-                TW.Clusters[t_type]["clust_default"] = {}
-            }
-            TW.Clusters[t_type]["clust_default"][t_cnumber] = t_label
+
+    // sorting out properties in n.attributes
+    // --------------------------------------
+
+    if(gotClusters) {
+      // 1) default cluster properties "cluster_index" [, "cluster_label"]
+      for (var t_type in tmpVals) {
+        var t_clusname
+
+        // all distinct values to create labels
+        var t_cnumbers = []
+        var allTicks = []
+        if (TW.nodeClusAtt != undefined && tmpVals[t_type][TW.nodeClusAtt]) {
+          t_clusname = TW.nodeClusAtt
         }
-        // TW.partialGraph._core.graph.nodesIndex[it].size=Nodes[it].size;
+        else if (tmpVals[t_type]["cluster_index"]) {
+          t_clusname = "cluster_index"
+        }
+        if (t_clusname) {
+          // values (we assume they are cluster numbers)
+          t_cnumbers = Object.keys(tmpVals[t_type][t_clusname].map)
+
+          // add label names (TODO use cluster_label if present
+          //                 £POSS, use maxsize node label if absent)
+          for (var l in t_cnumbers) {
+            var t_cnumber = t_cnumbers[l]
+
+            var newTick = {
+              'labl': `${t_type}||${t_clusname}||${t_cnumber}`,
+              'val': t_cnumber,
+              // val2ids: [nid5,nid27..]
+              'nids': tmpVals[t_type][TW.nodeClusAtt].map[t_cnumber]
+            }
+            allTicks.push(newTick)
+          }
+
+          TW.Clusters[t_type] = {}
+          TW.Clusters[t_type]["clust_default"] = allTicks
+        }
+      }
     }
+
+
+    // 2) all scanned
+    for (var cat in tmpVals) {
+      if (!TW.Clusters[cat])    TW.Clusters[cat] = {}
+
+      for (var at in tmpVals[cat]) {
+        // console.log(`======= ${cat}::${at} =======`)
+
+
+        var allTicks = []
+        // skip non-numeric or already done
+        if (Atts_2_Exclude[at] || at == "clust_default") {
+          continue
+        }
+
+        // array of valueclass/interval/bin objects
+        TW.Clusters[cat][at] = []
+
+        // if n possible values doesn't need binify
+        if (Object.keys(tmpVals[cat][at].map).length <= TW.maxDiscreteValues) {
+          for (var pval in tmpVals[cat][at].map) {
+            TW.Clusters[cat][at].push({
+              'labl': `${cat}||${at}||${pval}`,
+              'val': pval,
+              // val2ids
+              'nids': tmpVals[cat][at].map[pval]
+            })
+          }
+        }
+        // if binify
+        else {
+          var len = tmpVals[cat][at].vals.length
+
+          // sort out vals
+          tmpVals[cat][at].vals.sort(function (a,b) {
+                 return Number(a)-Number(b)
+          })
+
+          // (enhanced intervalsInventory)
+          // => creates bin, binlabels, reverse index per bins
+          var legendRefTicks = []
+
+          // how many bins for this attribute ?
+          var nBins = 3
+          if (TW.customLegendsBins && TW.customLegendsBins[at]) {
+            nBins = TW.customLegendsBins[at]
+          }
+          else if (TW.legendsBins) {
+            nBins = TW.legendsBins
+          }
+
+          // create tick thresholds
+          for (var l=0 ; l < nBins ; l++) {
+            let nthVal = Math.floor(len * l / nBins)
+            legendRefTicks.push(tmpVals[cat][at].vals[nthVal])
+          }
+
+          console.debug("intervals for", at, legendRefTicks)
+
+          var nTicks = legendRefTicks.length
+          var sortedDistinctVals = Object.keys(tmpVals[cat][at].map).sort(function(a,b){return Number(a)-Number(b)})
+
+          var nDistinctVals = sortedDistinctVals.length
+          var lastCursor = 0
+
+          // create ticks objects with retrieved full info
+          for (var l in legendRefTicks) {
+            l = Number(l)
+
+            let lowThres = Number(legendRefTicks[l])
+            let hiThres = null
+            if (l < nTicks-1) {
+              hiThres = Number(legendRefTicks[l+1])
+            }
+            else {
+              hiThres = Infinity
+            }
+
+            var newTick = {
+              'labl':'',
+              'nids':[],
+              'range':[lowThres, hiThres]
+            }
+
+            // 1) union of idmaps
+            for (var k = lastCursor ; k <= nDistinctVals ; k++) {
+              var val = Number(sortedDistinctVals[k])
+              if (val < lowThres) {
+                console.error("mixup !!", val, lowThres, at)
+              }
+              else if ((val >= lowThres) && (val < hiThres)) {
+                if (!tmpVals[cat][at].map[val]) {
+                  console.error("unscanned val2ids mapping", val, at)
+                }
+                else {
+                  // eg bin2ids map for 2 <= val < 3
+                  //    will be U(val2ids maps for 2, 2.1, 2.2,...,2.9)
+                  for (var j in tmpVals[cat][at].map[val]) {
+                    newTick.nids.push(tmpVals[cat][at].map[val][j])
+                  }
+                }
+              }
+              // we're over the interval upper bound
+              // we just need to remember where we were for next interval
+              else if (val >= hiThres) {
+                lastCursor = k
+                break
+              }
+            }
+
+            // create label
+            // round %.6f for display
+            var labLowThres = Math.round(lowThres*1000000)/1000000
+            var labHiThres = (l==nTicks-1)? '+ ∞' : Math.round(hiThres*1000000)/1000000
+            newTick.labl = `${cat}||${at}||[${labLowThres} ; ${labHiThres}]`
+
+            // save these bins as the cluster index (aka faceting)
+            TW.Clusters[cat][at].push(newTick)
+          }
+        }
+      }
+    }
+
+    var classvalues_fin = performance.now()
+    console.log('dictfyGexf: end TW.Clusters, own time:', classvalues_fin-classvalues_deb)
+
+    //New scale for node size: now, between 2 and 5 instead [1,70]
+    for(var nid in nodes){
+        // console.log("dictfyGexf node", nid)
+        nodes[nid].size =  desirableNodeSizeMIN+ (parseInt(nodes[nid].size)-1)*((desirableNodeSizeMAX-desirableNodeSizeMIN) / (maxNodeSize-minNodeSize));
+    }
+
+
 
     var edgeId = 0;
     var edgesNodes = gexf.getElementsByTagName('edges');
     for(i=0; i<edgesNodes.length; i++) {
         var edgesNode = edgesNodes[i];
         var edgeNodes = edgesNode.getElementsByTagName('edge');
+        console.log("edgeNodes.length", edgeNodes.length)
         for(j=0; j<edgeNodes.length; j++) {
             var edgeNode = edgeNodes[j];
             var source = parseInt( edgeNode.getAttribute('source') );
@@ -385,7 +658,10 @@ function dictfyGexf( gexf , categories ){
                 });
             }
 
+            // console.debug('>>> tr: read edge', edge)
+
             if ( nodes[source] && nodes[target] ) {
+                // console.debug('>>> tr: new edge has matching source and target nodes')
 
                 idS=nodes[source].type;
                 idT=nodes[target].type;
@@ -518,12 +794,15 @@ function dictfyGexf( gexf , categories ){
         }
     }
 
+
+    // ------------------------------- resDict <<<
     resDict = {}
-    resDict.catDict = catDict;
-    resDict.catCount = catCount;
-    resDict.nodes = nodes;
+    // TODO unify catDict and catCount (dict is count.keys())
+    resDict.catDict = catDict;          // ex : {'ISIterms':0}
+    resDict.catCount = catCount;        // ex:  {'ISIterms':1877}  ie #nodes
+    resDict.nodes = nodes;              //  { nid1: {label:"...", size:"11.1", attributes:"...", color:"#aaa", etc}, nid2: ...}
     resDict.edges = edges;
-    resDict.n1 = nodes1;
+    resDict.n1 = nodes1;       // relations
     if(nodes2) resDict.n2 = nodes2;
     if(bipartiteD2N) resDict.D2N = bipartiteD2N;
     if(bipartiteN2D) resDict.N2D = bipartiteN2D;

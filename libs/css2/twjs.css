@@ -20,8 +20,14 @@ html, body {
   top: 105px;
   bottom: 0;
   left: 0;
-  right: 250px;
+  right: 400px;
   z-index: 1;
+
+  /* non selectable: we've got our own events here */
+  -webkit-user-select: none; /* Safari */
+     -moz-user-select: none; /* Firefox */
+      -ms-user-select: none; /* IE/Edge */
+          user-select: none; /* Chrome and Opera, future + */
 }
 
 #sidebar {
@@ -29,7 +35,7 @@ html, body {
   top: 105px;
   bottom: 0;
   right: 0;
-  width: 250px;
+  width: 400px;
   z-index: 2;
   border-left: 1px #222 solid;
   overflow-y: scroll;
@@ -61,8 +67,8 @@ html, body {
 
 
 #twbrand {
-  font-family: "Gurajada" ;
-  font-size: 28px;
+  font-family: "Gurajada", "Droid Sans", sans-serif ;
+  font-size: 24px;
   width: 50px !important;
 }
 
@@ -115,12 +121,25 @@ html, body {
   display: none; /*not shown at init*/
 }
 
+/*thick buttons needs lift*/
+#changetype, #changelevel{
+  position: relative;
+  bottom: 2px;
+  font-size: 11px;
+  line-height: 12px;
+}
+
 /* override navbar toggle on right side when collapsed */
 #toolbar-open {
   float:left !important;
   margin-left: 15px !important;
 }
 
+
+/* right info panel */
+#accordion {
+  display:none
+}
 
 /* VARIAE */
 
@@ -255,6 +274,14 @@ p.micromessage{
     font-size:80%;
 }
 
+.centered {
+  text-align: center;
+}
+
+.code {
+  font-family: "Fira Sans", "Courier", "Courier New", monospace;
+  color: '#222'
+}
 
 
 /* switch css -- generic (src: proto.io/freebies/onoff/)*/

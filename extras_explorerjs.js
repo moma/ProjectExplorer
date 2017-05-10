@@ -9,80 +9,91 @@ function newPopup(url) {
 
 
 // = = = = = = = = = = = [ Clusters Plugin ] = = = = = = = = = = = //
-// Execution:    ChangeGraphAppearanceByAtt( true )
-// It scans the existing node-attributes and t keeps only those which are Numeric.
-//  then, add the button in the html with the sigmaUtils.clustersBy(x) listener.
-// [TODO: fonction un peu lourde dans le profilage]
-function ChangeGraphAppearanceByAtt( manualflag ) {
+// Execution:    changeGraphAppearanceByFacets( true )
+// It reads scanned node-attributes and prepared legends in TW.Clusters
+//  to add the button in the html with the sigmaUtils.clustersBy(x) listener.
+function changeGraphAppearanceByFacets( manualflag ) {
 
     if ( !isUndef(manualflag) && !TW.colorByAtt ) TW.colorByAtt = manualflag;
     if(!TW.colorByAtt) return;
 
-    // Seeing all the possible attributes!
-    var AttsDict = {}
-    var Atts_2_Exclude = {}
-    var v_nodes = getVisibleNodes();
-    for (var i in v_nodes) {
-        if(!v_nodes[i].hidden) {
-
-            var id = v_nodes[i].id;
-
-            for(var a in TW.Nodes[id].attributes) {
-                var someatt = TW.Nodes[id].attributes[a]
-
-                // Identifying the attribute datatype: exclude strings and objects
-                if ( ( typeof(someatt)=="string" && isNaN(Number(someatt)) ) || typeof(someatt)=="object" ) {
-                    if (!Atts_2_Exclude[a]) Atts_2_Exclude[a]=0;
-                    Atts_2_Exclude[a]++;
-                }
-            }
-
-            var possible_atts = [];
-            if (!isUndef(TW.Nodes[id].attributes))
-                possible_atts = Object.keys(TW.Nodes[id].attributes)
-
-            if(!isUndef(v_nodes[i].degree))
-                possible_atts.push("degree")
-            possible_atts.push("clust_louvain")
-
-            for(var a in possible_atts){
-                if ( !AttsDict[ possible_atts[a] ] )
-                    AttsDict[ possible_atts[a] ] = 0
-                AttsDict[ possible_atts[a] ] ++;
-            }
-
-        }
+    // for GUI html: if present, rename raw attribute key by a proper label
+    var AttsTranslations = {
+      'clust_louvain': 'Groupes de voisins, méthode de Louvain',
+      'pageranks': 'Importance dans le réseau, méthode Google',
+      'age': 'Date initiale d\'apparition du terme dans le corpus',
+      'growth_rate': 'Tendances et oubliés de la semaine',
+      'modularity_class': 'Groupes de voisins, méthode des classes de modularité'
     }
 
-    for(var i in Atts_2_Exclude)
-        delete AttsDict[i];
 
-    var AttsDict_sorted = ArraySortByValue(AttsDict, function(a,b){
-        return b-a
-    });
+    // create colormenu
 
-    // console.log( "I AM IN ChangeGraphAppearanceByAtt( true )" )
-    // console.log( AttsDict_sorted )
+    var ty = getCurrentType()
 
-
-    var color_menu_info = "";
+    var color_menu_info = '<li><a href="#" onclick="graphResetColor()">By Default</a></li>';
 
     if( $( "#colorgraph-menu" ).length>0 ){
-      for (var i in AttsDict_sorted) {
-          var att_s = AttsDict_sorted[i].key;
-          var att_c = AttsDict_sorted[i].value;
-          var the_method = "clustersBy"
 
-          // variants
-          if(att_s.indexOf("clust")>-1) the_method = "colorsBy"
-          if(att_s == "growth_rate") the_method = "colorsRelByBins"
-          if(att_s == "age") the_method = "colorsRelByBins"
+      // each facet family or clustering type was already prepared
+      for (var att_s in TW.Clusters[ty]) {
 
-          color_menu_info += '<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+att_s+'('+att_c+')'+'</a></li>'
-          // console.log('<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+att_s+'('+att_c+')'+'</a></li>')
+        // POSS here distinguish [ty][att_s].classes.length and ranges.length
+        var att_c = TW.Clusters[ty][att_s].length
+        var the_method = "clustersBy"
+
+        // variants
+        if(att_s.indexOf("clust")>-1||att_s.indexOf("class")>-1) {
+          // for classes and clusters
+          the_method = "colorsBy"
+        }
+        if(att_s == "growth_rate") the_method = "colorsRelByBins"
+        if(att_s == "age") the_method = "colorsRelByBins"
+
+        // family label :)
+        var lab_att_s ;
+        if (AttsTranslations[att_s])  lab_att_s = AttsTranslations[att_s]
+        else lab_att_s = att_s
+        color_menu_info += '<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+lab_att_s+'('+att_c+')'+'</a></li>'
+
       }
       $("#colorgraph-menu").html(color_menu_info)
     }
+
+    // // 2) prepare legend slots
+    // console.warn ("classes_per_Att:", classes_per_Att)
+    // let nodeType = getCurrentType()
+    // for (var attr in classes_per_Att) {
+    //   let distinctVals = Object.keys(classes_per_Att[attr])
+    //
+    //   // ------------------------------------------------
+    //   if (distinctVals.length > TW.maxDiscreteValues) {
+    //     TW.Clusters[nodeType][attr] = {'ranges': {}}
+    //     // will be computed at changeColor FIXME could be now...
+    //   }
+    //   else {
+    //     TW.Clusters[nodeType][attr] = {'classes': {}}
+    //     for (var k_cls in distinctVals) {
+    //       TW.Clusters[nodeType][attr].classes[distinctVals[k_cls]] = []
+    //       // will become array of ids per subclass
+    //     }
+    //   }
+    // }
+
+}
+
+
+// creates TW.legendsBins bins
+// @sortedValues array, mandatory
+function intervalsInventory(sortedValues) {
+  var binmins = []
+  var len = sortedValues.length
+  for (var l=0 ; l < TW.legendsBins ; l++) {
+    let nthVal = Math.floor(len * l / TW.legendsBins)
+    binmins.push(sortedValues[nthVal])
+  }
+  // console.info("legendRefTicks", binmins)
+  return binmins
 }
 
 
@@ -111,59 +122,40 @@ function RunLouvain() {
 }
 
 
-function SomeEffect( ClusterCode ) {
-    console.log( ClusterCode )
 
-    // ex: ISItermsriskV2_140 & ISItermsriskV2_140||clust_default||7
-    //       vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv          vvvvv      v
-    //                     type                      Cluster key  clstID
-
-    var raw = ClusterCode.split("||")
-    var Type=raw[0], Cluster=raw[1], clstID=Number(raw[2]);
-
-    var present = TW.partialGraph.states.slice(-1)[0]; // Last
-    var type_t0 = present.type;
-    var str_type_t0 = type_t0.map(Number).join("|")
-    console.log( "\t"+str_type_t0)
-
+// Highlights nodes with given value using id map
+// previously: highlighted nodes with given value using loop on node values
+function SomeEffect( ValueclassCode ) {
+    console.debug("highlighting:", ValueclassCode )
 
     greyEverything();
 
     var nodes_2_colour = {};
     var edges_2_colour = {};
 
-    var nodesV = getVisibleNodes()
 
-    for(var j=0;j<TW.nNodes;j++) {
-      let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
-      if (n && !n.hidden) {
-        n.customAttrs.forceLabel = false
+    // ex: ISItermsriskV2_140 & ISItermsriskV2_140::clust_default::7
+    //       vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv          vvvvv      v
+    //                     type                      Cluster key  class iClu
+    //                                                (family)   (array index)
+    var raw = ValueclassCode.split("::")
+    var nodeType=raw[0],
+        cluType=raw[1],
+        iClu=Number(raw[2]);
 
-        // we look also at the original gexf node to get access to gexf attributes like cluster
-        var gNode = TW.Nodes[n.id]
-        if (gNode.type = Type && !isUndef(gNode.attributes[Cluster]) && gNode.attributes[Cluster]==clstID) {
-          // console.log( n.id + " | " + Cluster + " : " + node.attributes[Cluster] )
-          // nodes_2_colour[n.id] = n.degree;
-          nodes_2_colour[n.id] = 1;
-        }
-      }
+
+    // also get node type code from env (ie "1", "1|1", etc for TW.Relations lookup)
+    var present = TW.partialGraph.states.slice(-1)[0]; // Last
+    var type_t0 = present.type;
+    var str_type_t0 = type_t0.map(Number).join("|")
+    // console.log( "\t"+str_type_t0)
+
+    // we have our precomputed idmaps for nodes_2_colour
+    // -------------------------------------------------
+    for (var k in TW.Clusters[nodeType][cluType][iClu].nids) {
+      var nid = TW.Clusters[nodeType][cluType][iClu].nids[k]
+      nodes_2_colour[nid] = true
     }
-
-    for(var s in nodes_2_colour) {
-        if(TW.Relations[str_type_t0] && TW.Relations[str_type_t0][s] ) {
-            neigh = TW.Relations[str_type_t0][s]
-            if(neigh) {
-                for(j in neigh) {
-                    t = neigh[j]
-                    if( !isUndef(nodes_2_colour[t]) ) {
-                        edges_2_colour[s+";"+t]=true;
-                        edges_2_colour[t+";"+s]=true;
-                    }
-                }
-            }
-        }
-    }
-
 
     for(var nid in nodes_2_colour) {
         n = TW.partialGraph.graph.nodes(nid)
@@ -173,6 +165,19 @@ function SomeEffect( ClusterCode ) {
 
             // highlight (like neighbors but with no selection)
             n.customAttrs['highlight'] = true;
+        }
+
+        if(TW.Relations[str_type_t0] && TW.Relations[str_type_t0][nid] ) {
+            neigh = TW.Relations[str_type_t0][nid]
+            if(neigh) {
+                for(j in neigh) {
+                    tgt_nid = neigh[j]
+                    if( !isUndef(nodes_2_colour[tgt_nid]) ) {
+                        edges_2_colour[nid+";"+tgt_nid]=true;
+                        edges_2_colour[tgt_nid+";"+nid]=true;
+                    }
+                }
+            }
         }
     }
 
@@ -187,77 +192,110 @@ function SomeEffect( ClusterCode ) {
     }
 
 
-
-    var nodes_2_label = ArraySortByValue(nodes_2_colour, function(a,b){
-        return b-a
-    });
-
-    // force 4 first labels
-    for(var j in nodes_2_label) {
-        if(j==4)
-            break
-        var ID = nodes_2_label[j].key
-        TW.partialGraph.graph.nodes(ID).customAttrs.forceLabel = true;
-    }
+    // // force 3 first labels
+    // for(var j in nodes_2_label) {
+    //     if(j==3)
+    //         break
+    //     var ID = nodes_2_label[j].key
+    //     TW.partialGraph.graph.nodes(ID).customAttrs.forceLabel = true;
+    // }
 
     TW.selectionActive=true;
 
-
-    // TW.partialGraph.render()
     TW.partialGraph.refresh()
 }
 
+function graphResetColor(){
 
-function set_ClustersLegend ( daclass ) {
+    // reset global var
+    TW.handpickedcolor = false
+
+    // reset each node's color and label
+    for (var j in TW.nodeIds) {
+      let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
+      n.color = n.customAttrs["true_color"];
+
+      n.customAttrs.alt_color = false
+      n.customAttrs.altgrey_color = false
+
+      n.label = TW.Nodes[n.id].label
+
+      // some colorings also modified size
+      n.size = TW.Nodes[n.id].size
+    }
+
+    // if (TW.partialGraph.settings('drawEdges')) {
+    //   for(var x in eds){
+    //       e=eds[x];
+    //       e.customAttrs["grey"] = 0;
+    //       e.color = e.customAttrs["true_color"];
+    //   }
+    // }
+
+    TW.partialGraph.render()
+}
+
+
+// @daclass: the name of a numeric/categorical attribute from node.attributes
+// @groupingTicks: an optional threshold's array expressing ranges with their low/up bounds label and ref to matchin nodeIds
+function set_ClustersLegend ( daclass, groupedByTicks ) {
+
     //TW.partialGraph.states.slice(-1)[0].LouvainFait = true
 
     $("#legend_for_clusters").removeClass( "my-legend" )
     $("#legend_for_clusters").html("")
     if(daclass==null) return;
 
-    var ClustNB_CurrentColor = {}
-    var nodesV = getVisibleNodes()
-    for(var i in nodesV) {
-        n = nodesV[i]
-        color = n.color
-        type = TW.Nodes[n.id].type
-        clstNB = TW.Nodes[n.id].attributes[daclass]
-        ClustNB_CurrentColor[type+"||"+daclass+"||"+clstNB] = color
-    }
-
-    LegendDiv = ""
-    LegendDiv += '    <div class="legend-title">Map Legend</div>'
+    var LegendDiv = ""
+    LegendDiv += `    <div class="legend-title">Map Legend <small>(${daclass})</small></div>`
     LegendDiv += '    <div class="legend-scale">'
     LegendDiv += '      <ul class="legend-labels">'
 
     if (daclass=="clust_louvain")
         daclass = "louvain"
-    OrderedClustDicts = Object.keys(ClustNB_CurrentColor).sort()
-    if( daclass.indexOf("clust")>-1 ) {
-        for(var i in OrderedClustDicts) {
-            var IDx = OrderedClustDicts[i]
-            var raw = IDx.split("||")
-            var Type = raw[0]
-            var ClustType = raw[1]
-            var ClustID = raw[2]
-            var Color = ClustNB_CurrentColor[IDx]
-            pr ( Color+" : "+ TW.Clusters[Type][ClustType][ClustID] )
-            var ColorDiv = '<span style="background:'+Color+';"></span>'
-            LegendDiv += '<li onclick=\'SomeEffect("'+IDx+'")\'>'+ColorDiv+ TW.Clusters[Type][ClustType][ClustID]+"</li>"+"\n"
-        }
-    } else {
-        for(var i in OrderedClustDicts) {
-            var IDx = OrderedClustDicts[i]
-            var Color = ClustNB_CurrentColor[IDx]
-            // pr ( Color+" : "+ TW.Clusters[Type][ClustType][ClustID] )
-            var ColorDiv = '<span style="background:'+Color+';"></span>'
-            LegendDiv += '<li onclick=\'SomeEffect("'+IDx+'")\'>'+ColorDiv+ IDx+"</li>"+"\n"
-        }
+
+    // usually 'terms' or anything in categories[0]
+    var curType = getCurrentType()
+
+    // all infos in a bin array
+    var legendInfo = []
+
+    // sample node color
+    var ClustNB_CurrentColor = {}
+
+    // passed as arg   or  prepared in parseCustom
+    if (!groupedByTicks && !TW.Clusters[curType][daclass]) {
+      console.error('class not prepared ??', daclass)
+    }
+    else {
+      var legendInfo = groupedByTicks || TW.Clusters[curType][daclass]
+
+      // valueclasses (values or intervals or classes) are already sorted in TW.Clusters
+      for (var l in legendInfo) {
+
+        // get a sample node color for each bin/class
+        var nMatchedNodes = legendInfo[l]['nids'].length
+        var midNid = legendInfo[l]['nids'][Math.floor(3*nMatchedNodes/4)]
+        var exampleColor = TW.partialGraph.graph.nodes(midNid).color
+
+        // create the legend item
+        var preparedLabel = legendInfo[l]['labl']
+        // console.log("preparedLabel", preparedLabel)
+
+        // all-in-one argument for SomeEffect
+        var valueclassId = `${curType}::${daclass}::${l}`
+
+        var colorBg = `<span style="background:${exampleColor};"></span>`
+
+        LegendDiv += `<li onclick='SomeEffect("${valueclassId}")'>`
+        LegendDiv += colorBg + preparedLabel
+        LegendDiv += "</li>\n"
+      }
 
     }
+
     LegendDiv += '      </ul>'
     LegendDiv += '    </div>'
-
 
     $("#legend_for_clusters").addClass( "my-legend" );
     $("#legend_for_clusters").html( LegendDiv )
@@ -266,27 +304,69 @@ function set_ClustersLegend ( daclass ) {
 // = = = = = = = = = = = [ / Clusters Plugin ] = = = = = = = = = = = //
 
 //For CNRS
+// function getTopPapers(type){
+//     if(TW.getAdditionalInfo){
+//         console.log("getTopPapers")
+//         jsonparams=JSON.stringify(getSelections());
+//         bi=(Object.keys(categories).length==2)?1:0;
+//         //jsonparams = jsonparams.replaceAll("&","__and__");
+//         jsonparams = jsonparams.split('&').join('__and__');
+//         //dbsPaths.push(getGlobalDBs());
+//         thisgexf=JSON.stringify(decodeURIComponent(getUrlParam.file));
+//         image='<img style="display:block; margin: 0px auto;" src="'+TW.APINAME+'img/ajax-loader.gif"></img>';
+//         $("#tab-container-top").show();
+//         $("#topPapers").show();
+//         $("#topPapers").html(image);
+//         $.ajax({
+//             type: 'GET',
+//             url: TW.APINAME+'info_div.php',
+//             data: "type="+type+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+TW.field[getUrlParam.file],
+//             //contentType: "application/json",
+//             //dataType: 'json',
+//             success : function(data){
+//                 console.log(TW.APINAME+'info_div.php?'+"type="+type+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+TW.field[getUrlParam.file]);
+//                 $("#topPapers").html(data);
+//             },
+//             error: function(){
+//                 console.log('Page Not found: getTopPapers');
+//             }
+//         });
+//     }
+// }
+
+
+// a custom variant of twitter plugin written for politoscope
 function getTopPapers(type){
     if(TW.getAdditionalInfo){
-        jsonparams=JSON.stringify(getSelections());
-        bi=(Object.keys(categories).length==2)?1:0;
-        //jsonparams = jsonparams.replaceAll("&","__and__");
-        jsonparams = jsonparams.split('&').join('__and__');
-        //dbsPaths.push(getGlobalDBs());
-        thisgexf=JSON.stringify(decodeURIComponent(getUrlParam.file));
-        image='<img style="display:block; margin: 0px auto;" src="'+TW.APINAME+'img/ajax-loader.gif"></img>';
-        $("#tab-container-top").show();
-        $("#topPapers").show();
-        $("#topPapers").html(image);
+        jsonparams=getSelections();
+
+        var joined_q = jsonparams.map(function(w) {return '('+w+')'}).join(' AND ')
+
+        // console.log(jsonparams)
+        // theHtml = "<p> jsonparams:"+jsonparams+" </p>"
+        //
         $.ajax({
             type: 'GET',
-            url: TW.APINAME+'info_div.php',
-            data: "type="+type+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+TW.field[getUrlParam.file],
-            //contentType: "application/json",
-            //dataType: 'json',
+            url: TW.APINAME,
+            data: {'query': joined_q},
+            contentType: "application/json",
             success : function(data){
-                console.log(TW.APINAME+'info_div.php?'+"type="+type+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+TW.field[getUrlParam.file]);
-                $("#topPapers").html(data);
+                // console.log(data);
+
+                var topTweetsHtml = ''
+
+                if (data.length) {
+                  for (var k in data) {
+                    let tweetJson = data[k]
+                    topTweetsHtml += RenderTweet(tweetJson)
+                  }
+                }
+                else {
+                  topTweetsHtml = `<p class="micromessage centered">The query <span class=code>${joined_q}</span> delivers no results on Twitter with the topic #Presidentielles2017 and most related hashtags</p>`
+                }
+
+                $("#topPapers").html(topTweetsHtml);
+                $("#topPapers").show()
             },
             error: function(){
                 console.log('Page Not found: getTopPapers');
@@ -295,34 +375,138 @@ function getTopPapers(type){
     }
 }
 
+function clickInsideTweet(e, tweetSrcUrl) {
+    console.log('>>>>> event target tag', e.target.tag)
+    console.log("event")
+    console.log(e)
+    var tgt = e.target
+    if (tgt.tagName.toLowerCase() == "a")
+        window.open(tgt.href, "Link in tweet")
+    else
+        window.open(tweetSrcUrl, "Source Tweet")
+}
+
+function RenderTweet( tweet) {
+
+    var tweet_links = true
+
+    var author_url = "http://twitter.com/"+tweet["user"]["screen_name"];
+    var tweet_url = author_url+"/status/"+tweet["id_str"]
+    var image_normal = author_url+"/profile_image?size=original";
+    var image_bigger = "";
+    if( tweet["user"]["profile_image_url"] ) {
+        image_normal = tweet["user"]["profile_image_url"]
+        image_bigger = tweet["user"]["profile_image_url"].replace("_normal","_bigger")
+    }
+    var html = ""
+    html += '\t\t'+ '<blockquote onclick="clickInsideTweet(event, \''+tweet_url+'\')" class="Tweet h-entry tweet subject expanded" cite="'+tweet_url+'" data-tweet-id="'+tweet["id_str"]+'" data-scribe="section:subject">' + '\n';
+
+    html += '\t\t\t'+ '<div class="Tweet-header u-cf">' + '\n';
+
+    html += '\t\t\t\t'+ '<div class="Tweet-brand u-floatRight">' + '\n';
+
+    html += '\t\t\t\t'+ '<span class="Tweet-metadata dateline">' + '\n';
+
+    // TODO check datetime iso dates here
+    html += '\t\t\t\t\t'+ '<a target="_blank" class="u-linkBlend u-url customisable-highlight long-permalink" data-datetime="2012-12-03T18:51:11+000" data-scribe="element:full_timestamp" href="'+tweet_url+'">' + '\n';
+    html += '\t\t\t\t\t\t'+ '<time class="dt-updated" datetime="2012-12-03T18:51:11+0000" title="'+tweet["created_at"]+'">'+tweet["created_at"]+'</time>' + '\n';
+    html += '\t\t\t\t\t'+ '</a>' + '\n';
+    html += '\t\t\t\t'+ '</span>' + '\n';
+
+    html += '\t\t\t\t\t'+ '<span class="u-hiddenInWideEnv">' + '\n';
+    html += '\t\t\t\t\t\t'+ '<a target="_blank" href="'+tweet_url+'" data-scribe="element:logo">' + '\n';
+    html += '\t\t\t\t\t\t\t'+ '<div class="Icon Icon--twitter " aria-label="" title="" role="presentation"></div>' + '\n';
+    html += '\t\t\t\t\t\t'+ '</a>' + '\n';
+    html += '\t\t\t\t\t'+ '</span>' + '\n';
+    html += '\t\t\t\t'+ '</div>' + '\n';
+
+    html += '\t\t\t\t'+ '<div class="Tweet-author u-textTruncate h-card p-author" data-scribe="component:author">' + '\n';
+    html += '\t\t\t\t\t'+ '<a target="_blank" class="Tweet-authorLink Identity u-linkBlend" data-scribe="element:user_link" href="'+author_url+'">' + '\n';
+    html += '\t\t\t\t\t\t'+ '<span class="Tweet-authorAvatar Identity-avatar">' + '\n';
+    html += '\t\t\t\t\t\t\t'+ '<img class="Avatar u-photo" data-scribe="element:avatar" data-src-2x="'+image_bigger+'" src="'+image_normal+'">' + '\n';
+    html += '\t\t\t\t\t\t'+ '</span>' + '\n';
+    html += '\t\t\t\t\t\t'+ '<span class="Tweet-authorName Identity-name p-name customisable-highlight" data-scribe="element:name">'+tweet["user"]["name"]+'</span>' + '\n';
+    html += '\t\t\t\t\t\t'+ '<span class="Tweet-authorScreenName Identity-screenName p-nickname" data-scribe="element:screen_name">@'+tweet["user"]["screen_name"]+'</span>' + '\n';
+
+    html += '\t\t\t\t\t'+ '</a>' + '\n';
+    html += '\t\t\t\t'+ '</div>' + '\n';
+    html += '\t\t\t'+ '</div>' + '\n';
+
+    html += '\t\t\t'+ '<div class="Tweet-body e-entry-content" data-scribe="component:tweet">' + '\n';
+
+    html += '\t\t\t\t'+ '<p class="Tweet-text e-entry-title" lang="en" dir="ltr">' + tweet["text"] + '</p>' + '\n';
+
+    if( !isUndef(tweet["retweet_count"]) || !isUndef(tweet["favourites_count"])  ) {
+        html += '\t\t\t\t'+ '<ul class="Tweet-actions" data-scribe="component:actions" role="menu" aria-label="Tweet actions">' + '\n';
+        if(tweet_links) {
+            html += '\t\t\t\t\t'+ '<li class="Tweet-action">' + '\n';
+            html += '\t\t\t\t\t\t'+ '<a target="_blank" class="TweetAction TweetAction--reply web-intent" href="https://twitter.com/intent/tweet?in_reply_to='+tweet["id_str"]+""+'" data-scribe="element:reply">' + '\n';
+            html += '\t\t\t\t\t\t\t'+ '<div class="Icon Icon--reply TweetAction-icon" aria-label="Reply" title="Reply" role="img"></div>' + '\n';
+            html += '\t\t\t\t\t\t'+ '</a>' + '\n';
+            html += '\t\t\t\t\t'+ '</li>' + '\n';
+        }
+
+        if(!isUndef(tweet["retweet_count"])) {
+            html += '\t\t\t\t\t'+ '<li class="Tweet-action">' + '\n';
+            html += '\t\t\t\t\t\t'+ '<a target="_blank" class="TweetAction TweetAction--retweet web-intent" href="https://twitter.com/intent/retweet?tweet_id='+tweet["id_str"]+'" data-scribe="element:retweet">' + '\n';
+            html += '\t\t\t\t\t\t\t'+ '<div class="Icon Icon--retweet TweetAction-icon" aria-label="Retweet" title="Retweet" role="img"></div>' + '\n';
+            html += '\t\t\t\t\t\t\t'+ '<span class="TweetAction-stat" data-scribe="element:retweet_count" aria-hidden="true">'+tweet["retweet_count"]+'</span>' + '\n';
+            html += '\t\t\t\t\t\t\t'+ '<span class="u-hiddenVisually">'+tweet["retweet_count"]+' Retweets</span>' + '\n';
+            html += '\t\t\t\t\t\t'+ '</a>' + '\n';
+            html += '\t\t\t\t\t'+ '</li>' + '\n';
+        }
+
+        if(!isUndef(tweet["favourites_count"])) {
+            html += '\t\t\t\t\t'+ '<li class="Tweet-action">' + '\n';
+            html += '\t\t\t\t\t\t'+ '<a target="_blank" class="TweetAction TweetAction--favorite web-intent" href="https://twitter.com/intent/favorite?tweet_id='+tweet["id_str"]+'" data-scribe="element:favorite">' + '\n';
+            html += '\t\t\t\t\t\t\t'+ '<div class="Icon Icon--favorite TweetAction-icon" aria-label="Favorite" title="Favorite" role="img"></div>' + '\n';
+            html += '\t\t\t\t\t\t\t'+ '<span class="TweetAction-stat" data-scribe="element:favourites_count" aria-hidden="true">'+tweet["favourites_count"]+'</span>' + '\n';
+            html += '\t\t\t\t\t\t\t'+ '<span class="u-hiddenVisually">'+tweet["favourites_count"]+' favorites</span>' + '\n';
+            html += '\t\t\t\t\t\t'+ '</a>' + '\n';
+            html += '\t\t\t\t\t'+ '</li>' + '\n';
+        }
+
+        html += '\t\t\t\t'+ '</ul>' + '\n';
+    }
+
+
+    html += '\t\t\t'+ '</div>' + '\n';
+
+
+    html += '\t\t'+ '</blockquote>' + '\n';
+    // html += '\t\t'+ '<br>' + '\n';
+
+
+    return html;
+}
 
 //FOR UNI-PARTITE
-function selectionUni(currentNode){
-    console.log("\tin selectionUni:"+currentNode.id);
-    if(checkBox==false && cursor_size==0) {
-        highlightSelectedNodes(false);
-        opossites = [];
-        selections = [];
-    }
-
-    if((typeof selections[currentNode.id])=="undefined"){
-        selections[currentNode.id] = 1;
-        currentNode.active=true;
-    }
-    else {
-        delete selections[currentNode.id];
-        currentNode.active=false;
-    }
-    //highlightOpossites(nodes1[currentNode.id].neighbours);
-    //        currentNode.color = currentNode.customAttrs['true_color'];
-    //        currentNode.customAttrs['grey'] = 0;
-    //
-    //
-
-
-    TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8);
-    TW.partialGraph.render();
-}
+// function selectionUni(currentNode){
+//     console.log("\tin selectionUni:"+currentNode.id);
+//     if(checkBox==false && cursor_size==0) {
+//         highlightSelectedNodes(false);
+//         opossites = [];
+//         selections = [];
+//     }
+//
+//     if((typeof selections[currentNode.id])=="undefined"){
+//         selections[currentNode.id] = 1;
+//         currentNode.active=true;
+//     }
+//     else {
+//         delete selections[currentNode.id];
+//         currentNode.active=false;
+//     }
+//     //highlightOpossites(nodes1[currentNode.id].neighbours);
+//     //        currentNode.color = currentNode.customAttrs['true_color'];
+//     //        currentNode.customAttrs['grey'] = 0;
+//     //
+//     //
+//
+//
+//     TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8);
+//     TW.partialGraph.render();
+// }
 
 //JUST ADEME
 function camaraButton(){

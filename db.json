@@ -1,10 +1,27 @@
 {
+	"data/politoscope": {
+		"dbname":null,
+		"title":"Politoscope",
+		"date":"2017",
+		"abstract":"",
+		"first" : "ProgrammeDesCandidats.enrichi.gexf",
+		"gexfs": {
+			"ProgrammeDesCandidats.enrichi.gexf": {
+				"social": {},
+				"semantic": {}
+			},
+			"ProgrammeDesCandidats.gexf": {
+				"social": {},
+				"semantic": {}
+			}
+		}
+	},
 	"data/AXA": {
 		"dbname":"data.db",
 		"title":"ISITITLE",
 		"date":"ISIpubdate",
 		"abstract":"ISIABSTRACT",
-		"first" : "RiskV2PageRank1000.gexf",		
+		"first" : "RiskV2PageRank1000.gexf",
 		"gexfs": {
 			"RiskV2PageRank1000.gexf": {
         		"social": { "table":"ISIAUTHOR" , "textCol":"data","forkeyCol":"id"},

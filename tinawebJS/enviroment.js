@@ -3,6 +3,12 @@
 // always useful
 var theHtml = document.getElementsByTagName('html')[0]
 
+TW.anynodegoes = true
+// TW.anynodegoes = true
+
+function writeBrand (brandString) {
+  document.getElementById('twbrand').innerHTML = brandString
+}
 
 //============================ < NEW BUTTONS > =============================//
 
@@ -28,6 +34,7 @@ function changeType() {
 
     // types eg [true]          <=> '1'
     //          [true, true]    <=> '1|1'
+    //          [true, false]   <=> '1|0'
 
     // Complement of the received state ~[X\Y] )
     var type_t1 = []
@@ -449,6 +456,11 @@ function changeLevel() {
 // NB new sigma js: dropEdge is quite slow so we add a waiting cursor
 
 function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
+  console.log("EdgeWeightFilter")
+  console.log("sliderDivID", sliderDivID)
+  console.log("type_attrb", type_attrb)
+  console.log("type", type)
+  console.log("criteria", criteria)
   // if ($(sliderDivID).html()!="") {
 	// 	console.log("\t\t\t\t\t\t[[ algorithm not applied "+sliderDivID+" ]]")
 	// 	return;
@@ -480,10 +492,12 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
     var filterparams = AlgorithmForSliders ( TW.Edges , type_attrb , type , criteria) //OK
 
     // TODO make an index
-    // console.log("EdgeWeightFilter: "+type)
-    // console.log(filterparams)
+    console.log("EdgeWeightFilter: "+type)
+    console.log(filterparams)
+
 
     var steps = filterparams["steps"]
+
     var finalarray = filterparams["finalarray"]
     // if(steps<3) {
     //     $(sliderDivID).freshslider({

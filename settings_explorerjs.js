@@ -5,7 +5,7 @@ var TW = {}
     TW.colorByAtt = false;
     TW.twittertimeline = false;
     TW.minimap=false;
-    TW.getAdditionalInfo=true;// True: Activate TopPapers feature.
+    TW.getAdditionalInfo = true;// True: Activate TopPapers feature.
     //TW.mainfile = ["db.json"];
     // // TW.mainfile = "api.json";
      TW.mainfile = [
@@ -21,7 +21,7 @@ var TW = {}
     // //     "data/example.json",
     // //     "data/Elisa__Omodei.gexf",
          ];
-    TW.APINAME = "LOCALDB/";
+    TW.APINAME = "http://127.0.0.1:5000/twitter_search";
     TW.tagcloud_limit = 50;
     TW.bridge={};
     TW.bridge["forFilteredQuery"] = "php/bridgeClientServer_filter.php";
@@ -43,8 +43,10 @@ var TW = {}
     // flag name is div class to be removed if false
     //        *and* subdirectory to import if true
     // see also ProcessDivsFlags()
-    TW.DivsFlags["histogramModule"] = true ;
-    TW.DivsFlags["crowdsourcingModule"] = true ;  // £TODO fix topPapers
+    TW.DivsFlags["histogramModule"] = false ;
+    TW.DivsFlags["histogramDailyVariantModule"] = true ;
+    // TODO more generic module integrating the variants cf. experiments/histogramModule_STUB_GENERIQUE
+    TW.DivsFlags["crowdsourcingModule"] = true ;
 
     TW.SystemStates = {}
     TW.SystemStates.level = true;
@@ -52,10 +54,7 @@ var TW = {}
     TW.SystemStates.selections = [];
     TW.SystemStates.opposites = [];
     TW.catSoc = "Document";
-    TW.catSem = "NGram";
-
-    // to get ajax topPapers via info_div.php
-    TW.getAdditionalInfo = false;
+    TW.catSem = "terms";
 
     TW.strSearchBar = "Select or suggest topics";
 
@@ -70,8 +69,6 @@ var sizeMult = [];
     sizeMult[TW.catSoc] = 0.0;
     sizeMult[TW.catSem] = 0.0;
 
-var inactiveColor = '#666';
-var startingNodeId = "1";
 var minLengthAutoComplete = 1;
 var maxSearchResults = 10;
 
@@ -83,6 +80,8 @@ var desirableTagCloudFont_MIN=12;
 var desirableTagCloudFont_MAX=20;
 var desirableNodeSizeMIN=1;
 var desirableNodeSizeMAX=12;
+
+// apparently not used ?
 var desirableScholarSize=6; //Remember that all scholars have the same size!
 
 /*
@@ -101,7 +100,13 @@ var semanticConverged=false;
 
 
 // ============ < / DEVELOPER OPTIONS > ============
-var showLabelsIfZoom=1.0;
+TW.branding = 'Politoscope: explorer les programmes'
+TW.nodeClusAtt = "modularity_class"
+
+TW.filterSliders = false
+
+TW.histogramStartThreshold = 10 ;
+
 TW.edgeDefaultOpacity = 0.5  // opacity when true_color
 TW.edgeGreyColor = "rgba(150, 150, 150, 0.2)";
 TW.nodesGreyBorderColor = "rgba(100, 100, 100, 0.5)";
@@ -110,8 +115,17 @@ TW.selectedColor = "node"  // "node" for a background like the node's color,
 
 TW.overSampling = true     // costly hi-def rendering (true => pixelRatio x 2)
 
-TW.deselectOnclickStage = false // will a click on the background remove selection ? (except when dragging)
+TW.deselectOnclickStage = true // will a click on the background remove selection ? (except when dragging)
+var showLabelsIfZoom=1.0;
 
+// for continuous attrvalues/colors (cf. clustersBy), how many levels in legend?
+TW.legendsBins = 7 ;
+
+// some specific attributes may have other number of levels
+TW.customLegendsBins = {
+  'age': 8,
+  'growth_rate': 12
+}
 // ============ < / DEVELOPER OPTIONS > ============
 
 
@@ -141,8 +155,9 @@ var sigmaJsDrawingProperties = {
     twNodeRendBorderColor: "#222",
     // twNodeRendBorderColor: "#eee",
 
+    font: "Droid Sans",
     // font: "Crete Round",
-    font: "Ubuntu Condensed",
+    // font: "Ubuntu Condensed",
     fontStyle: "bold",
 };
 var sigmaJsGraphProperties = {
@@ -150,7 +165,7 @@ var sigmaJsGraphProperties = {
     maxEdgeSize: 4
 };
 var sigmaJsMouseProperties = {
-    minRatio: 0.1,
+    minRatio: .03125,  // 1/32  pour permettre zoom x32
     maxRatio: 2
 };
 // ============ < / SIGMA.JS PROPERTIES > ============
@@ -164,7 +179,7 @@ var twjs="tinawebJS/";
 TW.categories = {};
 TW.categoriesIndex = [];
 
-var gexf;
+var gexfFile;
 //var zoom=0;
 
 var checkBox=false;
@@ -191,11 +206,11 @@ var lastFilter = []
 TW.Filters = {}
 
 
-
-var overviewWidth = 200;
-var overviewHeight = 175;
-var overviewScale = 0.25;
-var overviewHover=false;
+//
+// var overviewWidth = 200;
+// var overviewHeight = 175;
+// var overviewScale = 0.25;
+// var overviewHover=false;
 var moveDelay = 80, zoomDelay = 2;
 //var Vecindad;
 TW.partialGraph;
@@ -204,13 +219,31 @@ TW.Nodes = [];
 TW.Edges = [];
 TW.Clusters = [];
 
+
+// new dev properties
+TW.scanClusters = true   // build TW.Clusters in an (attr+val => nodes) reverse index (aka facets)
+TW.maxDiscreteValues = 40  // max discrete levels in facet legend (aka bins)
+// new TW.Clusters structure
+// --------------------------
+// was: built in separate loop from read of all attr values
+//      TW.Clusters[nodeType][clusterType][possibleValue] = clst_idx_of_possible_value
+
+// from now on:
+//      still built in ChangeGraphAppearanceByAtt
+//      POSS: build in parseCustom (when reading all nodes attributes anyway)
+//      if discrete attrvalues with <= 30 classes (colorsBy, clustersBy)
+//         => TW.Clusters[nodeType][clusterType].classes.[possibleValue] = list of ids with the value
+//      if continuous or many possible values (>30) (clustersBy, colorsRelByBins)
+//         => TW.Clusters[nodeType][clusterType].ranges.[interval] = list of ids in the interval
+
 var nodeslength=0;
 
 var labels = [];
 
-var numberOfDocs=0;
-var numberOfNGrams=0;
+var numberOfDocs=0;    // not used!
+var numberOfNGrams=0;  // not used, but cf TW.nNodes TW.nEdges
 
+// FIXME should become TW.*
 var selections = [];
 var deselections={};
 var opossites = {};

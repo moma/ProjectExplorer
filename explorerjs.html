@@ -23,9 +23,14 @@
   -->
   <link href="https://fonts.googleapis.com/css?family=Ubuntu+Condensed" rel="stylesheet" type='text/css'>
 
+  <!-- Roboto
+       Good for tweets if Helvetica is not present
+  -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type='text/css'>
+
   <!-- Crete Round
        Original *and* informative :) -->
-  <!-- <link href='https://fonts.googleapis.com/css?family=Crete+Round:400,400italic&subset=latin-ext' rel='stylesheet' type='text/css'> -->
+  <link href='https://fonts.googleapis.com/css?family=Crete+Round:400,400italic&subset=latin-ext' rel='stylesheet' type='text/css'>
 
   <!-- Lora
       "book" (roman style) + nice heading -->
@@ -53,6 +58,9 @@
   <!-- NB bs2/3 not used for main grid (graph + bars) but inside the bars -->
   <link rel="stylesheet" href="libs/css2/freshslider.css" media="screen">
 
+  <link type="text/css" href="twitterAPI2/twitterlibs/tweet.light.ltr.css" rel="stylesheet"/>
+  <link type="text/css" href="twitterAPI2/twitterlibs/custom.css" rel="stylesheet"/>
+
   <!-- JS -->
   <!-- <script src="script.js"></script> -->
 </head>
@@ -69,7 +77,8 @@
           </li>
           <li style="margin-left:10px;">
             <a href="#" class="navbar-middle navbar-brand">
-              <span id="twbrand">Mapping Risk Research</span>
+              <!-- will be replaced by TW.branding -->
+              <span id="twbrand">TinaWebJS</span>
             </a>
           </li>
 
@@ -144,15 +153,22 @@
             </li>
             -->
 
+            <li><a href="http://www.politoscope.org"
+                  class="navbar-higher"
+                  title="Politoscope">
+                  <img src="libs/img2/politoscope_logo.jpg"
+                       style="width:60px; position:absolute; top:-60px; left:-75px; z-index:5; overflow:visible; background-color:white">
+            </a></li>
+
             <li>
                <a>
-                <button type="button" id="changetype" class="btn btn-success btn-sm">Change Type</button>
+                <button type="button" id="changetype" class="btn btn-success btn-sm">Change<br>Type</button>
                </a>
             </li>
 
             <li>
                <a>
-                <button type="button" id="changelevel" class="btn btn-primary btn-sm" disabled>Change Level</button>
+                <button type="button" id="changelevel" class="btn btn-primary btn-sm" title="sélectionnez des sommets pour changer de niveau" disabled>Change<br>Level</button>
                </a>
             </li>
 
@@ -276,24 +292,13 @@
             <!-- say thanks for the suggestion, etc. -->
             <li id="crowdsourcing_answer" class="nav crowdsourcingModule navbar-lower"></li>
 
+            <!-- checkbox -->
             <li class="navbar-lower">
-
               <input id="checkboxdiv" onclick="alertCheckBox(this);"
                     title="Add next search results to current selection"
                     class="nav btn btn-info"
                     type="checkbox">
               <span style="position: relative; top: 4px;">Add to selection</span>
-
-            </li> <!-- /checkbox group -->
-
-            <li style="margin: 20px 0 0 10px;">
-              <div class="onoffswitch">
-                <input type="checkbox" name="edges-switch" class="onoffswitch-checkbox" id="edges-switch" checked>
-                <label class="onoffswitch-label" for="edges-switch">
-                  <span id="edges-switch-inner-label" class="onoffswitch-inner"></span>
-                  <span class="onoffswitch-switch"></span>
-                </label>
-              </div>
             </li>
 
           </ul>
@@ -365,6 +370,17 @@
                     <img src="libs/img2/edges.png" style="width:32px">
                   </a>
               </li>
+
+              <li>
+                <div class="onoffswitch">
+                  <input type="checkbox" name="edges-switch" class="onoffswitch-checkbox" id="edges-switch" checked>
+                  <label class="onoffswitch-label" for="edges-switch">
+                    <span id="edges-switch-inner-label" class="onoffswitch-inner"></span>
+                    <span class="onoffswitch-switch"></span>
+                  </label>
+                </div>
+              </li>
+
       </ul>
 
       <!-- inline *after* sigma-contnr for better overlay positioning -->
@@ -385,6 +401,12 @@
         <div class="histogramModule">
           <!-- filled by query (user search value) to wos api -->
           <div id="search_histogram" class="over-panels"></div>
+        </div><!-- /row -->
+
+        <!-- histogram of selected nodes, variant ; TODO unify -->
+        <div class="histogramDailyVariantModule">
+          <!-- filled by query (user search value) to wos api -->
+          <div id="search_histogram2" class="over-panels"></div>
         </div><!-- /row -->
       </div>
 
@@ -436,11 +458,11 @@
           </h4>
         </div>
 
-        <div class="panel-collapse collapse" id="le_tutorial">
-          <!-- TODO: outcloud the video for better stream+player -->
+        <!-- TODO: outcloud the video for better stream+player -->
+        <!-- <div class="panel-collapse collapse" id="le_tutorial">
           <video width="100%"
             src="video/AXA2015.mp4" controls=""  frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></video>
-        </div>
+        </div> -->
       </div>
 
       <div class="panel panel-default" id="tips_panel">
@@ -517,7 +539,7 @@
           </div>
 
           <div class="modal-body form-horizontal">
-            Which atributes do you want to keep?:
+            Which attributes do you want to keep?:
             <div class="form-group">
               <label class="col-lg-2 control-label"> </label>
               <div class="col-lg-10">
@@ -597,6 +619,10 @@
   <script src="tinawebJS/sigma_v1.2/plugins/sigma.layout.forceAtlas2/worker.js"></script>
   <script src="tinawebJS/sigma_v1.2/plugins/sigma.renderers.snapshot/sigma.renderers.snapshot.js"></script>
 
+  <!-- Tested as replacement for parseCustom -->
+  <!-- <script src="tinawebJS/sigma_v1.2/plugins/sigma.parsers.gexf/gexf-parser.js"></script> -->
+  <!-- <script src="tinawebJS/sigma_v1.2/plugins/sigma.parsers.gexf/sigma.parsers.gexf.js"></script> -->
+
   <!-- testing sigma 1.5 imports from linkurious src -->
   <!-- <script src="tinawebJS/sigma_v1.5/sigma.js" type="text/javascript" language="javascript"></script>
   <script src="tinawebJS/sigma_v1.5/plugins.js" type="text/javascript" language="javascript"></script> -->
@@ -617,6 +643,7 @@
   <!-- <script src="tinawebJS/asyncFA2.js" type="text/javascript" language="javascript"></script> -->
   <script src="tinawebJS/Tinaweb.js" type="text/javascript" language="javascript"></script>
   <script src="tinawebJS/main.js" type="text/javascript" language="javascript"></script>
+  <script src="twitterAPI2/twitterlibs/widgets.js" type="text/javascript" language="javascript"></script>
 
   <script type="text/javascript">
     // easytabs triggers errors when only one tab TODO fix
