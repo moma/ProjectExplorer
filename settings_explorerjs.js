@@ -21,7 +21,7 @@ var TW = {}
     // //     "data/example.json",
     // //     "data/Elisa__Omodei.gexf",
          ];
-    TW.APINAME = "http://134.158.75.71/twitter_search";
+    TW.APINAME = "http://127.0.0.1:5000/twitter_search";
     TW.tagcloud_limit = 50;
     TW.bridge={};
     TW.bridge["forFilteredQuery"] = "php/bridgeClientServer_filter.php";
