@@ -22,7 +22,6 @@ function changeType() {
 
     var level = present.level;
     var sels = present.selections
-    var catDict = present.categoriesDict;
     var type_t0 = present.type;
     var str_type_t0 = type_t0.map(Number).join("|")
 
@@ -94,7 +93,7 @@ function changeType() {
     if(present.level) { //If level=Global, fill all {X}-component
 
         for(var nid in TW.Nodes) {
-            if(type_t1[catDict[TW.Nodes[nid].type]])
+            if(type_t1[TW.catDict[TW.Nodes[nid].type]])
                 add1Elem(nid)
         }
         for(var eid in TW.Edges) {
@@ -262,8 +261,6 @@ function changeType() {
     TW.partialGraph.states[avantlastpos].selections = selsbackup;
     TW.partialGraph.states[avantlastpos].type = present.type;
     TW.partialGraph.states[avantlastpos].opposites = present.opposites;
-    TW.partialGraph.states[avantlastpos].categories = present.categories;//to_del
-    TW.partialGraph.states[avantlastpos].categoriesDict = present.categoriesDict;//to_del
 
     TW.partialGraph.states[lastpos].setState({
         type: nextState,
@@ -271,9 +268,6 @@ function changeType() {
         sels: Object.keys(selections).map(Number),
         oppos: []
     })
-    TW.partialGraph.states[lastpos].categories = present.categories;//to_del
-    TW.partialGraph.states[lastpos].categoriesDict = catDict;//to_del
-
 
     fa2enabled=true; TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8).draw();//.startForceAtlas2();
 }
@@ -302,7 +296,6 @@ function changeLevel() {
 
       var level = present.level;
       var sels = present.selections;//[144, 384, 543]//TW.partialGraph.states.selections;
-      var catDict = present.categoriesDict;
 
 
       // type "grammar"
@@ -374,7 +367,7 @@ function changeLevel() {
 
           // var t0 = performance.now()
           for(var nid in TW.Nodes) {
-              if(type_t0[catDict[TW.Nodes[nid].type]])
+              if(type_t0[TW.catDict[TW.Nodes[nid].type]])
                   // we add 1 by 1
                   add1Elem(nid)
           }
@@ -408,8 +401,6 @@ function changeLevel() {
       TW.partialGraph.states[avantlastpos].selections = present.selections;
       TW.partialGraph.states[avantlastpos].type = present.type;
       TW.partialGraph.states[avantlastpos].opposites = present.opposites;
-      TW.partialGraph.states[avantlastpos].categories = present.categories;//to_del
-      TW.partialGraph.states[avantlastpos].categoriesDict = present.categoriesDict;//to_del
 
       TW.partialGraph.states[lastpos].setState({
           type: present.type,
@@ -417,8 +408,6 @@ function changeLevel() {
           sels: Object.keys(selections).map(Number),
           oppos: []
       })
-      TW.partialGraph.states[lastpos].categories = present.categories;//to_del
-      TW.partialGraph.states[lastpos].categoriesDict = catDict;//to_del
 
       TW.partialGraph.camera.goTo({x:0, y:0, ratio:1.2, angle: 0})
       TW.partialGraph.refresh()

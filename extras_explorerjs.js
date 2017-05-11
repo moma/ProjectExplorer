@@ -254,7 +254,7 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
     if (daclass=="clust_louvain")
         daclass = "louvain"
 
-    // usually 'terms' or anything in categories[0]
+    // usually 'terms' or current display among TW.categories
     var curType = getCurrentType()
 
     // all infos in a bin array
@@ -785,7 +785,7 @@ function ProcessDivsFlags() {
             // load JS+CSS items corresponding to the flagname
             my_src_dir = key
 
-            // HEAD check on local file presence
+            // TODO check if async not a problem
             if (linkCheck(my_src_dir+"/init.js")) {
               loadJS(my_src_dir+"/init.js") ;
             }

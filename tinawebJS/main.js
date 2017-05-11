@@ -302,21 +302,26 @@ if (! inFormat || ! inData) {
 }
 else {
     console.log("parsing the data")
-    var start = new ParseCustom(  inFormat , inData );
-    var categories = start.scanFile(); //user should choose the order of categories
+    let start = new ParseCustom(  inFormat , inData );
+    let catsInfos = start.scanFile(); //user should choose the order of categories
 
+    TW.categories = catsInfos.categories
     console.log("Categories: ")
-    console.log(categories)
+    console.log(TW.categories)
 
-    if (! categories) {
+    // reverse lookup: category name => category indice
+    TW.catDict = catsInfos.lookup_dict
+
+    if (! TW.categories) {
       console.warn ('ParseCustom scanFile found no categories!!')
-      categories = []
+      TW.categories = []
+      TW.catDict = {}
     }
-    var possibleStates = makeSystemStates( categories )
-    var initialState = buildInitialState( categories ) //[true,false]//
+    var possibleStates = makeSystemStates( TW.categories )
+    var initialState = buildInitialState( TW.categories ) //[true,false]//
 
     // XML parsing from ParseCustom
-    var dicts = start.makeDicts(categories); // > parse json or gexf, dictfy
+    var dicts = start.makeDicts(TW.categories); // > parse json or gexf, dictfy
     console.warn("parsing result:", dicts)
 
     TW.Nodes = dicts.nodes;
@@ -363,11 +368,7 @@ else {
       console.error("== currently unhandled categorization of node types ==", TW.categories)
     }
 
-    // FIXME generalize the use of these two TW.* variants instead of window-scoped 'categories' and 'catDict'
-    TW.categories = categories;
-    TW.categoriesIndex = catDict;
-
-    for(var i in categories) {
+    for(var i in TW.categories) {
         TW.Filters[i] = {}
         TW.Filters[i]["#slidercat"+i+"edgesweight"] = true;
     }
@@ -394,8 +395,7 @@ else {
 
     // preparing the data and settings
     TW.graphData = {nodes: [], edges: []}
-    TW.graphData = sigma_utils.FillGraph(  initialState , catDict  , TW.Nodes , TW.Edges , TW.graphData );
-
+    TW.graphData = sigma_utils.FillGraph(  initialState , TW.catDict  , TW.Nodes , TW.Edges , TW.graphData );
 
 
         // // ----------- TEST stock parse gexf and use nodes to replace TW's ---------
@@ -518,9 +518,12 @@ else {
     TW.partialGraph.states = []
     TW.partialGraph.states[0] = false;
     TW.partialGraph.states[1] = TW.SystemStates;
-    TW.partialGraph.states[1].categories = categories
-    TW.partialGraph.states[1].categoriesDict = catDict;
-    console.log("!? initialState => states[1].type")
+
+    // can be COMMENTED OUT: in specifications categories never change so states shouldn't need them
+    // TW.partialGraph.states[1].categories = TW.categories
+    // TW.partialGraph.states[1].categoriesDict = TW.catDict;
+
+    // here 'type' means: the categorie(s) that is (are) currently displayed
     TW.partialGraph.states[1].type = initialState;
     TW.partialGraph.states[1].LouvainFait = false;
     // [ / Poblating the Sigma-Graph ]
@@ -678,7 +681,7 @@ else {
     // REFA new sigma.js
     TW.partialGraph.camera.goTo({x:0, y:0, ratio:0.5, angle: 0})
 
-    twjs_.initListeners( categories , TW.partialGraph);
+    twjs_.initListeners(TW.categories , TW.partialGraph);
 
     // run fa2 if settings_explorerjs.fa2enabled == true
     if (fa2enabled) {
@@ -688,7 +691,7 @@ else {
       });
     }
 
-    if( categories.length==1 ) {
+    if( TW.categories.length==1 ) {
         $("#changetype").hide();
         $("#taboppos").remove();
 

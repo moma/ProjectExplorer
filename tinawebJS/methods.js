@@ -85,10 +85,6 @@ function cancelSelection (fromTagCloud, settings) {
 
 
 function getCurrentType() {
-  // type grammar overly complicated: it's absurd to have to do 10 lines
-  //                                  to retrieve the tina type when other times
-  //                                  there's so many window-scoped vars !!!
-  // TODO expose current type more accessibly
   let currentTypeName
   let currentTypeIdx
   let typeIdxs = Object.keys(TW.partialGraph.states.slice(-1)[0].type)
@@ -99,7 +95,7 @@ function getCurrentType() {
     }
   }
 
-  currentTypeName = window.categories[currentTypeIdx]
+  currentTypeName = TW.categories[currentTypeIdx]
   return currentTypeName
 }
 

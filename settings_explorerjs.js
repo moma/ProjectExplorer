@@ -100,7 +100,7 @@ var semanticConverged=false;
 
 
 // ============ < / DEVELOPER OPTIONS > ============
-TW.branding = 'Politoscope: explorer les programmes'
+TW.branding = 'test bipart'
 TW.nodeClusAtt = "modularity_class"
 
 TW.filterSliders = false

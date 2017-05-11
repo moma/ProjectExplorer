@@ -5,9 +5,6 @@
 // Level-01
 ParseCustom = function ( format , data ) {
 
-    console.debug("ParseCustom init format, data", format, data)
-
-
     if (format == 'gexf') {
       this.data = $.parseXML(data)
     }
@@ -44,6 +41,7 @@ ParseCustom = function ( format , data ) {
 
 // Level-02
 ParseCustom.prototype.scanFile = function() {
+    let catInfos = {'categories':[], 'lookup_dict': {}}
     switch (this.format) {
         case "api.json":
             console.log("scanFile: "+this.format)
@@ -53,13 +51,13 @@ ParseCustom.prototype.scanFile = function() {
             break;
         case "json":
             console.log("scanFile: "+this.format)
-            categories = this.getJSONCategories( this.data );
-            return categories;
+            catInfos = this.getJSONCategories( this.data );
+            return catInfos;
             break;
         case "gexf":
             console.log("scanFile: "+this.format)
-            categories = this.getGEXFCategories( this.data );
-            return categories;
+            catInfos = this.getGEXFCategories( this.data );
+            return catInfos;
             break;
         default:
             console.log("scanFile   jsaispas: "+this.format)
@@ -166,7 +164,7 @@ function gexfCheckAttributesMap (someXMLContent) {
 
 // Level-00
 function scanGexf(gexfContent) {
-  console.log("ParseCustom : scanGexf ======= ")
+    console.debug("ParseCustom : scanGexf ======= ")
     var categoriesDict={};
 
     // adding gexfCheckAttributesMap call
@@ -259,7 +257,7 @@ function sortNodeTypes(observedTypesDict) {
       }
       observedTypes = newcats;
   }
-  return {'categories': observedTypes, 'reverse_dict': catDict}
+  return {'categories': observedTypes, 'lookup_dict': catDict}
 }
 
 // Level-00
@@ -297,7 +295,7 @@ function dictfyGexf( gexf , categories ){
     // let sizeStats = {'mean':null, 'median':null, 'max':0, 'min':1000000000}
 
     // if scanClusters, we'll also use:
-    var tmpVals = {}        // to build reverse index attval => nodes
+    var tmpVals = {}        // to build inverted index attval => nodes
                             // (to inventory subclasses for a given attr)
                             //   if < maxDiscreteValues: keep all in legend
                             //   else:  show intervals in legend
@@ -391,8 +389,6 @@ function dictfyGexf( gexf , categories ){
             }
             node.attributes = atts;
 
-
-            // £TODO copy this logic in json case
             // nodew=parseInt(attributes["weight"]);
             if ( atts["category"] ) {
               node_cat = atts["category"];
@@ -440,7 +436,7 @@ function dictfyGexf( gexf , categories ){
                   if (!tmpVals[node_cat][at].map[someval]) tmpVals[node_cat][at].map[someval] = []
 
                   tmpVals[node_cat][at].vals.push(someval)      // for ordered scale
-                  tmpVals[node_cat][at].map[someval].push(node.id)  // reverse index
+                  tmpVals[node_cat][at].map[someval].push(node.id)  // inverted index
                 }
               }
             }
@@ -449,7 +445,7 @@ function dictfyGexf( gexf , categories ){
     }
 
     // console.warn ('parseCustom output nodes', nodes)
-    // console.warn ('parseCustom reverse index: vals to ids', tmpVals)
+    // console.warn ('parseCustom inverted index: vals to ids', tmpVals)
 
     // -------------- debug: for local stats ----------------
     // allSizes.sort();
@@ -552,7 +548,7 @@ function dictfyGexf( gexf , categories ){
           })
 
           // (enhanced intervalsInventory)
-          // => creates bin, binlabels, reverse index per bins
+          // => creates bin, binlabels, inverted index per bins
           var legendRefTicks = []
 
           // how many bins for this attribute ?
