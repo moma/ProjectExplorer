@@ -646,6 +646,7 @@ function dictfyGexf( gexf , categories ){
 
     var edgeId = 0;
     var edgesNodes = gexf.getElementsByTagName('edges');
+
     for(i=0; i<edgesNodes.length; i++) {
         var edgesNode = edgesNodes[i];
         var edgeNodes = edgesNode.getElementsByTagName('edge');
@@ -671,7 +672,6 @@ function dictfyGexf( gexf , categories ){
             let edge_weight = edgeNode.getAttribute('weight')
             edge.weight = (edge_weight)?edge_weight:1;
 
-            var kind;
             var attvalueNodes = edgeNode.getElementsByTagName('attvalue');
             for(k=0; k<attvalueNodes.length; k++){
                 var attvalueNode = attvalueNodes[k];
@@ -686,129 +686,18 @@ function dictfyGexf( gexf , categories ){
             // console.debug('>>> tr: read edge', edge)
 
             if ( nodes[source] && nodes[target] ) {
-                // console.debug('>>> tr: new edge has matching source and target nodes')
+              // console.debug('>>> tr: new edge has matching source and target nodes')
 
-                let srcType=nodes[source].type;
-                let tgtType=nodes[target].type;
+              let typestring = findEdgeType(nodes, source, target)
 
-                // if(source==89 || target==89) console.log(edge)
-
-                // [ New Code! ]
-                let petitDict = {}
-                petitDict[ nodes[source].type ] = true;
-                petitDict[ nodes[target].type ] = true;
-                let idInRelations = []
-                for(var c in petitDict) idInRelations[catDict[c]] = true;
-                for(var c=0; c<categories.length;c++) {
-                    if(!idInRelations[c]) idInRelations[c] = false;
-                }
-                let idArray = idInRelations.map(Number).join("|")
-                edge.categ = idArray;
-                if(!TW.Relations[idArray]) TW.Relations[idArray] = {}
-
-                if(isUndef(TW.Relations[idArray][source])) TW.Relations[idArray][source] = {};
-                if(isUndef(TW.Relations[idArray][target]))  TW.Relations[idArray][target] = {};
-                TW.Relations[idArray][source][target]=true;
-                TW.Relations[idArray][target][source]=true;
-                // [ / New Code! ]
-
-
-                // Doc <-> Doc
-                if(srcType==categories[0] && tgtType==categories[0] ) {
-
-                    edge.label = "nodes1";
-                    if(isUndef(nodes1[source])) {
-                        nodes1[source] = {
-                            label: nodes[source].label,
-                            neighbours: []
-                        };
-                    }
-                    if(isUndef(nodes1[target])) {
-                        nodes1[target] = {
-                            label: nodes[target].label,
-                            neighbours: []
-                        };
-                    }
-                    nodes1[source].neighbours.push(target);
-                    nodes1[target].neighbours.push(source);
-                    // TW.partialGraph.addEdge(indice,source,target,edge);
-                }
-
-                if(categories.length>1) {
-
-                    // Term <-> Term
-                    if(srcType==categories[1] && tgtType==categories[1]){
-                        edge.label = "nodes2";
-
-                        if(isUndef(nodes2[source])) {
-                            nodes2[source] = {
-                                label: nodes[source].label,
-                                neighbours: []
-                            };
-                        }
-                        if(isUndef(nodes2[target])) {
-                            nodes2[target] = {
-                                label: nodes[target].label,
-                                neighbours: []
-                            };
-                        }
-                        nodes2[source].neighbours.push(target);
-                        nodes2[target].neighbours.push(source);
-
-                        // otherGraph.addEdge(indice,source,target,edge);
-                    }
-
-                    // Doc <-> Term
-                    if((srcType==categories[0] && tgtType==categories[1]) ||
-                        (srcType==categories[1] && tgtType==categories[0])) {
-                        edge.label = "bipartite";
-
-                        // // Source is Document
-                        if(srcType == categories[0]) {
-
-                            if(isUndef(bipartiteD2N[source])) {
-                                bipartiteD2N[source] = {
-                                    label: nodes[source].label,
-                                    neighbours: []
-                                };
-                            }
-                            if(isUndef(bipartiteN2D[target])) {
-                                bipartiteN2D[target] = {
-                                    label: nodes[target].label,
-                                    neighbours: []
-                                };
-                            }
-
-                            bipartiteD2N[source].neighbours.push(target);
-                            bipartiteN2D[target].neighbours.push(source);
-
-                        // // Source is NGram
-                        } else {
-
-                            if(isUndef(bipartiteN2D[source])) {
-                                bipartiteN2D[source] = {
-                                    label: nodes[source].label,
-                                    neighbours: []
-                                };
-                            }
-                            if(isUndef(bipartiteD2N[target])) {
-                                bipartiteD2N[target] = {
-                                    label: nodes[target].label,
-                                    neighbours: []
-                                };
-                            }
-                            bipartiteN2D[source].neighbours.push(target);
-                            bipartiteD2N[target].neighbours.push(source);
-                        }
-                    }
-                }
-
-                if(!edges[target+";"+source])
-                    edges[indice] = edge;
-
-
-
-
+              // save edge property
+              edge.categ = typestring
+              TW.Relations = updateRelations( TW.Relations,
+                                              typestring,
+                                              source, target )
+              // save
+              if(!edges[target+";"+source])
+                  edges[indice] = edge;
             }
         }
     }
@@ -818,7 +707,6 @@ function dictfyGexf( gexf , categories ){
             TW.Relations[i][j] = Object.keys(TW.Relations[i][j])
         }
     }
-
 
     // ------------------------------- resDict <<<
     let resDict = {}
@@ -832,6 +720,142 @@ function dictfyGexf( gexf , categories ){
 
     return resDict;
 }
+
+
+
+// To find the edge type (Doc=Doc, Doc=Term...)
+function findEdgeType(nodes, srcId, tgtId) {
+  let srcType=nodes[srcId].type;
+  let tgtType=nodes[tgtId].type;
+
+  // if(srcId==89 || tgtId==89) console.log(edge)
+
+  // [ New Code! ]
+  let petitDict = {}
+  petitDict[ srcType ] = true;
+  petitDict[ tgtType ] = true;
+  let idInRelations = []
+  for(var c in petitDict) idInRelations[TW.catDict[c]] = true;
+  for(var c=0; c<TW.categories.length;c++) {
+      if(!idInRelations[c]) idInRelations[c] = false;
+  }
+  let idArray = idInRelations.map(Number).join("|")
+  // [ / New Code! ]
+
+  // console.debug("new relation of type", idArray)
+
+  // aka edge.categ aka typestring
+  return idArray
+}
+
+// To fill TW.Relations with edges sorted by type (Doc=Doc, Doc=Term...)
+function updateRelations(typedRelations, edgeCateg, srcId, tgtId){
+  if(!typedRelations[edgeCateg]) typedRelations[edgeCateg] = {}
+  if(isUndef(typedRelations[edgeCateg][srcId])) typedRelations[edgeCateg][srcId] = {};
+  if(isUndef(typedRelations[edgeCateg][tgtId])) typedRelations[edgeCateg][tgtId] = {};
+  typedRelations[edgeCateg][srcId][tgtId]=true;
+  typedRelations[edgeCateg][tgtId][srcId]=true;
+
+  return typedRelations
+}
+
+
+// creates and updates nodes1 nodes2 and bipartiteN2D and bipartiteD2N
+// but seems useless because all info is already in each nodes.type and edge.categ
+// (especially when changeType uses a loop on all nodes anyway)
+// (was previously done at the same time that updateRelations)
+// (could be restored if we needed faster changeType)
+function sortNodesByTypeDeprecated() {
+  // Doc <-> Doc
+  // if(srcType==categories[0] && tgtType==categories[0] ) {
+  //
+  //     edge.label = "nodes1";
+  //     if(isUndef(nodes1[source])) {
+  //         nodes1[source] = {
+  //             label: nodes[source].label,
+  //             neighbours: []
+  //         };
+  //     }
+  //     if(isUndef(nodes1[target])) {
+  //         nodes1[target] = {
+  //             label: nodes[target].label,
+  //             neighbours: []
+  //         };
+  //     }
+  //     nodes1[source].neighbours.push(target);
+  //     nodes1[target].neighbours.push(source);
+  // }
+  //
+  // if(categories.length>1) {
+  //
+  //     // Term <-> Term
+  //     if(srcType==categories[1] && tgtType==categories[1]){
+  //         edge.label = "nodes2";
+  //
+  //         if(isUndef(nodes2[source])) {
+  //             nodes2[source] = {
+  //                 label: nodes[source].label,
+  //                 neighbours: []
+  //             };
+  //         }
+  //         if(isUndef(nodes2[target])) {
+  //             nodes2[target] = {
+  //                 label: nodes[target].label,
+  //                 neighbours: []
+  //             };
+  //         }
+  //         nodes2[source].neighbours.push(target);
+  //         nodes2[target].neighbours.push(source);
+  //     }
+  //
+  //     // Doc <-> Term
+  //     if((srcType==categories[0] && tgtType==categories[1]) ||
+  //         (srcType==categories[1] && tgtType==categories[0])) {
+  //         edge.label = "bipartite";
+  //
+  //         // // Source is Document
+  //         if(srcType == categories[0]) {
+  //
+  //             if(isUndef(bipartiteD2N[source])) {
+  //                 bipartiteD2N[source] = {
+  //                     label: nodes[source].label,
+  //                     neighbours: []
+  //                 };
+  //             }
+  //             if(isUndef(bipartiteN2D[target])) {
+  //                 bipartiteN2D[target] = {
+  //                     label: nodes[target].label,
+  //                     neighbours: []
+  //                 };
+  //             }
+  //
+  //             bipartiteD2N[source].neighbours.push(target);
+  //             bipartiteN2D[target].neighbours.push(source);
+  //
+  //         // // Source is NGram
+  //         } else {
+  //
+  //             if(isUndef(bipartiteN2D[source])) {
+  //                 bipartiteN2D[source] = {
+  //                     label: nodes[source].label,
+  //                     neighbours: []
+  //                 };
+  //             }
+  //             if(isUndef(bipartiteD2N[target])) {
+  //                 bipartiteD2N[target] = {
+  //                     label: nodes[target].label,
+  //                     neighbours: []
+  //                 };
+  //             }
+  //             bipartiteN2D[source].neighbours.push(target);
+  //             bipartiteD2N[target].neighbours.push(source);
+  //         }
+  //     }
+  // }
+}
+
+
+
 
 // Level-00
 function scanJSON( data ) {
@@ -913,121 +937,19 @@ function dictfyJSON( data , categories ) {
         edge.weight = weight;
         edge.type = type;
 
-        if (nodes[source] && nodes[target]) {
-            let srcType=nodes[source].type;
-            let tgtType=nodes[target].type;
+        if ( nodes[source] && nodes[target] ) {
+          // console.debug('>>> tr: new edge has matching source and target nodes')
 
-            // [ New Code! ]
-            let petitDict = {}
-            petitDict[ nodes[source].type ] = true;
-            petitDict[ nodes[target].type ] = true;
-            let idInRelations = []
-            for(var c in petitDict) idInRelations[catDict[c]] = true;
-            for(var c=0; c<categories.length;c++) {
-                if(!idInRelations[c]) idInRelations[c] = false;
-            }
-            let idArray = idInRelations.map(Number).join("|")
-            edge.categ = idArray;
-            if(!TW.Relations[idArray]) TW.Relations[idArray] = {}
+          let typestring = findEdgeType(nodes, source, target)
 
-            if(isUndef(TW.Relations[idArray][source])) TW.Relations[idArray][source] = {};
-            if(isUndef(TW.Relations[idArray][target]))  TW.Relations[idArray][target] = {};
-            TW.Relations[idArray][source][target]=true;
-            TW.Relations[idArray][target][source]=true;
-            // [ / New Code! ]
-
-
-            // Doc <-> Doc
-            if(srcType==categories[0] && tgtType==categories[0] ) {
-
-                edge.label = "nodes1";
-                if(isUndef(nodes1[source])) {
-                    nodes1[source] = {
-                        label: nodes[source].label,
-                        neighbours: []
-                    };
-                }
-                if(isUndef(nodes1[target])) {
-                    nodes1[target] = {
-                        label: nodes[target].label,
-                        neighbours: []
-                    };
-                }
-                nodes1[source].neighbours.push(target);
-                nodes1[target].neighbours.push(source);
-            }
-
-            if(categories.length>1) {
-
-                // Term <-> Term
-                if(srcType==categories[1] && tgtType==categories[1]){
-                    edge.label = "nodes2";
-
-                    if(isUndef(nodes2[source])) {
-                        nodes2[source] = {
-                            label: nodes[source].label,
-                            neighbours: []
-                        };
-                    }
-                    if(isUndef(nodes2[target])) {
-                        nodes2[target] = {
-                            label: nodes[target].label,
-                            neighbours: []
-                        };
-                    }
-                    nodes2[source].neighbours.push(target);
-                    nodes2[target].neighbours.push(source);
-
-                    // otherGraph.addEdge(indice,source,target,edge);
-                }
-
-                // Doc <-> Term
-                if((srcType==categories[0] && tgtType==categories[1]) ||
-                    (srcType==categories[1] && tgtType==categories[0])) {
-                    edge.label = "bipartite";
-
-                    // // Source is Document
-                    if(srcType == categories[0]) {
-
-                        if(isUndef(bipartiteD2N[source])) {
-                            bipartiteD2N[source] = {
-                                label: nodes[source].label,
-                                neighbours: []
-                            };
-                        }
-                        if(isUndef(bipartiteN2D[target])) {
-                            bipartiteN2D[target] = {
-                                label: nodes[target].label,
-                                neighbours: []
-                            };
-                        }
-
-                        bipartiteD2N[source].neighbours.push(target);
-                        bipartiteN2D[target].neighbours.push(source);
-
-                    // // Source is NGram
-                    } else {
-
-                        if(isUndef(bipartiteN2D[source])) {
-                            bipartiteN2D[source] = {
-                                label: nodes[source].label,
-                                neighbours: []
-                            };
-                        }
-                        if(isUndef(bipartiteD2N[target])) {
-                            bipartiteD2N[target] = {
-                                label: nodes[target].label,
-                                neighbours: []
-                            };
-                        }
-                        bipartiteN2D[source].neighbours.push(target);
-                        bipartiteD2N[target].neighbours.push(source);
-                    }
-                }
-            }
-
-            if(!edges[target+";"+source])
-                edges[id] = edge;
+          // save edge property
+          edge.categ = typestring
+          TW.Relations = updateRelations( TW.Relations,
+                                          typestring,
+                                          source, target )
+          // save
+          if(!edges[target+";"+source])
+              edges[id] = edge;
         }
     }
 
