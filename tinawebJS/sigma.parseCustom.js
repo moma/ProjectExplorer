@@ -814,7 +814,7 @@ function dictfyGexf( gexf , categories ){
 
     for(var i in TW.Relations) {
         for(var j in TW.Relations[i]) {
-            TW.Relations[i][j] = Object.keys(TW.Relations[i][j]).map(Number)
+            TW.Relations[i][j] = Object.keys(TW.Relations[i][j])
         }
     }
 
@@ -1036,7 +1036,7 @@ function dictfyJSON( data , categories ) {
 
     for(var i in TW.Relations) {
         for(var j in TW.Relations[i]) {
-            TW.Relations[i][j] = Object.keys(TW.Relations[i][j]).map(Number)
+            TW.Relations[i][j] = Object.keys(TW.Relations[i][j])
         }
     }
 
