@@ -1,4 +1,4 @@
-
+'use strict';
 // TODO REFA longterm refactoring: scanXX and dictifyXX is doing double work
 //   (for instance loop on full gexf in scanGexf then again in dictfyGexf)
 
@@ -67,6 +67,7 @@ ParseCustom.prototype.scanFile = function() {
 
 // Level-02
 ParseCustom.prototype.makeDicts = function(categories) {
+    let dictionaries = {}
     switch (this.format) {
         case "api.json":
             console.log("makeDicts: "+this.format)
@@ -172,17 +173,17 @@ function scanGexf(gexfContent) {
 
     var declaredAttrs = gexfCheckAttributesMap(gexfContent)
 
-    elsNodes = gexfContent.getElementsByTagName('nodes');
+    let elsNodes = gexfContent.getElementsByTagName('nodes');
     // console.debug('>>> tr: elsNodes', elsNodes) // <<<
     for(i=0; i<elsNodes.length; i++){
         var elNodes = elsNodes[i];  // Each xml node 'nodes' (plural)
-        node = elNodes.getElementsByTagName('node');
+        let node = elNodes.getElementsByTagName('node');
         for(j=0; j<node.length; j++){
-            attvalueNodes = node[j].getElementsByTagName('attvalue');
+            let attvalueNodes = node[j].getElementsByTagName('attvalue');
             for(k=0; k<attvalueNodes.length; k++){
-                attvalueNode = attvalueNodes[k];
-                attr = attvalueNode.getAttribute('for');
-                val = attvalueNode.getAttribute('value');
+                let attvalueNode = attvalueNodes[k];
+                let attr = attvalueNode.getAttribute('for');
+                let val = attvalueNode.getAttribute('value');
 
                 // some attrs are gexf-local indices refering to an <attributes> declaration
                 // so if it matches declared we translate their integer in title
@@ -205,9 +206,7 @@ function scanGexf(gexfContent) {
     }
 
     // sorting observed json node types into Sem (=> 1)/Soc (=> 0)
-    result = sortNodeTypes(categoriesDict)
-
-    return result;
+    return sortNodeTypes(categoriesDict)
 }
 
 // sorting observed node types into Sem/Soc (factorized 11/05/2017)
@@ -245,7 +244,7 @@ function sortNodeTypes(observedTypesDict) {
 
       // POSSible: allow more than 2 cats
       for(var i in observedTypes) {
-          c = observedTypes[i]
+          let c = observedTypes[i]
           if(c == TW.catSoc || (c != TW.catSem && c.indexOf("term")==-1)) {// NOT a term-category
               newcats[0] = c;
               catDict[c] = 0;
@@ -323,10 +322,10 @@ function dictfyGexf( gexf , categories ){
 
             // [ get Size ]
             var size=false;
-            sizeNodes = elNode.getElementsByTagName('size');
+            let sizeNodes = elNode.getElementsByTagName('size');
             sizeNodes = sizeNodes.length ? sizeNodes : elNode.getElementsByTagName('viz:size');
             if(sizeNodes.length>0){
-              sizeNode = sizeNodes[0];
+              let sizeNode = sizeNodes[0];
               size = parseFloat(sizeNode.getAttribute('value'));
 
               // debug: for stats  ---------------------------
@@ -357,7 +356,7 @@ function dictfyGexf( gexf , categories ){
             colorNodes = colorNodes.length ? colorNodes : elNode.getElementsByTagNameNS('*','color');
             var color;
             if(colorNodes.length>0){
-                colorNode = colorNodes[0];
+                let colorNode = colorNodes[0];
                 color = '#'+sigmaTools.rgbToHex(parseFloat(colorNode.getAttribute('r')),
                     parseFloat(colorNode.getAttribute('g')),
                     parseFloat(colorNode.getAttribute('b')));
@@ -389,6 +388,7 @@ function dictfyGexf( gexf , categories ){
             }
             node.attributes = atts;
 
+            let node_cat = ""
             // nodew=parseInt(attributes["weight"]);
             if ( atts["category"] ) {
               node_cat = atts["category"];
@@ -398,9 +398,9 @@ function dictfyGexf( gexf , categories ){
               node_cat = categories[0]
             }
 
-            node.type = node_cat;
             if (!catCount[node_cat]) catCount[node_cat] = 0
             catCount[node_cat]++;
+            node.type = node_cat;
 
             // node.id = (node_cat==categories[0])? ("D:"+node.id) : ("N:"+node.id);
             if(!node.size) console.log("node without size: "+node.id+" : "+node.label);
@@ -445,7 +445,7 @@ function dictfyGexf( gexf , categories ){
     }
 
     // console.warn ('parseCustom output nodes', nodes)
-    // console.warn ('parseCustom inverted index: vals to ids', tmpVals)
+    // console.warn ('parseCustom inverted index: vals to srcType', tmpVals)
 
     // -------------- debug: for local stats ----------------
     // allSizes.sort();
@@ -468,7 +468,7 @@ function dictfyGexf( gexf , categories ){
     // clusters and other facets => type => name => [{label,val/range,nodeids}]
     TW.Clusters = {}
 
-    // sorting out properties in n.attributes ==> £TODO shared function up to classvalues_fin
+    // sorting out properties in n.attributes ==> £TODO shared function createClusterIndex() up to classvalues_fin
     // --------------------------------------
 
     if(gotClusters) {
@@ -642,6 +642,7 @@ function dictfyGexf( gexf , categories ){
     }
 
 
+    // £TODO second shared function: createRelations() (same for gexf/json)
 
     var edgeId = 0;
     var edgesNodes = gexf.getElementsByTagName('edges');
@@ -667,7 +668,7 @@ function dictfyGexf( gexf , categories ){
                 attributes: []
             };
 
-            edge_weight = edgeNode.getAttribute('weight')
+            let edge_weight = edgeNode.getAttribute('weight')
             edge.weight = (edge_weight)?edge_weight:1;
 
             var kind;
@@ -687,21 +688,21 @@ function dictfyGexf( gexf , categories ){
             if ( nodes[source] && nodes[target] ) {
                 // console.debug('>>> tr: new edge has matching source and target nodes')
 
-                idS=nodes[source].type;
-                idT=nodes[target].type;
+                let srcType=nodes[source].type;
+                let tgtType=nodes[target].type;
 
                 // if(source==89 || target==89) console.log(edge)
 
                 // [ New Code! ]
-                petitDict = {}
+                let petitDict = {}
                 petitDict[ nodes[source].type ] = true;
                 petitDict[ nodes[target].type ] = true;
-                idInRelations = []
+                let idInRelations = []
                 for(var c in petitDict) idInRelations[catDict[c]] = true;
                 for(var c=0; c<categories.length;c++) {
                     if(!idInRelations[c]) idInRelations[c] = false;
                 }
-                idArray = idInRelations.map(Number).join("|")
+                let idArray = idInRelations.map(Number).join("|")
                 edge.categ = idArray;
                 if(!TW.Relations[idArray]) TW.Relations[idArray] = {}
 
@@ -713,7 +714,7 @@ function dictfyGexf( gexf , categories ){
 
 
                 // Doc <-> Doc
-                if(idS==categories[0] && idT==categories[0] ) {
+                if(srcType==categories[0] && tgtType==categories[0] ) {
 
                     edge.label = "nodes1";
                     if(isUndef(nodes1[source])) {
@@ -736,7 +737,7 @@ function dictfyGexf( gexf , categories ){
                 if(categories.length>1) {
 
                     // Term <-> Term
-                    if(idS==categories[1] && idT==categories[1]){
+                    if(srcType==categories[1] && tgtType==categories[1]){
                         edge.label = "nodes2";
 
                         if(isUndef(nodes2[source])) {
@@ -758,12 +759,12 @@ function dictfyGexf( gexf , categories ){
                     }
 
                     // Doc <-> Term
-                    if((idS==categories[0] && idT==categories[1]) ||
-                        (idS==categories[1] && idT==categories[0])) {
+                    if((srcType==categories[0] && tgtType==categories[1]) ||
+                        (srcType==categories[1] && tgtType==categories[0])) {
                         edge.label = "bipartite";
 
                         // // Source is Document
-                        if(idS == categories[0]) {
+                        if(srcType == categories[0]) {
 
                             if(isUndef(bipartiteD2N[source])) {
                                 bipartiteD2N[source] = {
@@ -820,9 +821,7 @@ function dictfyGexf( gexf , categories ){
 
 
     // ------------------------------- resDict <<<
-    resDict = {}
-    // TODO unify catDict and catCount (dict is count.keys())
-    resDict.catDict = catDict;          // ex : {'ISIterms':0}
+    let resDict = {}
     resDict.catCount = catCount;        // ex:  {'ISIterms':1877}  ie #nodes
     resDict.nodes = nodes;              //  { nid1: {label:"...", size:"11.1", attributes:"...", color:"#aaa", etc}, nid2: ...}
     resDict.edges = edges;
@@ -841,14 +840,12 @@ function scanJSON( data ) {
     var nodes = data.nodes;
 
     for(var i in nodes) {
-        n = nodes[i];
+        let n = nodes[i];
         if(n.type) categoriesDict[n.type]=n.type;
     }
 
     // sorting observed json node types into Sem (=> 1)/Soc (=> 0)
-    result = sortNodeTypes(categoriesDict)
-
-    return result;
+    return sortNodeTypes(categoriesDict);
 }
 
 // Level-00
@@ -866,8 +863,8 @@ function dictfyJSON( data , categories ) {
     }
 
     for(var i in data.nodes) {
-        n = data.nodes[i];
-        node = {}
+        let n = data.nodes[i];
+        let node = {}
         node.id = (n.id) ? n.id : i ; // use the key if no id
         node.label = (n.label)? n.label : ("node_"+node.id) ;
         node.size = (n.size)? n.size : 3 ;
@@ -901,8 +898,8 @@ function dictfyJSON( data , categories ) {
 
     // edges
     for(var i in data.links){
-        e = data.links[i];
-        edge = {}
+        let e = data.links[i];
+        let edge = {}
 
         var source = (!isUndef(e.s))? e.s : e.source;
         var target = (!isUndef(e.t))? e.t : e.target;
@@ -917,19 +914,19 @@ function dictfyJSON( data , categories ) {
         edge.type = type;
 
         if (nodes[source] && nodes[target]) {
-            idS=nodes[source].type;
-            idT=nodes[target].type;
+            let srcType=nodes[source].type;
+            let tgtType=nodes[target].type;
 
             // [ New Code! ]
-            petitDict = {}
+            let petitDict = {}
             petitDict[ nodes[source].type ] = true;
             petitDict[ nodes[target].type ] = true;
-            idInRelations = []
+            let idInRelations = []
             for(var c in petitDict) idInRelations[catDict[c]] = true;
             for(var c=0; c<categories.length;c++) {
                 if(!idInRelations[c]) idInRelations[c] = false;
             }
-            idArray = idInRelations.map(Number).join("|")
+            let idArray = idInRelations.map(Number).join("|")
             edge.categ = idArray;
             if(!TW.Relations[idArray]) TW.Relations[idArray] = {}
 
@@ -941,7 +938,7 @@ function dictfyJSON( data , categories ) {
 
 
             // Doc <-> Doc
-            if(idS==categories[0] && idT==categories[0] ) {
+            if(srcType==categories[0] && tgtType==categories[0] ) {
 
                 edge.label = "nodes1";
                 if(isUndef(nodes1[source])) {
@@ -963,7 +960,7 @@ function dictfyJSON( data , categories ) {
             if(categories.length>1) {
 
                 // Term <-> Term
-                if(idS==categories[1] && idT==categories[1]){
+                if(srcType==categories[1] && tgtType==categories[1]){
                     edge.label = "nodes2";
 
                     if(isUndef(nodes2[source])) {
@@ -985,12 +982,12 @@ function dictfyJSON( data , categories ) {
                 }
 
                 // Doc <-> Term
-                if((idS==categories[0] && idT==categories[1]) ||
-                    (idS==categories[1] && idT==categories[0])) {
+                if((srcType==categories[0] && tgtType==categories[1]) ||
+                    (srcType==categories[1] && tgtType==categories[0])) {
                     edge.label = "bipartite";
 
                     // // Source is Document
-                    if(idS == categories[0]) {
+                    if(srcType == categories[0]) {
 
                         if(isUndef(bipartiteD2N[source])) {
                             bipartiteD2N[source] = {
@@ -1040,8 +1037,7 @@ function dictfyJSON( data , categories ) {
         }
     }
 
-    resDict = {}
-    resDict.catDict = catDict;
+    let resDict = {}
     resDict.catCount = catCount;
     resDict.nodes = nodes;
     resDict.edges = edges;
@@ -1070,13 +1066,13 @@ function makeSystemStates (cats) {
 
     for (i = 0; i < N; i++) {
 
-        bin = (i).toString(2)
-        bin_splitted = []
+        let bin = (i).toString(2)
+        let bin_splitted = []
         for(var j in bin)
             bin_splitted.push(bin[j])
 
-        bin_array = [];
-        toadd = cats.length-bin_splitted.length;
+        let bin_array = [];
+        let toadd = cats.length-bin_splitted.length;
         for (k = 0; k < toadd; k++)
             bin_array.push("0")
 
@@ -1084,10 +1080,10 @@ function makeSystemStates (cats) {
             bin_array.push(bin[j])
 
         bin_array = bin_array.map(Number)
-        sum = bin_array.reduce(function(a, b){return a+b;})
+        let sum = bin_array.reduce(function(a, b){return a+b;})
 
         if( sum != 0 && sum < 3) {
-            id = bin_array.join("|")
+            let id = bin_array.join("|")
             systemstates[id] = bin_array.map(Boolean)
         }
     }
