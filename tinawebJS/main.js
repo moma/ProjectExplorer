@@ -316,8 +316,7 @@ else {
     var initialState = buildInitialState( categories ) //[true,false]//
 
     // XML parsing from ParseCustom
-    var dicts = start.makeDicts(categories); // > parseGexf, dictfyGexf
-
+    var dicts = start.makeDicts(categories); // > parse json or gexf, dictfy
     console.warn("parsing result:", dicts)
 
     TW.Nodes = dicts.nodes;
@@ -336,7 +335,7 @@ else {
     // relations already copied in TW.Relations at this point
     // TW.nodes1 = dicts.n1;//not used
 
-    var catDict = dicts.catDict
+    var catDict = dicts.catDict         // <= FIXME was already available at scanFile time...
     console.log("CategoriesDict: ")
     console.log(catDict)
 
@@ -562,6 +561,7 @@ else {
 
 
         if (TW.filterSliders) {
+          // £TODO test with comex2
           if(typestring=="0|1") {
               $("#category0").hide();
               $("#category1").show();
@@ -670,6 +670,7 @@ else {
 
         // if (TW.catSem && TW.catSoc) {
           setTimeout(function () {
+              // tabneigh: show "Related" tab
               document.querySelector('.etabs a[href="#tabs2"]').click()
           }, 500);
         // }

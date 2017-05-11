@@ -160,8 +160,7 @@ function gexfCheckAttributesMap (someXMLContent) {
 // Level-00
 function scanGexf(gexfContent) {
   console.log("ParseCustom : scanGexf ======= ")
-    var categoriesDict={}, categories=[];
-
+    var categoriesDict={};
 
     // adding gexfCheckAttributesMap call
     // to create a map from nodes/node/@for values to declared attribute name (title)
@@ -200,42 +199,61 @@ function scanGexf(gexfContent) {
         }
     }
 
-    for(var cat in categoriesDict)
-        // usually a just a few cats over entire node set
-        // ex: terms
-        // ex: ISItermsriskV2_140 & ISItermsriskV2_140
-        console.debug('>>> tr: cat', cat)
-        categories.push(cat);
+    // console.warn("observed categoriesDict in scanGexf", categoriesDict)
 
-    var catDict = {}
-    if(categories.length==0) {
-        categories[0]="Document";
-        catDict["Document"] = 0;
-    }
-    if(categories.length==1) {
-        // if we have only one category, it gets the same code 0 as Document
-        // but in practice it's more often terms. anyways doesn't affect much
-        catDict[categories[0]] = 0;
-        // console.log("-----cat unique =>0")
-    }
+    result = sortNodeTypes(categoriesDict)
 
-    // £TODO here should use TW.catSem and TW.catSoc
-    if(categories.length>1) {
-        var newcats = []
-        for(var i in categories) {
-            c = categories[i]
-            if(c.indexOf("term")==-1) {// NOT a term-category
-                newcats[0] = c;
-                catDict[c] = 0;
-            }
-            else {
-                newcats[1] = c; // IS a term-category
-                catDict[c] = 1;
-            }
-        }
-        categories = newcats;
-    }
-    return categories;
+    // var catDict = result.reverse_dict
+
+    return result.cats_pair;
+}
+
+// sorting observed node types into Sem/Soc (factorized 11/05/2017)
+// --------------------
+// FIXME this factorizes what we had twice (json & gexf scanFile workflows),
+//       and we just added missing TW.catSoc/Sem comparisons
+//       *but it doesn't fix the underlying logic*
+//       (current expected structure in 'categories' can only accomodate 2 types
+//        and the way it and catDict are used is not entirely coherent throughout
+//        the project, cf. among others: - the effect on 'typestring'
+//                                       - the way catDict recreated in dictfy
+//                                       - the way default cat is handled...)
+// -------------------
+// expected content: usually a just a few cats over all nodes
+// ex: terms
+// ex: ISItermsriskV2_140 & ISItermsriskV2_140
+function sortNodeTypes(observedTypesDict) {
+  var observedTypes = Object.keys(observedTypesDict)
+  var catDict = {}
+
+  var nTypes = observedTypes.length
+
+  if(nTypes==0) {
+      observedTypes[0]="Document";
+      catDict["Document"] = 0;
+  }
+  if(nTypes==1) {
+      // if we have only one category, it gets the same code 0 as Document
+      // but in practice it's more often terms. anyways doesn't affect much
+      catDict[observedTypes[0]] = 0;
+      console.log("-----cat unique =>0")
+  }
+  if(nTypes>1) {
+      var newcats = []
+      for(var i in observedTypes) {
+          c = observedTypes[i]
+          if(c == TW.catSoc || (c != TW.catSem && c.indexOf("term")==-1)) {// NOT a term-category
+              newcats[0] = c;
+              catDict[c] = 0;
+          }
+          else {
+              newcats[1] = c; // IS a term-category
+              catDict[c] = 1;
+          }
+      }
+      observedTypes = newcats;
+  }
+  return {'cats_pair': observedTypes, 'reverse_dict': catDict}
 }
 
 // Level-00
@@ -367,6 +385,8 @@ function dictfyGexf( gexf , categories ){
             }
             node.attributes = atts;
 
+
+            // £TODO copy this logic in json case
             // nodew=parseInt(attributes["weight"]);
             if ( atts["category"] ) {
               node_cat = atts["category"];
@@ -446,7 +466,7 @@ function dictfyGexf( gexf , categories ){
     // clusters and other facets => type => name => [{label,val/range,nodeids}]
     TW.Clusters = {}
 
-    // sorting out properties in n.attributes
+    // sorting out properties in n.attributes ==> £TODO shared function up to classvalues_fin
     // --------------------------------------
 
     if(gotClusters) {
@@ -815,46 +835,23 @@ function dictfyGexf( gexf , categories ){
 // Level-00
 function scanJSON( data ) {
 
-    var categoriesDict={}, categories=[];
+    var categoriesDict={};
     var nodes = data.nodes;
 
     for(var i in nodes) {
         n = nodes[i];
-        if (i<10)  console.log(n)
         if(n.type) categoriesDict[n.type]=n.type;
+        if (i<10)  console.debug("scanJSON node:", n)
     }
 
-    for(var cat in categoriesDict)
-        categories.push(cat);
+    // console.warn("observed categoriesDict in scanJSON", categoriesDict)
 
+    // sorting observed json node types into Sem/Soc
+    result = sortNodeTypes(categoriesDict)
 
-    var catDict = {}
-    if(categories.length==0) {
-        categories[0]="Document";
-        catDict["Document"] = 0;
-    }
-    if(categories.length==1) {
-        catDict[categories[0]] = 0;
-    }
+    var catDict = result.reverse_dict
 
-    // £TODO here also should USE TW.catSem TW.catSoc
-    if(categories.length>1) {
-        var newcats = []
-        for(var i in categories) {
-            c = categories[i]
-            if(c.indexOf("term")==-1) {// NOT a term-category
-                newcats[0] = c;
-                catDict[c] = 0;
-            }
-            else {
-                newcats[1] = c; // IS a term-category
-                catDict[c] = 1;
-            }
-        }
-        categories = newcats;
-    }
-
-    return categories;
+    return result.cats_pair;
 }
 
 // Level-00
