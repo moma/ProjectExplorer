@@ -333,15 +333,39 @@ else {
     if (inData.clusters) TW.Clusters = inData.clusters
 
     // relations already copied in TW.Relations at this point
+    // £TODO also test with comex2 for bipart case
     // TW.nodes1 = dicts.n1;//not used
 
-    var catDict = dicts.catDict         // <= FIXME was already available at scanFile time...
-    console.log("CategoriesDict: ")
-    console.log(catDict)
+    // a posteriori categories diagnostic
+    // ----------------------------------
+    // by default TW.categories now match user-suggested catSoc/Sem if present
+    // so we just need to handle mismatches here (when user-suggested cats were absent)
+    if (TW.categories.length == 2) {
+      console.log("== 'bipartite' case ==")
+      if (TW.catSoc != TW.categories[0]) {
+        console.warn(`Observed social category "${TW.categories[0]}" overwrites user-suggested TW.catSoc ("${TW.catSoc}")`)
+        TW.catSoc = TW.categories[0]
+      }
+      if (TW.catSem != TW.categories[1]) {
+        console.warn(`Observed semantic category "${TW.categories[1]}" overwrites user-suggested TW.catSem "(${TW.catSem})"`)
+        TW.catSem = TW.categories[1]
+      }
+    }
+    else if (TW.categories.length == 1) {
+      console.log("== monopartite case ==")
+      // FIXME it would be more coherent with all tina usecases (like gargantext or tweetoscope) for the default category to by catSem instead of Soc
+      if (TW.catSoc != TW.categories[0]) {
+        console.warn(`Observed unique category "${TW.categories[0]}" overwrites user-suggested TW.catSoc ("${TW.catSoc}")`)
+        TW.catSoc = TW.categories[0]
+      }
+    }
+    else {
+      console.error("== currently unhandled categorization of node types ==", TW.categories)
+    }
 
-    TW.categoriesIndex = categories;//to_remove
-    TW.catSoc = categories[0];//to_remove
-    TW.catSem = (categories[1])?categories[1]:false;//to_remove
+    // FIXME generalize the use of these two TW.* variants instead of window-scoped 'categories' and 'catDict'
+    TW.categories = categories;
+    TW.categoriesIndex = catDict;
 
     for(var i in categories) {
         TW.Filters[i] = {}

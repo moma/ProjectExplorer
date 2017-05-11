@@ -467,7 +467,7 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
     $("#information").html(informationDIV);
     $("#tips").html("");
 
-    if(TW.categoriesIndex.length==1) getTopPapers("semantic");
+    if(TW.categories.length==1) getTopPapers("semantic");
     else getTopPapers(swclickActual);
 }
 

@@ -4,15 +4,23 @@
 
 // Level-01
 ParseCustom = function ( format , data ) {
-    this.data = data;
+
+    console.debug("ParseCustom init format, data", format, data)
+
+
+    if (format == 'gexf') {
+      this.data = $.parseXML(data)
+    }
+    else {
+      this.data = data
+    }
     this.format = format;
     this.nbCats = 0;
 
     // input = GEXFstring
-    this.getGEXFCategories = function(aGexfFile) {
-        this.data = $.parseXML(aGexfFile) // <===================== (XML parse)
+    this.getGEXFCategories = function() {
         return scanGexf( this.data );
-    }// output = [ "cat1" , "cat2" , ...]
+    }// output = {'cats':[ "cat1" , "cat2" , ...], 'rev': {cat1: 0, cat2: 1...}}
 
 
     // input = [ "cat1" , "cat2" , ...]
@@ -24,9 +32,8 @@ ParseCustom = function ( format , data ) {
 
     // input = JSONstring
     this.getJSONCategories = function(json) {
-        this.data = json;
         return scanJSON( this.data );
-    }// output = [ "cat1" , "cat2" , ...]
+    }// output = {'cats':[ "cat1" , "cat2" , ...], 'rev': {cat1: 0, cat2: 1...}}
 
 
     // input = [ "cat1" , "cat2" , ...]
@@ -199,13 +206,10 @@ function scanGexf(gexfContent) {
         }
     }
 
-    // console.warn("observed categoriesDict in scanGexf", categoriesDict)
-
+    // sorting observed json node types into Sem (=> 1)/Soc (=> 0)
     result = sortNodeTypes(categoriesDict)
 
-    // var catDict = result.reverse_dict
-
-    return result.cats_pair;
+    return result;
 }
 
 // sorting observed node types into Sem/Soc (factorized 11/05/2017)
@@ -216,8 +220,8 @@ function scanGexf(gexfContent) {
 //       (current expected structure in 'categories' can only accomodate 2 types
 //        and the way it and catDict are used is not entirely coherent throughout
 //        the project, cf. among others: - the effect on 'typestring'
-//                                       - the way catDict recreated in dictfy
-//                                       - the way default cat is handled...)
+//                                       - the effect on 'swclickActual'
+//                                       - the way default cat is handled as 0...)
 // -------------------
 // expected content: usually a just a few cats over all nodes
 // ex: terms
@@ -240,6 +244,8 @@ function sortNodeTypes(observedTypesDict) {
   }
   if(nTypes>1) {
       var newcats = []
+
+      // POSSible: allow more than 2 cats
       for(var i in observedTypes) {
           c = observedTypes[i]
           if(c == TW.catSoc || (c != TW.catSem && c.indexOf("term")==-1)) {// NOT a term-category
@@ -253,7 +259,7 @@ function sortNodeTypes(observedTypesDict) {
       }
       observedTypes = newcats;
   }
-  return {'cats_pair': observedTypes, 'reverse_dict': catDict}
+  return {'categories': observedTypes, 'reverse_dict': catDict}
 }
 
 // Level-00
@@ -841,17 +847,12 @@ function scanJSON( data ) {
     for(var i in nodes) {
         n = nodes[i];
         if(n.type) categoriesDict[n.type]=n.type;
-        if (i<10)  console.debug("scanJSON node:", n)
     }
 
-    // console.warn("observed categoriesDict in scanJSON", categoriesDict)
-
-    // sorting observed json node types into Sem/Soc
+    // sorting observed json node types into Sem (=> 1)/Soc (=> 0)
     result = sortNodeTypes(categoriesDict)
 
-    var catDict = result.reverse_dict
-
-    return result.cats_pair;
+    return result;
 }
 
 // Level-00
