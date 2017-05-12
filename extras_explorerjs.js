@@ -246,11 +246,6 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
     $("#legend_for_clusters").html("")
     if(daclass==null) return;
 
-    var LegendDiv = ""
-    LegendDiv += `    <div class="legend-title">Map Legend <small>(${daclass})</small></div>`
-    LegendDiv += '    <div class="legend-scale">'
-    LegendDiv += '      <ul class="legend-labels">'
-
     if (daclass=="clust_louvain")
         daclass = "louvain"
 
@@ -265,9 +260,14 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
 
     // passed as arg   or  prepared in parseCustom
     if (!groupedByTicks && (!TW.Clusters[curType] || !TW.Clusters[curType][daclass])) {
-      console.error('class not prepared ??', daclass)
+      console.warn(`no class bins for ${daclass}, displaying no legend`)
     }
     else {
+      var LegendDiv = ""
+      LegendDiv += `    <div class="legend-title">Map Legend <small>(${daclass})</small></div>`
+      LegendDiv += '    <div class="legend-scale">'
+      LegendDiv += '      <ul class="legend-labels">'
+
       var legendInfo = groupedByTicks || TW.Clusters[curType][daclass]
 
       // valueclasses (values or intervals or classes) are already sorted in TW.Clusters
@@ -291,14 +291,12 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
         LegendDiv += colorBg + preparedLabel
         LegendDiv += "</li>\n"
       }
+      LegendDiv += '      </ul>'
+      LegendDiv += '    </div>'
 
+      $("#legend_for_clusters").addClass( "my-legend" );
+      $("#legend_for_clusters").html( LegendDiv )
     }
-
-    LegendDiv += '      </ul>'
-    LegendDiv += '    </div>'
-
-    $("#legend_for_clusters").addClass( "my-legend" );
-    $("#legend_for_clusters").html( LegendDiv )
 }
 
 // = = = = = = = = = = = [ / Clusters Plugin ] = = = = = = = = = = = //
