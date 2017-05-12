@@ -261,6 +261,8 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
     // passed as arg   or  prepared in parseCustom
     if (!groupedByTicks && (!TW.Clusters[curType] || !TW.Clusters[curType][daclass])) {
       console.warn(`no class bins for ${daclass}, displaying no legend`)
+
+      $("#legend_for_clusters").hide()
     }
     else {
       var LegendDiv = ""
@@ -275,27 +277,31 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
 
         // get a sample node color for each bin/class
         var nMatchedNodes = legendInfo[l]['nids'].length
-        var midNid = legendInfo[l]['nids'][Math.floor(3*nMatchedNodes/4)]
-        var exampleColor = TW.partialGraph.graph.nodes(midNid).color
 
-        // create the legend item
-        var preparedLabel = legendInfo[l]['labl']
-        // console.log("preparedLabel", preparedLabel)
+        if (nMatchedNodes) {
+          var midNid = legendInfo[l]['nids'][Math.floor(3*nMatchedNodes/4)]
+          var exampleColor = TW.partialGraph.graph.nodes(midNid).color
 
-        // all-in-one argument for SomeEffect
-        var valueclassId = `${curType}::${daclass}::${l}`
+          // create the legend item
+          var preparedLabel = legendInfo[l]['labl']
+          // console.log("preparedLabel", preparedLabel)
 
-        var colorBg = `<span style="background:${exampleColor};"></span>`
+          // all-in-one argument for SomeEffect
+          var valueclassId = `${curType}::${daclass}::${l}`
 
-        LegendDiv += `<li onclick='SomeEffect("${valueclassId}")'>`
-        LegendDiv += colorBg + preparedLabel
-        LegendDiv += "</li>\n"
+          var colorBg = `<span style="background:${exampleColor};"></span>`
+
+          LegendDiv += `<li onclick='SomeEffect("${valueclassId}")'>`
+          LegendDiv += colorBg + preparedLabel
+          LegendDiv += "</li>\n"
+        }
       }
       LegendDiv += '      </ul>'
       LegendDiv += '    </div>'
 
       $("#legend_for_clusters").addClass( "my-legend" );
       $("#legend_for_clusters").html( LegendDiv )
+      $("#legend_for_clusters").show()
     }
 }
 

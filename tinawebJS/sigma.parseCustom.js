@@ -602,7 +602,9 @@ function dictfyGexf( gexf , categories ){
             newTick.labl = `${cat}||${at}||[${labLowThres} ; ${labHiThres}]`
 
             // save these bins as the cluster index (aka faceting)
-            TW.Clusters[cat][at].push(newTick)
+            if (newTick.nids.length) {
+              TW.Clusters[cat][at].push(newTick)
+            }
           }
         }
       }
