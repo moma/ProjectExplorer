@@ -687,7 +687,7 @@ function prepareNodesRenderingProperties(nodesDict) {
         }
       }
       // hex color ex "#eee or #AA00AA"
-      else if (/^#[A-Fa-f0-1]{3,6}$/.test(n.color)) {
+      else if (/^#[A-Fa-f0-9]{3,6}$/.test(n.color)) {
         rgba = hex2rgba(n.color)
         rgbStr = rgba.splice(0, 3).join(',');
       }
@@ -695,12 +695,23 @@ function prepareNodesRenderingProperties(nodesDict) {
         invalidFormat = true
       }
     }
+    else {
+      invalidFormat = true
+    }
+
+    if (!invalidFormat) {
+      n.color = `rgb(${rgbStr})`
+    }
+    else {
+      n.color = TW.defaultNodeColor
+      rgbStr = TW.defaultNodeColor.split(',').splice(0, 3).join(',');
+    }
 
     n.customAttrs = {
       grey: false,
       highlight: false,
       true_color : n.color,
-      defgrey_color : "rgba("+rgbStr+",.4)"
+      defgrey_color : "rgba("+rgbStr+",.5)"
     }
 
     // POSS n.type: distinguish rendtype and twtype

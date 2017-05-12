@@ -8,26 +8,19 @@ function SelectionEngine() {
         // console.log("addvalue, prevsels, currsels",addvalue, prevsels, currsels)
 
         var targeted = []
-        var buffer = Object.keys(prevsels).map(Number).sort(this.sortNumber);
+        var buffer = Object.keys(prevsels);
 
         // currsels = bunch of nodes from a click in the map
-        currsels = currsels.map(Number).sort(this.sortNumber);
         if(addvalue) {
+            // FOR SIMPLE ADD WITHOUT COMPLEMENT
             targeted = currsels.concat(buffer.filter(function (item) {
                 return currsels.indexOf(item) < 0;
             }));
         } else targeted = currsels;
 
-        targeted = targeted.map(Number)
-
-        // debug
-        // console.log("targeted::", targeted)
-
-        // NB new sigma: my REFA deprecated clicktype=="double"
         if(targeted.length==0) return [];
 
-        targeted = targeted.sort();
-
+        // ------------ FOR SETWISE COMPLEMENT ---------------------->8---------
         // if(buffer.length>0) {
         //     if(JSON.stringify(buffer)==JSON.stringify(targeted)) {
         //         // this is just effective for Add[ ] ...
@@ -51,16 +44,17 @@ function SelectionEngine() {
         //                 whitelist[n] = true;
         //             }
         //         }
-        //         targeted = Object.keys(whitelist).map(Number);
+        //         targeted = Object.keys(whitelist);
         //     } else {// inter = 0 ==> click in other portion of the graph (!= current selection)
         //         // Union!
         //         if(addvalue) {
-        //             targeted = targeted.concat(buffer.filter(function (item) {
-        //                 return targeted.indexOf(item) < 0;
+        //             targeted = currsels.concat(buffer.filter(function (item) {
+        //                 return currsels.indexOf(item) < 0;
         //             }));
         //         }
         //     }
         // }
+        // ---------------------------------------------------------->8---------
 
         return targeted;
     }).index();
@@ -125,6 +119,8 @@ function SelectionEngine() {
 
     //Util
     this.intersect_safe = function(a, b) {
+        a.sort()
+        b.sort()
         var ai=0, bi=0;
         var result = new Array();
 
@@ -181,10 +177,13 @@ function SelectionEngine() {
 
         selections = {}
 
+
+        // targeted arg 'nodes' can be nid array or single nid
         var ndsids=[]
         if(nodes) {
             if(! $.isArray(nodes)) ndsids.push(nodes);
             else ndsids=nodes;
+
             for(var i in ndsids) {
                 var s = ndsids[i];
 
@@ -261,7 +260,7 @@ function SelectionEngine() {
         // show the button to remove selection
         $("#unselectbutton").show() ;
 
-        var the_new_sels = Object.keys(selections).map(Number)
+        var the_new_sels = Object.keys(selections)
         TW.partialGraph.states.slice(-1)[0].selections = the_new_sels;
         TW.partialGraph.states.slice(-1)[0].setState( { sels: the_new_sels} )
 
@@ -279,11 +278,12 @@ function SelectionEngine() {
         });
         // console.log("Event [gotNodeSet] sent from Tinaweb MultipleSelection2")
 
-        // TODO REFA this used for bipartite case but needs testing with correct typestring case
+        // £TODO REFA this used for bipartite case but needs testing with correct typestring case
+        //
         if(TW.Relations["1|1"]) {
             for(var s in the_new_sels) {
                 var bipaNeighs = TW.Relations["1|1"][the_new_sels[s]];
-                for(var n in neighs) {
+                for(var n in bipaNeighs) {
                     if (typeof oppositeSideNeighbors[bipaNeighs[n]] == "undefined")
                         oppositeSideNeighbors[bipaNeighs[n]] = 0;
                     oppositeSideNeighbors[bipaNeighs[n]]++;
@@ -308,9 +308,9 @@ function SelectionEngine() {
             return b-a
         });
 
-        // console.debug('oppos', oppos)
-        // console.debug('same', same)
-        //
+        console.debug('selections', selections)
+        console.debug('oppos', oppos)
+        console.debug('same', same)
 
         overNodes=true;
 

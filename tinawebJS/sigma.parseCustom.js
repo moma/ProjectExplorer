@@ -899,7 +899,8 @@ function dictfyJSON( data , categories ) {
         node.y = (n.y)? n.y : Math.random();
         node.color = (n.color)? n.color : "#FFFFFF" ;
         if(n.shape) node.shape = n.shape;
-        if(n.attributes) node.attributes = n.attributes;
+        if(n.attributes) node.attributes = n.attributes
+        else             node.attributes = {}
         node.type = (n.type)? n.type : categories[0] ;
         // node.shape = "square";
 

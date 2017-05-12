@@ -553,8 +553,8 @@ SigmaUtils = function () {
 
 // (TODO REFA make them inside TW.- ns)
 
-// not often necessary + costly in mem because is a clone
-// => preferably use TW.partialGraph.graph.nodes(some_node_id) as accessor
+// getnodes => preferably use TW.partialGraph.graph.nodes(some_node_id) as accessor
+// (not often necessary + costly in mem because is a clone)
 function getnodes(){
     // new sigma.js
     return TW.partialGraph.graph.nodes();
@@ -610,10 +610,9 @@ function find(lquery){
 }
 
 function exactfind(label) {
-    nds=getnodes();
     if (typeof lquery == 'string' && lquery.length > 0) {
-        for(var i in nds){
-            n=nds[i];
+        for(var i in TW.nodeIds){
+            n=TW.partialGraph.graph.nodes(TW.nodeIds[i]);
             if(!n.hidden){
                 if (n.label==label) {
                     return n;

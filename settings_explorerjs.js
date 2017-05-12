@@ -44,7 +44,7 @@ var TW = {}
     //        *and* subdirectory to import if true
     // see also ProcessDivsFlags()
     TW.DivsFlags["histogramModule"] = false ;
-    TW.DivsFlags["histogramDailyVariantModule"] = true ;
+    TW.DivsFlags["histogramDailyVariantModule"] = false ;
     // TODO more generic module integrating the variants cf. experiments/histogramModule_STUB_GENERIQUE
     TW.DivsFlags["crowdsourcingModule"] = true ;
 
@@ -107,11 +107,12 @@ TW.filterSliders = false
 
 TW.histogramStartThreshold = 10 ;
 
+TW.defaultNodeColor = "rgb(40,40,40)"
 TW.edgeDefaultOpacity = 0.5  // opacity when true_color
 TW.edgeGreyColor = "rgba(150, 150, 150, 0.2)";
 TW.nodesGreyBorderColor = "rgba(100, 100, 100, 0.5)";
 TW.selectedColor = "node"  // "node" for a background like the node's color,
-                              // "default" for note-like yellow
+                           // "default" for note-like yellow
 
 TW.overSampling = true     // costly hi-def rendering (true => pixelRatio x 2)
 
