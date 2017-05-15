@@ -127,6 +127,12 @@ TW.customLegendsBins = {
   'age': 8,
   'growth_rate': 12
 }
+
+TW.debugFlags = {
+  initialShowAll: false,
+}
+
+
 // ============ < / DEVELOPER OPTIONS > ============
 
 

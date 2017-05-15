@@ -261,6 +261,11 @@ function SelectionEngine() {
         $("#unselectbutton").show() ;
 
         var the_new_sels = Object.keys(selections)
+
+        if (the_new_sels.length && the_new_sels[0] == 'NaN') {
+          console.error("NaN selection key error")
+        }
+
         TW.partialGraph.states.slice(-1)[0].selections = the_new_sels;
         TW.partialGraph.states.slice(-1)[0].setState( { sels: the_new_sels} )
 

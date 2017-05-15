@@ -14,7 +14,7 @@ SigmaUtils = function () {
             var n = nodes[i];
             // console.debug('tr >>> fgr node', n)
 
-            if(initialState[catDict[n.type]] || TW.anynodegoes) {
+            if(initialState[catDict[n.type]] || TW.debugFlags.initialShowAll) {
                 // var node = {
                 //     id : n.id,
                 //     label : n.label,

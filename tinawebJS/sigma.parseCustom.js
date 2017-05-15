@@ -902,6 +902,8 @@ function dictfyJSON( data , categories ) {
         if(n.attributes) node.attributes = n.attributes
         else             node.attributes = {}
         node.type = (n.type)? n.type : categories[0] ;
+
+        // £TODO REFA new sigma.js: shape is not attr but custom type linked to a renderer's name
         // node.shape = "square";
 
         // £TODO generalize some alternate names in here and maybe gexf
@@ -911,6 +913,7 @@ function dictfyJSON( data , categories ) {
 
         if (!catCount[node.type]) catCount[node.type] = 0
         catCount[node.type]++;
+
 
         nodes[node.id] = node;
     }

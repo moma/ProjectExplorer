@@ -31,7 +31,7 @@ function cancelSelection (fromTagCloud, settings) {
     }
 
     //Nodes colors go back to previous
-    for(let j=0;j<TW.nNodes;j++){
+    for(let j in TW.nodeIds){
       let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
       // console.log("cancelSelection: node", n)
       if (n) {
@@ -83,20 +83,24 @@ function cancelSelection (fromTagCloud, settings) {
     }
 }
 
-
+// returns the name(s) of active types
+// this area is quite underspecified so we assume here
+//   - that all typenames have a mapping to cat[0] (terms) or cat[1] (contexts)
+//   - that currentState.type is an array of 2 bools for the currently displayed cat(s)
+// TODO transform result into array in all cases
 function getCurrentType() {
-  let currentTypeName
+  let currentTypes = []
   let currentTypeIdx
-  let typeIdxs = Object.keys(TW.partialGraph.states.slice(-1)[0].type)
-  for (var m in typeIdxs) {
-    if (TW.partialGraph.states.slice(-1)[0].type[m]) {
-      currentTypeIdx = m
-      break
+  let lastState = TW.partialGraph.states.slice(-1)[0]
+
+  for (var possType in TW.catDict) {
+    currentTypeIdx = TW.catDict[possType]
+    if (lastState.type[currentTypeIdx]) {
+      currentTypes.push(possType)
     }
   }
 
-  currentTypeName = TW.categories[currentTypeIdx]
-  return currentTypeName
+  return currentTypes.join('-')
 }
 
 
@@ -581,7 +585,7 @@ function graphTagCloudElem(nodes) {
     TW.partialGraph.states[lastpos].setState({
         type: next_state,
         level: futurelevel,
-        sels: Object.keys(selections).map(Number),
+        sels: Object.keys(selections),
         oppos: []
     })
 
@@ -604,7 +608,7 @@ function unHide(nodeId) {
 //     renderer will see the flags and handle the case accordingly
 function greyEverything(){
 
-  for(var j=0 ; j<TW.nNodes ; j++){
+  for(var j in TW.nodeIds){
     let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
 
     if (n && !n.hidden) {
@@ -619,7 +623,7 @@ function greyEverything(){
   }
 
   if (TW.partialGraph.settings('drawEdges')) {
-    for(var i=0;i<TW.nEdges;i++){
+    for(var i in TW.edgeIds){
       let e = TW.partialGraph.graph.edges(TW.edgeIds[i])
       if (e && !e.hidden && !e.customAttrs.grey) {
         e.customAttrs.grey = 1
@@ -752,8 +756,10 @@ function prepareEdgesRenderingProperties(edgesDict, nodesDict) {
 // use case: slider, changeLevel re-add nodes
 function add1Elem(id) {
     id = ""+id;
+
     if(id.split(";").length==1) { // i've received a NODE
-        id = parseInt(id)
+
+        // if already exists
         if(!isUndef(TW.partialGraph.graph.nodes(id))) return;
 
         if(TW.Nodes[id]) {

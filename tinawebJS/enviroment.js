@@ -3,9 +3,6 @@
 // always useful
 var theHtml = document.getElementsByTagName('html')[0]
 
-TW.anynodegoes = true
-// TW.anynodegoes = true
-
 function writeBrand (brandString) {
   document.getElementById('twbrand').innerHTML = brandString
 }
@@ -24,6 +21,9 @@ function changeType() {
     var sels = present.selections
     var type_t0 = present.type;
     var str_type_t0 = type_t0.map(Number).join("|")
+
+
+    console.debug("CHANGE TYPE, present.selections", present.selections)
 
     var selsbackup = present.selections.slice();
 
@@ -167,8 +167,8 @@ function changeType() {
 
     if(sels.length>0) { // and if there's some selection:
 
-        console.log("active selection 01:")
-        console.log(sels)
+        // console.log("active selection 01:")
+        // console.log(sels)
 
         // Defining the new selection (if it's necessary)
         var sumCats = type_t0.map(Number).reduce(function(a, b){return a+b;})
@@ -202,12 +202,13 @@ function changeType() {
                 // else newsels[sels[i]]=true;
             }
 
-            sels = Object.keys(newsels).map(Number);
+            sels = Object.keys(newsels);
             // output: newsels=[opposite-neighs]
         } // [ / ChangeType: incremental selection ]
 
-        console.log("new virtually selected nodes:")
-        console.log(sels)
+        // console.log("new virtually selected nodes:")
+        // console.log(sels)
+
         var selDict={}
         for(var i in sels) // useful for case: (sumNextState==2)
             selDict[sels[i]]=true
@@ -233,7 +234,7 @@ function changeType() {
 
         if(sumNextState==2) { // we're moving to bipartite subgraph
             for(var i in TW.Edges) {
-                n = i.split(";").map(Number)
+                n = i.split(";")
                 if( selDict[ n[0] ] || selDict[ n[1] ]  ) {
                     nodes_2_colour[n[0]]=false;
                     nodes_2_colour[n[1]]=false;
@@ -252,6 +253,8 @@ function changeType() {
                 add1Elem(eid)
         }
 
+
+        // to recreate the selection in the new type graph
         var SelInst = new SelectionEngine();
         SelInst.MultipleSelection2({
                     nodesDict:nodes_2_colour,
@@ -270,12 +273,12 @@ function changeType() {
     TW.partialGraph.states[lastpos].setState({
         type: nextState,
         level: level,
-        sels: Object.keys(selections).map(Number),
+        sels: Object.keys(selections),
         oppos: []
     })
 
     // REFA new sigma.js
-    TW.partialGraph.camera.goTo({x:0, y:0, ratio:0.5, angle: 0})
+    TW.partialGraph.camera.goTo({x:0, y:0, ratio:1, angle: 0})
     TW.partialGraph.refresh()
 
     // recreates FA2 nodes array from new nodes
@@ -350,7 +353,7 @@ function changeLevel() {
                   edges_2_colour[s+";"+t]=true;
                   edges_2_colour[t+";"+s]=true;
                   if( !selections[t]  )
-                      voisinage[ Number(t) ] = true;
+                      voisinage[ t ] = true;
               }
           }
       }
@@ -425,7 +428,7 @@ function changeLevel() {
       TW.partialGraph.states[lastpos].setState({
           type: present.type,
           level: futurelevel,
-          sels: Object.keys(selections).map(Number),
+          sels: Object.keys(selections),
           oppos: []
       })
 
@@ -959,7 +962,7 @@ function AlgorithmForSliders( elements , type_attrb , type , criteria) {
         }
         if(IDs.length==0) break;
 
-        finalarray[i] = (edgeflag)? IDs : IDs.map(Number);
+        finalarray[i] = IDs
     }
     // console.log("finalarray: ")
     return {"steps":finalarray.length,"finalarray":finalarray}

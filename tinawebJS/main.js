@@ -502,16 +502,15 @@ else {
     });
     // ==================================================================
 
+    // NB the list of nodes and edges from TW.graphData will be changed
+    //    by changeLevel, changeType or subset sliders
+
     // shortcuts to the renderer and camera
     TW.cam  = TW.partialGraph.camera
     TW.rend = TW.partialGraph.renderers[0]
 
     // NB : camera positions are fix if the node is fixed => they only depend on layout
     //      renderer position depend on viewpoint/zoom (like ~ html absolute positions of the node in the div)
-
-    // use for loops
-    TW.nNodes = TW.partialGraph.graph.nodes().length
-    TW.nEdges = TW.partialGraph.graph.edges().length
 
 
     // POSS make it TW.states
@@ -536,7 +535,7 @@ else {
 
     TW.partialGraph.states[1].setState = (function( type , level , sels , oppos ) {
         var bistate=false, typestring=false;
-        console.log("IN THE SET STATE METHOD:")
+        console.log("IN THE SET STATE METHOD:", this)
         if(!isUndef(type)) {
             this.type = type;
             bistate= type.map(Number).reduce(function(a, b){return a+b;})
