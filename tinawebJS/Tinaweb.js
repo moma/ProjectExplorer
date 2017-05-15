@@ -544,7 +544,7 @@ TinaWebJS = function ( sigmacanvas ) {
             setTimeout(function(){
               $('.etabs a[href="#tabs1"]').trigger('click');
             },500)
-            ChangeGraphAppearanceByAtt(true)
+
             console.log(" ############  / changeTYPE click");
             console.log("")
         });
@@ -555,9 +555,6 @@ TinaWebJS = function ( sigmacanvas ) {
 
             changeLevel();
 
-            // FIXME intention unclear
-            // $("#tabs1").click()
-            // ChangeGraphAppearanceByAtt(true)  // cf. extras_explorer
             console.log(" ############  / changeLEVEL click");
             console.log("")
         });

@@ -63,16 +63,19 @@ function changeType() {
 
     var prevnodes = {}
     var prevedges = {}
-    for(var i in TW.partialGraph._core.graph.nodesIndex) {
-        anode = TW.partialGraph._core.graph.nodesIndex[i];
+
+    // for all possible nodes, which ones actually in the graph atm
+    for(var i in TW.nodeIds) {
+        anode = TW.partialGraph.graph.nodes(TW.nodeIds[i]);
         if(anode) {
             prevnodes[i] = true
         }
     }
 
     var links_sels = {}
-    for(var i in TW.partialGraph._core.graph.edgesIndex) {
-        anedge = TW.partialGraph._core.graph.edgesIndex[i];
+
+    for(var i in TW.edgeIds) {
+        anedge = TW.partialGraph.graph.edges(TW.edgeIds[i]);
         if(anedge) {
             prevedges[i] = true;
             if(anedge.customAttrs) {
@@ -93,10 +96,12 @@ function changeType() {
     if(present.level) { //If level=Global, fill all {X}-component
 
         for(var nid in TW.Nodes) {
-            if(type_t1[TW.catDict[TW.Nodes[nid].type]])
-                add1Elem(nid)
+            if(type_t1[TW.catDict[TW.Nodes[nid].type]]) {
+              add1Elem(nid)
+            }
         }
         for(var eid in TW.Edges) {
+
             if(TW.Edges[eid].categ==str_type_t1)
                 add1Elem(eid)
         }
@@ -269,7 +274,22 @@ function changeType() {
         oppos: []
     })
 
-    fa2enabled=true; TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8).draw();//.startForceAtlas2();
+    // REFA new sigma.js
+    TW.partialGraph.camera.goTo({x:0, y:0, ratio:0.5, angle: 0})
+    TW.partialGraph.refresh()
+
+    // recreates FA2 nodes array from new nodes
+    reInitFa2({
+      useSoftMethod: false,
+      callback: function() {
+        // when going local, it's nice to see the selected nodes rearrange
+        TW.partialGraph.startForceAtlas2();
+        setTimeout(function(){
+            TW.partialGraph.stopForceAtlas2();
+          },
+        fa2milliseconds)
+      }
+    })
 }
 
 

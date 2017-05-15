@@ -546,17 +546,17 @@ else {
         if(!isUndef(sels)) this.selections = sels;
         if(!isUndef(oppos)) this.opposites = oppos;
         this.LouvainFait = false;
-        console.log("")
-        console.log(" % % % % % % % % % % ")
-        console.log("setState type: ", type);
-        console.log("bistate: "+bistate)
-        console.log("level: "+level);
-        console.log("selections: ");
-        console.log(sels)
-        console.log("selections len: ");
-        console.log(sels.length)
-        console.log("opposites: ");
-        console.log(oppos)
+        // console.log("")
+        // console.log(" % % % % % % % % % % ")
+        // console.log("setState type: ", type);
+        // console.log("bistate: "+bistate)
+        // console.log("level: "+level);
+        // console.log("selections: ");
+        // console.log(sels)
+        // console.log("selections len: ");
+        // console.log(sels.length)
+        // console.log("opposites: ");
+        // console.log(oppos)
 
         var present = TW.partialGraph.states.slice(-1)[0]; // Last
         var past = TW.partialGraph.states.slice(-2)[0] // avant Last
@@ -704,7 +704,8 @@ else {
     }
 
 
-    // TEST new strategy: TW.Clusters were prepared in parseCustom
+    // should prepare the colors/clusters menu once and for all
+    // (previously, needed to be called after changeType/changeLevel)
     changeGraphAppearanceByFacets(true)
 
     // set the default legend
