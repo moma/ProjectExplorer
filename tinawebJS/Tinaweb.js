@@ -822,6 +822,20 @@ TinaWebJS = function ( sigmacanvas ) {
           }
         });
 
+        $("#noverlapButton").click(function () {
+          if(! TW.partialGraph.isNoverlapRunning()) {
+              // show waiting cursor on page and button
+              theHtml.classList.add('waiting');
+              $("#noverlapButton").css('cursor', 'wait')
+              var listener = TW.partialGraph.startNoverlap();
+              listener.bind('stop', function(event) {
+                theHtml.classList.remove('waiting');
+                $("#noverlapButton").css('cursor', 'auto')
+              });
+
+              return;
+          }
+        });
 
         $("#edges-switch").click(function () {
             sigma_utils.toggleEdges()

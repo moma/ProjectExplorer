@@ -374,6 +374,13 @@
               </li>
 
               <li>
+                  <a href="#" id="noverlapButton" class="zoombarbuttons"
+                     title="Disperse Overlapping Nodes">
+                    <img src="libs/img2/disperse.png" style="width:36px">
+                  </a>
+              </li>
+
+              <li>
                 <div class="onoffswitch">
                   <input type="checkbox" name="edges-switch" class="onoffswitch-checkbox" id="edges-switch" checked>
                   <label class="onoffswitch-label" for="edges-switch">
@@ -617,6 +624,8 @@
       the v1.2 stock sigma.(min).js but with a much lighter RAM footprint!
       cf. https://github.com/jacomyal/sigma.js/issues/340
   -->
+  <script src="tinawebJS/sigma_v1.2/plugins/sigma.plugins.animate/sigma.plugins.animate.js"></script>
+  <script src="tinawebJS/sigma_v1.2/plugins/sigma.layout.noverlap/sigma.layout.noverlap.js"></script>
   <script src="tinawebJS/sigma_v1.2/plugins/sigma.layout.forceAtlas2/supervisor.js"></script>
   <script src="tinawebJS/sigma_v1.2/plugins/sigma.layout.forceAtlas2/worker.js"></script>
   <script src="tinawebJS/sigma_v1.2/plugins/sigma.renderers.snapshot/sigma.renderers.snapshot.js"></script>

@@ -677,6 +677,19 @@ else {
     // init FA2 for any future forceAtlas2 calls
     TW.partialGraph.configForceAtlas2(TW.FA2Params)
 
+
+    // init noverlap for any future calls
+    TW.partialGraph.configNoverlap({
+      nodeMargin: .3,
+      scaleNodes: 1.2,
+      gridSize: 400,
+      speed: 5,
+      maxIterations: 10,
+      easing: 'quadraticOut', // animation transition function
+      duration: 1500   // animation duration
+                       // NB animation happens *after* processing
+    });
+
     // REFA new sigma.js
     TW.partialGraph.camera.goTo({x:0, y:0, ratio:0.5, angle: 0})
 
@@ -685,9 +698,11 @@ else {
     // run fa2 if settings_explorerjs.fa2enabled == true
     if (fa2enabled) {
       TW.partialGraph.startForceAtlas2();
-      $.doTimeout(parseInt(fa2milliseconds) || 5000, function(){
+      setTimeout(function(){
           TW.partialGraph.stopForceAtlas2();
-      });
+      },
+      parseInt(fa2milliseconds) || 5000
+      );
     }
 
     if( TW.categories.length==1 ) {
