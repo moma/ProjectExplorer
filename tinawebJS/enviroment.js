@@ -764,7 +764,7 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
     }
 
     // ids per weight level
-    // £TODO make this into a type_attrb index (eg weight index) instead of recalculating each time
+    // £TODO should now use live index TW.partialGraph.graph.getNodesBySize()
     var filterparams = AlgorithmForSliders ( TW.Nodes , type , type_attrb , criteria)
     // console.log("NodeWeightFilter: "+type)
     // console.log(filterparams)

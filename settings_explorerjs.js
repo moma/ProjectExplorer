@@ -1,6 +1,9 @@
 'use strict;'
 
 var TW = {}
+
+    // POSSIBLE: group like TW.settings ?
+
     TW.geomap = false;
     TW.colorByAtt = false;
     TW.twittertimeline = false;
@@ -61,7 +64,6 @@ var TW = {}
 var ParseCustom = function () {};
 var SigmaUtils = function () {};
 var TinaWebJS = function () {};
-
 
 
 
@@ -132,6 +134,9 @@ TW.debugFlags = {
   initialShowAll: false,
 }
 
+// triggers overriding sigma.canvas renderers: nodes.def, labels.def, edges.def
+TW.ourRendering = true ;
+
 
 // ============ < / DEVELOPER OPTIONS > ============
 
@@ -156,9 +161,7 @@ var sigmaJsDrawingProperties = {
     nodeBorderColor: "default",  // vs. node
 
     // for custom TW node renderer with borders
-    // (if twNodeRendBorder, triggers overriding sigma.canvas.nodes.def)
-    twNodeRendBorder: true,
-    twNodeRendBorderSize: 1,   // (for all normal nodes, iff twNodeRendBorder)
+    twNodeRendBorderSize: 1,   // (for all normal nodes, iff TW.nodeRendBorder)
     twNodeRendBorderColor: "#222",
     // twNodeRendBorderColor: "#eee",
 

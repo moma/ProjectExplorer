@@ -336,7 +336,128 @@ TinaWebJS = function ( sigmacanvas ) {
     this.sigmacanvas = sigmacanvas;
 
     this.init = function () {
-        console.log("hola mundo")
+
+        console.warn("TW settings", TW)
+        let initErrMsg = null
+
+        if (typeof sigma == 'undefined') {
+          initErrMsg = "no sigma library"
+        }
+        else {
+          this.prepareSigmaCustomIndices(sigma)
+
+          if (TW.ourRendering)
+            this.prepareSigmaCustomRenderers(sigma)
+        }
+
+        if (initErrMsg) {
+          console.error(initErrMsg)
+        }
+    }
+
+    this.prepareSigmaCustomIndices = function(sigmaModule) {
+      // register direct access methods for nNodes nEdges
+      sigmaModule.classes.graph.addMethod('nNodes', function() {
+        return this.nodesArray.length;
+      });
+      sigmaModule.classes.graph.addMethod('nEdges', function() {
+        return this.edgesArray.length;
+      });
+
+      // register an index for nodes by size (<= origNode.size||origiNode.weight)
+      sigmaModule.classes.graph.addIndex('nodesBySize', {
+        constructor: function() {
+          this.nodesBySize = {};
+        },
+        addNode: function(n) {
+          if (n.size) {
+            let sizekey = parseFloat(n.size)
+            if (!this.nodesBySize[sizekey])
+              this.nodesBySize[sizekey] = {}
+            this.nodesBySize[sizekey][n.id] = true
+          }
+        },
+        dropNode: function(n) {
+          if (n.size) {
+            delete(this.nodesBySize[n.size][n.id])
+          }
+        }
+      });
+
+      // @aSizeSelector can be:
+      //  - a numeric value
+      //  - a range (ordered array of 2 numeric values)
+      sigmaModule.classes.graph.addMethod('getNodesBySize', function(aSizeSelector) {
+        let res = []
+
+        // shortcut case for commodity: entire index if no arg
+        if (isUndef(aSizeSelector)) {
+          res = this.nodesBySize
+        }
+
+        // normal cases
+        else if (isNumeric(aSizeSelector)) {
+          let sizekey = parseFloat(aSizeSelector)
+          if (this.nodesBySize[sizekey]) {
+            res = Object.keys(this.nodesBySize[sizekey])
+          }
+        }
+        else if (Array.isArray(aSizeSelector)
+                 && aSizeSelector.length == 2
+                 && isNumeric(aSizeSelector[0])
+                 && isNumeric(aSizeSelector[1])
+               ) {
+          let sizeMin = parseFloat(aSizeSelector[0])
+          let sizeMax = parseFloat(aSizeSelector[1])
+
+          // the available sizes
+          let sortedSizes = Object.keys(this.nodesBySize).sort(function(a,b){return a-b})
+
+          // the nodes with sizes in range
+          for (var k in sortedSizes) {
+            let val = sortedSizes[k]
+            if (val > sizeMax) {
+              break
+            }
+            if (val >= sizeMin) {
+              res = res.concat(Object.keys(this.nodesBySize[val]))
+            }
+          }
+        }
+        return res;
+      });
+    }
+
+
+    // register our renderers in sigma module
+    this.prepareSigmaCustomRenderers = function(sigmaModule) {
+
+      // £TODO group the rendering primitives it all together
+      //       and perhaps move here where the preparation occurs
+      var tempo = new SigmaUtils();
+
+
+      // custom nodes rendering
+      // overriding the def is simplest
+      // (could also do it by type)
+      sigmaModule.canvas.nodes.def = tempo.twRender.canvas.nodes.withBorders
+
+      // custom edges rendering registered under 'curve'
+      sigmaModule.canvas.edges.curve = tempo.twRender.canvas.edges.curve
+      sigmaModule.canvas.edges.line = tempo.twRender.canvas.edges.line
+
+      // custom labels rendering
+      //  - based on the normal one sigma.canvas.labels.def
+      //  - additionnaly supports 'active/forcelabel' node property (magnify x 3)
+      sigmaModule.canvas.labels.def = tempo.twRender.canvas.labels.largeractive
+
+      // custom hovers rendering
+      //  - based on the normal one sigma.canvas.hovers.def
+      //  - additionnaly magnifies all labels x 2
+      //  - additionnaly supports 'active/forcelabel' node property (magnify x 3)
+      sigmaModule.canvas.hovers.def = tempo.twRender.canvas.hovers.largerall
+
+      console.log('tw renderers registered in sigma module"')
     }
 
     this.SearchListeners = function () {

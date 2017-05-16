@@ -18,6 +18,10 @@ function compareNumbers(a, b) {
     return a - b;
 }
 
+function isNumeric(a) {
+    return parseFloat(a) == a ;
+}
+
 //python range(a,b) | range(a)
 function calc_range(begin, end) {
   if (typeof end === "undefined") {

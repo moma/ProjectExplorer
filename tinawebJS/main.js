@@ -374,7 +374,12 @@ else {
     }
 
     // [ Initiating Sigma-Canvas ]
+
+    // POSS: ideally this should take a TW.settings as parameter
     var twjs_ = new TinaWebJS('#sigma-contnr');
+
+    // add our tw rendering and index customizations into sigma module
+    twjs_.init()
 
     // overriding pixelRatio is possible if we need very high definition
     if (TW.overSampling) {
@@ -463,28 +468,6 @@ else {
     )
 
     console.info("sigma settings", customSettings)
-
-    // custom nodes rendering
-    if (customSettings['twNodeRendBorder']) {
-      // overriding the def is simplest
-      // (could also do it by type)
-      sigma.canvas.nodes.def = sigma_utils.twRender.canvas.nodes.withBorders
-    }
-
-    // custom edges rendering registered under 'curve'
-    sigma.canvas.edges.curve = sigma_utils.twRender.canvas.edges.curve
-    sigma.canvas.edges.line = sigma_utils.twRender.canvas.edges.line
-
-    // custom labels rendering
-    //  - based on the normal one sigma.canvas.labels.def
-    //  - additionnaly supports 'active/forcelabel' node property (magnify x 3)
-    sigma.canvas.labels.def = sigma_utils.twRender.canvas.labels.largeractive
-
-    // custom hovers rendering
-    //  - based on the normal one sigma.canvas.hovers.def
-    //  - additionnaly magnifies all labels x 2
-    //  - additionnaly supports 'active/forcelabel' node property (magnify x 3)
-    sigma.canvas.hovers.def = sigma_utils.twRender.canvas.hovers.largerall
 
 
     // ==================================================================
