@@ -22,6 +22,11 @@ function isNumeric(a) {
     return parseFloat(a) == a ;
 }
 
+// seconds since page load
+function tstamp() {
+    return parseInt(performance.now()) ;
+}
+
 //python range(a,b) | range(a)
 function calc_range(begin, end) {
   if (typeof end === "undefined") {

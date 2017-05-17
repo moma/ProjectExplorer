@@ -219,7 +219,7 @@ SigmaUtils = function () {
         // active edges look well with no opacity
         color = `rgb(${baseRGB})`
 
-        // edge.customAttrs.activeEdge = false // for one-time
+        // console.debug(`t=${tstamp()} curve render activeedge: ${edgeInfos(edge)})`)
       }
       else if (edge.customAttrs.grey) {
         color = TW.edgeGreyColor
@@ -690,6 +690,11 @@ function getArrSubkeys(arr,id) {
         result.push(arr[i][id])
     }
     return result;
+}
+
+// for logs
+function edgeInfos(anEdge) {
+    return `${anEdge.id} (${TW.Nodes[anEdge.source].label} -> ${TW.Nodes[anEdge.target].label})` ;
 }
 
 
