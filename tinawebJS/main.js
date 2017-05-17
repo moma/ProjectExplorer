@@ -326,6 +326,8 @@ else {
 
     TW.Nodes = dicts.nodes;
     TW.Edges = dicts.edges;
+
+    //£TODO not complete for edgeIds in bipartite case !!
     TW.nodeIds = Object.keys(dicts.nodes)  // useful for loops
     TW.edgeIds = Object.keys(dicts.edges)
 
@@ -506,7 +508,7 @@ else {
 
     // by default category0 is the initial type
     $(".category1").hide();
-
+    
     // [ / Poblating the Sigma-Graph ]
 
 
@@ -682,6 +684,10 @@ else {
               document.querySelector('.etabs a[href="#tabs2"]').click()
           }, 500);
         // }
+    }
+    // for elements hidden by default (cf. css) but useful in bipartite case
+    else {
+      $("#taboppos").css('display', 'inline-block');
     }
 
 

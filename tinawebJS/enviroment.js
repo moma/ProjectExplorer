@@ -285,12 +285,11 @@ function changeType() {
     reInitFa2({
       useSoftMethod: false,
       callback: function() {
-        // when going local, it's nice to see the selected nodes rearrange
         TW.partialGraph.startForceAtlas2();
         setTimeout(function(){
             TW.partialGraph.stopForceAtlas2();
           },
-        fa2milliseconds)
+        fa2milliseconds ? parseInt(fa2milliseconds/2) : 2000)
       }
     })
 }

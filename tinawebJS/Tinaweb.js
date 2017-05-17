@@ -283,11 +283,11 @@ function SelectionEngine() {
         });
         // console.log("Event [gotNodeSet] sent from Tinaweb MultipleSelection2")
 
-        // £TODO REFA this used for bipartite case but needs testing with correct typestring case
-        //
+        // neighbors of the opposite type
         if(TW.Relations["1|1"]) {
             for(var s in the_new_sels) {
                 var bipaNeighs = TW.Relations["1|1"][the_new_sels[s]];
+
                 for(var n in bipaNeighs) {
                     if (typeof oppositeSideNeighbors[bipaNeighs[n]] == "undefined")
                         oppositeSideNeighbors[bipaNeighs[n]] = 0;

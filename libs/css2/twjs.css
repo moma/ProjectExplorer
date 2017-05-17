@@ -158,22 +158,15 @@ html, body {
     box-shadow: 0px 2px 6px #000;
 }
 
-#opossitesBox{
-    display: none;
-    margin: 7px;
-    padding: 10px;
-    border-style:solid;
-    background-color:white;
-    margin: 7px;
-    border: 1px solid #666;
-    -moz-border-radius: 3px;
-    -webkit-border-radius: 3px;
-    -border-radius: 3px;
-    -moz-box-shadow: 0px 2px 6px #000;
-    -webkit-box-shadow: 0px 2px 6px #000;
-    box-shadow: 0px 2px 6px #000;
+#oppositesBox{
+  margin: 0;
+  padding: 0;
 }
 
+/* contains oppositesBox */
+#taboppos{
+  display: none;      /* initial display off but turned on if bipartite */
+}
 
 .tagcloud-item{
     display:inline-block;

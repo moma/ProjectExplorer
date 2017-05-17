@@ -171,7 +171,7 @@ var sigmaJsDrawingProperties = {
     fontStyle: "bold",
 };
 var sigmaJsGraphProperties = {
-    minEdgeSize: 1,
+    minEdgeSize: 2,
     maxEdgeSize: 4
 };
 var sigmaJsMouseProperties = {
@@ -207,13 +207,12 @@ var swMacro=true;
 var socsemFlag=false;
 var constantNGramFilter;
 
+
 var lastFilter = []
     lastFilter["#slidercat0nodesweight"] = {"orig":"-" , "last":"-"}
     lastFilter["#slidercat1nodesweight"] =  {"orig":"-" , "last":"-"}
     lastFilter["#slidercat0edgesweight"] =  {"orig":"-" , "last":"-"}
     lastFilter["#slidercat1edgesweight"] =  {"orig":"-" , "last":"-"}
-
-TW.Filters = {}
 
 
 //

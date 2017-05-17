@@ -435,6 +435,7 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
     var namesDIV=''
     var alterNodesDIV=''
     var informationDIV=''
+    var sameNodesDIV = '';
 
     // var alternodesname=getNodeLabels(opos)
 
@@ -443,16 +444,15 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
     namesDIV += '</h4></div>';
 
     if(oppos.length>0) {
-	    alterNodesDIV+='<div id="opossitesBox">';//tagcloud
-	    alterNodesDIV+= htmlfied_alternodes( oppos ).join("\n")
-	    alterNodesDIV+= '</div>';
-	}
+      alterNodesDIV+='<div id="oppositesBox">';//tagcloud
+      alterNodesDIV+= htmlfied_alternodes( oppos ).join("\n")
+      alterNodesDIV+= '</div>';
+    }
 
-    var sameNodesDIV = "";
     if(getNodeIDs(sels).length>0) {
         sameNodesDIV+='<div id="sameNodes">';//tagcloud
-        var tagcloud_opposite_neigh = htmlfied_tagcloud( same , TW.tagcloud_limit)
-        sameNodesDIV+= (tagcloud_opposite_neigh!=false) ? tagcloud_opposite_neigh.join("\n")  : "No related terms.";
+        var sameNeighTagcloudHtml = htmlfied_tagcloud( same , TW.tagcloud_limit)
+        sameNodesDIV+= (sameNeighTagcloudHtml!=false) ? sameNeighTagcloudHtml.join("\n")  : "No related items.";
         sameNodesDIV+= '</div>';
     }
 
@@ -471,7 +471,7 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
     $("#lefttopbox").show();
     $("#names").html(namesDIV).readmore({maxHeight:100});
     $("#tab-container").show();
-    $("#opossiteNodes").html(alterNodesDIV).readmore({maxHeight:200});
+    $("#oppositeNodes").html(alterNodesDIV).readmore({maxHeight:200});
     $("#sameNodes").html(sameNodesDIV).readmore({maxHeight:200});
     $("#information").html(informationDIV);
     $("#tips").html("");
@@ -499,12 +499,12 @@ function LevelButtonDisable( TF ){
 	$('#changelevel').prop('disabled', TF);
 }
 
-//Fixed! apres: refactor!
+// handler for clicking on a related or opposite node
+//  - provokes changeLevel to macro
+//  - if opposite node: provokes changeType
 function graphTagCloudElem(nodes) {
     console.log("in graphTagCloudElem, nodae_id: "+nodes);
     cancelSelection();
-    TW.partialGraph.graph.clear();
-
 
     var ndsids=[]
     if(! $.isArray(nodes)) ndsids.push(nodes);
@@ -512,98 +512,96 @@ function graphTagCloudElem(nodes) {
 
     var vars = []
 
-    node_id = ndsids[0]
-
-    var catDict = TW.partialGraph.states.slice(-1)[0].categoriesDict;
-    var type = TW.Nodes[node_id].type;
+    var catDict = TW.catDict;
+    var type = TW.Nodes[ndsids[0]].type;
     var next_state = [];
     for(var c in catDict)
         next_state.push( c==type )
     var str_nextstate = next_state.map(Number).join("|")
 
-
-    var present = TW.partialGraph.states.slice(-1)[0]; // Last
-    var level = present.level;
-    var sels = [node_id];//[144, 384, 543]//TW.partialGraph.states.selections;Last
-    var lastpos = TW.partialGraph.states.length-1;
-    var avantlastpos = lastpos-1;
-
+    // £TODO fix low-level selectionlogic duplicate with MultipleSelection2 function 1/2
     // Dictionaries of: selection+neighbors
     var nodes_2_colour = {}
     var edges_2_colour = {}
     var voisinage = {}
-    for(var i in sels) {
-        s = sels[i];
-        neigh = TW.Relations[str_nextstate][s]
+    for(var i in ndsids) {
+        let nid = ndsids[i];
+        let neigh = TW.Relations[str_nextstate][nid]
         if(neigh) {
             for(var j in neigh) {
                 t = neigh[j]
-                nodes_2_colour[t]=false;
-                edges_2_colour[s+";"+t]=true;
+
+                // FIXME deprecated should use customAttrs.highlight = true;
+                // nodes_2_colour[t]=false;
+
+                edges_2_colour[nid+";"+t]=true;
                 edges_2_colour[t+";"+s]=true;
                 if( !selections[t]  )
                     voisinage[ Number(t) ] = true;
             }
         }
-    }
-    for(var i in sels)
-        nodes_2_colour[sels[i]]=true;
-
-
-    for(var nid in nodes_2_colour)
-        add1Elem(nid)
-    for(var eid in edges_2_colour)
-        add1Elem(eid)
-
-
-
-    // Adding intra-neighbors edges O(voisinage²)
-    voisinage = Object.keys(voisinage)
-    for(var i=0;i<voisinage.length;i++) {
-        for(var j=1;j<voisinage.length;j++) {
-            if( voisinage[i]!=voisinage[j] ) {
-                // console.log( "\t" + voisinage[i] + " vs " + voisinage[j] )
-                add1Elem( voisinage[i]+";"+voisinage[j] )
-            }
-
-        }
+        // we make the selected (source) node active too
+        nodes_2_colour[ndsids[i]]=true;
     }
 
-    futurelevel = false;
+    // old strategy recreated a graph with the selected and its neighbors:
+    //  we know do it only if type is different
+    if (str_nextstate != getCurrentTypeString()) {
+      TW.partialGraph.graph.clear();
+      for(var nid in nodes_2_colour)
+          add1Elem(nid)
+      for(var eid in edges_2_colour)
+          add1Elem(eid)
 
+      // Adding intra-neighbors edges O(voisinage²)
+      voisinage = Object.keys(voisinage)
+      for(var i=0;i<voisinage.length;i++) {
+          for(var j=1;j<voisinage.length;j++) {
+              if( voisinage[i]!=voisinage[j] ) {
+                  // console.log( "\t" + voisinage[i] + " vs " + voisinage[j] )
+                  add1Elem( voisinage[i]+";"+voisinage[j] )
+              }
+          }
+      }
+    }
 
     // Nodes Selection now:
-    if(sels.length>0) {
+    // £TODO fix low-level selectionlogic duplicate with MultipleSelection2 function 2/2
+    if(ndsids.length>0) {
         var SelInst = new SelectionEngine();
         SelInst.MultipleSelection2({
                     nodesDict:nodes_2_colour,
                     edgesDict:edges_2_colour
                 });
-        overNodes=true;
+        overNodes=true;  // deprecated
     }
 
+    var present = TW.partialGraph.states.slice(-1)[0]; // Last
+    var level = present.level;
+    var lastpos = TW.partialGraph.states.length-1;
+
+    // like pushing down in a lifo state present becomes state penultimate
+    // £TODO setState should be doing this shifting
+    var avantlastpos = lastpos-1;
     TW.partialGraph.states[avantlastpos] = {};
-    TW.partialGraph.states[avantlastpos].level = present.level;
     TW.partialGraph.states[avantlastpos].selections = present.selections;
+    TW.partialGraph.states[avantlastpos].level = present.level;
     TW.partialGraph.states[avantlastpos].type = present.type;
     TW.partialGraph.states[avantlastpos].opposites = present.opposites;
-    TW.partialGraph.states[avantlastpos].categories = present.categories;//to_del
-    TW.partialGraph.states[avantlastpos].categoriesDict = present.categoriesDict;//to_del
 
-
+    // recording the new state
     TW.partialGraph.states[lastpos].setState({
         type: next_state,
-        level: futurelevel,
+        level: false,  // forced macro
         sels: Object.keys(selections),
         oppos: []
     })
 
-    TW.partialGraph.states[lastpos].categories = present.categories;//to_del
-    TW.partialGraph.states[lastpos].categoriesDict = catDict;//to_del
+    TW.partialGraph.refresh({skipIndexation:true});
 
-    fa2enabled=true; TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8).draw().startForceAtlas2();
-
-    ChangeGraphAppearanceByAtt(true)
+    // fa2enabled=true; TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8).draw().startForceAtlas2();
+    //
+    // ChangeGraphAppearanceByAtt(true)
 }
 
 

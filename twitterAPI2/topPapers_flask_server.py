@@ -34,7 +34,8 @@ TAPI = twitter.Api(consumer_key=credentials['consumer_key'],
 print("logged in to twitter as ***%s***" % TAPI.VerifyCredentials().screen_name)
 
 # query context: constant for one app
-QCONTEXT = "(Fillon OR Macron OR JLM2017 OR Mélenchon OR #Marine2017 OR @MLP_officiel OR Hamon OR Presidentielle2017)"
+# QCONTEXT = "(Fillon OR Macron OR JLM2017 OR Mélenchon OR #Marine2017 OR @MLP_officiel OR Hamon OR Presidentielle2017)"
+QCONTEXT = ""
 
 @app.route('/twitter_search')
 def searcher():
