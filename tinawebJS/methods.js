@@ -106,6 +106,12 @@ function getCurrentType() {
   return currentTypes.join('-')
 }
 
+function getCurrentTypeString() {
+  let lastState = TW.partialGraph.states.slice(-1)[0]
+
+  return lastState.type.map(Number).join('|')
+}
+
 
 function highlightSelectedNodes(flag){
     console.log("\t***methods.js:highlightSelectedNodes(flag)"+flag+" selEmpty:"+is_empty(selections))
@@ -201,8 +207,8 @@ function RefreshState(newNOW){
             $("#semLoader").hide();
             $("#category-B").show();
             setTimeout(function(){
-              EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
-              NodeWeightFilter ( "#sliderBNodeWeight"  , "NGram", "type" , "size");
+              EdgeWeightFilter("#sliderBEdgeWeight", "0|1", "weight");
+              NodeWeightFilter ( "#sliderBNodeWeight" , "NGram", "size");
             },30)
         } else {
             $("#semLoader").css('visibility', 'visible');

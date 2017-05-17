@@ -461,68 +461,66 @@ function changeLevel() {
 
 
 //=========================== < FILTERS-SLIDERS > ===========================//
+
+// census of edges by type and by size
+// (replaces deprecated AlgorithmForSliders, but without the sqrt transform)
+function edgeSizesLookup() {
+  var edgeweis = {}
+
+  for (let i in TW.edgeIds) {
+    let e = TW.partialGraph.graph.edges(TW.edgeIds[i])
+    if (e) {
+      if (!edgeweis[e.categ])           edgeweis[e.categ] = {}
+      if (!edgeweis[e.categ][e.weight]) edgeweis[e.categ][e.weight] = []
+
+      edgeweis[e.categ][e.weight].push(e.id)
+    }
+  }
+  return edgeweis
+}
+
+function edgeSizesSteps(eTypeStr) {
+  let esizesCensus = edgeSizesLookup()
+  var stepToIdsArray = []
+
+
+  if (esizesCensus[eTypeStr]) {
+    var sortedSizes = Object.keys(
+                        esizesCensus[eTypeStr]
+                      ).sort(function(a,b){return a-b})
+
+    for (let l in sortedSizes) {
+      stepToIdsArray.push(esizesCensus[eTypeStr][sortedSizes[l]])
+    }
+  }
+
+  return stepToIdsArray
+}
+
+
 //    Execution modes:
-//	EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
-//	EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
+//	EdgeWeightFilter("#sliderAEdgeWeight", "1",   "weight");
+//	EdgeWeightFilter("#sliderAEdgeWeight", "1|0", "weight");
+//	EdgeWeightFilter("#sliderBEdgeWeight", "0|1", "weight");
 
 // NB new sigma js: dropEdge is quite slow so we add a waiting cursor
 
-function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
-  console.log("EdgeWeightFilter")
-  console.log("sliderDivID", sliderDivID)
-  console.log("type_attrb", type_attrb)
-  console.log("type", type)
-  console.log("criteria", criteria)
-  // if ($(sliderDivID).html()!="") {
-	// 	console.log("\t\t\t\t\t\t[[ algorithm not applied "+sliderDivID+" ]]")
-	// 	return;
-	// }
-
-	// sliderDivID = "#sliderAEdgeWeight"
-	// type = "nodes1"
-	// type_attrb = "label"
-	// criteria = "weight"
-
-	// sliderDivID = "#sliderBNodeSize"
-	// type = "NGram"
-	// type_attrb = "type"
-	// criteria = "size"
-
-    if(TW.nEdges<3) {
-        $(sliderDivID).freshslider({
-            range: true,
-            step:1,
-            value:[10, 60],
-            enabled: false,
-            onchange:function(low, high){
-                console.log(low, high);
-            }
-        });
+function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
+    if(TW.partialGraph.graph.nEdges()<2) {
+        console.warn('not enough edges for subsets: skipping GUI slider init')
+        showDisabledSlider(sliderDivID)
         return;
     }
 
-    var filterparams = AlgorithmForSliders ( TW.Edges , type_attrb , type , criteria) //OK
 
-    // TODO make an index
-    console.log("EdgeWeightFilter: "+type)
-    console.log(filterparams)
+    var stepToIdsArr = edgeSizesSteps(typestr)
+    var steps = stepToIdsArr.length
 
-
-    var steps = filterparams["steps"]
-
-    var finalarray = filterparams["finalarray"]
-    // if(steps<3) {
-    //     $(sliderDivID).freshslider({
-    //         range: true,
-    //         step:1,
-    //         value:[10, 60],
-    //         enabled: false,
-    //         onchange:function(low, high){
-    //             console.log(low, high);
-    //         }
-    //     });
-    //     return;
-    // }
+    if(steps<2) {
+        console.warn('no size steps for edges: skipping GUI slider init')
+        showDisabledSlider(sliderDivID)
+        return;
+    }
 
 
     var lastvalue=("0-"+(steps-1));
@@ -531,17 +529,21 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
     var present = TW.partialGraph.states.slice(-1)[0];
 
-    console.log('init freshslider for edges, steps:', steps)
-
+    // console.log('init freshslider for edges, steps:', steps, sliderDivID)
 
     var edgeSlideTimeout = null
+
+    if (steps == 0) {
+      return
+    }
 
     //finished
     $(sliderDivID).freshslider({
         range: true,
         step: 1,
         min:0,
-        bgcolor: (type=="nodes1")?"#27c470":"#FFA500" ,
+        // green for docs, orange for terms
+        bgcolor: (typestr=="1|0" || typestr=="1")?"#27c470":"#FFA500" ,
         max:steps-1,
         value:[0,steps-1],
         onchange:function(low, high) {
@@ -564,7 +566,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
                 if(filtervalue!=lastFilter[sliderDivID]["last"]) {
 
-                  // TODO memoize the last filter value
+                  // £TODO better memoize the last filter value
                   // $.doTimeout(sliderDivID+"_"+lastFilter[sliderDivID]["last"]);
 
 
@@ -611,11 +613,11 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
                   // do the important stuff
                   // ex iterarr [0:0, 1:1...]
-                  // ex finalarray [0: [eid1,eid2], 1:[eid3,eid4,eid5]...]
+                  // ex stepToIdsArr [0: [eid1,eid2], 1:[eid3,eid4,eid5]...]
                   for( var c in iterarr ) {
 
                       var i = iterarr[c];
-                      var eids = finalarray[i]
+                      var eids = stepToIdsArr[i]
 
                       if(i>=low && i<=high) {
                           if(addflag) {
@@ -635,7 +637,7 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
 
                                   // local level case
-                                  // finalarray is full of edges that don't really exist at this point
+                                  // stepToIdsArr is full of edges that don't really exist at this point
                                   else {
 
                                     // NB we assume the sigma convention eid = "nid1;nid2"
@@ -696,16 +698,18 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
                   // console.log("\t\tedgesfilter:")
                   // console.log("\t\t[ Starting FA2 ]")
                   // [ Starting FA2 ]
-
-                  if (!TW.partialGraph.isForceAtlas2Running())
-                      TW.partialGraph.startForceAtlas2();
-                  setTimeout(function(){
-                      if (TW.partialGraph.isForceAtlas2Running())
-                          TW.partialGraph.stopForceAtlas2();
-                  },
-                  3000);
-
-                  // [ / Starting FA2 ]
+                  setTimeout(function() {
+                    if (!TW.partialGraph.isForceAtlas2Running()
+                        && TW.partialGraph.graph.nNodes() > 8) {
+                          TW.partialGraph.startForceAtlas2();
+                          setTimeout(function(){
+                            if (TW.partialGraph.isForceAtlas2Running())
+                              TW.partialGraph.stopForceAtlas2();
+                            },
+                            2000) // shorter FA2 sufficient
+                    }
+                  }, 10)
+                // [ / Starting FA2 ]
 
                   lastvalue = filtervalue;
                   pushFilterValue( sliderDivID , filtervalue )
@@ -729,64 +733,40 @@ function EdgeWeightFilter(sliderDivID , type_attrb , type ,  criteria) {
 
 
 //   Execution modes:
-// NodeWeightFilter ( "#sliderANodeWeight" ,  "Document" , "type" , "size")
-// NodeWeightFilter ( "#sliderBNodeWeight" ,  "NGram" , "type" , "size")
-function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  criteria) {
+// NodeWeightFilter ( "#sliderANodeWeight" , "Document"  , "size")
+// NodeWeightFilter ( "#sliderBNodeWeight" ,  "NGram"   , "size")
+function NodeWeightFilter( sliderDivID , tgtNodeType ,  criteria) {
 
-	// if ($(sliderDivID).html()!="") {
-	// 	console.log("\t\t\t\t\t\t[[ algorithm not applied "+sliderDivID+" ]]")
-	// 	return;
-	// }
-
-	// sliderDivID = "#sliderAEdgeWeight"
-	// type = "nodes1"
-	// type_attrb = "label"
-	// criteria = "weight"
-
-	// sliderDivID = "#sliderBNodeSize"
-	// type = "NGram"
-	// type_attrb = "type"
-	// criteria = "size"
-
-    if(TW.partialGraph.graph.nNodes() < 3) {
-
-        $(sliderDivID).freshslider({
-            range: true,
-            step:1,
-            value:[10, 60],
-            enabled: false,
-            onchange:function(low, high){
-                console.log(low, high);
-            }
-        });
-
-        return;
+    if(TW.partialGraph.graph.nNodes() < 2) {
+      console.warn('not enough nodes for subsets: skipping GUI slider init')
+      showDisabledSlider(sliderDivID)
+      return;
     }
 
     // ids per weight level
     // we use live index from prepareSigmaCustomIndices
-    let nodesBySize = TW.partialGraph.graph.getNodesBySize()
+    let nodesBySize = TW.partialGraph.graph.getNodesBySize(tgtNodeType)
     var sortedSizes = Object.keys(nodesBySize).sort(function(a,b){return a-b})
 
-    var steps = sortedSizes.length
-    var finalarray = []
+    var stepToIdsArr = []
+
     for (let l in sortedSizes) {
-      finalarray.push(TW.partialGraph.graph.getNodesBySize(sortedSizes[l]))
+
+      var nidsWithThatSize = TW.partialGraph.graph.getNodesBySize(tgtNodeType, sortedSizes[l])
+
+      if (nidsWithThatSize.length) {
+        stepToIdsArr.push(nidsWithThatSize)
+      }
     }
+
+    var steps = stepToIdsArr.length
 
     // console.warn('NodeWeightFilter: steps', steps)
 
-    if(steps<3) {
-        $(sliderDivID).freshslider({
-            range: true,
-            step:1,
-            value:[10, 60],
-            enabled: false,
-            onchange:function(low, high){
-                console.log(low, high);
-            }
-        });
-        return;
+    if(steps<2) {
+      console.warn('no size steps for nodes: skipping GUI slider init')
+      showDisabledSlider(sliderDivID)
+      return;
     }
 
     var nodeSlideTimeout = null
@@ -797,7 +777,7 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
         step: 1,
         min:0,
         max:steps-1,
-        bgcolor:( type_attrb==categories[0] )?"#27c470":"#FFA500" ,
+        bgcolor:( tgtNodeType==TW.categories[0] )?"#27c470":"#FFA500" ,
         value:[0,steps-1],
         onchange:function(low, high){
             var filtervalue = low+"-"+high
@@ -822,8 +802,8 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
                 // scheduled: graph rm nodes
                 nodeSlideTimeout = setTimeout ( function () {
 
-                    for(var i in finalarray) {
-                        ids = finalarray[i]
+                    for(var i in stepToIdsArr) {
+                        ids = stepToIdsArr[i]
                         if(i>=low && i<=high){
                             for(var id in ids) {
                                 ID = ids[id]
@@ -846,15 +826,18 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
 
                     // [ Starting FA2 ]
                     setTimeout(function() {
-                      if (!TW.partialGraph.isForceAtlas2Running())
-                          TW.partialGraph.startForceAtlas2()
-                      // duration = settings_explorerjs.fa2milliseconds
-                      setTimeout(function() {
-                        if (TW.partialGraph.isForceAtlas2Running())
-                            TW.partialGraph.stopForceAtlas2()
-                      }, parseInt(fa2milliseconds) || 5000)
+                      if (!TW.partialGraph.isForceAtlas2Running()
+                          && TW.partialGraph.graph.nNodes() > 8) {
+                            TW.partialGraph.startForceAtlas2();
+                            setTimeout(function(){
+                              if (TW.partialGraph.isForceAtlas2Running())
+                                TW.partialGraph.stopForceAtlas2();
+                              },
+                              2000) // shorter FA2 sufficient
+                      }
                     }, 10)
-                    // [ / Starting FA2 ]
+                  // [ / Starting FA2 ]
+
                 }, 300)
             }
 
@@ -862,113 +845,18 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
     });
 }
 
-// new sigma.js nodesIndex and edgesIndex are private attributes so we use getters
-function getGraphElement(elemId) {
-    if(elemId.split(";").length==1) return TW.partialGraph.graph.nodes(elemId);
-    else return TW.partialGraph.graph.edges(elemId)
+function showDisabledSlider(someDivId) {
+  $(someDivId).freshslider({
+      range: true,
+      step:1,
+      min: 0,
+      max: 1,
+      value:[0, 1],
+      enabled: false
+  });
+  $(someDivId).css('cursor', 'not-allowed')
 }
 
-
-// creates graph subsets
-// ---------------------
-// TODO use a   type-based      index for elems subset
-// TODO use a size/weight-based index for elem_attrb
-//  4 Execution modes:
-// AlgorithmForSliders ( TW.partialGraph._core.graph.edges , "label" , "nodes1" , "weight")
-// AlgorithmForSliders ( TW.partialGraph._core.graph.edges , "label" , "nodes2" , "weight")
-// AlgorithmForSliders ( TW.partialGraph._core.graph.nodes , "type" ,  "Document" ,  "size")
-// AlgorithmForSliders ( TW.partialGraph._core.graph.nodes , "type" ,  "NGram" ,  "size")
-function AlgorithmForSliders( elements , type_attrb , type , criteria) {
-	// //  ( 1 )
-    // // get visible sigma nodes|edges
-    if(isUndef(elements)) return {"steps":0 , "finalarray":[]};
-
-    var elems = [];
-
-    for(var e in elements) {
-        if( elements[e][type_attrb]==type ) {
-            if(getGraphElement(e)) {
-                elems.push(elements[e])
-            }
-        }
-    }
-    if(elems.length==0)
-        return { "steps":0 , "finalarray":[] };
-
-    // identifying if you received nodes or edges
-    var edgeflag = (elems[0].id.split(";").length>1);
-
-    console.log("AlgorithmForSliders edgeflag", edgeflag)
-    // //  ( 2 )
-    // // extract [ "edgeID" : edgeWEIGHT ] | [ "nodeID" : nodeSIZE ]
-    // // and save this into edges_weight | nodes_size
-    var elem_attrb=[]
-    for (var i in elems) {
-        e = elems[i]
-        id = e.id
-        elem_attrb[id]=e[criteria]
-        // console.log(id+"\t:\t"+e[criteria])
-    }
-    // console.log("{ id : size|weight } ")
-    // console.log(elem_attrb)
-
-    // //  ( 3 )
-    // // order dict edges_weight by edge weight | nodes_size by node size
-    var result = ArraySortByValue(elem_attrb, function(a,b){
-        return a-b
-        //ASCENDENT
-    });
-    // console.log(result.length)
-    // // ( 4 )
-    // // printing ordered ASC by weigth
-    // for (var i in result) {
-    //     r = result[i]
-    //     idid = r.key
-    //     elemattrb = r.value
-    //     console.log(idid+"\t:\t"+elemattrb)
-    //     // e = result[i]
-    //     // console.log(e[criteria])
-    // }
-    var N = result.length
-    // var magnitude = (""+N).length //order of magnitude of edges|nodes
-    // var exponent = magnitude - 1
-    // var steps = Math.pow(10,exponent) //    #(10 ^ magnit-1) steps
-    // var stepsize = Math.round(N/steps)// ~~(visibledges / #steps)
-
-
-    //var roundsqrtN = Math.round( Math.sqrt( N ) );
-    var steps =  Math.round( Math.sqrt( N ) );
-    var stepsize = Math.round( N / steps );
-
-    // console.log("-----------------------------------")
-    // console.log("number of visible nodes|edges: "+N);
-
-    // console.log("number of steps : "+steps)
-    // console.log("size of one step : "+stepsize)
-    // console.log("-----------------------------------")
-
-
-    var finalarray = []
-    var counter=0
-    for(var i = 0; i < steps*2; i++) {
-        // console.log(i)
-        var IDs = []
-        for(var j = 0; j < stepsize; j++)  {
-            if(!isUndef(result[counter])) {
-                k = result[counter].key
-                // w = result[counter].value
-                // console.log("\t["+counter+"] : "+w)
-                IDs.push(k)
-            }
-            counter++;
-        }
-        if(IDs.length==0) break;
-
-        finalarray[i] = IDs
-    }
-    // console.log("finalarray: ")
-    return {"steps":finalarray.length,"finalarray":finalarray}
-}
 //=========================== </ FILTERS-SLIDERS > ===========================//
 
 

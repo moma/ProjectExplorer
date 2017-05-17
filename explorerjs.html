@@ -184,9 +184,8 @@
             </a></li>
 
             <li><a>
-              <!-- TODO fix: category0 -> category1 switching -->
               Label size<br>
-              <div id="slidercat0nodessize" class="settingslider"></div>
+              <div id="sliderlabelsize" class="settingslider"></div>
             </a></li>
 
              <li class="dropdown">
@@ -205,10 +204,8 @@
             </li>
             -->
 
-            <!-- TODO fix: category0 -> category1 switching -->
-            <li class="weight-selectors">
-              <!-- <a> -->
-              <!-- Create a subgraph -->
+            <li class="weight-selectors category0">
+              <!-- Create a subgraph over nodes from TW.categories[0] (docs or def nodes)-->
               <table>
                 <tr>
                   <td class="slider-legend">
@@ -226,7 +223,8 @@
                 </tr>
               </table>
             </li>
-            <!-- <li class="weight-selectors">
+            <li class="weight-selectors category1">
+              <!-- Create a subgraph over nodes from TW.categories[1] (terms)-->
               <table>
                 <tr class="weight-selector">
                   <td class="slider-legend">
@@ -243,7 +241,7 @@
                   </td>
                 </tr>
               </table>
-            </li> -->
+            </li>
 
           </ul>
 

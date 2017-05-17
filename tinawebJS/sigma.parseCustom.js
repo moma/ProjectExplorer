@@ -948,7 +948,7 @@ function dictfyJSON( data , categories ) {
 
           let typestring = findEdgeType(nodes, source, target)
 
-          // save edge property
+          // save edge "type" in categ property
           edge.categ = typestring
           TW.Relations = updateRelations( TW.Relations,
                                           typestring,

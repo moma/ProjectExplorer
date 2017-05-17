@@ -364,42 +364,45 @@ TinaWebJS = function ( sigmacanvas ) {
         return this.edgesArray.length;
       });
 
-      // register an index for nodes by size (<= origNode.size||origiNode.weight)
+      // register an index for nodes by type and size (<= origNode.size||origNode.weight)
       sigmaModule.classes.graph.addIndex('nodesBySize', {
         constructor: function() {
           this.nodesBySize = {};
         },
         addNode: function(n) {
-          if (n.size) {
+          if (n.type && n.size) {
             let sizekey = parseFloat(n.size)
-            if (!this.nodesBySize[sizekey])
-              this.nodesBySize[sizekey] = {}
-            this.nodesBySize[sizekey][n.id] = true
+            if (!this.nodesBySize[n.type])
+              this.nodesBySize[n.type] = {}
+            if (!this.nodesBySize[n.type][sizekey])
+              this.nodesBySize[n.type][sizekey] = {}
+            this.nodesBySize[n.type][sizekey][n.id] = true
           }
         },
         dropNode: function(n) {
-          if (n.size) {
-            delete(this.nodesBySize[n.size][n.id])
+          if (n.type && n.size) {
+            delete(this.nodesBySize[n.type][n.size][n.id])
           }
         }
       });
 
+      // @ntype: a node type from TW.categories
       // @aSizeSelector can be:
       //  - a numeric value
       //  - a range (ordered array of 2 numeric values)
-      sigmaModule.classes.graph.addMethod('getNodesBySize', function(aSizeSelector) {
+      sigmaModule.classes.graph.addMethod('getNodesBySize', function(ntype, aSizeSelector) {
         let res = []
 
         // shortcut case for commodity: entire index if no arg
         if (isUndef(aSizeSelector)) {
-          res = this.nodesBySize
+          res = this.nodesBySize[ntype]
         }
 
         // normal cases
         else if (isNumeric(aSizeSelector)) {
           let sizekey = parseFloat(aSizeSelector)
-          if (this.nodesBySize[sizekey]) {
-            res = Object.keys(this.nodesBySize[sizekey])
+          if (this.nodesBySize[ntype][sizekey]) {
+            res = Object.keys(this.nodesBySize[ntype][sizekey])
           }
         }
         else if (Array.isArray(aSizeSelector)
@@ -411,7 +414,7 @@ TinaWebJS = function ( sigmacanvas ) {
           let sizeMax = parseFloat(aSizeSelector[1])
 
           // the available sizes
-          let sortedSizes = Object.keys(this.nodesBySize).sort(function(a,b){return a-b})
+          let sortedSizes = Object.keys(this.nodesBySize[ntype]).sort(function(a,b){return a-b})
 
           // the nodes with sizes in range
           for (var k in sortedSizes) {
@@ -420,7 +423,7 @@ TinaWebJS = function ( sigmacanvas ) {
               break
             }
             if (val >= sizeMin) {
-              res = res.concat(Object.keys(this.nodesBySize[val]))
+              res = res.concat(Object.keys(this.nodesBySize[ntype][val]))
             }
           }
         }
@@ -457,7 +460,7 @@ TinaWebJS = function ( sigmacanvas ) {
       //  - additionnaly supports 'active/forcelabel' node property (magnify x 3)
       sigmaModule.canvas.hovers.def = tempo.twRender.canvas.hovers.largerall
 
-      console.log('tw renderers registered in sigma module"')
+      console.log('tw renderers registered in sigma module')
     }
 
     this.SearchListeners = function () {
@@ -725,6 +728,8 @@ TinaWebJS = function ( sigmacanvas ) {
             }
         });
 
+
+        // £TODO test if still needed
         pushSWClick("social");
 
         cancelSelection(false);
@@ -965,18 +970,25 @@ TinaWebJS = function ( sigmacanvas ) {
 
         if (TW.filterSliders) {
 
-          NodeWeightFilter ( categories , "#slidercat0nodesweight" ,  categories[0],  "type" ,"size");
+          // args: for display: target div ,
+          //       for context: family/type prop value,
+          //       for values:  the property to filter
+          NodeWeightFilter ( "#slidercat0nodesweight" ,
+                                categories[0] ,
+                               "size"
+                             );
 
-          EdgeWeightFilter("#slidercat0edgesweight", "label" , "nodes1", "weight");
-
+          EdgeWeightFilter("#slidercat0edgesweight",
+                            getCurrentTypeString(),
+                            "weight"
+                          );
         }
-
 
           $("#category1").hide();
 
           //finished
           var labelSizeTimeout = null
-          $("#slidercat0nodessize").freshslider({
+          $("#sliderlabelsize").freshslider({
               step:.5,
               min:0,
               max:5,

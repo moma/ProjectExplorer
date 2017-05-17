@@ -368,11 +368,6 @@ else {
       console.error("== currently unhandled categorization of node types ==", TW.categories)
     }
 
-    for(var i in TW.categories) {
-        TW.Filters[i] = {}
-        TW.Filters[i]["#slidercat"+i+"edgesweight"] = true;
-    }
-
     // [ Initiating Sigma-Canvas ]
 
     // POSS: ideally this should take a TW.settings as parameter
@@ -508,6 +503,10 @@ else {
     // here 'type' means: the categorie(s) that is (are) currently displayed
     TW.partialGraph.states[1].type = initialState;
     TW.partialGraph.states[1].LouvainFait = false;
+
+    // by default category0 is the initial type
+    $(".category1").hide();
+
     // [ / Poblating the Sigma-Graph ]
 
 
@@ -570,51 +569,38 @@ else {
 
 
         if (TW.filterSliders) {
-          // £TODO test with comex2
+
+          // recreate sliders after perimeter changes
+          // £TODO fix conditions (was if #slider.html == '' or if level changed)
+          //       atm on any state change
+
+          // terms
           if(typestring=="0|1") {
-              $("#category0").hide();
-              $("#category1").show();
-
-              if($("#slidercat1nodesweight").html()=="")
-                  NodeWeightFilter( this.categories , "#slidercat1nodesweight" ,  this.categories[1],  "type" ,"size");
-
-              if($("#slidercat1edgesweight").html()=="")
-                  EdgeWeightFilter("#slidercat1edgesweight", "label" , "nodes2", "weight");
+              $(".category0").hide();
+              $(".category1").show();
 
 
-              if(present.level!=past.level) {
-                  NodeWeightFilter( this.categories , "#slidercat1nodesweight" ,  this.categories[1],  "type" ,"size");
-                  EdgeWeightFilter("#slidercat1edgesweight", "label" , "nodes2", "weight");
-              }
-              set_ClustersLegend ( "clust_default" )
+              NodeWeightFilter( "#slidercat1nodesweight" ,  TW.categories[1], "size");
+              EdgeWeightFilter("#slidercat1edgesweight", typestring, "weight");
           }
 
+          // docs
           if(typestring=="1|0") {
-              $("#category0").show();
-              $("#category1").hide();
+              $(".category0").show();
+              $(".category1").hide();
 
-              if($("#slidercat0nodesweight").html()=="")
-                  NodeWeightFilter( this.categories , "#slidercat0nodesweight" ,  this.categories[0],  "type" ,"size");
-
-              if($("#slidercat0edgesweight").html()=="")
-                  EdgeWeightFilter("#slidercat0edgesweight", "label" , "nodes1", "weight");
-
-              if(present.level!=past.level) {
-                  NodeWeightFilter( this.categories , "#slidercat0nodesweight" ,  this.categories[0],  "type" ,"size");
-                  EdgeWeightFilter("#slidercat0edgesweight", "label" , "nodes1", "weight");
-              }
-              set_ClustersLegend ( "clust_default" )
+              NodeWeightFilter( "#slidercat0nodesweight" ,  TW.categories[0], "size");
+              EdgeWeightFilter("#slidercat0edgesweight", typestring, "weight");
           }
 
+          // terms and docs
           if(typestring=="1|1") {
-              $("#category0").show();
-              $("#category1").show();
-              // if(present.level!=past.level) {
-              NodeWeightFilter ( this.categories , "#slidercat0nodesweight" ,  this.categories[0],  "type" ,"size");
-              EdgeWeightFilter("#slidercat0edgesweight", "label" , "nodes1", "weight");
-              NodeWeightFilter( this.categories , "#slidercat1nodesweight" ,  this.categories[1],  "type" ,"size");
-              EdgeWeightFilter("#slidercat1edgesweight", "label" , "nodes2", "weight");
-              // }
+              $(".category0").show();
+              $(".category1").show();
+              NodeWeightFilter( "#slidercat0nodesweight" ,  TW.categories[0], "size");
+              NodeWeightFilter( "#slidercat1nodesweight" ,  TW.categories[1], "size");
+              EdgeWeightFilter("#slidercat0edgesweight", "1|0", "weight");
+              EdgeWeightFilter("#slidercat1edgesweight", "0|1", "weight");
           }
         }
 
@@ -628,10 +614,6 @@ else {
       for (var k in filterEls) {
         if (filterEls[k] && filterEls[k].style) filterEls[k].style.display="none"
       }
-      // document.getElementById('slidercat0nodesweight').style.display="none"
-      // document.getElementById('slidercat0edgesweight').style.display="none"
-      // document.getElementById('slidercat1nodesweight').style.display="none"
-      // document.getElementById('slidercat1edgesweight').style.display="none"
     }
 
     TW.FA2Params = {
@@ -688,6 +670,8 @@ else {
       );
     }
 
+
+    // adapt the enviroment to monopartite vs. bipartite cases
     if( TW.categories.length==1 ) {
         $("#changetype").hide();
         $("#taboppos").remove();
