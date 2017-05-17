@@ -105,7 +105,7 @@ var semanticConverged=false;
 TW.branding = 'test bipart'
 TW.nodeClusAtt = "modularity_class"
 
-TW.filterSliders = false
+TW.filterSliders = true
 
 TW.histogramStartThreshold = 10 ;
 

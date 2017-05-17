@@ -748,7 +748,7 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
 	// type_attrb = "type"
 	// criteria = "size"
 
-    if(TW.nNodes < 3) {
+    if(TW.partialGraph.graph.nNodes() < 3) {
 
         $(sliderDivID).freshslider({
             range: true,
@@ -764,13 +764,15 @@ function NodeWeightFilter( categories ,  sliderDivID , type_attrb , type ,  crit
     }
 
     // ids per weight level
-    // £TODO should now use live index TW.partialGraph.graph.getNodesBySize()
-    var filterparams = AlgorithmForSliders ( TW.Nodes , type , type_attrb , criteria)
-    // console.log("NodeWeightFilter: "+type)
-    // console.log(filterparams)
+    // we use live index from prepareSigmaCustomIndices
+    let nodesBySize = TW.partialGraph.graph.getNodesBySize()
+    var sortedSizes = Object.keys(nodesBySize).sort(function(a,b){return a-b})
 
-    var steps = filterparams["steps"]
-    var finalarray = filterparams["finalarray"]
+    var steps = sortedSizes.length
+    var finalarray = []
+    for (let l in sortedSizes) {
+      finalarray.push(TW.partialGraph.graph.getNodesBySize(sortedSizes[l]))
+    }
 
     // console.warn('NodeWeightFilter: steps', steps)
 
