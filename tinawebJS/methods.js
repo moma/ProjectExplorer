@@ -19,13 +19,16 @@ function cancelSelection (fromTagCloud, settings) {
 
     //Edges colors go back to normal
     if (TW.partialGraph.settings('drawEdges')) {
-      for(let i=0;i<TW.nEdges;i++){
+      for(let i in TW.edgeIds){
         let e = TW.partialGraph.graph.edges(TW.edgeIds[i])
         // console.log("cancelSelection: edge", e)
         if (e) {
           e.color = e.customAttrs['true_color'];
           e.customAttrs.grey = 0;
-          e.customAttrs.activeEdge = 0;
+
+          if (e.customAttrs.activeEdge) {
+            e.customAttrs.activeEdge = 0;
+          }
         }
       }
     }
