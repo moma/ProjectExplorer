@@ -81,6 +81,7 @@ function jsActionOnGexfSelector(gexfBasename , db_json){
 // show the custom name of the app
 writeBrand(TW.branding)
 
+console.log("Starting TWJS")
 
 //  === [   what to do at start ] === //
 // --------------------- choosing the input ------------------------------------
@@ -570,11 +571,11 @@ else {
         console.log("printing the typestring:", typestring)
 
 
-        if (TW.filterSliders) {
+        if (TW.filterSliders
+            && (present.level != past.level
+                || present.type.map(Number).join("|") != past.type.map(Number).join("|"))) {
 
-          // recreate sliders after perimeter changes
-          // £TODO fix conditions (was if #slider.html == '' or if level changed)
-          //       atm on any state change
+          // recreate sliders after type, level changes
 
           // terms
           if(typestring=="0|1") {
@@ -621,15 +622,15 @@ else {
     TW.FA2Params = {
       // adapting speed -------------
       slowDown: 1.5,
-      startingIterations: 5,
-      iterationsPerRender: 3,
+      startingIterations: 2,             // keep it an even number to reduce visible oscillations at rendering
+      iterationsPerRender: 4,            // idem
       barnesHutOptimize: false,
       // barnesHutTheta: .5,
 
       // global behavior -----------
       linLogMode: true,
-      edgeWeightInfluence: .5,
-      gravity: 1,
+      edgeWeightInfluence: .3,
+      gravity: .8,
       strongGravityMode: false,
       scalingRatio: 1,
 
@@ -647,8 +648,8 @@ else {
 
     // init noverlap for any future calls
     TW.partialGraph.configNoverlap({
-      nodeMargin: .3,
-      scaleNodes: 1.2,
+      nodeMargin: .4,
+      scaleNodes: 1.5,
       gridSize: 400,
       speed: 5,
       maxIterations: 10,
@@ -658,9 +659,12 @@ else {
     });
 
     // REFA new sigma.js
-    TW.partialGraph.camera.goTo({x:0, y:0, ratio:0.5, angle: 0})
+    TW.partialGraph.camera.goTo({x:0, y:0, ratio:0.9, angle: 0})
 
     twjs_.initListeners(TW.categories , TW.partialGraph);
+
+    // mostly json data are extracts provided by DB apis => no positions
+    if (inFormat == "json")  fa2enabled = true
 
     // run fa2 if settings_explorerjs.fa2enabled == true
     if (fa2enabled) {

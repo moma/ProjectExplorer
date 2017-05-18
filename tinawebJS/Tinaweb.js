@@ -989,7 +989,7 @@ TinaWebJS = function ( sigmacanvas ) {
           //finished
           var labelSizeTimeout = null
           $("#sliderlabelsize").freshslider({
-              step:.5,
+              step:.25,
               min:0,
               max:5,
               value: TW.partialGraph.settings('labelSizeRatio'),

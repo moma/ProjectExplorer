@@ -722,7 +722,7 @@ function prepareNodesRenderingProperties(nodesDict) {
       grey: false,
       highlight: false,
       true_color : n.color,
-      defgrey_color : "rgba("+rgbStr+",.5)"
+      defgrey_color : "rgba("+rgbStr+",.35)"
     }
 
     // POSS n.type: distinguish rendtype and twtype

@@ -49,7 +49,7 @@ var TW = {}
     TW.DivsFlags["histogramModule"] = false ;
     TW.DivsFlags["histogramDailyVariantModule"] = false ;
     // TODO more generic module integrating the variants cf. experiments/histogramModule_STUB_GENERIQUE
-    TW.DivsFlags["crowdsourcingModule"] = true ;
+    TW.DivsFlags["crowdsourcingModule"] = false ;
 
     TW.SystemStates = {}
     TW.SystemStates.level = true;
@@ -110,10 +110,10 @@ TW.filterSliders = true
 TW.histogramStartThreshold = 10 ;
 
 TW.defaultNodeColor = "rgb(40,40,40)"
-TW.edgeDefaultOpacity = 0.5  // opacity when true_color
-TW.edgeGreyColor = "rgba(150, 150, 150, 0.2)";
+TW.edgeDefaultOpacity = 0.4  // opacity when true_color
+TW.edgeGreyColor = "rgba(150, 150, 150, 0.5)";
 TW.nodesGreyBorderColor = "rgba(100, 100, 100, 0.5)";
-TW.selectedColor = "node"  // "node" for a background like the node's color,
+TW.selectedColor = "default"  // "node" for a background like the node's color,
                            // "default" for note-like yellow
 
 TW.overSampling = true     // costly hi-def rendering (true => pixelRatio x 2)
@@ -146,7 +146,7 @@ TW.ourRendering = true ;
 var sigmaJsDrawingProperties = {
     defaultLabelColor: 'black',
     defaultLabelSize: 30, // in fact usually overridden by node data...
-    labelSizeRatio: 1.5,   // ...but this ratio allows truly adjusting the sizes
+    labelSizeRatio: 1,   // ...but this ratio allows truly adjusting the sizes
 
     labelThreshold: 5,
     defaultEdgeType: 'curve',  // 'curve' or 'line'
@@ -171,8 +171,8 @@ var sigmaJsDrawingProperties = {
     fontStyle: "bold",
 };
 var sigmaJsGraphProperties = {
-    minEdgeSize: 2,
-    maxEdgeSize: 4
+    minEdgeSize: 3,
+    // maxEdgeSize: 10
 };
 var sigmaJsMouseProperties = {
     minRatio: .03125,  // 1/32  pour permettre zoom x32
