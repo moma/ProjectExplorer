@@ -30,33 +30,44 @@
   /[$\w]+/g
 );
 
-var AjaxSync = (function(TYPE, URL, DATA, CT , DT) {
+var AjaxSync = (function(TYPE, URL, DATA, DT) {
     var Result = []
     TYPE = (!TYPE)?"GET":TYPE
-    if(DT && (DT=="jsonp" || DT=="json")) CT="application/json";
-    console.log("---AjaxSync---\n", TYPE, URL, DATA, CT , DT, "\n--------------")
+    if(DT && (DT=="jsonp" || DT=="json")) DT="json"
+    else DT = 'text'  // ie "if not json then raw xml string"
+
+
+    if (TW.debugFlags.logFetchers)
+      console.log("---AjaxSync---\n", TYPE, URL, DATA, DT, "\n--------------")
+
     $.ajax({
             type: TYPE,
             url: URL,
+            dataType: DT,  // <= the expected response format
+            async: false,  // <= synchronous (POSS alternative: cb + waiting display)
+
+            // our payload: filters...
             data: DATA,
-            contentType: CT,
-            dataType: DT,
-            async: false,
+            contentType: 'application/json',
             success : function(data, textStatus, jqXHR) {
                 var header = jqXHR.getResponseHeader("Content-Type")
-                // console.log("AjaxSync("+URL+"):header="+header);
                 var format ;
-                if (!header || header == "application/octet-stream") {
-                  // default choice if undetailed header
+                if (!header
+                     || header == "application/octet-stream"
+                     || header == "application/xml"
+                ) {
+                  // default parser choice if xml or if undetailed header
                   format = "gexf" ;
                 }
                 else {
+                  if (TW.debugFlags.logFetchers)
+                    console.debug("after AjaxSync("+URL+") => response header="+header +"not xml => fallback on json");
                   format = "json" ;
                 }
                 Result = { "OK":true , "format":format , "data":data };
             },
             error: function(exception) {
-                console.log('now error', exception)
+                console.warn('ajax error:', exception, exception.getAllResponseHeaders())
                 Result = { "OK":false , "format":false , "data":exception.status };
             }
         });
@@ -111,7 +122,7 @@ if (getUrlParam.type) {
       if(qtype == "filter" || qtype == "uid"){
         var theurl,thedata,thename;
 
-        console.warn("===> PASSING ON QUERY (type "+qtype+") TO BRIDGE <===")
+        // console.warn("===> PASSING ON QUERY (type "+qtype+") TO BRIDGE <===")
         if(qtype=="uid") {
             // pr("bring the noise, case: unique_id");
             // pr(getClientTime()+" : DataExt Ini");
@@ -131,7 +142,7 @@ if (getUrlParam.type) {
             // json is twice URI encoded by whoswho to avoid both '"' and '%22'
             var json_constraints = decodeURIComponent(sourceinfo)
 
-            console.log("multipleQuery RECEIVED", json_constraints)
+            // console.log("multipleQuery RECEIVED", json_constraints)
 
             // safe parsing of the URL's untrusted JSON
             var filteringKeyArrayPairs = JSON.parse( json_constraints)
@@ -188,11 +199,13 @@ if (getUrlParam.type) {
 
         // £TODO restore thename
         console.warn (thename, ":name not used anymore since refacto 10/05 could put on same level as inData as inMapname or smth")
-        console.log( "url", theurl , "data", thedata , "name", thename );
+
         var bridgeRes = AjaxSync({ URL: theurl, DATA:thedata, TYPE:'GET', DT:'json' })
 
         // should be a js object with 'nodes' and 'edges' properties
         inData = bridgeRes.data
+
+        if (TW.debugFlags.logFetchers)   console.info("JSON input data", inData)
       }
       else {
           console.warn ("=> unsupported query type !")
@@ -214,18 +227,31 @@ else {
   // ===================
 
   // direct urlparam file case
-  if( !isUndef(getUrlParam.file)  && (isUndef(getUrlParam.mode) || getUrlParam.mode != "db.json") ) {
+  if( !isUndef(getUrlParam.file)  ) {
     the_file = getUrlParam.file
   }
-  // indirect case
-  else if ( !isUndef(getUrlParam.mode) && getUrlParam.mode=="db.json") {
-
-      console.log("===>legacy db.json<===")
-
+  // direct file fallback case: specified file in settings_explorer
+  else if (TW.mainfile && linkCheck(TW.mainfile)) {
+    console.log("no @file arg: trying TW.mainfile from settings")
+    the_file = TW.mainfile;
+  }
+  // overall fallback case: try to open a listing of files (by default: db.json)
+  // TODO rename 'mode=' argkey into something more descriptive like 'menufile='
+  //      here and in caller apps like tweetoscope etc.
+  else {
       // we'll first retrieve the menu of available files in db.json, then get the real data in a second ajax
-      var infofile = getUrlParam.mode
+      var infofile = ''
 
-      var preRES = AjaxSync({ URL: infofile });
+      if ( !isUndef(getUrlParam.mode) ) {
+        infofile = getUrlParam.mode
+      }
+      // default
+      else {
+        infofile = "db.json"
+      }
+
+      if (TW.debugFlags.logFetchers)  console.info(`attempting to load infofile ${infofile}`)
+      var preRES = AjaxSync({ URL: infofile, DT:"json" });
 
       if (preRES['OK'] && preRES.data) {
         console.log('initial AjaxSync result preRES', preRES)
@@ -234,7 +260,9 @@ else {
 
       var first_file = "" , first_path = ""
       for( var path in preRES.data ) {
-          console.log("db.json path", path)
+
+          // console.log("db.json path", path)
+
           first_file = preRES.data[path]["first"]
           first_path = path
           console.log("db.json first_file", first_path, first_file)
@@ -252,11 +280,12 @@ else {
 
       for( var path in preRES.data ) {
           var the_gexfs = preRES.data[path]["gexfs"]
-          console.log("\t\tThese are the available  Gexfs:")
-          console.log(the_gexfs)
           for(var aGexf in the_gexfs) {
               var gexfBasename = aGexf.replace(/\.gexf$/, "") // more human-readable in the menu
-              console.log("\t\t\t"+gexfBasename+ "   -> table:" +the_gexfs[aGexf]["semantic"]["table"] )
+
+
+              if (TW.debugFlags.logFetchers)
+                console.log("\t\t\t"+gexfBasename+ "   -> table:" +the_gexfs[aGexf]["semantic"]["table"] )
 
               TW.field[path+"/"+aGexf] = the_gexfs[aGexf]["semantic"]["table"]
               // ex : data/AXA/RiskV2PageRank5000.gexf:"ISItermsAxa_2015"
@@ -272,24 +301,18 @@ else {
       }
       files_selector += "</select>"
       $("#network").html(files_selector)
-
-      // console.log("\n============================\n")
-      // console.log(TW.field)
-      // console.log(TW.gexfDict)
-      var finalRes = AjaxSync({ URL: the_file });
-      inData = finalRes["data"]
-      inFormat = finalRes["format"]
-      console.log(inData.length)
-      console.log(inFormat)
-
-      console.warn('@the_file', finalRes["OK"], the_file)
   }
-  // recreated fallback case: specified file in settings_explorer
-  else if (TW.mainfile) {
-    var unique_mainfile = TW.mainfile.filter(function(item, pos) {
-      return TW.mainfile.indexOf(item) == pos;
-    });
-    the_file = (Array.isArray(TW.mainfile))?TW.mainfile[0]:TW.mainfile;
+
+  var finalRes = AjaxSync({ URL: the_file });
+  inData = finalRes["data"]
+  inFormat = finalRes["format"]
+
+
+  if (TW.debugFlags.logFetchers) {
+    console.warn('@the_file', finalRes["OK"], the_file)
+    console.log('  fetch result: format', inFormat)
+    console.log('  fetch result: typeof data', typeof inData)
+    console.log("\n============================\n")
   }
 }
 

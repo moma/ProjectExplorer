@@ -303,15 +303,20 @@ saferString = function(string) {
 
  /**
   * function to test if file exists
-  * via XHR, from http://stackoverflow.com/questions/5115141
+  * via XHR, enhanced from http://stackoverflow.com/questions/5115141
   */
 
 var linkCheck = function(url) {
-      var http = new XMLHttpRequest();
-      http.open('HEAD', url, false);
+    var http = new XMLHttpRequest();
+    try {
+      http.open('HEAD', url, false);  // 3rd arg false <=> synchronous request
       http.send();
       return http.status!=404;
-  }
+    }
+    catch(e) {
+      return false
+    }
+}
 
  /**
   * function to load a given css file

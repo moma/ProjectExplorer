@@ -9,21 +9,8 @@ var TW = {}
     TW.twittertimeline = false;
     TW.minimap=false;
     TW.getAdditionalInfo = true;// True: Activate TopPapers feature.
-    //TW.mainfile = ["db.json"];
-    // // TW.mainfile = "api.json";
-     TW.mainfile = [
-    //     "data/2-Terms-Authors-300nodes.gexf",
-         "data/0-terms-terms-MainNodes.gexf",
-    //     "data/maziyar2.json",
-    //     "data/3-Terms-Countries-300nodes.gexf",
-    // //     "data/noclimatechange_mnodes.gexf",
-    //     "data/20150518t1052_phylograph.json",
-    // //     "data/phylograph_6.json",
-    // //     "data/maziyar.json",
-    // //     "data/20141128_GPs_03_bi.gexf",
-    // //     "data/example.json",
-    // //     "data/Elisa__Omodei.gexf",
-         ];
+    // TW.mainfile = "data/mysuperproject/my.gexf"
+    TW.mainfile = "data/politoscope/ProgrammeDesCandidats.sans_outliers.gexf"
     TW.APINAME = "http://127.0.0.1:5000/twitter_search";
     TW.tagcloud_limit = 50;
     TW.bridge={};
