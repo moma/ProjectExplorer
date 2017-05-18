@@ -921,8 +921,8 @@ function dictfyJSON( data , categories ) {
         // node.shape = "square";
 
         // £TODO generalize some alternate names in here and maybe gexf
-        if (node.term_occ) {
-          node.size = Number(node.term_occ)
+        if (n.term_occ) {
+          node.size = Math.sqrt(Number(n.term_occ))
         }
 
         if (!catCount[node.type]) catCount[node.type] = 0
