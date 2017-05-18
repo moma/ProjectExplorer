@@ -255,11 +255,13 @@ function changeType() {
 
 
         // to recreate the selection in the new type graph
-        var SelInst = new SelectionEngine();
-        SelInst.MultipleSelection2({
-                    nodesDict:nodes_2_colour,
-                    edgesDict:edges_2_colour
-                });
+        // var SelInst = new SelectionEngine();
+        // SelInst.MultipleSelection2({
+        //             nodesDict:nodes_2_colour,
+        //             edgesDict:edges_2_colour
+        //         });
+        var SelInst2 = new SelectionEngine();
+        SelInst2.MultipleSelection2({ nodes: sels });
         overNodes=true;
     }
 
