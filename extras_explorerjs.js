@@ -200,7 +200,7 @@ function SomeEffect( ValueclassCode ) {
     //     TW.partialGraph.graph.nodes(ID).customAttrs.forceLabel = true;
     // }
 
-    TW.selectionActive=true;
+    // TW.selectionActive=true;
 
     TW.partialGraph.refresh()
 }
@@ -714,7 +714,7 @@ function circleGetAreaNodes(camX0, camY0) {
 //         that is containing the circle centered on x0, y0
 // (use case: reduce number of nodes before exact check)
 function circleLocalSubset(camX0, camY0 , camRay) {
-y
+
   var P0 = {x:camX0, y:camY0}
 
   // to use quadtree.area, we consider the square
@@ -804,14 +804,4 @@ function ProcessDivsFlags() {
             //                └── "crowdsourcingTerms"+"/suggest.js"
         }
     }
-}
-
-
-//both obsolete
-function closeDialog () {
-    $('#windowTitleDialog').modal('hide');
-}
-function okClicked () {
-    //document.title = document.getElementById ("xlInput").value;
-    closeDialog ();
 }
