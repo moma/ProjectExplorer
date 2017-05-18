@@ -3,7 +3,7 @@
 
 // settings: {norender: Bool}
 function cancelSelection (fromTagCloud, settings) {
-    console.log("\t***in cancelSelection");
+    if (TW.debugFlags.selections) { console.log("\t***in cancelSelection"); }
     if (!settings) settings = {}
 
     highlightSelectedNodes(false); //Unselect the selected ones :D
@@ -114,7 +114,8 @@ function getCurrentTypeString() {
 
 
 function highlightSelectedNodes(flag){
-    console.log("\t***methods.js:highlightSelectedNodes(flag)"+flag+" selEmpty:"+is_empty(selections))
+    if (TW.debugFlags.logSelections)
+      console.log("\t***methods.js:highlightSelectedNodes(flag)"+flag+" selEmpty:"+is_empty(selections))
     if(!is_empty(selections)){
         for(var i in selections) {
           TW.partialGraph.graph.nodes(i).active = flag
@@ -132,6 +133,10 @@ function alertCheckBox(eventCheck){
     }
 }
 
+
+//  THIS IS THE ORIGINAL FIRST VERSION OF changeType()
+//  It's not used since before I arrived, but useful as a logical resume
+//
 // States:
 // A : Macro-Social
 // B : Macro-Semantic

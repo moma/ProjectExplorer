@@ -165,7 +165,7 @@ function gexfCheckAttributesMap (someXMLContent) {
 
 // Level-00
 function scanGexf(gexfContent) {
-    console.debug("ParseCustom : scanGexf ======= ")
+
     var categoriesDict={};
 
     // adding gexfCheckAttributesMap call
@@ -237,7 +237,9 @@ function sortNodeTypes(observedTypesDict) {
       // if we have only one category, it gets the same code 0 as Document
       // but in practice it's more often terms. anyways doesn't affect much
       catDict[observedTypes[0]] = 0;
-      console.log("-----cat unique =>0")
+
+      if (TW.debugFlags.logParsers)
+        console.log(`cat unique (${observedTypes[0]}) =>0`)
   }
   if(nTypes>1) {
       var newcats = []
@@ -263,7 +265,8 @@ function sortNodeTypes(observedTypesDict) {
 // for {1,2}partite graphs
 function dictfyGexf( gexf , categories ){
 
-  console.log("ParseCustom gexf 2nd loop, main data extraction, with categories", categories)
+  if (TW.debugFlags.logParsers)
+    console.log("ParseCustom gexf 2nd loop, main data extraction, with categories", categories)
 
 
     // var catDict = {'terms':"0"}
@@ -457,8 +460,10 @@ function dictfyGexf( gexf , categories ){
     // ------------- /debug: for local stats ----------------
 
 
-    var classvalues_deb = performance.now()
-    // console.log('dictfyGexf: begin TW.Clusters')
+    if (TW.debugFlags.logFacets) {
+      console.log('dictfyGexf: begin TW.Clusters')
+      var classvalues_deb = performance.now()
+    }
 
     var gotClusters = false
     for (var nodecat in tmpVals) {
@@ -566,7 +571,7 @@ function dictfyGexf( gexf , categories ){
             legendRefTicks.push(tmpVals[cat][at].vals[nthVal])
           }
 
-          console.debug("intervals for", at, legendRefTicks)
+          if (TW.debugFlags.logFacets)    console.debug("intervals for", at, legendRefTicks)
 
           var nTicks = legendRefTicks.length
           var sortedDistinctVals = Object.keys(tmpVals[cat][at].map).sort(function(a,b){return Number(a)-Number(b)})
@@ -634,8 +639,11 @@ function dictfyGexf( gexf , categories ){
       }
     }
 
-    var classvalues_fin = performance.now()
-    console.log('dictfyGexf: end TW.Clusters, own time:', classvalues_fin-classvalues_deb)
+    if (TW.debugFlags.logFacets) {
+      var classvalues_fin = performance.now()
+      console.log('end TW.Clusters, own time:', classvalues_fin-classvalues_deb)
+    }
+
 
     //New scale for node size: now, between 2 and 5 instead [1,70]
     for(var nid in nodes){
@@ -652,7 +660,10 @@ function dictfyGexf( gexf , categories ){
     for(i=0; i<edgesNodes.length; i++) {
         var edgesNode = edgesNodes[i];
         var edgeNodes = edgesNode.getElementsByTagName('edge');
-        console.log("edgeNodes.length", edgeNodes.length)
+
+        if (TW.debugFlags.logParsers)
+          console.log("edgeNodes.length", edgeNodes.length)
+
         for(j=0; j<edgeNodes.length; j++) {
             var edgeNode = edgeNodes[j];
             var source = parseInt( edgeNode.getAttribute('source') );
@@ -877,7 +888,9 @@ function scanJSON( data ) {
 // Level-00
 // for {1,2}partite graphs
 function dictfyJSON( data , categories ) {
-    console.debug(`dictfyJSON, categories:${categories}, data:`, data)
+    if (TW.debugFlags.logParsers)
+      console.log("ParseCustom json 2nd loop, main data extraction, with categories", categories)
+
     var catDict = {}
     var catCount = {}
     for(var i in categories)  catDict[categories[i]] = i;
@@ -888,10 +901,11 @@ function dictfyJSON( data , categories ) {
         nodes2={}, bipartiteD2N={}, bipartiteN2D={}
     }
 
-    for(var i in data.nodes) {
-        let n = data.nodes[i];
+    for(var nid in data.nodes) {
+        let n = data.nodes[nid];
         let node = {}
-        node.id = (n.id) ? n.id : i ; // use the key if no id
+
+        node.id = (n.id) ? n.id : nid ; // use the key if no id
         node.label = (n.label)? n.label : ("node_"+node.id) ;
         node.size = (n.size)? n.size : 3 ;
         node.type = (n.type)? n.type : "Document" ;
@@ -913,7 +927,6 @@ function dictfyJSON( data , categories ) {
 
         if (!catCount[node.type]) catCount[node.type] = 0
         catCount[node.type]++;
-
 
         nodes[node.id] = node;
     }

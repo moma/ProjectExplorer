@@ -90,11 +90,11 @@ var desirableScholarSize=6; //Remember that all scholars have the same size!
  *Three states:
  *  - true: fa2 auto-running at start
  *  - false: fa2 stopped at start, button exists
- *  - "off": button doesn't exist, fa2 stopped forever
+ *  - "off": button doesn't exist, fa2 stopped forever // £TODO restore case
  **/ var fa2enabled=false;//"off";
 var stopcriteria = false;
-var fa2milliseconds=7000;  // for initial auto-run if fa2enabled and any
-                           // subsequent auto-runs if graph modified
+var fa2milliseconds=10000;  // for initial auto-run if fa2enabled and any
+                            // subsequent auto-runs if graph modified
 
 // deprecated ?
 var seed=999999999;//defaultseed
@@ -130,8 +130,16 @@ TW.customLegendsBins = {
   'growth_rate': 12
 }
 
+
 TW.debugFlags = {
-  initialShowAll: false,
+  initialShowAll: false,           // show all nodes on bipartite case init (docs + terms)
+
+  // show verbose console logs...
+  logFetchers: false,              // ...about ajax/fetching of graph data
+  logParsers: false,               // ...about parsing said data
+  logFacets: false,                // ...about parsing node attribute:value facets
+  logSettings: false,              // ...about settings at Tina and Sigma init time
+  logSelections: false
 }
 
 // triggers overriding sigma.canvas renderers: nodes.def, labels.def, edges.def

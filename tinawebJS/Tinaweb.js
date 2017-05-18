@@ -147,10 +147,12 @@ function SelectionEngine() {
      // ====================
     this.MultipleSelection2 = (function(nodes,nodesDict,edgesDict) {
 
-      var tMS2_deb = performance.now()
+      if (TW.debugFlags.selections) {
+        var tMS2_deb = performance.now()
 
         console.log("IN SelectionEngine.MultipleSelection2:")
         console.log("nodes", nodes)
+      }
 
         greyEverything();
 
@@ -313,9 +315,11 @@ function SelectionEngine() {
             return b-a
         });
 
-        console.debug('selections', selections)
-        console.debug('oppos', oppos)
-        console.debug('same', same)
+        if (TW.debugFlags.selections) {
+          console.debug('selections', selections)
+          console.debug('oppos', oppos)
+          console.debug('same', same)
+        }
 
         overNodes=true;
 
@@ -323,8 +327,10 @@ function SelectionEngine() {
 
         updateRelatedNodesPanel( selections , same, oppos );
 
-        var tMS2_fin = performance.now()
-        console.log("end MultipleSelection2, own time:", tMS2_fin-tMS2_deb)
+        if (TW.debugFlags.selections) {
+          var tMS2_fin = performance.now()
+          console.log("end MultipleSelection2, own time:", tMS2_fin-tMS2_deb)
+        }
 
     }).index()
 };
@@ -337,7 +343,8 @@ TinaWebJS = function ( sigmacanvas ) {
 
     this.init = function () {
 
-        console.warn("TW settings", TW)
+        if (TW.debugFlags.logSettings)    console.info("TW settings", TW)
+
         let initErrMsg = null
 
         if (typeof sigma == 'undefined') {
@@ -460,7 +467,7 @@ TinaWebJS = function ( sigmacanvas ) {
       //  - additionnaly supports 'active/forcelabel' node property (magnify x 3)
       sigmaModule.canvas.hovers.def = tempo.twRender.canvas.hovers.largerall
 
-      console.log('tw renderers registered in sigma module')
+      if (TW.debugFlags.logSettings) console.log('tw renderers registered in sigma module')
     }
 
     this.SearchListeners = function () {

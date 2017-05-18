@@ -186,6 +186,7 @@ if (getUrlParam.type) {
             thename = '"'+elements.join('" , "')+'"';
         }
 
+        // £TODO restore thename
         console.warn (thename, ":name not used anymore since refacto 10/05 could put on same level as inData as inMapname or smth")
         console.log( "url", theurl , "data", thedata , "name", thename );
         var bridgeRes = AjaxSync({ URL: theurl, DATA:thedata, TYPE:'GET', DT:'json' })
@@ -302,13 +303,16 @@ if (! inFormat || ! inData) {
   alert("error on initial data load")
 }
 else {
-    console.log("parsing the data")
+
+    if (TW.debugFlags.logParsers)   console.log("parsing the data")
+
     let start = new ParseCustom(  inFormat , inData );
     let catsInfos = start.scanFile(); //user should choose the order of categories
 
     TW.categories = catsInfos.categories
-    console.log("Categories: ")
-    console.log(TW.categories)
+    if (TW.debugFlags.logParsers){
+      console.log(`Source scan found ${TW.categories.length} node categories: ${TW.categories}`)
+    }
 
     // reverse lookup: category name => category indice
     TW.catDict = catsInfos.lookup_dict
@@ -323,7 +327,8 @@ else {
 
     // XML parsing from ParseCustom
     var dicts = start.makeDicts(TW.categories); // > parse json or gexf, dictfy
-    console.warn("parsing result:", dicts)
+
+    if (TW.debugFlags.logParsers)   console.info("parsing result:", dicts)
 
     TW.Nodes = dicts.nodes;
     TW.Edges = dicts.edges;
@@ -344,12 +349,15 @@ else {
     // £TODO also test with comex2 for bipart case
     // TW.nodes1 = dicts.n1;//not used
 
+
+    console.info(`== new graph ${TW.nodeIds.length} nodes, ${TW.edgeIds.length} edges ==`)
+
     // a posteriori categories diagnostic
     // ----------------------------------
     // by default TW.categories now match user-suggested catSoc/Sem if present
     // so we just need to handle mismatches here (when user-suggested cats were absent)
     if (TW.categories.length == 2) {
-      console.log("== 'bipartite' case ==")
+      console.info("== 'bipartite' case ==")
       if (TW.catSoc != TW.categories[0]) {
         console.warn(`Observed social category "${TW.categories[0]}" overwrites user-suggested TW.catSoc ("${TW.catSoc}")`)
         TW.catSoc = TW.categories[0]
@@ -360,7 +368,7 @@ else {
       }
     }
     else if (TW.categories.length == 1) {
-      console.log("== monopartite case ==")
+      console.info("== monopartite case ==")
       // FIXME it would be more coherent with all tina usecases (like gargantext or tweetoscope) for the default category to by catSem instead of Soc
       if (TW.catSoc != TW.categories[0]) {
         console.warn(`Observed unique category "${TW.categories[0]}" overwrites user-suggested TW.catSoc ("${TW.catSoc}")`)
@@ -465,7 +473,8 @@ else {
         sigmaJsMouseProperties
     )
 
-    console.info("sigma settings", customSettings)
+
+    if (TW.debugFlags.logSettings) console.info("sigma settings", customSettings)
 
 
     // ==================================================================
@@ -509,7 +518,7 @@ else {
 
     // by default category0 is the initial type
     $(".category1").hide();
-    
+
     // [ / Poblating the Sigma-Graph ]
 
 
@@ -544,11 +553,11 @@ else {
 
         var present = TW.partialGraph.states.slice(-1)[0]; // Last
         var past = TW.partialGraph.states.slice(-2)[0] // avant Last
-        console.log("previous level: "+past.level)
-        console.log("new level: "+present.level)
-
-        console.log(" % % % % % % % % % % ")
-        console.log("")
+        // console.log("previous level: "+past.level)
+        // console.log("new level: "+present.level)
+        //
+        // console.log(" % % % % % % % % % % ")
+        // console.log("")
 
         var bistate= this.type.map(Number).reduce(function(a, b){return a+b;})
         LevelButtonDisable(false);
@@ -568,7 +577,7 @@ else {
         // }
 
 
-        console.log("printing the typestring:", typestring)
+        // console.log("printing the typestring:", typestring)
 
 
         if (TW.filterSliders
@@ -641,6 +650,8 @@ else {
       //  node groups and/nor when preferential attachment type of data)
       outboundAttractionDistribution: false
     }
+
+    if (TW.debugFlags.logSettings) console.info("FA2 settings", TW.FA2Params)
 
     // init FA2 for any future forceAtlas2 calls
     TW.partialGraph.configForceAtlas2(TW.FA2Params)
