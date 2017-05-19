@@ -97,10 +97,61 @@ writeBrand(TW.branding)
 
 console.log("Starting TWJS")
 
-// choosing the input (WIP: currently refactoring for simpler handling)
-var [inFormat, inData] = syncRemoteGraphData()
+// choosing the input
+// -------------------
+// if page is being run locally ==> only possible source shall be via file input
+if (window.location.protocol == 'file:') {
 
-mainStartGraph(inFormat, inData)
+  // POSS we could actually provide this local file chooser in all cases
+  var graphFileInput = document.createElement('input')
+
+  graphFileInput.id = 'localgraphfile'
+  graphFileInput.type = 'file'
+  graphFileInput.accept = 'application/xml,application/gexf,application/json'
+
+  document.getElementById('gexfs').appendChild(graphFileInput)
+
+  // NB file input will trigger mainStartGraph() when the user chooses something
+  graphFileInput.onchange = function() {
+    if (this.files && this.files[0]) {
+
+      console.log(this.files[0])
+      let clientLocalGraphFile = this.files[0]
+
+      // determine the format
+      let theFormat
+      if (/\.(?:gexf|xml)$/.test(clientLocalGraphFile.name)) {
+        theFormat = 'gexf'
+      }
+      else if (/\.json$/.test(clientLocalGraphFile.name)) {
+        theFormat = 'json'
+      }
+
+      // retrieving the content
+      let rdr = new FileReader()
+
+      rdr.onload = function() {
+        if (! rdr.result ||  !rdr.result.length) {
+          alert('the selected file is not readable')
+        }
+        else if(! theFormat) {
+          alert('unrecognized file format')
+        }
+        else {
+          mainStartGraph(theFormat, rdr.result)
+        }
+      }
+      rdr.readAsText(clientLocalGraphFile)
+    }
+  }
+}
+// traditional cases: remote read from API or prepared server-side file
+else {
+  // NB it will use global urlParams and TW.settings to choose the source
+  var [inFormat, inData] = syncRemoteGraphData()
+  mainStartGraph(inFormat, inData)
+}
+
 //  === [ / what to do at start ] === //
 
 
@@ -111,10 +162,8 @@ function syncRemoteGraphData () {
   var inData;              // = {nodes: [....], edges: [....], cats:...}
 
   // case (1) read from DB => one ajax to api eg /services/api/graph?q=filters...
-  // this one is the API case
-  // sourcemode == "api"
   if (getUrlParam.type) {
-    console.warn("input case: @type [future: @mode=api], using TW.bridge")
+    console.warn("input case: @type [future: @sourcemode=api], using TW.bridge")
 
     // the only API format, cf. inData
     inFormat = 'json'
@@ -223,7 +272,7 @@ function syncRemoteGraphData () {
   // case (2) gexf => in params or in preRes db.json, then 2nd ajax for a gexf file => covered here
   // sourcemode == "serverfile"
   else {
-    console.warn("input case: @mode=db.json or @file=... [future: @mode=serverfile], using server's gexf(s)")
+    console.warn("input case: @mode=db.json or @file=... [future: @sourcemode=serverfile], using server's gexf(s)")
     // subcases:
     // -> gexf file path is already specified in TW.mainfile
     // -> gexf file path is in the urlparam @file
