@@ -92,6 +92,12 @@ function jsActionOnGexfSelector(gexfBasename , db_json){
 // NB this method-holding instance could be initialized just once or even removed?
 var sigma_utils = new SigmaUtils();
 
+// POSS: ideally this should take a TW.settings as parameter
+TW.instance = new TinaWebJS('#sigma-contnr');
+
+// add once our tw rendering and index customizations into sigma module
+TW.instance.init()
+
 // show the custom name of the app
 writeBrand(TW.branding)
 
@@ -115,7 +121,6 @@ if (window.location.protocol == 'file:') {
   graphFileInput.onchange = function() {
     if (this.files && this.files[0]) {
 
-      console.log(this.files[0])
       let clientLocalGraphFile = this.files[0]
 
       // determine the format
@@ -126,6 +131,9 @@ if (window.location.protocol == 'file:') {
       else if (/\.json$/.test(clientLocalGraphFile.name)) {
         theFormat = 'json'
       }
+      else {
+        alert('unrecognized file format')
+      }
 
       // retrieving the content
       let rdr = new FileReader()
@@ -134,11 +142,19 @@ if (window.location.protocol == 'file:') {
         if (! rdr.result ||  !rdr.result.length) {
           alert('the selected file is not readable')
         }
-        else if(! theFormat) {
-          alert('unrecognized file format')
-        }
         else {
-          mainStartGraph(theFormat, rdr.result)
+          // we might have a previous graph opened
+          if (TW.partialGraph && TW.partialGraph.graph) {
+            TW.partialGraph.graph.clear()
+            TW.partialGraph.refresh()
+            selections = []
+          }
+
+          // run
+          if (theFormat == 'json')
+            mainStartGraph(theFormat, JSON.parse(rdr.result), TW.instance)
+          else
+            mainStartGraph(theFormat, rdr.result, TW.instance)
         }
       }
       rdr.readAsText(clientLocalGraphFile)
@@ -149,7 +165,7 @@ if (window.location.protocol == 'file:') {
 else {
   // NB it will use global urlParams and TW.settings to choose the source
   var [inFormat, inData] = syncRemoteGraphData()
-  mainStartGraph(inFormat, inData)
+  mainStartGraph(inFormat, inData, TW.instance)
 }
 
 //  === [ / what to do at start ] === //
@@ -392,7 +408,7 @@ function syncRemoteGraphData () {
 // 3 - starts the tinaweb instance
 // 4 - finishes setting up the environment
 // (NB inspired by Samuel's legacy bringTheNoise() function)
-function mainStartGraph(inFormat, inData) {
+function mainStartGraph(inFormat, inData, twInstance) {
 
   if (! inFormat || ! inData) {
     alert("error on data load")
@@ -475,12 +491,6 @@ function mainStartGraph(inFormat, inData) {
       }
 
       // [ Initiating Sigma-Canvas ]
-
-      // POSS: ideally this should take a TW.settings as parameter
-      var twjs_ = new TinaWebJS('#sigma-contnr');
-
-      // add our tw rendering and index customizations into sigma module
-      twjs_.init()
 
       // overriding pixelRatio is possible if we need very high definition
       if (TW.overSampling) {
@@ -770,7 +780,7 @@ function mainStartGraph(inFormat, inData) {
       // REFA new sigma.js
       TW.partialGraph.camera.goTo({x:0, y:0, ratio:0.9, angle: 0})
 
-      twjs_.initListeners(TW.categories , TW.partialGraph);
+      twInstance.initListeners(TW.categories , TW.partialGraph);
 
       // mostly json data are extracts provided by DB apis => no positions
       if (inFormat == "json")  TW.fa2enabled = true
@@ -782,7 +792,7 @@ function mainStartGraph(inFormat, inData) {
       // adapt the enviroment to monopartite vs. bipartite cases
       if( TW.categories.length==1 ) {
           $("#changetype").hide();
-          $("#taboppos").remove();
+          $("#taboppos").hide();
 
           // if (TW.catSem && TW.catSoc) {
             setTimeout(function () {
@@ -793,6 +803,8 @@ function mainStartGraph(inFormat, inData) {
       }
       // for elements hidden by default (cf. css) but useful in bipartite case
       else {
+        $("#changetype").show();
+        $("#taboppos").show();
         $("#taboppos").css('display', 'inline-block');
       }
 

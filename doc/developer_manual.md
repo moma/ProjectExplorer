@@ -3,18 +3,21 @@ This is a stub for a future documentation for developers.
 
 ## Graph initialization
 
-The main steps for any graph initialization messily use functions across several modules, so it can be useful to list them here together:
+This will still evolve but the main steps for any graph initialization messily use functions across several modules, so it can be useful to list them here together:
 
- 1. [`main.js`] initial choice of data source from URL params or settings
- 2. [`sigma.parseCustom.js`] prepares the data
-     - read a source via ajax GET
+ 1. [`main.js`] initializes the TinaWebJS object and runs its init which registers our rendering function to sigma module
+ 2. [`main.js`] makes the initial choice of data source from URL protocol (local or remote) and URL params (when remote)
+     - then read a source via fileinput (when local) or ajax GET (when remote)
+ 3. [`sigma.parseCustom.js`] prepares the data
      - *"scan"*: loop once to list present node categories
      - *"dictify"*: loop again to copy all nodes/edges information
      - prepares TW.Relations: edges sorted by type (term-term, term-doc...)
      - prepares TW.Clusters: bins and facet index (node attr vals => nodes)
- 3. [`main.js`] precomputes display properties (grey color, etc.)
- 4. [`sigmaUtils`] the function `FillGraph()` was a central point for filtering and preparing properties but now with 2 and 3 it just copies the nodes and edges to a new structure that groups them together
- 5. [`main.js`] Finally all sigma settings (user + defaults) are merged and we initialize the sigma instance (`new sigma` etc.)
+ 4. [`main.js`] mainStartGraph() function runs all the rest
+    1. precomputes display properties (grey color, etc.)
+    2. calls [`sigmaUtils`] where the function `FillGraph()` was a central point for filtering and preparing properties but now with 2 and 3 it just copies the nodes and edges to a new structure that groups them together
+    3. back in [`main.js`], finally all sigma settings (user + defaults) are merged and we initialize the sigma instance (`new sigma` etc.)
+    4. finally a call to [`TinawebJS`] initializes the action listeners and this phase should crucially initialize items that need the sigma instance (because they may depend the displayed categories, the number of displayed nodes, etc)
 
 
 #### About source data
