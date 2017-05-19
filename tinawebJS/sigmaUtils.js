@@ -482,6 +482,7 @@ SigmaUtils = function () {
 
       // ================ /alternative rendering =====================
 
+
       this.toggleEdges = function(optionalTargetFlag) {
         var targetFlag
         if (typeof optionalTargetFlag == "undefined") {
@@ -496,7 +497,79 @@ SigmaUtils = function () {
         TW.partialGraph.render()
       }
 
+
+
+      this.ourStopFA2 = function() {
+        document.getElementById('layoutwait').remove()
+        TW.partialGraph.stopForceAtlas2();
+
+        // restore edges if needed
+        if (document.getElementById('edges-switch').checked) {
+          this.toggleEdges(true)
+        }
+      }
+
+      // factorized: forceAtlas2 supervisor call with:
+      //  - togglability (ie. turns FA2 off if called again)
+      //  - custom expiration duration
+      //  - conditions on graph size (£TODO use these to slowDown small graphs)
+      //  - edges management (turns them off and restores them after finished)
+      this.smartForceAtlas = function (fa2duration) {
+
+        if (!fa2duration) {
+          fa2duration = parseInt(TW.fa2milliseconds) || 4000
+        }
+
+        // togglability case
+        if(TW.partialGraph.isForceAtlas2Running()) {
+            this.ourStopFA2()
+            return;
+        }
+        // normal case
+        else {
+            if ( TW.fa2enabled && TW.partialGraph.graph.nNodes() >= TW.minNodesForAutoFA2) {
+              // hide edges during work for smaller cpu load
+              if (TW.partialGraph.settings('drawEdges')) {
+                this.toggleEdges(false)
+              }
+
+              TW.partialGraph.startForceAtlas2();
+
+              var icon = createWaitIcon('layoutwait')
+              var btn = document.querySelector('#layoutButton')
+              btn.insertBefore(icon, btn.children[0])
+
+              setTimeout(function(){
+                // NB in here scope: 'this' is the window
+                if (TW.partialGraph.isForceAtlas2Running())
+                  sigma_utils.ourStopFA2()
+              },
+              fa2duration)
+
+              return;
+            }
+
+        }
+      }
+
 } // /SigmaUtils object
+
+
+function createWaitIcon(idname, width) {
+  let icon = document.createElement('img')
+
+  icon.src = TW.libspath + '/img2/loader.gif'
+
+  icon.style.position = 'absolute'
+  icon.style.left = '0'
+  icon.style.width = width || '100%'
+
+  if (idname) {
+    icon.id = idname
+  }
+
+  return icon
+}
 //
 // //for socialgraph
 // function showMeSomeLabels(N){

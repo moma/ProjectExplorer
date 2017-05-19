@@ -293,8 +293,8 @@ else {
               TW.gexfDict[path+"/"+aGexf] = aGexf
               // ex : data/AXA/RiskV2PageRank1000.gexf:"RiskV2PageRank1000.gexf"
 
-              var selected = (the_file==(path+"/"+aGexf))?"selected":""
-              files_selector += '<option '+selected+'>'+gexfBasename+'</option>'
+              let cssFileSelected = (the_file==(path+"/"+aGexf))?"selected":""
+              files_selector += '<option '+cssFileSelected+'>'+gexfBasename+'</option>'
           }
           // console.log( files_selector )
           break;
@@ -698,17 +698,10 @@ else {
     twjs_.initListeners(TW.categories , TW.partialGraph);
 
     // mostly json data are extracts provided by DB apis => no positions
-    if (inFormat == "json")  fa2enabled = true
+    if (inFormat == "json")  TW.fa2enabled = true
 
-    // run fa2 if settings_explorerjs.fa2enabled == true
-    if (fa2enabled) {
-      TW.partialGraph.startForceAtlas2();
-      setTimeout(function(){
-          TW.partialGraph.stopForceAtlas2();
-      },
-      parseInt(fa2milliseconds) || 5000
-      );
-    }
+    // will run fa2 if enough nodes and TW.fa2enabled == true
+    sigma_utils.smartForceAtlas()
 
 
     // adapt the enviroment to monopartite vs. bipartite cases

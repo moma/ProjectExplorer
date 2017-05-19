@@ -10,7 +10,7 @@ var TW = {}
     TW.minimap=false;
     TW.getAdditionalInfo = true;// True: Activate TopPapers feature.
     // TW.mainfile = "data/mysuperproject/my.gexf"
-    TW.mainfile = "data/politoscope/ProgrammeDesCandidats.sans_outliers.gexf"
+    TW.mainfile = "data/politoscope/ProgrammeDesCandidats.enrichi.gexf"
     TW.APINAME = "http://127.0.0.1:5000/twitter_search";
     TW.tagcloud_limit = 50;
     TW.bridge={};
@@ -77,20 +77,20 @@ var desirableScholarSize=6; //Remember that all scholars have the same size!
  *Three states:
  *  - true: fa2 auto-running at start
  *  - false: fa2 stopped at start, button exists
- *  - "off": button doesn't exist, fa2 stopped forever // £TODO restore case
- **/ var fa2enabled=false;//"off";
-var stopcriteria = false;
-var fa2milliseconds=10000;  // for initial auto-run if fa2enabled and any
-                            // subsequent auto-runs if graph modified
+ *  - "off": button doesn't exist, fa2 stopped forever
+ **/  TW.fa2enabled=true;//"off";
 
-// deprecated ?
-var seed=999999999;//defaultseed
-var semanticConverged=false;
+TW.minNodesForAutoFA2 = 5
+
+
 
 
 // ============ < / DEVELOPER OPTIONS > ============
 TW.branding = 'test bipart'
+TW.libspath = 'static/newtinalibs'
+
 TW.nodeClusAtt = "modularity_class"
+
 
 TW.filterSliders = true
 
@@ -131,7 +131,6 @@ TW.debugFlags = {
 
 // triggers overriding sigma.canvas renderers: nodes.def, labels.def, edges.def
 TW.ourRendering = true ;
-
 
 // ============ < / DEVELOPER OPTIONS > ============
 
@@ -239,6 +238,12 @@ TW.maxDiscreteValues = 40  // max discrete levels in facet legend (aka bins)
 //         => TW.Clusters[nodeType][clusterType].classes.[possibleValue] = list of ids with the value
 //      if continuous or many possible values (>30) (clustersBy, colorsRelByBins)
 //         => TW.Clusters[nodeType][clusterType].ranges.[interval] = list of ids in the interval
+
+
+TW.fa2milliseconds=5000;   // for initial auto-run if fa2enabled and any
+                           // subsequent auto-runs if graph modified
+
+
 
 var nodeslength=0;
 

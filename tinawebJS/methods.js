@@ -571,7 +571,7 @@ function graphTagCloudElem(nodes) {
     }
 
     // Nodes Selection now:
-    // £TODO fix low-level selectionlogic duplicate with MultipleSelection2 function 2/2
+    // £TODO fix  low-level selectionlogic duplicate with MultipleSelection2 function 2/2
     if(ndsids.length>0) {
         var SelInst = new SelectionEngine();
         SelInst.MultipleSelection2({
@@ -602,9 +602,11 @@ function graphTagCloudElem(nodes) {
         oppos: []
     })
 
+    TW.partialGraph.camera.goTo({x:0, y:0, ratio:0.9, angle: 0})
     TW.partialGraph.refresh({skipIndexation:true});
 
-    // fa2enabled=true; TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8).draw().startForceAtlas2();
+    sigma_utils.smartForceAtlas(TW.fa2milliseconds/2)
+
     //
     // ChangeGraphAppearanceByAtt(true)
 }

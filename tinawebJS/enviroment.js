@@ -287,11 +287,7 @@ function changeType() {
     reInitFa2({
       useSoftMethod: false,
       callback: function() {
-        TW.partialGraph.startForceAtlas2();
-        setTimeout(function(){
-            TW.partialGraph.stopForceAtlas2();
-          },
-        fa2milliseconds ? parseInt(fa2milliseconds/2) : 2000)
+        sigma_utils.smartForceAtlas()
       }
     })
 }
@@ -444,11 +440,7 @@ function changeLevel() {
 
           // when going local, it's nice to see the selected nodes rearrange
           if (!futurelevel) {
-            TW.partialGraph.startForceAtlas2();
-            setTimeout(function(){
-                TW.partialGraph.stopForceAtlas2();
-              },
-            fa2milliseconds)
+            sigma_utils.smartForceAtlas()
           }
         }
       })
@@ -700,15 +692,7 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
                   // console.log("\t\t[ Starting FA2 ]")
                   // [ Starting FA2 ]
                   setTimeout(function() {
-                    if (!TW.partialGraph.isForceAtlas2Running()
-                        && TW.partialGraph.graph.nNodes() > 8) {
-                          TW.partialGraph.startForceAtlas2();
-                          setTimeout(function(){
-                            if (TW.partialGraph.isForceAtlas2Running())
-                              TW.partialGraph.stopForceAtlas2();
-                            },
-                            2000) // shorter FA2 sufficient
-                    }
+                    sigma_utils.smartForceAtlas(2000) // shorter FA2 sufficient
                   }, 10)
                 // [ / Starting FA2 ]
 
@@ -827,15 +811,7 @@ function NodeWeightFilter( sliderDivID , tgtNodeType ,  criteria) {
 
                     // [ Starting FA2 ]
                     setTimeout(function() {
-                      if (!TW.partialGraph.isForceAtlas2Running()
-                          && TW.partialGraph.graph.nNodes() > 8) {
-                            TW.partialGraph.startForceAtlas2();
-                            setTimeout(function(){
-                              if (TW.partialGraph.isForceAtlas2Running())
-                                TW.partialGraph.stopForceAtlas2();
-                              },
-                              2000) // shorter FA2 sufficient
-                      }
+                      sigma_utils.smartForceAtlas(2000) // shorter FA2 sufficient
                     }, 10)
                   // [ / Starting FA2 ]
 

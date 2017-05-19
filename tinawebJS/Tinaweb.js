@@ -928,42 +928,28 @@ TinaWebJS = function ( sigmacanvas ) {
 
 
 
-        var fa2HadEdges = false
         $("#layoutButton").click(function () {
-
-          if(TW.partialGraph.isForceAtlas2Running()) {
-
-              partialGraph.stopForceAtlas2();
-
-              // restore edges if needed
-              if (fa2HadEdges) {
-                sigma_utils.toggleEdges(true)
-                fa2HadEdges = false
-              }
-              return;
-          }
-          else {
-              // hide edges during work for smaller cpu load
-              if (TW.partialGraph.settings('drawEdges')) {
-                sigma_utils.toggleEdges(false)
-                fa2HadEdges = true
-              }
-
-              partialGraph.startForceAtlas2();
-
-              return;
-          }
+          sigma_utils.smartForceAtlas()
         });
 
         $("#noverlapButton").click(function () {
+
           if(! TW.partialGraph.isNoverlapRunning()) {
               // show waiting cursor on page and button
               theHtml.classList.add('waiting');
-              $("#noverlapButton").css('cursor', 'wait')
+              this.style.cursor = 'wait'
+              // and waiting icon
+              this.insertBefore(createWaitIcon('noverlapwait'), this.children[0])
+
               var listener = TW.partialGraph.startNoverlap();
+              var noverButton = this
               listener.bind('stop', function(event) {
-                theHtml.classList.remove('waiting');
-                $("#noverlapButton").css('cursor', 'auto')
+                var stillRunning = document.getElementById('noverlapwait')
+                if (stillRunning) {
+                  theHtml.classList.remove('waiting');
+                  noverButton.style.cursor = 'auto'
+                  stillRunning.remove()
+                }
               });
 
               return;
@@ -971,7 +957,7 @@ TinaWebJS = function ( sigmacanvas ) {
         });
 
         $("#edges-switch").click(function () {
-            sigma_utils.toggleEdges()
+            sigma_utils.toggleEdges(this.checked)
         });
 
 

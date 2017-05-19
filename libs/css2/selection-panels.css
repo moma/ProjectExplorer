@@ -219,6 +219,10 @@
     margin: 0 auto;
 }
 
+.zoombarbuttons {
+  position:relative;  /* b/c they can contain absolute wait icon */
+}
+
 .zoombarbuttons:hover {
     opacity: .7;
 }
