@@ -690,7 +690,8 @@ TinaWebJS = function ( sigmacanvas ) {
         $("#changelevel").click(function(){
             console.log("")
             console.log(" ############  changeLEVEL click");
-
+            if (TW.partialGraph.isForceAtlas2Running())
+                sigma_utils.ourStopFA2();
             changeLevel();
 
             console.log(" ############  / changeLEVEL click");
