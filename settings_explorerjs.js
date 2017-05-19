@@ -87,7 +87,7 @@ TW.minNodesForAutoFA2 = 5
 
 // ============ < / DEVELOPER OPTIONS > ============
 TW.branding = 'test bipart'
-TW.libspath = 'static/newtinalibs'
+TW.libspath = 'libs'
 
 TW.nodeClusAtt = "modularity_class"
 
