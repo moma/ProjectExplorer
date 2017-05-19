@@ -476,46 +476,7 @@ function dictfyGexf( gexf , categories ){
     // sorting out properties in n.attributes ==> £TODO shared function createClusterIndex() up to classvalues_fin
     // --------------------------------------
 
-    if(gotClusters) {
-      // 1) default cluster properties "cluster_index" [, "cluster_label"]
-      for (var t_type in tmpVals) {
-        var t_clusname
-
-        // all distinct values to create labels
-        var t_cnumbers = []
-        var allTicks = []
-        if (TW.nodeClusAtt != undefined && tmpVals[t_type][TW.nodeClusAtt]) {
-          t_clusname = TW.nodeClusAtt
-        }
-        else if (tmpVals[t_type]["cluster_index"]) {
-          t_clusname = "cluster_index"
-        }
-        if (t_clusname) {
-          // values (we assume they are cluster numbers)
-          t_cnumbers = Object.keys(tmpVals[t_type][t_clusname].map)
-
-          // add label names (TODO use cluster_label if present
-          //                 £POSS, use maxsize node label if absent)
-          for (var l in t_cnumbers) {
-            var t_cnumber = t_cnumbers[l]
-
-            var newTick = {
-              'labl': `${t_type}||${t_clusname}||${t_cnumber}`,
-              'val': t_cnumber,
-              // val2ids: [nid5,nid27..]
-              'nids': tmpVals[t_type][TW.nodeClusAtt].map[t_cnumber]
-            }
-            allTicks.push(newTick)
-          }
-
-          TW.Clusters[t_type] = {}
-          TW.Clusters[t_type]["clust_default"] = allTicks
-        }
-      }
-    }
-
-
-    // 2) all scanned
+    // all scanned attributes get an inverted index
     for (var cat in tmpVals) {
       if (!TW.Clusters[cat])    TW.Clusters[cat] = {}
 
@@ -637,7 +598,17 @@ function dictfyGexf( gexf , categories ){
           }
         }
       }
+
+      // 'clust_default' is an alias to the user-defined default clustering
+      if (TW.nodeClusAtt != undefined
+          && TW.Clusters[cat][TW.nodeClusAtt]   // <= if found in data
+          && !TW.Clusters[cat]['clust_default'] // <= and if an attr named 'clust_default' was not already in data
+        ) {
+        TW.Clusters[cat]['clust_default'] = TW.Clusters[cat][TW.nodeClusAtt]
+      }
+
     }
+
 
     if (TW.debugFlags.logFacets) {
       var classvalues_fin = performance.now()

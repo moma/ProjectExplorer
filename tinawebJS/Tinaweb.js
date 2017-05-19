@@ -654,6 +654,7 @@ TinaWebJS = function ( sigmacanvas ) {
 
         document.getElementById('edges-switch').checked = TW.customSettings.drawEdges
 
+        // £TODO test if still needed
         $("#semLoader").hide();
 
         $("#closeloader").click();
@@ -674,7 +675,8 @@ TinaWebJS = function ( sigmacanvas ) {
         $("#changetype").click(function(){
             console.log("")
             console.log(" ############  changeTYPE click");
-            partialGraph.stopForceAtlas2();
+            if (TW.partialGraph.isForceAtlas2Running())
+                sigma_utils.ourStopFA2();
             changeType();
 
             setTimeout(function(){

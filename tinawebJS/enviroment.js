@@ -569,7 +569,7 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
 
                   // [ Stopping FA2 ]
                   if (TW.partialGraph.isForceAtlas2Running())
-                      TW.partialGraph.stopForceAtlas2();
+                      sigma_utils.ourStopFA2();
                   // [ / Stopping FA2 ]
 
                   var t0 = lastvalue.split("-")
@@ -774,7 +774,8 @@ function NodeWeightFilter( sliderDivID , tgtNodeType ,  criteria) {
                 }
 
                 // [ Stopping FA2 ]
-                TW.partialGraph.stopForceAtlas2();
+                if (TW.partialGraph.isForceAtlas2Running())
+                    sigma_utils.ourStopFA2();
                 // [ / Stopping FA2 ]
 
 

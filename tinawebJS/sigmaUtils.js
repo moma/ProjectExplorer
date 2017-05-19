@@ -500,8 +500,12 @@ SigmaUtils = function () {
 
 
       this.ourStopFA2 = function() {
-        document.getElementById('layoutwait').remove()
         TW.partialGraph.stopForceAtlas2();
+
+        try {
+          document.getElementById('layoutwait').remove()
+        }
+        catch(e) {}
 
         // restore edges if needed
         if (document.getElementById('edges-switch').checked) {
@@ -698,10 +702,12 @@ function exactfind(label) {
 
 
 function getNodeLabels(elems){
-    console.log(elems)
+
     var labelss=[]
     for(var i in elems){
-        console.log(elems[i])
+
+        console.debug(i, elems[i])
+
         var id=(!isUndef(elems[i].id))?elems[i].id:i
         labelss.push(TW.Nodes[id].label)
     }
