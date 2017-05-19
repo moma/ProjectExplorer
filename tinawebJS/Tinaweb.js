@@ -652,7 +652,7 @@ TinaWebJS = function ( sigmacanvas ) {
 
         var SelInst = new SelectionEngine();
 
-        document.getElementById('edges-switch').checked = customSettings.drawEdges
+        document.getElementById('edges-switch').checked = TW.customSettings.drawEdges
 
         $("#semLoader").hide();
 

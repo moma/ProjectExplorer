@@ -175,12 +175,12 @@ function scanGexf(gexfContent) {
 
     let elsNodes = gexfContent.getElementsByTagName('nodes');
     // console.debug('>>> tr: elsNodes', elsNodes) // <<<
-    for(i=0; i<elsNodes.length; i++){
+    for(var i=0; i<elsNodes.length; i++){
         var elNodes = elsNodes[i];  // Each xml node 'nodes' (plural)
         let node = elNodes.getElementsByTagName('node');
-        for(j=0; j<node.length; j++){
+        for(var j=0; j<node.length; j++){
             let attvalueNodes = node[j].getElementsByTagName('attvalue');
-            for(k=0; k<attvalueNodes.length; k++){
+            for(var k=0; k<attvalueNodes.length; k++){
                 let attvalueNode = attvalueNodes[k];
                 let attr = attvalueNode.getAttribute('for');
                 let val = attvalueNode.getAttribute('value');
@@ -1014,7 +1014,7 @@ function makeSystemStates (cats) {
 
         let bin_array = [];
         let toadd = cats.length-bin_splitted.length;
-        for (k = 0; k < toadd; k++)
+        for (var k = 0; k < toadd; k++)
             bin_array.push("0")
 
         for(var j in bin)
