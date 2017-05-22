@@ -623,8 +623,8 @@ function dictfyGexf( gexf , categories ){
     }
 
 
-    // £TODO second shared function: createRelations() (same for gexf/json)
-
+    // looping source edges to conforming edge
+    // then updateRelations
     var edgeId = 0;
     var edgesNodes = gexf.getElementsByTagName('edges');
 
@@ -959,45 +959,4 @@ function dictfyJSON( data , categories ) {
     if(bipartiteN2D) resDict.N2D = bipartiteN2D;
 
     return resDict;
-}
-
-// to move
-function buildInitialState( categories ) {
-    var firstState = []
-    for(var i=0; i<categories.length ; i++) {
-        if(i==0) firstState.push(true)
-        else firstState.push(false)
-    }
-    return firstState;
-}
-
-//to move
-function makeSystemStates (cats) {
-    var systemstates = {}
-    var N=Math.pow(2 , cats.length);
-
-    for (i = 0; i < N; i++) {
-
-        let bin = (i).toString(2)
-        let bin_splitted = []
-        for(var j in bin)
-            bin_splitted.push(bin[j])
-
-        let bin_array = [];
-        let toadd = cats.length-bin_splitted.length;
-        for (var k = 0; k < toadd; k++)
-            bin_array.push("0")
-
-        for(var j in bin)
-            bin_array.push(bin[j])
-
-        bin_array = bin_array.map(Number)
-        let sum = bin_array.reduce(function(a, b){return a+b;})
-
-        if( sum != 0 && sum < 3) {
-            let id = bin_array.join("|")
-            systemstates[id] = bin_array.map(Boolean)
-        }
-    }
-    return systemstates;
 }

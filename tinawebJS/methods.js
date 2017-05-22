@@ -89,27 +89,30 @@ function cancelSelection (fromTagCloud, settings) {
 // returns the name(s) of active types
 // this area is quite underspecified so we assume here
 //   - that all typenames have a mapping to cat[0] (terms) or cat[1] (contexts)
-//   - that currentState.type is an array of 2 bools for the currently displayed cat(s)
+//   - that currentState.activetypes is an array of 2 bools for the currently displayed cat(s)
 // TODO transform result into array in all cases
-function getCurrentType() {
+function getActivetypesName() {
   let currentTypes = []
   let currentTypeIdx
   let lastState = TW.partialGraph.states.slice(-1)[0]
 
   for (var possType in TW.catDict) {
     currentTypeIdx = TW.catDict[possType]
-    if (lastState.type[currentTypeIdx]) {
+    if (lastState.activetypes[currentTypeIdx]) {
       currentTypes.push(possType)
     }
   }
 
+
+  // ex: 'Document' or 'Ngrams' or 'Document-Ngrams'
   return currentTypes.join('-')
 }
 
-function getCurrentTypeString() {
+function getActivetypesKey() {
   let lastState = TW.partialGraph.states.slice(-1)[0]
 
-  return lastState.type.map(Number).join('|')
+  // ex: '1'        or  '0|1'   or   '1|1'
+  return lastState.activetypes.map(Number).join('|')
 }
 
 
@@ -519,10 +522,10 @@ function graphTagCloudElem(nodes) {
 
     var catDict = TW.catDict;
     var type = TW.Nodes[ndsids[0]].type;
-    var next_state = [];
+    var nextTypes = [];
     for(var c in catDict)
-        next_state.push( c==type )
-    var str_nextstate = next_state.map(Number).join("|")
+        nextTypes.push( c==type )
+    var nextTypesKey = nextTypes.map(Number).join("|")
 
     // £TODO fix low-level selectionlogic duplicate with MultipleSelection2 function 1/2
     // Dictionaries of: selection+neighbors
@@ -531,7 +534,7 @@ function graphTagCloudElem(nodes) {
     var voisinage = {}
     for(var i in ndsids) {
         let nid = ndsids[i];
-        let neigh = TW.Relations[str_nextstate][nid]
+        let neigh = TW.Relations[nextTypesKey][nid]
         if(neigh) {
             for(var j in neigh) {
                 t = neigh[j]
@@ -551,7 +554,7 @@ function graphTagCloudElem(nodes) {
 
     // old strategy recreated a graph with the selected and its neighbors:
     //  we know do it only if type is different
-    if (str_nextstate != getCurrentTypeString()) {
+    if (nextTypesKey != getActivetypesKey()) {
       TW.partialGraph.graph.clear();
       for(var nid in nodes_2_colour)
           add1Elem(nid)
@@ -591,12 +594,12 @@ function graphTagCloudElem(nodes) {
     TW.partialGraph.states[avantlastpos] = {};
     TW.partialGraph.states[avantlastpos].selections = present.selections;
     TW.partialGraph.states[avantlastpos].level = present.level;
-    TW.partialGraph.states[avantlastpos].type = present.type;
+    TW.partialGraph.states[avantlastpos].activetypes = present.activetypes;
     TW.partialGraph.states[avantlastpos].opposites = present.opposites;
 
     // recording the new state
     TW.partialGraph.states[lastpos].setState({
-        type: next_state,
+        activetypes: nextTypes,
         level: false,  // forced macro
         sels: Object.keys(selections),
         oppos: []

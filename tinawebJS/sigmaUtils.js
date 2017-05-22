@@ -4,7 +4,7 @@ SigmaUtils = function () {
     this.nbCats = 0;
 
     // input = GEXFstring
-    this.FillGraph = function( initialState , catDict  , nodes, edges , graph ) {
+    this.FillGraph = function( initialActivetypes , catDict  , nodes, edges , graph ) {
 
         console.log("Filling the graaaaph:")
         console.log("FillGraph catDict",catDict)
@@ -14,7 +14,7 @@ SigmaUtils = function () {
             var n = nodes[i];
             // console.debug('tr >>> fgr node', n)
 
-            if(initialState[catDict[n.type]] || TW.debugFlags.initialShowAll) {
+            if(initialActivetypes[catDict[n.type]] || TW.debugFlags.initialShowAll) {
                 // var node = {
                 //     id : n.id,
                 //     label : n.label,
@@ -40,35 +40,17 @@ SigmaUtils = function () {
             }
         }
 
-        var typeNow = initialState.map(Number).join("|")
 
-        for(var i in TW.Relations[typeNow]) {
+        // the typestring of the activetypes is the key to stored Relations (<=> edges)
+        var activetypesKey = initialActivetypes.map(Number).join("|")
+
+        for(var i in TW.Relations[activetypesKey]) {
             let s = i;
-            for(var j in TW.Relations[typeNow][i]) {
-                let t = TW.Relations[typeNow][i][j]
+            for(var j in TW.Relations[activetypesKey][i]) {
+                let t = TW.Relations[activetypesKey][i][j]
                 let e = TW.Edges[s+";"+t]
                 if(e) {
                     if(e.source != e.target) {
-                        // var edge = {
-                        //
-                        //     // sigma mandatory properties
-                        //     id : e.id,
-                        //     source : e.source,
-                        //     target : e.target,
-                        //
-                        //     // sigma optional properties
-                        //     hidden : false,
-                        //     color : e.color,
-                        //     weight : e.weight,
-                        //     // size : e.size,
-                        //
-                        //     // twjs additional properties
-                        //     type : e.type,
-                        //     customAttrs : e.customAttrs
-                        // }
-
-                        // console.log("edge.color", edge.color)
-
                         graph.edges.push( e);
                     }
                 }
@@ -892,7 +874,7 @@ function repaintEdges() {
 function colorsRelByBins(daclass) {
   var binColors
   var doModifyLabel = false
-  var ty = getCurrentType()
+  var ty = getActivetypesName()
 
   // our binning
   var tickThresholds = TW.Clusters[ty][daclass]

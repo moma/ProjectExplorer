@@ -29,7 +29,7 @@ function changeGraphAppearanceByFacets( manualflag ) {
 
     // create colormenu
 
-    var ty = getCurrentType()
+    var ty = getActivetypesName()
 
     var color_menu_info = '<li><a href="#" onclick="graphResetColor()">By Default</a></li>';
 
@@ -144,11 +144,11 @@ function SomeEffect( ValueclassCode ) {
         iClu=Number(raw[2]);
 
 
-    // also get node type code from env (ie "1", "1|1", etc for TW.Relations lookup)
-    var present = TW.partialGraph.states.slice(-1)[0]; // Last
-    var type_t0 = present.type;
-    var str_type_t0 = type_t0.map(Number).join("|")
-    // console.log( "\t"+str_type_t0)
+
+    // £TODO factorizable: always the same loop for neighbors this should be handled by a sub of MultipleSelection2
+    // get the active types code from current state (ie "1", "1|1", etc for TW.Relations lookup)
+    var activetypesKey = getActivetypesKey()
+    // console.log( "\t"+activetypesKey)
 
     // we have our precomputed idmaps for nodes_2_colour
     // -------------------------------------------------
@@ -167,8 +167,8 @@ function SomeEffect( ValueclassCode ) {
             n.customAttrs['highlight'] = true;
         }
 
-        if(TW.Relations[str_type_t0] && TW.Relations[str_type_t0][nid] ) {
-            neigh = TW.Relations[str_type_t0][nid]
+        if(TW.Relations[activetypesKey] && TW.Relations[activetypesKey][nid] ) {
+            neigh = TW.Relations[activetypesKey][nid]
             if(neigh) {
                 for(j in neigh) {
                     tgt_nid = neigh[j]
@@ -250,7 +250,7 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
         daclass = "louvain"
 
     // usually 'terms' or current display among TW.categories
-    var curType = getCurrentType()
+    var curType = getActivetypesName()
 
     // all infos in a bin array
     var legendInfo = []

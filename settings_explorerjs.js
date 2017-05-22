@@ -38,12 +38,11 @@ var TW = {}
     // TODO more generic module integrating the variants cf. experiments/histogramModule_STUB_GENERIQUE
     TW.DivsFlags["crowdsourcingModule"] = false ;
 
-    TW.SystemStates = {}
-    TW.SystemStates.level = true;
-    // TW.SystemStates.type = [ true ] //[ true , false ]; //social activated!
-    TW.SystemStates.type = [ true, false ] //[ true , false ]; //social activated!
-    TW.SystemStates.selections = [];
-    TW.SystemStates.opposites = [];
+    TW.SystemState = {}
+    TW.SystemState.level = true;
+    TW.SystemState.type = [ true, false ] // usually overridden by makeSystemStates
+    TW.SystemState.selections = [];
+    TW.SystemState.opposites = [];
     TW.catSoc = "Document";
     TW.catSem = "NGram";
 

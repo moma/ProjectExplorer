@@ -84,8 +84,8 @@ function changeType() {
 
     var level = present.level;
     var sels = present.selections
-    var type_t0 = present.type;
-    var str_type_t0 = type_t0.map(Number).join("|")
+    var t0Activetypes = present.activetypes;
+    var t0ActivetypesKey = t0Activetypes.map(Number).join("|")
 
 
     console.debug("CHANGE TYPE, present.selections", present.selections)
@@ -96,32 +96,32 @@ function changeType() {
     // type "grammar"
     //     used to distinguish types in TW.Relations
 
-    // types eg [true]          <=> '1'
-    //          [true, true]    <=> '1|1'
-    //          [true, false]   <=> '1|0'
+    // activetypes eg [true]          <=> key '1'
+    //                [true, true]    <=> key '1|1'
+    //                [true, false]   <=> key '1|0'
 
     // Complement of the received state ~[X\Y] )
-    var type_t1 = []
-    for(var i in type_t0) type_t1[i] = !type_t0[i]
-    var str_type_t1 = type_t1.map(Number).join("|")
+    var t1Activetypes = []
+    for(var i in t0Activetypes) t1Activetypes[i] = !t0Activetypes[i]
+    var t1ActivetypesKey = t1Activetypes.map(Number).join("|")
 
     var binSumCats = []
-    for(var i in type_t0)
-        binSumCats[i] = (type_t0[i]||type_t1[i])
+    for(var i in t0Activetypes)
+        binSumCats[i] = (t0Activetypes[i]||t1Activetypes[i])
     var str_binSumCats = binSumCats.map(Number).join("|")
 
     var nextState = []
-    if(level) nextState = type_t1;
+    if(level) nextState = t1Activetypes;
     else nextState = binSumCats;
 
     if(!level && past!=false) {
-        var sum_past = present.type.map(Number).reduce(function(a, b){return a+b;})
+        var sum_past = present.activetypes.map(Number).reduce(function(a, b){return a+b;})
         console.log("sum_past:")
         console.log(sum_past)
-        console.log("past.type:")
-        console.log(past.type)
+        console.log("past.activetypes:")
+        console.log(past.activetypes)
         if(sum_past>1) {
-            nextState = past.type;
+            nextState = past.activetypes;
         }
     }
     var str_nextState = nextState.map(Number).join("|")
@@ -161,32 +161,32 @@ function changeType() {
     if(present.level) { //If level=Global, fill all {X}-component
 
         for(var nid in TW.Nodes) {
-            if(type_t1[TW.catDict[TW.Nodes[nid].type]]) {
+            if(t1Activetypes[TW.catDict[TW.Nodes[nid].type]]) {
               add1Elem(nid)
             }
         }
         for(var eid in TW.Edges) {
 
-            if(TW.Edges[eid].categ==str_type_t1)
+            if(TW.Edges[eid].categ==t1ActivetypesKey)
                 add1Elem(eid)
         }
     } else /* Local level, change to previous or alter component*/ {
         if(sels.length==0) {
             console.log(" * * * * * * * * * * * * * * ")
             console.log("the past: ")
-            console.log(past.type.map(Number)+" , "+past.level)
+            console.log(past.activetypes.map(Number)+" , "+past.level)
             console.log(past)
 
             console.log("the present: ")
-            console.log(present.type.map(Number)+" , "+present.level)
+            console.log(present.activetypes.map(Number)+" , "+present.level)
             console.log(present)
 
-            console.log("str_type_t0: "+str_type_t0)
-            console.log("str_type_t1: "+str_type_t1)
+            console.log("t0ActivetypesKey: "+t0ActivetypesKey)
+            console.log("t1ActivetypesKey: "+t1ActivetypesKey)
             console.log("str_nextState: "+str_nextState)
 
             var newsels = {}
-            var sumpastcat = type_t0.map(Number).reduce(function(a, b){return a+b;})
+            var sumpastcat = t0Activetypes.map(Number).reduce(function(a, b){return a+b;})
             if(sumpastcat==1) /* change to alter comp*/ {
                 for(var i in prevnodes) {
                     s = i;
@@ -201,7 +201,7 @@ function changeType() {
 
                 for(var i in nodes_2_colour) {
                     s = i;
-                    neigh = TW.Relations[str_type_t1][s]
+                    neigh = TW.Relations[t1ActivetypesKey][s]
                     if(neigh) {
                         for(var j in neigh) {
                             t = neigh[j]
@@ -219,7 +219,7 @@ function changeType() {
                 for(var eid in edges_2_colour)
                     add1Elem(eid)
 
-                nextState = type_t1;
+                nextState = t1Activetypes;
 
             }
 
@@ -236,19 +236,19 @@ function changeType() {
         // console.log(sels)
 
         // Defining the new selection (if it's necessary)
-        var sumCats = type_t0.map(Number).reduce(function(a, b){return a+b;})
+        var sumCats = t0Activetypes.map(Number).reduce(function(a, b){return a+b;})
         var sumFutureCats = nextState.map(Number).reduce(function(a, b){return a+b;})
 
-        nextState = (sumFutureCats==2 && !level && sumCats==1 )? nextState : type_t1;
-        if(str_type_t1=="0|0" ) nextState=past.type;
-        // nextState = ( past.type && !level && sumCats==1 )? past.type : type_t1;
+        nextState = (sumFutureCats==2 && !level && sumCats==1 )? nextState : t1Activetypes;
+        if(t1ActivetypesKey=="0|0" ) nextState=past.activetypes;
+        // nextState = ( past.activetypes && !level && sumCats==1 )? past.activetypes : t1Activetypes;
         str_nextState = nextState.map(Number).join("|")
         var sumNextState = nextState.map(Number).reduce(function(a, b){return a+b;})
 
         // [ ChangeType: incremental selection ]
         if(sumCats==1 && sumNextState<2) {
 
-            var indexCat = str_binSumCats;//(level)? str_type_t1 : str_binSumCats ;
+            var indexCat = str_binSumCats;//(level)? t1ActivetypesKey : str_binSumCats ;
             // Dictionaries of: opposite-neighs of current selection
             var newsels = {}
             for(var i in sels) {
@@ -334,11 +334,11 @@ function changeType() {
     TW.partialGraph.states[avantlastpos].LouvainFait = false;
     TW.partialGraph.states[avantlastpos].level = present.level;
     TW.partialGraph.states[avantlastpos].selections = selsbackup;
-    TW.partialGraph.states[avantlastpos].type = present.type;
+    TW.partialGraph.states[avantlastpos].activetypes = present.activetypes;
     TW.partialGraph.states[avantlastpos].opposites = present.opposites;
 
     TW.partialGraph.states[lastpos].setState({
-        type: nextState,
+        activetypes: nextState,
         level: level,
         sels: Object.keys(selections),
         oppos: []
@@ -389,13 +389,13 @@ function changeLevel() {
       // types eg [true]          <=> '1'
       //          [true, true]    <=> '1|1'
 
-      var type_t0 = present.type;
-      var str_type_t0 = type_t0.map(Number).join("|")
+      var t0Activetypes = present.activetypes;
+      var t0ActivetypesKey = t0Activetypes.map(Number).join("|")
 
       // [X|Y]-change (NOT operation over the received state [X\Y] )
-      var type_t1 = []
-      for(var i in type_t0) type_t1[i] = !type_t0[i]
-      var str_type_t1 = type_t1.map(Number).join("|")
+      var t1Activetypes = []
+      for(var i in t0Activetypes) t1Activetypes[i] = !t0Activetypes[i]
+      var t1ActivetypesKey = t1Activetypes.map(Number).join("|")
 
       TW.partialGraph.graph.clear();
 
@@ -407,7 +407,7 @@ function changeLevel() {
       // POSS: factorize with same strategy in MultipleSelection2 beginning
       for(var i in sels) {
           s = sels[i];
-          neigh = TW.Relations[str_type_t0][s]
+          neigh = TW.Relations[t0ActivetypesKey][s]
           if(neigh) {
               for(var j in neigh) {
                   t = neigh[j]
@@ -452,12 +452,12 @@ function changeLevel() {
 
           // var t0 = performance.now()
           for(var nid in TW.Nodes) {
-              if(type_t0[TW.catDict[TW.Nodes[nid].type]])
+              if(t0Activetypes[TW.catDict[TW.Nodes[nid].type]])
                   // we add 1 by 1
                   add1Elem(nid)
           }
           for(var eid in TW.Edges) {
-              if(TW.Edges[eid].categ==str_type_t0)
+              if(TW.Edges[eid].categ==t0ActivetypesKey)
                   add1Elem(eid)
           }
 
@@ -484,11 +484,11 @@ function changeLevel() {
       TW.partialGraph.states[avantlastpos] = {};
       TW.partialGraph.states[avantlastpos].level = present.level;
       TW.partialGraph.states[avantlastpos].selections = present.selections;
-      TW.partialGraph.states[avantlastpos].type = present.type;
+      TW.partialGraph.states[avantlastpos].activetypes = present.activetypes;
       TW.partialGraph.states[avantlastpos].opposites = present.opposites;
 
       TW.partialGraph.states[lastpos].setState({
-          type: present.type,
+          activetypes: present.activetypes,
           level: futurelevel,
           sels: Object.keys(selections),
           oppos: []

@@ -398,8 +398,10 @@ function mainStartGraph(inFormat, inData, twInstance) {
         TW.categories = []
         TW.catDict = {}
       }
-      var possibleStates = makeSystemStates( TW.categories )
-      var initialState = buildInitialState( TW.categories ) //[true,false]//
+
+      // possible typestates as a child of scenario states
+      var possibleActivetypes = TW.instance.allPossibleActivetypes( TW.categories )
+      var initialActivetypes = TW.instance.initialActivetypes( TW.categories ) //[true,false]//
 
       // XML parsing from ParseCustom
       var dicts = start.makeDicts(TW.categories); // > parse json or gexf, dictfy
@@ -468,13 +470,13 @@ function mainStartGraph(inFormat, inData, twInstance) {
       // NB new sigma.js: autoResize (no need for AdjustSigmaCanvas + sigmaLimits)
 
       // console.log("categories: "+categories)
-      // console.log("initial state: "+initialState)
+      // console.log("initial types: "+initialTypes)
 
       // [ Poblating the Sigma-Graph ]
 
       // preparing the data and settings
       TW.graphData = {nodes: [], edges: []}
-      TW.graphData = sigma_utils.FillGraph(  initialState , TW.catDict  , TW.Nodes , TW.Edges , TW.graphData );
+      TW.graphData = sigma_utils.FillGraph( initialActivetypes , TW.catDict  , TW.Nodes , TW.Edges , TW.graphData );
 
 
           // // ----------- TEST stock parse gexf and use nodes to replace TW's ---------
@@ -579,37 +581,43 @@ function mainStartGraph(inFormat, inData, twInstance) {
       // POSS make it TW.states
       TW.partialGraph.states = []
       TW.partialGraph.states[0] = false;
-      TW.partialGraph.states[1] = TW.SystemStates;
 
-      // can be COMMENTED OUT: in specifications categories never change so states shouldn't need them
-      // TW.partialGraph.states[1].categories = TW.categories
-      // TW.partialGraph.states[1].categoriesDict = TW.catDict;
+      // from settings_explorer (everything except the type)
+      TW.partialGraph.states[1] = TW.SystemState
 
-      // here 'type' means: the categorie(s) that is (are) currently displayed
-      TW.partialGraph.states[1].type = initialState;
+      // activetypes: the node categorie(s) that is (are) currently displayed
+      TW.partialGraph.states[1].activetypes = initialActivetypes ;
       TW.partialGraph.states[1].LouvainFait = false;
 
-      // by default category0 is the initial type
-      $(".category1").hide();
+      // NB specs: categories don't change within a given 'states' array so we don't include them
+      // (new graph => new initialActivetypes => new array)
 
-      // now that we have a sigma instance, let's bind our handlers to it
+      // hide GUI elements of inactive types
+      for (var catId in initialActivetypes) {
+        if (!initialActivetypes[catId]) {
+          $(".for-nodecategory-"+catId).hide();
+        }
+      }
+
+      // now that we have a sigma instance, let's bind our click handlers to it
       TW.instance.SigmaListeners(TW.partialGraph)
 
       // [ / Poblating the Sigma-Graph ]
 
 
-      // ex called for new selections with args like:
-      //          (undefined, undefined, [268], undefined)
-      //             ^^^^
-      //          why type not used (monopart? deprecated?)
+      // signatures
+      // for new selections:  (undefined,     undefined,  [268],      undefined)
+      // for new activetypes: ([false, true], undefined,  undefined,  undefined)
+      // for new level:       (undefined,     false,      undefined,  undefined)
 
-      TW.partialGraph.states[1].setState = (function( type , level , sels , oppos ) {
-          var bistate=false, typestring=false;
+      // TODO: method never changes, shouldn't need to be inside each new state!
+      TW.partialGraph.states[1].setState = (function( activetypes , level , sels , oppos ) {
+          var bistate=false, typesKey=false;
           console.log("IN THE SET STATE METHOD:", this)
-          if(!isUndef(type)) {
-              this.type = type;
-              bistate= type.map(Number).reduce(function(a, b){return a+b;})
-              typestring = type.map(Number).join("|")
+          if(!isUndef(activetypes)) {
+              this.activetypes = activetypes;
+              bistate= activetypes.map(Number).reduce(function(a, b){return a+b;})
+              typesKey = activetypes.map(Number).join("|")
           }
           if(!isUndef(level)) this.level = level;
           if(!isUndef(sels)) this.selections = sels;
@@ -617,7 +625,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
           this.LouvainFait = false;
           // console.log("")
           // console.log(" % % % % % % % % % % ")
-          // console.log("setState type: ", type);
+          // console.log("setState activetypes: ", activetypes);
           // console.log("bistate: "+bistate)
           // console.log("level: "+level);
           // console.log("selections: ");
@@ -635,7 +643,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
           // console.log(" % % % % % % % % % % ")
           // console.log("")
 
-          var bistate= this.type.map(Number).reduce(function(a, b){return a+b;})
+          var bistate= this.activetypes.map(Number).reduce(function(a, b){return a+b;})
           LevelButtonDisable(false);
           if(level && sels && sels.length==0)
               LevelButtonDisable(true);
@@ -644,7 +652,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
               LevelButtonDisable(true)
 
           // console.log("printing the first state:")
-          // first_state = TW.partialGraph.states.slice(-1)[0].type;
+          // first_state = TW.partialGraph.states.slice(-1)[0].activetypes;
           // for(var i in first_state) {
           //     if(first_state[i]) {
           //         for(var j in Filters[i])
@@ -653,36 +661,36 @@ function mainStartGraph(inFormat, inData, twInstance) {
           // }
 
 
-          // console.log("printing the typestring:", typestring)
+          // console.log("printing the typesKey:", typesKey)
 
 
+          // recreate sliders after activetype or level changes
           if (TW.filterSliders
               && (present.level != past.level
-                  || present.type.map(Number).join("|") != past.type.map(Number).join("|"))) {
+                  || present.activetypes.map(Number).join("|") != past.activetypes.map(Number).join("|"))) {
 
-            // recreate sliders after type, level changes
 
             // terms
-            if(typestring=="0|1") {
+            if(typesKey=="0|1") {
                 $(".category0").hide();
                 $(".category1").show();
 
 
                 NodeWeightFilter( "#slidercat1nodesweight" ,  TW.categories[1], "size");
-                EdgeWeightFilter("#slidercat1edgesweight", typestring, "weight");
+                EdgeWeightFilter("#slidercat1edgesweight", typesKey, "weight");
             }
 
             // docs
-            if(typestring=="1|0") {
+            if(typesKey=="1|0") {
                 $(".category0").show();
                 $(".category1").hide();
 
                 NodeWeightFilter( "#slidercat0nodesweight" ,  TW.categories[0], "size");
-                EdgeWeightFilter("#slidercat0edgesweight", typestring, "weight");
+                EdgeWeightFilter("#slidercat0edgesweight", typesKey, "weight");
             }
 
             // terms and docs
-            if(typestring=="1|1") {
+            if(typesKey=="1|1") {
                 $(".category0").show();
                 $(".category1").show();
                 NodeWeightFilter( "#slidercat0nodesweight" ,  TW.categories[0], "size");
@@ -747,9 +755,6 @@ function mainStartGraph(inFormat, inData, twInstance) {
 
       // REFA new sigma.js
       TW.partialGraph.camera.goTo({x:0, y:0, ratio:0.9, angle: 0})
-
-
-      $("#category1").hide();
 
       // mostly json data are extracts provided by DB apis => no positions
       if (inFormat == "json")  TW.fa2enabled = true

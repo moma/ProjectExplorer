@@ -168,9 +168,9 @@ function SelectionEngine() {
         // type:[0]}
 
 
-        var typeNow = TW.partialGraph.states.slice(-1)[0].type.map(Number).join("|")
+        var activetypesKey = getActivetypesKey()
         // console.log ("console.loging the Type:")
-        // console.log (typeNow)
+        // console.log (activetypesKey)
         // console.log (" - - - - - - ")
         // Dictionaries of: selection+neighbors
 
@@ -189,8 +189,8 @@ function SelectionEngine() {
             for(var i in ndsids) {
                 var s = ndsids[i];
 
-                if(TW.Relations[typeNow] && TW.Relations[typeNow][s] ) {
-                    var neigh = TW.Relations[typeNow][s]
+                if(TW.Relations[activetypesKey] && TW.Relations[activetypesKey][s] ) {
+                    var neigh = TW.Relations[activetypesKey][s]
                     if(neigh) {
                         for(var j in neigh) {
                             var t = neigh[j]
@@ -1021,7 +1021,7 @@ TinaWebJS = function ( sigmacanvas ) {
                            );
 
         EdgeWeightFilter("#slidercat0edgesweight",
-                          getCurrentTypeString(),
+                          getActivetypesKey(),
                           "weight"
                         );
       }
@@ -1056,5 +1056,48 @@ TinaWebJS = function ( sigmacanvas ) {
 
       cancelSelection(false);
     }
+
+
+    this.initialActivetypes = function( categories ) {
+        var firstActivetypes = []
+        for(var i=0; i<categories.length ; i++) {
+            if(i==0) firstActivetypes.push(true)  // <==> show the cat stored in 0
+            else firstActivetypes.push(false)     // <==> hide the cat stored in 1
+        }
+        console.debug('firstActivetypes', firstActivetypes)
+        return firstActivetypes;
+    }
+
+    this.allPossibleActivetypes = function (cats) {
+        if (TW.debugFlags.logSettings) console.debug(`allPossibleActivetypes(cats=${cats})`)
+        var possibleActivetypes = {}
+        var N=Math.pow(2 , cats.length);
+
+        for (i = 0; i < N; i++) {
+
+            let bin = (i).toString(2)
+            let bin_splitted = []
+            for(var j in bin)
+                bin_splitted.push(bin[j])
+
+            let bin_array = [];
+            let toadd = cats.length-bin_splitted.length;
+            for (var k = 0; k < toadd; k++)
+                bin_array.push("0")
+
+            for(var j in bin)
+                bin_array.push(bin[j])
+
+            bin_array = bin_array.map(Number)
+            let sum = bin_array.reduce(function(a, b){return a+b;})
+
+            if( sum != 0 && sum < 3) {
+                let id = bin_array.join("|")
+                possibleActivetypes[id] = bin_array.map(Boolean)
+            }
+        }
+        return possibleActivetypes;
+    }
+
 
 };
