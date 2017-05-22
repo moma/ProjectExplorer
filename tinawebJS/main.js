@@ -98,6 +98,10 @@ TW.instance = new TinaWebJS('#sigma-contnr');
 // add once our tw rendering and index customizations into sigma module
 TW.instance.init()
 
+// init the button, sliders and search handlers, also only once
+TW.instance.initGUIListeners();
+TW.instance.initSearchListeners();
+
 // show the custom name of the app
 writeBrand(TW.branding)
 
@@ -108,58 +112,19 @@ console.log("Starting TWJS")
 // if page is being run locally ==> only possible source shall be via file input
 if (window.location.protocol == 'file:') {
 
+  let inputDiv = document.getElementById('localInput')
+  inputDiv.style.display = 'block'
+
+  var remark = document.createElement("p")
+  remark.innerHTML = `You're running project explorer as a local html file (no syncing).`
+  remark.classList.add('comment')
+  remark.classList.add('centered')
+  inputDiv.appendChild(remark)
+
+  // user can open a gexf or json from his fs
   // POSS we could actually provide this local file chooser in all cases
-  var graphFileInput = document.createElement('input')
-
-  graphFileInput.id = 'localgraphfile'
-  graphFileInput.type = 'file'
-  graphFileInput.accept = 'application/xml,application/gexf,application/json'
-
-  document.getElementById('gexfs').appendChild(graphFileInput)
-
-  // NB file input will trigger mainStartGraph() when the user chooses something
-  graphFileInput.onchange = function() {
-    if (this.files && this.files[0]) {
-
-      let clientLocalGraphFile = this.files[0]
-
-      // determine the format
-      let theFormat
-      if (/\.(?:gexf|xml)$/.test(clientLocalGraphFile.name)) {
-        theFormat = 'gexf'
-      }
-      else if (/\.json$/.test(clientLocalGraphFile.name)) {
-        theFormat = 'json'
-      }
-      else {
-        alert('unrecognized file format')
-      }
-
-      // retrieving the content
-      let rdr = new FileReader()
-
-      rdr.onload = function() {
-        if (! rdr.result ||  !rdr.result.length) {
-          alert('the selected file is not readable')
-        }
-        else {
-          // we might have a previous graph opened
-          if (TW.partialGraph && TW.partialGraph.graph) {
-            TW.partialGraph.graph.clear()
-            TW.partialGraph.refresh()
-            selections = []
-          }
-
-          // run
-          if (theFormat == 'json')
-            mainStartGraph(theFormat, JSON.parse(rdr.result), TW.instance)
-          else
-            mainStartGraph(theFormat, rdr.result, TW.instance)
-        }
-      }
-      rdr.readAsText(clientLocalGraphFile)
-    }
-  }
+  var graphFileInput = createFilechooserEl()
+  inputDiv.appendChild(graphFileInput)
 }
 // traditional cases: remote read from API or prepared server-side file
 else {
@@ -627,6 +592,9 @@ function mainStartGraph(inFormat, inData, twInstance) {
       // by default category0 is the initial type
       $(".category1").hide();
 
+      // now that we have a sigma instance, let's bind our handlers to it
+      TW.instance.SigmaListeners(TW.partialGraph)
+
       // [ / Poblating the Sigma-Graph ]
 
 
@@ -780,7 +748,8 @@ function mainStartGraph(inFormat, inData, twInstance) {
       // REFA new sigma.js
       TW.partialGraph.camera.goTo({x:0, y:0, ratio:0.9, angle: 0})
 
-      twInstance.initListeners(TW.categories , TW.partialGraph);
+
+      $("#category1").hide();
 
       // mostly json data are extracts provided by DB apis => no positions
       if (inFormat == "json")  TW.fa2enabled = true

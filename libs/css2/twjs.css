@@ -269,6 +269,21 @@ p.micromessage{
     font-size:80%;
 }
 
+
+#localInput {
+    font-size: 80%;
+    padding: 10px;
+}
+
+#localgraphfile {
+  margin-left: auto ;
+  margin-right: auto ;
+}
+
+.comment {
+  padding: 10px
+}
+
 .centered {
   text-align: center;
 }

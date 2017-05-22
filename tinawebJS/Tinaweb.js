@@ -470,28 +470,14 @@ TinaWebJS = function ( sigmacanvas ) {
       if (TW.debugFlags.logSettings) console.log('tw renderers registered in sigma module')
     }
 
-    this.SearchListeners = function () {
+    this.initSearchListeners = function () {
 
-        // REFA tempo expose
-        // var SelInst = new SelectionEngine();
-        SelInst = new SelectionEngine();
-
-        //~ $.ui.autocomplete.prototype._renderItem = function(ul, item) {
-            //~ var searchVal = $("#searchinput").val();
-            //~ var desc = extractContext(item.desc, searchVal);
-            //~ return $('<li onclick=\'var s = "'+item.label+'"; search(s);$("#searchinput").val(strSearchBar);\'></li>')
-            //~ .data('item.autocomplete', item)
-            //~ .append("<a><span class=\"labelresult\">" + item.label + "</span></a>" )
-            //~ .appendTo(ul);
-        //~ };
+        var SelInst = new SelectionEngine();
 
         $('input#searchinput').autocomplete({
             source: function(request, response) {
-                // console.log("in autocomplete:")
-
                 // labels initialized in settings, filled in updateSearchLabels
                 // console.log(labels.length)
-                // console.log(" - - - - - - - - - ")
                 matches = [];
                 var matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i");
                 // grep at heart
@@ -646,18 +632,8 @@ TinaWebJS = function ( sigmacanvas ) {
         });
     }
 
-    //  external usage: SelectorEngine*() , MultipleSelection2() ,
-    //      enviroment.js:changeType()|changeLevel()|NodeWeightFilter()|EdgeWeightFilter
-    this.initListeners = function (categories, partialGraph) {
-
-        var SelInst = new SelectionEngine();
-
-        document.getElementById('edges-switch').checked = TW.customSettings.drawEdges
-
-        // £TODO test if still needed
-        $("#semLoader").hide();
-
-        $("#closeloader").click();
+    // to init handlers for tina GUI environment (run once on page load)
+    this.initGUIListeners = function () {
 
         var body=document.getElementsByTagName('body')[0];
         body.style.paddingTop="41px";
@@ -738,15 +714,7 @@ TinaWebJS = function ( sigmacanvas ) {
             }
         });
 
-
-        // £TODO test if still needed
-        pushSWClick("social");
-
-        cancelSelection(false);
-
         $("#tips").html(getTips());
-
-
 
         // a bit costly, TODO make conditional or deprecated
         // showMeSomeLabels(6);
@@ -756,180 +724,11 @@ TinaWebJS = function ( sigmacanvas ) {
 
         // #saveAs => toggle #savemodal initialized in html + bootstrap-native
 
-        this.SearchListeners();
-
         // button CENTER
         $("#lensButton").click(function () {
             // new sigma.js
             partialGraph.camera.goTo({x:0, y:0, ratio:1.2})
         });
-
-        // ---------------------------------------------------------------------
-        // new sigma.js: sigma events bindings
-        //               ---------------------
-
-        // cf. https://github.com/jacomyal/sigma.js/wiki/Events-API
-
-        // cases:
-        // 'click'    - simple click, early event
-        //              used for area (with global: cursor_size)
-        // 'clickNode'- simple click, second event if one node
-
-        // POSS easy in new sigma.js:
-        //       add doubleClick to select node + neighboors
-
-
-        // when circle area select
-        // ========================
-        // 1st event, even before we know if there are nodes
-        TW.partialGraph.bind('click', function(e) {
-          // console.log("sigma click event e", e)
-
-          // case with a selector circle cursor handled here
-          if (cursor_size > 0) {
-            // actual click position, but in graph coords
-            var x = e.data.x
-            var y = e.data.y
-
-            // convert
-            var camCoords = TW.cam.cameraPosition(x,y)
-
-            // retrieve area nodes, using indexed quadtree and global cursor_size
-            var circleNodes = circleGetAreaNodes(
-              camCoords.x,
-              camCoords.y
-            )
-
-            // 1) clear previous while keeping its list (useful iff 'Add' checkBox)
-            var previousSelection = selections
-            cancelSelection(false)
-
-            // 2) show selection + do all related effects
-            var targeted = SelInst.SelectorEngine( {
-                                addvalue:checkBox,
-                                currsels:circleNodes,
-                                prevsels:previousSelection
-                            } )
-            if(targeted.length>0) {
-              SelInst.MultipleSelection2( {nodes:targeted} )
-            }
-          }
-        })
-
-        // when one node and normal click
-        // ===============================
-        TW.partialGraph.bind('clickNode', function(e) {
-          // console.log("clickNode event e", e.data.node)
-
-          // new sigma.js gives easy access to clicked node!
-          var theNodeId = e.data.node.id
-
-          // we keep the global selections and then clear it and all its effects
-          var previousSelection = selections
-          cancelSelection(false, {norender:true}); // no need to render before MS2
-
-          if (cursor_size == 0) {
-            var targeted = SelInst.SelectorEngine( {
-                                addvalue:checkBox,
-                                currsels:[theNodeId],
-                                prevsels:previousSelection
-                            } )
-            if(targeted.length>0) {
-              SelInst.MultipleSelection2( {nodes:targeted} )
-            }
-          }
-          // case with a selector circle cursor handled
-          // just before, at click event
-        })
-
-        // when click in the empty background
-        // ==================================
-        if (TW.deselectOnclickStage) {
-          TW.partialGraph.bind('clickStage', function(e) {
-            // console.log("clickStage event e", e)
-
-            if (! e.data.captor.isDragging
-              && Object.keys(selections).length
-              && ! cursor_size) {
-
-              // we clear selections and all its effects
-              cancelSelection(false);
-            }
-          })
-        }
-
-        // for all TW.cam.goTo (move/zoom) events
-        //     ===============
-        var zoomTimeoutId = null
-        TW.cam.bind('coordinatesUpdated', function(e) {
-          $("#zoomSlider").slider("value",1/TW.cam.ratio)
-        })
-
-        // ---------------------------------------------------------------------
-
-        // POSS: bind to captors  (0=>mouse, 1=>touch)
-        // TW.rend.captors[0].bind('mousemove', function(e) {
-        //   console.log("mousemove event e", e.data.node)
-        //
-        // })
-
-        // ---------------------------------------------------------------------
-
-        // raw events (non-sigma): handlers attached to the container
-        // ==========
-        $("#sigma-contnr")
-
-            .mousemove(function(e){
-                if(!isUndef(partialGraph)) {
-                    // show/move selector circle cursor
-                    if(cursor_size>0) circleTrackMouse(e);
-                }
-            })
-
-        // POSSible for the future: add tools to contextmenu
-        //     .contextmenu(function(){
-        //         return false;
-        //     })
-
-        // sliders events
-        // ==============
-        $("#zoomSlider").slider({
-            orientation: "vertical",
-
-            // new sigma.js current zoom ratio
-            value: partialGraph.camera.ratio,
-            min: 1 / sigmaJsMouseProperties.maxRatio,   // ex x.5
-            max: 1 / sigmaJsMouseProperties.minRatio,   // ex x32
-            // range: true,
-            step: .2,
-            value: 1,
-            slide: function( event, ui ) {
-                partialGraph.camera.goTo({
-                    // POSS: make a transform to increase detail around x = 1
-                    ratio: 1 / ui.value
-                });
-            }
-        });
-
-        $("#zoomPlusButton").click(function () {
-            var newRatio = TW.cam.ratio * .75
-            if (newRatio >= sigmaJsMouseProperties.minRatio) {
-              // triggers coordinatesUpdated which sets the slider cursor
-              partialGraph.camera.goTo({ratio: newRatio});
-              return false;
-            }
-        });
-
-        $("#zoomMinusButton").click(function () {
-          var newRatio = TW.cam.ratio * 1.25
-          if (newRatio <= sigmaJsMouseProperties.maxRatio) {
-            // triggers coordinatesUpdated which sets the slider cursor
-            partialGraph.camera.goTo({ratio: newRatio});
-            return false;
-          }
-        });
-
-
 
         $("#layoutButton").click(function () {
           sigma_utils.smartForceAtlas()
@@ -964,77 +763,6 @@ TinaWebJS = function ( sigmacanvas ) {
         });
 
 
-        if (TW.filterSliders) {
-
-          // args: for display: target div ,
-          //       for context: family/type prop value,
-          //       for values:  the property to filter
-          NodeWeightFilter ( "#slidercat0nodesweight" ,
-                                categories[0] ,
-                               "size"
-                             );
-
-          EdgeWeightFilter("#slidercat0edgesweight",
-                            getCurrentTypeString(),
-                            "weight"
-                          );
-        }
-
-          $("#category1").hide();
-
-          //finished
-          var labelSizeTimeout = null
-          $("#sliderlabelsize").freshslider({
-              step:.25,
-              min:0,
-              max:5,
-              value: TW.partialGraph.settings('labelSizeRatio'),
-              bgcolor:"#27c470",
-              onchange:function(value){
-                if (labelSizeTimeout) {
-                  clearTimeout(labelSizeTimeout)
-                }
-                labelSizeTimeout = setTimeout(function(){
-                  if (TW.partialGraph.settings('labelSizeRatio') != value) {
-                    var adaptedLabelThreshold = 7 - value
-                    // console.log("value", value, "thres", adaptedLabelThreshold)
-
-                    TW.partialGraph.settings('labelSizeRatio', value)
-                    TW.partialGraph.settings('labelThreshold', adaptedLabelThreshold)
-                    TW.partialGraph.render()
-                  }
-                }, 200)
-
-              }
-          });
-
-          // //finished
-          // $("#slidercat1nodessize").freshslider({
-          //     step:1,
-          //     min:-20,
-          //     max:20,
-          //     value:0,
-          //     bgcolor:"#FFA500",
-          //     onchange:function(value){
-          //         setTimeout(function (){
-          //             // new sigma.js loop on nodes POSS optimize
-          //             nds  = TW.partialGraph.graph.nodes()
-          //             console.log("init: slider resize")
-          //             for(j=0 ; j<TW.partialGraph.nNodes ; j++){
-          //                 if (nds[j]
-          //                  && nds[j].type == TW.catSem) {
-          //                      var n = nds[j]
-          //                      var newval = parseFloat(TW.Nodes[n.id].size) + parseFloat((value-1))*0.3
-          //                      n.size = (newval<1.0)?1:newval;
-          //                      sizeMult[TW.catSem] = parseFloat(value-1)*0.3;
-          //                 }
-          //             }
-          //             partialGraph.render()
-          //         },
-          //         100);
-          //     }
-          // });
-
         //Cursor Size slider
         var cursorSlider = $("#unranged-value").freshslider({
             step: 1,
@@ -1052,14 +780,33 @@ TinaWebJS = function ( sigmacanvas ) {
             cursorSlider.setValue(0)
         });
 
-        // general listener: shift key in the window <=> add to selection
-        $(document).on('keyup keydown', function(e){
-          // changes the global boolean ("add node to selection" status) if keydown and SHIFT
-          checkBox = manuallyChecked || e.shiftKey
+        // //finished
+        // $("#slidercat1nodessize").freshslider({
+        //     step:1,
+        //     min:-20,
+        //     max:20,
+        //     value:0,
+        //     bgcolor:"#FFA500",
+        //     onchange:function(value){
+        //         setTimeout(function (){
+        //             // new sigma.js loop on nodes POSS optimize
+        //             nds  = TW.partialGraph.graph.nodes()
+        //             console.log("init: slider resize")
+        //             for(j=0 ; j<TW.partialGraph.nNodes ; j++){
+        //                 if (nds[j]
+        //                  && nds[j].type == TW.catSem) {
+        //                      var n = nds[j]
+        //                      var newval = parseFloat(TW.Nodes[n.id].size) + parseFloat((value-1))*0.3
+        //                      n.size = (newval<1.0)?1:newval;
+        //                      sizeMult[TW.catSem] = parseFloat(value-1)*0.3;
+        //                 }
+        //             }
+        //             partialGraph.render()
+        //         },
+        //         100);
+        //     }
+        // });
 
-          // show it in the real checkbox too
-          $('#checkboxdiv').prop("checked", manuallyChecked || e.shiftKey)
-        } );
 
         // costly entire refresh (~400ms) only after stopped resizing for 3s
         // NB: rescale middleware already reacted and, except for large win size changes, it handles the resize fine
@@ -1071,13 +818,243 @@ TinaWebJS = function ( sigmacanvas ) {
           }
           winResizeTimeout = setTimeout(function() {
             console.log('did refresh')
-            TW.partialGraph.refresh()
+
+            if (window.TW.partialGraph && window.TW.partialGraph.refresh) {
+              window.TW.partialGraph.refresh()
+            }
             if (theHtml.classList) {
               theHtml.classList.remove('waiting');
             }
           }, 3000)
         }, true)
 
-    } // finish initListeners
+
+        // general listener: shift key in the window <=> add to selection
+        $(document).on('keyup keydown', function(e){
+          // changes the global boolean ("add node to selection" status) if keydown and SHIFT
+          checkBox = manuallyChecked || e.shiftKey
+
+          // show it in the real checkbox too
+          $('#checkboxdiv').prop("checked", manuallyChecked || e.shiftKey)
+        } );
+
+    } // finish envListeners
+
+
+    // to init local, instance-related listeners (need to run at new sigma instance)
+    // args: @partialGraph = a sigma instance
+    this.SigmaListeners = function(partialGraph) {
+
+      var SelInst = new SelectionEngine();
+
+      // sigma events bindings
+      // ---------------------
+
+      // cf. https://github.com/jacomyal/sigma.js/wiki/Events-API
+
+      // cases:
+      // 'click'    - simple click, early event
+      //              used for area (with global: cursor_size)
+      // 'clickNode'- simple click, second event if one node
+
+      // POSS easy in new sigma.js:
+      //       add doubleClick to select node + neighboors
+
+
+      // when circle area select
+      // ========================
+      // 1st event, even before we know if there are nodes
+      partialGraph.bind('click', function(e) {
+        // console.log("sigma click event e", e)
+
+        // case with a selector circle cursor handled here
+        if (cursor_size > 0) {
+          // actual click position, but in graph coords
+          var x = e.data.x
+          var y = e.data.y
+
+          // convert
+          var camCoords = TW.cam.cameraPosition(x,y)
+
+          // retrieve area nodes, using indexed quadtree and global cursor_size
+          var circleNodes = circleGetAreaNodes(
+            camCoords.x,
+            camCoords.y
+          )
+
+          // 1) clear previous while keeping its list (useful iff 'Add' checkBox)
+          var previousSelection = selections
+          cancelSelection(false)
+
+          // 2) show selection + do all related effects
+          var targeted = SelInst.SelectorEngine( {
+                              addvalue:checkBox,
+                              currsels:circleNodes,
+                              prevsels:previousSelection
+                          } )
+          if(targeted.length>0) {
+            SelInst.MultipleSelection2( {nodes:targeted} )
+          }
+        }
+      })
+
+      // when one node and normal click
+      // ===============================
+      partialGraph.bind('clickNode', function(e) {
+        // console.log("clickNode event e", e.data.node)
+
+        // new sigma.js gives easy access to clicked node!
+        var theNodeId = e.data.node.id
+
+        // we keep the global selections and then clear it and all its effects
+        var previousSelection = selections
+        cancelSelection(false, {norender:true}); // no need to render before MS2
+
+        if (cursor_size == 0) {
+          var targeted = SelInst.SelectorEngine( {
+                              addvalue:checkBox,
+                              currsels:[theNodeId],
+                              prevsels:previousSelection
+                          } )
+          if(targeted.length>0) {
+            SelInst.MultipleSelection2( {nodes:targeted} )
+          }
+        }
+        // case with a selector circle cursor handled
+        // just before, at click event
+      })
+
+      // when click in the empty background
+      // ==================================
+      if (TW.deselectOnclickStage) {
+        partialGraph.bind('clickStage', function(e) {
+          // console.log("clickStage event e", e)
+
+          if (! e.data.captor.isDragging
+            && Object.keys(selections).length
+            && ! cursor_size) {
+
+            // we clear selections and all its effects
+            cancelSelection(false);
+          }
+        })
+      }
+
+      // for all TW.cam.goTo (move/zoom) events
+      //     ===============
+      var zoomTimeoutId = null
+      TW.cam.bind('coordinatesUpdated', function(e) {
+        $("#zoomSlider").slider("value",1/TW.cam.ratio)
+      })
+
+      // ---------------------------------------------------------------------
+
+      // POSS: bind to captors  (0=>mouse, 1=>touch)
+      // TW.rend.captors[0].bind('mousemove', function(e) {
+      //   console.log("mousemove event e", e.data.node)
+      //
+      // })
+
+      // ---------------------------------------------------------------------
+
+      // raw events (non-sigma): handlers attached to the container
+      // ==========
+      $("#sigma-contnr")
+          .mousemove(function(e){
+              if(!isUndef(partialGraph)) {
+                  // show/move selector circle cursor
+                  if(cursor_size>0) circleTrackMouse(e);
+              }
+          })
+
+      // POSSible for the future: add tools to contextmenu
+      //     .contextmenu(function(){
+      //         return false;
+      //     })
+
+      // sliders events
+      // ==============
+      $("#zoomSlider").slider({
+          orientation: "vertical",
+
+          // new sigma.js current zoom ratio
+          value: partialGraph.camera.ratio,
+          min: 1 / sigmaJsMouseProperties.maxRatio,   // ex x.5
+          max: 1 / sigmaJsMouseProperties.minRatio,   // ex x32
+          // range: true,
+          step: .2,
+          value: 1,
+          slide: function( event, ui ) {
+              partialGraph.camera.goTo({
+                  // POSS: make a transform to increase detail around x = 1
+                  ratio: 1 / ui.value
+              });
+          }
+      });
+
+      $("#zoomPlusButton").click(function () {
+          var newRatio = TW.cam.ratio * .75
+          if (newRatio >= sigmaJsMouseProperties.minRatio) {
+            // triggers coordinatesUpdated which sets the slider cursor
+            partialGraph.camera.goTo({ratio: newRatio});
+            return false;
+          }
+      });
+
+      $("#zoomMinusButton").click(function () {
+        var newRatio = TW.cam.ratio * 1.25
+        if (newRatio <= sigmaJsMouseProperties.maxRatio) {
+          // triggers coordinatesUpdated which sets the slider cursor
+          partialGraph.camera.goTo({ratio: newRatio});
+          return false;
+        }
+      });
+
+      if (TW.filterSliders) {
+
+        // args: for display: target div ,
+        //       for context: family/type prop value,
+        //       for values:  the property to filter
+        NodeWeightFilter ( "#slidercat0nodesweight" ,
+                              TW.categories[0] ,
+                             "size"
+                           );
+
+        EdgeWeightFilter("#slidercat0edgesweight",
+                          getCurrentTypeString(),
+                          "weight"
+                        );
+      }
+
+      // node's label size
+      var labelSizeTimeout = null
+      $("#sliderlabelsize").freshslider({
+          step:.25,
+          min:0,
+          max:5,
+          value: sigmaJsDrawingProperties['labelSizeRatio'] || 1,
+          bgcolor:"#27c470",
+          onchange:function(value){
+            if (labelSizeTimeout) {
+              clearTimeout(labelSizeTimeout)
+            }
+            labelSizeTimeout = setTimeout(function(){
+              if (TW.partialGraph.settings('labelSizeRatio') != value) {
+                var adaptedLabelThreshold = 7 - value
+                // console.log("value", value, "thres", adaptedLabelThreshold)
+
+                TW.partialGraph.settings('labelSizeRatio', value)
+                TW.partialGraph.settings('labelThreshold', adaptedLabelThreshold)
+                TW.partialGraph.render()
+              }
+            }, 200)
+
+          }
+      });
+
+      document.getElementById('edges-switch').checked = TW.customSettings.drawEdges
+
+      cancelSelection(false);
+    }
 
 };

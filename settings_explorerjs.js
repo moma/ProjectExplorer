@@ -40,7 +40,8 @@ var TW = {}
 
     TW.SystemStates = {}
     TW.SystemStates.level = true;
-    TW.SystemStates.type = [ true ] //[ true , false ]; //social activated!
+    // TW.SystemStates.type = [ true ] //[ true , false ]; //social activated!
+    TW.SystemStates.type = [ true, false ] //[ true , false ]; //social activated!
     TW.SystemStates.selections = [];
     TW.SystemStates.opposites = [];
     TW.catSoc = "Document";
@@ -119,7 +120,7 @@ TW.customLegendsBins = {
 
 
 TW.debugFlags = {
-  initialShowAll: false,           // show all nodes on bipartite case init (docs + terms)
+  initialShowAll: false,           // show all nodes on bipartite case init (docs + terms in one view)
 
   // show verbose console logs...
   logFetchers: false,              // ...about ajax/fetching of graph data

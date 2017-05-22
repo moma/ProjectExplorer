@@ -7,6 +7,71 @@ function writeBrand (brandString) {
   document.getElementById('twbrand').innerHTML = brandString
 }
 
+
+function createFilechooserEl () {
+
+  var inputComment = document.createElement("p")
+  inputComment.innerHTML = `<strong>Choose a graph from your filesystem (gexf or json).</strong>`
+  inputComment.classList.add('comment')
+  inputComment.classList.add('centered')
+
+  var graphFileInput = document.createElement('input')
+  graphFileInput.id = 'localgraphfile'
+  graphFileInput.type = 'file'
+  graphFileInput.accept = 'application/xml,application/gexf,application/json'
+  graphFileInput.classList.add('centered')
+
+  // NB file input will trigger mainStartGraph() when the user chooses something
+  graphFileInput.onchange = function() {
+    if (this.files && this.files[0]) {
+
+      let clientLocalGraphFile = this.files[0]
+
+      // determine the format
+      let theFormat
+      if (/\.(?:gexf|xml)$/.test(clientLocalGraphFile.name)) {
+        theFormat = 'gexf'
+      }
+      else if (/\.json$/.test(clientLocalGraphFile.name)) {
+        theFormat = 'json'
+      }
+      else {
+        alert('unrecognized file format')
+      }
+
+      // retrieving the content
+      let rdr = new FileReader()
+
+      rdr.onload = function() {
+        if (! rdr.result ||  !rdr.result.length) {
+          alert('the selected file is not readable')
+        }
+        else {
+          // we might have a previous graph opened
+          if (TW.partialGraph && TW.partialGraph.graph) {
+            TW.partialGraph.graph.clear()
+            TW.partialGraph.refresh()
+            selections = []
+          }
+
+          // run
+          if (theFormat == 'json')
+            mainStartGraph(theFormat, JSON.parse(rdr.result), TW.instance)
+          else
+            mainStartGraph(theFormat, rdr.result, TW.instance)
+        }
+      }
+      rdr.readAsText(clientLocalGraphFile)
+    }
+  }
+
+  var filechooserBox = document.createElement('div')
+  filechooserBox.appendChild(inputComment)
+  filechooserBox.appendChild(graphFileInput)
+
+  return filechooserBox
+}
+
 //============================ < NEW BUTTONS > =============================//
 
 // Documentation Level: *****
