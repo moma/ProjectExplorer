@@ -262,6 +262,175 @@ function sortNodeTypes(observedTypesDict) {
   return {'categories': observedTypes, 'lookup_dict': catDict}
 }
 
+
+// sorting out n.attributes + binning them if too much distinct values
+// --------------------------------------------------------------------
+// @arg valuesIdx:
+//      a census of present attribute-values with a 4+ tier structure
+//           by nodetype
+//                => by attribute
+//                       => {vals:[allpossiblevalues...],
+//                           map:{eachvalue:[matchingnodeids],
+//                                eachvalue2:[matchingnodeids]...}
+
+// NB vals and map are both useful and complementary
+
+function facetsBinning (valuesIdx, Atts_2_Exclude) {
+
+  console.warn("valuesIdx", valuesIdx)
+
+  let facetIdx = {}
+
+  if (TW.debugFlags.logFacets) {
+    console.log('dictfyGexf: begin TW.Clusters')
+    var classvalues_deb = performance.now()
+  }
+
+  // var gotClusters = false
+  // for (var nodecat in valuesIdx) {
+  //   gotClusters = gotClusters || (valuesIdx[nodecat]['cluster_index'] || valuesIdx[nodecat][TW.nodeClusAtt])
+  // }
+
+  // all scanned attributes get an inverted index
+  for (var cat in valuesIdx) {
+    if (!facetIdx[cat])    facetIdx[cat] = {}
+
+    for (var at in valuesIdx[cat]) {
+      // console.log(`======= ${cat}::${at} =======`)
+
+      // skip non-numeric or already done
+      if (Atts_2_Exclude[at] || at == "clust_default") {
+        continue
+      }
+
+      // array of valueclass/interval/bin objects
+      facetIdx[cat][at] = []
+
+      // if n possible values doesn't need binify
+      if (Object.keys(valuesIdx[cat][at].map).length <= TW.maxDiscreteValues) {
+        for (var pval in valuesIdx[cat][at].map) {
+          facetIdx[cat][at].push({
+            'labl': `${cat}||${at}||${pval}`,
+            'val': pval,
+            // val2ids
+            'nids': valuesIdx[cat][at].map[pval]
+          })
+        }
+      }
+      // if binify
+      else {
+        var len = valuesIdx[cat][at].vals.length
+
+        // sort out vals
+        valuesIdx[cat][at].vals.sort(function (a,b) {
+               return Number(a)-Number(b)
+        })
+
+        // (enhanced intervalsInventory)
+        // => creates bin, binlabels, inverted index per bins
+        var legendRefTicks = []
+
+        // how many bins for this attribute ?
+        var nBins = 3
+        if (TW.customLegendsBins && TW.customLegendsBins[at]) {
+          nBins = TW.customLegendsBins[at]
+        }
+        else if (TW.legendsBins) {
+          nBins = TW.legendsBins
+        }
+
+        // create tick thresholds
+        for (var l=0 ; l < nBins ; l++) {
+          let nthVal = Math.floor(len * l / nBins)
+          legendRefTicks.push(valuesIdx[cat][at].vals[nthVal])
+        }
+
+        if (TW.debugFlags.logFacets)    console.debug("intervals for", at, legendRefTicks)
+
+        var nTicks = legendRefTicks.length
+        var sortedDistinctVals = Object.keys(valuesIdx[cat][at].map).sort(function(a,b){return Number(a)-Number(b)})
+
+        var nDistinctVals = sortedDistinctVals.length
+        var lastCursor = 0
+
+        // create ticks objects with retrieved full info
+        for (var l in legendRefTicks) {
+          l = Number(l)
+
+          let lowThres = Number(legendRefTicks[l])
+          let hiThres = null
+          if (l < nTicks-1) {
+            hiThres = Number(legendRefTicks[l+1])
+          }
+          else {
+            hiThres = Infinity
+          }
+
+          var newTick = {
+            'labl':'',
+            'nids':[],
+            'range':[lowThres, hiThres]
+          }
+
+          // 1) union of idmaps
+          for (var k = lastCursor ; k <= nDistinctVals ; k++) {
+            var val = Number(sortedDistinctVals[k])
+            if (val < lowThres) {
+              console.error("mixup !!", val, lowThres, at)
+            }
+            else if ((val >= lowThres) && (val < hiThres)) {
+              if (!valuesIdx[cat][at].map[val]) {
+                console.error("unscanned val2ids mapping", val, at)
+              }
+              else {
+                // eg bin2ids map for 2 <= val < 3
+                //    will be U(val2ids maps for 2, 2.1, 2.2,...,2.9)
+                for (var j in valuesIdx[cat][at].map[val]) {
+                  newTick.nids.push(valuesIdx[cat][at].map[val][j])
+                }
+              }
+            }
+            // we're over the interval upper bound
+            // we just need to remember where we were for next interval
+            else if (val >= hiThres) {
+              lastCursor = k
+              break
+            }
+          }
+
+          // create label
+          // round %.6f for display
+          var labLowThres = Math.round(lowThres*1000000)/1000000
+          var labHiThres = (l==nTicks-1)? '+ ∞' : Math.round(hiThres*1000000)/1000000
+          newTick.labl = `${cat}||${at}||[${labLowThres} ; ${labHiThres}]`
+
+          // save these bins as the cluster index (aka faceting)
+          if (newTick.nids.length) {
+            facetIdx[cat][at].push(newTick)
+          }
+        }
+      }
+    }
+
+    // 'clust_default' is an alias to the user-defined default clustering
+    if (TW.nodeClusAtt != undefined
+        && facetIdx[cat][TW.nodeClusAtt]   // <= if found in data
+        && !facetIdx[cat]['clust_default'] // <= and if an attr named 'clust_default' was not already in data
+      ) {
+      facetIdx[cat]['clust_default'] = facetIdx[cat][TW.nodeClusAtt]
+    }
+
+  }
+
+  if (TW.debugFlags.logFacets) {
+    var classvalues_fin = performance.now()
+    console.log('end TW.Clusters, own time:', classvalues_fin-classvalues_deb)
+  }
+
+  return facetIdx
+}
+
+
 // Level-00
 // for {1,2}partite graphs
 function dictfyGexf( gexf , categories ){
@@ -382,7 +551,7 @@ function dictfyGexf( gexf , categories ){
             var attributes = []
             var attvalueNodes = elNode.getElementsByTagName('attvalue');
             var atts={};
-            for(k=0; k<attvalueNodes.length; k++){
+            for(var k=0; k<attvalueNodes.length; k++){
                 var attvalueNode = attvalueNodes[k];
                 var attr = attvalueNode.getAttribute('for');
                 var val = attvalueNode.getAttribute('value');
@@ -424,25 +593,9 @@ function dictfyGexf( gexf , categories ){
                 maxNodeSize= node.size;
 
             // console.debug("node.attributes", node.attributes)
-
+            // creating a faceted index from node.attributes
             if (TW.scanClusters) {
-              if (!tmpVals[node_cat])      tmpVals[node_cat]={}
-              for (var at in node.attributes) {
-                if (!tmpVals[node_cat][at])  tmpVals[node_cat][at]={'vals':[],'map':{}}
-
-                let someval = Number(node.attributes[at])
-                // Identifying the attribute datatype: exclude strings and objects
-                if ( isNaN(someval) ) {
-                    if (!Atts_2_Exclude[at]) Atts_2_Exclude[at]=true;
-                }
-                // numeric attr => build facets
-                else {
-                  if (!tmpVals[node_cat][at].map[someval]) tmpVals[node_cat][at].map[someval] = []
-
-                  tmpVals[node_cat][at].vals.push(someval)      // for ordered scale
-                  tmpVals[node_cat][at].map[someval].push(node.id)  // inverted index
-                }
-              }
+              [tmpVals, Atts_2_Exclude] = updateValueFacets(tmpVals, Atts_2_Exclude, node)
             }
 
         } // finish nodes loop
@@ -461,160 +614,10 @@ function dictfyGexf( gexf , categories ){
     // ------------- /debug: for local stats ----------------
 
 
-    if (TW.debugFlags.logFacets) {
-      console.log('dictfyGexf: begin TW.Clusters')
-      var classvalues_deb = performance.now()
-    }
 
-    var gotClusters = false
-    for (var nodecat in tmpVals) {
-      gotClusters = gotClusters || (tmpVals[nodecat]['cluster_index'] || tmpVals[nodecat][TW.nodeClusAtt])
-    }
 
     // clusters and other facets => type => name => [{label,val/range,nodeids}]
-    TW.Clusters = {}
-
-    // sorting out properties in n.attributes ==> £TODO shared function createClusterIndex() up to classvalues_fin
-    // --------------------------------------
-
-    // all scanned attributes get an inverted index
-    for (var cat in tmpVals) {
-      if (!TW.Clusters[cat])    TW.Clusters[cat] = {}
-
-      for (var at in tmpVals[cat]) {
-        // console.log(`======= ${cat}::${at} =======`)
-
-
-        var allTicks = []
-        // skip non-numeric or already done
-        if (Atts_2_Exclude[at] || at == "clust_default") {
-          continue
-        }
-
-        // array of valueclass/interval/bin objects
-        TW.Clusters[cat][at] = []
-
-        // if n possible values doesn't need binify
-        if (Object.keys(tmpVals[cat][at].map).length <= TW.maxDiscreteValues) {
-          for (var pval in tmpVals[cat][at].map) {
-            TW.Clusters[cat][at].push({
-              'labl': `${cat}||${at}||${pval}`,
-              'val': pval,
-              // val2ids
-              'nids': tmpVals[cat][at].map[pval]
-            })
-          }
-        }
-        // if binify
-        else {
-          var len = tmpVals[cat][at].vals.length
-
-          // sort out vals
-          tmpVals[cat][at].vals.sort(function (a,b) {
-                 return Number(a)-Number(b)
-          })
-
-          // (enhanced intervalsInventory)
-          // => creates bin, binlabels, inverted index per bins
-          var legendRefTicks = []
-
-          // how many bins for this attribute ?
-          var nBins = 3
-          if (TW.customLegendsBins && TW.customLegendsBins[at]) {
-            nBins = TW.customLegendsBins[at]
-          }
-          else if (TW.legendsBins) {
-            nBins = TW.legendsBins
-          }
-
-          // create tick thresholds
-          for (var l=0 ; l < nBins ; l++) {
-            let nthVal = Math.floor(len * l / nBins)
-            legendRefTicks.push(tmpVals[cat][at].vals[nthVal])
-          }
-
-          if (TW.debugFlags.logFacets)    console.debug("intervals for", at, legendRefTicks)
-
-          var nTicks = legendRefTicks.length
-          var sortedDistinctVals = Object.keys(tmpVals[cat][at].map).sort(function(a,b){return Number(a)-Number(b)})
-
-          var nDistinctVals = sortedDistinctVals.length
-          var lastCursor = 0
-
-          // create ticks objects with retrieved full info
-          for (var l in legendRefTicks) {
-            l = Number(l)
-
-            let lowThres = Number(legendRefTicks[l])
-            let hiThres = null
-            if (l < nTicks-1) {
-              hiThres = Number(legendRefTicks[l+1])
-            }
-            else {
-              hiThres = Infinity
-            }
-
-            var newTick = {
-              'labl':'',
-              'nids':[],
-              'range':[lowThres, hiThres]
-            }
-
-            // 1) union of idmaps
-            for (var k = lastCursor ; k <= nDistinctVals ; k++) {
-              var val = Number(sortedDistinctVals[k])
-              if (val < lowThres) {
-                console.error("mixup !!", val, lowThres, at)
-              }
-              else if ((val >= lowThres) && (val < hiThres)) {
-                if (!tmpVals[cat][at].map[val]) {
-                  console.error("unscanned val2ids mapping", val, at)
-                }
-                else {
-                  // eg bin2ids map for 2 <= val < 3
-                  //    will be U(val2ids maps for 2, 2.1, 2.2,...,2.9)
-                  for (var j in tmpVals[cat][at].map[val]) {
-                    newTick.nids.push(tmpVals[cat][at].map[val][j])
-                  }
-                }
-              }
-              // we're over the interval upper bound
-              // we just need to remember where we were for next interval
-              else if (val >= hiThres) {
-                lastCursor = k
-                break
-              }
-            }
-
-            // create label
-            // round %.6f for display
-            var labLowThres = Math.round(lowThres*1000000)/1000000
-            var labHiThres = (l==nTicks-1)? '+ ∞' : Math.round(hiThres*1000000)/1000000
-            newTick.labl = `${cat}||${at}||[${labLowThres} ; ${labHiThres}]`
-
-            // save these bins as the cluster index (aka faceting)
-            if (newTick.nids.length) {
-              TW.Clusters[cat][at].push(newTick)
-            }
-          }
-        }
-      }
-
-      // 'clust_default' is an alias to the user-defined default clustering
-      if (TW.nodeClusAtt != undefined
-          && TW.Clusters[cat][TW.nodeClusAtt]   // <= if found in data
-          && !TW.Clusters[cat]['clust_default'] // <= and if an attr named 'clust_default' was not already in data
-        ) {
-        TW.Clusters[cat]['clust_default'] = TW.Clusters[cat][TW.nodeClusAtt]
-      }
-
-    }
-
-
-    if (TW.debugFlags.logFacets) {
-      var classvalues_fin = performance.now()
-      console.log('end TW.Clusters, own time:', classvalues_fin-classvalues_deb)
-    }
+    TW.Clusters = facetsBinning(tmpVals, Atts_2_Exclude)
 
 
     //New scale for node size: now, between 2 and 5 instead [1,70]
@@ -742,6 +745,37 @@ function updateRelations(typedRelations, edgeCateg, srcId, tgtId){
   typedRelations[edgeCateg][tgtId][srcId]=true;
 
   return typedRelations
+}
+
+
+// To fill the reverse map: values => nodeids of a given type
+function updateValueFacets(facetIdx, Atts_2_Exclude, aNode){
+  if (!facetIdx[aNode.type])      facetIdx[aNode.type]={}
+  for (var at in aNode.attributes) {
+    if (!facetIdx[aNode.type][at])  facetIdx[aNode.type][at]={'vals':[],'map':{}}
+
+    let castVal = Number(aNode.attributes[at])
+    // Identifying the attribute datatype: exclude strings and objects
+    if ( isNaN(castVal) ) {
+        if (!Atts_2_Exclude[at]) Atts_2_Exclude[at]=true;
+
+        // TODO: this old Atts_2_Exclude strategy could be replaced,
+        //       not to exclude but to store the datatype somewhere like facetIdx[aNode.type][at].dtype
+        //  => the datatype would be a condition (no bins if not numeric, etc.)
+        //  => it would also allow to index text values (eg country, affiliation, etc.)
+        //     with the strategy "most frequent distinct values" + "others"
+        //     which would be useful (eg country, affiliation, etc.) !!!
+
+    }
+    // numeric attr => build facets
+    else {
+      if (!facetIdx[aNode.type][at].map[castVal]) facetIdx[aNode.type][at].map[castVal] = []
+
+      facetIdx[aNode.type][at].vals.push(castVal)      // for ordered scale
+      facetIdx[aNode.type][at].map[castVal].push(aNode.id)  // inverted index
+    }
+  }
+  return [facetIdx, Atts_2_Exclude]
 }
 
 
@@ -873,6 +907,10 @@ function dictfyJSON( data , categories ) {
         nodes2={}, bipartiteD2N={}, bipartiteN2D={}
     }
 
+    // if scanClusters, we'll also use:
+    var tmpVals = {}
+    var Atts_2_Exclude = {}
+
     for(var nid in data.nodes) {
         let n = data.nodes[nid];
         let node = {}
@@ -901,7 +939,16 @@ function dictfyJSON( data , categories ) {
         catCount[node.type]++;
 
         nodes[node.id] = node;
+
+        console.log(n.attributes)
+
+        // creating a faceted index from node.attributes
+        if (TW.scanClusters) {
+          [tmpVals, Atts_2_Exclude] = updateValueFacets(tmpVals, Atts_2_Exclude, node)
+        }
     }
+
+    TW.Clusters = facetsBinning (tmpVals, Atts_2_Exclude)
 
     colorList.sort(function(){ return Math.random()-0.5; });
     for (var i in nodes ){

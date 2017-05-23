@@ -816,17 +816,24 @@ function clustersBy(daclass) {
     for(var nid in NodeID_Val) {
         var newval_color = Math.round( ( Min_color+(NodeID_Val[nid]["round"]-real_min)*((Max_color-Min_color)/(real_max-real_min)) ) );
         var hex_color = rgbToHex(255, (255-newval_color) , 0)
-        TW.partialGraph.graph.nodes(nid).color = hex_color
-        TW.partialGraph.graph.nodes(nid).customAttrs.alt_color = hex_color
 
-        // FIXME not used ?
-        TW.partialGraph.graph.nodes(nid).customAttrs.altgrey_color = false
+        let n = TW.partialGraph.graph.nodes(nid)
+        if (n && !n.hidden) {
+          n.color = hex_color
+          n.customAttrs.alt_color = hex_color
 
-        var newval_size = Math.round( ( Min_size+(NodeID_Val[nid]["round"]-real_min)*((Max_size-Min_size)/(real_max-real_min)) ) );
-        TW.partialGraph.graph.nodes(nid).size = newval_size;
+          // FIXME not used ?
+          n.customAttrs.altgrey_color = false
+
+          // £TODO SETTING SIZE HERE SHOULD BE OPTIONAL
+          var newval_size = Math.round( ( Min_size+(NodeID_Val[nid]["round"]-real_min)*((Max_size-Min_size)/(real_max-real_min)) ) );
+          n.size = newval_size;
+
+          n.label = "("+NodeID_Val[nid]["real"].toFixed(min_pow)+") "+TW.Nodes[nid].label
+        }
+
         // console.log("real:"+ NodeID_Val[i]["real"] + " | newvalue: "+newval_size)
 
-        TW.partialGraph.graph.nodes(nid).label = "("+NodeID_Val[nid]["real"].toFixed(min_pow)+") "+TW.Nodes[nid].label
     }
     //    [ / Scaling node colours(0-255) and sizes(2-7) ]
 
@@ -855,15 +862,18 @@ function repaintEdges() {
       }
       else {
         let e = TW.partialGraph.graph.edges(eid)
-        let src = TW.partialGraph.graph.nodes(idPair[0])
-        let tgt = TW.partialGraph.graph.nodes(idPair[1])
+
+        if (e) {
+          let src = TW.partialGraph.graph.nodes(idPair[0])
+          let tgt = TW.partialGraph.graph.nodes(idPair[1])
 
 
-        if (src && tgt) {
-          let src_color = src.customAttrs.alt_color || '#555'
-          let tgt_color = tgt.customAttrs.alt_color || '#555'
-          e.customAttrs.alt_rgb = sigmaTools.edgeRGB(src_color,tgt_color)
-          // we don't set e.color because opacity may vary if selected or not
+          if (src && tgt) {
+            let src_color = src.customAttrs.alt_color || '#555'
+            let tgt_color = tgt.customAttrs.alt_color || '#555'
+            e.customAttrs.alt_rgb = sigmaTools.edgeRGB(src_color,tgt_color)
+            // we don't set e.color because opacity may vary if selected or not
+          }
         }
       }
     }
