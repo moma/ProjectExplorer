@@ -29,32 +29,37 @@ function changeGraphAppearanceByFacets( manualflag ) {
 
     // create colormenu
 
-    var ty = getActivetypesName()
 
     var color_menu_info = '<li><a href="#" onclick="graphResetColor()">By Default</a></li>';
 
-    if( $( "#colorgraph-menu" ).length>0 ){
+    if( $( "#colorgraph-menu" ).length>0 ) {
 
-      // each facet family or clustering type was already prepared
-      for (var att_s in TW.Clusters[ty]) {
+      var actypes = getActivetypes()
+      for (var tid in actypes) {
+        let ty = actypes[tid]
 
-        // POSS here distinguish [ty][att_s].classes.length and ranges.length
-        var att_c = TW.Clusters[ty][att_s].length
-        var the_method = "clustersBy"
+        // each facet family or clustering type was already prepared
+        for (var att_s in TW.Clusters[ty]) {
 
-        // variants
-        if(att_s.indexOf("clust")>-1||att_s.indexOf("class")>-1) {
-          // for classes and clusters
-          the_method = "colorsBy"
+          // POSS here distinguish [ty][att_s].classes.length and ranges.length
+          var att_c = TW.Clusters[ty][att_s].length
+          var the_method = "clustersBy"
+
+          // variants
+          if(att_s.indexOf("clust")>-1||att_s.indexOf("class")>-1) {
+            // for classes and clusters
+            the_method = "colorsBy"
+          }
+          if(att_s == "growth_rate") the_method = "colorsRelByBins"
+          if(att_s == "age") the_method = "colorsRelByBins"
+
+          // family label :)
+          var lab_att_s ;
+          if (AttsTranslations[att_s])  lab_att_s = AttsTranslations[att_s]
+          else lab_att_s = att_s
+          color_menu_info += '<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+lab_att_s+'('+att_c+')'+'</a></li>'
+
         }
-        if(att_s == "growth_rate") the_method = "colorsRelByBins"
-        if(att_s == "age") the_method = "colorsRelByBins"
-
-        // family label :)
-        var lab_att_s ;
-        if (AttsTranslations[att_s])  lab_att_s = AttsTranslations[att_s]
-        else lab_att_s = att_s
-        color_menu_info += '<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+lab_att_s+'('+att_c+')'+'</a></li>'
 
       }
       $("#colorgraph-menu").html(color_menu_info)
@@ -213,17 +218,20 @@ function graphResetColor(){
     // reset each node's color and label
     for (var j in TW.nodeIds) {
       let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
-      n.color = n.customAttrs["true_color"];
+      // as usual, n can be absent if not in current subset !
+      if (n) {
+        n.color = n.customAttrs["true_color"];
 
-      n.customAttrs.alt_color = false
-      n.customAttrs.altgrey_color = false
+        n.customAttrs.alt_color = false
+        n.customAttrs.altgrey_color = false
 
-      n.label = TW.Nodes[n.id].label
+        n.label = TW.Nodes[n.id].label
 
-      // some colorings also modified size
-      n.size = TW.Nodes[n.id].size
+        // some colorings also modified size
+        n.size = TW.Nodes[n.id].size
+      }
+
     }
-
     // if (TW.partialGraph.settings('drawEdges')) {
     //   for(var x in eds){
     //       e=eds[x];
@@ -249,8 +257,14 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
     if (daclass=="clust_louvain")
         daclass = "louvain"
 
-    // usually 'terms' or current display among TW.categories
-    var curType = getActivetypesName()
+    var actypes = getActivetypes()
+
+    // we have no specifications yet for colors (and legends) on multiple types
+    if (actypes.length > 1) {
+      console.warn("colors by bins will only color nodes of type 0")
+    }
+    // current display among TW.categories (ex: 'terms')
+    var curType = actypes[0]
 
     // all infos in a bin array
     var legendInfo = []

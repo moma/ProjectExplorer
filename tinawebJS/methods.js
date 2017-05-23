@@ -86,12 +86,11 @@ function cancelSelection (fromTagCloud, settings) {
     }
 }
 
-// returns the name(s) of active types
+// returns an array of the name(s) of active type(s)
 // this area is quite underspecified so we assume here
 //   - that all typenames have a mapping to cat[0] (terms) or cat[1] (contexts)
 //   - that currentState.activetypes is an array of 2 bools for the currently displayed cat(s)
-// TODO transform result into array in all cases
-function getActivetypesName() {
+function getActivetypes() {
   let currentTypes = []
   let currentTypeIdx
   let lastState = TW.partialGraph.states.slice(-1)[0]
@@ -103,9 +102,8 @@ function getActivetypesName() {
     }
   }
 
-
-  // ex: 'Document' or 'Ngrams' or 'Document-Ngrams'
-  return currentTypes.join('-')
+  // ex: ['Document'] or ['Ngrams'] or ['Document','Ngrams']
+  return currentTypes
 }
 
 function getActivetypesKey() {

@@ -858,10 +858,13 @@ function repaintEdges() {
         let src = TW.partialGraph.graph.nodes(idPair[0])
         let tgt = TW.partialGraph.graph.nodes(idPair[1])
 
-        let src_color = src.customAttrs.alt_color || '#555'
-        let tgt_color = tgt.customAttrs.alt_color || '#555'
-        e.customAttrs.alt_rgb = sigmaTools.edgeRGB(src_color,tgt_color)
-        // we don't set e.color because opacity may vary if selected or not
+
+        if (src && tgt) {
+          let src_color = src.customAttrs.alt_color || '#555'
+          let tgt_color = tgt.customAttrs.alt_color || '#555'
+          e.customAttrs.alt_rgb = sigmaTools.edgeRGB(src_color,tgt_color)
+          // we don't set e.color because opacity may vary if selected or not
+        }
       }
     }
   }
@@ -874,7 +877,14 @@ function repaintEdges() {
 function colorsRelByBins(daclass) {
   var binColors
   var doModifyLabel = false
-  var ty = getActivetypesName()
+  var actypes = getActivetypes()
+
+  // we have no specifications yet for colors and legends on multiple types
+  if (actypes.length > 1) {
+    console.warn("colors by bins will only color nodes of type 0")
+  }
+
+  var ty = actypes[0]
 
   // our binning
   var tickThresholds = TW.Clusters[ty][daclass]
@@ -1157,15 +1167,13 @@ function colorsBy(daclass) {
     console.log(" = = = = = = = = = = = = = = = = = ")
     console.log("")
 
+    // louvain needs preparation
     if(daclass=="clust_louvain") {
         if(!TW.partialGraph.states.slice(-1)[0].LouvainFait) {
             RunLouvain()
             TW.partialGraph.states.slice(-1)[0].LouvainFait = true
         }
     }
-
-    var v_nodes = getVisibleNodes();
-
 
     if (daclass=="clust_default") {
         for(var j in TW.nodeIds) {
