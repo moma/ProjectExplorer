@@ -994,7 +994,7 @@ TinaWebJS = function ( sigmacanvas ) {
           step: .2,
           value: 1,
           slide: function( event, ui ) {
-              partialGraph.camera.goTo({
+              TW.partialGraph.camera.goTo({
                   // POSS: make a transform to increase detail around x = 1
                   ratio: 1 / ui.value
               });

@@ -61,7 +61,12 @@ function changeGraphAppearanceByFacets( manualflag ) {
 
         }
 
+        // POSS add cumulated degree via TW.partialGraph.graph.degree(nid)
       }
+
+      // we also add clust_louvain in all cases
+      color_menu_info += `<li><a href="#" onclick='colorsBy("clust_louvain")'>By Louvain clustering (${TW.partialGraph.graph.nNodes()})</a></li>`
+
       $("#colorgraph-menu").html(color_menu_info)
     }
 

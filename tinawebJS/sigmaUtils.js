@@ -1203,10 +1203,20 @@ function colorsBy(daclass) {
 
       for(var j in TW.nodeIds) {
           var the_node = TW.Nodes[ TW.nodeIds[j] ]
-          var attval = ( isUndef(the_node.attributes) || isUndef(the_node.attributes[daclass]) )? TW.partialGraph.graph.nodes(TW.nodeIds[j])[daclass]: the_node.attributes[daclass];
-          TW.partialGraph.graph.nodes(TW.nodeIds[j]).color = randomColorList[ attval ]
-          TW.partialGraph.graph.nodes(TW.nodeIds[j]).customAttrs.alt_color = randomColorList[ attval ]
-          TW.partialGraph.graph.nodes(TW.nodeIds[j]).customAttrs.altgrey_color = false
+          
+          // ££TODO put louvain in graph.nodes() like other attrs ??
+          // then possible to use TW.partialGraph.graph.nodes(TW.nodeIds[j])
+
+          if (j< 15)
+            console.log(` ${TW.nodeIds[j]} : hidden?${the_node.hidden} the_node.attributes[daclass] = ${the_node.attributes[daclass]}`) // final val=${attval}
+
+          if (! the_node.hidden) {
+            console.log(the_node)
+            var attval = ( !isUndef(the_node.attributes) && !isUndef(the_node.attributes[daclass]) )? the_node.attributes[daclass] : TW.partialGraph.graph.nodes(TW.nodeIds[j])[daclass];
+            TW.partialGraph.graph.nodes(TW.nodeIds[j]).color = randomColorList[ attval ]
+            TW.partialGraph.graph.nodes(TW.nodeIds[j]).customAttrs.alt_color = randomColorList[ attval ]
+            TW.partialGraph.graph.nodes(TW.nodeIds[j]).customAttrs.altgrey_color = false
+          }
       }
       // set the global state
       TW.handpickedcolor = true
