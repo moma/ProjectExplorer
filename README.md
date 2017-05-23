@@ -52,7 +52,7 @@ server {
     }
 }
 ```
-See the [detailed doc](https://github.com/moma/comex2/blob/master/doc/nginx_conf.md) and a [typical production conf file](https://github.com/moma/comex2/blob/master/setup/comex2_deployed_outer.nginx.conf)) for a real-life configuration example.
+See the [detailed doc](https://github.com/moma/comex2/blob/master/doc/nginx_conf.md) and a [typical production conf file](https://github.com/moma/comex2/blob/master/setup/comex2_deployed_outer.nginx.conf) for a real-life configuration example.
 
 ```
 # the app is then accessible directly on localhost
@@ -172,14 +172,12 @@ More info in `doc/` directory
 This project first started as a side-project of the EU FET Funded TINA project (2009-2011) coordinated by David Chavalarias (CNRS). It was endorsed by the Complex Systems Institute of Paris Ile-de-France (ISC-PIF), the Complex Systems Society and the French National Network for Complex Systems.
 
 The development have been conducted under the scientific supervision of David Chavalarias :
--  The core of the plateform is based on the TinawebJS online bipartite graph visualization software developed at CNRS/ISC-PIF by Julian Bilke (2009-2011) and Samuel Castillo (2012-2015). 
-- The community explorer was refactored by Romain Loth (CNRS/ISC-PIF) in 2016-2017 for a more flexible deployment and better user interface. 
-- The community explorer use the DOORS platforme for user identification (https://github.com/ISCPIF/doors)
+-  The core of the plateform is based on the TinawebJS online bipartite graph visualization software developed at CNRS/ISC-PIF by Julian Bilke (2009-2011) and Samuel Castillo (2012-2015).
+- The community explorer was refactored by Romain Loth (CNRS/ISC-PIF) in 2016-2017 for a more flexible deployment and better user interface.
+- The community explorer use the DOORS platform for user identification (https://github.com/ISCPIF/doors)
 
 ##### Copyright
 See the Community Explorer Software Copyright (c) 2017 CNRS ISC-PIF - http://iscpif.fr
 Licences:
     - GNU aGPLV3
     - a CECILL variant affero compliant
-
-
