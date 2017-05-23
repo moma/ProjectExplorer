@@ -342,14 +342,9 @@ function syncRemoteGraphData () {
         $("#network").html(files_selector)
     }
 
-
-    // TODO avoid this ajax in the case we're used locally like an "HTA" app (ie our URL starts with file:// protocol)
-    //      (but we could use a fileInput instead, because in this case the client machine is also the data containing machine)
-
     var finalRes = AjaxSync({ URL: the_file });
     inData = finalRes["data"]
     inFormat = finalRes["format"]
-
 
     if (TW.debugFlags.logFetchers) {
       console.warn('@the_file', finalRes["OK"], the_file)
@@ -399,9 +394,10 @@ function mainStartGraph(inFormat, inData, twInstance) {
         TW.catDict = {}
       }
 
-      // possible typestates as a child of scenario states
+      // ex: [true,false] = [nodes of type 0 shown  ; nodes of type 1 not drawn]
+      var initialActivetypes = TW.instance.initialActivetypes( TW.categories )
       var possibleActivetypes = TW.instance.allPossibleActivetypes( TW.categories )
-      var initialActivetypes = TW.instance.initialActivetypes( TW.categories ) //[true,false]//
+
 
       // XML parsing from ParseCustom
       var dicts = start.makeDicts(TW.categories); // > parse json or gexf, dictfy
@@ -411,7 +407,6 @@ function mainStartGraph(inFormat, inData, twInstance) {
       TW.Nodes = dicts.nodes;
       TW.Edges = dicts.edges;
 
-      //£TODO not complete for edgeIds in bipartite case !!
       TW.nodeIds = Object.keys(dicts.nodes)  // useful for loops
       TW.edgeIds = Object.keys(dicts.edges)
 
@@ -423,11 +418,11 @@ function mainStartGraph(inFormat, inData, twInstance) {
 
       if (inData.clusters) TW.Clusters = inData.clusters
 
-      // relations already copied in TW.Relations at this point
-      // £TODO also test with comex2 for bipart case
+      // £TODO remove from parseCustom or start using
       // TW.nodes1 = dicts.n1;//not used
 
-
+      // main console info
+      // ===================
       console.info(`== new graph ${TW.nodeIds.length} nodes, ${TW.edgeIds.length} edges ==`)
 
       // a posteriori categories diagnostic
@@ -447,7 +442,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
       }
       else if (TW.categories.length == 1) {
         console.info("== monopartite case ==")
-        // FIXME it would be more coherent with all tina usecases (like gargantext or tweetoscope) for the default category to by catSem instead of Soc
+        // FIXME it would be more coherent with all tina usecases (like gargantext or tweetoscope) for the default category to be catSem instead of Soc
         if (TW.catSoc != TW.categories[0]) {
           console.warn(`Observed unique category "${TW.categories[0]}" overwrites user-suggested TW.catSoc ("${TW.catSoc}")`)
           TW.catSoc = TW.categories[0]
@@ -456,21 +451,6 @@ function mainStartGraph(inFormat, inData, twInstance) {
       else {
         console.error("== currently unhandled categorization of node types ==", TW.categories)
       }
-
-      // [ Initiating Sigma-Canvas ]
-
-      // overriding pixelRatio is possible if we need very high definition
-      if (TW.overSampling) {
-        var realRatio = sigma.utils.getPixelRatio
-        sigma.utils.getPixelRatio = function() {
-          return 2 * realRatio()
-        }
-      }
-
-      // NB new sigma.js: autoResize (no need for AdjustSigmaCanvas + sigmaLimits)
-
-      // console.log("categories: "+categories)
-      // console.log("initial types: "+initialTypes)
 
       // [ Poblating the Sigma-Graph ]
 
@@ -590,90 +570,68 @@ function mainStartGraph(inFormat, inData, twInstance) {
       TW.partialGraph.states[1].LouvainFait = false;
 
       // NB specs: categories don't change within a given 'states' array so we don't include them
-      // (new graph => new initialActivetypes => new array)
-
-      // hide GUI elements of inactive types
-      for (var catId in initialActivetypes) {
-        if (!initialActivetypes[catId]) {
-          $(".for-nodecategory-"+catId).hide();
-        }
-      }
+      // (new graph => new categories combinations => new array)
 
       // now that we have a sigma instance, let's bind our click handlers to it
-      TW.instance.SigmaListeners(TW.partialGraph)
+      TW.instance.SigmaListeners(TW.partialGraph, initialActivetypes)
 
       // [ / Poblating the Sigma-Graph ]
 
 
-      // signatures
-      // for new selections:  (undefined,     undefined,  [268],      undefined)
-      // for new activetypes: ([false, true], undefined,  undefined,  undefined)
-      // for new level:       (undefined,     false,      undefined,  undefined)
-
-      // TODO: method never changes, shouldn't need to be inside each new state!
-      TW.partialGraph.states[1].setState = (function( activetypes , level , sels , oppos ) {
+      // @args is an object with 4 possible properties that define the new state
+      //     ex: new selections:  {sels: [268]}
+      //     ex: new activetypes: {activetypes:[false, true]}
+      //     ex: new level:       {level:false}
+      TW.setState = function( args ) {
           var bistate=false, typesKey=false;
-          console.log("IN THE SET STATE METHOD:", this)
-          if(!isUndef(activetypes)) {
-              this.activetypes = activetypes;
-              bistate= activetypes.map(Number).reduce(function(a, b){return a+b;})
-              typesKey = activetypes.map(Number).join("|")
-          }
-          if(!isUndef(level)) this.level = level;
-          if(!isUndef(sels)) this.selections = sels;
-          if(!isUndef(oppos)) this.opposites = oppos;
-          this.LouvainFait = false;
-          // console.log("")
-          // console.log(" % % % % % % % % % % ")
-          // console.log("setState activetypes: ", activetypes);
-          // console.log("bistate: "+bistate)
-          // console.log("level: "+level);
-          // console.log("selections: ");
-          // console.log(sels)
-          // console.log("selections len: ");
-          // console.log(sels.length)
-          // console.log("opposites: ");
-          // console.log(oppos)
 
+          // £TODO we could append the new state in this function too
           var present = TW.partialGraph.states.slice(-1)[0]; // Last
           var past = TW.partialGraph.states.slice(-2)[0] // avant Last
-          // console.log("previous level: "+past.level)
-          // console.log("new level: "+present.level)
-          //
-          // console.log(" % % % % % % % % % % ")
-          // console.log("")
-
-          var bistate= this.activetypes.map(Number).reduce(function(a, b){return a+b;})
-          LevelButtonDisable(false);
-          if(level && sels && sels.length==0)
-              LevelButtonDisable(true);
-
-          if(this.level==false && bistate>1)
-              LevelButtonDisable(true)
-
-          // console.log("printing the first state:")
-          // first_state = TW.partialGraph.states.slice(-1)[0].activetypes;
-          // for(var i in first_state) {
-          //     if(first_state[i]) {
-          //         for(var j in Filters[i])
-          //             console.log(j)
-          //     }
-          // }
 
 
+          console.log("IN THE SET STATE METHOD:", this)
+          console.log(" % % % % % % % % % % ")
+          console.log("setState args: ", args);
+
+          if(!isUndef(args.activetypes)) {
+
+              // record into last state
+              present.activetypes = args.activetypes;
+
+
+              bistate= present.activetypes.map(Number).reduce(
+                function(a, b){return a+b;}
+              )
+              typesKey = present.activetypes.map(Number).join("|")
+          }
           // console.log("printing the typesKey:", typesKey)
 
+          if(!isUndef(args.level)) present.level = args.level;
+          if(!isUndef(args.sels))  present.selections = args.sels;
+          if(!isUndef(args.oppos)) present.opposites = args.oppos;
+          present.LouvainFait = false;
+
+          // change level needs a selection
+          LevelButtonDisable(false);  // £TODO rename toggleLevelButton
+          if(   present.level
+             && present.selections
+             && present.selections.length==0)
+              LevelButtonDisable(true);
+
+          // case to go back
+          if(present.level==false && bistate>1)
+              LevelButtonDisable(true)
 
           // recreate sliders after activetype or level changes
           if (TW.filterSliders
               && (present.level != past.level
                   || present.activetypes.map(Number).join("|") != past.activetypes.map(Number).join("|"))) {
 
-
             // terms
             if(typesKey=="0|1") {
-                $(".category0").hide();
-                $(".category1").show();
+                $(".for-nodecategory-0").hide()
+                $(".for-nodecategory-1").show();
 
 
                 NodeWeightFilter( "#slidercat1nodesweight" ,  TW.categories[1], "size");
@@ -682,8 +640,8 @@ function mainStartGraph(inFormat, inData, twInstance) {
 
             // docs
             if(typesKey=="1|0") {
-                $(".category0").show();
-                $(".category1").hide();
+              $(".for-nodecategory-0").show()
+              $(".for-nodecategory-1").hide();
 
                 NodeWeightFilter( "#slidercat0nodesweight" ,  TW.categories[0], "size");
                 EdgeWeightFilter("#slidercat0edgesweight", typesKey, "weight");
@@ -691,8 +649,8 @@ function mainStartGraph(inFormat, inData, twInstance) {
 
             // terms and docs
             if(typesKey=="1|1") {
-                $(".category0").show();
-                $(".category1").show();
+              $(".for-nodecategory-0").show()
+              $(".for-nodecategory-1").show();
                 NodeWeightFilter( "#slidercat0nodesweight" ,  TW.categories[0], "size");
                 NodeWeightFilter( "#slidercat1nodesweight" ,  TW.categories[1], "size");
                 EdgeWeightFilter("#slidercat0edgesweight", "1|0", "weight");
@@ -700,7 +658,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
             }
           }
 
-      }).index();
+      };
 
 
       if (!TW.filterSliders) {

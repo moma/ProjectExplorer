@@ -269,7 +269,7 @@ function SelectionEngine() {
         }
 
         TW.partialGraph.states.slice(-1)[0].selections = the_new_sels;
-        TW.partialGraph.states.slice(-1)[0].setState( { sels: the_new_sels} )
+        TW.setState( { sels: the_new_sels} )
 
         // alert("MultipleSelection2=======\nthe_new_sels:" + JSON.stringify(the_new_sels))
 
@@ -341,6 +341,7 @@ var SelInst
 TinaWebJS = function ( sigmacanvas ) {
     this.sigmacanvas = sigmacanvas;
 
+    // functions that modify the sigma module (not sigma instance!)
     this.init = function () {
 
         if (TW.debugFlags.logSettings)    console.info("TW settings", TW)
@@ -355,6 +356,14 @@ TinaWebJS = function ( sigmacanvas ) {
 
           if (TW.ourRendering)
             this.prepareSigmaCustomRenderers(sigma)
+        }
+
+        // overriding pixelRatio is possible if we need high definition
+        if (TW.overSampling) {
+          var realRatio = sigma.utils.getPixelRatio
+          sigma.utils.getPixelRatio = function() {
+            return 2 * realRatio()
+          }
         }
 
         if (initErrMsg) {
@@ -843,7 +852,7 @@ TinaWebJS = function ( sigmacanvas ) {
 
     // to init local, instance-related listeners (need to run at new sigma instance)
     // args: @partialGraph = a sigma instance
-    this.SigmaListeners = function(partialGraph) {
+    this.SigmaListeners = function(partialGraph, initialActivetypes) {
 
       var SelInst = new SelectionEngine();
 
@@ -1052,9 +1061,19 @@ TinaWebJS = function ( sigmacanvas ) {
           }
       });
 
+      // set the switch
       document.getElementById('edges-switch').checked = TW.customSettings.drawEdges
 
-      cancelSelection(false);
+      // hide GUI elements of inactive types
+      // (frontend currently allows max 2 types)
+      for (var possibleTypeid in [0,1]) {
+        if (   ! TW.categories[possibleTypeid]
+            || ! initialActivetypes[possibleTypeid]) {
+          $(".for-nodecategory-"+possibleTypeid).hide();
+        }
+      }
+
+      // cancelSelection(false);
     }
 
 
@@ -1064,7 +1083,6 @@ TinaWebJS = function ( sigmacanvas ) {
             if(i==0) firstActivetypes.push(true)  // <==> show the cat stored in 0
             else firstActivetypes.push(false)     // <==> hide the cat stored in 1
         }
-        console.debug('firstActivetypes', firstActivetypes)
         return firstActivetypes;
     }
 

@@ -598,7 +598,7 @@ function graphTagCloudElem(nodes) {
     TW.partialGraph.states[avantlastpos].opposites = present.opposites;
 
     // recording the new state
-    TW.partialGraph.states[lastpos].setState({
+    TW.setState({
         activetypes: nextTypes,
         level: false,  // forced macro
         sels: Object.keys(selections),

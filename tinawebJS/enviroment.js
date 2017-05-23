@@ -337,7 +337,7 @@ function changeType() {
     TW.partialGraph.states[avantlastpos].activetypes = present.activetypes;
     TW.partialGraph.states[avantlastpos].opposites = present.opposites;
 
-    TW.partialGraph.states[lastpos].setState({
+    TW.setState({
         activetypes: nextState,
         level: level,
         sels: Object.keys(selections),
@@ -487,7 +487,7 @@ function changeLevel() {
       TW.partialGraph.states[avantlastpos].activetypes = present.activetypes;
       TW.partialGraph.states[avantlastpos].opposites = present.opposites;
 
-      TW.partialGraph.states[lastpos].setState({
+      TW.setState({
           activetypes: present.activetypes,
           level: futurelevel,
           sels: Object.keys(selections),

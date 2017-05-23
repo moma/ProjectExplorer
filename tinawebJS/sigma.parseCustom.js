@@ -41,7 +41,8 @@ ParseCustom = function ( format , data ) {
 
 // Level-02
 ParseCustom.prototype.scanFile = function() {
-    let catInfos = {'categories':[], 'lookup_dict': {}}
+    let catInfos = {'categories': new Array(),
+                    'lookup_dict': new Object()}
     switch (this.format) {
         case "api.json":
             console.log("scanFile: "+this.format)

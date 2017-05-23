@@ -103,7 +103,7 @@ TW.nodesGreyBorderColor = "rgba(100, 100, 100, 0.5)";
 TW.selectedColor = "default"  // "node" for a background like the node's color,
                            // "default" for note-like yellow
 
-TW.overSampling = true     // costly hi-def rendering (true => pixelRatio x 2)
+TW.overSampling = false    // costly hi-def rendering (true => pixelRatio x 2)
 
 TW.deselectOnclickStage = true // will a click on the background remove selection ? (except when dragging)
 var showLabelsIfZoom=1.0;
@@ -180,8 +180,10 @@ var sigmaJsMouseProperties = {
 // ============ < VARIABLES.JS > ============
 
 var twjs="tinawebJS/";
-TW.categories = {};
-TW.categoriesIndex = [];
+
+// possible node types and their inverted map
+TW.categories = [];
+TW.catDict = {};
 
 var gexfFile;
 //var zoom=0;
