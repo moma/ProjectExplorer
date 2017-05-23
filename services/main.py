@@ -31,7 +31,7 @@ from json         import dumps
 from datetime     import timedelta
 from urllib.parse import unquote
 from flask        import Flask, render_template, request, \
-                         redirect, url_for, session, jsonify
+                         redirect, url_for, session, Response
 from flask_login  import fresh_login_required, login_required, \
                          current_user, login_user, logout_user
 
@@ -217,7 +217,11 @@ def aggs_api():
             search_filter_str=search_filter,
             hapax_threshold=hap_thresh
             )
-        return jsonify(result)
+
+        return Response(
+            response=dumps(result),
+            status=200,
+            mimetype="application/json")
     else:
         raise TypeError("aggs API query is missing 'field' argument")
 
@@ -250,7 +254,12 @@ def graph_api():
             # (less modular but a lot faster)
             graphdb.extract(scholars)
 
-        return dumps(graphdb.buildJSON(graphdb.Graph))
+        return(
+            Response(
+                response=dumps(graphdb.buildJSON(graphdb.Graph)),
+                status=200,
+                mimetype="application/json")
+        )
 
     else:
         raise TypeError("graph API query is missing qtype (should be 'filters' or 'uid')")
@@ -270,7 +279,12 @@ def user_api():
         if request.args['op'] == "exists":
             if 'email' in request.args:
                 email = sanitize(request.args['email'])
-                return(dumps({'exists':dbcrud.email_exists(email)}))
+                return(
+                    Response(
+                        response=dumps({'exists':dbcrud.email_exists(email)}),
+                        status=200,
+                        mimetype="application/json")
+                )
 
     else:
         raise TypeError("user API query is missing the operation to perform (eg op=exists)")
