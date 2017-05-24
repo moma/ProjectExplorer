@@ -2,13 +2,15 @@
 
 var TW = {}
 
-    // POSSIBLE: group like TW.settings ?
+
+// £TODO separate files for TW.vars and TW.settings (configfile)
 
     TW.geomap = false;
     TW.colorByAtt = false;
     TW.twittertimeline = false;
     TW.minimap=false;
     TW.getAdditionalInfo = true;// True: Activate TopPapers feature.
+    TW.filemenu = 'db.json'
     // TW.mainfile = "data/mysuperproject/my.gexf"
     TW.mainfile = "data/politoscope/ProgrammeDesCandidats.enrichi.gexf"
     TW.APINAME = "http://127.0.0.1:5000/twitter_search";
@@ -16,15 +18,7 @@ var TW = {}
     TW.bridge={};
     TW.bridge["forFilteredQuery"] = "services/api/graph";
     TW.bridge["forNormalQuery"] = "services/api/graph";
-
-    TW.gexfDict={};
-    TW.gexfDictReverse={}
-    for (var i in TW.gexfDict){
-        TW.gexfDictReverse[TW.gexfDict[i]]=i;
-    }
-    TW.field = {}
-    // field["data/20141128_GPs_03_bi.gexf"] = "ISItermsfirstindexing";
-    // field["data/20141215_GPs_04.gexf"] = "ISItermsfirstindexing";
+    TW.gexfPaths={};
     TW.Relations = {}
 
     //  module_names to load
@@ -40,7 +34,7 @@ var TW = {}
 
     TW.SystemState = {}
     TW.SystemState.level = true;
-    TW.SystemState.type = [ true, false ] // usually overridden by makeSystemStates
+    TW.SystemState.type = [ true, false ] // usually overridden by initialActivetypes
     TW.SystemState.selections = [];
     TW.SystemState.opposites = [];
     TW.catSoc = "Document";
@@ -53,7 +47,8 @@ var SigmaUtils = function () {};
 var TinaWebJS = function () {};
 
 
-
+// node sizes
+// ----------
 var sizeMult = [];
     sizeMult[TW.catSoc] = 0.0;
     sizeMult[TW.catSem] = 0.0;
@@ -70,24 +65,20 @@ var desirableTagCloudFont_MAX=20;
 var desirableNodeSizeMIN=1;
 var desirableNodeSizeMAX=12;
 
-// apparently not used ?
-var desirableScholarSize=6; //Remember that all scholars have the same size!
 
-/*
- *Three states:
- *  - true: fa2 auto-running at start
- *  - false: fa2 stopped at start, button exists
- *  - "off": button doesn't exist, fa2 stopped forever
- **/  TW.fa2enabled=true;//"off";
-
-TW.minNodesForAutoFA2 = 5
-
-
+// layouts
+// -------
+// just a simple flag on this one
+TW.disperseAvailable=false;               // disperseButton hidden at start, disperse stopped forever
+TW.fa2Available=false;                    // fa2Button hidden at start, fa2 stopped forever
+// if fa2Button:
+  TW.fa2enabled=0;                 // fa2 auto-running at start ?
+  TW.minNodesForAutoFA2 = 5        // fa2 not run if graph has less nodes than this threshold
 
 
 // ============ < / DEVELOPER OPTIONS > ============
 TW.branding = 'test bipart'
-TW.libspath = 'libs'
+TW.libspath = 'libs'                      // NB path vars should not be used after page load
 
 TW.nodeClusAtt = "modularity_class"
 
@@ -126,7 +117,7 @@ TW.debugFlags = {
   logParsers: false,               // ...about parsing said data
   logFacets: false,                // ...about parsing node attribute:value facets
   logSettings: false,              // ...about settings at Tina and Sigma init time
-  logSelections: false
+  logSelections: true
 }
 
 // triggers overriding sigma.canvas renderers: nodes.def, labels.def, edges.def

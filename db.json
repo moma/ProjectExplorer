@@ -8,11 +8,11 @@
 		"gexfs": {
 			"ProgrammeDesCandidats.enrichi.gexf": {
 				"social": {},
-				"semantic": {}
+				"semantic": {"table":"terms"}
 			},
 			"ProgrammeDesCandidats.gexf": {
 				"social": {},
-				"semantic": {}
+				"semantic": {"table":"terms"}
 			}
 		}
 	},

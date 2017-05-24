@@ -255,8 +255,8 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
 
     //TW.partialGraph.states.slice(-1)[0].LouvainFait = true
 
-    $("#legend_for_clusters").removeClass( "my-legend" )
-    $("#legend_for_clusters").html("")
+    $("#legend-for-clusters").removeClass( "my-legend" )
+    $("#legend-for-clusters").html("")
     if(daclass==null) return;
 
     if (daclass=="clust_louvain")
@@ -281,7 +281,7 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
     if (!groupedByTicks && (!TW.Clusters[curType] || !TW.Clusters[curType][daclass])) {
       console.warn(`no class bins for ${daclass}, displaying no legend`)
 
-      $("#legend_for_clusters").hide()
+      $("#legend-for-clusters").hide()
     }
     else {
       var LegendDiv = ""
@@ -318,9 +318,9 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
       LegendDiv += '      </ul>'
       LegendDiv += '    </div>'
 
-      $("#legend_for_clusters").addClass( "my-legend" );
-      $("#legend_for_clusters").html( LegendDiv )
-      $("#legend_for_clusters").show()
+      $("#legend-for-clusters").addClass( "my-legend" );
+      $("#legend-for-clusters").html( LegendDiv )
+      $("#legend-for-clusters").show()
     }
 }
 

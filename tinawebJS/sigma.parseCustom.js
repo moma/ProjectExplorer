@@ -749,31 +749,32 @@ function updateRelations(typedRelations, edgeCateg, srcId, tgtId){
 
 
 // To fill the reverse map: values => nodeids of a given type
-function updateValueFacets(facetIdx, Atts_2_Exclude, aNode){
+function updateValueFacets(facetIdx, Atts_2_Exclude, aNode) {
+
   if (!facetIdx[aNode.type])      facetIdx[aNode.type]={}
   for (var at in aNode.attributes) {
     if (!facetIdx[aNode.type][at])  facetIdx[aNode.type][at]={'vals':[],'map':{}}
 
     let castVal = Number(aNode.attributes[at])
     // Identifying the attribute datatype: exclude strings and objects
-    if ( isNaN(castVal) ) {
-        if (!Atts_2_Exclude[at]) Atts_2_Exclude[at]=true;
-
-        // TODO: this old Atts_2_Exclude strategy could be replaced,
-        //       not to exclude but to store the datatype somewhere like facetIdx[aNode.type][at].dtype
-        //  => the datatype would be a condition (no bins if not numeric, etc.)
-        //  => it would also allow to index text values (eg country, affiliation, etc.)
-        //     with the strategy "most frequent distinct values" + "others"
-        //     which would be useful (eg country, affiliation, etc.) !!!
-
-    }
+    // if ( isNaN(castVal) ) {
+    //     if (!Atts_2_Exclude[at]) Atts_2_Exclude[at]=true;
+    //
+    //     // TODO: this old Atts_2_Exclude strategy could be replaced,
+    //     //       not to exclude but to store the datatype somewhere like facetIdx[aNode.type][at].dtype
+    //     //  => the datatype would be a condition (no bins if not numeric, etc.)
+    //     //  => it would also allow to index text values (eg country, affiliation, etc.)
+    //     //     with the strategy "most frequent distinct values" + "others"
+    //     //     which would be useful (eg country, affiliation, etc.) !!!
+    //
+    // }
     // numeric attr => build facets
-    else {
+    // else {
       if (!facetIdx[aNode.type][at].map[castVal]) facetIdx[aNode.type][at].map[castVal] = []
 
       facetIdx[aNode.type][at].vals.push(castVal)      // for ordered scale
       facetIdx[aNode.type][at].map[castVal].push(aNode.id)  // inverted index
-    }
+    // }
   }
   return [facetIdx, Atts_2_Exclude]
 }
@@ -940,13 +941,14 @@ function dictfyJSON( data , categories ) {
 
         nodes[node.id] = node;
 
-        console.log(n.attributes)
-
         // creating a faceted index from node.attributes
         if (TW.scanClusters) {
           [tmpVals, Atts_2_Exclude] = updateValueFacets(tmpVals, Atts_2_Exclude, node)
         }
     }
+
+    // test: json with string facet (eg lab affiliation in comex)
+    console.log(tmpVals['Document'])
 
     TW.Clusters = facetsBinning (tmpVals, Atts_2_Exclude)
 

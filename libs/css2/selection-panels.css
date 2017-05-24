@@ -1,7 +1,6 @@
 /*  any block over the graph (legend, histogram...) */
 .over-panels {
   z-index: 5 ; /* over the graph */
-  padding: 5px;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   -border-radius: 3px;
@@ -25,38 +24,25 @@
   font-size: 70%;
   float:right;
   margin-top:.5em;
-  margin-right:1em
+  margin-right:1em;
 }
 
-""
 /* LEGEND PANEL */
-.legend_for_clusters {
-    position:absolute;
-    bottom:1px;
-    left:1px;
-    border:solid 1px red;
-    font-size:xx-small;
-}
-
-
-/*
-.my-legend * {
-  position: relative;
-  z-index: 5;
-}*/
 .my-legend {
     position:fixed;
-    z-index: 5;
     /* width: we set it equal or smaller than #lefttopbox width */
-    width:18%;
+    max-width:18%;
     max-height: 25%;
+    padding: 0 5px;
     overflow-y:scroll;
-    bottom:5px;
-    left:5px;
+    bottom:0;
+    left:0;
+    border:solid 1px black;
     background-color:white;
     opacity: 0.8;
     color:#250587;
     margin: 7px;
+    font-size:small;
 }
 
 .my-legend .legend-title {
@@ -286,6 +272,8 @@
     overflow: hidden;
     text-align:center;
     padding: .3em 1em 1em 1em;
+
+    display: none; /* because no are nodes selected at page init time */
 }
 
 #current-selection {

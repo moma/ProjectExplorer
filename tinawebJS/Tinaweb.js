@@ -736,36 +736,46 @@ TinaWebJS = function ( sigmacanvas ) {
         // button CENTER
         $("#lensButton").click(function () {
             // new sigma.js
-            partialGraph.camera.goTo({x:0, y:0, ratio:1.2})
+            TW.partialGraph.camera.goTo({x:0, y:0, ratio:1.2})
         });
 
-        $("#layoutButton").click(function () {
-          sigma_utils.smartForceAtlas()
-        });
+        if (TW.fa2Available) {
+          $("#layoutButton").click(function () {
+            sigma_utils.smartForceAtlas()
+          });
+        }
+        else {
+          $("#layoutButton").hide()
+        }
 
-        $("#noverlapButton").click(function () {
+        if (TW.disperseAvailable) {
+          $("#noverlapButton").click(function () {
+            if(! TW.partialGraph.isNoverlapRunning()) {
+                // show waiting cursor on page and button
+                theHtml.classList.add('waiting');
+                this.style.cursor = 'wait'
+                // and waiting icon
+                this.insertBefore(createWaitIcon('noverlapwait'), this.children[0])
 
-          if(! TW.partialGraph.isNoverlapRunning()) {
-              // show waiting cursor on page and button
-              theHtml.classList.add('waiting');
-              this.style.cursor = 'wait'
-              // and waiting icon
-              this.insertBefore(createWaitIcon('noverlapwait'), this.children[0])
+                var listener = TW.partialGraph.startNoverlap();
+                var noverButton = this
+                listener.bind('stop', function(event) {
+                  var stillRunning = document.getElementById('noverlapwait')
+                  if (stillRunning) {
+                    theHtml.classList.remove('waiting');
+                    noverButton.style.cursor = 'auto'
+                    stillRunning.remove()
+                  }
+                });
 
-              var listener = TW.partialGraph.startNoverlap();
-              var noverButton = this
-              listener.bind('stop', function(event) {
-                var stillRunning = document.getElementById('noverlapwait')
-                if (stillRunning) {
-                  theHtml.classList.remove('waiting');
-                  noverButton.style.cursor = 'auto'
-                  stillRunning.remove()
-                }
-              });
+                return;
+            }
+          });
+        }
+        else {
+          $("#noverlapButton").hide()
+        }
 
-              return;
-          }
-        });
 
         $("#edges-switch").click(function () {
             sigma_utils.toggleEdges(this.checked)
@@ -1091,7 +1101,7 @@ TinaWebJS = function ( sigmacanvas ) {
         var possibleActivetypes = {}
         var N=Math.pow(2 , cats.length);
 
-        for (i = 0; i < N; i++) {
+        for (var i = 0; i < N; i++) {
 
             let bin = (i).toString(2)
             let bin_splitted = []

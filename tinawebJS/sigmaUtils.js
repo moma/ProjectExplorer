@@ -502,40 +502,43 @@ SigmaUtils = function () {
       //  - edges management (turns them off and restores them after finished)
       this.smartForceAtlas = function (fa2duration) {
 
-        if (!fa2duration) {
-          fa2duration = parseInt(TW.fa2milliseconds) || 4000
-        }
+        if (TW.fa2Available) {
+          if (!fa2duration) {
+            fa2duration = parseInt(TW.fa2milliseconds) || 4000
+          }
 
-        // togglability case
-        if(TW.partialGraph.isForceAtlas2Running()) {
-            this.ourStopFA2()
-            return;
-        }
-        // normal case
-        else {
-            if ( TW.fa2enabled && TW.partialGraph.graph.nNodes() >= TW.minNodesForAutoFA2) {
-              // hide edges during work for smaller cpu load
-              if (TW.partialGraph.settings('drawEdges')) {
-                this.toggleEdges(false)
+          // togglability case
+          if(TW.partialGraph.isForceAtlas2Running()) {
+              this.ourStopFA2()
+              return;
+          }
+          // normal case
+          else {
+              if ( TW.fa2enabled && TW.partialGraph.graph.nNodes() >= TW.minNodesForAutoFA2) {
+                // hide edges during work for smaller cpu load
+                if (TW.partialGraph.settings('drawEdges')) {
+                  this.toggleEdges(false)
+                }
+
+                TW.partialGraph.startForceAtlas2();
+
+                var icon = createWaitIcon('layoutwait')
+                var btn = document.querySelector('#layoutButton')
+                btn.insertBefore(icon, btn.children[0])
+
+                setTimeout(function(){
+                  // NB in here scope: 'this' is the window
+                  if (TW.partialGraph.isForceAtlas2Running())
+                    sigma_utils.ourStopFA2()
+                },
+                fa2duration)
+
+                return;
               }
 
-              TW.partialGraph.startForceAtlas2();
-
-              var icon = createWaitIcon('layoutwait')
-              var btn = document.querySelector('#layoutButton')
-              btn.insertBefore(icon, btn.children[0])
-
-              setTimeout(function(){
-                // NB in here scope: 'this' is the window
-                if (TW.partialGraph.isForceAtlas2Running())
-                  sigma_utils.ourStopFA2()
-              },
-              fa2duration)
-
-              return;
-            }
-
+          }
         }
+
       }
 
 } // /SigmaUtils object
@@ -1203,7 +1206,7 @@ function colorsBy(daclass) {
 
       for(var j in TW.nodeIds) {
           var the_node = TW.Nodes[ TW.nodeIds[j] ]
-          
+
           // ££TODO put louvain in graph.nodes() like other attrs ??
           // then possible to use TW.partialGraph.graph.nodes(TW.nodeIds[j])
 

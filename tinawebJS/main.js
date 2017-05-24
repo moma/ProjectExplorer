@@ -74,18 +74,16 @@ var AjaxSync = (function(TYPE, URL, DATA, DT) {
     return Result;
 }).index();
 
-function getGexfPath(v){
-    var gexfpath=(TW.gexfDictReverse[v])?TW.gexfDictReverse[v]:v;
-    return gexfpath;
-}
-
-function jsActionOnGexfSelector(gexfBasename , db_json){
-    db_json = (db_json)?"&mode=db.json":""
-    let gexfLegend = gexfBasename+".gexf"
-    if(getGexfPath[gexfLegend])
-        window.location=window.location.origin+window.location.pathname+"?file="+encodeURIComponent(getGexfPath(gexfLegend))+db_json;
-    else
-        window.location=window.location.origin+window.location.pathname+"?file="+encodeURIComponent( gexfLegend )+db_json;
+function jsActionOnGexfSelector(gexfBasename){
+    let gexfPath = TW.gexfPaths[gexfBasename] || gexfBasename+".gexf"
+    let serverPrefix = ''
+    var pathcomponents = window.location.pathname.split('/')
+    for (var i in pathcomponents) {
+      if (pathcomponents[i] != 'explorerjs.html')
+        serverPrefix += '/'+pathcomponents[i]
+    }
+    var newDataRes = AjaxSync({ URL: window.location.origin+serverPrefix+'/'+gexfPath });
+    mainStartGraph(newDataRes["format"], newDataRes["data"], TW.instance)
 }
 
 //  === [   what to do at start ] === //
@@ -265,29 +263,17 @@ function syncRemoteGraphData () {
     var the_file = "";
     // ===================
 
-    // direct urlparam file case
-    if( !isUndef(getUrlParam.file)  ) {
-      the_file = getUrlParam.file
-    }
-    // direct file fallback case: specified file in settings_explorer
-    else if (TW.mainfile && linkCheck(TW.mainfile)) {
-      console.log("no @file arg: trying TW.mainfile from settings")
-      the_file = TW.mainfile;
-    }
-    // overall fallback case: try to open a listing of files (by default: db.json)
-    // TODO rename 'mode=' argkey into something more descriptive like 'menufile='
-    //      here and in caller apps like tweetoscope etc.
-    else {
-        // we'll first retrieve the menu of available files in db.json, then get the real data in a second ajax
-        var infofile = ''
 
-        if ( !isUndef(getUrlParam.mode) ) {
-          infofile = getUrlParam.mode
-        }
-        // default
-        else {
-          infofile = "db.json"
-        }
+    // TODO check if legacy apps use db.json name otherwise use mode == 'menufile'
+    //      and 'db.json' should be hardcoded (safer)
+    // if (!isUndef(getUrlParam.mode) && getUrlParam.mode == 'menufile') {
+
+
+    // menufile case comes before single file because it uses urlparam file too
+    if (!isUndef(getUrlParam.mode) && getUrlParam.mode == 'db.json') {
+        console.log("no @file arg nor TW.mainfile: trying FILEMENU db.json")
+        // we'll first retrieve the menu of available files in db.json, then get the real data in a second ajax
+        var infofile = "db.json"
 
         if (TW.debugFlags.logFetchers)  console.info(`attempting to load infofile ${infofile}`)
         var preRES = AjaxSync({ URL: infofile, DT:"json" });
@@ -295,7 +281,6 @@ function syncRemoteGraphData () {
         if (preRES['OK'] && preRES.data) {
           console.log('initial AjaxSync result preRES', preRES)
         }
-
 
         var first_file = "" , first_path = ""
         for( var path in preRES.data ) {
@@ -315,22 +300,29 @@ function syncRemoteGraphData () {
             the_file = first_path+"/"+getUrlParam.file
         }
 
-        var files_selector = '<select onchange="jsActionOnGexfSelector(this.value , true);">'
+        var files_selector = '<select onchange="jsActionOnGexfSelector(this.value);">'
 
         for( var path in preRES.data ) {
             var the_gexfs = preRES.data[path]["gexfs"]
             for(var aGexf in the_gexfs) {
                 var gexfBasename = aGexf.replace(/\.gexf$/, "") // more human-readable in the menu
+                TW.gexfPaths[gexfBasename] = path+"/"+aGexf
+                // ex : "RiskV2PageRank1000.gexf":data/AXA/RiskV2PageRank1000.gexf
+                // (we assume there's no duplicate basenames)
 
 
                 if (TW.debugFlags.logFetchers)
                   console.log("\t\t\t"+gexfBasename+ "   -> table:" +the_gexfs[aGexf]["semantic"]["table"] )
 
-                TW.field[path+"/"+aGexf] = the_gexfs[aGexf]["semantic"]["table"]
-                // ex : data/AXA/RiskV2PageRank5000.gexf:"ISItermsAxa_2015"
 
-                TW.gexfDict[path+"/"+aGexf] = aGexf
-                // ex : data/AXA/RiskV2PageRank1000.gexf:"RiskV2PageRank1000.gexf"
+                // -------------------------->8------------------------------------------
+                // £TODO this part is underspecified
+                // if used in some usecases, port it to nodetypes
+                // otherwise remove
+                // TW.field[path+"/"+aGexf] = the_gexfs[aGexf]["semantic"]["table"]
+                // ex : data/AXA/RiskV2PageRank5000.gexf:"ISItermsAxa_2015"
+                // -------------------------->8------------------------------------------
+
 
                 let cssFileSelected = (the_file==(path+"/"+aGexf))?"selected":""
                 files_selector += '<option '+cssFileSelected+'>'+gexfBasename+'</option>'
@@ -339,7 +331,20 @@ function syncRemoteGraphData () {
             break;
         }
         files_selector += "</select>"
+        console.log("files_selector HTML", files_selector)
         $("#network").html(files_selector)
+    }
+    // direct urlparam file case
+    else if( !isUndef(getUrlParam.file)  ) {
+      the_file = getUrlParam.file
+    }
+    // direct file fallback case: specified file in settings_explorer
+    else if (TW.mainfile && linkCheck(TW.mainfile)) {
+      console.log("no @file arg: trying TW.mainfile from settings")
+      the_file = TW.mainfile;
+    }
+    else {
+      console.warn("No specified input!")
     }
 
     var finalRes = AjaxSync({ URL: the_file });
