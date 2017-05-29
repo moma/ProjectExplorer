@@ -14,7 +14,7 @@ SigmaUtils = function () {
             var n = nodes[i];
             // console.debug('tr >>> fgr node', n)
 
-            if(initialActivetypes[catDict[n.type]] || TW.debugFlags.initialShowAll) {
+            if(initialActivetypes[catDict[n.type]] || TW.conf.debug.initialShowAll) {
                 // var node = {
                 //     id : n.id,
                 //     label : n.label,
@@ -111,7 +111,7 @@ SigmaUtils = function () {
 
         context.beginPath();
 
-        if (TW.selectedColor == "node")
+        if (TW.conf.nodesGreyBorderColor == "node")
           context.fillStyle = TW.handpickedcolor? node.customAttrs.alt_color : node.color; // node's
         else
           context.fillStyle = "#F7E521"; // yellow
@@ -204,11 +204,11 @@ SigmaUtils = function () {
         // console.debug(`t=${tstamp()} curve render activeedge: ${edgeInfos(edge)})`)
       }
       else if (edge.customAttrs.grey) {
-        color = TW.edgeGreyColor
+        color = TW.conf.edgeGreyColor
         size = 1
       }
       else {
-        color = "rgba( "+baseRGB+" , "+TW.edgeDefaultOpacity+")";
+        color = "rgba( "+baseRGB+" , "+TW.conf.edgeDefaultOpacity+")";
         size = defSize
       }
 
@@ -256,11 +256,11 @@ SigmaUtils = function () {
         color = 'rgba('+rgb.join()+',.7)'
       }
       else if (edge.customAttrs.grey) {
-        color = TW.edgeGreyColor
+        color = TW.conf.edgeGreyColor
         size = 1
       }
       else {
-        // color = "rgba( "+rgb.join()+" , "+TW.edgeDefaultOpacity+")";
+        // color = "rgba( "+rgb.join()+" , "+TW.conf.edgeDefaultOpacity+")";
         color = edge.customAttrs.true_color
         size = defSize
       }
@@ -294,7 +294,7 @@ SigmaUtils = function () {
 
         // mode variants
         if (TW.selectionActive) {
-          // passive nodes should blend in the grey of TW.edgeGreyColor
+          // passive nodes should blend in the grey of TW.conf.edgeGreyColor
           // cf settings_explorerjs, defgrey_color and greyEverything()
           if (node.customAttrs.grey) {
             if (! TW.handpickedcolor) {
@@ -310,7 +310,7 @@ SigmaUtils = function () {
               nodeColor = node.customAttrs.altgrey_color
             }
             // nice looking uniform grey
-            borderColor = TW.nodesGreyBorderColor
+            borderColor = TW.conf.nodesGreyBorderColor
           }
           // neighbor nodes <=> (highlight flag AND selectionActive)
           else if(node.customAttrs.highlight) {
@@ -501,10 +501,9 @@ SigmaUtils = function () {
       //  - conditions on graph size (£TODO use these to slowDown small graphs)
       //  - edges management (turns them off and restores them after finished)
       this.smartForceAtlas = function (fa2duration) {
-
-        if (TW.fa2Available) {
+        if (TW.conf.fa2Available) {
           if (!fa2duration) {
-            fa2duration = parseInt(TW.fa2milliseconds) || 4000
+            fa2duration = parseInt(TW.conf.fa2Milliseconds) || 4000
           }
 
           // togglability case
@@ -514,7 +513,7 @@ SigmaUtils = function () {
           }
           // normal case
           else {
-              if ( TW.fa2enabled && TW.partialGraph.graph.nNodes() >= TW.minNodesForAutoFA2) {
+              if ( TW.conf.fa2Enabled && TW.partialGraph.graph.nNodes() >= TW.conf.minNodesForAutoFA2) {
                 // hide edges during work for smaller cpu load
                 if (TW.partialGraph.settings('drawEdges')) {
                   this.toggleEdges(false)
@@ -547,7 +546,7 @@ SigmaUtils = function () {
 function createWaitIcon(idname, width) {
   let icon = document.createElement('img')
 
-  icon.src = TW.libspath + '/img2/loader.gif'
+  icon.src = TW.conf.libspath + '/img2/loader.gif'
 
   icon.style.position = 'absolute'
   icon.style.left = '0'
@@ -886,7 +885,7 @@ function repaintEdges() {
 // rewrite of clustersBy with binning and for attributes that can have negative float values
 
 // NB - binning is done at parseCustom
-//    - number of bins can be specified by attribute name in TW.customLegendsBins
+//    - number of bins can be specified by attribute name in TW.conf.customLegendsBins
 function colorsRelByBins(daclass) {
   var binColors
   var doModifyLabel = false
@@ -1202,7 +1201,7 @@ function colorsBy(daclass) {
     }
     else {
       // shuffle on entire array is better than random sorting function on each element
-      var randomColorList = shuffle(colorList)
+      var randomColorList = shuffle(TW.colorList)
 
       for(var j in TW.nodeIds) {
           var the_node = TW.Nodes[ TW.nodeIds[j] ]

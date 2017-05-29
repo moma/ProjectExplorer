@@ -907,7 +907,7 @@ function showDisabledSlider(someDivId) {
 
 //============================= < SEARCH > =============================//
 function updateSearchLabels(id,name,type){
-    labels.push({
+    TW.labels.push({
         'id' : id,
         'label' : name,
         'desc': type

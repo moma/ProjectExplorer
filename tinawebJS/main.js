@@ -37,7 +37,7 @@ var AjaxSync = (function(TYPE, URL, DATA, DT) {
     else DT = 'text'  // ie "if not json then raw xml string"
 
 
-    if (TW.debugFlags.logFetchers)
+    if (TW.conf.debug.logFetchers)
       console.log("---AjaxSync---\n", TYPE, URL, DATA, DT, "\n--------------")
 
     $.ajax({
@@ -60,7 +60,7 @@ var AjaxSync = (function(TYPE, URL, DATA, DT) {
                   format = "gexf" ;
                 }
                 else {
-                  if (TW.debugFlags.logFetchers)
+                  if (TW.conf.debug.logFetchers)
                     console.debug("after AjaxSync("+URL+") => response header="+header +"not xml => fallback on json");
                   format = "json" ;
                 }
@@ -101,7 +101,7 @@ TW.instance.initGUIListeners();
 TW.instance.initSearchListeners();
 
 // show the custom name of the app
-writeBrand(TW.branding)
+writeBrand(TW.conf.branding)
 
 console.log("Starting TWJS")
 
@@ -140,9 +140,15 @@ function syncRemoteGraphData () {
   var inFormat;            // = { db|api.json , somefile.json|gexf }
   var inData;              // = {nodes: [....], edges: [....], cats:...}
 
-  // case (1) read from DB => one ajax to api eg /services/api/graph?q=filters...
-  if (getUrlParam.type) {
-    console.warn("input case: @type [future: @sourcemode=api], using TW.bridge")
+  var mapLabel;            // user displayed label for this input dataset
+
+  // type of input
+  let sourcemode = isUndef(getUrlParam.sourcemode)?TW.sourcemode:getUrlParam.sourcemode
+
+  // case (1) read from remote DB via API bridge fetching
+  // ex: /services/api/graph?q=filters...
+  if (sourcemode == "api") {
+    console.log("input case: api, using TW.conf.sourceAPI")
 
     // the only API format, cf. inData
     inFormat = 'json'
@@ -151,29 +157,29 @@ function syncRemoteGraphData () {
     var sourceinfo = getUrlParam.nodeidparam
     var qtype = getUrlParam.type
     if(isUndef(sourceinfo) || isUndef(qtype)) {
-        console.warn("missing nodes filter/id param");
+        console.warn("missing nodes filter/id param to transmit to source api");
     }
     else {
         console.log("Received query of type:", qtype)
         if(qtype == "filter" || qtype == "uid"){
-          var theurl,thedata,thename;
+          var theurl,thedata
 
           // console.warn("===> PASSING ON QUERY (type "+qtype+") TO BRIDGE <===")
-          if(qtype=="uid") {
+          if (qtype=="uid") {
               // pr("bring the noise, case: unique_id");
               // pr(getClientTime()+" : DataExt Ini");
               // < === DATA EXTRACTION === >
-              theurl = TW.bridge["forNormalQuery"]
+              theurl = TW.conf.sourceAPI["forNormalQuery"]
 
               // NB before also passed it for Fa2 iterations (useless?)
               thedata = "qtype=uid&unique_id="+sourceinfo;
-              thename = "unique scholar";
+              mapLabel = "unique scholar";
           }
 
           if (qtype=="filter") {
               // pr("bring the noise, case: multipleQuery");
               // pr(getClientTime()+" : DataExt Ini");
-              theurl = TW.bridge["forFilteredQuery"];
+              theurl = TW.conf.sourceAPI["forFilteredQuery"];
 
               // json is twice URI encoded by whoswho to avoid both '"' and '%22'
               var json_constraints = decodeURIComponent(sourceinfo)
@@ -191,7 +197,7 @@ function syncRemoteGraphData () {
               // => thedata (for comexAPI):
               //   keywords[]="complex systems"&keywords[]="something"&countries="France"&countries[]="USA"
 
-              // => thename (for user display):
+              // => mapLabel (for user display):
               //   ("complex systems" or "something") and ("France" or "USA")
 
               // console.log("decoded filtering query", filteringKeyArrayPairs)
@@ -212,16 +218,16 @@ function syncRemoteGraphData () {
 
               if (restParams.length) {
                   thedata = "qtype=filters&" + restParams.join("&")
-                  thename = nameElts.join(" and ")
+                  mapLabel = nameElts.join(" and ")
               }
               else {
                   thedata = "qtype=filters&query=*"
-                  thename = "(ENTIRE NETWORK)"
+                  mapLabel = "(ENTIRE NETWORK)"
               }
           }
 
           // Assigning name for the network
-          if (! thename) {
+          if (! mapLabel) {
               elements = []
               queryarray = JSON.parse(ourGetUrlParam.nodeidparam)
               for(var i in queryarray) {
@@ -230,52 +236,47 @@ function syncRemoteGraphData () {
                       for(var j in item) elements.push(item[j])
                   }
               }
-              thename = '"'+elements.join('" , "')+'"';
+              mapLabel = '"'+elements.join('" , "')+'"';
           }
-
-          // £TODO restore thename
-          console.warn (thename, ":name not used anymore since refacto 10/05 could put on same level as inData as inMapname or smth")
 
           var bridgeRes = AjaxSync({ URL: theurl, DATA:thedata, TYPE:'GET', DT:'json' })
 
           // should be a js object with 'nodes' and 'edges' properties
           inData = bridgeRes.data
 
-          if (TW.debugFlags.logFetchers)   console.info("JSON input data", inData)
+          if (TW.conf.debug.logFetchers)   console.info("JSON input data", inData)
         }
         else {
             console.warn ("=> unsupported query type !")
         }
     }
   }
-  // case (2) gexf => in params or in preRes db.json, then 2nd ajax for a gexf file => covered here
-  // sourcemode == "serverfile"
+
+
+  // cases            (2)       and     (3) : we'll read a file from server
+  // sourcemode == "serverfile" or "servermenu" (several files with <select>)
   else {
-    console.warn("input case: @mode=db.json or @file=... [future: @sourcemode=serverfile], using server's gexf(s)")
-    // subcases:
-    // -> gexf file path is already specified in TW.mainfile
-    // -> gexf file path is in the urlparam @file
-    // -> @mode is db.json, files are listed in db.json file
-    //                  --> if @file also in url, choose the db.json one matching
-    //                  --> otherwise, choose the "first_file" from db.json list
+    console.log("input case: server-side file, using db.json or getUrlParam.file or TW.conf.sourceFile")
+
+    // -> @mode is servermenu, files are listed in db.json file (preRes ajax)
+    //      --> if @file also in url, choose the db.json one matching  <=== £TODO THIS CASE STILL TO FIX
+    //      --> otherwise, choose the "first_file" from db.json list
+
+    // -> @mode is serverfile
+    //      -> gexf file path is in the urlparam @file
+    //      -> gexf file path is already specified in TW.conf.sourceFile
 
     // ===================
     var the_file = "";
     // ===================
 
-
-    // TODO check if legacy apps use db.json name otherwise use mode == 'menufile'
-    //      and 'db.json' should be hardcoded (safer)
-    // if (!isUndef(getUrlParam.mode) && getUrlParam.mode == 'menufile') {
-
-
-    // menufile case comes before single file because it uses urlparam file too
-    if (!isUndef(getUrlParam.mode) && getUrlParam.mode == 'db.json') {
+    // menufile case : a list of source files in ./db.json
+    if (sourcemode == 'servermenu') {
         console.log("no @file arg nor TW.mainfile: trying FILEMENU db.json")
         // we'll first retrieve the menu of available files in db.json, then get the real data in a second ajax
         var infofile = "db.json"
 
-        if (TW.debugFlags.logFetchers)  console.info(`attempting to load infofile ${infofile}`)
+        if (TW.conf.debug.logFetchers)  console.info(`attempting to load infofile ${infofile}`)
         var preRES = AjaxSync({ URL: infofile, DT:"json" });
 
         if (preRES['OK'] && preRES.data) {
@@ -297,29 +298,30 @@ function syncRemoteGraphData () {
         if( isUndef(getUrlParam.file) ) {
             the_file = first_path+"/"+first_file
         } else {
+            // £POSS; match on the full paths from db.json
             the_file = first_path+"/"+getUrlParam.file
         }
 
         var files_selector = '<select onchange="jsActionOnGexfSelector(this.value);">'
 
         for( var path in preRES.data ) {
-            var the_gexfs = preRES.data[path]["gexfs"]
-            for(var aGexf in the_gexfs) {
+            var theGexfs = preRES.data[path]["gexfs"]
+            for(var aGexf in theGexfs) {
                 var gexfBasename = aGexf.replace(/\.gexf$/, "") // more human-readable in the menu
                 TW.gexfPaths[gexfBasename] = path+"/"+aGexf
                 // ex : "RiskV2PageRank1000.gexf":data/AXA/RiskV2PageRank1000.gexf
                 // (we assume there's no duplicate basenames)
 
 
-                if (TW.debugFlags.logFetchers)
-                  console.log("\t\t\t"+gexfBasename+ "   -> table:" +the_gexfs[aGexf]["semantic"]["table"] )
+                if (TW.conf.debug.logFetchers)
+                  console.log("\t\t\t"+gexfBasename+ "   -> table:" +theGexfs[aGexf]["semantic"]["table"] )
 
 
                 // -------------------------->8------------------------------------------
                 // £TODO this part is underspecified
                 // if used in some usecases, port it to nodetypes
                 // otherwise remove
-                // TW.field[path+"/"+aGexf] = the_gexfs[aGexf]["semantic"]["table"]
+                // TW.field[path+"/"+aGexf] = theGexfs[aGexf]["semantic"]["table"]
                 // ex : data/AXA/RiskV2PageRank5000.gexf:"ISItermsAxa_2015"
                 // -------------------------->8------------------------------------------
 
@@ -334,24 +336,25 @@ function syncRemoteGraphData () {
         console.log("files_selector HTML", files_selector)
         $("#network").html(files_selector)
     }
+
     // direct urlparam file case
     else if( !isUndef(getUrlParam.file)  ) {
       the_file = getUrlParam.file
     }
     // direct file fallback case: specified file in settings_explorer
-    else if (TW.mainfile && linkCheck(TW.mainfile)) {
+    else if (TW.conf.sourceFile && linkCheck(TW.conf.sourceFile)) {
       console.log("no @file arg: trying TW.mainfile from settings")
-      the_file = TW.mainfile;
+      the_file = TW.conf.sourceFile;
     }
     else {
-      console.warn("No specified input!")
+      console.error(`No specified input and neither db.json nor TW.conf.sourceFile ${TW.conf.sourceFile} are present`)
     }
 
     var finalRes = AjaxSync({ URL: the_file });
     inData = finalRes["data"]
     inFormat = finalRes["format"]
 
-    if (TW.debugFlags.logFetchers) {
+    if (TW.conf.debug.logFetchers) {
       console.warn('@the_file', finalRes["OK"], the_file)
       console.log('  fetch result: format', inFormat)
       console.log('  fetch result: typeof data', typeof inData)
@@ -359,7 +362,7 @@ function syncRemoteGraphData () {
     }
   }
 
-  return [inFormat, inData]
+  return [inFormat, inData, mapLabel]
 
 }
 
@@ -380,13 +383,13 @@ function mainStartGraph(inFormat, inData, twInstance) {
   }
   else {
 
-      if (TW.debugFlags.logParsers)   console.log("parsing the data")
+      if (TW.conf.debug.logParsers)   console.log("parsing the data")
 
       let start = new ParseCustom(  inFormat , inData );
       let catsInfos = start.scanFile();
 
       TW.categories = catsInfos.categories
-      if (TW.debugFlags.logParsers){
+      if (TW.conf.debug.logParsers){
         console.log(`Source scan found ${TW.categories.length} node categories: ${TW.categories}`)
       }
 
@@ -407,7 +410,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
       // XML parsing from ParseCustom
       var dicts = start.makeDicts(TW.categories); // > parse json or gexf, dictfy
 
-      if (TW.debugFlags.logParsers)   console.info("parsing result:", dicts)
+      if (TW.conf.debug.logParsers)   console.info("parsing result:", dicts)
 
       TW.Nodes = dicts.nodes;
       TW.Edges = dicts.edges;
@@ -436,21 +439,21 @@ function mainStartGraph(inFormat, inData, twInstance) {
       // so we just need to handle mismatches here (when user-suggested cats were absent)
       if (TW.categories.length == 2) {
         console.info("== 'bipartite' case ==")
-        if (TW.catSoc != TW.categories[0]) {
-          console.warn(`Observed social category "${TW.categories[0]}" overwrites user-suggested TW.catSoc ("${TW.catSoc}")`)
-          TW.catSoc = TW.categories[0]
+        if (TW.conf.catSoc != TW.categories[0]) {
+          console.warn(`Observed social category "${TW.categories[0]}" overwrites user-suggested TW.conf.catSoc ("${TW.conf.catSoc}")`)
+          TW.conf.catSoc = TW.categories[0]
         }
-        if (TW.catSem != TW.categories[1]) {
-          console.warn(`Observed semantic category "${TW.categories[1]}" overwrites user-suggested TW.catSem "(${TW.catSem})"`)
-          TW.catSem = TW.categories[1]
+        if (TW.conf.catSem != TW.categories[1]) {
+          console.warn(`Observed semantic category "${TW.categories[1]}" overwrites user-suggested TW.conf.catSem "(${TW.conf.catSem})"`)
+          TW.conf.catSem = TW.categories[1]
         }
       }
       else if (TW.categories.length == 1) {
         console.info("== monopartite case ==")
         // FIXME it would be more coherent with all tina usecases (like gargantext or tweetoscope) for the default category to be catSem instead of Soc
-        if (TW.catSoc != TW.categories[0]) {
-          console.warn(`Observed unique category "${TW.categories[0]}" overwrites user-suggested TW.catSoc ("${TW.catSoc}")`)
-          TW.catSoc = TW.categories[0]
+        if (TW.conf.catSoc != TW.categories[0]) {
+          console.warn(`Observed unique category "${TW.categories[0]}" overwrites user-suggested TW.conf.catSoc ("${TW.conf.catSoc}")`)
+          TW.conf.catSoc = TW.categories[0]
         }
       }
       else {
@@ -528,13 +531,13 @@ function mainStartGraph(inFormat, inData, twInstance) {
           },
 
           // 2) settings_explorer values
-          sigmaJsDrawingProperties,
-          sigmaJsGraphProperties,
-          sigmaJsMouseProperties
+          TW.conf.sigmaJsDrawingProperties,
+          TW.conf.sigmaJsGraphProperties,
+          TW.conf.sigmaJsMouseProperties
       )
 
 
-      if (TW.debugFlags.logSettings) console.info("sigma settings", TW.customSettings)
+      if (TW.conf.debug.logSettings) console.info("sigma settings", TW.customSettings)
 
 
       // ==================================================================
@@ -629,7 +632,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
               LevelButtonDisable(true)
 
           // recreate sliders after activetype or level changes
-          if (TW.filterSliders
+          if (TW.conf.filterSliders
               && (present.level != past.level
                   || present.activetypes.map(Number).join("|") != past.activetypes.map(Number).join("|"))) {
 
@@ -666,7 +669,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
       };
 
 
-      if (!TW.filterSliders) {
+      if (!TW.conf.filterSliders) {
 
         var filterEls = document.getElementsByClassName('weight-selectors')
 
@@ -698,7 +701,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
         outboundAttractionDistribution: false
       }
 
-      if (TW.debugFlags.logSettings) console.info("FA2 settings", TW.FA2Params)
+      if (TW.conf.debug.logSettings) console.info("FA2 settings", TW.FA2Params)
 
       // init FA2 for any future forceAtlas2 calls
       TW.partialGraph.configForceAtlas2(TW.FA2Params)
@@ -720,9 +723,9 @@ function mainStartGraph(inFormat, inData, twInstance) {
       TW.partialGraph.camera.goTo({x:0, y:0, ratio:0.9, angle: 0})
 
       // mostly json data are extracts provided by DB apis => no positions
-      if (inFormat == "json")  TW.fa2enabled = true
+      if (inFormat == "json")  TW.conf.fa2Enabled = true
 
-      // will run fa2 if enough nodes and TW.fa2enabled == true
+      // will run fa2 if enough nodes and TW.conf.fa2Enabled == true
       sigma_utils.smartForceAtlas()
 
 
@@ -731,7 +734,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
           $("#changetype").hide();
           $("#taboppos").hide();
 
-          // if (TW.catSem && TW.catSoc) {
+          // if (TW.conf.catSem && TW.conf.catSoc) {
             setTimeout(function () {
                 // tabneigh: show "Related" tab
                 document.querySelector('.etabs a[href="#tabs2"]').click()

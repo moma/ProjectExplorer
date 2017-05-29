@@ -3,7 +3,7 @@
 
 // settings: {norender: Bool}
 function cancelSelection (fromTagCloud, settings) {
-    if (TW.debugFlags.selections) { console.log("\t***in cancelSelection"); }
+    if (TW.conf.debug.selections) { console.log("\t***in cancelSelection"); }
     if (!settings) settings = {}
 
     highlightSelectedNodes(false); //Unselect the selected ones :D
@@ -14,8 +14,9 @@ function cancelSelection (fromTagCloud, settings) {
 
     TW.partialGraph.states.slice(-1)[0].selections=[]
 
-    //Nodes colors go back to normal
-    overNodes=false;
+    // global flag
+    TW.selectionActive = false
+
 
     //Edges colors go back to normal
     if (TW.partialGraph.settings('drawEdges')) {
@@ -77,9 +78,6 @@ function cancelSelection (fromTagCloud, settings) {
     if(TW.partialGraph.states.slice(-1)[0].level)
         LevelButtonDisable(true);
 
-    // global flag
-    TW.selectionActive = false
-
     if (!settings.norender) {
       // finally redraw
       TW.partialGraph.render();
@@ -115,7 +113,7 @@ function getActivetypesKey() {
 
 
 function highlightSelectedNodes(flag){
-    if (TW.debugFlags.logSelections)
+    if (TW.conf.debug.logSelections)
       console.log("\t***methods.js:highlightSelectedNodes(flag)"+flag+" selEmpty:"+is_empty(selections))
     if(!is_empty(selections)){
         for(var i in selections) {
@@ -126,11 +124,11 @@ function highlightSelectedNodes(flag){
 
 function alertCheckBox(eventCheck){
     // NB: we use 2 booleans to adapt to SHIFT checking
-    //      - var checkBox  ---------> has the real box state
-    //      - var manuallyChecked  --> remembers if it was changed here
+    //      - var TW.checkBox  ---------> has the real box state
+    //      - var TW.manuallyChecked  --> remembers if it was changed here
     if(!isUndef(eventCheck.checked)) {
-        checkBox=eventCheck.checked;
-        manuallyChecked = eventCheck.checked
+        TW.checkBox=eventCheck.checked;
+        TW.manuallyChecked = eventCheck.checked
     }
 }
 
@@ -174,7 +172,7 @@ function RefreshState(newNOW){
     	// N : number of nodes
     	// k : number of ( selected nodes + their neighbors )
     	// s : number of selections
-        var N=( Object.keys(TW.Nodes).filter(function(n){return TW.Nodes[n].type==TW.catSoc}) ).length
+        var N=( Object.keys(TW.Nodes).filter(function(n){return TW.Nodes[n].type==TW.conf.catSoc}) ).length
         var k=Object.keys(getNeighs(Object.keys(selections),nodes1)).length
         var s=Object.keys(selections).length
         console.log("in social N: "+N+" - k: "+k+" - s: "+s)
@@ -195,7 +193,7 @@ function RefreshState(newNOW){
 
     }
     if(NOW=="B" || NOW=="b") {
-        var N=( Object.keys(TW.Nodes).filter(function(n){return TW.Nodes[n].type==TW.catSem}) ).length
+        var N=( Object.keys(TW.Nodes).filter(function(n){return TW.Nodes[n].type==TW.conf.catSem}) ).length
         var k=Object.keys(getNeighs(Object.keys(selections),nodes2)).length
         var s=Object.keys(selections).length
         console.log("in semantic N: "+N+" - k: "+k+" - s: "+s)
@@ -357,7 +355,7 @@ function htmlfied_nodesatts(elems){
             }
             socnodes.push(information);
         } else {
-            if(node.type==TW.catSoc){
+            if(node.type==TW.conf.catSoc){
                 information += '<li><b>' + node.label + '</b></li>';
                 if(node.htmlCont==""){
                     if (!isUndef(node.level)) {
@@ -369,7 +367,7 @@ function htmlfied_nodesatts(elems){
                 socnodes.push(information)
             }
 
-            if(node.type==TW.catSem){
+            if(node.type==TW.conf.catSem){
                 information += '<li><b>' + node.label + '</b></li>';
                 google='<a href=http://www.google.com/#hl=en&source=hp&q=%20'+node.label.replace(" ","+")+'%20><img src="'+'img/google.png"></img></a>';
                 wiki = '<a href=http://en.wikipedia.org/wiki/'+node.label.replace(" ","_")+'><img src="'+'img/wikipedia.png"></img></a>';
@@ -606,7 +604,7 @@ function graphTagCloudElem(nodes) {
     TW.partialGraph.camera.goTo({x:0, y:0, ratio:0.9, angle: 0})
     TW.partialGraph.refresh({skipIndexation:true});
 
-    sigma_utils.smartForceAtlas(TW.fa2milliseconds/2)
+    sigma_utils.smartForceAtlas(TW.conf.fa2Milliseconds/2)
 
     //
     // ChangeGraphAppearanceByAtt(true)
@@ -681,9 +679,11 @@ function prepareNodesRenderingProperties(nodesDict) {
   for (var nid in nodesDict) {
     var n = nodesDict[nid]
 
+    let sizeFactor = TW.conf.sizeMult[TW.catDict[n.type]] || 1
+
     // 3 decimals is way more tractable
     // and quite enough in precision !!
-    n.size = Math.round(n.size*1000)/1000
+    n.size = Math.round(n.size*sizeFactor*1000)/1000
 
     // new initial setup of properties
     n.active = false
@@ -722,8 +722,8 @@ function prepareNodesRenderingProperties(nodesDict) {
       n.color = `rgb(${rgbStr})`
     }
     else {
-      n.color = TW.defaultNodeColor
-      rgbStr = TW.defaultNodeColor.split(',').splice(0, 3).join(',');
+      n.color = TW.conf.defaultNodeColor
+      rgbStr = TW.conf.defaultNodeColor.split(',').splice(0, 3).join(',');
     }
 
     n.customAttrs = {
@@ -757,7 +757,7 @@ function prepareEdgesRenderingProperties(edgesDict, nodesDict) {
 
     var rgbStr = sigmaTools.edgeRGB(nodesDict[e.source].color, nodesDict[e.target].color)
 
-    e.color = "rgba("+rgbStr+","+TW.edgeDefaultOpacity+")"
+    e.color = "rgba("+rgbStr+","+TW.conf.edgeDefaultOpacity+")"
     e.customAttrs = {
       grey: false,
       activeEdge : false,

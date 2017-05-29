@@ -213,7 +213,7 @@ function scanGexf(gexfContent) {
 // sorting observed node types into Sem/Soc (factorized 11/05/2017)
 // --------------------
 // FIXME this factorizes what we had twice (json & gexf scanFile workflows),
-//       and we just added missing TW.catSoc/Sem comparisons
+//       and we just added missing TW.conf.catSoc/Sem comparisons
 //       *but it doesn't fix the underlying logic*
 //       (current expected structure in 'categories' can only accomodate 2 types
 //        and the way it and catDict are used is not entirely coherent throughout
@@ -239,7 +239,7 @@ function sortNodeTypes(observedTypesDict) {
       // but in practice it's more often terms. anyways doesn't affect much
       catDict[observedTypes[0]] = 0;
 
-      if (TW.debugFlags.logParsers)
+      if (TW.conf.debug.logParsers)
         console.log(`cat unique (${observedTypes[0]}) =>0`)
   }
   if(nTypes>1) {
@@ -248,7 +248,7 @@ function sortNodeTypes(observedTypesDict) {
       // POSSible: allow more than 2 cats
       for(var i in observedTypes) {
           let c = observedTypes[i]
-          if(c == TW.catSoc || (c != TW.catSem && c.indexOf("term")==-1)) {// NOT a term-category
+          if(c == TW.conf.catSoc || (c != TW.catSem && c.indexOf("term")==-1)) {// NOT a term-category
               newcats[0] = c;
               catDict[c] = 0;
           }
@@ -281,14 +281,14 @@ function facetsBinning (valuesIdx, Atts_2_Exclude) {
 
   let facetIdx = {}
 
-  if (TW.debugFlags.logFacets) {
+  if (TW.conf.debug.logFacets) {
     console.log('dictfyGexf: begin TW.Clusters')
     var classvalues_deb = performance.now()
   }
 
   // var gotClusters = false
   // for (var nodecat in valuesIdx) {
-  //   gotClusters = gotClusters || (valuesIdx[nodecat]['cluster_index'] || valuesIdx[nodecat][TW.nodeClusAtt])
+  //   gotClusters = gotClusters || (valuesIdx[nodecat]['cluster_index'] || valuesIdx[nodecat][TW.conf.nodeClusAtt])
   // }
 
   // all scanned attributes get an inverted index
@@ -332,11 +332,11 @@ function facetsBinning (valuesIdx, Atts_2_Exclude) {
 
         // how many bins for this attribute ?
         var nBins = 3
-        if (TW.customLegendsBins && TW.customLegendsBins[at]) {
-          nBins = TW.customLegendsBins[at]
+        if (TW.conf.customLegendsBins && TW.conf.customLegendsBins[at]) {
+          nBins = TW.conf.customLegendsBins[at]
         }
-        else if (TW.legendsBins) {
-          nBins = TW.legendsBins
+        else if (TW.conf.legendsBins) {
+          nBins = TW.conf.legendsBins
         }
 
         // create tick thresholds
@@ -345,7 +345,7 @@ function facetsBinning (valuesIdx, Atts_2_Exclude) {
           legendRefTicks.push(valuesIdx[cat][at].vals[nthVal])
         }
 
-        if (TW.debugFlags.logFacets)    console.debug("intervals for", at, legendRefTicks)
+        if (TW.conf.debug.logFacets)    console.debug("intervals for", at, legendRefTicks)
 
         var nTicks = legendRefTicks.length
         var sortedDistinctVals = Object.keys(valuesIdx[cat][at].map).sort(function(a,b){return Number(a)-Number(b)})
@@ -413,16 +413,16 @@ function facetsBinning (valuesIdx, Atts_2_Exclude) {
     }
 
     // 'clust_default' is an alias to the user-defined default clustering
-    if (TW.nodeClusAtt != undefined
-        && facetIdx[cat][TW.nodeClusAtt]   // <= if found in data
+    if (TW.conf.nodeClusAtt != undefined
+        && facetIdx[cat][TW.conf.nodeClusAtt]   // <= if found in data
         && !facetIdx[cat]['clust_default'] // <= and if an attr named 'clust_default' was not already in data
       ) {
-      facetIdx[cat]['clust_default'] = facetIdx[cat][TW.nodeClusAtt]
+      facetIdx[cat]['clust_default'] = facetIdx[cat][TW.conf.nodeClusAtt]
     }
 
   }
 
-  if (TW.debugFlags.logFacets) {
+  if (TW.conf.debug.logFacets) {
     var classvalues_fin = performance.now()
     console.log('end TW.Clusters, own time:', classvalues_fin-classvalues_deb)
   }
@@ -435,7 +435,7 @@ function facetsBinning (valuesIdx, Atts_2_Exclude) {
 // for {1,2}partite graphs
 function dictfyGexf( gexf , categories ){
 
-  if (TW.debugFlags.logParsers)
+  if (TW.conf.debug.logParsers)
     console.log("ParseCustom gexf 2nd loop, main data extraction, with categories", categories)
 
 
@@ -455,11 +455,9 @@ function dictfyGexf( gexf , categories ){
     // var edgesAttributes = declaredAtts.eAttrs
 
     var elsNodes = gexf.getElementsByTagName('nodes') // The list of xml nodes 'nodes' (plural)
-    labels = [];
-    minNodeSize=999.00;
-    maxNodeSize=0.001;
-    numberOfDocs=0;
-    numberOfNGrams=0;
+    TW.labels = [];
+    minNodeSize=10000000;
+    maxNodeSize=0;
 
     // debug: for local stats
     // let allSizes = []
@@ -579,8 +577,8 @@ function dictfyGexf( gexf , categories ){
             if(!node.size) console.log("node without size: "+node.id+" : "+node.label);
 
             // user-indicated default => copy for old default accessors
-            if (node.attributes[TW.nodeClusAtt]) {
-              node.attributes['clust_default'] = node.attributes[TW.nodeClusAtt]
+            if (node.attributes[TW.conf.nodeClusAtt]) {
+              node.attributes['clust_default'] = node.attributes[TW.conf.nodeClusAtt]
             }
 
             // save record
@@ -636,7 +634,7 @@ function dictfyGexf( gexf , categories ){
         var edgesNode = edgesNodes[i];
         var edgeNodes = edgesNode.getElementsByTagName('edge');
 
-        if (TW.debugFlags.logParsers)
+        if (TW.conf.debug.logParsers)
           console.log("edgeNodes.length", edgeNodes.length)
 
         for(j=0; j<edgeNodes.length; j++) {
@@ -651,7 +649,7 @@ function dictfyGexf( gexf , categories ){
                 id: indice,
                 source: source,
                 target: target,
-                type : (type) ? type : sigmaJsDrawingProperties['defaultEdgeType'],
+                type : (type) ? type : TW.conf.sigmaJsDrawingProperties['defaultEdgeType'],
                 label: "",
                 categ: "",
                 attributes: []
@@ -895,7 +893,7 @@ function scanJSON( data ) {
 // Level-00
 // for {1,2}partite graphs
 function dictfyJSON( data , categories ) {
-    if (TW.debugFlags.logParsers)
+    if (TW.conf.debug.logParsers)
       console.log("ParseCustom json 2nd loop, main data extraction, with categories", categories)
 
     var catDict = {}
@@ -952,11 +950,11 @@ function dictfyJSON( data , categories ) {
 
     TW.Clusters = facetsBinning (tmpVals, Atts_2_Exclude)
 
-    colorList.sort(function(){ return Math.random()-0.5; });
+    TW.colorList.sort(function(){ return Math.random()-0.5; });
     for (var i in nodes ){
         if (nodes[i].color=="#FFFFFF") {
             var attval = ( isUndef(nodes[i].attributes) || isUndef(nodes[i].attributes["clust_default"]) )? 0 : nodes[i].attributes["clust_default"] ;
-            nodes[i].color = colorList[ attval ]
+            nodes[i].color = TW.colorList[ attval ]
         }
     }
 

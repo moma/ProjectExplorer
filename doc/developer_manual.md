@@ -57,3 +57,16 @@ They are handled in Tinaweb.MultipleSelection2.
 For any node `n` the relevant flags at selection are:
   - `n.active` iff node is selected
   - `n.customAttrs.highlight` if  node is a neighbor of a selected node
+
+
+## Variae
+
+#### Facets: node attributes as colors/clusters
+
+At parsing time, every node attributes are indexed by values.
+
+This indexes are stored in TW.Clusters and provide an access to sets of nodes that have a given value or range of values.
+  - if discrete attrvalues with <= 30 classes (colorsBy, clustersBy), the storage structure is: `TW.Clusters[nodeType][clusterType].classes.[possibleValue]`
+     (the content is a list of ids with the value `possibleValue`)
+  - if continuous or many possible values (>30) (clustersBy, colorsRelByBins), the storage uses ordered ranges ("bins"):
+     `TW.Clusters[nodeType][clusterType].ranges.[interval]`

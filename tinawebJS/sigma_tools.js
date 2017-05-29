@@ -45,7 +45,7 @@ sigmaTools = (function(stools) {
         var rawEdge = rawGexfEdges[i]
 
         var rgbStr = sigmaTools.edgeRGB(newNodes[rawEdge.source].color, newNodes[rawEdge.target].color)
-        var leColor = "rgba("+rgbStr+","+TW.edgeDefaultOpacity+")"
+        var leColor = "rgba("+rgbStr+","+TW.conf.edgeDefaultOpacity+")"
 
         var newEid = rawEdge.source+";"+rawEdge.target;
         var newEdge = {

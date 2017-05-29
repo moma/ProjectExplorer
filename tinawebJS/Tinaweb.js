@@ -83,7 +83,7 @@ function SelectionEngine() {
                 coincd.push(results[i].id)
             }
             var targeted = this.SelectorEngine( {
-                            addvalue:checkBox,
+                            addvalue:TW.checkBox,
                             prevsels:selections,
                             currsels:coincd
                         } )
@@ -147,7 +147,7 @@ function SelectionEngine() {
      // ====================
     this.MultipleSelection2 = (function(nodes,nodesDict,edgesDict) {
 
-      if (TW.debugFlags.selections) {
+      if (TW.conf.debug.selections) {
         var tMS2_deb = performance.now()
 
         console.log("IN SelectionEngine.MultipleSelection2:")
@@ -273,9 +273,6 @@ function SelectionEngine() {
 
         // alert("MultipleSelection2=======\nthe_new_sels:" + JSON.stringify(the_new_sels))
 
-        // global flag
-        TW.selectionActive = true
-
         // we send our "gotNodeSet" event
         // (signal for plugins that a search-selection was done or a new hand picked selection)
         $('#searchinput').trigger({
@@ -315,19 +312,20 @@ function SelectionEngine() {
             return b-a
         });
 
-        if (TW.debugFlags.selections) {
+        if (TW.conf.debug.selections) {
           console.debug('selections', selections)
           console.debug('oppos', oppos)
           console.debug('same', same)
         }
 
-        overNodes=true;
+        // global flag
+        TW.selectionActive = true
 
         TW.partialGraph.render();
 
         updateRelatedNodesPanel( selections , same, oppos );
 
-        if (TW.debugFlags.selections) {
+        if (TW.conf.debug.selections) {
           var tMS2_fin = performance.now()
           console.log("end MultipleSelection2, own time:", tMS2_fin-tMS2_deb)
         }
@@ -344,7 +342,7 @@ TinaWebJS = function ( sigmacanvas ) {
     // functions that modify the sigma module (not sigma instance!)
     this.init = function () {
 
-        if (TW.debugFlags.logSettings)    console.info("TW settings", TW)
+        if (TW.conf.debug.logSettings)    console.info("TW settings", TW)
 
         let initErrMsg = null
 
@@ -354,12 +352,12 @@ TinaWebJS = function ( sigmacanvas ) {
         else {
           this.prepareSigmaCustomIndices(sigma)
 
-          if (TW.ourRendering)
+          if (TW.conf.ourRendering)
             this.prepareSigmaCustomRenderers(sigma)
         }
 
         // overriding pixelRatio is possible if we need high definition
-        if (TW.overSampling) {
+        if (TW.conf.overSampling) {
           var realRatio = sigma.utils.getPixelRatio
           sigma.utils.getPixelRatio = function() {
             return 2 * realRatio()
@@ -476,7 +474,7 @@ TinaWebJS = function ( sigmacanvas ) {
       //  - additionnaly supports 'active/forcelabel' node property (magnify x 3)
       sigmaModule.canvas.hovers.def = tempo.twRender.canvas.hovers.largerall
 
-      if (TW.debugFlags.logSettings) console.log('tw renderers registered in sigma module')
+      if (TW.conf.debug.logSettings) console.log('tw renderers registered in sigma module')
     }
 
     this.initSearchListeners = function () {
@@ -487,10 +485,10 @@ TinaWebJS = function ( sigmacanvas ) {
             source: function(request, response) {
                 // labels initialized in settings, filled in updateSearchLabels
                 // console.log(labels.length)
-                matches = [];
+                var matches = [];
                 var matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i");
                 // grep at heart
-                var results = $.grep(labels, function(e) {
+                var results = $.grep(TW.labels, function(e) {
                     return matcher.test(e.label); //|| matcher.test(e.desc);
                 });
 
@@ -499,11 +497,11 @@ TinaWebJS = function ( sigmacanvas ) {
                 } else {
                     $("#noresults").empty();
                 }
-                matches = results.slice(0, maxSearchResults);
+                matches = results.slice(0, TW.conf.minLengthAutoComplete);
                 response(matches);
 
             },
-            minLength: minLengthAutoComplete,
+            minLength: TW.conf.minLengthAutoComplete,
 
 
             // ----------------------->8---------------------
@@ -574,7 +572,7 @@ TinaWebJS = function ( sigmacanvas ) {
                     setTimeout(
                       function (){
                           targeted = SelInst.SelectorEngine( {
-                                          addvalue:checkBox,
+                                          addvalue:TW.checkBox,
                                           clicktype:"double",
                                           prevsels:selections,
                                           currsels:coincidences
@@ -582,12 +580,12 @@ TinaWebJS = function ( sigmacanvas ) {
 
                           // tricky stuff for simulating a multiple selection D:
                           // ... to be improved in the future ...
-                          var prev_cursor_size = cursor_size;
+                          var prev_cursor_size = TW.circleSize;
                           if(targeted.length>0) {
-                              cursor_size = (cursor_size==0)? 1 : cursor_size;
+                              TW.circleSize = (TW.circleSize==0)? 1 : TW.circleSize;
                               cancelSelection(false);
                               SelInst.MultipleSelection2({nodes:targeted});
-                              cursor_size = prev_cursor_size;
+                              TW.circleSize = prev_cursor_size;
                           }
 
                           $("input#searchinput").val("");
@@ -621,7 +619,7 @@ TinaWebJS = function ( sigmacanvas ) {
                     setTimeout(
                       function() {
                         targeted = SelInst.SelectorEngine( {
-                                    addvalue:checkBox,
+                                    addvalue:TW.checkBox,
                                     clicktype:"double",
                                     prevsels:selections,
                                     currsels:[exfnd.id]
@@ -739,7 +737,7 @@ TinaWebJS = function ( sigmacanvas ) {
             TW.partialGraph.camera.goTo({x:0, y:0, ratio:1.2})
         });
 
-        if (TW.fa2Available) {
+        if (TW.conf.fa2Available) {
           $("#layoutButton").click(function () {
             sigma_utils.smartForceAtlas()
           });
@@ -748,7 +746,7 @@ TinaWebJS = function ( sigmacanvas ) {
           $("#layoutButton").hide()
         }
 
-        if (TW.disperseAvailable) {
+        if (TW.conf.disperseAvailable) {
           $("#noverlapButton").click(function () {
             if(! TW.partialGraph.isNoverlapRunning()) {
                 // show waiting cursor on page and button
@@ -785,12 +783,12 @@ TinaWebJS = function ( sigmacanvas ) {
         //Cursor Size slider
         var cursorSlider = $("#unranged-value").freshslider({
             step: 1,
-            min:cursor_size_min,
-            max:cursor_size_max,
-            value:cursor_size,
+            min:TW.conf.circleSizeMin,
+            max:TW.conf.circleSizeMax,
+            value:TW.circleSize,
             onchange:function(value){
                 // console.log("en cursorsize: "+value);
-                cursor_size=value;
+                TW.circleSize=value;
             }
         });
 
@@ -813,11 +811,11 @@ TinaWebJS = function ( sigmacanvas ) {
         //             console.log("init: slider resize")
         //             for(j=0 ; j<TW.partialGraph.nNodes ; j++){
         //                 if (nds[j]
-        //                  && nds[j].type == TW.catSem) {
+        //                  && nds[j].type == TW.conf.catSem) {
         //                      var n = nds[j]
         //                      var newval = parseFloat(TW.Nodes[n.id].size) + parseFloat((value-1))*0.3
         //                      n.size = (newval<1.0)?1:newval;
-        //                      sizeMult[TW.catSem] = parseFloat(value-1)*0.3;
+        //                      sizeMult[TW.conf.catSem] = parseFloat(value-1)*0.3;
         //                 }
         //             }
         //             partialGraph.render()
@@ -851,10 +849,10 @@ TinaWebJS = function ( sigmacanvas ) {
         // general listener: shift key in the window <=> add to selection
         $(document).on('keyup keydown', function(e){
           // changes the global boolean ("add node to selection" status) if keydown and SHIFT
-          checkBox = manuallyChecked || e.shiftKey
+          TW.checkBox = TW.manuallyChecked || e.shiftKey
 
-          // show it in the real checkbox too
-          $('#checkboxdiv').prop("checked", manuallyChecked || e.shiftKey)
+          // show it in the real TW.checkBox too
+          $('#checkboxdiv').prop("checked", TW.manuallyChecked || e.shiftKey)
         } );
 
     } // finish envListeners
@@ -873,7 +871,7 @@ TinaWebJS = function ( sigmacanvas ) {
 
       // cases:
       // 'click'    - simple click, early event
-      //              used for area (with global: cursor_size)
+      //              used for area (with global: TW.circleSize)
       // 'clickNode'- simple click, second event if one node
 
       // POSS easy in new sigma.js:
@@ -887,7 +885,7 @@ TinaWebJS = function ( sigmacanvas ) {
         // console.log("sigma click event e", e)
 
         // case with a selector circle cursor handled here
-        if (cursor_size > 0) {
+        if (TW.circleSize > 0) {
           // actual click position, but in graph coords
           var x = e.data.x
           var y = e.data.y
@@ -895,19 +893,19 @@ TinaWebJS = function ( sigmacanvas ) {
           // convert
           var camCoords = TW.cam.cameraPosition(x,y)
 
-          // retrieve area nodes, using indexed quadtree and global cursor_size
+          // retrieve area nodes, using indexed quadtree and global TW.circleSize
           var circleNodes = circleGetAreaNodes(
             camCoords.x,
             camCoords.y
           )
 
-          // 1) clear previous while keeping its list (useful iff 'Add' checkBox)
+          // 1) clear previous while keeping its list (useful iff 'Add' TW.checkBox)
           var previousSelection = selections
           cancelSelection(false)
 
           // 2) show selection + do all related effects
           var targeted = SelInst.SelectorEngine( {
-                              addvalue:checkBox,
+                              addvalue:TW.checkBox,
                               currsels:circleNodes,
                               prevsels:previousSelection
                           } )
@@ -929,9 +927,9 @@ TinaWebJS = function ( sigmacanvas ) {
         var previousSelection = selections
         cancelSelection(false, {norender:true}); // no need to render before MS2
 
-        if (cursor_size == 0) {
+        if (TW.circleSize == 0) {
           var targeted = SelInst.SelectorEngine( {
-                              addvalue:checkBox,
+                              addvalue:TW.checkBox,
                               currsels:[theNodeId],
                               prevsels:previousSelection
                           } )
@@ -945,13 +943,13 @@ TinaWebJS = function ( sigmacanvas ) {
 
       // when click in the empty background
       // ==================================
-      if (TW.deselectOnclickStage) {
+      if (TW.conf.deselectOnclickStage) {
         partialGraph.bind('clickStage', function(e) {
           // console.log("clickStage event e", e)
 
           if (! e.data.captor.isDragging
             && Object.keys(selections).length
-            && ! cursor_size) {
+            && ! TW.circleSize) {
 
             // we clear selections and all its effects
             cancelSelection(false);
@@ -982,7 +980,7 @@ TinaWebJS = function ( sigmacanvas ) {
           .mousemove(function(e){
               if(!isUndef(partialGraph)) {
                   // show/move selector circle cursor
-                  if(cursor_size>0) circleTrackMouse(e);
+                  if(TW.circleSize>0) circleTrackMouse(e);
               }
           })
 
@@ -998,8 +996,8 @@ TinaWebJS = function ( sigmacanvas ) {
 
           // new sigma.js current zoom ratio
           value: partialGraph.camera.ratio,
-          min: 1 / sigmaJsMouseProperties.maxRatio,   // ex x.5
-          max: 1 / sigmaJsMouseProperties.minRatio,   // ex x32
+          min: 1 / TW.conf.sigmaJsMouseProperties.maxRatio,   // ex x.5
+          max: 1 / TW.conf.sigmaJsMouseProperties.minRatio,   // ex x32
           // range: true,
           step: .2,
           value: 1,
@@ -1013,7 +1011,7 @@ TinaWebJS = function ( sigmacanvas ) {
 
       $("#zoomPlusButton").click(function () {
           var newRatio = TW.cam.ratio * .75
-          if (newRatio >= sigmaJsMouseProperties.minRatio) {
+          if (newRatio >= TW.conf.sigmaJsMouseProperties.minRatio) {
             // triggers coordinatesUpdated which sets the slider cursor
             partialGraph.camera.goTo({ratio: newRatio});
             return false;
@@ -1022,14 +1020,14 @@ TinaWebJS = function ( sigmacanvas ) {
 
       $("#zoomMinusButton").click(function () {
         var newRatio = TW.cam.ratio * 1.25
-        if (newRatio <= sigmaJsMouseProperties.maxRatio) {
+        if (newRatio <= TW.conf.sigmaJsMouseProperties.maxRatio) {
           // triggers coordinatesUpdated which sets the slider cursor
           partialGraph.camera.goTo({ratio: newRatio});
           return false;
         }
       });
 
-      if (TW.filterSliders) {
+      if (TW.conf.filterSliders) {
 
         // args: for display: target div ,
         //       for context: family/type prop value,
@@ -1051,7 +1049,7 @@ TinaWebJS = function ( sigmacanvas ) {
           step:.25,
           min:0,
           max:5,
-          value: sigmaJsDrawingProperties['labelSizeRatio'] || 1,
+          value: TW.conf.sigmaJsDrawingProperties['labelSizeRatio'] || 1,
           bgcolor:"#27c470",
           onchange:function(value){
             if (labelSizeTimeout) {
@@ -1097,7 +1095,7 @@ TinaWebJS = function ( sigmacanvas ) {
     }
 
     this.allPossibleActivetypes = function (cats) {
-        if (TW.debugFlags.logSettings) console.debug(`allPossibleActivetypes(cats=${cats})`)
+        if (TW.conf.debug.logSettings) console.debug(`allPossibleActivetypes(cats=${cats})`)
         var possibleActivetypes = {}
         var N=Math.pow(2 , cats.length);
 

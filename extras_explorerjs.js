@@ -336,18 +336,18 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
 //         jsonparams = jsonparams.split('&').join('__and__');
 //         //dbsPaths.push(getGlobalDBs());
 //         thisgexf=JSON.stringify(decodeURIComponent(getUrlParam.file));
-//         image='<img style="display:block; margin: 0px auto;" src="'+TW.APINAME+'img/ajax-loader.gif"></img>';
+//         image='<img style="display:block; margin: 0px auto;" src="'+TW.companionAPI+'img/ajax-loader.gif"></img>';
 //         $("#tab-container-top").show();
 //         $("#topPapers").show();
 //         $("#topPapers").html(image);
 //         $.ajax({
 //             type: 'GET',
-//             url: TW.APINAME+'info_div.php',
+//             url: TW.companionAPI+'info_div.php',
 //             data: "type="+type+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+TW.field[getUrlParam.file],
 //             //contentType: "application/json",
 //             //dataType: 'json',
 //             success : function(data){
-//                 console.log(TW.APINAME+'info_div.php?'+"type="+type+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+TW.field[getUrlParam.file]);
+//                 console.log(TW.companionAPI+'info_div.php?'+"type="+type+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+TW.field[getUrlParam.file]);
 //                 $("#topPapers").html(data);
 //             },
 //             error: function(){
@@ -370,7 +370,7 @@ function getTopPapers(type){
         //
         $.ajax({
             type: 'GET',
-            url: TW.APINAME,
+            url: TW.companionAPI,
             data: {'query': joined_q},
             contentType: "application/json",
             success : function(data){
@@ -506,7 +506,7 @@ function RenderTweet( tweet) {
 //FOR UNI-PARTITE
 // function selectionUni(currentNode){
 //     console.log("\tin selectionUni:"+currentNode.id);
-//     if(checkBox==false && cursor_size==0) {
+//     if(checkBox==false && TW.circleSize==0) {
 //         highlightSelectedNodes(false);
 //         opossites = [];
 //         selections = [];
@@ -683,7 +683,7 @@ function circleTrackMouse(e) {
       //   }
       // }
 
-  ctx.arc(x, y, cursor_size, 0, Math.PI * 2, true);
+  ctx.arc(x, y, TW.circleSize, 0, Math.PI * 2, true);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
@@ -694,7 +694,7 @@ function circleTrackMouse(e) {
 // exact subset of nodes under circle
 function circleGetAreaNodes(camX0, camY0) {
 
-  var cursor_ray = cursor_size * TW.cam.ratio // cursor_size to cam units
+  var cursor_ray = TW.circleSize * TW.cam.ratio // converting TW.circleSize to cam units
 
   // prepare an approximate neighborhood
   var slightlyLargerNodeset = circleLocalSubset(
@@ -799,8 +799,8 @@ function flashNodesArray (nodesArray) {
 //   - the dirname of the submodule's files (with a mandatory init.js)
 //   - the css class of all html elements added by the submodule
 function ProcessDivsFlags() {
-    for(var key in TW.DivsFlags) {
-        if(TW.DivsFlags[key]===false) {
+    for(var key in TW.conf.DivsFlags) {
+        if(TW.conf.DivsFlags[key]===false) {
             $("."+key).remove() ; // hide elements of module's class
         }
         else {
