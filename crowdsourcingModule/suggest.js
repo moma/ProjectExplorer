@@ -2,6 +2,9 @@
 /* ---------------------  crowdsourcingTerms  --------------------- */
 /* ---------------------------------------------------------------- */
 
+// update message in the search bar
+TW.conf.strSearchBar = "Select or suggest topics";
+$("#searchinput").attr('placeholder', TW.conf.strSearchBar) ;
 
 /* 3 possible events affect crowdsourcing */
 

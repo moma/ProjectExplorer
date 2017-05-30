@@ -248,7 +248,7 @@ function sortNodeTypes(observedTypesDict) {
       // POSSible: allow more than 2 cats
       for(var i in observedTypes) {
           let c = observedTypes[i]
-          if(c == TW.conf.catSoc || (c != TW.catSem && c.indexOf("term")==-1)) {// NOT a term-category
+          if(c == TW.conf.catSoc || (c != TW.conf.catSem && c.indexOf("term")==-1)) {// NOT a term-category
               newcats[0] = c;
               catDict[c] = 0;
           }
@@ -299,6 +299,7 @@ function facetsBinning (valuesIdx, Atts_2_Exclude) {
       // console.log(`======= ${cat}::${at} =======`)
 
       // skip non-numeric or already done
+      // £TODO finish changes to Atts_2_Exclude from 69e7c039
       if (Atts_2_Exclude[at] || at == "clust_default") {
         continue
       }
@@ -307,7 +308,7 @@ function facetsBinning (valuesIdx, Atts_2_Exclude) {
       facetIdx[cat][at] = []
 
       // if n possible values doesn't need binify
-      if (Object.keys(valuesIdx[cat][at].map).length <= TW.maxDiscreteValues) {
+      if (Object.keys(valuesIdx[cat][at].map).length <= TW.conf.maxDiscreteValues) {
         for (var pval in valuesIdx[cat][at].map) {
           facetIdx[cat][at].push({
             'labl': `${cat}||${at}||${pval}`,
@@ -592,7 +593,7 @@ function dictfyGexf( gexf , categories ){
 
             // console.debug("node.attributes", node.attributes)
             // creating a faceted index from node.attributes
-            if (TW.scanClusters) {
+            if (TW.conf.scanClusters) {
               [tmpVals, Atts_2_Exclude] = updateValueFacets(tmpVals, Atts_2_Exclude, node)
             }
 
@@ -615,6 +616,7 @@ function dictfyGexf( gexf , categories ){
 
 
     // clusters and other facets => type => name => [{label,val/range,nodeids}]
+    // £TODO finish changes to Atts_2_Exclude from 69e7c039 (new specif: dtype str is accepted for classes)
     TW.Clusters = facetsBinning(tmpVals, Atts_2_Exclude)
 
 

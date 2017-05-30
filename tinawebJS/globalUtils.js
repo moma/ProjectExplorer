@@ -143,38 +143,16 @@ getUrlParam = (function () {
 
 function ArraySortByValue(array, sortFunc){
     var tmp = [];
-    // oposMAX=0;
     for (var k in array) {
-        if (array.hasOwnProperty(k)) {
-            tmp.push({
-                key: k,
-                value:  array[k]
-            });
-            // if((array[k]) > oposMAX) oposMAX= array[k];
-        }
+      tmp.push({
+          key: k,
+          value:  array[k]
+      });
     }
 
+    // reverse numeric on prop 'value'
     tmp.sort(function(o1, o2) {
-        return sortFunc(o1.value, o2.value);
-    });
-    return tmp;
-}
-
-
-
-function ArraySortByKey(array, sortFunc){
-    var tmp = [];
-    for (var k in array) {
-        if (array.hasOwnProperty(k)) {
-            tmp.push({
-                key: k,
-                value:  array[k]
-            });
-        }
-    }
-
-    tmp.sort(function(o1, o2) {
-        return sortFunc(o1.key, o2.key);
+        return (parseFloat(o2.value) - parseFloat(o1.value));
     });
     return tmp;
 }

@@ -77,14 +77,14 @@
           </li>
           <li style="margin-left:10px;">
             <a href="#" class="navbar-middle navbar-brand">
-              <!-- will be replaced by TW.branding -->
+              <!-- will be replaced by TW.conf.branding -->
               <span id="twbrand">TinaWebJS</span>
             </a>
           </li>
 
           <li class="disabled">
             <a class="navbar-middle">
-              <span class="label label-default label-lg">MAP: </span>
+              <span class="label label-default label-lg">MAP: <span id="maplabel"></span></span>
             </a>
           </li>
 
@@ -188,7 +188,7 @@
               <div id="sliderlabelsize" class="settingslider"></div>
             </a></li>
 
-             <li class="dropdown">
+             <li id="setcolorsMenu" class="dropdown">
                <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
                Set Colors <img title="Set Colors" src="libs/img2/colors.png" width="20px"><span class="caret"></span>
                </a>

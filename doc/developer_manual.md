@@ -1,6 +1,22 @@
 This is a stub for a future documentation for developers.
 
 
+## Graph input choices
+
+Tina allows 3 main ways of input :
+  - a local file from the client machine  
+      activated by `sourcemode=localfile` or by opening the entry point explorerjs.html via file protocol (<=> locally)  
+  - a static file from the remote server  
+    `sourcemode=serverfile`
+  - a dataset from a remote server API  
+    `sourcemode=api`
+
+The `sourcemode` value is by default the one in settings_explorerjs.js (`TW.conf.sourcemode`), unless an url argument of the same name is present.
+
+The `serverfile` option has an extended version called `servermenu`. It opens a list of files called `db.json` on the server, providing a menu to choose from it.
+
+The detailed implementation of these choices can be found in the function `syncRemoteGraphData()` in main.js.
+
 ## Graph initialization
 
 This will still evolve but the main steps for any graph initialization messily use functions across several modules, so it can be useful to list them here together:
@@ -29,7 +45,7 @@ This will still evolve but the main steps for any graph initialization messily u
    - any attribute listed in the sourcenode.attributes will be indexed if the TW.scanClusters flag is true
    - the mapping from attribute values to matching nodes is in TW.Clusters.aType.anAttr.aValue.map
    - coloration:     "`age`" "`growth_rate`" + any attribute of type float or int
-   - clustering:     "`cluster_index`" ou nom figurant dans `TW.nodeClusAtt`
+   - clustering:     "`cluster_index`" ou nom figurant dans `TW.conf.nodeClusAtt`
    - vocabulary: (en cours) any attribute of type string and where the amount of distinct values is < TW.somesettings
 
 

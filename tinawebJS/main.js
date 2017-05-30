@@ -74,19 +74,10 @@ var AjaxSync = (function(TYPE, URL, DATA, DT) {
     return Result;
 }).index();
 
-function jsActionOnGexfSelector(gexfBasename){
-    let gexfPath = TW.gexfPaths[gexfBasename] || gexfBasename+".gexf"
-    let serverPrefix = ''
-    var pathcomponents = window.location.pathname.split('/')
-    for (var i in pathcomponents) {
-      if (pathcomponents[i] != 'explorerjs.html')
-        serverPrefix += '/'+pathcomponents[i]
-    }
-    var newDataRes = AjaxSync({ URL: window.location.origin+serverPrefix+'/'+gexfPath });
-    mainStartGraph(newDataRes["format"], newDataRes["data"], TW.instance)
-}
 
 //  === [   what to do at start ] === //
+console.log("Starting TWJS")
+
 // NB this method-holding instance could be initialized just once or even removed?
 var sigma_utils = new SigmaUtils();
 
@@ -103,12 +94,12 @@ TW.instance.initSearchListeners();
 // show the custom name of the app
 writeBrand(TW.conf.branding)
 
-console.log("Starting TWJS")
 
 // choosing the input
 // -------------------
 // if page is being run locally ==> only possible source shall be via file input
-if (window.location.protocol == 'file:') {
+if (window.location.protocol == 'file:'
+    || (!isUndef(getUrlParam.sourcemode) && getUrlParam.sourcemode == 'localfile')) {
 
   let inputDiv = document.getElementById('localInput')
   inputDiv.style.display = 'block'
@@ -120,15 +111,15 @@ if (window.location.protocol == 'file:') {
   inputDiv.appendChild(remark)
 
   // user can open a gexf or json from his fs
-  // POSS we could actually provide this local file chooser in all cases
   var graphFileInput = createFilechooserEl()
   inputDiv.appendChild(graphFileInput)
 }
 // traditional cases: remote read from API or prepared server-side file
 else {
   // NB it will use global urlParams and TW.settings to choose the source
-  var [inFormat, inData] = syncRemoteGraphData()
+  var [inFormat, inData, mapLabel] = syncRemoteGraphData()
   mainStartGraph(inFormat, inData, TW.instance)
+  writeLabel(mapLabel)
 }
 
 //  === [ / what to do at start ] === //
@@ -256,7 +247,7 @@ function syncRemoteGraphData () {
   // cases            (2)       and     (3) : we'll read a file from server
   // sourcemode == "serverfile" or "servermenu" (several files with <select>)
   else {
-    console.log("input case: server-side file, using db.json or getUrlParam.file or TW.conf.sourceFile")
+    console.log("input case: server-side file, using TW.conf.sourceMenu or getUrlParam.file or TW.conf.sourceFile")
 
     // -> @mode is servermenu, files are listed in db.json file (preRes ajax)
     //      --> if @file also in url, choose the db.json one matching  <=== £TODO THIS CASE STILL TO FIX
@@ -272,9 +263,9 @@ function syncRemoteGraphData () {
 
     // menufile case : a list of source files in ./db.json
     if (sourcemode == 'servermenu') {
-        console.log("no @file arg nor TW.mainfile: trying FILEMENU db.json")
+        console.log("no @file arg nor TW.mainfile: trying FILEMENU TW.conf.sourceMenu")
         // we'll first retrieve the menu of available files in db.json, then get the real data in a second ajax
-        var infofile = "db.json"
+        var infofile = TW.conf.sourceMenu
 
         if (TW.conf.debug.logFetchers)  console.info(`attempting to load infofile ${infofile}`)
         var preRES = AjaxSync({ URL: infofile, DT:"json" });
@@ -297,9 +288,11 @@ function syncRemoteGraphData () {
         // the first or a specified one (ie both mode and file params are present)
         if( isUndef(getUrlParam.file) ) {
             the_file = first_path+"/"+first_file
+            mapLabel = first_file
         } else {
             // £POSS; match on the full paths from db.json
             the_file = first_path+"/"+getUrlParam.file
+            mapLabel = getUrlParam.file
         }
 
         var files_selector = '<select onchange="jsActionOnGexfSelector(this.value);">'
@@ -723,7 +716,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
       TW.partialGraph.camera.goTo({x:0, y:0, ratio:0.9, angle: 0})
 
       // mostly json data are extracts provided by DB apis => no positions
-      if (inFormat == "json")  TW.conf.fa2Enabled = true
+      // if (inFormat == "json")  TW.conf.fa2Enabled = true
 
       // will run fa2 if enough nodes and TW.conf.fa2Enabled == true
       sigma_utils.smartForceAtlas()
@@ -761,13 +754,13 @@ function mainStartGraph(inFormat, inData, twInstance) {
 
 
 // load optional modules
-ProcessDivsFlags() ;
+activateModules() ;
 
 // show any already existing panel
 document.getElementById("graph-panels").style.display = "block"
 
 // grey message in the search bar from settings
-$("#searchinput").attr('placeholder', TW.strSearchBar) ;
+$("#searchinput").attr('placeholder', TW.conf.strSearchBar) ;
 
 
 setTimeout( function() {

@@ -6,28 +6,49 @@ TW.conf = (function(TW){
 
   let TWConf = {}
 
-  TWConf.branding = 'test bipart'        // <----- the name displayed in upper left
+  TWConf.branding = 'ProjectExplorer'   // <--- the name displayed in upper left
 
 
   // ==========================
   // TINA POSSIBLE DATA SOURCES
   // ==========================
 
+
+  // Graph data source
+  // -----------------
   // the graph input depends on TWConf.sourcemode (or manual url arg 'sourcemode')
   TWConf.sourcemode = "api"   // accepted: "api" | "serverfile" | "servermenu" | "localfile"
 
-  // server-side gexf default source
+  // server-side .gexf|.json default source
   TWConf.sourceFile = "data/politoscope/ProgrammeDesCandidats.enrichi.gexf"
 
-  // or remote bridge to default source api ajax queries
+  // ...or server-side gexf default source list
+  TWConf.sourceMenu = "db.json"
+
+  // ...or remote bridge to default source api ajax queries
   TWConf.sourceAPI={};
   TWConf.sourceAPI["forNormalQuery"] = "services/api/graph";
   TWConf.sourceAPI["forFilteredQuery"] = "services/api/graph";
 
 
+  // Related documents (topPapers) data source
+  // -----------------------------------------
+
+  TWConf.getRelatedDocs = true
+  TWConf.relatedDocsAPI = "http://127.0.0.1:5000/twitter_search"
+
+
+  // £TODO : allow to choose between twitter or elasticsearch topPapers (choic of post-process function in extras_explorer)
+  // TWConf.relatedDocsType
+
+
   // ===========
   // DATA FACETS
   // ===========
+
+
+  // create facets ?
+  TWConf.scanClusters = true
 
   // to handle node attributes from data
   //    => clusters (discrete numeric or str vars),
@@ -36,73 +57,120 @@ TW.conf = (function(TW){
   // for continuous attrvalues/colors (cf. clustersBy), how many levels in legend?
   TWConf.legendsBins = 7 ;
 
+  // max discrete levels in facet legend (if attribute has more distinct values then binning)
+  TWConf.maxDiscreteValues = 40
+
+  // £TODO transform for new specifications
   // some specific attributes may have other number of levels
   TWConf.customLegendsBins = {
     'age': 8,
     'growth_rate': 12
   }
 
+  // default clustering (used to show as initial color)
+  TWConf.nodeClusAtt = "modularity_class"
 
-  // ===================
-  // TINA ACTIVE MODULES
-  // ===================
-  TWConf.DivsFlags = {} ;
-  // flag name is div class to be removed if false
-  //        *and* subdirectory to import if true
-  // see also ProcessDivsFlags()
-  TWConf.DivsFlags["histogramModule"] = false ;
-  TWConf.DivsFlags["histogramDailyVariantModule"] = false ;
-  // TODO more generic module integrating the variants cf. experiments/histogramModule_STUB_GENERIQUE
-  TWConf.DivsFlags["crowdsourcingModule"] = false ;
-
-  TWConf.libspath = 'libs'    // FIXME path vars should not be used after page load !
 
   // =============
   // TINA BEHAVIOR
   // =============
 
-  // Node typology
+  // Node typology (searched in nodes data, overridden if data has other types)
+
+  // (FIXME cf. comment in sortNodeTypes and swActual functions
+  //            about the limits of how these 2 values and
+  //            TW.categories are used in older functions)
   TWConf.catSoc = "Document";
   TWConf.catSem = "NGram";
 
-  // Events handling
-  TWConf.deselectOnclickStage = true // will a click on the background remove selection ? (except when dragging)
+  // Active modules
+  // --------------
+  TWConf.ModulesFlags = {} ;
+  // flag name is div class to be removed if false
+  //        *and* subdirectory to import if true
+  // see also activateModules()
+  TWConf.ModulesFlags["histogramModule"] = false ;
+  TWConf.ModulesFlags["histogramDailyVariantModule"] = false ;
+  // TODO more generic module integrating the variants cf. experiments/histogramModule_STUB_GENERIQUE
+  TWConf.ModulesFlags["crowdsourcingModule"] = true ;
 
 
-  // debug flags & log levels
-  TWConf.debug = {
-    initialShowAll: false,           // show all nodes on bipartite case init (docs + terms in one view)
+  // Other optional functionalities
+  // -----------------------------
+  TWConf.filterSliders = true     // show sliders for nodes/edges subsets
 
-    // show verbose console logs...
-    logFetchers: false,              // ...about ajax/fetching of graph data
-    logParsers: false,               // ...about parsing said data
-    logFacets: false,                // ...about parsing node attribute:value facets
-    logSettings: false,              // ...about settings at Tina and Sigma init time
-    logSelections: false
-  }
+  TWConf.colorsByAtt = false;     // show "Set colors" menu
+
+  TWConf.deselectOnclickStage = true   // click on background remove selection ?
+                                       // (except when dragging)
+
+  TWConf.histogramStartThreshold = 10 ;   // for daily histo module
+                                          // (from how many docs are significant)
 
 
-  // Layouts
-  // -------
+  // £TODO these exist only in git branches
+  //       (geomap: ademe, timeline: tweetoscope)
+  //       ==> ask if need to be restored
+  // TW.geomap = false;
+  // TW.twittertimeline = false;
+
+  // Layout options
+  // --------------
   TWConf.fa2Available=true;        // show/hide fa2Button
   TWConf.disperseAvailable=true;   // show/hide disperseButton
 
   // if fa2Available, the auto-run config:
 
-    TWConf.fa2Enabled= true;       // fa2 auto-run at start and after graph modified ?
-    TWConf.fa2Milliseconds=5000;   // duration of auto-run
-    TWConf.minNodesForAutoFA2 = 5  // graph size threshold to auto-run
+    TWConf.fa2Enabled= false;       // fa2 auto-run at start and after graph modified ?
+    TWConf.fa2Milliseconds=5000;    // duration of auto-run
+    TWConf.minNodesForAutoFA2 = 5   // graph size threshold to auto-run
 
 
   // Full-text search
   // ----------------
-  TWConf.minLengthAutoComplete = 1;
-  TWConf.maxSearchResults = 10;
+  TWConf.maxSearchResults = 10;           // how many "top papers" to display
+  TWConf.minLengthAutoComplete = 1;       // how many chars to type for autocomp
+  TWConf.strSearchBar = "Select topics";
 
 
-  // SIGMA BEHAVIOR SETTINGS
+  // =======================
+  // TINA RENDERING SETTINGS
+  // =======================
+  TWConf.overSampling = true    // costly hi-def rendering (true => pixelRatio x 2)
 
+  // relative sizes (iff graph display with both nodetypes)
+  TWConf.sizeMult = [];
+  TWConf.sizeMult[0] = 1.5;    // ie for node type 0
+  TWConf.sizeMult[1] = 1.0;    // ie for node type 1
+
+  // circle selection cursor
+  TWConf.circleSizeMin = 0;
+  TWConf.circleSizeMax = 100;
+
+  // size range for neighbor nodes "tagcloud"
+  TWConf.tagcloudFontsizeMin = 12;
+  TWConf.tagcloudFontsizeMax = 24;
+
+  TWConf.tagcloudSameLimit = 50   // display at most how many neighbors of the same type
+  TWConf.tagcloudOpposLimit = 10    // display at most how many neighbors of the opposite type
+
+
+  TWConf.defaultNodeColor = "rgb(40,40,40)"
+
+  // selected/deselected rendering
+  TWConf.nodesGreyBorderColor = "rgba(100, 100, 100, 0.5)";  // not selected nodes
+
+
+  TWConf.selectedColor = "default"  // "node" for a background like the node's color,
+                                    // "default" for note-like yellow
+
+  TWConf.edgeDefaultOpacity = 0.4                      // opacity when true_color
+  TWConf.edgeGreyColor = "rgba(150, 150, 150, 0.5)";   // not selected edges
+
+
+  // ========================
   // SIGMA RENDERING SETTINGS
+  // ========================
   // triggers overriding sigma.canvas renderers: nodes.def, labels.def, edges.def
   TWConf.ourRendering = true ;
 
@@ -147,46 +215,34 @@ TW.conf = (function(TW){
   };
 
 
-  // =======================
-  // TINA RENDERING SETTINGS
-  // =======================
-  TWConf.overSampling = false    // costly hi-def rendering (true => pixelRatio x 2)
+  // ===========
+  // DEBUG FLAGS
+  // ===========
+  TWConf.debug = {
+    initialShowAll: false,           // show all nodes on bipartite case init (docs + terms in one view)
 
-  TWConf.sizeMult = [];
-
-  TWConf.sizeMult[0] = 1.0;    // ie for node type 0
-  TWConf.sizeMult[1] = 1.0;    // ie for node type 1
-
-  TWConf.circleSizeMin= 0;
-  TWConf.circleSizeMax= 100;
-
-
-  // ========
-  // A RANGER £TODO
-  // ========
-
-  TWConf.nodeClusAtt = "modularity_class"
+    // show verbose console logs...
+    logFetchers: false,              // ...about ajax/fetching of graph data
+    logParsers: false,               // ...about parsing said data
+    logFacets: true,                // ...about parsing node attribute:value facets
+    logSettings: false,              // ...about settings at Tina and Sigma init time
+    logSelections: true
+  }
 
 
-  TWConf.filterSliders = true
+  // £TODO: fix these 2 settings with a better dir structure
+  //        + but avoid path injection
+  //        + find a place for modules *INSIDE* tinawebJS dir for easier deployment
+  TWConf.ModulesPath = ''
+  TWConf.libspath = 'libs'
 
-  TWConf.histogramStartThreshold = 10 ;
-
-  TWConf.defaultNodeColor = "rgb(40,40,40)"
-  TWConf.edgeDefaultOpacity = 0.4  // opacity when true_color
-  TWConf.edgeGreyColor = "rgba(150, 150, 150, 0.5)";
-  TWConf.nodesGreyBorderColor = "rgba(100, 100, 100, 0.5)";
-  TWConf.selectedColor = "default"  // "node" for a background like the node's color,
-                             // "default" for note-like yellow
-
-  console.warn("current conf:", TWConf)
 
   return TWConf
 })()
 
 
 
-// INITIALIZED VARS (£TODO move to main or Tina)
+// INITIALIZED VARS
 // ================
 TW.Nodes = [];
 TW.Edges = [];
@@ -213,9 +269,6 @@ var bipartiteN2D = {};
 // possible node types and their inverted map
 TW.categories = [];
 TW.catDict = {};
-
-
-TW.nodeslength = 0  // <=== £TODO harmonize use with TW.partialGraph.graph.nNodes()
 
 var gexfFile;
 //var zoom=0;
@@ -248,8 +301,6 @@ var lastFilter = []
     lastFilter["#slidercat0edgesweight"] =  {"orig":"-" , "last":"-"}
     lastFilter["#slidercat1edgesweight"] =  {"orig":"-" , "last":"-"}
 
-var desirableTagCloudFont_MIN=12;
-var desirableTagCloudFont_MAX=20;
 var desirableNodeSizeMIN=1;
 var desirableNodeSizeMAX=12;
 

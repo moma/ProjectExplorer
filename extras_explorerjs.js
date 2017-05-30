@@ -14,8 +14,8 @@ function newPopup(url) {
 //  to add the button in the html with the sigmaUtils.clustersBy(x) listener.
 function changeGraphAppearanceByFacets( manualflag ) {
 
-    if ( !isUndef(manualflag) && !TW.colorByAtt ) TW.colorByAtt = manualflag;
-    if(!TW.colorByAtt) return;
+    if ( !isUndef(manualflag) && !TW.conf.colorByAtt ) TW.conf.colorByAtt = manualflag;
+    if(!TW.conf.colorByAtt) return;
 
     // for GUI html: if present, rename raw attribute key by a proper label
     var AttsTranslations = {
@@ -93,13 +93,13 @@ function changeGraphAppearanceByFacets( manualflag ) {
 }
 
 
-// creates TW.legendsBins bins
+// creates TW.conf.legendsBins bins
 // @sortedValues array, mandatory
 function intervalsInventory(sortedValues) {
   var binmins = []
   var len = sortedValues.length
-  for (var l=0 ; l < TW.legendsBins ; l++) {
-    let nthVal = Math.floor(len * l / TW.legendsBins)
+  for (var l=0 ; l < TW.conf.legendsBins ; l++) {
+    let nthVal = Math.floor(len * l / TW.conf.legendsBins)
     binmins.push(sortedValues[nthVal])
   }
   // console.info("legendRefTicks", binmins)
@@ -328,7 +328,7 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
 
 //For CNRS
 // function getTopPapers(type){
-//     if(TW.getAdditionalInfo){
+//     if(TW.conf.getRelatedDocs){
 //         console.log("getTopPapers")
 //         jsonparams=JSON.stringify(getSelections());
 //         bi=(Object.keys(categories).length==2)?1:0;
@@ -336,18 +336,18 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
 //         jsonparams = jsonparams.split('&').join('__and__');
 //         //dbsPaths.push(getGlobalDBs());
 //         thisgexf=JSON.stringify(decodeURIComponent(getUrlParam.file));
-//         image='<img style="display:block; margin: 0px auto;" src="'+TW.companionAPI+'img/ajax-loader.gif"></img>';
+//         image='<img style="display:block; margin: 0px auto;" src="'+TW.conf.relatedDocsAPI+'img/ajax-loader.gif"></img>';
 //         $("#tab-container-top").show();
 //         $("#topPapers").show();
 //         $("#topPapers").html(image);
 //         $.ajax({
 //             type: 'GET',
-//             url: TW.companionAPI+'info_div.php',
-//             data: "type="+type+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+TW.field[getUrlParam.file],
+//             url: TW.conf.relatedDocsAPI+'info_div.php',
+//             data: "type="+nodetype+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+TW.field[getUrlParam.file],
 //             //contentType: "application/json",
 //             //dataType: 'json',
 //             success : function(data){
-//                 console.log(TW.companionAPI+'info_div.php?'+"type="+type+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+TW.field[getUrlParam.file]);
+//                 console.log(TW.conf.relatedDocsAPI+'info_div.php?'+"type="+nodetype+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+TW.field[getUrlParam.file]);
 //                 $("#topPapers").html(data);
 //             },
 //             error: function(){
@@ -359,8 +359,11 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
 
 
 // a custom variant of twitter plugin written for politoscope
-function getTopPapers(type){
-    if(TW.getAdditionalInfo){
+// NB: this variant only for nodetype semantic
+function getTopPapers(nodetypeLegacy){
+
+    if (nodetypeLegacy == 'semantic' && TW.conf.getRelatedDocs) {
+
         jsonparams=getSelections();
 
         var joined_q = jsonparams.map(function(w) {return '('+w+')'}).join(' AND ')
@@ -370,7 +373,7 @@ function getTopPapers(type){
         //
         $.ajax({
             type: 'GET',
-            url: TW.companionAPI,
+            url: TW.conf.relatedDocsAPI,
             data: {'query': joined_q},
             contentType: "application/json",
             success : function(data){
@@ -385,7 +388,7 @@ function getTopPapers(type){
                   }
                 }
                 else {
-                  topTweetsHtml = `<p class="micromessage centered">The query <span class=code>${joined_q}</span> delivers no results on Twitter with the topic #Presidentielles2017 and most related hashtags</p>`
+                  topTweetsHtml = `<p class="micromessage centered">The query <span class=code>${joined_q}</span> delivers no results on Twitter.</p>`
                 }
 
                 $("#topPapers").html(topTweetsHtml);
@@ -399,9 +402,7 @@ function getTopPapers(type){
 }
 
 function clickInsideTweet(e, tweetSrcUrl) {
-    console.log('>>>>> event target tag', e.target.tag)
-    console.log("event")
-    console.log(e)
+    console.debug('inside tweet tagName', e.target.tagName)
     var tgt = e.target
     if (tgt.tagName.toLowerCase() == "a")
         window.open(tgt.href, "Link in tweet")
@@ -506,7 +507,7 @@ function RenderTweet( tweet) {
 //FOR UNI-PARTITE
 // function selectionUni(currentNode){
 //     console.log("\tin selectionUni:"+currentNode.id);
-//     if(checkBox==false && TW.circleSize==0) {
+//     if(TW.checkBox==false && TW.circleSize==0) {
 //         highlightSelectedNodes(false);
 //         opossites = [];
 //         selections = [];
@@ -793,23 +794,26 @@ function flashNodesArray (nodesArray) {
 
 // BASIC MODULARITY
 // =================
-// ProcessDivsFlags is for adding/removing features from TinawebJS
+// activateModules is for adding/removing features from TinawebJS
 // each flag is simultaneously 3 things:
-//   - the key of a bool config value in DivsFlags (settings_explorerjs)
+//   - the key of a bool config value in TW.conf.ModulesFlags (settings_explorerjs)
 //   - the dirname of the submodule's files (with a mandatory init.js)
 //   - the css class of all html elements added by the submodule
-function ProcessDivsFlags() {
-    for(var key in TW.conf.DivsFlags) {
-        if(TW.conf.DivsFlags[key]===false) {
+function activateModules() {
+    for(var key in TW.conf.ModulesFlags) {
+
+        if(TW.conf.ModulesFlags[key]===false) {
             $("."+key).remove() ; // hide elements of module's class
         }
         else {
-            // console.log("extras:ProcessDivsFlags: key is true: "+key)
+            // console.log("extras:activateModules: key is true: "+key)
             // load JS+CSS items corresponding to the flagname
-            my_src_dir = key
+            let my_src_dir = key
 
-            // TODO check if async not a problem
-            if (linkCheck(my_src_dir+"/init.js")) {
+            // synchronous ajax
+            let moduleIsPresent = linkCheck(my_src_dir+"/init.js")
+
+            if (moduleIsPresent) {
               loadJS(my_src_dir+"/init.js") ;
             }
             else {

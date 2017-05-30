@@ -147,7 +147,7 @@ function SelectionEngine() {
      // ====================
     this.MultipleSelection2 = (function(nodes,nodesDict,edgesDict) {
 
-      if (TW.conf.debug.selections) {
+      if (TW.conf.debug.logSelections) {
         var tMS2_deb = performance.now()
 
         console.log("IN SelectionEngine.MultipleSelection2:")
@@ -214,7 +214,12 @@ function SelectionEngine() {
                               if (typeof sameSideNeighbors[t] == 'undefined') {
                                 sameSideNeighbors[t]=0
                               }
-                              sameSideNeighbors[t]++
+
+                              if (TW.Edges[s+";"+t])
+                                sameSideNeighbors[t] += TW.Edges[s+";"+t].weight || 1
+
+                              if (TW.Edges[t+";"+s])
+                                sameSideNeighbors[t] += TW.Edges[t+";"+s].weight || 1
                             }
                         }
                     }
@@ -290,6 +295,8 @@ function SelectionEngine() {
                 for(var n in bipaNeighs) {
                     if (typeof oppositeSideNeighbors[bipaNeighs[n]] == "undefined")
                         oppositeSideNeighbors[bipaNeighs[n]] = 0;
+
+                    // £TODO weighted increment
                     oppositeSideNeighbors[bipaNeighs[n]]++;
                 }
             }
@@ -312,7 +319,7 @@ function SelectionEngine() {
             return b-a
         });
 
-        if (TW.conf.debug.selections) {
+        if (TW.conf.debug.logSelections) {
           console.debug('selections', selections)
           console.debug('oppos', oppos)
           console.debug('same', same)
@@ -325,10 +332,12 @@ function SelectionEngine() {
 
         updateRelatedNodesPanel( selections , same, oppos );
 
-        if (TW.conf.debug.selections) {
+        if (TW.conf.debug.logSelections) {
           var tMS2_fin = performance.now()
           console.log("end MultipleSelection2, own time:", tMS2_fin-tMS2_deb)
         }
+
+
 
     }).index()
 };
@@ -736,6 +745,10 @@ TinaWebJS = function ( sigmacanvas ) {
             // new sigma.js
             TW.partialGraph.camera.goTo({x:0, y:0, ratio:1.2})
         });
+
+        if (!TW.conf.colorsByAtt) {
+          $("#setcolorsMenu").hide()
+        }
 
         if (TW.conf.fa2Available) {
           $("#layoutButton").click(function () {

@@ -3,7 +3,7 @@
 
 // settings: {norender: Bool}
 function cancelSelection (fromTagCloud, settings) {
-    if (TW.conf.debug.selections) { console.log("\t***in cancelSelection"); }
+    if (TW.conf.debug.logSelections) { console.log("\t***in cancelSelection"); }
     if (!settings) settings = {}
 
     highlightSelectedNodes(false); //Unselect the selected ones :D
@@ -110,6 +110,24 @@ function getActivetypesKey() {
   // ex: '1'        or  '0|1'   or   '1|1'
   return lastState.activetypes.map(Number).join('|')
 }
+
+// transitional function:
+// ----------------------
+// Goal: determine if a single nodetype or global activetype is semantic or social
+// Explanation: some older functions (eg topPapers) used this distinction
+//              (via semi-deprecated global swclickActual),
+//              but the specification changed twice since then:
+//                - 1st change: types described as type 0 and type 1 and possible default type
+//                - 2nd change default type of monopartite case changed from document to semantic
+function swActual(aNodetype) {
+  if (TW.categories.length == 1) {
+    return 'semantic'
+  }
+  else if (TW.categories.length == 2) {
+    return (aNodetype == TW.categories[0]) ? 'social' : 'semantic'
+  }
+}
+
 
 
 function highlightSelectedNodes(flag){
@@ -242,17 +260,21 @@ function htmlfied_alternodes(elems) {
     var js1='onclick="graphTagCloudElem(\'';
     var js2="');\""
     var frecMAX=elems[0].value
+
+    console.log("htmlfied_alternodes elems", elems)
+    console.log("htmlfied_alternodes frecMAX", frecMAX)
+
     for(var i in elems){
         var id=elems[i].key
         var frec=elems[i].value
         var fontSize
         var htmlfied_alternode
-        if(frecMAX==1) fontSize=desirableTagCloudFont_MIN;
+        if(frecMAX==1) fontSize=TW.conf.tagcloudFontsizeMin;
         else {
             fontSize=
-            desirableTagCloudFont_MIN+
+            TW.conf.tagcloudFontsizeMin+
             (frec-1)*
-            ((desirableTagCloudFont_MAX-desirableTagCloudFont_MIN)/(frecMAX-1));
+            ((TW.conf.tagcloudFontsizeMax-TW.conf.tagcloudFontsizeMin)/(frecMAX-1));
         }
         if(!isUndef(TW.Nodes[id])){
 
@@ -316,22 +338,6 @@ function clearHover() {
   )
 }
 
-// TODO rm ? function doesn't make sense, probably replaced by htmlfied_tagcloud
-// function htmlfied_samenodes(elems) {
-//     var sameNodes=[]
-//     js1=' onmouseover="manualForceLabel(this.id,true, true);" ';
-//     js2=' onmouseout="manualForceLabel(this.id,true, true);" ';
-//     if(elems.length>0) {
-//         var A = getVisibleNodes()
-//         for (var a in A){
-//             n = A[a]
-//             if(!n.active && n.color.charAt(0)=="#" ) {
-//                 sameNodes.push('<li onmouseover="manualForceLabel(\''+n.id+'\',true, true)"  onmouseout="manualForceLabel(\''+n.id+'\',false, true)" ><a>'+ n.label+ '</a></li>')
-//             }
-//         }
-//     }
-//     return sameNodes
-// }
 
 // nodes information div
 function htmlfied_nodesatts(elems){
@@ -369,9 +375,9 @@ function htmlfied_nodesatts(elems){
 
             if(node.type==TW.conf.catSem){
                 information += '<li><b>' + node.label + '</b></li>';
-                google='<a href=http://www.google.com/#hl=en&source=hp&q=%20'+node.label.replace(" ","+")+'%20><img src="'+'img/google.png"></img></a>';
-                wiki = '<a href=http://en.wikipedia.org/wiki/'+node.label.replace(" ","_")+'><img src="'+'img/wikipedia.png"></img></a>';
-                flickr= '<a href=http://www.flickr.com/search/?w=all&q='+node.label.replace(" ","+")+'><img src="'+'img/flickr.png"></img></a>';
+                let google='<a href=http://www.google.com/#hl=en&source=hp&q=%20'+node.label.replace(" ","+")+'%20><img src="'+'img/google.png"></img></a>';
+                let wiki = '<a href=http://en.wikipedia.org/wiki/'+node.label.replace(" ","_")+'><img src="'+'img/wikipedia.png"></img></a>';
+                let flickr= '<a href=http://www.flickr.com/search/?w=all&q='+node.label.replace(" ","+")+'><img src="'+'img/flickr.png"></img></a>';
                 information += '<li>'+google+"&nbsp;"+wiki+"&nbsp;"+flickr+'</li><br>';
                 semnodes.push(information)
             }
@@ -388,33 +394,40 @@ function manualSelectNode ( nodeid ) {
     // (MultipleSelection2 will do the re-rendering)
 }
 
-function htmlfied_tagcloud(elems , limit) {
+function htmlProportionalLabels(elems , limit, selectableFlag) {
     if(elems.length==0) return false;
-    var oppositesNodes=[]
-    var fontSize=desirableTagCloudFont_MIN
-    let frecMAX=elems[0].value
+    let resHtml=[]
+
+    let fontSize   // <-- normalized for display
+
+    // we assume already sorted
+    let frecMax = elems[0].value
+    let frecMin = elems.slice(-1)[0].value
+
     for(var i in elems){
         if(i==limit)
             break
         let id=elems[i].key
         let frec=elems[i].value
-        if(frecMAX > 1) {
-            fontSize=
-            desirableTagCloudFont_MIN+
-            (frec-1)*
-            ((desirableTagCloudFont_MAX-desirableTagCloudFont_MIN)/(frecMAX-1));
-        }
+
+        // FIXME: works but is optimizable (precompute stable part)
+        fontSize = ((frec - frecMin) * (TW.conf.tagcloudFontsizeMax - TW.conf.tagcloudFontsizeMin) / (frecMax - frecMin)) + TW.conf.tagcloudFontsizeMin
 
         // debug
         // console.log('htmlfied_tagcloud (',id, TW.Nodes[id].label,') freq',frec,' fontSize', fontSize)
 
         if(!isUndef(TW.Nodes[id])){
-            var jspart = ' onclick="manualSelectNode(\''+id+'\')" onmouseover="manualForceLabel(\''+id+'\',true, true)"  onmouseout="manualForceLabel(\''+id+'\',false, true)"'
-            let htmlfied_alternode = '<span class="tagcloud-item" style="font-size:'+fontSize+'px;" '+jspart+'>'+ TW.Nodes[id].label+ '</span>';
-            oppositesNodes.push(htmlfied_alternode)
+            var jspart = ''
+
+            if (selectableFlag) {
+              jspart = ' onclick="manualSelectNode(\''+id+'\')" onmouseover="manualForceLabel(\''+id+'\',true, true)"  onmouseout="manualForceLabel(\''+id+'\',false, true)"'
+            }
+
+            let htmlLabel = '<span class="tagcloud-item" style="font-size:'+fontSize+'px;" '+jspart+'>'+ TW.Nodes[id].label+ '</span>';
+            resHtml.push(htmlLabel)
         }
     }
-    return oppositesNodes
+    return resHtml
 }
 
 //missing: getTopPapers for both node types
@@ -449,13 +462,13 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
 
     if(oppos.length>0) {
       alterNodesDIV+='<div id="oppositesBox">';//tagcloud
-      alterNodesDIV+= htmlfied_alternodes( oppos ).join("\n")
+      alterNodesDIV+= htmlProportionalLabels( oppos , TW.conf.tagcloudOpposLimit, false).join("\n")
       alterNodesDIV+= '</div>';
     }
 
     if(getNodeIDs(sels).length>0) {
         sameNodesDIV+='<div id="sameNodes">';//tagcloud
-        var sameNeighTagcloudHtml = htmlfied_tagcloud( same , TW.tagcloud_limit)
+        var sameNeighTagcloudHtml = htmlProportionalLabels( same , TW.conf.tagcloudSameLimit, true )
         sameNodesDIV+= (sameNeighTagcloudHtml!=false) ? sameNeighTagcloudHtml.join("\n")  : "No related items.";
         sameNodesDIV+= '</div>';
     }
@@ -481,7 +494,7 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
     $("#tips").html("");
 
     if(TW.categories.length==1) getTopPapers("semantic");
-    else getTopPapers(swclickActual);
+    else getTopPapers(swActual(getActivetypes()[0]));
 }
 
 function printStates() {
@@ -577,7 +590,7 @@ function graphTagCloudElem(nodes) {
                     nodesDict:nodes_2_colour,
                     edgesDict:edges_2_colour
                 });
-        overNodes=true;  // deprecated
+        TW.selectionActive = true
     }
 
     var present = TW.partialGraph.states.slice(-1)[0]; // Last
@@ -799,7 +812,6 @@ function add1Elem(id) {
 
             if(!n.lock) {
                 updateSearchLabels(id,n.label,n.type);
-                nodeslength++;
             }
             // TW.partialGraph.graph.addNode(anode);
             TW.partialGraph.graph.addNode(n);

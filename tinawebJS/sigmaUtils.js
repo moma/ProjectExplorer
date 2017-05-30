@@ -1,7 +1,6 @@
 'use strict';
 
 SigmaUtils = function () {
-    this.nbCats = 0;
 
     // input = GEXFstring
     this.FillGraph = function( initialActivetypes , catDict  , nodes, edges , graph ) {

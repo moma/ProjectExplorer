@@ -7,6 +7,9 @@ function writeBrand (brandString) {
   document.getElementById('twbrand').innerHTML = brandString
 }
 
+function writeLabel (aMapLabel) {
+  document.getElementById('maplabel').innerHTML = aMapLabel
+}
 
 function createFilechooserEl () {
 
@@ -45,6 +48,7 @@ function createFilechooserEl () {
       rdr.onload = function() {
         if (! rdr.result ||  !rdr.result.length) {
           alert('the selected file is not readable')
+          writeLabel(`Local file: unreadable!`)
         }
         else {
           // we might have a previous graph opened
@@ -59,6 +63,8 @@ function createFilechooserEl () {
             mainStartGraph(theFormat, JSON.parse(rdr.result), TW.instance)
           else
             mainStartGraph(theFormat, rdr.result, TW.instance)
+
+          writeLabel(`Local file: ${clientLocalGraphFile.name}`)
         }
       }
       rdr.readAsText(clientLocalGraphFile)
@@ -787,6 +793,10 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
 // NodeWeightFilter ( "#sliderBNodeWeight" ,  "NGram"   , "size")
 function NodeWeightFilter( sliderDivID , tgtNodeType ,  criteria) {
 
+    if (typeof tgtNodeType == "undefined") {
+      throw 'no nodetype'
+    }
+
     if(TW.partialGraph.graph.nNodes() < 2) {
       console.warn('not enough nodes for subsets: skipping GUI slider init')
       showDisabledSlider(sliderDivID)
@@ -903,8 +913,6 @@ function showDisabledSlider(someDivId) {
 //=========================== </ FILTERS-SLIDERS > ===========================//
 
 
-
-
 //============================= < SEARCH > =============================//
 function updateSearchLabels(id,name,type){
     TW.labels.push({
@@ -959,3 +967,19 @@ function searchLabel(string){
     }
 }
 //============================ < / SEARCH > ============================//
+
+
+//============================= < OTHER ACTIONS > =============================//
+function jsActionOnGexfSelector(gexfBasename){
+    let gexfPath = TW.gexfPaths[gexfBasename] || gexfBasename+".gexf"
+    let serverPrefix = ''
+    var pathcomponents = window.location.pathname.split('/')
+    for (var i in pathcomponents) {
+      if (pathcomponents[i] != 'explorerjs.html')
+        serverPrefix += '/'+pathcomponents[i]
+    }
+    var newDataRes = AjaxSync({ URL: window.location.origin+serverPrefix+'/'+gexfPath });
+    mainStartGraph(newDataRes["format"], newDataRes["data"], TW.instance)
+    writeLabel(gexfBasename)
+}
+//============================= </OTHER ACTIONS > =============================//
