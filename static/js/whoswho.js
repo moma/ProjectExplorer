@@ -240,7 +240,7 @@ $(document).ready(function() {
         return window.open("/print_scholar_directory.php?query=" + nodeId);
       }
       document.getElementById('generate2').onclick = function() {
-        return window.open('/explorerjs.html?type="uid"&nodeidparam="' + nodeId + '"');
+        return window.open('/explorerjs.html?sourcemode="api"&type="uid"&nodeidparam="' + nodeId + '"');
       }
   }
 
@@ -327,7 +327,7 @@ $(document).ready(function() {
           }
           return null
       }
-      return window.open('/explorerjs.html?type="filter"&nodeidparam="' + escape(query) +'"');
+      return window.open('/explorerjs.html?sourcemode="api"&type="filter"&nodeidparam="' + escape(query) +'"');
       //return loadGraph("getgraph.php?query=" + query);
     });
   });

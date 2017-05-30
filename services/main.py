@@ -757,7 +757,7 @@ def register():
                   </li>
                   <li>
                       <span class="glyphicon glyphicon-eye-open"></span>&nbsp;&nbsp;
-                      <a href='/explorerjs.html?type="uid"&nodeidparam=%(luid)i'> Your Map </a>
+                      <a href='/explorerjs.html?sourcemode="api"&type="uid"&nodeidparam=%(luid)i'> Your Map </a>
                   </li>
                   <li>
                       <span class="glyphicon glyphicon glyphicon-stats"></span>&nbsp;&nbsp;
