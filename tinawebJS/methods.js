@@ -1,6 +1,87 @@
 'use strict';
 
 
+// @args is an object with 4 possible properties that define the new state
+//     ex: new selections:  {sels: [268]}
+//     ex: new activetypes: {activetypes:[false, true]}
+//     ex: new level:       {level:false}
+TW.setState = function( args ) {
+    var bistate=false, typesKey=false;
+
+    // £TODO we could append the new state in this function too
+    var present = TW.states.slice(-1)[0]; // Last
+    var past = TW.states.slice(-2)[0] // avant Last
+
+    console.log("setState args: ", args);
+
+    if(!isUndef(args.activetypes)) {
+
+        // record into last state
+        present.activetypes = args.activetypes;
+
+
+        bistate= present.activetypes.map(Number).reduce(
+          function(a, b){return a+b;}
+        )
+        typesKey = present.activetypes.map(Number).join("|")
+    }
+    // console.log("printing the typesKey:", typesKey)
+
+    if(!isUndef(args.level)) present.level = args.level;
+    if(!isUndef(args.sels))  present.selections = args.sels;
+    if(!isUndef(args.oppos)) present.opposites = args.oppos;
+    present.LouvainFait = false;
+
+    // change level needs a selection
+    LevelButtonDisable(false);  // £TODO rename toggleLevelButton
+    if(   present.level
+       && present.selections
+       && present.selections.length==0)
+        LevelButtonDisable(true);
+
+    // case to go back
+    if(present.level==false && bistate>1)
+        LevelButtonDisable(true)
+
+    // recreate sliders after activetype or level changes
+    if (TW.conf.filterSliders
+        && (present.level != past.level
+            || present.activetypes.map(Number).join("|") != past.activetypes.map(Number).join("|"))) {
+
+      // terms
+      if(typesKey=="0|1") {
+          $(".for-nodecategory-0").hide()
+          $(".for-nodecategory-1").show();
+
+
+          NodeWeightFilter( "#slidercat1nodesweight" ,  TW.categories[1], "size");
+          EdgeWeightFilter("#slidercat1edgesweight", typesKey, "weight");
+      }
+
+      // docs
+      if(typesKey=="1|0") {
+        $(".for-nodecategory-0").show()
+        $(".for-nodecategory-1").hide();
+
+          NodeWeightFilter( "#slidercat0nodesweight" ,  TW.categories[0], "size");
+          EdgeWeightFilter("#slidercat0edgesweight", typesKey, "weight");
+      }
+
+      // terms and docs
+      if(typesKey=="1|1") {
+        $(".for-nodecategory-0").show()
+        $(".for-nodecategory-1").show();
+          NodeWeightFilter( "#slidercat0nodesweight" ,  TW.categories[0], "size");
+          NodeWeightFilter( "#slidercat1nodesweight" ,  TW.categories[1], "size");
+          EdgeWeightFilter("#slidercat0edgesweight", "1|0", "weight");
+          EdgeWeightFilter("#slidercat1edgesweight", "0|1", "weight");
+      }
+    }
+
+};
+
+
+
 // settings: {norender: Bool}
 function cancelSelection (fromTagCloud, settings) {
     if (TW.conf.debug.logSelections) { console.log("\t***in cancelSelection"); }
@@ -12,10 +93,10 @@ function cancelSelection (fromTagCloud, settings) {
     //selections.length = 0;
     selections.splice(0, selections.length);
 
-    TW.partialGraph.states.slice(-1)[0].selections=[]
+    TW.states.slice(-1)[0].selections=[]
 
     // global flag
-    TW.selectionActive = false
+    TW.gui.selectionActive = false
 
 
     //Edges colors go back to normal
@@ -75,7 +156,7 @@ function cancelSelection (fromTagCloud, settings) {
 
     deselections={};
 
-    if(TW.partialGraph.states.slice(-1)[0].level)
+    if(TW.states.slice(-1)[0].level)
         LevelButtonDisable(true);
 
     if (!settings.norender) {
@@ -91,7 +172,7 @@ function cancelSelection (fromTagCloud, settings) {
 function getActivetypes() {
   let currentTypes = []
   let currentTypeIdx
-  let lastState = TW.partialGraph.states.slice(-1)[0]
+  let lastState = TW.states.slice(-1)[0]
 
   for (var possType in TW.catDict) {
     currentTypeIdx = TW.catDict[possType]
@@ -105,7 +186,7 @@ function getActivetypes() {
 }
 
 function getActivetypesKey() {
-  let lastState = TW.partialGraph.states.slice(-1)[0]
+  let lastState = TW.states.slice(-1)[0]
 
   // ex: '1'        or  '0|1'   or   '1|1'
   return lastState.activetypes.map(Number).join('|')
@@ -142,11 +223,11 @@ function highlightSelectedNodes(flag){
 
 function alertCheckBox(eventCheck){
     // NB: we use 2 booleans to adapt to SHIFT checking
-    //      - var TW.checkBox  ---------> has the real box state
-    //      - var TW.manuallyChecked  --> remembers if it was changed here
+    //      - var TW.gui.checkBox  ---------> has the real box state
+    //      - var TW.gui.manuallyChecked  --> remembers if it was changed here
     if(!isUndef(eventCheck.checked)) {
-        TW.checkBox=eventCheck.checked;
-        TW.manuallyChecked = eventCheck.checked
+        TW.gui.checkBox=eventCheck.checked;
+        TW.gui.manuallyChecked = eventCheck.checked
     }
 }
 
@@ -403,14 +484,16 @@ function htmlProportionalLabels(elems , limit, selectableFlag) {
     let frecMax = elems[0].value
     let frecMin = elems.slice(-1)[0].value
 
+    let sourceRange = frecMax - frecMin
+    let targetRange = TW.conf.tagcloudFontsizeMax - TW.conf.tagcloudFontsizeMin
+
     for(var i in elems){
         if(i==limit)
             break
         let id=elems[i].key
         let frec=elems[i].value
 
-        // FIXME: works but is optimizable (precompute stable part)
-        fontSize = ((frec - frecMin) * (TW.conf.tagcloudFontsizeMax - TW.conf.tagcloudFontsizeMin) / (frecMax - frecMin)) + TW.conf.tagcloudFontsizeMin
+        fontSize = ((frec - frecMin) * (targetRange) / (sourceRange)) + TW.conf.tagcloudFontsizeMin
 
         // debug
         // console.log('htmlfied_tagcloud (',id, TW.Nodes[id].label,') freq',frec,' fontSize', fontSize)
@@ -588,21 +671,21 @@ function graphTagCloudElem(nodes) {
                     nodesDict:nodes_2_colour,
                     edgesDict:edges_2_colour
                 });
-        TW.selectionActive = true
+        TW.gui.selectionActive = true
     }
 
-    var present = TW.partialGraph.states.slice(-1)[0]; // Last
+    var present = TW.states.slice(-1)[0]; // Last
     var level = present.level;
-    var lastpos = TW.partialGraph.states.length-1;
+    var lastpos = TW.states.length-1;
 
     // like pushing down in a lifo state present becomes state penultimate
     // £TODO setState should be doing this shifting
     var avantlastpos = lastpos-1;
-    TW.partialGraph.states[avantlastpos] = {};
-    TW.partialGraph.states[avantlastpos].selections = present.selections;
-    TW.partialGraph.states[avantlastpos].level = present.level;
-    TW.partialGraph.states[avantlastpos].activetypes = present.activetypes;
-    TW.partialGraph.states[avantlastpos].opposites = present.opposites;
+    TW.states[avantlastpos] = {};
+    TW.states[avantlastpos].selections = present.selections;
+    TW.states[avantlastpos].level = present.level;
+    TW.states[avantlastpos].activetypes = present.activetypes;
+    TW.states[avantlastpos].opposites = present.opposites;
 
     // recording the new state
     TW.setState({
@@ -839,16 +922,6 @@ function add1Elem(id) {
     }
 }
 
-function pushFilterValue(filtername,arg){
-    if(lastFilter[filtername]["orig"]=="-") {
-        lastFilter[filtername]["orig"] = arg;
-        lastFilter[filtername]["last"] = arg;
-        return;
-    } else {
-        lastFilter[filtername]["last"] = arg;
-        return;
-    }
-}
 
 function saveGraph() {
 

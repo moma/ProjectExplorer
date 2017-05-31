@@ -210,7 +210,7 @@ function SomeEffect( ValueclassCode ) {
     //     TW.partialGraph.graph.nodes(ID).customAttrs.forceLabel = true;
     // }
 
-    // TW.selectionActive=true;
+    // TW.gui.selectionActive=true;
 
     TW.partialGraph.refresh()
 }
@@ -507,7 +507,7 @@ function RenderTweet( tweet) {
 //FOR UNI-PARTITE
 // function selectionUni(currentNode){
 //     console.log("\tin selectionUni:"+currentNode.id);
-//     if(TW.checkBox==false && TW.circleSize==0) {
+//     if(TW.gui.checkBox==false && TW.gui.circleSize==0) {
 //         highlightSelectedNodes(false);
 //         opossites = [];
 //         selections = [];
@@ -684,7 +684,7 @@ function circleTrackMouse(e) {
       //   }
       // }
 
-  ctx.arc(x, y, TW.circleSize, 0, Math.PI * 2, true);
+  ctx.arc(x, y, TW.gui.circleSize, 0, Math.PI * 2, true);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
@@ -695,7 +695,7 @@ function circleTrackMouse(e) {
 // exact subset of nodes under circle
 function circleGetAreaNodes(camX0, camY0) {
 
-  var cursor_ray = TW.circleSize * TW.cam.ratio // converting TW.circleSize to cam units
+  var cursor_ray = TW.gui.circleSize * TW.cam.ratio // converting TW.gui.circleSize to cam units
 
   // prepare an approximate neighborhood
   var slightlyLargerNodeset = circleLocalSubset(

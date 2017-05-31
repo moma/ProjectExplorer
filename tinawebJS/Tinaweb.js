@@ -89,7 +89,7 @@ function SelectionEngine() {
                 coincd.push(results[i].id)
             }
             var targeted = this.SelectorEngine( {
-                            addvalue:TW.checkBox,
+                            addvalue:TW.gui.checkBox,
                             prevsels:selections,
                             currsels:coincd
                         } )
@@ -170,7 +170,7 @@ function SelectionEngine() {
         var sameSideNeighbors = {}
         var oppositeSideNeighbors = {}
 
-        // TW.partialGraph.states.slice(-1)[0] is the present graph state
+        // TW.states.slice(-1)[0] is the present graph state
         // eg
         // {categories: ["someNodeCat"]
         // categoriesDict: {"someNodeCat":0}  // where val 0 or 1 is type sem or soc
@@ -284,7 +284,7 @@ function SelectionEngine() {
           console.error("NaN selection key error")
         }
 
-        TW.partialGraph.states.slice(-1)[0].selections = the_new_sels;
+        TW.states.slice(-1)[0].selections = the_new_sels;
         TW.setState( { sels: the_new_sels} )
 
         // alert("MultipleSelection2=======\nthe_new_sels:" + JSON.stringify(the_new_sels))
@@ -337,7 +337,7 @@ function SelectionEngine() {
         }
 
         // global flag
-        TW.selectionActive = true
+        TW.gui.selectionActive = true
 
         TW.partialGraph.render();
 
@@ -591,7 +591,7 @@ var TinaWebJS = function ( sigmacanvas ) {
                     setTimeout(
                       function (){
                           targeted = selInst.SelectorEngine( {
-                                          addvalue:TW.checkBox,
+                                          addvalue:TW.gui.checkBox,
                                           clicktype:"double",
                                           prevsels:selections,
                                           currsels:coincidences
@@ -599,12 +599,12 @@ var TinaWebJS = function ( sigmacanvas ) {
 
                           // tricky stuff for simulating a multiple selection D:
                           // ... to be improved in the future ...
-                          var prev_cursor_size = TW.circleSize;
+                          var prev_cursor_size = TW.gui.circleSize;
                           if(targeted.length>0) {
-                              TW.circleSize = (TW.circleSize==0)? 1 : TW.circleSize;
+                              TW.gui.circleSize = (TW.gui.circleSize==0)? 1 : TW.gui.circleSize;
                               cancelSelection(false);
                               this.selInst.MultipleSelection2({nodes:targeted});
-                              TW.circleSize = prev_cursor_size;
+                              TW.gui.circleSize = prev_cursor_size;
                           }
 
                           $("input#searchinput").val("");
@@ -638,7 +638,7 @@ var TinaWebJS = function ( sigmacanvas ) {
                     setTimeout(
                       function() {
                         targeted = selInst.SelectorEngine( {
-                                    addvalue:TW.checkBox,
+                                    addvalue:TW.gui.checkBox,
                                     clicktype:"double",
                                     prevsels:selections,
                                     currsels:[exfnd.id]
@@ -808,10 +808,10 @@ var TinaWebJS = function ( sigmacanvas ) {
             step: 1,
             min:TW.conf.circleSizeMin,
             max:TW.conf.circleSizeMax,
-            value:TW.circleSize,
+            value:TW.gui.circleSize,
             onchange:function(value){
                 // console.log("en cursorsize: "+value);
-                TW.circleSize=value;
+                TW.gui.circleSize=value;
             }
         });
 
@@ -872,10 +872,10 @@ var TinaWebJS = function ( sigmacanvas ) {
         // general listener: shift key in the window <=> add to selection
         $(document).on('keyup keydown', function(e){
           // changes the global boolean ("add node to selection" status) if keydown and SHIFT
-          TW.checkBox = TW.manuallyChecked || e.shiftKey
+          TW.gui.checkBox = TW.gui.manuallyChecked || e.shiftKey
 
-          // show it in the real TW.checkBox too
-          $('#checkboxdiv').prop("checked", TW.manuallyChecked || e.shiftKey)
+          // show it in the real TW.gui.checkBox too
+          $('#checkboxdiv').prop("checked", TW.gui.manuallyChecked || e.shiftKey)
         } );
 
     } // finish envListeners
@@ -894,7 +894,7 @@ var TinaWebJS = function ( sigmacanvas ) {
 
       // cases:
       // 'click'    - simple click, early event
-      //              used for area (with global: TW.circleSize)
+      //              used for area (with global: TW.gui.circleSize)
       // 'clickNode'- simple click, second event if one node
 
       // POSS easy in new sigma.js:
@@ -908,7 +908,7 @@ var TinaWebJS = function ( sigmacanvas ) {
         // console.log("sigma click event e", e)
 
         // case with a selector circle cursor handled here
-        if (TW.circleSize > 0) {
+        if (TW.gui.circleSize > 0) {
           // actual click position, but in graph coords
           var x = e.data.x
           var y = e.data.y
@@ -916,19 +916,19 @@ var TinaWebJS = function ( sigmacanvas ) {
           // convert
           var camCoords = TW.cam.cameraPosition(x,y)
 
-          // retrieve area nodes, using indexed quadtree and global TW.circleSize
+          // retrieve area nodes, using indexed quadtree and global TW.gui.circleSize
           var circleNodes = circleGetAreaNodes(
             camCoords.x,
             camCoords.y
           )
 
-          // 1) clear previous while keeping its list (useful iff 'Add' TW.checkBox)
+          // 1) clear previous while keeping its list (useful iff 'Add' TW.gui.checkBox)
           var previousSelection = selections
           cancelSelection(false)
 
           // 2) show selection + do all related effects
           var targeted = selInst.SelectorEngine( {
-                              addvalue:TW.checkBox,
+                              addvalue:TW.gui.checkBox,
                               currsels:circleNodes,
                               prevsels:previousSelection
                           } )
@@ -950,9 +950,9 @@ var TinaWebJS = function ( sigmacanvas ) {
         var previousSelection = selections
         cancelSelection(false, {norender:true}); // no need to render before MS2
 
-        if (TW.circleSize == 0) {
+        if (TW.gui.circleSize == 0) {
           var targeted = selInst.SelectorEngine( {
-                              addvalue:TW.checkBox,
+                              addvalue:TW.gui.checkBox,
                               currsels:[theNodeId],
                               prevsels:previousSelection
                           } )
@@ -972,7 +972,7 @@ var TinaWebJS = function ( sigmacanvas ) {
 
           if (! e.data.captor.isDragging
             && Object.keys(selections).length
-            && ! TW.circleSize) {
+            && ! TW.gui.circleSize) {
 
             // we clear selections and all its effects
             cancelSelection(false);
@@ -1003,7 +1003,7 @@ var TinaWebJS = function ( sigmacanvas ) {
           .mousemove(function(e){
               if(!isUndef(partialGraph)) {
                   // show/move selector circle cursor
-                  if(TW.circleSize>0) circleTrackMouse(e);
+                  if(TW.gui.circleSize>0) circleTrackMouse(e);
               }
           })
 

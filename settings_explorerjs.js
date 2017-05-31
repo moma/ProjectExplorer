@@ -68,6 +68,11 @@ TW.conf = (function(TW){
   TWConf.nodeClusAtt = "modularity_class"
 
 
+  // to normalize node sizes: (NB not very useful because tina normalizes them at display)
+  TWConf.desirableNodeSizeMin=1;
+  TWConf.desirableNodeSizeMax=12;
+
+
   // =============
   // TINA BEHAVIOR
   // =============
@@ -216,9 +221,9 @@ TW.conf = (function(TW){
     // show verbose console logs...
     logFetchers: false,              // ...about ajax/fetching of graph data
     logParsers: false,               // ...about parsing said data
-    logFacets: true,                // ...about parsing node attribute:value facets
+    logFacets: false,                // ...about parsing node attribute:value facets
     logSettings: false,              // ...about settings at Tina and Sigma init time
-    logSelections: true
+    logSelections: false
   }
 
 

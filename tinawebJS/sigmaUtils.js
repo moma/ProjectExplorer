@@ -292,7 +292,7 @@ var SigmaUtils = function () {
         var nodeColor = node.color || settings('defaultNodeColor')
 
         // mode variants
-        if (TW.selectionActive) {
+        if (TW.gui.selectionActive) {
           // passive nodes should blend in the grey of twEdgeGreyColor
           // cf settings_explorerjs, defgrey_color and greyEverything()
           if (node.customAttrs.grey) {
@@ -1180,9 +1180,9 @@ function colorsBy(daclass) {
 
     // louvain needs preparation
     if(daclass=="clust_louvain") {
-        if(!TW.partialGraph.states.slice(-1)[0].LouvainFait) {
+        if(!TW.states.slice(-1)[0].LouvainFait) {
             RunLouvain()
-            TW.partialGraph.states.slice(-1)[0].LouvainFait = true
+            TW.states.slice(-1)[0].LouvainFait = true
         }
     }
 

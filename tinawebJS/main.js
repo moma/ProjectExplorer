@@ -1,18 +1,35 @@
 'use strict';
 
-//  ======= [ variable initialization ] ======== //
+//  ======= [ main TW properties initialization ] ======== //
 
-// INITIALIZED VARS
-// ================
 TW.Nodes = [];
 TW.Edges = [];
-TW.Relations = {}
-TW.Clusters = [];  // A "by value" index, built in parseCustom, (aka facets)
+TW.Relations = {}       // edges sorted by source/target type
+TW.Clusters = [];       // "by value" facet index built in parseCustom
 
-TW.gexfPaths={};
-TW.labels=[];
+TW.partialGraph = null  // will contain the sigma visible graph instance
 
-// FIXME should become TW.*
+TW.labels=[];           // fulltext search list
+TW.gexfPaths={};        // for file selectors iff servermenu
+
+TW.categories = [];     // possible node types and their inverted map
+TW.catDict = {};
+
+// SystemState is a summary of current situation
+TW.SystemState = {}
+TW.SystemState.level = true;
+TW.SystemState.activetypes = [] // will be filled from TW.categories
+TW.SystemState.selections = [];
+TW.SystemState.opposites = [];
+TW.SystemState.LouvainFait = false;
+
+// states[] is an array of SystemStates for future CTRL+Z or usage track
+TW.states = []
+TW.states[0] = false;
+TW.states[1] = TW.SystemState
+
+
+// £TODO should become TW.* or TW.SystemState.*
 var selections = [];
 var deselections={};
 var opossites = {};
@@ -26,42 +43,18 @@ var nodes2 = {};
 var bipartiteD2N = {};
 var bipartiteN2D = {};
 
-// possible node types and their inverted map
-TW.categories = [];
-TW.catDict = {};
 
-var gexfFile;
-//var zoom=0;
-TW.checkBox=false;
-TW.shiftKey=false;
-TW.manuallyChecked = false;
-
-TW.SystemState = {}
-TW.SystemState.level = true;
-TW.SystemState.type = [ true, false ] // usually overridden by initialActivetypes
-TW.SystemState.selections = [];
-TW.SystemState.opposites = [];
-
+// GUI vars
+TW.gui = {}
+TW.gui.selectionActive = false  // <== changes rendering mode
+TW.gui.circleSize = 0;
+TW.gui.checkBox=false;
+TW.gui.shiftKey=false;
+TW.gui.manuallyChecked = false;
+TW.gui.lastFilters = {}
 
 TW.colorList = ["#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941", "#006FA6", "#A30059", "#FFDBE5", "#7A4900", "#0000A6", "#63FFAC", "#B79762", "#004D43", "#8FB0FF", "#997D87", "#5A0007", "#809693", "#FEFFE6", "#1B4400", "#4FC601", "#3B5DFF", "#4A3B53", "#FF2F80", "#61615A", "#BA0900", "#6B7900", "#00C2A0", "#FFAA92", "#FF90C9", "#B903AA", "#D16100", "#DDEFFF", "#000035", "#7B4F4B", "#A1C299", "#300018", "#0AA6D8", "#013349", "#00846F", "#372101", "#FFB500", "#C2FFED", "#A079BF", "#CC0744", "#C0B9B2", "#C2FF99", "#001E09", "#00489C", "#6F0062", "#0CBD66", "#EEC3FF", "#456D75", "#B77B68", "#7A87A1", "#788D66", "#885578", "#FAD09F", "#FF8A9A", "#D157A0", "#BEC459", "#456648", "#0086ED", "#886F4C","#34362D", "#B4A8BD", "#00A6AA", "#452C2C", "#636375", "#A3C8C9", "#FF913F", "#938A81", "#575329", "#00FECF", "#B05B6F", "#8CD0FF", "#3B9700", "#04F757", "#C8A1A1", "#1E6E00", "#7900D7", "#A77500", "#6367A9", "#A05837", "#6B002C", "#772600", "#D790FF", "#9B9700", "#549E79", "#FFF69F", "#201625", "#72418F", "#BC23FF", "#99ADC0", "#3A2465", "#922329", "#5B4534", "#FDE8DC", "#404E55", "#0089A3", "#CB7E98", "#A4E804", "#324E72", "#6A3A4C", "#83AB58", "#001C1E", "#D1F7CE", "#004B28", "#C8D0F6", "#A3A489", "#806C66", "#222800", "#BF5650", "#E83000", "#66796D", "#DA007C", "#FF1A59", "#8ADBB4", "#1E0200", "#5B4E51", "#C895C5", "#320033", "#FF6832", "#66E1D3", "#CFCDAC", "#D0AC94", "#7ED379", "#012C58"];
 
-
-
-// £TODO à ranger
-TW.circleSize= 0;
-var lastFilter = []
-    lastFilter["#slidercat0nodesweight"] = {"orig":"-" , "last":"-"}
-    lastFilter["#slidercat1nodesweight"] =  {"orig":"-" , "last":"-"}
-    lastFilter["#slidercat0edgesweight"] =  {"orig":"-" , "last":"-"}
-    lastFilter["#slidercat1edgesweight"] =  {"orig":"-" , "last":"-"}
-
-var desirableNodeSizeMIN=1;
-var desirableNodeSizeMAX=12;
-
-
-// These variables will be updated in sigma.parseCustom.js
-var minNodeSize
-var maxNodeSize
 
 
 //  ======== [   what to do at start ] ========= //
@@ -70,7 +63,7 @@ console.log("Starting TWJS")
 // NB this method-holding instance could be initialized just once or even removed?
 var sigma_utils = new SigmaUtils();
 
-// POSS: ideally this should take a TW.settings as parameter
+// POSS: ideally this should take a TW.conf as parameter
 TW.instance = new TinaWebJS('#sigma-contnr');
 
 // add once our tw rendering and index customizations into sigma module
@@ -241,7 +234,7 @@ function syncRemoteGraphData () {
     console.log("input case: server-side file, using TW.conf.sourceMenu or getUrlParam.file or TW.conf.sourceFile")
 
     // -> @mode is servermenu, files are listed in db.json file (preRes ajax)
-    //      --> if @file also in url, choose the db.json one matching  <=== £TODO THIS CASE STILL TO FIX
+    //      --> if @file also in url, choose the db.json one matching
     //      --> otherwise, choose the "first_file" from db.json list
 
     // -> @mode is serverfile
@@ -300,7 +293,6 @@ function syncRemoteGraphData () {
                 if (TW.conf.debug.logFetchers)
                   console.log("\t\t\t"+gexfBasename+ "   -> table:" +theGexfs[aGexf]["semantic"]["table"] )
 
-
                 // -------------------------->8------------------------------------------
                 // £TODO this part is underspecified
                 // if used in some usecases, port it to nodetypes
@@ -316,7 +308,6 @@ function syncRemoteGraphData () {
             // console.log( files_selector )
         }
         files_selector += "</select>"
-        console.log("files_selector HTML", files_selector)
         $("#network").html(files_selector)
     }
 
@@ -381,14 +372,15 @@ function mainStartGraph(inFormat, inData, twInstance) {
 
       if (! TW.categories) {
         console.warn ('ParseCustom scanFile found no categories!!')
-        TW.categories = []
-        TW.catDict = {}
       }
 
+      // activetypes: the node categorie(s) that is (are) currently displayed
       // ex: [true,false] = [nodes of type 0 shown  ; nodes of type 1 not drawn]
       var initialActivetypes = TW.instance.initialActivetypes( TW.categories )
       var possibleActivetypes = TW.instance.allPossibleActivetypes( TW.categories )
 
+      // remember it
+      TW.states[1].activetypes = initialActivetypes ;
 
       // XML parsing from ParseCustom
       var dicts = start.makeDicts(TW.categories); // > parse json or gexf, dictfy
@@ -404,8 +396,6 @@ function mainStartGraph(inFormat, inData, twInstance) {
       // in-place: pre-compute all color/grey/size properties
       prepareNodesRenderingProperties(TW.Nodes)
       prepareEdgesRenderingProperties(TW.Edges, TW.Nodes)
-
-      TW.selectionActive = false  // changes rendering mode
 
       if (inData.clusters) TW.Clusters = inData.clusters
 
@@ -445,7 +435,8 @@ function mainStartGraph(inFormat, inData, twInstance) {
 
       // [ Poblating the Sigma-Graph ]
 
-      // preparing the data and settings
+      // preparing the data (TW.Nodes and TW.Edges filtered by initial type)
+      // POSS: avoid this step and use the filters at rendering time!
       TW.graphData = {nodes: [], edges: []}
       TW.graphData = sigma_utils.FillGraph( initialActivetypes , TW.catDict  , TW.Nodes , TW.Edges , TW.graphData );
 
@@ -547,109 +538,10 @@ function mainStartGraph(inFormat, inData, twInstance) {
       // NB : camera positions are fix if the node is fixed => they only depend on layout
       //      renderer position depend on viewpoint/zoom (like ~ html absolute positions of the node in the div)
 
-
-      // POSS make it TW.states
-      TW.partialGraph.states = []
-      TW.partialGraph.states[0] = false;
-
-      // from settings_explorer (everything except the type)
-      TW.partialGraph.states[1] = TW.SystemState
-
-      // activetypes: the node categorie(s) that is (are) currently displayed
-      TW.partialGraph.states[1].activetypes = initialActivetypes ;
-      TW.partialGraph.states[1].LouvainFait = false;
-
-      // NB specs: categories don't change within a given 'states' array so we don't include them
-      // (new graph => new categories combinations => new array)
-
       // now that we have a sigma instance, let's bind our click handlers to it
       TW.instance.initSigmaListeners(TW.partialGraph, initialActivetypes)
 
       // [ / Poblating the Sigma-Graph ]
-
-
-      // @args is an object with 4 possible properties that define the new state
-      //     ex: new selections:  {sels: [268]}
-      //     ex: new activetypes: {activetypes:[false, true]}
-      //     ex: new level:       {level:false}
-      TW.setState = function( args ) {
-          var bistate=false, typesKey=false;
-
-          // £TODO we could append the new state in this function too
-          var present = TW.partialGraph.states.slice(-1)[0]; // Last
-          var past = TW.partialGraph.states.slice(-2)[0] // avant Last
-
-
-          console.log("IN THE SET STATE METHOD:", this)
-          console.log(" % % % % % % % % % % ")
-          console.log("setState args: ", args);
-
-          if(!isUndef(args.activetypes)) {
-
-              // record into last state
-              present.activetypes = args.activetypes;
-
-
-              bistate= present.activetypes.map(Number).reduce(
-                function(a, b){return a+b;}
-              )
-              typesKey = present.activetypes.map(Number).join("|")
-          }
-          // console.log("printing the typesKey:", typesKey)
-
-          if(!isUndef(args.level)) present.level = args.level;
-          if(!isUndef(args.sels))  present.selections = args.sels;
-          if(!isUndef(args.oppos)) present.opposites = args.oppos;
-          present.LouvainFait = false;
-
-          // change level needs a selection
-          LevelButtonDisable(false);  // £TODO rename toggleLevelButton
-          if(   present.level
-             && present.selections
-             && present.selections.length==0)
-              LevelButtonDisable(true);
-
-          // case to go back
-          if(present.level==false && bistate>1)
-              LevelButtonDisable(true)
-
-          // recreate sliders after activetype or level changes
-          if (TW.conf.filterSliders
-              && (present.level != past.level
-                  || present.activetypes.map(Number).join("|") != past.activetypes.map(Number).join("|"))) {
-
-            // terms
-            if(typesKey=="0|1") {
-                $(".for-nodecategory-0").hide()
-                $(".for-nodecategory-1").show();
-
-
-                NodeWeightFilter( "#slidercat1nodesweight" ,  TW.categories[1], "size");
-                EdgeWeightFilter("#slidercat1edgesweight", typesKey, "weight");
-            }
-
-            // docs
-            if(typesKey=="1|0") {
-              $(".for-nodecategory-0").show()
-              $(".for-nodecategory-1").hide();
-
-                NodeWeightFilter( "#slidercat0nodesweight" ,  TW.categories[0], "size");
-                EdgeWeightFilter("#slidercat0edgesweight", typesKey, "weight");
-            }
-
-            // terms and docs
-            if(typesKey=="1|1") {
-              $(".for-nodecategory-0").show()
-              $(".for-nodecategory-1").show();
-                NodeWeightFilter( "#slidercat0nodesweight" ,  TW.categories[0], "size");
-                NodeWeightFilter( "#slidercat1nodesweight" ,  TW.categories[1], "size");
-                EdgeWeightFilter("#slidercat0edgesweight", "1|0", "weight");
-                EdgeWeightFilter("#slidercat1edgesweight", "0|1", "weight");
-            }
-          }
-
-      };
-
 
       if (!TW.conf.filterSliders) {
 

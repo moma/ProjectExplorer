@@ -78,9 +78,9 @@ function createFilechooserEl () {
 
 // Documentation Level: *****
 function changeType() {
-    var present = TW.partialGraph.states.slice(-1)[0]; // Last
-    var past = TW.partialGraph.states.slice(-2)[0] // avant Last
-    var lastpos = TW.partialGraph.states.length-1;
+    var present = TW.states.slice(-1)[0]; // Last
+    var past = TW.states.slice(-2)[0] // avant Last
+    var lastpos = TW.states.length-1;
     var avantlastpos = lastpos-1;
 
 
@@ -327,15 +327,15 @@ function changeType() {
         //             edgesDict:edges_2_colour
         //         });
         TW.instance.selNgn.MultipleSelection2({ nodes: sels });
-        TW.selectionActive=true;
+        TW.gui.selectionActive=true;
     }
 
-    TW.partialGraph.states[avantlastpos] = {};
-    TW.partialGraph.states[avantlastpos].LouvainFait = false;
-    TW.partialGraph.states[avantlastpos].level = present.level;
-    TW.partialGraph.states[avantlastpos].selections = selsbackup;
-    TW.partialGraph.states[avantlastpos].activetypes = present.activetypes;
-    TW.partialGraph.states[avantlastpos].opposites = present.opposites;
+    TW.states[avantlastpos] = {};
+    TW.states[avantlastpos].LouvainFait = false;
+    TW.states[avantlastpos].level = present.level;
+    TW.states[avantlastpos].selections = selsbackup;
+    TW.states[avantlastpos].activetypes = present.activetypes;
+    TW.states[avantlastpos].opposites = present.opposites;
 
     TW.setState({
         activetypes: nextState,
@@ -365,7 +365,7 @@ function changeType() {
 //                         v
 //                   local selection SysSt = {level: false, type:XY}
 //
-//  where SysSt is the last state aka TW.partialGraph.states.slice(-1)[0]
+//  where SysSt is the last state aka TW.states.slice(-1)[0]
 //    and SysSt.level is aka swMacro
 
 function changeLevel() {
@@ -374,13 +374,13 @@ function changeLevel() {
 
     // let the waiting cursor appear
     setTimeout(function() {
-      var present = TW.partialGraph.states.slice(-1)[0]; // Last
-      var past = TW.partialGraph.states.slice(-2)[0] // avant Last
-      var lastpos = TW.partialGraph.states.length-1;
+      var present = TW.states.slice(-1)[0]; // Last
+      var past = TW.states.slice(-2)[0] // avant Last
+      var lastpos = TW.states.length-1;
       var avantlastpos = lastpos-1;
 
       var level = present.level;
-      var sels = present.selections;//[144, 384, 543]//TW.partialGraph.states.selections;
+      var sels = present.selections;//[144, 384, 543]//TW.states.selections;
 
 
       // type "grammar"
@@ -473,18 +473,18 @@ function changeLevel() {
                           nodesDict:nodes_2_colour,
                           edgesDict:edges_2_colour
                       });
-              TW.selectionActive=true;
+              TW.gui.selectionActive=true;
           }
       }
 
       // console.log("enviroment changeLevel nodes_2_colour", nodes_2_colour)
 
 
-      TW.partialGraph.states[avantlastpos] = {};
-      TW.partialGraph.states[avantlastpos].level = present.level;
-      TW.partialGraph.states[avantlastpos].selections = present.selections;
-      TW.partialGraph.states[avantlastpos].activetypes = present.activetypes;
-      TW.partialGraph.states[avantlastpos].opposites = present.opposites;
+      TW.states[avantlastpos] = {};
+      TW.states[avantlastpos].level = present.level;
+      TW.states[avantlastpos].selections = present.selections;
+      TW.states[avantlastpos].activetypes = present.activetypes;
+      TW.states[avantlastpos].opposites = present.opposites;
 
       TW.setState({
           activetypes: present.activetypes,
@@ -580,11 +580,11 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
     }
 
 
-    var lastvalue=("0-"+(steps-1));
+    // cache initial value
+    var initialValue=("0-"+(steps-1));
+    TW.gui.lastFilters[sliderDivID] = initialValue
 
-    pushFilterValue( sliderDivID , lastvalue )
-
-    var present = TW.partialGraph.states.slice(-1)[0];
+    var present = TW.states.slice(-1)[0];
 
     // console.log('init freshslider for edges, steps:', steps, sliderDivID)
 
@@ -606,7 +606,7 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
         onchange:function(low, high) {
           theHtml.classList.add('waiting');
 
-          // 500ms timeout to let the waiting cursor appear
+          // 40ms timeout to let the waiting cursor appear
           setTimeout(function() {
 
             var totalDeletingTime = 0
@@ -619,17 +619,14 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
 
             // scheduled: costly graph rm edges
             edgeSlideTimeout = setTimeout ( function () {
+
                 var filtervalue = low+"-"+high
+                var lastvalue = TW.gui.lastFilters[sliderDivID]
+                // sliderDivID+"_"+filtervalue
 
-                if(filtervalue!=lastFilter[sliderDivID]["last"]) {
+                // console.debug("\nprevious value "+lastvalue+" | current value "+filtervalue)
 
-                  // £TODO better memoize the last filter value
-                  // $.doTimeout(sliderDivID+"_"+lastFilter[sliderDivID]["last"]);
-
-
-                  // sliderDivID+"_"+filtervalue
-
-                  console.log("\nprevious value "+lastvalue+" | current value "+filtervalue)
+                if(filtervalue!=lastvalue) {
 
                   // [ Stopping FA2 ]
                   if (TW.partialGraph.isForceAtlas2Running())
@@ -642,7 +639,6 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
                   var delflag = false;
 
                   var iterarr = []
-
 
                   if(mint0!=mint1) {
                       if(mint0<mint1) {
@@ -760,19 +756,23 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
                   }, 10)
                 // [ / Starting FA2 ]
 
-                  lastvalue = filtervalue;
-                  pushFilterValue( sliderDivID , filtervalue )
+                  console.log("lastvalue===", lastvalue)
+                  TW.gui.lastFilters[sliderDivID] = lastvalue
+                  // pushFilterValue( sliderDivID , lastvalue )
                 }
 
+                else {
+                  // console.log('edges:::same position')
+                }
+
+                // in any case
                 setTimeout( function() {
                   theHtml.classList.remove('waiting')
                 }, 20)
 
-            }, 700) // large-ish debounce timeout
+            }, 1500) // large-ish debounce timeout
 
-
-
-          }, 500)  // wait cursor timeout
+          }, 40)  // wait cursor timeout
 
         }
     });
@@ -824,7 +824,10 @@ function NodeWeightFilter( sliderDivID , tgtNodeType ,  criteria) {
 
     var nodeSlideTimeout = null
 
-    //finished
+    // cache initial value
+    TW.gui.lastFilters[sliderDivID] = `0-${steps-1}`
+
+    // freshslider widget
     $(sliderDivID).freshslider({
         range: true,
         step: 1,
@@ -832,61 +835,57 @@ function NodeWeightFilter( sliderDivID , tgtNodeType ,  criteria) {
         max:steps-1,
         bgcolor:( tgtNodeType==TW.categories[0] )?"#27c470":"#FFA500" ,
         value:[0,steps-1],
+
+        // handler
         onchange:function(low, high){
+
             var filtervalue = low+"-"+high
 
-            if(filtervalue!=lastFilter[sliderDivID]["last"]) {
-                if(lastFilter[sliderDivID]["orig"]=="-") {
-                    pushFilterValue( sliderDivID , filtervalue )
-                    return false
-                }
+            // [ Stopping FA2 ]
+            if (TW.partialGraph.isForceAtlas2Running())
+                sigma_utils.ourStopFA2();
+            // [ / Stopping FA2 ]
 
-                // [ Stopping FA2 ]
-                if (TW.partialGraph.isForceAtlas2Running())
-                    sigma_utils.ourStopFA2();
-                // [ / Stopping FA2 ]
-
-
-                // debounced
-                if (nodeSlideTimeout){
-                  // console.log('clearing updated function', nodeSlideTimeout)
-                  clearTimeout(nodeSlideTimeout)
-                }
-
-                // scheduled: graph rm nodes
-                nodeSlideTimeout = setTimeout ( function () {
-
-                    for(var i in stepToIdsArr) {
-                        ids = stepToIdsArr[i]
-                        if(i>=low && i<=high){
-                            for(var id in ids) {
-                                ID = ids[id]
-                                TW.Nodes[ID].lock = false;
-                                if(TW.partialGraph.graph.nodes(ID))
-                                    TW.partialGraph.graph.nodes(ID).hidden = false;
-                            }
-                        } else {
-                            for(var id in ids) {
-                                ID = ids[id]
-                                TW.Nodes[ID].lock = true;
-                                if(TW.partialGraph.graph.nodes(ID))
-                                    TW.partialGraph.graph.nodes(ID).hidden = true;
-                            }
-                        }
-                    }
-                    pushFilterValue(sliderDivID,filtervalue)
-
-                    TW.partialGraph.render()
-
-                    // [ Starting FA2 ]
-                    setTimeout(function() {
-                      sigma_utils.smartForceAtlas(2000) // shorter FA2 sufficient
-                    }, 10)
-                  // [ / Starting FA2 ]
-
-                }, 300)
+            // debounced
+            if (nodeSlideTimeout){
+              clearTimeout(nodeSlideTimeout)
             }
 
+            // scheduled: graph rm nodes
+            nodeSlideTimeout = setTimeout ( function () {
+
+                // check memoized value to see if any changes needed
+                if(filtervalue!=TW.gui.lastFilters[sliderDivID]) {
+
+                  for(var i in stepToIdsArr) {
+                      ids = stepToIdsArr[i]
+                      if(i>=low && i<=high){
+                          for(var id in ids) {
+                              ID = ids[id]
+                              TW.Nodes[ID].lock = false;
+                              if(TW.partialGraph.graph.nodes(ID))
+                                  TW.partialGraph.graph.nodes(ID).hidden = false;
+                          }
+                      } else {
+                          for(var id in ids) {
+                              ID = ids[id]
+                              TW.Nodes[ID].lock = true;
+                              if(TW.partialGraph.graph.nodes(ID))
+                                  TW.partialGraph.graph.nodes(ID).hidden = true;
+                          }
+                      }
+                  }
+                  TW.gui.lastFilters[sliderDivID] = filtervalue
+
+                  TW.partialGraph.render()
+
+                  // [ Starting FA2 ]
+                  setTimeout(function() {
+                    sigma_utils.smartForceAtlas(2000) // shorter FA2 sufficient
+                  }, 10)
+                  // [ / Starting FA2 ]
+                }
+            }, 1000)
         }
     });
 }

@@ -37,6 +37,7 @@ var ParseCustom = function ( format , data ) {
     this.parseJSON = function(categories ) {
         return dictfyJSON( this.data , categories );
     }// output = [ nodes, edges, nodes1, ... ]
+
 };
 
 // Level-02
@@ -457,8 +458,10 @@ function dictfyGexf( gexf , categories ){
 
     var elsNodes = gexf.getElementsByTagName('nodes') // The list of xml nodes 'nodes' (plural)
     TW.labels = [];
-    minNodeSize=10000000;
-    maxNodeSize=0;
+
+    // vars for stats => used in a posteriori normalization
+    let minNodeSize = Infinity
+    let maxNodeSize = 0
 
     // debug: for local stats
     // let allSizes = []
@@ -561,7 +564,7 @@ function dictfyGexf( gexf , categories ){
             node.attributes = atts;
 
             let node_cat = ""
-            // nodew=parseInt(attributes["weight"]);
+
             if ( atts["category"] ) {
               node_cat = atts["category"];
             }
@@ -585,11 +588,11 @@ function dictfyGexf( gexf , categories ){
             // save record
             nodes[node.id] = node
 
-            if(parseInt(node.size) < parseInt(minNodeSize))
-                minNodeSize= node.size;
+            if(parseFloat(node.size) < minNodeSize)
+                minNodeSize= parseFloat(node.size);
 
-            if(parseInt(node.size) > parseInt(maxNodeSize))
-                maxNodeSize= node.size;
+            if(parseFloat(node.size) > maxNodeSize)
+                maxNodeSize= parseFloat(node.size);
 
             // console.debug("node.attributes", node.attributes)
             // creating a faceted index from node.attributes
@@ -620,12 +623,14 @@ function dictfyGexf( gexf , categories ){
     TW.Clusters = facetsBinning(tmpVals, Atts_2_Exclude)
 
 
-    //New scale for node size: now, between 2 and 5 instead [1,70]
-    for(var nid in nodes){
-        // console.log("dictfyGexf node", nid)
-        nodes[nid].size =  desirableNodeSizeMIN+ (parseInt(nodes[nid].size)-1)*((desirableNodeSizeMAX-desirableNodeSizeMIN) / (maxNodeSize-minNodeSize));
+    // linear rescale node sizes
+    if (!isUndef(TW.conf.desirableNodeSizeMin) && !isUndef(TW.conf.desirableNodeSizeMax)) {
+      let desiSizeRange = TW.conf.desirableNodeSizeMax-TW.conf.desirableNodeSizeMin
+      let realSizeRange = maxNodeSize - minNodeSize
+      for(var nid in nodes){
+          nodes[nid].size = parseInt(1000 * ((parseFloat(nodes[nid].size) - minNodeSize) / realSizeRange * desiSizeRange + TW.conf.desirableNodeSizeMin)) / 1000
+      }
     }
-
 
     // looping source edges to conforming edge
     // then updateRelations
@@ -908,6 +913,10 @@ function dictfyJSON( data , categories ) {
         nodes2={}, bipartiteD2N={}, bipartiteN2D={}
     }
 
+    // normalization, same as parseGexf
+    let minNodeSize = Infinity
+    let maxNodeSize = 0
+
     // if scanClusters, we'll also use:
     var tmpVals = {}
     var Atts_2_Exclude = {}
@@ -936,6 +945,12 @@ function dictfyJSON( data , categories ) {
           node.size = Math.sqrt(Number(n.term_occ))
         }
 
+        if(parseFloat(node.size) < minNodeSize)
+            minNodeSize= parseFloat(node.size);
+
+        if(parseFloat(node.size) > maxNodeSize)
+            maxNodeSize= parseFloat(node.size);
+
         if (!catCount[node.type]) catCount[node.type] = 0
         catCount[node.type]++;
 
@@ -951,6 +966,17 @@ function dictfyJSON( data , categories ) {
     console.log(tmpVals['Document'])
 
     TW.Clusters = facetsBinning (tmpVals, Atts_2_Exclude)
+
+    // £TODO ask if wanted
+    // if we wanted linear rescale node sizes like dictfyGexf:
+
+    // if (!isUndef(TW.conf.desirableNodeSizeMin) && !isUndef(TW.conf.desirableNodeSizeMax)) {
+    //   let desiSizeRange = TW.conf.desirableNodeSizeMax-TW.conf.desirableNodeSizeMin
+    //   let realSizeRange = maxNodeSize - minNodeSize
+    //   for(var nid in nodes){
+    //       nodes[nid].size = parseInt(1000 * ((parseFloat(nodes[nid].size) - minNodeSize) / realSizeRange * desiSizeRange + TW.conf.desirableNodeSizeMin)) / 1000
+    //   }
+    // }
 
     TW.colorList.sort(function(){ return Math.random()-0.5; });
     for (var i in nodes ){

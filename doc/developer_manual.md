@@ -31,7 +31,7 @@ This will still evolve but the main steps for any graph initialization messily u
      - prepares TW.Clusters: bins and facet index (node attr vals => nodes)
  4. [`main.js`] mainStartGraph() function runs all the rest
     1. precomputes display properties (grey color, etc.)
-    2. calls [`sigmaUtils`] where the function `FillGraph()` was a central point for filtering and preparing properties but now with 2 and 3 it just copies the nodes and edges to a new structure that groups them together
+    2. calls [`sigmaUtils`] where the function `FillGraph()` was a central point for filtering and preparing properties but now with 2 and 3 it just creates a filtered copy of the nodes and edges of the current active types to a new structure that groups them together (POSSIBLE remove this extra step)
     3. back in [`main.js`], finally all sigma settings (user + defaults) are merged and we initialize the sigma instance (`new sigma` etc.)
     4. finally a call to [`TinawebJS`] initializes the action listeners and this phase should crucially initialize items that need the sigma instance (because they may depend the displayed categories, the number of displayed nodes, etc)
 
