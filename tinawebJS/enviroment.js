@@ -322,14 +322,12 @@ function changeType() {
 
 
         // to recreate the selection in the new type graph
-        // var SelInst = new SelectionEngine();
-        // SelInst.MultipleSelection2({
+        // TW.instance.selNgn.MultipleSelection2({
         //             nodesDict:nodes_2_colour,
         //             edgesDict:edges_2_colour
         //         });
-        var SelInst2 = new SelectionEngine();
-        SelInst2.MultipleSelection2({ nodes: sels });
-        overNodes=true;
+        TW.instance.selNgn.MultipleSelection2({ nodes: sels });
+        TW.selectionActive=true;
     }
 
     TW.partialGraph.states[avantlastpos] = {};
@@ -470,13 +468,12 @@ function changeLevel() {
 
           // Nodes Selection now:
           if(sels.length>0) {
-              var SelInst = new SelectionEngine();
-              SelInst.MultipleSelection2({
+              TW.instance.selNgn.MultipleSelection2({
                           nodes:sels,
                           nodesDict:nodes_2_colour,
                           edgesDict:edges_2_colour
                       });
-              overNodes=true;
+              TW.selectionActive=true;
           }
       }
 

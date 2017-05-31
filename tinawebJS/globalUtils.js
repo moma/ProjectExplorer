@@ -1,8 +1,57 @@
 
+// ajax request
+// args:
+//   - type:     REST method to use: GET (by def), POST...
+//   - url:      target url
+//   - data:     url params or payload if POST
+//   - datatype: expected response format: 'json', 'text' (by def)...
+var AjaxSync = function(args) {
 
-function pr(msg) {
-    console.log(msg);
+    if (!args)                        args = {}
+    if (isUndef(args.url))            console.error("AjaxSync call needs url")
+    if (isUndef(args.type))           args.type = 'GET'
+    if (isUndef(args.datatype))       args.datatype = 'text'
+    else if (args.datatype=="jsonp")  args.datatype = "json"
+
+    var Result = []
+
+    if (TW.conf.debug.logFetchers)
+      console.log("---AjaxSync---", args)
+
+    $.ajax({
+            type: args.type,
+            url: args.url,
+            dataType: args.datatype,
+            async: false,  // <= synchronous (POSS alternative: cb + waiting display)
+
+            // our payload: filters...
+            data: args.data,
+            contentType: 'application/json',
+            success : function(data, textStatus, jqXHR) {
+                var header = jqXHR.getResponseHeader("Content-Type")
+                var format ;
+                if (!header
+                     || header == "application/octet-stream"
+                     || header == "application/xml"
+                ) {
+                  // default parser choice if xml or if undetailed header
+                  format = "gexf" ;
+                }
+                else {
+                  if (TW.conf.debug.logFetchers)
+                    console.debug("after AjaxSync("+args.url+") => response header="+header +"not xml => fallback on json");
+                  format = "json" ;
+                }
+                Result = { "OK":true , "format":format , "data":data };
+            },
+            error: function(exception) {
+                console.warn('ajax error:', exception, exception.getAllResponseHeaders())
+                Result = { "OK":false , "format":false , "data":exception.status };
+            }
+        });
+    return Result;
 }
+
 
 function getClientTime(){
     var totalSec = new Date().getTime() / 1000;

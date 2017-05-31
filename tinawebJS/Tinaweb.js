@@ -1,6 +1,6 @@
 'use strict';
 
-// this class will be instanciated once, as SelInst (and exposed)
+// this class will be instanciated once (and exposed as TW.instance.selNgn)
 function SelectionEngine() {
 
     // creates the union of prevsels and currsels, if addvalue
@@ -353,11 +353,10 @@ function SelectionEngine() {
     }
 };
 
-// TODO TW.SelInst
-var SelInst
-
-TinaWebJS = function ( sigmacanvas ) {
+var TinaWebJS = function ( sigmacanvas ) {
     this.sigmacanvas = sigmacanvas;
+
+    this.selNgn = new SelectionEngine();
 
     // functions that modify the sigma module (not sigma instance!)
     this.init = function () {
@@ -499,7 +498,7 @@ TinaWebJS = function ( sigmacanvas ) {
 
     this.initSearchListeners = function () {
 
-        var SelInst = new SelectionEngine();
+        var selInst = this.selNgn
 
         $('input#searchinput').autocomplete({
             source: function(request, response) {
@@ -574,7 +573,7 @@ TinaWebJS = function ( sigmacanvas ) {
             //           over sigmaUtils.getnodesIndex()
             //   -> then call this.SelectorEngine
             //            and this.MultipleSelection2
-            SelInst.search_n_select(query)
+            selInst.search_n_select(query)
             // ------------------------------------------------
         });
 
@@ -591,7 +590,7 @@ TinaWebJS = function ( sigmacanvas ) {
                     }
                     setTimeout(
                       function (){
-                          targeted = SelInst.SelectorEngine( {
+                          targeted = selInst.SelectorEngine( {
                                           addvalue:TW.checkBox,
                                           clicktype:"double",
                                           prevsels:selections,
@@ -604,7 +603,7 @@ TinaWebJS = function ( sigmacanvas ) {
                           if(targeted.length>0) {
                               TW.circleSize = (TW.circleSize==0)? 1 : TW.circleSize;
                               cancelSelection(false);
-                              SelInst.MultipleSelection2({nodes:targeted});
+                              this.selInst.MultipleSelection2({nodes:targeted});
                               TW.circleSize = prev_cursor_size;
                           }
 
@@ -624,7 +623,7 @@ TinaWebJS = function ( sigmacanvas ) {
                 // (but we know the results will be empty)
                 // (we still do it for the side effects: events, cleaning)
                 var query = normalizeString($("#searchinput").val())
-                SelInst.search_n_select(query)
+                selInst.search_n_select(query)
             }
         });
 
@@ -638,7 +637,7 @@ TinaWebJS = function ( sigmacanvas ) {
                     console.log("search KEY UP");
                     setTimeout(
                       function() {
-                        targeted = SelInst.SelectorEngine( {
+                        targeted = selInst.SelectorEngine( {
                                     addvalue:TW.checkBox,
                                     clicktype:"double",
                                     prevsels:selections,
@@ -646,7 +645,7 @@ TinaWebJS = function ( sigmacanvas ) {
                                 } )
                         if(targeted.length>0) {
                             cancelSelection(false);
-                            SelInst.MultipleSelection2({nodes:targeted});
+                            selInst.MultipleSelection2({nodes:targeted});
                         }
 
                         $("input#searchinput").val("");
@@ -886,7 +885,7 @@ TinaWebJS = function ( sigmacanvas ) {
     // args: @partialGraph = a sigma instance
     this.initSigmaListeners = function(partialGraph, initialActivetypes) {
 
-      var SelInst = new SelectionEngine();
+      var selInst = this.selNgn
 
       // sigma events bindings
       // ---------------------
@@ -928,13 +927,13 @@ TinaWebJS = function ( sigmacanvas ) {
           cancelSelection(false)
 
           // 2) show selection + do all related effects
-          var targeted = SelInst.SelectorEngine( {
+          var targeted = selInst.SelectorEngine( {
                               addvalue:TW.checkBox,
                               currsels:circleNodes,
                               prevsels:previousSelection
                           } )
           if(targeted.length>0) {
-            SelInst.MultipleSelection2( {nodes:targeted} )
+            selInst.MultipleSelection2( {nodes:targeted} )
           }
         }
       })
@@ -952,13 +951,13 @@ TinaWebJS = function ( sigmacanvas ) {
         cancelSelection(false, {norender:true}); // no need to render before MS2
 
         if (TW.circleSize == 0) {
-          var targeted = SelInst.SelectorEngine( {
+          var targeted = selInst.SelectorEngine( {
                               addvalue:TW.checkBox,
                               currsels:[theNodeId],
                               prevsels:previousSelection
                           } )
           if(targeted.length>0) {
-            SelInst.MultipleSelection2( {nodes:targeted} )
+            selInst.MultipleSelection2( {nodes:targeted} )
           }
         }
         // case with a selector circle cursor handled

@@ -1,6 +1,6 @@
 'use strict';
 
-SigmaUtils = function () {
+var SigmaUtils = function () {
 
     // input = GEXFstring
     this.FillGraph = function( initialActivetypes , catDict  , nodes, edges , graph ) {

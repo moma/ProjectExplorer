@@ -389,8 +389,7 @@ function htmlfied_nodesatts(elems){
 
 function manualSelectNode ( nodeid ) {
     cancelSelection(false);
-    var SelInst = new SelectionEngine();
-    SelInst.MultipleSelection2({nodes:[nodeid]});
+    TW.instance.selNgn.MultipleSelection2({nodes:[nodeid]});
     // (MultipleSelection2 will do the re-rendering)
 }
 
@@ -583,10 +582,9 @@ function graphTagCloudElem(nodes) {
     }
 
     // Nodes Selection now:
-    // £TODO fix  low-level selectionlogic duplicate with MultipleSelection2 function 2/2
+    // ££TODO fix  low-level selectionlogic duplicate with MultipleSelection2 function 2/2
     if(ndsids.length>0) {
-        var SelInst = new SelectionEngine();
-        SelInst.MultipleSelection2({
+        TW.instance.selNgn.MultipleSelection2({
                     nodesDict:nodes_2_colour,
                     edgesDict:edges_2_colour
                 });

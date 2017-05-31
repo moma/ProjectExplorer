@@ -3,7 +3,7 @@
 //   (for instance loop on full gexf in scanGexf then again in dictfyGexf)
 
 // Level-01
-ParseCustom = function ( format , data ) {
+var ParseCustom = function ( format , data ) {
 
     if (format == 'gexf') {
       this.data = $.parseXML(data)
