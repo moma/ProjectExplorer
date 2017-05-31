@@ -4,19 +4,25 @@
 function SelectionEngine() {
 
     // creates the union of prevsels and currsels, if addvalue
-    this.SelectorEngine = (function(addvalue , prevsels , currsels ) {
-        // console.log("addvalue, prevsels, currsels",addvalue, prevsels, currsels)
+    this.SelectorEngine = function( args ) {
+
+        console.log("addvalue, prevsels, currsels", args)
+
+        if (!args)                 args = {}
+        if (!args.addvalue)        args.addvalue = false
+        if (!args.prevsels)        args.prevsels = {}      // FIXME easier with array like currsels.concat(buffer)
+        if (!args.currsels)        args.currsels = []
 
         var targeted = []
-        var buffer = Object.keys(prevsels);
+        var buffer = Object.keys(args.prevsels);
 
         // currsels = bunch of nodes from a click in the map
-        if(addvalue) {
-            // FOR SIMPLE ADD WITHOUT COMPLEMENT
-            targeted = currsels.concat(buffer.filter(function (item) {
-                return currsels.indexOf(item) < 0;
+        if(args.addvalue) {
+            // FOR SIMPLE UNIQUE UNION
+            targeted = args.currsels.concat(buffer.filter(function (item) {
+                return args.currsels.indexOf(item) < 0;
             }));
-        } else targeted = currsels;
+        } else targeted = args.currsels;
 
         if(targeted.length==0) return [];
 
@@ -47,7 +53,7 @@ function SelectionEngine() {
         //         targeted = Object.keys(whitelist);
         //     } else {// inter = 0 ==> click in other portion of the graph (!= current selection)
         //         // Union!
-        //         if(addvalue) {
+        //         if(args.addvalue) {
         //             targeted = currsels.concat(buffer.filter(function (item) {
         //                 return currsels.indexOf(item) < 0;
         //             }));
@@ -57,7 +63,7 @@ function SelectionEngine() {
         // ---------------------------------------------------------->8---------
 
         return targeted;
-    }).index();
+    };
 
 
     // uses: SelectorEngine() and MultipleSelection2()
@@ -145,13 +151,18 @@ function SelectionEngine() {
      *                   updateRelatedNodesPanel();
      */
      // ====================
-    this.MultipleSelection2 = (function(nodes,nodesDict,edgesDict) {
+    this.MultipleSelection2 = function(args) {
+
+      if (!args)                      args = {}
+      if (isUndef(args.nodes))        args.nodes = []
+      if (isUndef(args.nodesDict))    args.nodesDict = {}
+      if (isUndef(args.edgesDict))    args.edgesDict = {}
 
       if (TW.conf.debug.logSelections) {
         var tMS2_deb = performance.now()
 
         console.log("IN SelectionEngine.MultipleSelection2:")
-        console.log("nodes", nodes)
+        console.log("nodes", args.nodes)
       }
 
         greyEverything();
@@ -174,17 +185,17 @@ function SelectionEngine() {
         // console.log (" - - - - - - ")
         // Dictionaries of: selection+neighbors
 
-        var nodes_2_colour = (nodesDict)? nodesDict : {};
-        var edges_2_colour = (edgesDict)? edgesDict : {};
+        var nodes_2_colour = args.nodesDict
+        var edges_2_colour = args.edgesDict
 
         selections = {}
 
 
         // targeted arg 'nodes' can be nid array or single nid
         var ndsids=[]
-        if(nodes) {
-            if(! $.isArray(nodes)) ndsids.push(nodes);
-            else ndsids=nodes;
+        if(args.nodes) {
+            if(! $.isArray(args.nodes)) ndsids.push(args.nodes);
+            else ndsids=args.nodes;
 
             for(var i in ndsids) {
                 var s = ndsids[i];
@@ -339,7 +350,7 @@ function SelectionEngine() {
 
 
 
-    }).index()
+    }
 };
 
 // TODO TW.SelInst
@@ -361,7 +372,7 @@ TinaWebJS = function ( sigmacanvas ) {
         else {
           this.prepareSigmaCustomIndices(sigma)
 
-          if (TW.conf.ourRendering)
+          if (TW.conf.twRendering)
             this.prepareSigmaCustomRenderers(sigma)
         }
 
@@ -1024,7 +1035,7 @@ TinaWebJS = function ( sigmacanvas ) {
 
       $("#zoomPlusButton").click(function () {
           var newRatio = TW.cam.ratio * .75
-          if (newRatio >= TW.conf.sigmaJsMouseProperties.minRatio) {
+          if (newRatio >= TW.conf.zoomMin) {
             // triggers coordinatesUpdated which sets the slider cursor
             partialGraph.camera.goTo({ratio: newRatio});
             return false;
@@ -1033,7 +1044,7 @@ TinaWebJS = function ( sigmacanvas ) {
 
       $("#zoomMinusButton").click(function () {
         var newRatio = TW.cam.ratio * 1.25
-        if (newRatio <= TW.conf.sigmaJsMouseProperties.maxRatio) {
+        if (newRatio <= TW.conf.zoomMax) {
           // triggers coordinatesUpdated which sets the slider cursor
           partialGraph.camera.goTo({ratio: newRatio});
           return false;

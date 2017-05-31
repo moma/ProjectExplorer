@@ -1,53 +1,32 @@
 'use strict';
 
-// Function.prototype.index
-// ---
-// 'decorator'
-// (used here and in Tinaweb.js for MultipleSelection2)
-// ---
-// transforms calls like foobar({arg1:a, arg2:b})
-//      into  calls like foobar(a, b)
+// ajax request
+// args:
+//   - type:     REST method to use: GET (by def), POST...
+//   - url:      target url
+//   - data:     url params or payload if POST
+//   - datatype: expected response format: 'json', 'text' (by def)...
+var AjaxSync = function(args) {
 
-(function(reComments, reParams, reNames) {
-  Function.prototype.index = function(arrParamNames) {
-    var fnMe = this;
-    arrParamNames = arrParamNames
-      || (((fnMe + '').replace(reComments, '')
-           .match(reParams)[1] || '')
-          .match(reNames) || []);
-    return function(namedArgs) {
-      var args = [], i = arrParamNames.length;
-      args[i] = namedArgs;
-      while(i--) {
-        args[i] = namedArgs[arrParamNames[i]];
-      }
-      return fnMe.apply(this, args);
-    };
-  };
-})(
-  /\/\*[\s\S]*?\*\/|\/\/.*?[\r\n]/g,
-  /\(([\s\S]*?)\)/,
-  /[$\w]+/g
-);
+    if (!args)                        args = {}
+    if (isUndef(args.url))            console.error("AjaxSync call needs url")
+    if (isUndef(args.type))           args.type = 'GET'
+    if (isUndef(args.datatype))       args.datatype = 'text'
+    else if (args.datatype=="jsonp")  args.datatype = "json"
 
-var AjaxSync = (function(TYPE, URL, DATA, DT) {
     var Result = []
-    TYPE = (!TYPE)?"GET":TYPE
-    if(DT && (DT=="jsonp" || DT=="json")) DT="json"
-    else DT = 'text'  // ie "if not json then raw xml string"
-
 
     if (TW.conf.debug.logFetchers)
-      console.log("---AjaxSync---\n", TYPE, URL, DATA, DT, "\n--------------")
+      console.log("---AjaxSync---", args)
 
     $.ajax({
-            type: TYPE,
-            url: URL,
-            dataType: DT,  // <= the expected response format
+            type: args.type,
+            url: args.url,
+            dataType: args.datatype,
             async: false,  // <= synchronous (POSS alternative: cb + waiting display)
 
             // our payload: filters...
-            data: DATA,
+            data: args.data,
             contentType: 'application/json',
             success : function(data, textStatus, jqXHR) {
                 var header = jqXHR.getResponseHeader("Content-Type")
@@ -61,7 +40,7 @@ var AjaxSync = (function(TYPE, URL, DATA, DT) {
                 }
                 else {
                   if (TW.conf.debug.logFetchers)
-                    console.debug("after AjaxSync("+URL+") => response header="+header +"not xml => fallback on json");
+                    console.debug("after AjaxSync("+args.url+") => response header="+header +"not xml => fallback on json");
                   format = "json" ;
                 }
                 Result = { "OK":true , "format":format , "data":data };
@@ -72,7 +51,7 @@ var AjaxSync = (function(TYPE, URL, DATA, DT) {
             }
         });
     return Result;
-}).index();
+}
 
 
 //  === [   what to do at start ] === //
@@ -232,7 +211,7 @@ function syncRemoteGraphData () {
               mapLabel = '"'+elements.join('" , "')+'"';
           }
 
-          var bridgeRes = AjaxSync({ URL: theurl, DATA:thedata, TYPE:'GET', DT:'json' })
+          var bridgeRes = AjaxSync({ url: theurl, data:thedata, type:'GET', datatype:'json' })
 
           // should be a js object with 'nodes' and 'edges' properties
           inData = bridgeRes.data
@@ -270,7 +249,7 @@ function syncRemoteGraphData () {
         var infofile = TW.conf.sourceMenu
 
         if (TW.conf.debug.logFetchers)  console.info(`attempting to load filemenu ${infofile}`)
-        var preRES = AjaxSync({ URL: infofile, DT:"json" });
+        var preRES = AjaxSync({ url: infofile, datatype:"json" });
 
         if (preRES['OK'] && preRES.data) {
           console.log('initial AjaxSync result preRES', preRES)
@@ -344,7 +323,7 @@ function syncRemoteGraphData () {
       console.error(`No specified input and neither db.json nor TW.conf.sourceFile ${TW.conf.sourceFile} are present`)
     }
 
-    var finalRes = AjaxSync({ URL: the_file });
+    var finalRes = AjaxSync({ url: the_file });
     inData = finalRes["data"]
     inFormat = finalRes["format"]
 
