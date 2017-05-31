@@ -13,7 +13,6 @@ TW.conf = (function(TW){
   // TINA POSSIBLE DATA SOURCES
   // ==========================
 
-
   // Graph data source
   // -----------------
   // the graph input depends on TWConf.sourcemode (or manual url arg 'sourcemode')
@@ -42,17 +41,15 @@ TW.conf = (function(TW){
   // TWConf.relatedDocsType
 
 
-  // ===========
-  // DATA FACETS
-  // ===========
-
+  // =======================
+  // DATA FACETS AND LEGENDS
+  // =======================
+  // to process node attributes values from data
+  //    => colors   (continuous numeric attributes)
+  //    => clusters (discrete numeric or str attributes),
 
   // create facets ?
   TWConf.scanClusters = true
-
-  // to handle node attributes from data
-  //    => clusters (discrete numeric or str vars),
-  //    => colors   (continuous numeric vars)
 
   // for continuous attrvalues/colors (cf. clustersBy), how many levels in legend?
   TWConf.legendsBins = 7 ;
@@ -67,7 +64,7 @@ TW.conf = (function(TW){
     'growth_rate': 12
   }
 
-  // default clustering (used to show as initial color)
+  // default clustering attribute (<---> used for initial node colors)
   TWConf.nodeClusAtt = "modularity_class"
 
 
@@ -121,7 +118,7 @@ TW.conf = (function(TW){
 
   // if fa2Available, the auto-run config:
 
-    TWConf.fa2Enabled= false;       // fa2 auto-run at start and after graph modified ?
+    TWConf.fa2Enabled= true;        // fa2 auto-run at start and after graph modified ?
     TWConf.fa2Milliseconds=5000;    // duration of auto-run
     TWConf.minNodesForAutoFA2 = 5   // graph size threshold to auto-run
 
@@ -133,15 +130,64 @@ TW.conf = (function(TW){
   TWConf.strSearchBar = "Select topics";
 
 
-  // =======================
-  // TINA RENDERING SETTINGS
-  // =======================
-  TWConf.overSampling = true    // costly hi-def rendering (true => pixelRatio x 2)
+  // ===================
+  // RENDERING SETTINGS
+  // ===================
+  TWConf.twRendering = true ;     // false: use sigma "stock" rendering
+                                  // true:  use our rendering customizations
+                                  //        (nodes with borders,
+                                  //         edges with curves,
+                                  //         better labels, etc)
 
-  // relative sizes (iff graph display with both nodetypes)
-  TWConf.sizeMult = [];
-  TWConf.sizeMult[0] = 1.5;    // ie for node type 0
-  TWConf.sizeMult[1] = 1.0;    // ie for node type 1
+  TWConf.overSampling = true      // hi-def rendering (true => pixelRatio x 2)
+
+  // sigma rendering settings
+  // ------------------------
+  TWConf.sigmaJsDrawingProperties = {
+      // nodes
+      defaultNodeColor: "#333",
+      twNodeRendBorderSize: 1,           // node borders (only iff ourRendering)
+      twNodeRendBorderColor: "#eee",
+
+      // edges
+      minEdgeSize: 2,                    // in fact used in tina as edge size
+      defaultEdgeType: 'curve',          // 'curve' or 'line' (curve only iff ourRendering)
+      twEdgeDefaultOpacity: 0.4,         // initial opacity added to src/tgt colors
+
+      // labels
+      font: "Droid Sans",                // font params
+      fontStyle: "bold",
+      defaultLabelColor: '#000',         // labels text color
+      labelSizeRatio: 1,                 // initial label size (on the slider)
+      labelThreshold: 5,                 // min node cam size to start showing label
+                                         // (old tina: showLabelsIfZoom)
+
+      // hovered nodes
+      defaultHoverLabelBGColor: '#fff',
+      defaultHoverLabelColor: '#000',
+      borderSize: 2.5,                   // for ex, bigger border when hover
+      nodeBorderColor: "node",           // choices: 'default' color vs. node color
+      defaultNodeBorderColor: "black",   // <- if nodeBorderColor = 'default'
+
+
+      // selected nodes <=> special label
+      twSelectedColor: "node",     // "node" for a label bg like the node color,
+                                   // "default" for note-like yellow
+
+      // not selected <=> grey
+      twNodesGreyOpacity: .35,                       // smaller value: more grey
+      twBorderGreyColor: "rgba(100, 100, 100, 0.5)",
+      twEdgeGreyColor: "rgba(150, 150, 150, 0.5)",
+  };
+  // NB: sigmaJsDrawingProperties are available as 'settings' in all renderers
+  // cf. https://github.com/jacomyal/sigma.js/wiki/Settings#renderers-settings
+
+
+  // tina environment rendering settings
+  // -----------------------------------
+  // mouse captor zoom limits
+  TWConf.zoomMin = .015625         // for zoom IN   (ex: 1/64 to allow zoom x64)
+  TWConf.zoomMax = 2               // for zoom OUT
 
   // circle selection cursor
   TWConf.circleSizeMin = 0;
@@ -151,68 +197,14 @@ TW.conf = (function(TW){
   TWConf.tagcloudFontsizeMin = 12;
   TWConf.tagcloudFontsizeMax = 24;
 
-  TWConf.tagcloudSameLimit = 50   // display at most how many neighbors of the same type
-  TWConf.tagcloudOpposLimit = 10    // display at most how many neighbors of the opposite type
+  TWConf.tagcloudSameLimit = 50     // max displayed neighbors of the same type
+  TWConf.tagcloudOpposLimit = 10    // max displayed neighbors of the opposite type
 
+  // relative sizes (iff ChangeType == both nodetypes)
+  TWConf.sizeMult = [];
+  TWConf.sizeMult[0] = 1.5;    // ie for node type 0
+  TWConf.sizeMult[1] = 1.0;    // ie for node type 1
 
-  TWConf.defaultNodeColor = "rgb(40,40,40)"
-
-  // selected/deselected rendering
-  TWConf.nodesGreyBorderColor = "rgba(100, 100, 100, 0.5)";  // not selected nodes
-
-
-  TWConf.selectedColor = "default"  // "node" for a background like the node's color,
-                                    // "default" for note-like yellow
-
-  TWConf.edgeDefaultOpacity = 0.4                      // opacity when true_color
-  TWConf.edgeGreyColor = "rgba(150, 150, 150, 0.5)";   // not selected edges
-
-
-  // ========================
-  // SIGMA RENDERING SETTINGS
-  // ========================
-  // triggers overriding sigma.canvas renderers: nodes.def, labels.def, edges.def
-  TWConf.ourRendering = true ;
-
-
-  TWConf.sigmaJsDrawingProperties = {
-      defaultLabelColor: 'black',
-      defaultLabelSize: 30, // in fact usually overridden by node data...
-      labelSizeRatio: 1,   // ...but this ratio allows truly adjusting the sizes
-
-      labelThreshold: 5,   // <- replaces deprecated showLabelsIfZoom
-
-      defaultEdgeType: 'curve',  // 'curve' or 'line'
-
-      defaultBorderView: "always",
-
-      // new sigma.js only for hover + new settingnames
-      defaultHoverLabelBGColor: '#fff',
-      defaultHoverLabelColor: '#000',
-      borderSize: 2.5, // (only for hovered nodes)
-      defaultNodeBorderColor: "black",
-      nodeBorderColor: "default",  // vs. node
-
-      // for custom TW node renderer with borders
-      twNodeRendBorderSize: 1,   // (for all normal nodes, iff TWConf.nodeRendBorder)
-      twNodeRendBorderColor: "#222",
-      // twNodeRendBorderColor: "#eee",
-
-      font: "Droid Sans",
-      // font: "Crete Round",
-      // font: "Ubuntu Condensed",
-      fontStyle: "bold",
-  };
-
-  TWConf.sigmaJsGraphProperties = {
-      minEdgeSize: 3,
-      // maxEdgeSize: 10
-  };
-
-  TWConf.sigmaJsMouseProperties = {
-      minRatio: .03125,  // 1/32  pour permettre zoom x32
-      maxRatio: 2
-  };
 
 
   // ===========

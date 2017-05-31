@@ -873,7 +873,7 @@ TinaWebJS = function ( sigmacanvas ) {
 
     // to init local, instance-related listeners (need to run at new sigma instance)
     // args: @partialGraph = a sigma instance
-    this.SigmaListeners = function(partialGraph, initialActivetypes) {
+    this.initSigmaListeners = function(partialGraph, initialActivetypes) {
 
       var SelInst = new SelectionEngine();
 
@@ -1009,8 +1009,8 @@ TinaWebJS = function ( sigmacanvas ) {
 
           // new sigma.js current zoom ratio
           value: partialGraph.camera.ratio,
-          min: 1 / TW.conf.sigmaJsMouseProperties.maxRatio,   // ex x.5
-          max: 1 / TW.conf.sigmaJsMouseProperties.minRatio,   // ex x32
+          min: 1 / TW.conf.zoomMax,   // ex x.5
+          max: 1 / TW.conf.zoomMin,   // ex x32
           // range: true,
           step: .2,
           value: 1,
@@ -1095,6 +1095,16 @@ TinaWebJS = function ( sigmacanvas ) {
       }
 
       // cancelSelection(false);
+    }
+
+
+    // clears the graph instance
+    this.clearSigma = function() {
+      if (TW.partialGraph && TW.partialGraph.graph) {
+        TW.partialGraph.graph.clear()
+        TW.partialGraph.refresh()
+        selections = []
+      }
     }
 
 

@@ -110,7 +110,7 @@ SigmaUtils = function () {
 
         context.beginPath();
 
-        if (TW.conf.nodesGreyBorderColor == "node")
+        if (settings('twSelectedColor') == "node")
           context.fillStyle = TW.handpickedcolor? node.customAttrs.alt_color : node.color; // node's
         else
           context.fillStyle = "#F7E521"; // yellow
@@ -203,11 +203,11 @@ SigmaUtils = function () {
         // console.debug(`t=${tstamp()} curve render activeedge: ${edgeInfos(edge)})`)
       }
       else if (edge.customAttrs.grey) {
-        color = TW.conf.edgeGreyColor
+        color = settings('twEdgeGreyColor')
         size = 1
       }
       else {
-        color = "rgba( "+baseRGB+" , "+TW.conf.edgeDefaultOpacity+")";
+        color = "rgba( "+baseRGB+" , "+TW.conf.sigmaJsDrawingProperties.twEdgeDefaultOpacity+")";
         size = defSize
       }
 
@@ -255,11 +255,11 @@ SigmaUtils = function () {
         color = 'rgba('+rgb.join()+',.7)'
       }
       else if (edge.customAttrs.grey) {
-        color = TW.conf.edgeGreyColor
+        color = settings('twEdgeGreyColor')
         size = 1
       }
       else {
-        // color = "rgba( "+rgb.join()+" , "+TW.conf.edgeDefaultOpacity+")";
+        // color = "rgba( "+rgb.join()+" , "+TW.conf.sigmaJsDrawingProperties.twEdgeDefaultOpacity+")";
         color = edge.customAttrs.true_color
         size = defSize
       }
@@ -293,7 +293,7 @@ SigmaUtils = function () {
 
         // mode variants
         if (TW.selectionActive) {
-          // passive nodes should blend in the grey of TW.conf.edgeGreyColor
+          // passive nodes should blend in the grey of twEdgeGreyColor
           // cf settings_explorerjs, defgrey_color and greyEverything()
           if (node.customAttrs.grey) {
             if (! TW.handpickedcolor) {
@@ -309,7 +309,7 @@ SigmaUtils = function () {
               nodeColor = node.customAttrs.altgrey_color
             }
             // nice looking uniform grey
-            borderColor = TW.conf.nodesGreyBorderColor
+            borderColor = TW.conf.sigmaJsDrawingProperties.twBorderGreyColor
           }
           // neighbor nodes <=> (highlight flag AND selectionActive)
           else if(node.customAttrs.highlight) {

@@ -104,11 +104,13 @@ if (window.location.protocol == 'file:'
   let inputDiv = document.getElementById('localInput')
   inputDiv.style.display = 'block'
 
-  var remark = document.createElement("p")
-  remark.innerHTML = `You're running project explorer as a local html file (no syncing).`
-  remark.classList.add('comment')
-  remark.classList.add('centered')
-  inputDiv.appendChild(remark)
+  if (window.location.protocol == 'file:') {
+    var remark = document.createElement("p")
+    remark.innerHTML = `You're running project explorer as a local html file (no syncing).`
+    remark.classList.add('comment')
+    remark.classList.add('centered')
+    inputDiv.appendChild(remark)
+  }
 
   // user can open a gexf or json from his fs
   var graphFileInput = createFilechooserEl()
@@ -263,11 +265,11 @@ function syncRemoteGraphData () {
 
     // menufile case : a list of source files in ./db.json
     if (sourcemode == 'servermenu') {
-        console.log("no @file arg nor TW.mainfile: trying FILEMENU TW.conf.sourceMenu")
+        console.log("reading from FILEMENU TW.conf.sourceMenu")
         // we'll first retrieve the menu of available files in db.json, then get the real data in a second ajax
         var infofile = TW.conf.sourceMenu
 
-        if (TW.conf.debug.logFetchers)  console.info(`attempting to load infofile ${infofile}`)
+        if (TW.conf.debug.logFetchers)  console.info(`attempting to load filemenu ${infofile}`)
         var preRES = AjaxSync({ URL: infofile, DT:"json" });
 
         if (preRES['OK'] && preRES.data) {
@@ -323,7 +325,6 @@ function syncRemoteGraphData () {
                 files_selector += '<option '+cssFileSelected+'>'+gexfBasename+'</option>'
             }
             // console.log( files_selector )
-            break;
         }
         files_selector += "</select>"
         console.log("files_selector HTML", files_selector)
@@ -336,7 +337,7 @@ function syncRemoteGraphData () {
     }
     // direct file fallback case: specified file in settings_explorer
     else if (TW.conf.sourceFile && linkCheck(TW.conf.sourceFile)) {
-      console.log("no @file arg: trying TW.mainfile from settings")
+      console.log("no @file arg: trying TW.conf.sourceFile from settings")
       the_file = TW.conf.sourceFile;
     }
     else {
@@ -495,15 +496,13 @@ function mainStartGraph(inFormat, inData, twInstance) {
       // our final sigma params (cf github.com/jacomyal/sigma.js/wiki/Settings)
       TW.customSettings = Object.assign(
 
-          // 1) default values
+          // 1) optimal low-level values (was: "developer settings")
           {
               drawEdges: true,
               drawNodes: true,
               drawLabels: true,
 
               labelSize: "proportional",
-              // font: "Ubuntu Condensed",   // overridden by settings_explorer.js
-              // labelColor: "node",
 
               // nodesPowRatio: .3,
               batchEdgesDrawing: false,
@@ -520,13 +519,14 @@ function mainStartGraph(inFormat, inData, twInstance) {
               touchEnabled: false,
 
               animationsTime:150,
-              mouseZoomDuration:250
+              mouseZoomDuration:250,
+
+              zoomMin: TW.conf.zoomMin,
+              zoomMax: TW.conf.zoomMax
           },
 
-          // 2) settings_explorer values
+          // 2) user-configurable values (cf. settings_explorer)
           TW.conf.sigmaJsDrawingProperties,
-          TW.conf.sigmaJsGraphProperties,
-          TW.conf.sigmaJsMouseProperties
       )
 
 
@@ -574,7 +574,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
       // (new graph => new categories combinations => new array)
 
       // now that we have a sigma instance, let's bind our click handlers to it
-      TW.instance.SigmaListeners(TW.partialGraph, initialActivetypes)
+      TW.instance.initSigmaListeners(TW.partialGraph, initialActivetypes)
 
       // [ / Poblating the Sigma-Graph ]
 

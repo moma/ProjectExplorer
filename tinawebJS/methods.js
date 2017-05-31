@@ -735,15 +735,15 @@ function prepareNodesRenderingProperties(nodesDict) {
       n.color = `rgb(${rgbStr})`
     }
     else {
-      n.color = TW.conf.defaultNodeColor
-      rgbStr = TW.conf.defaultNodeColor.split(',').splice(0, 3).join(',');
+      n.color = TW.conf.sigmaJsDrawingProperties.defaultNodeColor
+      rgbStr = n.color.split(',').splice(0, 3).join(',');
     }
 
     n.customAttrs = {
       grey: false,
       highlight: false,
       true_color : n.color,
-      defgrey_color : "rgba("+rgbStr+",.35)"
+      defgrey_color : "rgba("+rgbStr+","+TW.conf.sigmaJsDrawingProperties.twNodesGreyOpacity+")"
     }
 
     // POSS n.type: distinguish rendtype and twtype
@@ -770,7 +770,7 @@ function prepareEdgesRenderingProperties(edgesDict, nodesDict) {
 
     var rgbStr = sigmaTools.edgeRGB(nodesDict[e.source].color, nodesDict[e.target].color)
 
-    e.color = "rgba("+rgbStr+","+TW.conf.edgeDefaultOpacity+")"
+    e.color = "rgba("+rgbStr+","+TW.conf.sigmaJsDrawingProperties.twEdgeDefaultOpacity+")"
     e.customAttrs = {
       grey: false,
       activeEdge : false,

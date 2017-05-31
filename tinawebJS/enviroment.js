@@ -52,11 +52,7 @@ function createFilechooserEl () {
         }
         else {
           // we might have a previous graph opened
-          if (TW.partialGraph && TW.partialGraph.graph) {
-            TW.partialGraph.graph.clear()
-            TW.partialGraph.refresh()
-            selections = []
-          }
+          TW.instance.clearSigma()
 
           // run
           if (theFormat == 'json')
@@ -978,7 +974,11 @@ function jsActionOnGexfSelector(gexfBasename){
       if (pathcomponents[i] != 'explorerjs.html')
         serverPrefix += '/'+pathcomponents[i]
     }
-    var newDataRes = AjaxSync({ URL: window.location.origin+serverPrefix+'/'+gexfPath });
+    var newDataRes = AjaxSync({ URL: window.location.origin+serverPrefix+gexfPath });
+
+    // remove any previous instance
+    TW.instance.clearSigma()
+
     mainStartGraph(newDataRes["format"], newDataRes["data"], TW.instance)
     writeLabel(gexfBasename)
 }
