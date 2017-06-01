@@ -107,62 +107,61 @@ function gexfCheckAttributesMap (someXMLContent) {
     //   (...)
 
 
-      // THIS SEGMENT USED TO BE IN dictifyGexf
-      // Census of the conversions between attr and some attr name
-      var i, j, k;
-      var nodesAttributes = [];   // The list of attributes of the nodes of the graph that we build in json
-      var edgesAttributes = [];   // The list of attributes of the edges of the graph that we build in json
+    // Census of the conversions between attr and some attr name
+    var i, j, k;
+    var nodesAttributes = {};
+    var edgesAttributes = {};
 
-      // In the gexf (that is an xml), the list of xml nodes 'attributes' (note the plural 's')
-      var attributesNodes = someXMLContent.getElementsByTagName('attributes');
+    // In the gexf (that is an xml), the list of xml nodes 'attributes' (note the plural 's')
+    var attributesNodes = someXMLContent.getElementsByTagName('attributes');
 
-      for(i = 0; i<attributesNodes.length; i++){
-          var attributesNode = attributesNodes[i];  // attributesNode is each xml node 'attributes' (plural)
-          if(attributesNode.getAttribute('class') == 'node'){
-              var attributeNodes = attributesNode.getElementsByTagName('attribute');  // The list of xml nodes 'attribute' (no 's')
-              for(j = 0; j<attributeNodes.length; j++){
-                  var attributeNode = attributeNodes[j];  // Each xml node 'attribute'
+    for(i = 0; i<attributesNodes.length; i++){
+        var attributesNode = attributesNodes[i];  // attributesNode is each xml node 'attributes' (plural)
+        if(attributesNode.getAttribute('class') == 'node'){
+            var attributeNodes = attributesNode.getElementsByTagName('attribute');  // The list of xml nodes 'attribute' (no 's')
+            for(j = 0; j<attributeNodes.length; j++){
+                var attributeNode = attributeNodes[j];  // Each xml node 'attribute'
 
-                  var id = attributeNode.getAttribute('id'),
-                  title = attributeNode.getAttribute('title'),
-                  type = attributeNode.getAttribute('type');
+                var id = attributeNode.getAttribute('id'),
+                title = attributeNode.getAttribute('title'),
+                type = attributeNode.getAttribute('type');
 
-                  // ex:    id   = "in-degree"   or "3"  <= can be an int to be resolved into the title
-                  // ex:   title = "in-degree"
-                  // ex:   type  = "string"
+                // ex:    id   = "in-degree"   or "3"  <= can be an int to be resolved into the title
+                // ex:   title = "in-degree"
+                // ex:   type  = "string"
 
-                  var attribute = {
-                      id:id,
-                      title:title,
-                      type:type
-                  };
-                  nodesAttributes.push(attribute);
+                var attribute = {
+                    id:id,
+                    title:title,
+                    type:type
+                };
+                nodesAttributes[id] = attribute;
 
-              }
-          } else if(attributesNode.getAttribute('class') == 'edge'){
-              var attributeNodes = attributesNode.getElementsByTagName('attribute');  // The list of xml nodes 'attribute' (no 's')
-              for(j = 0; j<attributeNodes.length; j++){
-                  var attributeNode = attributeNodes[j];  // Each xml node 'attribute'
+            }
+        } else if(attributesNode.getAttribute('class') == 'edge'){
+            var attributeNodes = attributesNode.getElementsByTagName('attribute');  // The list of xml nodes 'attribute' (no 's')
+            for(j = 0; j<attributeNodes.length; j++){
+                var attributeNode = attributeNodes[j];  // Each xml node 'attribute'
 
-                  var id = attributeNode.getAttribute('id'),
-                  title = attributeNode.getAttribute('title'),
-                  type = attributeNode.getAttribute('type');
+                var id = attributeNode.getAttribute('id'),
+                title = attributeNode.getAttribute('title'),
+                type = attributeNode.getAttribute('type');
 
-                  var attribute = {
-                      id:id,
-                      title:title,
-                      type:type
-                  };
-                  edgesAttributes.push(attribute);
+                var attribute = {
+                    id:id,
+                    title:title,
+                    type:type
+                };
+                edgesAttributes[id] = attribute;
 
-              }
-          }
-      } //out: nodesAttributes Array
+            }
+        }
+    }
 
-      // console.debug('>>> tr: nodesAttributes', nodesAttributes)
-      // console.debug('>>> tr: edgesAttributes', edgesAttributes)
+    // console.debug('gexf declared nodesAttributes:', nodesAttributes)
+    // console.debug('gexf declared edgesAttributes:', edgesAttributes)
 
-      return {nAttrs: nodesAttributes, eAttrs: edgesAttributes}
+    return {nodeAttrs: nodesAttributes, edgeAttrs: edgesAttributes}
 }
 
 // Level-00
@@ -189,16 +188,9 @@ function scanGexf(gexfContent) {
 
                 // some attrs are gexf-local indices refering to an <attributes> declaration
                 // so if it matches declared we translate their integer in title
-                // FIXME use a dict by id in gexfCheckAttributesMap for loop rm
-                if(Number.isInteger(Number(attr))) {
-                  // mini loop inside declared node attrs (eg substitute 0 for 'centrality')
-                  for (var l=0;l<declaredAttrs.nAttrs.length;l++) {
-                    let declared = declaredAttrs.nAttrs[l]
-                    if (declared.id == attr) {
-                      attr = declared.title
-                    }
-                  }
-                }
+                if (! isUndef(declaredAttrs.nodeAttrs[attr]))
+                  attr = declaredAttrs.nodeAttrs[attr].title
+
                 // console.log('attr', attr)
 
                 // THIS WILL BECOME catDict (if ncats == 1 => monopart)
@@ -272,18 +264,21 @@ function sortNodeTypes(observedTypesDict) {
 //                => by attribute
 //                       => {vals:[allpossiblevalues...],
 //                           map:{eachvalue:[matchingnodeids],
-//                                eachvalue2:[matchingnodeids]...}
+//                                eachvalue2:[matchingnodeids]...
+//                           vtypes:{str: nbstringvaluesforthisattr
+//                                   num: nbnumericvaluesforthisattr}
+//                           }
 
 // NB vals and map are both useful and complementary
 
-function facetsBinning (valuesIdx, Atts_2_Exclude) {
+function facetsBinning (valuesIdx) {
 
-  console.warn("valuesIdx", valuesIdx)
+  console.debug("facetsBinning: valuesIdx", valuesIdx)
 
   let facetIdx = {}
 
   if (TW.conf.debug.logFacets) {
-    console.log('dictfyGexf: begin TW.Clusters')
+    console.log('facetsBinning: begin TW.Clusters')
     var classvalues_deb = performance.now()
   }
 
@@ -299,28 +294,56 @@ function facetsBinning (valuesIdx, Atts_2_Exclude) {
     for (var at in valuesIdx[cat]) {
       // console.log(`======= ${cat}::${at} =======`)
 
-      // skip non-numeric or already done
-      // £TODO finish changes to Atts_2_Exclude from 69e7c039
-      if (Atts_2_Exclude[at] || at == "clust_default") {
-        continue
-      }
-
-      // array of valueclass/interval/bin objects
+      // new array of valueclass/interval/bin objects
       facetIdx[cat][at] = []
 
-      // if n possible values doesn't need binify
-      if (Object.keys(valuesIdx[cat][at].map).length <= TW.conf.maxDiscreteValues) {
+      // POSSible: auto-detect if vtypes ==> condition
+
+
+
+      // diagnosed data type replacing previous Atts_2_Exclude (more polyvalent)
+      let dataType = 'num'
+      if (valuesIdx[cat][at].vtypes.vnum = 0) {
+        // FIXME condition should be vnum << vstr instead of vnum = 0
+        dataType = 'str'
+      }
+
+      // default options
+      let maxDiscreteValues = TW.conf.maxDiscreteValues
+      let nBins = TW.conf.legendsBins
+      let binningMode = 'samepop'
+
+      // read stipulated options in user settings
+      // ----------------------------------------
+      if (TW.conf.facetOptions[at]) {
+        binningMode = TW.conf.facetOptions[at]["binmode"]
+        nBins = TW.conf.facetOptions[at]["n"]
+        maxDiscreteValues = nBins
+
+        if (nBins == 0) {
+          console.warn(`Can't use user-specified number of bins value 0 for attribute ${at}, using TW.conf.legendsBins ${TW.conf.legendsBins} instead`)
+          nBins = TW.conf.legendsBins
+        }
+      }
+
+      // if small number of distinct values doesn't need binify
+      if (Object.keys(valuesIdx[cat][at].map).length <= maxDiscreteValues) {
         for (var pval in valuesIdx[cat][at].map) {
+
+          var idList = valuesIdx[cat][at].map[pval]
           facetIdx[cat][at].push({
-            'labl': `${cat}||${at}||${pval}`,
+            // simple label
+            'labl': `${pval} (${idList.length})`,
+            // verbose label
+            'fullLabl': `${cat}||${at}||${pval} (${idList.length})`,
             'val': pval,
             // val2ids
-            'nids': valuesIdx[cat][at].map[pval]
+            'nids': idList
           })
         }
       }
       // if binify
-      else {
+      else if (dataType == 'num') {
         var len = valuesIdx[cat][at].vals.length
 
         // sort out vals
@@ -332,25 +355,38 @@ function facetsBinning (valuesIdx, Atts_2_Exclude) {
         // => creates bin, binlabels, inverted index per bins
         var legendRefTicks = []
 
-        // how many bins for this attribute ?
-        var nBins = 3
-        if (TW.conf.customLegendsBins && TW.conf.customLegendsBins[at]) {
-          nBins = TW.conf.customLegendsBins[at]
-        }
-        else if (TW.conf.legendsBins) {
-          nBins = TW.conf.legendsBins
+        var lastUpperBound = null
+
+        if (binningMode == 'samerange') {
+          // minimax
+          let vMin = valuesIdx[cat][at].vals[0]
+          let vMax = valuesIdx[cat][at].vals.slice(-1)[0]
+          lastUpperBound = vMax
+
+          // same interval each time
+          let step = (vMax - vMin) / nBins
+
+          for (var k=vMin ; k < vMax ; k += step ){
+            legendRefTicks.push(k)
+          }
+          // NB these ticks are *minimums* so we stop one step *before* vMax
+          //    and simply include it in last interval
         }
 
-        // create tick thresholds
-        for (var l=0 ; l < nBins ; l++) {
-          let nthVal = Math.floor(len * l / nBins)
-          legendRefTicks.push(valuesIdx[cat][at].vals[nthVal])
+        else if (binningMode == 'samepop') {
+          // create tick thresholds
+          for (var l=0 ; l < nBins ; l++) {
+            let nthVal = Math.floor(len * l / nBins)
+            legendRefTicks.push(valuesIdx[cat][at].vals[nthVal])
+          }
         }
 
-        if (TW.conf.debug.logFacets)    console.debug("intervals for", at, legendRefTicks)
+        if (TW.conf.debug.logFacets)    console.debug("intervals for", at, legendRefTicks, "(list of minima)")
+
+        // the unique-d array will allow us to group ranges
+        var sortedDistinctVals = Object.keys(valuesIdx[cat][at].map).sort(function(a,b){return Number(a)-Number(b)})
 
         var nTicks = legendRefTicks.length
-        var sortedDistinctVals = Object.keys(valuesIdx[cat][at].map).sort(function(a,b){return Number(a)-Number(b)})
 
         var nDistinctVals = sortedDistinctVals.length
         var lastCursor = 0
@@ -361,15 +397,21 @@ function facetsBinning (valuesIdx, Atts_2_Exclude) {
 
           let lowThres = Number(legendRefTicks[l])
           let hiThres = null
+
           if (l < nTicks-1) {
             hiThres = Number(legendRefTicks[l+1])
           }
-          else {
+          else if (binningMode == 'samepop') {
             hiThres = Infinity
+          }
+          else {
+            // in 'samerange' mode
+            hiThres = lastUpperBound
           }
 
           var newTick = {
             'labl':'',
+            'fullLabl':'',
             'nids':[],
             'range':[lowThres, hiThres]
           }
@@ -393,24 +435,52 @@ function facetsBinning (valuesIdx, Atts_2_Exclude) {
               }
             }
             // we're over the interval upper bound
-            // we just need to remember where we were for next interval
             else if (val >= hiThres) {
-              lastCursor = k
-              break
+
+              // normal case
+              if (binningMode != 'samerange' || l != nTicks-1 ) {
+                // we just need to remember where we were for next interval
+                lastCursor = k
+                break
+              }
+
+              // samerange && last interval case: inclusive last interval upper bound
+              else {
+                for (var j in valuesIdx[cat][at].map[val]) {
+                  newTick.nids.push(valuesIdx[cat][at].map[val][j])
+                }
+              }
+
             }
           }
 
           // create label
-          // round %.6f for display
-          var labLowThres = Math.round(lowThres*1000000)/1000000
-          var labHiThres = (l==nTicks-1)? '+ ∞' : Math.round(hiThres*1000000)/1000000
-          newTick.labl = `${cat}||${at}||[${labLowThres} ; ${labHiThres}]`
+          // round %.3f for display
+          var labLowThres = Math.round(lowThres*1000)/1000
+          var labHiThres = ''
+          var bracket = '['
+
+          if (l < nTicks-1) {
+            labHiThres = Math.round(hiThres*1000)/1000
+          }
+          // last bound is +Inf if samepop
+          else if (binningMode == 'samepop') {
+            labHiThres = '+ ∞'
+          }
+          else if (binningMode == 'samerange') {
+            labHiThres = Math.round(hiThres*1000)/1000
+            bracket = ']'
+          }
+
+          newTick.labl = `[${labLowThres} ; ${labHiThres}${bracket} (${newTick.nids.length})`
+          newTick.fullLabl = `${cat}||${at}||[${labLowThres} ; ${labHiThres}${bracket} (${newTick.nids.length})`
 
           // save these bins as the cluster index (aka faceting)
           if (newTick.nids.length) {
             facetIdx[cat][at].push(newTick)
           }
         }
+
       }
     }
 
@@ -437,8 +507,8 @@ function facetsBinning (valuesIdx, Atts_2_Exclude) {
 // for {1,2}partite graphs
 function dictfyGexf( gexf , categories ){
 
-  if (TW.conf.debug.logParsers)
-    console.log("ParseCustom gexf 2nd loop, main data extraction, with categories", categories)
+    if (TW.conf.debug.logParsers)
+      console.log("ParseCustom gexf 2nd loop, main data extraction, with categories", categories)
 
 
     // var catDict = {'terms':"0"}
@@ -453,8 +523,9 @@ function dictfyGexf( gexf , categories ){
     }
 
     var declaredAtts = gexfCheckAttributesMap(gexf)
-    var nodesAttributes = declaredAtts.nAttrs
+    var nodesAttributes = declaredAtts.nodeAttrs
     // var edgesAttributes = declaredAtts.eAttrs
+
 
     var elsNodes = gexf.getElementsByTagName('nodes') // The list of xml nodes 'nodes' (plural)
     TW.labels = [];
@@ -473,7 +544,6 @@ function dictfyGexf( gexf , categories ){
                             // (to inventory subclasses for a given attr)
                             //   if < maxDiscreteValues: keep all in legend
                             //   else:  show intervals in legend
-    var Atts_2_Exclude = {} // to exclude strings that don't convert to number
 
     // usually there is only 1 <nodes> element...
     for(i=0; i<elsNodes.length; i++) {
@@ -558,7 +628,9 @@ function dictfyGexf( gexf , categories ){
                 var attr = attvalueNode.getAttribute('for');
                 var val = attvalueNode.getAttribute('value');
 
-                if(nodesAttributes[attr]) attr = atts[nodesAttributes[attr]]=val
+                if(! isUndef(nodesAttributes[attr])) {
+                  atts[nodesAttributes[attr].title]=val
+                }
                 else atts[attr]=val;
             }
             node.attributes = atts;
@@ -597,14 +669,24 @@ function dictfyGexf( gexf , categories ){
             // console.debug("node.attributes", node.attributes)
             // creating a faceted index from node.attributes
             if (TW.conf.scanClusters) {
-              [tmpVals, Atts_2_Exclude] = updateValueFacets(tmpVals, Atts_2_Exclude, node)
+
+              tmpVals = updateValueFacets(tmpVals, node)
             }
 
         } // finish nodes loop
     }
 
     // console.warn ('parseCustom output nodes', nodes)
-    // console.warn ('parseCustom inverted index: vals to srcType', tmpVals)
+
+
+
+
+
+    console.warn ('parseCustom inverted index: vals to srcType', tmpVals)
+
+
+
+
 
     // -------------- debug: for local stats ----------------
     // allSizes.sort();
@@ -619,8 +701,7 @@ function dictfyGexf( gexf , categories ){
 
 
     // clusters and other facets => type => name => [{label,val/range,nodeids}]
-    // £TODO finish changes to Atts_2_Exclude from 69e7c039 (new specif: dtype str is accepted for classes)
-    TW.Clusters = facetsBinning(tmpVals, Atts_2_Exclude)
+    TW.Clusters = facetsBinning(tmpVals)
 
 
     // linear rescale node sizes
@@ -754,34 +835,42 @@ function updateRelations(typedRelations, edgeCateg, srcId, tgtId){
 
 
 // To fill the reverse map: values => nodeids of a given type
-function updateValueFacets(facetIdx, Atts_2_Exclude, aNode) {
+function updateValueFacets(facetIdx, aNode) {
 
   if (!facetIdx[aNode.type])      facetIdx[aNode.type]={}
   for (var at in aNode.attributes) {
-    if (!facetIdx[aNode.type][at])  facetIdx[aNode.type][at]={'vals':[],'map':{}}
+    let val = aNode.attributes[at]
 
-    let castVal = Number(aNode.attributes[at])
-    // Identifying the attribute datatype: exclude strings and objects
-    // if ( isNaN(castVal) ) {
-    //     if (!Atts_2_Exclude[at]) Atts_2_Exclude[at]=true;
-    //
-    //     // TODO: this old Atts_2_Exclude strategy could be replaced,
-    //     //       not to exclude but to store the datatype somewhere like facetIdx[aNode.type][at].dtype
-    //     //  => the datatype would be a condition (no bins if not numeric, etc.)
-    //     //  => it would also allow to index text values (eg country, affiliation, etc.)
-    //     //     with the strategy "most frequent distinct values" + "others"
-    //     //     which would be useful (eg country, affiliation, etc.) !!!
-    //
-    // }
-    // numeric attr => build facets
-    // else {
-      if (!facetIdx[aNode.type][at].map[castVal]) facetIdx[aNode.type][at].map[castVal] = []
+    if (!facetIdx[aNode.type][at])  facetIdx[aNode.type][at]={'vals':[],'map':{}, 'vtypes': {'vstr':0, 'vnum':0}}
 
-      facetIdx[aNode.type][at].vals.push(castVal)      // for ordered scale
-      facetIdx[aNode.type][at].map[castVal].push(aNode.id)  // inverted index
-    // }
+    // shortcut
+    var indx = facetIdx[aNode.type][at]
+
+    // determine observed type of this single value
+    let castVal = Number(val)
+
+    // this discovered datatype will be a condition (no bins if not numeric)
+    if (isNaN(castVal)) {
+      indx.vtypes["vstr"]++
+    }
+    else {
+      indx.vtypes["vnum"]++
+      val = castVal           // we keep it as number
+    }
+
+    if (!indx.map[val]) indx.map[val] = []
+
+    indx.vals.push(val)               // for ordered scale
+    indx.map[val].push(aNode.id)      // inverted index
+
+
+    // POSSIBLE with the discovered datatype
+    //  => it would also allow to index text values (eg country, affiliation, etc.)
+    //     with the strategy "most frequent distinct values" + "others"
+    //     which would be useful (eg country, affiliation, etc.) !!!
+
   }
-  return [facetIdx, Atts_2_Exclude]
+  return facetIdx
 }
 
 
@@ -919,7 +1008,6 @@ function dictfyJSON( data , categories ) {
 
     // if scanClusters, we'll also use:
     var tmpVals = {}
-    var Atts_2_Exclude = {}
 
     for(var nid in data.nodes) {
         let n = data.nodes[nid];
@@ -958,14 +1046,14 @@ function dictfyJSON( data , categories ) {
 
         // creating a faceted index from node.attributes
         if (TW.scanClusters) {
-          [tmpVals, Atts_2_Exclude] = updateValueFacets(tmpVals, Atts_2_Exclude, node)
+          tmpVals = updateValueFacets(tmpVals, node)
         }
     }
 
     // test: json with string facet (eg lab affiliation in comex)
     console.log(tmpVals['Document'])
 
-    TW.Clusters = facetsBinning (tmpVals, Atts_2_Exclude)
+    TW.Clusters = facetsBinning (tmpVals)
 
     // £TODO ask if wanted
     // if we wanted linear rescale node sizes like dictfyGexf:

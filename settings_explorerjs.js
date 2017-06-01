@@ -64,6 +64,30 @@ TW.conf = (function(TW){
     'growth_rate': 12
   }
 
+  // facetOptions: choose here the visual result of your node attributes
+  // 3 possible coloring functions
+  //   - cluster   (contrasted colors for attributes describing *classes*)
+  //   - gradient  (uniform map from a numeric attribute to red/yellow gradient)
+  //   - heatmap   (from blue to red/brown, centered on a white "neutral" color)
+  // 2 possible binning modes
+  //   - samerange: constant intervals between each bin
+  //   - samepop:   constant cardinality inside each class (~ quantiles)
+  // Cases with no binning: if type is not numeric or if there is less than n vdistinct values
+  TWConf.facetOptions = {
+
+    // attribute     |    coloring     |  number |    binning
+    //   name        |    function     | of bins |     mode
+    // --------------------------------------------------------------------
+    'numuniform'   : {'col': "gradient", 'n': 3,  'binmode': 'samerange'},
+    'numpareto'    : {'col': "gradient", 'n': 8,  'binmode': 'samepop'  },
+    'intfewvalues' : {'col': "heatmap" , 'n': 4,  'binmode': 'samerange'},
+    'countryuniform':{'col': "cluster" },
+  }
+
+  // other POSS option: display attribute value in label or not ?
+
+
+
   // default clustering attribute (<---> used for initial node colors)
   TWConf.nodeClusAtt = "modularity_class"
 
@@ -101,7 +125,7 @@ TW.conf = (function(TW){
   // -----------------------------
   TWConf.filterSliders = true     // show sliders for nodes/edges subsets
 
-  TWConf.colorsByAtt = false;     // show "Set colors" menu
+  TWConf.colorsByAtt = true;      // show "Set colors" menu
 
   TWConf.deselectOnclickStage = true   // click on background remove selection ?
                                        // (except when dragging)
@@ -152,7 +176,7 @@ TW.conf = (function(TW){
       // nodes
       defaultNodeColor: "#333",
       twNodeRendBorderSize: 1,           // node borders (only iff ourRendering)
-      twNodeRendBorderColor: "#eee",
+      twNodeRendBorderColor: "#222",
 
       // edges
       minEdgeSize: 2,                    // in fact used in tina as edge size
@@ -176,7 +200,7 @@ TW.conf = (function(TW){
 
 
       // selected nodes <=> special label
-      twSelectedColor: "node",     // "node" for a label bg like the node color,
+      twSelectedColor: "default",     // "node" for a label bg like the node color,
                                    // "default" for note-like yellow
 
       // not selected <=> grey
@@ -221,7 +245,7 @@ TW.conf = (function(TW){
     // show verbose console logs...
     logFetchers: false,              // ...about ajax/fetching of graph data
     logParsers: false,               // ...about parsing said data
-    logFacets: false,                // ...about parsing node attribute:value facets
+    logFacets: true,                // ...about parsing node attribute:value facets
     logSettings: false,              // ...about settings at Tina and Sigma init time
     logSelections: false
   }

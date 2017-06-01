@@ -43,10 +43,18 @@ This will still evolve but the main steps for any graph initialization messily u
 
  - `somenode.attributes`: the `attributes` property is always an object
    - any attribute listed in the sourcenode.attributes will be indexed if the TW.scanClusters flag is true
+   - data type and style of processing (for heatmap, or for classes, etc.) should be stipulated in settings
    - the mapping from attribute values to matching nodes is in TW.Clusters.aType.anAttr.aValue.map
-   - coloration:     "`age`" "`growth_rate`" + any attribute of type float or int
-   - clustering:     "`cluster_index`" ou nom figurant dans `TW.conf.nodeClusAtt`
-   - vocabulary: (en cours) any attribute of type string and where the amount of distinct values is < TW.somesettings
+
+   - finally in GUI we can associate 3 types of coloration
+    - `"gradient"` coloration
+      - available for any attribute that looks like a continuous metric
+    - `"heatmap"` coloration
+      - colors from cold to hot centered on a white "neutral" color
+      - applied for attributes stipulated in settings: eg "`age`" "`growth_rate`"
+    - `"cluster"` coloration for str or num classes like modularity_class, affiliation, etc.
+      - we use contrasted values from colorList
+      - automatically applied for "`cluster_index`" or any name in `TW.conf.nodeClusAtt`
 
 
 ## User interaction mecanisms
