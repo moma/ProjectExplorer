@@ -930,16 +930,18 @@ function saveGraph() {
     let atts = {"size":size,"color":color}
 
     if(getByID("fullgraph").checked) {
-        saveGEXF ( getnodes() , getedges() , atts);
+        saveGEXF ( TW.Nodes , TW.Edges , atts);
     }
 
     if(getByID("visgraph").checked) {
-        saveGEXF ( getVisibleNodes() , getVisibleEdges(), atts )
+        saveGEXF ( TW.partialGraph.graph.nodes() , TW.partialGraph.graph.edges(), atts )
     }
 
     $("#closesavemodal").click();
 }
 
+
+// £TODO: we should use https://github.com/Linkurious/linkurious.js/tree/develop/plugins/sigma.exporters.gexf
 function saveGEXF(nodes,edges,atts){
     let gexf = '<?xml version="1.0" encoding="UTF-8"?>\n';
     gexf += '<gexf xmlns="http://www.gexf.net/1.1draft" xmlns:viz="http://www.gephi.org/gexf/viz" version="1.1">\n';
@@ -977,7 +979,7 @@ function saveGEXF(nodes,edges,atts){
     gexf += "<edges>\n";
     let cont = 1;
     for(var e in edges){
-        gexf += '<edge id="'+cont+'" source="'+edges[e].source.id+'"  target="'+edges[e].target.id+'" weight="'+edges[e].weight+'">\n';
+        gexf += '<edge id="'+cont+'" source="'+edges[e].source+'"  target="'+edges[e].target+'" weight="'+edges[e].weight+'">\n';
         gexf += '<attvalues> <attvalue for="6" value="'+edges[e].label+'"/></attvalues>';
         gexf += '</edge>\n';
         cont++;
