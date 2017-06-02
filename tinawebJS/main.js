@@ -482,7 +482,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
               rescaleIgnoreSize: true,
 
               mouseEnabled: true,
-              touchEnabled: false,
+              touchEnabled: true,
 
               animationsTime:150,
               mouseZoomDuration:250,
