@@ -31,8 +31,8 @@
 .my-legend {
     position:fixed;
     /* width: we set it equal or smaller than #lefttopbox width */
-    max-width:18%;
-    max-height: 25%;
+    max-width:20%;
+    max-height: 30%;
     padding: 0 5px;
     overflow-y:scroll;
     bottom:0;
@@ -42,7 +42,7 @@
     opacity: 0.8;
     color:#250587;
     margin: 7px;
-    font-size:small;
+    font-size:120%;
 }
 
 .my-legend .legend-title {

@@ -760,7 +760,7 @@ function edgeInfos(anEdge) {
 }
 
 
-function clustersBy(daclass) {
+function gradientColoring(daclass) {
 
     cancelSelection(false);
 
@@ -887,14 +887,28 @@ function repaintEdges() {
   }
 }
 
-// rewrite of clustersBy with binning and for attributes that can have negative float values
 
-// NB - binning is done at parseCustom
-//    - number of bins can be specified by attribute name in TW.conf.customLegendsBins
-function colorsRelByBins(daclass) {
+// heatmap from cold to warm with middle white
+//         (good for values centered around a neutral zone)
+// NB - binning is done at parseCustom (cf. TW.Clusters)
+//    - number of bins can be specified by attribute name in TW.conf.facetOptions[daclass]["n"]
+function heatmapColoring(daclass) {
   var binColors
   var doModifyLabel = false
   var actypes = getActivetypes()
+
+  // default value
+  let nColors = TW.conf.legendsBins || 5
+
+  // possible user value
+  if (TW.conf.facetOptions[daclass]) {
+    if (TW.conf.facetOptions[daclass]["n"] != 0) {
+      nColors = TW.conf.facetOptions[daclass]["n"]
+    }
+    else {
+      console.warn(`Can't use user-specified number of bins value 0 for attribute ${at}, using TW.conf.legendsBins ${TW.conf.legendsBins} instead`)
+    }
+  }
 
   // we have no specifications yet for colors and legends on multiple types
   if (actypes.length > 1) {
@@ -906,7 +920,14 @@ function colorsRelByBins(daclass) {
   // our binning
   var tickThresholds = TW.Clusters[ty][daclass]
 
-  // for debug of colorsRelByBins
+  // verifications
+  if (tickThresholds.length != nColors) {
+    console.warn (`heatmapColoring setup mismatch: TW.Clusters ticks ${tickThresholds} from scanClusters should == nColors ${nColors}`)
+  }
+
+  binColors = getHeatmapColors(nColors)
+
+  // for debug of heatmapColoring
   var totalsPerBinMin = {}
 
   // let's go
@@ -915,271 +936,57 @@ function colorsRelByBins(daclass) {
   // global flag
   TW.handpickedcolor = true
 
-  if (daclass == 'age') {
-    // 9 colors
-    binColors = [
-        "#F9F588",//epsilon
-        "#f9f008", //yel
-        "#f9da08",
-        "#fab207",
-        "#fa9607",
-        "#fa6e07",
-        "#fa4607",
-        "#ff0000" // red     binMin 125
-    ];
-    }
-    else if (daclass == 'growth_rate') {
+  // use our valueclass => ids mapping
+  for (var k in tickThresholds) {
 
-      doModifyLabel = true
+    // console.debug('tick infos', tickThresholds[k])
 
-      // 12 colors
-      binColors = [
-          "#005197",  //blue    binMin -∞
-          "#3c76fb",        //  binMin -75
-          "#5c8af2",        //  binMin -50
-          "#64c5f2",        //  binMin -25
-          "#F9F7ED",//epsilon   binMin -15
-          "#bae64f",        //  binMin 15
-          "#f9f008",        //  binMin 25
-          "#fab207",        //  binMin 50
-          "#fa9607",        //  binMin 75
-          "#fa6e07",        //  binMin 100
-          "#fa4607", // red     binMin 125
-          "#991B1E"         //  binMin 150
-      ];
-
+    // skip grouped NaN values case => grey
+    if (tickThresholds[k].labl == '_non_numeric_') {
+      continue
     }
 
-    // verification
-    if (tickThresholds.length != binColors.length) {
-      console.warn (`colorsRelByBins setup mismatch: TW.Clusters ticks ${tickThresholds} should == nColors ${binColors.length}`)
-    }
+    // ex: {labl: "terms||growth_rate||[0 ; 0.583]", nids: Array(99), range: [0 ; 0.583210]}
 
+    totalsPerBinMin[tickThresholds[k].range[0]] = tickThresholds[k].nids.length
 
-    // use our valueclass => ids mapping
-    for (var k in tickThresholds) {
+    // color the referred nodes
+    for (var j in tickThresholds[k].nids) {
+      let n = TW.partialGraph.graph.nodes(tickThresholds[k].nids[j])
 
-      // console.debug('tick infos', tickThresholds[k])
-      // ex: {labl: "terms||growth_rate||[0 ; 0.583]", nids: Array(99), range: [0 ; 0.583210]}
+      n.color = binColors[k]
+      n.customAttrs.alt_color = binColors[k]
+      n.customAttrs.altgrey_color = false
 
-      totalsPerBinMin[tickThresholds[k].range[0]] = tickThresholds[k].nids.length
-
-      // color the referred nodes
-      for (var j in tickThresholds[k].nids) {
-        let n = TW.partialGraph.graph.nodes(tickThresholds[k].nids[j])
-
-        n.color = binColors[k]
-        n.customAttrs.alt_color = binColors[k]
-        n.customAttrs.altgrey_color = false
-
-        var originalLabel = TW.Nodes[n.id].label
-        if (doModifyLabel) {
-          var valSt = n.attributes[daclass]
-          n.label = `(${valSt}) ${originalLabel}`
-        }
-        else {
-          n.label = originalLabel
-        }
-
-      }
-    }
-
-    // console.debug(valArray)
-
-    console.info('coloring distribution per tick thresholds' , totalsPerBinMin)
-
-    // Edge precompute alt_rgb by new source-target nodes-colours combination
-    repaintEdges()
-
-    set_ClustersLegend ( daclass )
-
-    TW.partialGraph.render();
-}
-
-
-
-// KEPT FOR REFERENCE, BINNING NOW PRECOMPUTED in parseCustom
-// rewrite of clustersBy with binning and for attributes that can have negative float values
-// /!\ age and growth_rate attributes referred to by name
-function colorsRelByBins_old(daclass) {
-  cancelSelection(false);
-
-  var binColors
-  var doModifyLabel = false
-
-  TW.handpickedcolor = true
-
-  // for debug of colorsRelByBins
-  var totalsPerBinMin = {}
-
-
-  // should be = binColors.length
-  var nTicksParam = (daclass == 'age') ? 8 : 12
-  // do first loop entirely to get percentiles => bins, then modify alt_color
-
-  // estimating ticks
-  let tickThresholds = []
-  let valArray = []
-  for (var j=0 ; j < TW.nNodes ; j++) {
-    let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
-
-    if (
-        !n.hidden
-        && n.attributes
-        && n.attributes.category == 'terms'
-        && n.attributes[daclass] != undefined
-      ) {
-          valArray.push(Number(n.attributes[daclass]))
-    }
-  }
-
-  var len = valArray.length
-
-  valArray.sort(function(a, b) {return a - b;}) // important :)
-
-  for (var l=0 ; l < nTicksParam ; l++) {
-    let nthVal = Math.floor(len * l / nTicksParam)
-
-    tickThresholds.push(valArray[nthVal])
-  }
-
-  // also always add the max+1 as last tick (excluded upper bound of last bin)
-  tickThresholds.push((valArray[len-1])+1)
-
-  console.info(`[|===|=== ${nTicksParam} color ticks ===|===|]\n`, tickThresholds)
-
-
-  cancelSelection(false);
-
-  if (daclass == 'age') {
-    // 9 colors
-    binColors = [
-        "#F9F588",//epsilon
-        "#f9f008", //yel
-        "#f9da08",
-        "#fab207",
-        "#fa9607",
-        "#fa6e07",
-        "#fa4607",
-        "#ff0000" // red     binMin 125
-    ];
-    }
-    else if (daclass == 'growth_rate') {
-
-      doModifyLabel = true
-
-      // 12 colors
-      binColors = [
-          "#005197",  //blue    binMin -∞
-          "#3c76fb",        //  binMin -75
-          "#5c8af2",        //  binMin -50
-          "#64c5f2",        //  binMin -25
-          "#F9F7ED",//epsilon   binMin -15
-          "#bae64f",        //  binMin 15
-          "#f9f008",        //  binMin 25
-          "#fab207",        //  binMin 50
-          "#fa9607",        //  binMin 75
-          "#fa6e07",        //  binMin 100
-          "#fa4607", // red     binMin 125
-          "#991B1E"         //  binMin 150
-      ];
-
-    }
-
-    // verification
-    if (nTicksParam != binColors.length) {
-      console.warn (`colorsRelByBins setup mismatch: nTicksParam ${nTicksParam} should == nColors ${binColors.length}`)
-    }
-
-
-    // get the nodes
-    for (var j=0 ; j < TW.nNodes ; j++) {
-      let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
-      if (! n.hidden
-        && n.attributes
-        && n.attributes.category == 'terms'
-        && ! isUndef(n.attributes[daclass])
-      ) {
-
+      var originalLabel = TW.Nodes[n.id].label
+      if (doModifyLabel) {
         var valSt = n.attributes[daclass]
-
-        var originalLabel = TW.Nodes[n.id].label
-        if (doModifyLabel) {
-          n.label = `(${valSt}) ${originalLabel}`
-        }
-        else {
-          n.label = originalLabel
-        }
-
-        var theVal = parseFloat(valSt)
-        var foundBin = false
-        // console.log('theVal:',theVal)
-
-        if( !isNaN(theVal) ) { //is float
-          // iterate over bins
-          for(var k=0 ; k < tickThresholds.length-1; k++) {
-            var binMin = tickThresholds[k]
-            var binMax = tickThresholds[(k+1)]
-            if((theVal >= binMin) && (theVal < binMax)) {
-                // TW.partialGraph._core.graph.nodesIndex[n.id].binMin = binMin
-                // TW.partialGraph._core.graph.nodesIndex[n.id].color = binColors[j]
-
-                n.binMin = binMin
-                n.color = binColors[k]
-                n.customAttrs.alt_color = binColors[k]
-                n.customAttrs.altgrey_color = false
-                foundBin = true
-                // console.log(`theVal ${theVal} => found its bin ${binMin} ... ${binColors[k]}`)
-
-                if (!totalsPerBinMin[binMin]) {
-                  totalsPerBinMin[binMin] = 1
-                }
-                else {
-                  totalsPerBinMin[binMin]++
-                }
-                break
-            }
-          }
-
-          // case no bin after loop (perhaps more ticks than colors-1 ??)
-          if (!foundBin) {
-            console.warn('no bin for theVal', theVal, n.id)
-            n.binMin = null
-            n.color = '#000'
-            n.customAttrs.alt_color = '#000'
-          }
-        }
-        else {
-          // case no val
-          // console.log('no val for', n.id)
-          n.binMin = null
-          n.color = '#555'
-          n.customAttrs.alt_color = '#555'
-        }
-
+        n.label = `(${valSt}) ${originalLabel}`
       }
+      else {
+        n.label = originalLabel
+      }
+
     }
+  }
 
-    // console.debug(valArray)
+  console.info('coloring distribution per tick thresholds' , totalsPerBinMin)
 
-    console.info('coloring distribution per tick thresholds' , totalsPerBinMin)
+  // Edge precompute alt_rgb by new source-target nodes-colours combination
+  repaintEdges()
 
-    // Edge precompute alt_rgb by new source-target nodes-colours combination
-    repaintEdges()
+  set_ClustersLegend ( daclass )
 
-    // set_ClustersLegend ( daclass )
-
-    TW.partialGraph.render();
+  TW.partialGraph.render();
 }
 
 
-
-function colorsBy(daclass) {
+function clusterColoring(daclass) {
 
     console.log("")
     console.log(" = = = = = = = = = = = = = = = = = ")
     console.log(" = = = = = = = = = = = = = = = = = ")
-    console.log("colorsBy (    "+daclass+"    )")
+    console.log("clusterColoring (    "+daclass+"    )")
     console.log(" = = = = = = = = = = = = = = = = = ")
     console.log(" = = = = = = = = = = = = = = = = = ")
     console.log("")
@@ -1206,7 +1013,7 @@ function colorsBy(daclass) {
     }
     else {
       // shuffle on entire array is better than random sorting function on each element
-      var randomColorList = shuffle(TW.colorList)
+      var randomColorList = shuffle(TW.gui.colorList)
 
       for(var j in TW.nodeIds) {
           var the_node = TW.Nodes[ TW.nodeIds[j] ]
@@ -1214,11 +1021,10 @@ function colorsBy(daclass) {
           // ££TODO put louvain in graph.nodes() like other attrs ??
           // then possible to use TW.partialGraph.graph.nodes(TW.nodeIds[j])
 
-          if (j< 15)
-            console.log(` ${TW.nodeIds[j]} : hidden?${the_node.hidden} the_node.attributes[daclass] = ${the_node.attributes[daclass]}`) // final val=${attval}
+          // if (j< 15)
+          //   console.log(` ${TW.nodeIds[j]} : hidden?${the_node.hidden} the_node.attributes[daclass] = ${the_node.attributes[daclass]}`) // final val=${attval}
 
           if (! the_node.hidden) {
-            console.log(the_node)
             var attval = ( !isUndef(the_node.attributes) && !isUndef(the_node.attributes[daclass]) )? the_node.attributes[daclass] : TW.partialGraph.graph.nodes(TW.nodeIds[j])[daclass];
             TW.partialGraph.graph.nodes(TW.nodeIds[j]).color = randomColorList[ attval ]
             TW.partialGraph.graph.nodes(TW.nodeIds[j]).customAttrs.alt_color = randomColorList[ attval ]

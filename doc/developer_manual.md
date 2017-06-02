@@ -43,18 +43,7 @@ This will still evolve but the main steps for any graph initialization messily u
 
  - `somenode.attributes`: the `attributes` property is always an object
    - any attribute listed in the sourcenode.attributes will be indexed if the TW.scanClusters flag is true
-   - data type and style of processing (for heatmap, or for classes, etc.) should be stipulated in settings
-   - the mapping from attribute values to matching nodes is in TW.Clusters.aType.anAttr.aValue.map
-
-   - finally in GUI we can associate 3 types of coloration
-    - `"gradient"` coloration
-      - available for any attribute that looks like a continuous metric
-    - `"heatmap"` coloration
-      - colors from cold to hot centered on a white "neutral" color
-      - applied for attributes stipulated in settings: eg "`age`" "`growth_rate`"
-    - `"cluster"` coloration for str or num classes like modularity_class, affiliation, etc.
-      - we use contrasted values from colorList
-      - automatically applied for "`cluster_index`" or any name in `TW.conf.nodeClusAtt`
+   - data type and style of processing (for heatmap, or for classes, etc.) should be stipulated in settings (cf. **data facets** below)
 
 
 ## User interaction mecanisms
@@ -87,10 +76,28 @@ For any node `n` the relevant flags at selection are:
 
 #### Facets: node attributes as colors/clusters
 
-At parsing time, every node attributes are indexed by values.
+At parsing time, every node attributes are indexed by values (allows to highlight them from legend, other uses are possible).
 
-This indexes are stored in TW.Clusters and provide an access to sets of nodes that have a given value or range of values.
-  - if discrete attrvalues with <= 30 classes (colorsBy, clustersBy), the storage structure is: `TW.Clusters[nodeType][clusterType].classes.[possibleValue]`
-     (the content is a list of ids with the value `possibleValue`)
-  - if continuous or many possible values (>30) (clustersBy, colorsRelByBins), the storage uses ordered ranges ("bins"):
-     `TW.Clusters[nodeType][clusterType].ranges.[interval]`
+The values can be binned or not and can be linked to different color schemes:
+ - we can associate 3 types of coloration
+   - `"gradient"` coloration
+     - available for any attribute that looks like a continuous metric
+   - `"heatmap"` coloration
+     - colors from cold to hot centered on a white "neutral" color
+     - applied for attributes stipulated in settings: eg "`growth_rate`"
+   - `"cluster"` coloration for str or num classes like modularity_class, affiliation, etc.
+     - we use contrasted values from colorList
+     - automatically applied for "`cluster_index`" or any name in `TW.conf.nodeClusAtt`
+
+ - and also 3 possible binning modes:
+   - 'samerange':  constant intervals between each bin
+   - 'samepop':    constant cardinality inside each class (~ quantiles)
+   - 'off'  :       no binning (each distinct value will be a legend item)
+
+These choices can be specified in the conf `facetOptions` entry.
+
+If an attribute is **not** described in `facetOptions`, it will get `"gradient"` coloration and will be binned iff it has more disctinct values than `maxDiscreteValues`, into `legendBins` intervals.
+
+These indexes are stored in TW.Clusters and provide an access to sets of nodes that have a given value or range of values
+  - the mapping from attribute values to matching nodes is always in TW.Clusters.aType.anAttr.aClass.map
+    (where aClass is the chosen interval or distinct value)

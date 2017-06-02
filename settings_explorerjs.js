@@ -51,38 +51,42 @@ TW.conf = (function(TW){
   // create facets ?
   TWConf.scanClusters = true
 
-  // for continuous attrvalues/colors (cf. clustersBy), how many levels in legend?
-  TWConf.legendsBins = 7 ;
-
-  // max discrete levels in facet legend (if attribute has more distinct values then binning)
-  TWConf.maxDiscreteValues = 40
-
-  // £TODO transform for new specifications
-  // some specific attributes may have other number of levels
-  TWConf.customLegendsBins = {
-    'age': 8,
-    'growth_rate': 12
-  }
-
   // facetOptions: choose here the visual result of your node attributes
+  // -------------------------------------------------------------------
   // 3 possible coloring functions
   //   - cluster   (contrasted colors for attributes describing *classes*)
   //   - gradient  (uniform map from a numeric attribute to red/yellow gradient)
-  //   - heatmap   (from blue to red/brown, centered on a white "neutral" color)
-  // 2 possible binning modes
-  //   - samerange: constant intervals between each bin
-  //   - samepop:   constant cardinality inside each class (~ quantiles)
-  // Cases with no binning: if type is not numeric or if there is less than n vdistinct values
+  //   - heatmap   (from blue to red, centered on a white "neutral" color)
+  // 3 possible binning modes
+  //   - 'samerange':  constant intervals between each bin
+  //   - 'samepop':    constant cardinality inside each class (~ quantiles)
+  //   - 'off'  :       no binning (each distinct value will be a legend item)
   TWConf.facetOptions = {
 
-    // attribute     |    coloring     |  number |    binning
-    //   name        |    function     | of bins |     mode
+    //      gexf       |                 |  custom  |
+    //    attribute    |    coloring     |  number  |    binning
+    //      title      |    function     |  of bins |     mode
     // --------------------------------------------------------------------
-    'numuniform'   : {'col': "gradient", 'n': 3,  'binmode': 'samerange'},
-    'numpareto'    : {'col': "gradient", 'n': 8,  'binmode': 'samepop'  },
-    'intfewvalues' : {'col': "heatmap" , 'n': 4,  'binmode': 'samerange'},
-    'countryuniform':{'col': "cluster" },
+    'age'             : {'col': "gradient", 'n': 2,  'binmode': 'samerange'},
+    'growth_rate'     : {'col': "heatmap",  'n': 11, 'binmode': 'samepop'  },
+    'PageRank'        : {'col': "gradient", 'n': 8,  'binmode': 'samepop'  },
+    'numuniform'      : {'col': "heatmap",  'n': 7,  'binmode': 'samepop'  },
+    'numpareto'       : {'col': "gradient", 'n': 5,  'binmode': 'samerange'},
+    'intfewvalues'    : {'col': "cluster" , 'n': 4,  'binmode': 'samerange'},
+    'Modularity Class': {'col': "cluster",           'binmode': 'off'},  // <== exemple with no binning
+    'countryuniform'  : {'col': "cluster" ,          'binmode': 'off'},
+    'countrypareto'   : {'col': "cluster" ,          'binmode': 'off'},
   }
+
+  // NB  other cases with no binning:
+  //     - if data type is not numeric
+  //     - if there is less than distinct values that facetOptions[attr][n]
+
+
+  // NB for heatmapColoring:
+  //     - you should prefer odd number of bins
+  //     - if the number of bins is even, the 2 classes in the middle get white
+  //     - the maximum number of bins is 24
 
   // other POSS option: display attribute value in label or not ?
 
@@ -125,7 +129,7 @@ TW.conf = (function(TW){
   // -----------------------------
   TWConf.filterSliders = true     // show sliders for nodes/edges subsets
 
-  TWConf.colorsByAtt = true;      // show "Set colors" menu
+  TWConf.clusterColorsAtt = true;      // show "Set colors" menu
 
   TWConf.deselectOnclickStage = true   // click on background remove selection ?
                                        // (except when dragging)
@@ -245,7 +249,7 @@ TW.conf = (function(TW){
     // show verbose console logs...
     logFetchers: false,              // ...about ajax/fetching of graph data
     logParsers: false,               // ...about parsing said data
-    logFacets: true,                // ...about parsing node attribute:value facets
+    logFacets: false,                // ...about parsing node attribute:value facets
     logSettings: false,              // ...about settings at Tina and Sigma init time
     logSelections: false
   }

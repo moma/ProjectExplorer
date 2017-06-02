@@ -11,7 +11,7 @@ function newPopup(url) {
 // = = = = = = = = = = = [ Clusters Plugin ] = = = = = = = = = = = //
 // Execution:    changeGraphAppearanceByFacets( true )
 // It reads scanned node-attributes and prepared legends in TW.Clusters
-//  to add the button in the html with the sigmaUtils.clustersBy(x) listener.
+//  to add the button in the html with the sigmaUtils.gradientColoring(x) listener.
 function changeGraphAppearanceByFacets( manualflag ) {
 
     if ( !isUndef(manualflag) && !TW.conf.colorByAtt ) TW.conf.colorByAtt = manualflag;
@@ -20,16 +20,21 @@ function changeGraphAppearanceByFacets( manualflag ) {
     // for GUI html: if present, rename raw attribute key by a proper label
     var AttsTranslations = {
       'clust_louvain': 'Groupes de voisins, méthode de Louvain',
-      'pageranks': 'Importance dans le réseau, méthode Google',
+      'PageRank': 'Importance dans le réseau, méthode Google',
       'age': 'Date initiale d\'apparition du terme dans le corpus',
       'growth_rate': 'Tendances et oubliés de la semaine',
-      'modularity_class': 'Groupes de voisins, méthode des classes de modularité'
+      'Modularity Class': 'Groupes de voisins, méthode des classes de modularité'
     }
 
 
+    // settings to function name
+    var colorFuns = {
+      'heatmap': "heatmapColoring",
+      'gradient': "gradientColoring",
+      'cluster': "clusterColoring"
+    }
+
     // create colormenu
-
-
     var color_menu_info = '<li><a href="#" onclick="graphResetColor()">By Default</a></li>';
 
     if( $( "#colorgraph-menu" ).length>0 ) {
@@ -43,15 +48,26 @@ function changeGraphAppearanceByFacets( manualflag ) {
 
           // POSS here distinguish [ty][att_s].classes.length and ranges.length
           var att_c = TW.Clusters[ty][att_s].length
-          var the_method = "clustersBy"
 
-          // variants
-          if(att_s.indexOf("clust")>-1||att_s.indexOf("class")>-1) {
-            // for classes and clusters
-            the_method = "colorsBy"
+
+          // coloringFunction
+          var the_method
+
+          // read from user settings
+          if (TW.conf.facetOptions[att_s] && TW.conf.facetOptions[att_s]['col']) {
+            the_method = colorFuns[TW.conf.facetOptions[att_s]['col']]
           }
-          if(att_s == "growth_rate") the_method = "colorsRelByBins"
-          if(att_s == "age") the_method = "colorsRelByBins"
+
+          // default values
+          if (! the_method) {
+            if(att_s.indexOf("clust")>-1||att_s.indexOf("class")>-1) {
+              // for classes and clusters
+              the_method = "clusterColoring"
+            }
+            else {
+              the_method = "gradientColoring"
+            }
+          }
 
           // family label :)
           var lab_att_s ;
@@ -65,30 +81,15 @@ function changeGraphAppearanceByFacets( manualflag ) {
       }
 
       // we also add clust_louvain in all cases
-      color_menu_info += `<li><a href="#" onclick='colorsBy("clust_louvain")'>By Louvain clustering (${TW.partialGraph.graph.nNodes()})</a></li>`
+      color_menu_info += `<li><a href="#" onclick='clusterColoring("clust_louvain")'>By Louvain clustering (${TW.partialGraph.graph.nNodes()})</a></li>`
+
+      // for debug
+      console.warn('color_menu_info', color_menu_info)
 
       $("#colorgraph-menu").html(color_menu_info)
     }
 
-    // // 2) prepare legend slots
-    // console.warn ("classes_per_Att:", classes_per_Att)
-    // let nodeType = getCurrentType()
-    // for (var attr in classes_per_Att) {
-    //   let distinctVals = Object.keys(classes_per_Att[attr])
-    //
-    //   // ------------------------------------------------
-    //   if (distinctVals.length > TW.maxDiscreteValues) {
-    //     TW.Clusters[nodeType][attr] = {'ranges': {}}
-    //     // will be computed at changeColor FIXME could be now...
-    //   }
-    //   else {
-    //     TW.Clusters[nodeType][attr] = {'classes': {}}
-    //     for (var k_cls in distinctVals) {
-    //       TW.Clusters[nodeType][attr].classes[distinctVals[k_cls]] = []
-    //       // will become array of ids per subclass
-    //     }
-    //   }
-    // }
+    // Legend slots were prepared in TW.Clusters
 
 }
 

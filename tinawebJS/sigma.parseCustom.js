@@ -101,8 +101,9 @@ function gexfCheckAttributesMap (someXMLContent) {
     // excerpt from targeted XML:
     // <graph defaultedgetype="undirected" mode="static">
     // |  <attributes class="node" mode="static">
-    // |    <attribute id="0" title="category" type="string"></attribute>
-    // |    <attribute id="1" title="country" type="float"></attribute>
+    // |    <attribute id="0"         title="category" type="string"></attribute>
+    // |    <attribute id="1"         title="country" type="float"></attribute>
+    // |    <attribute id="mod_class" title="Modularity Class" type="float"></attribute>
     // |  </attributes>
     //   (...)
 
@@ -127,7 +128,7 @@ function gexfCheckAttributesMap (someXMLContent) {
                 type = attributeNode.getAttribute('type');
 
                 // ex:    id   = "in-degree"   or "3"  <= can be an int to be resolved into the title
-                // ex:   title = "in-degree"
+                // ex:   title = "in-degree"   or "In Degree" <= can be a label != id
                 // ex:   type  = "string"
 
                 var attribute = {
@@ -294,6 +295,9 @@ function facetsBinning (valuesIdx) {
     for (var at in valuesIdx[cat]) {
       if (TW.conf.debug.logFacets) console.log(`======= ${cat}::${at} =======`)
 
+
+      // console.warn("all raw vals before binning" valuesIdx[cat][at].vals)
+
       // new array of valueclass/interval/bin objects
       facetIdx[cat][at] = []
 
@@ -333,9 +337,11 @@ function facetsBinning (valuesIdx) {
         workingVals = valuesIdx[cat][at].vals.vstr
       }
 
-      console.debug("datatyping:", dataType)
-      console.debug("valuesIdx after datatyping:", valuesIdx[cat][at])
-      console.debug("workingVals after datatyping:", workingVals)
+      if (TW.conf.debug.logFacets)  {
+        console.debug("datatyping:", dataType)
+        // console.debug("valuesIdx after datatyping:", valuesIdx[cat][at])
+        // console.debug("workingVals after datatyping:", workingVals)
+      }
 
       // default options
       let maxDiscreteValues = TW.conf.maxDiscreteValues
@@ -353,14 +359,27 @@ function facetsBinning (valuesIdx) {
           console.warn(`Can't use user-specified number of bins value 0 for attribute ${at}, using TW.conf.legendsBins ${TW.conf.legendsBins} instead`)
           nBins = TW.conf.legendsBins
         }
+        if (TW.conf.debug.logFacets) console.log("TW.conf.facetOptions[at]", TW.conf.facetOptions[at])
+      }
+      else {
+        if (TW.conf.debug.logFacets) console.log("(no specified options in settings for this attribute)")
       }
 
       // POSSible: auto-detect if vtypes ==> color
       // else {
       // }
 
+
+      // if (binningMode != "off") console.warn("maxDiscreteValues from settings", maxDiscreteValues)
+
+      var nDistinctVals = Object.keys(valuesIdx[cat][at].map).length
+
       // if small number of distinct values doesn't need binify
-      if (Object.keys(valuesIdx[cat][at].map).length <= maxDiscreteValues) {
+      if (    dataType == 'str'
+         || (TW.conf.facetOptions[at]                               // case with custom facetOptions
+              && (nDistinctVals <= nBins || binningMode == "off"))
+         || (nDistinctVals <= maxDiscreteValues )           // case with unspecified options
+       ) {
         for (var pval in valuesIdx[cat][at].map) {
 
           var idList = valuesIdx[cat][at].map[pval]
@@ -416,12 +435,18 @@ function facetsBinning (valuesIdx) {
 
         if (TW.conf.debug.logFacets)    console.debug("intervals for", at, legendRefTicks, "(list of minima)")
 
-        // the unique-d array will allow us to group ranges
-        var sortedDistinctVals = Object.keys(valuesIdx[cat][at].map).sort(function(a,b){return Number(a)-Number(b)})
+        // the unique-d array will serve as a todolist with lastCursor and k
+        // won't use keys(map) because of _non_numeric_ entry
+        let uniqueVals = {}
+        for (let k in workingVals) {
+          if (! uniqueVals[workingVals[k]]) {
+            uniqueVals[workingVals[k]] = 1
+          }
+        }
+        var sortedDistinctVals = Object.keys(uniqueVals).sort(function(a,b){return Number(a)-Number(b)})
 
         var nTicks = legendRefTicks.length
 
-        var nDistinctVals = sortedDistinctVals.length
         var lastCursor = 0
 
         // create ticks objects with retrieved full info
@@ -449,11 +474,27 @@ function facetsBinning (valuesIdx) {
             'range':[lowThres, hiThres]
           }
 
+          if (TW.conf.debug.logFacets)  console.debug("...new interval:",[lowThres, hiThres])
+
           // 1) union of idmaps
           for (var k = lastCursor ; k <= nDistinctVals ; k++) {
             var val = Number(sortedDistinctVals[k])
+
+            if (val == '_non_numeric_') {
+              continue
+            }
+            // FIXME why still NaN sometimes ?
+            // NB: however skipping them is enough for work
+            else if (isNaN(val)) {
+              console.debug('skipped undetected NaN ? attribute, lastCursor, k, sortedDistinctVals[k], nodes:', at, lastCursor, k, val, valuesIdx[cat][at].map[sortedDistinctVals[k]])
+              continue
+            }
+
+            // for debug
+            // console.debug('lastCursor, k, val', lastCursor, k, val)
+
             if (val < lowThres) {
-              console.error("mixup !!", val, lowThres, at)
+                console.error("mixup !!", val, lowThres, at)
             }
             else if ((val >= lowThres) && (val < hiThres)) {
               if (!valuesIdx[cat][at].map[val]) {
@@ -470,8 +511,12 @@ function facetsBinning (valuesIdx) {
             // we're over the interval upper bound
             else if (val >= hiThres) {
 
+              // console.log("over hiThres", val, hiThres)
+
               // normal case
               if (binningMode != 'samerange' || l != nTicks-1 ) {
+                // console.log("...moving on to next interval")
+
                 // we just need to remember where we were for next interval
                 lastCursor = k
                 break
@@ -479,6 +524,8 @@ function facetsBinning (valuesIdx) {
 
               // samerange && last interval case: inclusive last interval upper bound
               else {
+                // console.warn("last interval for samepop")
+
                 for (var j in valuesIdx[cat][at].map[val]) {
                   newTick.nids.push(valuesIdx[cat][at].map[val][j])
                 }
@@ -878,6 +925,11 @@ function updateValueFacets(facetIdx, aNode) {
 
   if (!facetIdx[aNode.type])      facetIdx[aNode.type]={}
   for (var at in aNode.attributes) {
+
+    // we're not interested in node type/category at this point
+    if (at == 'category')
+      continue
+
     let val = aNode.attributes[at]
 
     if (!facetIdx[aNode.type][at])  facetIdx[aNode.type][at]={'vals':{'vstr':[], 'vnum':[]},'map':{}}
@@ -1106,11 +1158,13 @@ function dictfyJSON( data , categories ) {
     //   }
     // }
 
-    TW.colorList.sort(function(){ return Math.random()-0.5; });
+
+    // £TODO this could be a call to clusterColoring()
+    TW.gui.colorList.sort(function(){ return Math.random()-0.5; });
     for (var i in nodes ){
         if (nodes[i].color=="#FFFFFF") {
             var attval = ( isUndef(nodes[i].attributes) || isUndef(nodes[i].attributes["clust_default"]) )? 0 : nodes[i].attributes["clust_default"] ;
-            nodes[i].color = TW.colorList[ attval ]
+            nodes[i].color = TW.gui.colorList[ attval ]
         }
     }
 
