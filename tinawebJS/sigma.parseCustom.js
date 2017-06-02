@@ -292,21 +292,50 @@ function facetsBinning (valuesIdx) {
     if (!facetIdx[cat])    facetIdx[cat] = {}
 
     for (var at in valuesIdx[cat]) {
-      // console.log(`======= ${cat}::${at} =======`)
+      if (TW.conf.debug.logFacets) console.log(`======= ${cat}::${at} =======`)
 
       // new array of valueclass/interval/bin objects
       facetIdx[cat][at] = []
 
-      // POSSible: auto-detect if vtypes ==> condition
 
+      // the full array of values of the accepted type
+      let workingVals = []
 
+      // the observed pre-eminent data type
+      let dataType = ''
 
-      // diagnosed data type replacing previous Atts_2_Exclude (more polyvalent)
-      let dataType = 'num'
-      if (valuesIdx[cat][at].vtypes.vnum = 0) {
-        // FIXME condition should be vnum << vstr instead of vnum = 0
-        dataType = 'str'
+      // if (less than 2% str) => type is mostly num
+      //                                  ----------
+      if (valuesIdx[cat][at].vals.vstr.length * 50 < valuesIdx[cat][at].vals.vnum.length) {
+        dataType = 'num'
+
+        workingVals = valuesIdx[cat][at].vals.vnum
+
+        // here we just move the str values to isolate them in one legend item
+        valuesIdx[cat][at].map['_non_numeric_'] = []
+        for (let k in valuesIdx[cat][at].vals.vstr) {
+          let unusualValue = valuesIdx[cat][at].vals.vstr[k]
+
+          if (TW.conf.debug.logFacets) console.log(`pruning unusual value ${unusualValue} from legends`)
+
+          for (let j in valuesIdx[cat][at].map[unusualValue]) {
+            let nanNid = valuesIdx[cat][at].map[unusualValue][j]
+            valuesIdx[cat][at].map['_non_numeric_'].push(nanNid)
+          }
+          delete valuesIdx[cat][at].map[unusualValue]
+        }
+
       }
+      // type str is the catchall type
+      // --------
+      else {
+        dataType = 'str'
+        workingVals = valuesIdx[cat][at].vals.vstr
+      }
+
+      console.debug("datatyping:", dataType)
+      console.debug("valuesIdx after datatyping:", valuesIdx[cat][at])
+      console.debug("workingVals after datatyping:", workingVals)
 
       // default options
       let maxDiscreteValues = TW.conf.maxDiscreteValues
@@ -326,6 +355,10 @@ function facetsBinning (valuesIdx) {
         }
       }
 
+      // POSSible: auto-detect if vtypes ==> color
+      // else {
+      // }
+
       // if small number of distinct values doesn't need binify
       if (Object.keys(valuesIdx[cat][at].map).length <= maxDiscreteValues) {
         for (var pval in valuesIdx[cat][at].map) {
@@ -342,12 +375,12 @@ function facetsBinning (valuesIdx) {
           })
         }
       }
-      // if binify
+      // (if many values && binify)
       else if (dataType == 'num') {
-        var len = valuesIdx[cat][at].vals.length
+        var len = workingVals.length
 
         // sort out vals
-        valuesIdx[cat][at].vals.sort(function (a,b) {
+        workingVals.sort(function (a,b) {
                return Number(a)-Number(b)
         })
 
@@ -359,8 +392,8 @@ function facetsBinning (valuesIdx) {
 
         if (binningMode == 'samerange') {
           // minimax
-          let vMin = valuesIdx[cat][at].vals[0]
-          let vMax = valuesIdx[cat][at].vals.slice(-1)[0]
+          let vMin = workingVals[0]
+          let vMax = workingVals.slice(-1)[0]
           lastUpperBound = vMax
 
           // same interval each time
@@ -377,7 +410,7 @@ function facetsBinning (valuesIdx) {
           // create tick thresholds
           for (var l=0 ; l < nBins ; l++) {
             let nthVal = Math.floor(len * l / nBins)
-            legendRefTicks.push(valuesIdx[cat][at].vals[nthVal])
+            legendRefTicks.push(workingVals[nthVal])
           }
         }
 
@@ -481,6 +514,12 @@ function facetsBinning (valuesIdx) {
           }
         }
 
+        // finally add the 'trash' category with any non_numeric vals
+        facetIdx[cat][at].push({
+          'labl':'_non_numeric_',
+          'fullLabl':'`${cat}||${at}||_non_numeric_',
+          'nids': valuesIdx[cat][at].map['_non_numeric_'],
+        })
       }
     }
 
@@ -841,7 +880,7 @@ function updateValueFacets(facetIdx, aNode) {
   for (var at in aNode.attributes) {
     let val = aNode.attributes[at]
 
-    if (!facetIdx[aNode.type][at])  facetIdx[aNode.type][at]={'vals':[],'map':{}, 'vtypes': {'vstr':0, 'vnum':0}}
+    if (!facetIdx[aNode.type][at])  facetIdx[aNode.type][at]={'vals':{'vstr':[], 'vnum':[]},'map':{}}
 
     // shortcut
     var indx = facetIdx[aNode.type][at]
@@ -849,19 +888,20 @@ function updateValueFacets(facetIdx, aNode) {
     // determine observed type of this single value
     let castVal = Number(val)
 
-    // this discovered datatype will be a condition (no bins if not numeric)
+    // this discovered datatype will be a condition (no bins if not mostly numeric)
+    let dtype = ''
     if (isNaN(castVal)) {
-      indx.vtypes["vstr"]++
+      dtype = 'vstr'
     }
     else {
-      indx.vtypes["vnum"]++
+      dtype = 'vnum'
       val = castVal           // we keep it as number
     }
 
     if (!indx.map[val]) indx.map[val] = []
 
-    indx.vals.push(val)               // for ordered scale
-    indx.map[val].push(aNode.id)      // inverted index
+    indx.vals[dtype].push(val)              // for ordered scale
+    indx.map[val].push(aNode.id)            // inverted index
 
 
     // POSSIBLE with the discovered datatype

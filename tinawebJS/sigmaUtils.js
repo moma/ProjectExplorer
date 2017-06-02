@@ -787,10 +787,16 @@ function clustersBy(daclass) {
     var themult = Math.pow(10,min_pow);
     // console.log('themult', themult)
 
+
+    // £TODO should use TW.Clusters here
     for(var j in TW.nodeIds) {
         var the_node = TW.Nodes[ TW.nodeIds[j] ]
         var attval = the_node.attributes[daclass];
         var attnumber = Number(attval);
+        if (isNaN(attnumber)) {
+          continue;
+        }
+
         var round_number = Math.round(  attnumber*themult ) ;
 
         NodeID_Val[TW.nodeIds[j]] = { "round":round_number , "real":attnumber };
