@@ -417,37 +417,27 @@ function htmlfied_nodesatts(elems){
         var id=elems[i]
         var node = TW.Nodes[id]
 
-        if (TW.mainfile) {
-            var addname = (node.attributes["name"])?node.attributes["name"]:"";
-            var google='<a target="_blank" href="http://www.google.com/search?q='+addname+"+"+node.label.replace(" ","+")+'">';
-            information += '<li><b>'+ google + node.label + '</a></b></li>';
-            for (var i in node.attributes) {
-                if(i=="cluster_label")
-                    information += '<li>&nbsp;&nbsp;'+i +" : " + node.attributes[i] + '</li>';
-            }
-            socnodes.push(information);
-        } else {
-            if(node.type==TW.conf.catSoc){
-                information += '<li><b>' + node.label + '</b></li>';
-                if(node.htmlCont==""){
-                    if (!isUndef(node.level)) {
-                        information += '<li>' + node.level + '</li>';
-                    }
-                } else {
-                    information += '<li>' + $("<div/>").html(node.htmlCont).text() + '</li>';
+        if(node.type==TW.conf.catSoc){
+            information += '<li><b>' + node.label + '</b></li>';
+            if(node.htmlCont==""){
+                if (!isUndef(node.level)) {
+                    information += '<li>' + node.level + '</li>';
                 }
-                socnodes.push(information)
+            } else {
+                information += '<li>' + $("<div/>").html(node.htmlCont).text() + '</li>';
             }
-
-            if(node.type==TW.conf.catSem){
-                information += '<li><b>' + node.label + '</b></li>';
-                let google='<a href=http://www.google.com/#hl=en&source=hp&q=%20'+node.label.replace(" ","+")+'%20><img src="'+'img/google.png"></img></a>';
-                let wiki = '<a href=http://en.wikipedia.org/wiki/'+node.label.replace(" ","_")+'><img src="'+'img/wikipedia.png"></img></a>';
-                let flickr= '<a href=http://www.flickr.com/search/?w=all&q='+node.label.replace(" ","+")+'><img src="'+'img/flickr.png"></img></a>';
-                information += '<li>'+google+"&nbsp;"+wiki+"&nbsp;"+flickr+'</li><br>';
-                semnodes.push(information)
-            }
+            socnodes.push(information)
         }
+
+        if(node.type==TW.conf.catSem){
+            information += '<li><b>' + node.label + '</b></li>';
+            let google='<a href=http://www.google.com/#hl=en&source=hp&q=%20'+node.label.replace(" ","+")+'%20><img src="'+'img/google.png"></img></a>';
+            let wiki = '<a href=http://en.wikipedia.org/wiki/'+node.label.replace(" ","_")+'><img src="'+'img/wikipedia.png"></img></a>';
+            let flickr= '<a href=http://www.flickr.com/search/?w=all&q='+node.label.replace(" ","+")+'><img src="'+'img/flickr.png"></img></a>';
+            information += '<li>'+google+"&nbsp;"+wiki+"&nbsp;"+flickr+'</li><br>';
+            semnodes.push(information)
+        }
+
     }
     return socnodes.concat(semnodes)
 }
