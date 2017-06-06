@@ -197,14 +197,14 @@ function changeType() {
 
 
     var level = present.level;
-    var sels = present.selections
+    var sels = present.selectionNids
     var t0Activetypes = present.activetypes;
     var t0ActivetypesKey = t0Activetypes.map(Number).join("|")
 
 
-    console.debug("CHANGE TYPE, present.selections", present.selections)
+    // console.debug("CHANGE TYPE, present.selections", present.selectionNids)
 
-    var selsbackup = present.selections.slice();
+    var selsbackup = present.selectionNids.slice();
 
 
     // type "grammar"
@@ -359,7 +359,7 @@ function changeType() {
         str_nextState = nextState.map(Number).join("|")
         var sumNextState = nextState.map(Number).reduce(function(a, b){return a+b;})
 
-        // [ ChangeType: incremental selection ]
+        // [ ChangeType: incremental selection ;]
         if(sumCats==1 && sumNextState<2) {
 
             var indexCat = str_binSumCats;//(level)? t1ActivetypesKey : str_binSumCats ;
@@ -385,8 +385,8 @@ function changeType() {
             // output: newsels=[opposite-neighs]
         } // [ / ChangeType: incremental selection ]
 
-        // console.log("new virtually selected nodes:")
-        // console.log(sels)
+        if (TW.conf.debug.logSelections)
+          console.log("new virtually selected nodes:", sels)
 
         var selDict={}
         for(var i in sels) // useful for case: (sumNextState==2)
@@ -434,25 +434,26 @@ function changeType() {
 
 
         // to recreate the selection in the new type graph
-        // TW.instance.selNgn.MultipleSelection2({
-        //             nodesDict:nodes_2_colour,
-        //             edgesDict:edges_2_colour
-        //         });
-        TW.instance.selNgn.MultipleSelection2({ nodes: sels });
+        TW.instance.selNgn.MultipleSelection2({
+                    nodes: sels,
+                    nodesDict:nodes_2_colour,
+                    edgesDict:edges_2_colour
+                });
         TW.gui.selectionActive=true;
     }
 
+    // £TODO this should be done by setState()
     TW.states[avantlastpos] = {};
     TW.states[avantlastpos].LouvainFait = false;
     TW.states[avantlastpos].level = present.level;
-    TW.states[avantlastpos].selections = selsbackup;
+    TW.states[avantlastpos].selectionNids = selsbackup;
     TW.states[avantlastpos].activetypes = present.activetypes;
-    TW.states[avantlastpos].opposites = present.opposites;
-
+    // possible: integrated highlighted opposite- and same-side neighbours from MS2
+    // (var used to exist but wasn't filled and used consistently)
     TW.setState({
         activetypes: nextState,
         level: level,
-        sels: Object.keys(selections),
+        sels: sels,
         oppos: []
     })
 
@@ -492,8 +493,12 @@ function changeLevel() {
       var avantlastpos = lastpos-1;
 
       var level = present.level;
-      var sels = present.selections;//[144, 384, 543]//TW.states.selections;
+      var sels = present.selectionNids ;//[144, 384, 543]//TW.states[last].selectionNids;
 
+      let selsChecker = {}
+      for (let i in sels) {
+        selsChecker[sels[i]] = true
+      }
 
       // type "grammar"
       //     used to distinguish types in TW.Relations
@@ -526,14 +531,13 @@ function changeLevel() {
                   nodes_2_colour[t]=false;
                   edges_2_colour[s+";"+t]=true;
                   edges_2_colour[t+";"+s]=true;
-                  if( !selections[t]  )
+                  if( !selsChecker[t]  )
                       voisinage[ t ] = true;
               }
           }
       }
       for(var i in sels)
           nodes_2_colour[sels[i]]=true;
-
 
 
       var futurelevel = []
@@ -590,18 +594,15 @@ function changeLevel() {
       }
 
       // console.log("enviroment changeLevel nodes_2_colour", nodes_2_colour)
-
-
       TW.states[avantlastpos] = {};
       TW.states[avantlastpos].level = present.level;
-      TW.states[avantlastpos].selections = present.selections;
       TW.states[avantlastpos].activetypes = present.activetypes;
-      TW.states[avantlastpos].opposites = present.opposites;
+      TW.states[avantlastpos].selectionNids = present.selectionNids;
 
       TW.setState({
           activetypes: present.activetypes,
           level: futurelevel,
-          sels: Object.keys(selections),
+          sels: sels,
           oppos: []
       })
 

@@ -17,10 +17,9 @@ TW.catDict = {};
 
 // SystemState is a summary of current situation
 TW.SystemState = {}
+TW.SystemState.activetypes = []           // <== filled from TW.categories
 TW.SystemState.level = true;
-TW.SystemState.activetypes = [] // will be filled from TW.categories
-TW.SystemState.selections = [];
-TW.SystemState.opposites = [];
+TW.SystemState.selectionNids = [];        // <== current selection !!
 TW.SystemState.LouvainFait = false;
 
 // states[] is an array of SystemStates for future CTRL+Z or usage track
@@ -28,21 +27,13 @@ TW.states = []
 TW.states[0] = false;
 TW.states[1] = TW.SystemState
 
-
-// £TODO should become TW.* or TW.SystemState.*
-var selections = [];
-var deselections={};
-var opossites = {};
-var opos=[];
-var oposMAX;
-
-var matches = [];
-
+// -------------------------------8<--------------
+// £TODO remove deprecated here and in parseCustom
 var nodes1 = {};
 var nodes2 = {};
 var bipartiteD2N = {};
 var bipartiteN2D = {};
-
+// -------------------------------8<--------------
 
 //  ======== [   what to do at start ] ========= //
 console.log("Starting TWJS")

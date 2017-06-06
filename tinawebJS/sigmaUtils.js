@@ -687,29 +687,20 @@ function exactfind(label) {
 
 
 function getNodeLabels(elems){
-
     var labelss=[]
-    for(var i in elems){
-
-        console.debug(i, elems[i])
-
-        var id=(!isUndef(elems[i].id))?elems[i].id:i
-        labelss.push(TW.Nodes[id].label)
+    for(let i in elems){
+        labelss.push(TW.Nodes[elems[i]].label)
     }
     return labelss
 }
 
-function getNodeIDs(elems){
-    return Object.keys(elems)
-}
-
-
 function getSelections(){
-        let params=[];
-        for(var i in selections){
-            params.push(TW.Nodes[i].label);
+        let selLabels=[];
+        for(let i in TW.SystemState.selectionNids){
+            let nid = TW.SystemState.selectionNids[i]
+            selLabels.push(TW.Nodes[nid].label);
         }
-        return params;
+        return selLabels;
 }
 
 

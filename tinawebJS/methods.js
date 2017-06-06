@@ -12,7 +12,7 @@ TW.setState = function( args ) {
     var present = TW.states.slice(-1)[0]; // Last
     var past = TW.states.slice(-2)[0] // avant Last
 
-    console.log("setState args: ", args);
+    if (TW.conf.debug.logSelections) console.log("setState args: ", args);
 
     if(!isUndef(args.activetypes)) {
 
@@ -28,15 +28,14 @@ TW.setState = function( args ) {
     // console.log("printing the typesKey:", typesKey)
 
     if(!isUndef(args.level)) present.level = args.level;
-    if(!isUndef(args.sels))  present.selections = args.sels;
-    if(!isUndef(args.oppos)) present.opposites = args.oppos;
+    if(!isUndef(args.sels))  present.selectionNids = args.sels;
     present.LouvainFait = false;
 
     // change level needs a selection
     LevelButtonDisable(false);  // £TODO rename toggleLevelButton
     if(   present.level
-       && present.selections
-       && present.selections.length==0)
+       && present.selectionNids
+       && present.selectionNids.length==0)
         LevelButtonDisable(true);
 
     // case to go back
@@ -88,12 +87,9 @@ function cancelSelection (fromTagCloud, settings) {
     if (!settings) settings = {}
 
     highlightSelectedNodes(false); //Unselect the selected ones :D
-    opossites = [];
-    selections = [];
-    //selections.length = 0;
-    selections.splice(0, selections.length);
 
-    TW.states.slice(-1)[0].selections=[]
+    // clear the current state's selection and neighbors arrays
+    TW.SystemState.selectionNids.splice(0, TW.SystemState.selectionNids.length)
 
     // global flag
     TW.gui.selectionActive = false
@@ -142,19 +138,6 @@ function cancelSelection (fromTagCloud, settings) {
     // send "eraseNodeSet" event
     $('#searchinput').trigger("tw:eraseNodeSet");
     // (signal for plugins that any selection behavior is finished)
-
-    for(var nid in deselections){
-      let n = TW.partialGraph.graph.nodes(nid)
-        if( !isUndef(n) ) {
-            n.customAttrs.forceLabel = false;
-            n.customAttrs.highlight = false;
-            n.customAttrs.grey=false
-            // like old graphResetColor but now rather graphResetFlags...
-            n.active=false;
-        }
-    }
-
-    deselections={};
 
     if(TW.states.slice(-1)[0].level)
         LevelButtonDisable(true);
@@ -213,11 +196,10 @@ function swActual(aNodetype) {
 
 function highlightSelectedNodes(flag){
     if (TW.conf.debug.logSelections)
-      console.log("\t***methods.js:highlightSelectedNodes(flag)"+flag+" selEmpty:"+is_empty(selections))
-    if(!is_empty(selections)){
-        for(var i in selections) {
-          TW.partialGraph.graph.nodes(i).active = flag
-        }
+      console.log("\t***methods.js:highlightSelectedNodes(flag)"+flag+" sel:"+TW.SystemState.selectionNids)
+    for(let i in TW.SystemState.selectionNids) {
+      let nid = TW.SystemState.selectionNids[i]
+      TW.partialGraph.graph.nodes(nid).active = flag
     }
 }
 
@@ -425,6 +407,9 @@ function htmlfied_nodesatts(elems){
 
     var socnodes=[]
     var semnodes=[]
+
+    if (TW.conf.debug.logSelections) console.log("htmlfied_nodesatts", elems)
+
     for(var i in elems) {
 
         var information=[]
@@ -516,21 +501,6 @@ function htmlProportionalLabels(elems , limit, selectableFlag) {
 //considering complete graphs case! <= maybe i should mv it
 function updateRelatedNodesPanel( sels , same, oppos ) {
 
-    // debug
-    // neiLabls = []
-    // for (var l in same) {
-    //   var neiId = same[l].key
-    //   if (TW.Nodes[neiId]) {
-    //
-    //     neiLabls.push(TW.Nodes[neiId].label)
-    //   }
-    //   else {
-    //     console.warn("missing entry for neiId", neiId)
-    //   }
-    // }
-    // console.log("updateRelatedNodesPanel, same:",neiLabls)
-
-
     var namesDIV=''
     var alterNodesDIV=''
     var informationDIV=''
@@ -548,7 +518,7 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
       alterNodesDIV+= '</div>';
     }
 
-    if(getNodeIDs(sels).length>0) {
+    if(sels.length>0) {
         sameNodesDIV+='<div id="sameNodes">';//tagcloud
         var sameNeighTagcloudHtml = htmlProportionalLabels( same , TW.conf.tagcloudSameLimit, true )
         sameNodesDIV+= (sameNeighTagcloudHtml!=false) ? sameNeighTagcloudHtml.join("\n")  : "No related items.";
@@ -558,7 +528,7 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
         // getTopPapers("semantic");
 
     informationDIV += '<br><h4>Information:</h4><ul>';
-    informationDIV += htmlfied_nodesatts( getNodeIDs(sels) ).join("<br>\n")
+    informationDIV += htmlfied_nodesatts( sels ).join("<br>\n")
     informationDIV += '</ul><br>';
 
     //using the readmore.js
@@ -585,9 +555,11 @@ function printStates() {
 	console.log("\t\t\t\tswActual: "+swclickActual+" |  swPrev: "+swclickPrev)
 	console.log("\t\t\t\tNOW: "+NOW+" |  PAST: "+PAST)
 	console.log("\t\t\t\tselections: ")
-	console.log(Object.keys(selections))
-	console.log("\t\t\t\topposites: ")
-	console.log(Object.keys(opossites))
+	console.log(TW.SystemState.selectionNids)
+	console.log("\t\t\t\topposites neighbors: ")
+	console.log(TW.SystemState.opposideSortdNeighs)
+	console.log("\t\t\t\tsame neighbors: ")
+	console.log(TW.SystemState.samesideSortdNeighs)
 	console.log("\t\t\t\t------------------------------------")
 }
 
@@ -608,6 +580,11 @@ function graphTagCloudElem(nodes) {
     var ndsids=[]
     if(! $.isArray(nodes)) ndsids.push(nodes);
     else ndsids=nodes;
+
+    let newselsChecker = {}
+    for (let i in ndsids) {
+      newselsChecker[ndsids[i]] = true
+    }
 
     var vars = []
 
@@ -635,7 +612,7 @@ function graphTagCloudElem(nodes) {
 
                 edges_2_colour[nid+";"+t]=true;
                 edges_2_colour[t+";"+s]=true;
-                if( !selections[t]  )
+                if( !newselsChecker[t]  )
                     voisinage[ Number(t) ] = true;
             }
         }
@@ -644,7 +621,7 @@ function graphTagCloudElem(nodes) {
     }
 
     // old strategy recreated a graph with the selected and its neighbors:
-    //  we know do it only if type is different
+    //  we now do it only if type is different
     if (nextTypesKey != getActivetypesKey()) {
       TW.partialGraph.graph.clear();
       for(var nid in nodes_2_colour)
@@ -657,7 +634,7 @@ function graphTagCloudElem(nodes) {
       for(var i=0;i<voisinage.length;i++) {
           for(var j=1;j<voisinage.length;j++) {
               if( voisinage[i]!=voisinage[j] ) {
-                  // console.log( "\t" + voisinage[i] + " vs " + voisinage[j] )
+                  console.log( "\t" + voisinage[i] + " vs " + voisinage[j] )
                   add1Elem( voisinage[i]+";"+voisinage[j] )
               }
           }
@@ -682,17 +659,15 @@ function graphTagCloudElem(nodes) {
     // £TODO setState should be doing this shifting
     var avantlastpos = lastpos-1;
     TW.states[avantlastpos] = {};
-    TW.states[avantlastpos].selections = present.selections;
+    TW.states[avantlastpos].selectionNids = present.selectionNids;
     TW.states[avantlastpos].level = present.level;
     TW.states[avantlastpos].activetypes = present.activetypes;
-    TW.states[avantlastpos].opposites = present.opposites;
 
     // recording the new state
     TW.setState({
         activetypes: nextTypes,
         level: false,  // forced macro
-        sels: Object.keys(selections),
-        oppos: []
+        sels: present.selectionNids
     })
 
     TW.partialGraph.camera.goTo({x:0, y:0, ratio:0.9, angle: 0})

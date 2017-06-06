@@ -505,33 +505,6 @@ function RenderTweet( tweet) {
     return html;
 }
 
-//FOR UNI-PARTITE
-// function selectionUni(currentNode){
-//     console.log("\tin selectionUni:"+currentNode.id);
-//     if(TW.gui.checkBox==false && TW.gui.circleSize==0) {
-//         highlightSelectedNodes(false);
-//         opossites = [];
-//         selections = [];
-//     }
-//
-//     if((typeof selections[currentNode.id])=="undefined"){
-//         selections[currentNode.id] = 1;
-//         currentNode.active=true;
-//     }
-//     else {
-//         delete selections[currentNode.id];
-//         currentNode.active=false;
-//     }
-//     //highlightOpossites(nodes1[currentNode.id].neighbours);
-//     //        currentNode.color = currentNode.customAttrs['true_color'];
-//     //        currentNode.customAttrs['grey'] = 0;
-//     //
-//     //
-//
-//
-//     TW.partialGraph.zoomTo(TW.partialGraph._core.width / 2, TW.partialGraph._core.height / 2, 0.8);
-//     TW.partialGraph.render();
-// }
 
 //JUST ADEME
 function camaraButton(){

@@ -6,20 +6,19 @@ function SelectionEngine() {
     // creates the union of prevsels and currsels, if addvalue
     this.SelectorEngine = function( args ) {
 
-        console.log("addvalue, prevsels, currsels", args)
+        // console.log("addvalue, prevsels, currsels", args)
 
         if (!args)                 args = {}
         if (!args.addvalue)        args.addvalue = false
-        if (!args.prevsels)        args.prevsels = {}      // FIXME easier with array like currsels.concat(buffer)
+        if (!args.prevsels)        args.prevsels = []
         if (!args.currsels)        args.currsels = []
 
         var targeted = []
-        var buffer = Object.keys(args.prevsels);
 
         // currsels = bunch of nodes from a click in the map
         if(args.addvalue) {
             // FOR SIMPLE UNIQUE UNION
-            targeted = args.currsels.concat(buffer.filter(function (item) {
+            targeted = args.currsels.concat(args.prevsels.filter(function (item) {
                 return args.currsels.indexOf(item) < 0;
             }));
         } else targeted = args.currsels;
@@ -27,34 +26,34 @@ function SelectionEngine() {
         if(targeted.length==0) return [];
 
         // ------------ FOR SETWISE COMPLEMENT ---------------------->8---------
-        // if(buffer.length>0) {
-        //     if(JSON.stringify(buffer)==JSON.stringify(targeted)) {
+        // if(args.prevsels.length>0) {
+        //     if(JSON.stringify(args.prevsels)==JSON.stringify(targeted)) {
         //         // this is just effective for Add[ ] ...
         //         // If previous selection is equal to the current one, you've nothing :D
         //         cancelSelection(false);
         //         return [];
         //     }
-        //     var inter = this.intersect_safe(buffer,targeted)
+        //     var inter = this.intersect_safe(args.prevsels,targeted)
         //     if(inter.length>0) {
         //         var blacklist = {} , whitelist = {};
         //         for(var k in inter) blacklist[inter[k]]=true;
-        //         for(var k in buffer){
-        //             let n = buffer[k]
-        //             if(!blacklist[n]) {
-        //                 whitelist[n] = true;
+        //         for(var k in args.prevsels){
+        //             let nid = args.prevsels[k]
+        //             if(!blacklist[nid]) {
+        //                 whitelist[nid] = true;
         //             }
         //         }
         //         for(var k in targeted){
-        //             let n = targeted[k]
-        //             if(!blacklist[n]) {
-        //                 whitelist[n] = true;
+        //             let nid = targeted[k]
+        //             if(!blacklist[nid]) {
+        //                 whitelist[nid] = true;
         //             }
         //         }
         //         targeted = Object.keys(whitelist);
         //     } else {// inter = 0 ==> click in other portion of the graph (!= current selection)
         //         // Union!
         //         if(args.addvalue) {
-        //             targeted = currsels.concat(buffer.filter(function (item) {
+        //             targeted = currsels.concat(args.prevsels.filter(function (item) {
         //                 return currsels.indexOf(item) < 0;
         //             }));
         //         }
@@ -70,7 +69,7 @@ function SelectionEngine() {
     // we assume string is normalized
     this.search_n_select = function(string) {
 
-        let previousSelections = selections
+        let previousSelections = TW.SystemState.selectionNids
 
         cancelSelection(false, {norender:true});
 
@@ -189,7 +188,7 @@ function SelectionEngine() {
         var nodes_2_colour = args.nodesDict
         var edges_2_colour = args.edgesDict
 
-        selections = {}
+        let selections = {}
 
 
         // targeted arg 'nodes' can be nid array or single nid
@@ -239,12 +238,12 @@ function SelectionEngine() {
                 // we make the selected (source) node active too
                 nodes_2_colour[s]=true;
 
-                // update GLOBAL selections dict
-                // (FIXME it's widely used but TW.SystemStates.selections has the same)
+                // update local selections dict
                 selections[ndsids[i]]=1;
             }
         }
 
+        // FIXME: could be done in previous loop
         for(var nid in nodes_2_colour) {
             if(nid) {
                 n = TW.partialGraph.graph.nodes(nid)
@@ -255,7 +254,6 @@ function SelectionEngine() {
                     // it's a selected node
                     if(nodes_2_colour[nid]) {
                         n.active = true;
-                        // selections[nid]=1
                     }
                     // it's a neighbor
                     else {
@@ -279,30 +277,32 @@ function SelectionEngine() {
         // show the button to remove selection
         $("#unselectbutton").show() ;
 
-        var the_new_sels = Object.keys(selections)
 
-        if (the_new_sels.length && the_new_sels[0] == 'NaN') {
+        // £TODO: all this should be done in one line via TW.setState or ref
+        TW.SystemState.selectionNids = Object.keys(selections)
+        TW.states.slice(-1)[0].selectionNids = TW.SystemState.selectionNids;
+        TW.setState( { sels: TW.SystemState.selectionNids} )
+
+        if (TW.SystemState.selectionNids.length
+             && TW.SystemState.selectionNids[0] == 'NaN') {
           console.error("NaN selection key error")
         }
 
-        TW.states.slice(-1)[0].selections = the_new_sels;
-        TW.setState( { sels: the_new_sels} )
-
-        // alert("MultipleSelection2=======\nthe_new_sels:" + JSON.stringify(the_new_sels))
+        // alert("MultipleSelection2=======\nthe_new_sels:" + JSON.stringify(TW.SystemState.selectionNids))
 
         // we send our "gotNodeSet" event
         // (signal for plugins that a search-selection was done or a new hand picked selection)
         $('#searchinput').trigger({
             type: "tw:gotNodeSet",
             q: $("#searchinput").val(),
-            nodeIds: the_new_sels
+            nodeIds: TW.SystemState.selectionNids
         });
         // console.log("Event [gotNodeSet] sent from Tinaweb MultipleSelection2")
 
         // neighbors of the opposite type
         if(TW.Relations["1|1"]) {
-            for(var s in the_new_sels) {
-                var bipaNeighs = TW.Relations["1|1"][the_new_sels[s]];
+            for(var s in TW.SystemState.selectionNids) {
+                var bipaNeighs = TW.Relations["1|1"][TW.SystemState.selectionNids[s]];
 
                 for(var n in bipaNeighs) {
                     if (typeof oppositeSideNeighbors[bipaNeighs[n]] == "undefined")
@@ -314,16 +314,8 @@ function SelectionEngine() {
             }
         }
 
-        // debug
-        // var neiLabls = []
-        // for (var neiId in sameSideNeighbors) {
-        //   neiLabls.push(TW.Nodes[neiId].label)
-        // }
-        // console.log('sameSideNeighbors labels', neiLabls)
-
-        // NB doesn't only sort by value but also
-        // rewrites dict[id]: val
-        //   as array[order]: {key:id, value:val}
+        // Sort by descending value
+        //   and rewrites dict[id]: val as array[order]: {key:id, value:val}
         var oppos = ArraySortByValue(oppositeSideNeighbors, function(a,b){
             return b-a
         });
@@ -332,7 +324,7 @@ function SelectionEngine() {
         });
 
         if (TW.conf.debug.logSelections) {
-          console.debug('selections', selections)
+          console.debug('TW.SystemState.selectionNids', TW.SystemState.selectionNids)
           console.debug('oppos', oppos)
           console.debug('same', same)
         }
@@ -342,15 +334,12 @@ function SelectionEngine() {
 
         TW.partialGraph.render();
 
-        updateRelatedNodesPanel( selections , same, oppos );
+        updateRelatedNodesPanel( TW.SystemState.selectionNids , same, oppos )
 
         if (TW.conf.debug.logSelections) {
           var tMS2_fin = performance.now()
           console.log("end MultipleSelection2, own time:", tMS2_fin-tMS2_deb)
         }
-
-
-
     }
 };
 
@@ -838,16 +827,17 @@ var TinaWebJS = function ( sigmacanvas ) {
             camCoords.y
           )
 
-          // 1) clear previous while keeping its list (useful iff 'Add' TW.gui.checkBox)
-          var previousSelection = selections
-          cancelSelection(false)
-
-          // 2) show selection + do all related effects
+          // 1) determine new selection
           var targeted = selInst.SelectorEngine( {
                               addvalue:TW.gui.checkBox,
                               currsels:circleNodes,
-                              prevsels:previousSelection
+                              prevsels:TW.SystemState.selectionNids
                           } )
+
+          // 2) clear previous selection
+          cancelSelection(false)
+
+          // 3) show new selection + do all related effects
           if(targeted.length>0) {
             selInst.MultipleSelection2( {nodes:targeted} )
           }
@@ -862,16 +852,16 @@ var TinaWebJS = function ( sigmacanvas ) {
         // new sigma.js gives easy access to clicked node!
         var theNodeId = e.data.node.id
 
-        // we keep the global selections and then clear it and all its effects
-        var previousSelection = selections
-        cancelSelection(false, {norender:true}); // no need to render before MS2
-
         if (TW.gui.circleSize == 0) {
+          // 1)
           var targeted = selInst.SelectorEngine( {
                               addvalue:TW.gui.checkBox,
                               currsels:[theNodeId],
-                              prevsels:previousSelection
+                              prevsels: TW.SystemState.selectionNids
                           } )
+          // 2)
+          cancelSelection(false, {norender:true}); // no need to render before MS2
+          // 3)
           if(targeted.length>0) {
             selInst.MultipleSelection2( {nodes:targeted} )
           }
@@ -887,7 +877,7 @@ var TinaWebJS = function ( sigmacanvas ) {
           // console.log("clickStage event e", e)
 
           if (! e.data.captor.isDragging
-            && Object.keys(selections).length
+            && TW.SystemState.selectionNids.length
             && ! TW.gui.circleSize) {
 
             // we clear selections and all its effects
@@ -1029,7 +1019,7 @@ var TinaWebJS = function ( sigmacanvas ) {
       if (TW.partialGraph && TW.partialGraph.graph) {
         TW.partialGraph.graph.clear()
         TW.partialGraph.refresh()
-        selections = []
+        TW.SystemState.selectionNids = []
       }
     }
 
