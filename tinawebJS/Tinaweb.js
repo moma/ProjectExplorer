@@ -667,7 +667,7 @@ var TinaWebJS = function ( sigmacanvas ) {
 
         if (TW.conf.fa2Available) {
           $("#layoutButton").click(function () {
-            sigma_utils.smartForceAtlas()
+            sigma_utils.smartForceAtlas({'manual': true})
           });
         }
         else {

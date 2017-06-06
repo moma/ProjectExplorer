@@ -663,7 +663,7 @@ function graphTagCloudElem(nodes) {
     TW.partialGraph.camera.goTo({x:0, y:0, ratio:0.9, angle: 0})
     TW.partialGraph.refresh({skipIndexation:true});
 
-    sigma_utils.smartForceAtlas(TW.conf.fa2Milliseconds/2)
+    sigma_utils.smartForceAtlas({'duration': TW.conf.fa2Milliseconds/2})
 
     //
     // ChangeGraphAppearanceByAtt(true)

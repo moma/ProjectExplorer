@@ -499,11 +499,11 @@ var SigmaUtils = function () {
       //  - custom expiration duration
       //  - conditions on graph size (£TODO use these to slowDown small graphs)
       //  - edges management (turns them off and restores them after finished)
-      this.smartForceAtlas = function (fa2duration) {
+      this.smartForceAtlas = function (args) {
         if (TW.conf.fa2Available) {
-          if (!fa2duration) {
-            fa2duration = parseInt(TW.conf.fa2Milliseconds) || 4000
-          }
+          if (!args)             args = {}
+          if (!args.manual)      args.manual = false
+          if (!args.duration)    args.duration = parseInt(TW.conf.fa2Milliseconds) || 4000
 
           // togglability case
           if(TW.partialGraph.isForceAtlas2Running()) {
@@ -512,7 +512,8 @@ var SigmaUtils = function () {
           }
           // normal case
           else {
-              if ( TW.conf.fa2Enabled && TW.partialGraph.graph.nNodes() >= TW.conf.minNodesForAutoFA2) {
+              if ((TW.conf.fa2Enabled || args.manual)
+                  && TW.partialGraph.graph.nNodes() >= TW.conf.minNodesForAutoFA2) {
                 // hide edges during work for smaller cpu load
                 if (TW.partialGraph.settings('drawEdges')) {
                   this.toggleEdges(false)
@@ -529,7 +530,7 @@ var SigmaUtils = function () {
                   if (TW.partialGraph.isForceAtlas2Running())
                     sigma_utils.ourStopFA2()
                 },
-                fa2duration)
+                args.duration)
 
                 return;
               }

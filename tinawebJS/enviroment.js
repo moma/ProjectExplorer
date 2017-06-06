@@ -862,7 +862,7 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
                   // console.log("\t\t[ Starting FA2 ]")
                   // [ Starting FA2 ]
                   setTimeout(function() {
-                    sigma_utils.smartForceAtlas(2000) // shorter FA2 sufficient
+                    sigma_utils.smartForceAtlas({'duration': 2000}) // shorter FA2 sufficient
                   }, 10)
                 // [ / Starting FA2 ]
 
@@ -991,7 +991,7 @@ function NodeWeightFilter( sliderDivID , tgtNodeType ,  criteria) {
 
                   // [ Starting FA2 ]
                   setTimeout(function() {
-                    sigma_utils.smartForceAtlas(2000) // shorter FA2 sufficient
+                    sigma_utils.smartForceAtlas({'duration': 2000}) // shorter FA2 sufficient
                   }, 10)
                   // [ / Starting FA2 ]
                 }
