@@ -242,21 +242,23 @@ function changeType() {
 
     // for all possible nodes, which ones actually in the graph atm
     for(var i in TW.nodeIds) {
-        anode = TW.partialGraph.graph.nodes(TW.nodeIds[i]);
+        let nid = TW.nodeIds[i]
+        let anode = TW.partialGraph.graph.nodes(nid);
         if(anode) {
-            prevnodes[i] = true
+            prevnodes[nid] = true
         }
     }
 
     var links_sels = {}
 
     for(var i in TW.edgeIds) {
-        anedge = TW.partialGraph.graph.edges(TW.edgeIds[i]);
+        let eid = TW.edgeIds[i]
+        let anedge = TW.partialGraph.graph.edges(eid);
         if(anedge) {
-            prevedges[i] = true;
+            prevedges[eid] = true;
             if(anedge.customAttrs) {
                 if(anedge.customAttrs["grey"]==0) {
-                    links_sels[i] = true;
+                    links_sels[eid] = true;
                 }
             }
         }
@@ -299,30 +301,28 @@ function changeType() {
             var newsels = {}
             var sumpastcat = t0Activetypes.map(Number).reduce(function(a, b){return a+b;})
             if(sumpastcat==1) /* change to alter comp*/ {
-                for(var i in prevnodes) {
-                    s = i;
-                    neigh = TW.Relations[str_nextState][s]
+                for(var nid in prevnodes) {
+                    let neigh = TW.Relations[str_nextState][nid]
                     if(neigh) {
                         for(var j in neigh) {
-                            t = neigh[j]
-                            nodes_2_colour[t]=true;
+                            let tid = neigh[j]
+                            nodes_2_colour[tid]=true;
                         }
                     }
                 }
 
-                for(var i in nodes_2_colour) {
-                    s = i;
-                    neigh = TW.Relations[t1ActivetypesKey][s]
+                for(var nid in nodes_2_colour) {
+                    let neigh = TW.Relations[t1ActivetypesKey][nid]
                     if(neigh) {
                         for(var j in neigh) {
-                            t = neigh[j]
-                            if(nodes_2_colour[t]) {
-                                edges_2_colour[s+";"+t]=true;
-                                edges_2_colour[t+";"+s]=true;
+                            let tid = neigh[j]
+                            if(nodes_2_colour[tid]) {
+                                edges_2_colour[nid+";"+tid]=true;
+                                edges_2_colour[tid+";"+nid]=true;
                             }
                         }
                     }
-                    nodes_2_colour[i] = false;
+                    nodes_2_colour[nid] = false;
                 }
 
                 for(var nid in nodes_2_colour)
@@ -428,7 +428,6 @@ function changeType() {
             for(var eid in edges_2_colour)
                 add1Elem(eid)
         }
-
 
         // to recreate the selection in the new type graph
         TW.instance.selNgn.MultipleSelection2({
