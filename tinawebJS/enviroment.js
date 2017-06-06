@@ -1081,7 +1081,7 @@ function jsActionOnGexfSelector(gexfBasename){
         serverPrefix += '/'+pathcomponents[i]
     }
 
-    var newDataRes = AjaxSync({ "url": window.location.origin+serverPrefix+gexfPath });
+    var newDataRes = AjaxSync({ "url": window.location.origin+serverPrefix+'/'+gexfPath });
 
     // remove any previous instance
     TW.instance.clearSigma()
