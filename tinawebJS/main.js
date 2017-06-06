@@ -54,12 +54,13 @@ TW.instance.initSearchListeners();
 // show the custom name of the app
 writeBrand(TW.conf.branding)
 
-
 // choosing the input
 // -------------------
+// type of input
+var sourcemode = isUndef(getUrlParam.sourcemode) ? TW.conf.sourcemode : getUrlParam.sourcemode
+
 // if page is being run locally ==> only possible source shall be via file input
-if (window.location.protocol == 'file:'
-    || (!isUndef(getUrlParam.sourcemode) && getUrlParam.sourcemode == 'localfile')) {
+if (window.location.protocol == 'file:' || sourcemode == 'localfile') {
 
   let inputDiv = document.getElementById('localInput')
   inputDiv.style.display = 'block'
@@ -94,9 +95,6 @@ function syncRemoteGraphData () {
   var inData;              // = {nodes: [....], edges: [....], cats:...}
 
   var mapLabel;            // user displayed label for this input dataset
-
-  // type of input
-  let sourcemode = isUndef(getUrlParam.sourcemode)?TW.sourcemode:getUrlParam.sourcemode
 
   // case (1) read from remote DB via API bridge fetching
   // ex: /services/api/graph?q=filters...
