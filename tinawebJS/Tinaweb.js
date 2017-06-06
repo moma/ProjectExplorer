@@ -70,7 +70,8 @@ function SelectionEngine() {
     // we assume string is normalized
     this.search_n_select = function(string) {
 
-        // alert("search is happening !")
+        let previousSelections = selections
+
         cancelSelection(false, {norender:true});
 
         if (typeof string != "string") {
@@ -90,7 +91,7 @@ function SelectionEngine() {
             }
             var targeted = this.SelectorEngine( {
                             addvalue:TW.gui.checkBox,
-                            prevsels:selections,
+                            prevsels:previousSelections,
                             currsels:coincd
                         } )
 
@@ -550,20 +551,7 @@ var TinaWebJS = function ( sigmacanvas ) {
             // ----------------------->8---------------------
         });
 
-        // is_open flag for keydown choice
-        $('#searchinput').bind('autocompleteopen', function(event, ui) {
-            $(this).data('is_open',true);
-        });
-        $('#searchinput').bind('autocompleteclose', function(event, ui) {
-            $(this).data('is_open',false);
-        });
-
-        // default search value now handled through input/@placeholder
-        // $("#searchinput").focus(function () {        });
-        // $("#searchinput").blur(function () {        });
-
-
-        // i click on the search button, independently from autocomplete
+        // Search by click on the search button, independently from autocomplete
         $("#searchbutton").click(function() {
             var query = normalizeString($("#searchinput").val())
             // console.log('===\nyour query was: "'+query+'"');
@@ -577,83 +565,11 @@ var TinaWebJS = function ( sigmacanvas ) {
             // ------------------------------------------------
         });
 
-
-        // i've a list of coincidences and i press enter like a boss >:D
-        //  external usage: partialGraph, SelectorEngine() , MultipleSelection2()
+        // Search by pressing ENTER, independently from autocomplete
         $("#searchinput").keydown(function (e) {
-            if (e.keyCode == 13 && $("input#searchinput").data('is_open') === true) {
-                // Search has several results and you pressed ENTER
-                if(!is_empty(matches)) {
-                    var coincidences = []
-                    for(j=0;j<matches.length;j++){
-                        coincidences.push(matches[j].id)
-                    }
-                    setTimeout(
-                      function (){
-                          targeted = selInst.SelectorEngine( {
-                                          addvalue:TW.gui.checkBox,
-                                          clicktype:"double",
-                                          prevsels:selections,
-                                          currsels:coincidences
-                                      } )
-
-                          // tricky stuff for simulating a multiple selection D:
-                          // ... to be improved in the future ...
-                          var prev_cursor_size = TW.gui.circleSize;
-                          if(targeted.length>0) {
-                              TW.gui.circleSize = (TW.gui.circleSize==0)? 1 : TW.gui.circleSize;
-                              cancelSelection(false);
-                              this.selInst.MultipleSelection2({nodes:targeted});
-                              TW.gui.circleSize = prev_cursor_size;
-                          }
-
-                          $("input#searchinput").val("");
-                          $("input#searchinput").autocomplete( "close" );
-                      },
-                      30
-                    )
-                    //$("input#searchinput").trigger('autocompleteclose');
-                }
-
-            // alert("matches[].id\n" + JSON.stringify(matches.map(function(n) {return n.id})))
-            }
-            else if (e.keyCode == 13 && $("input#searchinput").data('is_open') !== true) {
-                // pressed down [ENTER] but with no autocomplete
-                // it really means "do search_and_select()"
-                // (but we know the results will be empty)
-                // (we still do it for the side effects: events, cleaning)
+            if (e.keyCode == 13) {
                 var query = normalizeString($("#searchinput").val())
                 selInst.search_n_select(query)
-            }
-        });
-
-        // i was navigating (with the up|down) sur the coincidences-list and i pressed enter!
-        //  external usage: partialGraph, SelectorEngine() , MultipleSelection2()
-        $("#searchinput").keyup(function (e) {
-            if (e.keyCode == 13 && $("input#searchinput").data('is_open') !== true) {
-                var targeted = [] ;
-                var exfnd = exactfind( $("#searchinput").val() )
-                if (exfnd!=null) {
-                    console.log("search KEY UP");
-                    setTimeout(
-                      function() {
-                        targeted = selInst.SelectorEngine( {
-                                    addvalue:TW.gui.checkBox,
-                                    clicktype:"double",
-                                    prevsels:selections,
-                                    currsels:[exfnd.id]
-                                } )
-                        if(targeted.length>0) {
-                            cancelSelection(false);
-                            selInst.MultipleSelection2({nodes:targeted});
-                        }
-
-                        $("input#searchinput").val("");
-                        $("input#searchinput").autocomplete( "close" );
-                      },
-                      30
-                    )
-                }
             }
         });
     }

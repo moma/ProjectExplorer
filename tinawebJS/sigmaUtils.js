@@ -648,7 +648,7 @@ function getNodesByAtt(att) {
     });
 }
 
-// new sigma.js
+// fulltext search handler for #searchinput
 function find(lquery){
     var results=[];
     if (typeof lquery == 'string' && lquery.length > 0) {
@@ -659,7 +659,9 @@ function find(lquery){
             var n=nds[i];
             if(! n.hidden){
                 var possiblematch=n.label.toLowerCase()
-                // string.indexOf(substring) faster than search/match
+                // ------------------
+                //  substring search
+                // ------------------
                 if (possiblematch.indexOf(lquery)!==-1) {
                     results.push(n);
                 }
