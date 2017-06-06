@@ -16,7 +16,7 @@ TW.conf = (function(TW){
   // Graph data source
   // -----------------
   // the graph input depends on TWConf.sourcemode (or manual url arg 'sourcemode')
-  TWConf.sourcemode = "api"   // accepted: "api" | "serverfile" | "servermenu" | "localfile"
+  TWConf.sourcemode = "servermenu"   // accepted: "api" | "serverfile" | "servermenu" | "localfile"
 
   // server-side .gexf|.json default source
   TWConf.sourceFile = "data/politoscope/ProgrammeDesCandidats.enrichi.gexf"
@@ -69,10 +69,23 @@ TW.conf = (function(TW){
     // --------------------------------------------------------------------
     'age'             : {'col': "gradient", 'n': 4,  'binmode': 'samerange'},
     'growth_rate'     : {'col': "heatmap",  'n': 5,  'binmode': 'samepop'  },
-    'PageRank'        : {'col': "gradient", 'n': 4,  'binmode': 'samerange'  },
+    'PageRank'        : {'col': "gradient", 'n': 6,  'binmode': 'samerange'  },
     'numuniform'      : {'col': "heatmap",  'n': 7,  'binmode': 'samepop'  },
     'numpareto'       : {'col': "gradient", 'n': 5,  'binmode': 'samerange'},
     'intfewvalues'    : {'col': "cluster" , 'n': 4,  'binmode': 'samerange'},
+    'period'          : {'col': "cluster" ,          'binmode': 'off'},
+    'in-degree'       : {'col': "heatmap" , 'n': 3,  'binmode': 'samepop'  },
+    'cluster_index'   : {'col': "cluster" ,          'binmode': 'off'},
+    'cluster_label'   : {'col': "cluster" ,          'binmode': 'off'},
+    'betweeness'      : {'col': "gradient", 'n': 4,  'binmode': 'samepop'  },
+    'level'           : {'col': "heatmap" ,          'binmode': 'off'  },
+    'weight'          : {'col': "heatmap" , 'n': 5,  'binmode': 'samerange'  },
+    'Weighted Degree' : {'col': "gradient", 'n': 8,  'binmode': 'samepop'  },
+'Eigenvector Centrality':{'col':"heatmap" , 'n': 9,  'binmode': 'samepop'  },
+    'out-degree'      : {'col': "heatmap" , 'n': 3,  'binmode': 'samepop'  },
+    'cluster_universal_index'   : {'col': "cluster" , 'binmode': 'off'},
+    'community_orphan'   : {'col': "cluster" ,          'binmode': 'off'},
+
     'Modularity Class': {'col': "cluster",           'binmode': 'off'},  // <== exemple with no binning
     'countryuniform'  : {'col': "cluster" ,          'binmode': 'off'},
     'countrypareto'   : {'col': "cluster" ,          'binmode': 'off'},
@@ -151,7 +164,7 @@ TW.conf = (function(TW){
 
   // if fa2Available, the auto-run config:
 
-    TWConf.fa2Enabled= true;        // fa2 auto-run at start and after graph modified ?
+    TWConf.fa2Enabled= false;        // fa2 auto-run at start and after graph modified ?
     TWConf.fa2Milliseconds=5000;    // duration of auto-run
     TWConf.minNodesForAutoFA2 = 5   // graph size threshold to auto-run
 
