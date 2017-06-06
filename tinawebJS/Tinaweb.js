@@ -162,7 +162,7 @@ function SelectionEngine() {
         var tMS2_deb = performance.now()
 
         console.log("IN SelectionEngine.MultipleSelection2:")
-        console.log("nodes", args.nodes)
+        console.log("args", args)
       }
 
         greyEverything();
@@ -243,7 +243,7 @@ function SelectionEngine() {
             }
         }
 
-        // FIXME: could be done in previous loop
+        // separate loop to allow nodes_2_colour without nodes as args (only used in changeType)
         for(var nid in nodes_2_colour) {
             if(nid) {
                 n = TW.partialGraph.graph.nodes(nid)

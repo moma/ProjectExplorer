@@ -268,12 +268,14 @@ function syncRemoteGraphData () {
 
 
                 if (TW.conf.debug.logFetchers)
-                  console.log("\t\t\t"+gexfBasename+ "   -> table:" +theGexfs[aGexf]["semantic"]["table"] )
+                  console.log("\t\t\t"+gexfBasename)
+
 
                 // -------------------------->8------------------------------------------
                 // £TODO this part is underspecified
                 // if used in some usecases, port it to nodetypes
                 // otherwise remove
+                // console.log("\t\t\ttable:"+theGexfs[aGexf]["semantic"]["table"])
                 // TW.field[path+"/"+aGexf] = theGexfs[aGexf]["semantic"]["table"]
                 // ex : data/AXA/RiskV2PageRank5000.gexf:"ISItermsAxa_2015"
                 // -------------------------->8------------------------------------------

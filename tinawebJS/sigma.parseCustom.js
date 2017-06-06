@@ -9,7 +9,7 @@ var ParseCustom = function ( format , data ) {
       this.data = $.parseXML(data)
     }
     else {
-      this.data = data
+      this.data = JSON.parse(data)
     }
     this.format = format;
     this.nbCats = 0;
@@ -486,7 +486,7 @@ function facetsBinning (valuesIdx) {
             // FIXME why still NaN sometimes ?
             // NB: however skipping them is enough for work
             else if (isNaN(val)) {
-              console.debug('skipped undetected NaN ? attribute, lastCursor, k, sortedDistinctVals[k], nodes:', at, lastCursor, k, val, valuesIdx[cat][at].map[sortedDistinctVals[k]])
+              // console.debug('skipped undetected NaN ? attribute, lastCursor, k, sortedDistinctVals[k], nodes:', at, lastCursor, k, val, valuesIdx[cat][at].map[sortedDistinctVals[k]])
               continue
             }
 
@@ -1081,6 +1081,7 @@ function scanJSON( data ) {
 // Level-00
 // for {1,2}partite graphs
 function dictfyJSON( data , categories ) {
+
     if (TW.conf.debug.logParsers)
       console.log("ParseCustom json 2nd loop, main data extraction, with categories", categories)
 

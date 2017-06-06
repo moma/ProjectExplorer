@@ -84,7 +84,7 @@ function changeGraphAppearanceByFacets( manualflag ) {
       color_menu_info += `<li><a href="#" onclick='clusterColoring("clust_louvain")'>By Louvain clustering (${TW.partialGraph.graph.nNodes()})</a></li>`
 
       // for debug
-      console.warn('color_menu_info', color_menu_info)
+      // console.warn('color_menu_info', color_menu_info)
 
       $("#colorgraph-menu").html(color_menu_info)
     }

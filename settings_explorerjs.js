@@ -67,9 +67,9 @@ TW.conf = (function(TW){
     //    attribute    |    coloring     |  number  |    binning
     //      title      |    function     |  of bins |     mode
     // --------------------------------------------------------------------
-    'age'             : {'col': "gradient", 'n': 2,  'binmode': 'samerange'},
-    'growth_rate'     : {'col': "heatmap",  'n': 11, 'binmode': 'samepop'  },
-    'PageRank'        : {'col': "gradient", 'n': 8,  'binmode': 'samepop'  },
+    'age'             : {'col': "gradient", 'n': 4,  'binmode': 'samerange'},
+    'growth_rate'     : {'col': "heatmap",  'n': 5,  'binmode': 'samepop'  },
+    'PageRank'        : {'col': "gradient", 'n': 4,  'binmode': 'samerange'  },
     'numuniform'      : {'col': "heatmap",  'n': 7,  'binmode': 'samepop'  },
     'numpareto'       : {'col': "gradient", 'n': 5,  'binmode': 'samerange'},
     'intfewvalues'    : {'col': "cluster" , 'n': 4,  'binmode': 'samerange'},

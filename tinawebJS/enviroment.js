@@ -167,10 +167,7 @@ function createFilechooserEl () {
           TW.instance.clearSigma()
 
           // run
-          if (theFormat == 'json')
-            mainStartGraph(theFormat, JSON.parse(rdr.result), TW.instance)
-          else
-            mainStartGraph(theFormat, rdr.result, TW.instance)
+          mainStartGraph(theFormat, rdr.result, TW.instance)
 
           writeLabel(`Local file: ${clientLocalGraphFile.name}`)
         }
@@ -1083,7 +1080,8 @@ function jsActionOnGexfSelector(gexfBasename){
       if (pathcomponents[i] != 'explorerjs.html')
         serverPrefix += '/'+pathcomponents[i]
     }
-    var newDataRes = AjaxSync({ URL: window.location.origin+serverPrefix+gexfPath });
+
+    var newDataRes = AjaxSync({ "url": window.location.origin+serverPrefix+gexfPath });
 
     // remove any previous instance
     TW.instance.clearSigma()

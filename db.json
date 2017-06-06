@@ -16,6 +16,19 @@
 			}
 		}
 	},
+	"data/comexjsons": {
+		"first" : "graph_example.json",
+		"gexfs": {
+			"graph_example.json": {},
+			"graph_example_attrs.json": {}
+		}
+	},
+	"data/test": {
+		"first" : "test_with_various_atts.gexf",
+		"gexfs": {
+			"test_with_various_atts.gexf": {}
+		}
+	},
 	"data/AXA": {
 		"dbname":"data.db",
 		"title":"ISITITLE",
@@ -35,7 +48,6 @@
 				"social": { "table":"ISIAUTHOR" , "textCol":"data","forkeyCol":"id"},
 				"semantic": { "table":"ISItermsAxa_2015" , "textCol":"data","forkeyCol":"id"}
 			}
-
 		}
 	},
 	"data/ClimateChange": {
