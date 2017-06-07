@@ -19,12 +19,17 @@
 }
 
 #unselectbutton {
+  background-color: rgba(255,255,255,0)
   color: #900;
   font-weight: bold;
   font-size: 70%;
-  float:right;
-  margin-top:.5em;
-  margin-right:1em;
+  position: absolute;
+  right: 24px;
+  top: 14px;
+  z-index: 6;
+}
+#unselectbutton:hover {
+  color: #400;
 }
 
 /* LEGEND PANEL */
@@ -114,7 +119,7 @@
 
 
 
-/* ZOOM IN OUT */
+/* ZOOMBAR */
 
 #ctlzoom {
     position: fixed;
@@ -135,6 +140,14 @@
 }
 
 #zoomSliderzone {
+}
+
+.zoombarbuttons {
+  position:relative;  /* b/c they can contain absolute wait icon */
+}
+
+.zoombarbuttons:hover {
+    opacity: .7;
 }
 
 #edgesButton {
@@ -167,67 +180,7 @@
     background-position: -24px 0;
 }
 
-
-#lensButton {
-    display: block;
-    width: 36px;
-    height: 36px;
-    margin: 0 auto;
-    /*background:url("../libs/img2/loupe-edges2.png");*/
-}
-
-#lensButton:hover {
-    opacity: .7;
-}
-
-
-/*#lensButton {
-    background-position: -72px 0;
-}
-
-#lensButton:hover {
-    background-position: -36px 0;
-}
-
-#lensButton.off {
-    background-position: 0 0;
-}
-
-#lensButton.off:hover {
-    background-position: -108px 0;
-}*/
-
-#edgesButton {
-    display: block;
-    width: 36px;
-    height: 36px;
-    /*background:url("../libs/img2/loupe-edges.png");*/
-    margin: 0 auto;
-}
-
-.zoombarbuttons {
-  position:relative;  /* b/c they can contain absolute wait icon */
-}
-
-.zoombarbuttons:hover {
-    opacity: .7;
-}
-
-/*#edgesButton {
-    background-position: -72px -36px;
-}
-
-#edgesButton:hover {
-    background-position: -36px -36px;
-}
-
-#edgesButton.off {
-    background-position: 0 -36px;
-}
-
-#edgesButton.off:hover {
-    background-position: -108px -36px;
-}*/
+/* ----------- */
 
 #unfold {
     display:none; width: 12px; height: 12px; background: rgb(250, 250, 252); padding: 2px 2px 2px 0; border-top-right-radius: 5px; border-bottom-right-radius: 5px; box-shadow: 1px 1px 2px #808090;
@@ -276,8 +229,24 @@
     display: none; /* because no are nodes selected at page init time */
 }
 
-#current-selection {
+#tw-current-selection {
     width: 100%;  /* 100% within lefttopbox */
+}
+
+/* inside #tw-current-selection > #names */
+#selectionsBox {
+    text-align:center;
+    background-color:white;
+    color:#250587;
+    margin: 7px;
+    padding: 3px;
+    border: 1px solid #666;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -border-radius: 3px;
+    -moz-box-shadow: 0px 2px 6px #000;
+    -webkit-box-shadow: 0px 2px 6px #000;
+    box-shadow: 0px 2px 6px #000;
 }
 
 
@@ -288,18 +257,126 @@
 }
 
 
-/* xs and smaller: for mobile */
-@media(max-width:544px){
+/* freshslider right-side cursor positioning fix
+ * (cf. freshslider.js l. 125) */
+.fss-right {
+  margin-left: 0 !important ;
+}
+
+/* sm and smaller: for mobile */
+@media(max-width:768px){
   #lefttopbox {
-      top: 105px;
-      left: -15px;
-      width:30% ;
+    top: 105px;
+    left: 0;
+    width:30% ;
+  }
+  #lefttopbox h4 {
+    font-size: 10px;
   }
 
+  /* zoombar re-positioned */
   #ctlzoom {
-      position: fixed;
-      left: 10px ;
-      top: 170px;
+    right: 5px ;
+    bottom: calc(40% - 105px);
+    /* bot just above #sidebar which has top at calc(105px + 60%); */
   }
 
+  /* "top left" */
+  #selectionsBox{
+      margin: 0;
+      padding: 3px 0;
+  }
+
+  #unselectbutton {
+    font-size: 60%;
+    right: 17px;
+    top: 7px;
+  }
+
+  .readmore-js-toggle {
+    font-size: 10px;
+  }
+
+  #defaultop #searchnav {
+    padding-left: 15px !important;
+  }
+  #defaultop .weight-selectors {
+    padding-left: 15px !important;
+    margin-left: 0 !important;
+  }
+
+  /* collapsed menu styling */
+  #left {
+    max-width: 320px;
+    background-color: #ddd;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    z-index: 3;
+    padding: 5px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -border-radius: 3px;
+    -moz-box-shadow: 0px 2px 6px #000;
+    -webkit-box-shadow: 0px 2px 6px #000;
+    box-shadow: 0px 2px 6px #000;
+  }
+
+}
+
+
+
+/* small width or small height */
+@media(max-width:768px), (max-height:500px) {
+
+  /* zoombar reduction */
+  .zoombarbuttons img {
+    width: 20px !important;
+  }
+
+  #ctlzoom li:not(#zoomSliderzone) {
+    margin: 5px 0;
+    height: 18px;
+    width: 18px;
+  }
+
+  #zoomMinusButton, #zoomPlusButton {
+    margin-left: -2px;
+  }
+
+  #zoomSliderzone {
+    display: none;
+  }
+
+
+  /* smaller switch */
+  .onoffswitch {
+    width: 20px;
+    padding-left: 0px;
+  }
+  .onoffswitch-inner:before, .onoffswitch-inner:after {
+      height: 10px;
+      line-height: 10px;
+      font-size: 6px;
+  }
+  .onoffswitch-switch {
+      width: 5px;
+      border-radius: 20px;
+  }
+
+  .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+      margin-left: 0;
+  }
+  .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+      left: 16px;
+  }
+
+  /* switch css -- Edges instance */
+  #edges-switch-inner-label:before {
+      font-size: 4px;
+      padding-left: 2px;
+  }
+  #edges-switch-inner-label:after {
+      font-size: 4px;
+      padding-right: 2px;
+  }
 }

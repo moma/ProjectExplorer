@@ -480,7 +480,8 @@ function htmlProportionalLabels(elems , limit, selectableFlag) {
               jspart = ' onclick="manualSelectNode(\''+id+'\')" onmouseover="manualForceLabel(\''+id+'\',true, true)"  onmouseout="manualForceLabel(\''+id+'\',false, true)"'
             }
 
-            let htmlLabel = '<span class="tagcloud-item" style="font-size:'+fontSize+'px;" '+jspart+'>'+ TW.Nodes[id].label+ '</span>';
+            // using em instead of px to allow global x% resize at css box level
+            let htmlLabel = '<span class="tagcloud-item" style="font-size:'+fontSize+'em;" '+jspart+'>'+ TW.Nodes[id].label+ '</span>';
             resHtml.push(htmlLabel)
         }
     }

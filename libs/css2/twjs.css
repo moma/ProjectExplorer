@@ -15,6 +15,11 @@ html, body {
   font-family: "Droid Sans", Calibri, "Helvetica Neue", Helvetica, sans-serif;
 }
 
+/* to display wait cursor */
+html.waiting {
+  cursor: wait;
+}
+
 #sigma-contnr {
   position: fixed;
   top: 105px;
@@ -71,84 +76,6 @@ html, body {
   font-size: 24px;
   width: 50px !important;
 }
-
-
-/* xs and smaller: for mobile */
-@media(max-width:544px){
-  html, body {
-    height: 100%;
-    width: 100%;
-    background-color: #eee;
-    font-family: "Droid Sans", Calibri, "Helvetica Neue", Helvetica, sans-serif;
-  }
-
-  #sigma-contnr {
-    position: fixed;
-    top: 105px;
-    left: 0;
-    right: 0;
-    height: 500px;
-    z-index: 1;
-
-    /* non selectable: we've got our own events here */
-    -webkit-user-select: none; /* Safari */
-       -moz-user-select: none; /* Firefox */
-        -ms-user-select: none; /* IE/Edge */
-            user-select: none; /* Chrome and Opera, future + */
-  }
-
-  #sidebar {
-    position: fixed;
-    top: 605px;
-    left: 0;
-    right: 0;
-    width: 100%;
-    z-index: 2;
-    border-left: 1px #222 solid;
-    overflow-y: scroll;
-  }
-
-  #toolbar {
-    position: fixed;
-    top: 35px;
-    left: 0;
-    right: 0;
-    z-index: 2;
-    height: 70px;
-    width: 100%;
-    border-bottom: 1px #222 solid;
-    font-size: 9px;
-    line-height: 10px;
-  }
-
-  #topbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 2;
-    height: 35px;
-    width: 100%;
-    border-bottom: 1px #222 solid;
-  }
-
-
-  #twbrand {
-    font-family: "Gurajada", "Droid Sans", sans-serif ;
-    font-size: 24px;
-    width: 50px !important;
-  }
-
-
-  #topbar .container {
-    max-height: 35px !important;
-    width: 100%;
-    font-size: 9px ;
-    overflow-y: hidden;
-  }
-}
-
-
 
 /* toolbar contents */
 #defaultop {
@@ -221,21 +148,6 @@ html, body {
 
 /* VARIAE */
 
-#selectionsBox{
-    text-align:center;
-    background-color:white;
-    color:#250587;
-    margin: 7px;
-    padding: 3px;
-    border: 1px solid #666;
-    -moz-border-radius: 3px;
-    -webkit-border-radius: 3px;
-    -border-radius: 3px;
-    -moz-box-shadow: 0px 2px 6px #000;
-    -webkit-box-shadow: 0px 2px 6px #000;
-    box-shadow: 0px 2px 6px #000;
-}
-
 #oppositesBox{
   margin: 0;
   padding: 0;
@@ -260,6 +172,10 @@ html, body {
 }
 
 
+#tab-container {
+  margin: 7px;
+}
+
 #topPapers{
     display: none;
     margin: 7px;
@@ -267,14 +183,10 @@ html, body {
     border-style:solid;
     background-color:white;
     color:black;
-    margin: 7px;
     border: 1px solid #666;
     -moz-border-radius: 3px;
     -webkit-border-radius: 3px;
     -border-radius: 3px;
-    -moz-box-shadow: 0px 2px 6px #000;
-    -webkit-box-shadow: 0px 2px 6px #000;
-    box-shadow: 0px 2px 6px #000;
 }
 
 
@@ -314,9 +226,9 @@ p.micromessage{
 }
 
 /* Example Styles for Demo */
-.etabs { margin: 0; padding: 0; }
+.etabs { margin: 0; padding: 0; line-height: 15px;}
 .tab { display: inline-block; zoom:1; *display:inline; background: #eee; border: solid 1px #999; border-bottom: none; -moz-border-radius: 4px 4px 0 0; -webkit-border-radius: 4px 4px 0 0; }
-.tab a { font-size: 12px; line-height: 2em; display: block; padding: 0 10px; outline: none; }
+.tab a { font-size: 12px; line-height: 15px; display: block; padding: 0 5px 2px 5px; outline: none; }
 .tab a:hover { text-decoration: underline; }
 .tab.active { background: #fff; padding-top: 6px; position: relative; top: 1px; border-color: #666; }
 .tab a.active { font-weight: bold; }
@@ -426,50 +338,68 @@ p.micromessage{
 }
 
 
-
-
 /* viewport-specific variants */
 
-/* collapsed variants */
+/* sm and smaller: for mobile */
 @media(max-width: 768px){
 
-  /* collapsed nav items don't need padding anymore */
-  #defaultop #searchnav {
-    padding-left: 15px !important;
-  }
-  #defaultop .weight-selectors {
-    padding-left: 15px !important;
-    margin-left: 0 !important;
+  body {
+    font-size: 10px;
   }
 
-  /* collapsed menu styling */
-  #left {
-    max-width: 320px;
-    background-color: #ddd;
-    overflow-x: hidden;
-    overflow-y: scroll;
-    z-index: 3;
-    padding: 5px;
-    -moz-border-radius: 3px;
-    -webkit-border-radius: 3px;
-    -border-radius: 3px;
-    -moz-box-shadow: 0px 2px 6px #000;
-    -webkit-box-shadow: 0px 2px 6px #000;
-    box-shadow: 0px 2px 6px #000;
+  #sigma-contnr {
+    top: 105px;
+    left: 0;
+    width: 100%;
+    height: 60%;
+    border-bottom: 1px #222 solid;
   }
 
-}
+  #sidebar {
+    top: calc(105px + 60%);
+    bottom: 0;
+    height: 25%;
+    width: 100%;
+    background-color: #CCC;
+  }
+
+  #topPapers {
+    -moz-box-shadow: none ;
+    -webkit-box-shadow: none ;
+    box-shadow: none;
+  }
 
 
-/* freshslider right-side cursor positioning fix
- * (cf. freshslider.js l. 125)
- */
-.fss-right {
-  margin-left: 0 !important ;
-}
+  #toolbar {
+  }
 
-/* to display wait cursor
- */
-html.waiting {
-  cursor: wait;
+  /* £TODO de-collapsed but smaller */
+  #topbar {
+  }
+
+
+  #twbrand {
+    font-size: 12px;
+    width: 30px !important;
+  }
+
+
+  #topbar .container {
+    max-height: 35px !important;
+    width: 100%;
+    font-size: 9px ;
+    overflow-y: hidden;
+  }
+
+  /* in percentage of what htmlProportionalLabels() calculates*/
+  #sameNodes {
+    font-size: 75%;
+  }
+
+  .etabs {
+    font-size: 10px;
+    line-height: 10px;
+  }
+
+
 }

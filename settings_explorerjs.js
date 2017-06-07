@@ -239,9 +239,9 @@ TW.conf = (function(TW){
   TWConf.circleSizeMin = 0;
   TWConf.circleSizeMax = 100;
 
-  // size range for neighbor nodes "tagcloud"
-  TWConf.tagcloudFontsizeMin = 12;
-  TWConf.tagcloudFontsizeMax = 24;
+  // em size range for neighbor nodes "tagcloud"  (1 = "normal size")
+  TWConf.tagcloudFontsizeMin = .5  ;
+  TWConf.tagcloudFontsizeMax = 2 ;
 
   TWConf.tagcloudSameLimit = 50     // max displayed neighbors of the same type
   TWConf.tagcloudOpposLimit = 10    // max displayed neighbors of the opposite type
