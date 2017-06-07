@@ -286,3 +286,20 @@
   width: 295px;
   max-width: 295px;
 }
+
+
+/* xs and smaller: for mobile */
+@media(max-width:544px){
+  #lefttopbox {
+      top: 105px;
+      left: -15px;
+      width:30% ;
+  }
+
+  #ctlzoom {
+      position: fixed;
+      left: 10px ;
+      top: 170px;
+  }
+
+}

@@ -72,6 +72,84 @@ html, body {
   width: 50px !important;
 }
 
+
+/* xs and smaller: for mobile */
+@media(max-width:544px){
+  html, body {
+    height: 100%;
+    width: 100%;
+    background-color: #eee;
+    font-family: "Droid Sans", Calibri, "Helvetica Neue", Helvetica, sans-serif;
+  }
+
+  #sigma-contnr {
+    position: fixed;
+    top: 105px;
+    left: 0;
+    right: 0;
+    height: 500px;
+    z-index: 1;
+
+    /* non selectable: we've got our own events here */
+    -webkit-user-select: none; /* Safari */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* IE/Edge */
+            user-select: none; /* Chrome and Opera, future + */
+  }
+
+  #sidebar {
+    position: fixed;
+    top: 605px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 2;
+    border-left: 1px #222 solid;
+    overflow-y: scroll;
+  }
+
+  #toolbar {
+    position: fixed;
+    top: 35px;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    height: 70px;
+    width: 100%;
+    border-bottom: 1px #222 solid;
+    font-size: 9px;
+    line-height: 10px;
+  }
+
+  #topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    height: 35px;
+    width: 100%;
+    border-bottom: 1px #222 solid;
+  }
+
+
+  #twbrand {
+    font-family: "Gurajada", "Droid Sans", sans-serif ;
+    font-size: 24px;
+    width: 50px !important;
+  }
+
+
+  #topbar .container {
+    max-height: 35px !important;
+    width: 100%;
+    font-size: 9px ;
+    overflow-y: hidden;
+  }
+}
+
+
+
 /* toolbar contents */
 #defaultop {
   padding-top: 8px;
