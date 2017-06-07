@@ -305,6 +305,12 @@
     margin-left: 0 !important;
   }
 
+  /* legend re-positioned */
+  .my-legend {
+    bottom: calc(40% - 105px);
+    /* bot just above #sidebar which has top at calc(105px + 60%); */
+  }
+
   /* collapsed menu styling */
   #left {
     max-width: 320px;
@@ -347,6 +353,33 @@
     display: none;
   }
 
+  /* legend reduction */
+  .my-legend {
+    max-width: 27%;
+    max-height: 25%;
+    padding: 0 2px;
+    font-size: 85%;
+    margin: 0 0 5px 0;
+  }
+
+  .my-legend .legend-title {
+      margin-bottom: 0;
+      font-size: 90%;
+   }
+  .my-legend .legend-scale ul {
+    margin-bottom: 0;
+  }
+  .my-legend .legend-scale ul li {
+    margin-left: 0;
+    line-height: 12px;
+    margin-bottom: 0;
+  }
+
+  .my-legend ul.legend-labels li span {
+    height: 11px;
+    width: 11px;
+    border: 1px solid #999;
+  }
 
   /* smaller switch */
   .onoffswitch {
