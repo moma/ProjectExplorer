@@ -24,6 +24,8 @@ function changeGraphAppearanceByFacets( manualflag ) {
       'cluster': "clusterColoring"
     }
 
+    let currentNbNodes = TW.partialGraph.graph.nNodes()
+
     // create colormenu
     var color_menu_info = '<li><a href="#" onclick="graphResetColor()">By Default</a></li>';
 
@@ -34,49 +36,63 @@ function changeGraphAppearanceByFacets( manualflag ) {
         let ty = actypes[tid]
 
         // each facet family or clustering type was already prepared
-        for (var att_s in TW.Clusters[ty]) {
-
-          // POSS here distinguish [ty][att_s].classes.length and ranges.length
-          var att_c = TW.Clusters[ty][att_s].length
+        for (var attTitle in TW.Clusters[ty]) {
 
 
-          // coloringFunction
-          var the_method
+          // attribute counts: nb of classes
+          // POSS here distinguish [ty][attTitle].classes.length and ranges.length
+          var attNbClasses = TW.Clusters[ty][attTitle].length
+          var attNbNodes = currentNbNodes
 
-          // read from user settings
-          if (TW.conf.facetOptions[att_s] && TW.conf.facetOptions[att_s]['col']) {
-            the_method = colorFuns[TW.conf.facetOptions[att_s]['col']]
+          if (attNbClasses) {
+            let lastClass = TW.Clusters[ty][attTitle][attNbClasses-1]
+            if (lastClass.labl && lastClass.labl == '_non_numeric_' && lastClass.nids) {
+              if (lastClass.nids.length) {
+                attNbNodes -= lastClass.nids.length
+              }
+              else {
+                attNbClasses -= 1
+              }
+            }
           }
 
-          // default values
-          if (! the_method) {
-            if(att_s.indexOf("clust")>-1||att_s.indexOf("class")>-1) {
+          // coloringFunction
+          var colMethod
+
+          // read from user settings
+          if (TW.conf.facetOptions[attTitle] && TW.conf.facetOptions[attTitle]['col']) {
+            colMethod = colorFuns[TW.conf.facetOptions[attTitle]['col']]
+          }
+
+          // fallback guess-values
+          if (! colMethod) {
+            if(attTitle.indexOf("clust")>-1||attTitle.indexOf("class")>-1) {
               // for classes and clusters
-              the_method = "clusterColoring"
+              colMethod = "clusterColoring"
             }
             else {
-              the_method = "gradientColoring"
+              colMethod = "gradientColoring"
             }
           }
 
           // family label :)
-          var lab_att_s ;
-          if (att_s == 'clust_louvain') {
-            lab_att_s = 'Groupes de voisins, méthode de Louvain'
+          var attLabel ;
+          if (attTitle == 'clust_louvain') {
+            attLabel = 'Groupes de voisins, méthode de Louvain'
           }
-          else if (TW.conf.facetOptions[att_s] && TW.conf.facetOptions[att_s]['menutransl']) {
-            lab_att_s = TW.conf.facetOptions[att_s]['menutransl']
+          else if (TW.conf.facetOptions[attTitle] && TW.conf.facetOptions[attTitle]['menutransl']) {
+            attLabel = TW.conf.facetOptions[attTitle]['menutransl']
           }
-          else lab_att_s = att_s
+          else attLabel = attTitle
 
-          color_menu_info += '<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+lab_att_s+'('+att_c+')'+'</a></li>'
+          color_menu_info += `<li><a href="#" onclick='${colMethod}("${attTitle}")'>By ${attLabel} (${attNbClasses} | ${attNbNodes})</a></li>`
         }
 
         // POSS add cumulated degree via TW.partialGraph.graph.degree(nid)
       }
 
       // we also add clust_louvain in all cases
-      color_menu_info += `<li><a href="#" onclick='clusterColoring("clust_louvain")'>By Louvain clustering (${TW.partialGraph.graph.nNodes()})</a></li>`
+      color_menu_info += `<li><a href="#" onclick='clusterColoring("clust_louvain")'>By Louvain clustering ( ? | ${currentNbNodes})</a></li>`
 
       // for debug
       // console.warn('color_menu_info', color_menu_info)
@@ -132,7 +148,7 @@ function RunLouvain() {
 // Highlights nodes with given value using id map
 // previously: highlighted nodes with given value using loop on node values
 function SomeEffect( ValueclassCode ) {
-    console.debug("highlighting:", ValueclassCode )
+    // console.debug("highlighting:", ValueclassCode )
 
     greyEverything();
 
@@ -814,8 +830,6 @@ function fillAttrsInForm() {
       opt.value = att
       opt.innerText = att
       elChooser.appendChild(opt)
-
-      console.log(opt)
     }
   }
 }
@@ -836,12 +850,12 @@ function showAttrConf() {
   let attrTitle = this.value
   let settings = TW.conf.facetOptions[attrTitle]
   if (settings) {
-    document.getElementById('attr-col').value = settings.col
-    document.getElementById('attr-binmode').value = settings.binmode
-    document.getElementById('attr-translation').value = settings.menutransl
+    document.getElementById('attr-col').value = settings.col || 'gradient'
+    document.getElementById('attr-binmode').value = settings.binmode || 'off'
+    document.getElementById('attr-translation').value = settings.menutransl || attrTitle
     if(settings.n) {
       document.getElementById('attr-nbins-div').style.display = 'block'
-      document.getElementById('attr-nbins').value = settings.n
+      document.getElementById('attr-nbins').value = settings.n || 5
     }
   }
 }
