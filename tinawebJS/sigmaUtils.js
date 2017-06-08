@@ -111,7 +111,7 @@ var SigmaUtils = function () {
         context.beginPath();
 
         if (settings('twSelectedColor') == "node")
-          context.fillStyle = TW.handpickedcolor? node.customAttrs.alt_color : node.color; // node's
+          context.fillStyle = TW.gui.handpickedcolor? node.customAttrs.alt_color : node.color; // node's
         else
           context.fillStyle = "#F7E521"; // yellow
 
@@ -192,7 +192,7 @@ var SigmaUtils = function () {
 
       // precomputed color with no opacity
       // cf. sigmaTools.edgeRGB
-      var baseRGB = TW.handpickedcolor ? edge.customAttrs.alt_rgb : edge.customAttrs.rgb
+      var baseRGB = TW.gui.handpickedcolor ? edge.customAttrs.alt_rgb : edge.customAttrs.rgb
 
       if (edge.customAttrs.activeEdge) {
         size = (defSize * 2) + 1
@@ -296,7 +296,7 @@ var SigmaUtils = function () {
           // passive nodes should blend in the grey of twEdgeGreyColor
           // cf settings_explorerjs, defgrey_color and greyEverything()
           if (node.customAttrs.grey) {
-            if (! TW.handpickedcolor) {
+            if (! TW.gui.handpickedcolor) {
               nodeColor = node.customAttrs.defgrey_color
             }
             else {
@@ -315,7 +315,7 @@ var SigmaUtils = function () {
           else if(node.customAttrs.highlight) {
             nodeSize *= 1.4
             borderSize *= 1.4
-            if (TW.handpickedcolor) {
+            if (TW.gui.handpickedcolor) {
               nodeColor = node.customAttrs.alt_color
             }
           }
@@ -758,7 +758,7 @@ function gradientColoring(daclass) {
 
     cancelSelection(false);
 
-    TW.handpickedcolor = true
+    TW.gui.handpickedcolor = true
 
     var min_pow = 0;
     for(var j in TW.nodeIds) {
@@ -928,7 +928,7 @@ function heatmapColoring(daclass) {
   cancelSelection(false);
 
   // global flag
-  TW.handpickedcolor = true
+  TW.gui.handpickedcolor = true
 
   // use our valueclass => ids mapping
   for (var k in tickThresholds) {
@@ -1003,11 +1003,20 @@ function clusterColoring(daclass) {
         }
 
         // reset the global state
-        TW.handpickedcolor = false
+        TW.gui.handpickedcolor = false
     }
     else {
-      // shuffle on entire array is better than random sorting function on each element
-      var randomColorList = shuffle(TW.gui.colorList)
+
+      let colList = []
+      if (TW.conf.randomizeClusterColors) {
+        // shuffle on entire array is better than random sorting function on each element
+        colList = shuffle(TW.gui.colorList)
+      }
+      else {
+        colList = TW.gui.colorList
+      }
+
+      let nColors = TW.gui.colorList.length
 
       for(var j in TW.nodeIds) {
           var the_node = TW.Nodes[ TW.nodeIds[j] ]
@@ -1020,13 +1029,27 @@ function clusterColoring(daclass) {
 
           if (! the_node.hidden) {
             var attval = ( !isUndef(the_node.attributes) && !isUndef(the_node.attributes[daclass]) )? the_node.attributes[daclass] : TW.partialGraph.graph.nodes(TW.nodeIds[j])[daclass];
-            TW.partialGraph.graph.nodes(TW.nodeIds[j]).color = randomColorList[ attval ]
-            TW.partialGraph.graph.nodes(TW.nodeIds[j]).customAttrs.alt_color = randomColorList[ attval ]
+
+            let theColor
+
+            if (attval == '_non_numeric_') {
+              theColor = '#bbb'
+            }
+            else if (! isNaN(parseInt(attval))) {
+              theColor = colList[ attval ]
+            }
+            else {
+              let someRepresentativeInt = stringToSomeInt(attval) % nColors
+              theColor = colList[ someRepresentativeInt ]
+            }
+
+            TW.partialGraph.graph.nodes(TW.nodeIds[j]).color = theColor
+            TW.partialGraph.graph.nodes(TW.nodeIds[j]).customAttrs.alt_color = theColor
             TW.partialGraph.graph.nodes(TW.nodeIds[j]).customAttrs.altgrey_color = false
           }
       }
       // set the global state
-      TW.handpickedcolor = true
+      TW.gui.handpickedcolor = true
     }
 
     // Edge precompute alt_rgb by new source-target nodes-colours combination
@@ -1034,6 +1057,15 @@ function clusterColoring(daclass) {
 
     set_ClustersLegend ( daclass )
     TW.partialGraph.render();
+}
+
+
+function stringToSomeInt (anyString) {
+  let charCodeSum = 0
+  for (let i = 0 ; i < anyString.length ; i++) {
+    charCodeSum += anyString.charCodeAt(i)
+  }
+  return charCodeSum
 }
 
 //just for fun

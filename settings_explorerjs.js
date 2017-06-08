@@ -63,13 +63,37 @@ TW.conf = (function(TW){
   //   - 'off'  :       no binning (each distinct value will be a legend item)
   TWConf.facetOptions = {
 
-    //      gexf       |                 |  custom  |
-    //    attribute    |    coloring     |  number  |    binning
-    //      title      |    function     |  of bins |     mode
-    // --------------------------------------------------------------------
-    'age'             : {'col': "gradient", 'n': 4,  'binmode': 'samerange'},
-    'growth_rate'     : {'col': "heatmap",  'n': 5,  'binmode': 'samepop'  },
-    'PageRank'        : {'col': "gradient", 'n': 6,  'binmode': 'samerange'  },
+    // attr title
+    'age'             : {
+                         'col': "gradient",       // coloring function
+                         'binmode': 'samerange',  // binning mode
+                         'n': 4,                  // custom number of bins
+                         'menutransl': "Date initiale d'apparition du terme dans le corpus"
+                      },
+    'growth_rate'     : {
+                        'col': "heatmap",
+                        'binmode': 'samepop',
+                        'n': 5,
+                        'menutransl': 'Tendances et oubliés de la semaine'
+                      },
+    'PageRank'        : {
+                         'col': "gradient",
+                         'binmode': 'samerange',
+                         'n': 6,
+                         'menutransl': 'Importance dans le réseau, méthode Google',
+                       },
+   'Modularity Class' : { // <== exemple with no binning
+                         'col': "cluster",
+                         'binmode': 'off',
+                         'menutransl': 'Groupes de voisins, méthode des classes de modularité'
+                       },
+   'Eigenvector Centrality':{
+                         'col':"heatmap" ,
+                         'binmode': 'samepop',
+                         'n': 9,
+                         'menutransl': 'Centralité par vecteurs propres'
+                       },
+
     'numuniform'      : {'col': "heatmap",  'n': 7,  'binmode': 'samepop'  },
     'numpareto'       : {'col': "gradient", 'n': 5,  'binmode': 'samerange'},
     'intfewvalues'    : {'col': "cluster" , 'n': 4,  'binmode': 'samerange'},
@@ -80,15 +104,13 @@ TW.conf = (function(TW){
     'betweeness'      : {'col': "gradient", 'n': 4,  'binmode': 'samepop'  },
     'level'           : {'col': "heatmap" ,          'binmode': 'off'  },
     'weight'          : {'col': "heatmap" , 'n': 5,  'binmode': 'samerange'  },
-    'Weighted Degree' : {'col': "gradient", 'n': 8,  'binmode': 'samepop'  },
-'Eigenvector Centrality':{'col':"heatmap" , 'n': 9,  'binmode': 'samepop'  },
+    'Weighted Degree' : {'col': "heatmap", 'n': 8,  'binmode': 'samerange'  },
     'out-degree'      : {'col': "heatmap" , 'n': 3,  'binmode': 'samepop'  },
-    'cluster_universal_index'   : {'col': "cluster" , 'binmode': 'off'},
-    'community_orphan'   : {'col': "cluster" ,          'binmode': 'off'},
-
-    'Modularity Class': {'col': "cluster",           'binmode': 'off'},  // <== exemple with no binning
     'countryuniform'  : {'col': "cluster" ,          'binmode': 'off'},
-    'countrypareto'   : {'col': "cluster" ,          'binmode': 'off'},
+    'countrypareto'    : {'col': "cluster" ,          'binmode': 'off'},
+'cluster_universal_index': {'col': "cluster" ,         'binmode': 'off'      },
+       'community_orphan' : {'col': "cluster" ,        'binmode': 'off'      }
+
   }
 
   // NB  other cases with no binning:
@@ -103,6 +125,9 @@ TW.conf = (function(TW){
 
   // other POSS option: display attribute value in label or not ?
 
+
+  // when coloring method is "cluster", should the colors change each time ?
+  TWConf.randomizeClusterColors = false
 
 
   // default clustering attribute (<---> used for initial node colors)

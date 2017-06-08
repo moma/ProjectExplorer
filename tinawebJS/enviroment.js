@@ -10,8 +10,11 @@ TW.gui.circleSize = 0;
 TW.gui.checkBox=false;
 TW.gui.shiftKey=false;
 TW.gui.manuallyChecked = false;
+TW.gui.handpickedcolor = false;     // <= changes edge rendering strategy
 TW.gui.lastFilters = {}
 
+
+// POSS: themed variants (ex: for dark bg vs light bg)
 // contrasted color list for clusterColoring()
 TW.gui.colorList = ["#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941",
          "#006FA6", "#A30059", "#FFDBE5", "#7A4900", "#0000A6", "#63FFAC", "#B79762",

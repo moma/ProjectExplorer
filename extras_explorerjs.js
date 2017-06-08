@@ -19,11 +19,7 @@ function changeGraphAppearanceByFacets( manualflag ) {
 
     // for GUI html: if present, rename raw attribute key by a proper label
     var AttsTranslations = {
-      'clust_louvain': 'Groupes de voisins, méthode de Louvain',
-      'PageRank': 'Importance dans le réseau, méthode Google',
-      'age': 'Date initiale d\'apparition du terme dans le corpus',
-      'growth_rate': 'Tendances et oubliés de la semaine',
-      'Modularity Class': 'Groupes de voisins, méthode des classes de modularité'
+
     }
 
 
@@ -71,10 +67,15 @@ function changeGraphAppearanceByFacets( manualflag ) {
 
           // family label :)
           var lab_att_s ;
-          if (AttsTranslations[att_s])  lab_att_s = AttsTranslations[att_s]
+          if (att_s == 'clust_louvain') {
+            lab_att_s = 'Groupes de voisins, méthode de Louvain'
+          }
+          else if (TW.conf.facetOptions[att_s] && TW.conf.facetOptions[att_s]['menutransl']) {
+            lab_att_s = TW.conf.facetOptions[att_s]['menutransl']
+          }
           else lab_att_s = att_s
-          color_menu_info += '<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+lab_att_s+'('+att_c+')'+'</a></li>'
 
+          color_menu_info += '<li><a href="#" onclick=\''+the_method+'("'+att_s+'")\'>By '+lab_att_s+'('+att_c+')'+'</a></li>'
         }
 
         // POSS add cumulated degree via TW.partialGraph.graph.degree(nid)
@@ -219,7 +220,7 @@ function SomeEffect( ValueclassCode ) {
 function graphResetColor(){
 
     // reset global var
-    TW.handpickedcolor = false
+    TW.gui.handpickedcolor = false
 
     // reset each node's color and label
     for (var j in TW.nodeIds) {

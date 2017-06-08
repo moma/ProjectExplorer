@@ -117,7 +117,7 @@ function cancelSelection (fromTagCloud, settings) {
       // console.log("cancelSelection: node", n)
       if (n) {
         n.active = false;
-        n.color = TW.handpickedcolor ? n.customAttrs['alt_color'] : n.customAttrs['true_color'];
+        n.color = TW.gui.handpickedcolor ? n.customAttrs['alt_color'] : n.customAttrs['true_color'];
         n.customAttrs.grey = 0
         n.customAttrs.forceLabel = 0
       }
