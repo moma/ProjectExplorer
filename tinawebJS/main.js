@@ -506,7 +506,8 @@ function mainStartGraph(inFormat, inData, twInstance) {
       // ==================================================================
 
       // NB the list of nodes and edges from TW.graphData will be changed
-      //    by changeLevel, changeType or subset sliders
+      //    by changeLevel, changeType or subset sliders => no need to keep it
+      delete TW.graphData
 
       // shortcuts to the renderer and camera
       TW.cam  = TW.partialGraph.camera
