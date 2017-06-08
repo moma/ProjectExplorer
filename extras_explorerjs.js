@@ -17,12 +17,6 @@ function changeGraphAppearanceByFacets( manualflag ) {
     if ( !isUndef(manualflag) && !TW.conf.colorByAtt ) TW.conf.colorByAtt = manualflag;
     if(!TW.conf.colorByAtt) return;
 
-    // for GUI html: if present, rename raw attribute key by a proper label
-    var AttsTranslations = {
-
-    }
-
-
     // settings to function name
     var colorFuns = {
       'heatmap': "heatmapColoring",
@@ -802,4 +796,97 @@ function activateModules() {
             //                └── "crowdsourcingTerms"+"/suggest.js"
         }
     }
+}
+
+
+// Settings edition
+// =================
+function fillAttrsInForm() {
+  var actypes = getActivetypes()
+  for (let tid in actypes) {
+    let ty = actypes[tid]
+
+    let elChooser = document.getElementById('choose-attr')
+
+    // each facet family or clustering type was already prepared
+    for (let att in TW.Clusters[ty]) {
+      let opt = document.createElement('option')
+      opt.value = att
+      opt.innerText = att
+      elChooser.appendChild(opt)
+
+      console.log(opt)
+    }
+  }
+}
+
+
+function binmodeOpenNBins() {
+  let mainq = document.getElementById('attr-binmode')
+  let subq  = document.getElementById('attr-nbins-div')
+  if (mainq.value == "samepop" || mainq.value == "samerange") {
+    subq.style.display = 'block'
+  }
+  else {
+    subq.style.display = 'none'
+  }
+}
+
+function showAttrConf() {
+  let attrTitle = this.value
+  let settings = TW.conf.facetOptions[attrTitle]
+  if (settings) {
+    document.getElementById('attr-col').value = settings.col
+    document.getElementById('attr-binmode').value = settings.binmode
+    document.getElementById('attr-translation').value = settings.menutransl
+    if(settings.n) {
+      document.getElementById('attr-nbins-div').style.display = 'block'
+      document.getElementById('attr-nbins').value = settings.n
+    }
+  }
+}
+
+
+// writes new attribute configuration from user form AND recreates facet bins
+// processing time: ~~ 1.5 ms for 100 nodes
+function newAttrConf() {
+  let attrTitle = document.getElementById('choose-attr').value
+
+  // read values from GUI
+  TW.conf.facetOptions[attrTitle] = {
+     'col': document.getElementById('attr-col').value,
+     'binmode': document.getElementById('attr-binmode').value,
+     'n': document.getElementById('attr-nbins').value,
+     'menutransl': document.getElementById('attr-translation').value
+  }
+
+  // find the corresponding types
+  let relevantTypes = {}
+  for (let ty in TW.Clusters) {
+    if (TW.Clusters[ty][attrTitle]) {
+      relevantTypes[ty] = true
+    }
+  }
+
+  // reparse values (avoids keeping them in RAM since parseCustom)
+  tmpVals = {}
+  for (let nid in TW.Nodes) {
+    let n = TW.Nodes[nid]
+    if (relevantTypes[n.type]) {
+      tmpVals = updateValueFacets(tmpVals, n, attrTitle)
+    }
+  }
+
+  let newClustering = facetsBinning (tmpVals)
+
+  // write result to global TW.Clusters
+  for (let ty in newClustering) {
+    TW.Clusters[ty][attrTitle] = newClustering[ty][attrTitle]
+  }
+
+  // update the GUI menu
+  changeGraphAppearanceByFacets(true)
+
+  // console.log("reparse raw result", tmpVals)
+  // console.log("reparse binned result", newClustering)
 }

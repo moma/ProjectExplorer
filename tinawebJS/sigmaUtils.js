@@ -915,8 +915,9 @@ function heatmapColoring(daclass) {
   var tickThresholds = TW.Clusters[ty][daclass]
 
   // verifications
-  if (tickThresholds.length != nColors) {
-    console.warn (`heatmapColoring setup mismatch: TW.Clusters ticks ${tickThresholds} from scanClusters should == nColors ${nColors}`)
+  if (tickThresholds.length - 1 != nColors) {
+    console.warn (`heatmapColoring setup mismatch: TW.Clusters ticks ${tickThresholds.length} - 1 non_numeric from scanClusters should == nColors ${nColors}`)
+    nColors = tickThresholds.length - 1
   }
 
   binColors = getHeatmapColors(nColors)
@@ -964,7 +965,7 @@ function heatmapColoring(daclass) {
     }
   }
 
-  console.info('coloring distribution per tick thresholds' , totalsPerBinMin)
+  // console.info('coloring distribution per tick thresholds' , totalsPerBinMin)
 
   // Edge precompute alt_rgb by new source-target nodes-colours combination
   repaintEdges()

@@ -332,7 +332,7 @@
 
 
 /* small width or small height */
-@media(max-width:768px), (max-height:500px) {
+@media(max-width:768px), (max-height:550px) {
 
   /* zoombar reduction */
   .zoombarbuttons img {

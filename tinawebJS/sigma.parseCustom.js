@@ -274,7 +274,7 @@ function sortNodeTypes(observedTypesDict) {
 
 function facetsBinning (valuesIdx) {
 
-  console.debug("facetsBinning: valuesIdx", valuesIdx)
+  // console.debug("facetsBinning: valuesIdx", valuesIdx)
 
   let facetIdx = {}
 
@@ -921,7 +921,7 @@ function updateRelations(typedRelations, edgeCateg, srcId, tgtId){
 
 
 // To fill the reverse map: values => nodeids of a given type
-function updateValueFacets(facetIdx, aNode) {
+function updateValueFacets(facetIdx, aNode, optionalFilter) {
 
   if (!facetIdx[aNode.type])      facetIdx[aNode.type]={}
   for (var at in aNode.attributes) {
@@ -930,39 +930,43 @@ function updateValueFacets(facetIdx, aNode) {
     if (at == 'category')
       continue
 
-    let val = aNode.attributes[at]
+    // attribute filter  undef or str: acceptedAttrName
+    if (isUndef(optionalFilter) || at == optionalFilter) {
+      let val = aNode.attributes[at]
 
-    if (!facetIdx[aNode.type][at])  facetIdx[aNode.type][at]={'vals':{'vstr':[], 'vnum':[]},'map':{}}
+      if (!facetIdx[aNode.type][at])  facetIdx[aNode.type][at]={'vals':{'vstr':[], 'vnum':[]},'map':{}}
 
-    // shortcut
-    var indx = facetIdx[aNode.type][at]
+      // shortcut
+      var indx = facetIdx[aNode.type][at]
 
-    // determine observed type of this single value
-    let castVal = Number(val)
+      // determine observed type of this single value
+      let castVal = Number(val)
 
-    // this discovered datatype will be a condition (no bins if not mostly numeric)
-    let dtype = ''
-    if (isNaN(castVal)) {
-      dtype = 'vstr'
+      // this discovered datatype will be a condition (no bins if not mostly numeric)
+      let dtype = ''
+      if (isNaN(castVal)) {
+        dtype = 'vstr'
+      }
+      else {
+        dtype = 'vnum'
+        val = castVal           // we keep it as number
+      }
+
+      if (!indx.map[val]) indx.map[val] = []
+
+      indx.vals[dtype].push(val)              // for ordered scale
+      indx.map[val].push(aNode.id)            // inverted index
+
+
+      // POSSIBLE with the discovered datatype
+      //  => it would also allow to index text values (eg country, affiliation, etc.)
+      //     with the strategy "most frequent distinct values" + "others"
+      //     which would be useful (eg country, affiliation, etc.) !!!
+
     }
-    else {
-      dtype = 'vnum'
-      val = castVal           // we keep it as number
-    }
-
-    if (!indx.map[val]) indx.map[val] = []
-
-    indx.vals[dtype].push(val)              // for ordered scale
-    indx.map[val].push(aNode.id)            // inverted index
-
-
-    // POSSIBLE with the discovered datatype
-    //  => it would also allow to index text values (eg country, affiliation, etc.)
-    //     with the strategy "most frequent distinct values" + "others"
-    //     which would be useful (eg country, affiliation, etc.) !!!
-
   }
   return facetIdx
+
 }
 
 

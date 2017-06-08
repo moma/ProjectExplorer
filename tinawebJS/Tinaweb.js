@@ -1010,6 +1010,11 @@ var TinaWebJS = function ( sigmacanvas ) {
         }
       }
 
+
+      // attributes' facet-options init & handler
+      fillAttrsInForm()
+      document.getElementById('choose-attr').onchange = showAttrConf
+
       // cancelSelection(false);
     }
 

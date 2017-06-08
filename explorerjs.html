@@ -60,6 +60,7 @@
 
   <link type="text/css" href="twitterAPI2/twitterlibs/tweet.light.ltr.css" rel="stylesheet"/>
   <link type="text/css" href="twitterAPI2/twitterlibs/custom.css" rel="stylesheet"/>
+  <link type="text/css" href="libs/css2/user_form.css" rel="stylesheet"/>
 
   <!-- JS -->
   <!-- <script src="script.js"></script> -->
@@ -330,8 +331,8 @@
                   </a>
               </li>
 
-               <li>
-                  <a href="#savemodal" id="saveAs" class="zoombarbuttons" data-toggle="modal">
+              <li>
+                  <a href="#savemodal" id="saveAs" class="zoombarbuttons" data-toggle="modal" data-target="#savemodal">
                     <img style="width:28px" title="Save As..." src="libs/img2/save.png"></img>
                   </a>
               </li>
@@ -366,7 +367,14 @@
               <li>
                   <a href="#" id="noverlapButton" class="zoombarbuttons"
                      title="Disperse Overlapping Nodes">
-                    <img src="libs/img2/disperse.png" style="width:36px">
+                    <img src="libs/img2/disperse.png" style="width:32px">
+                  </a>
+              </li>
+
+
+              <li>
+                  <a href="#facet-options" id="facets" class="zoombarbuttons" data-toggle="modal" data-target="#facet-options">
+                    <img style="width:32px" title="Facets coloring options" src="libs/img2/facet_options.png"></img>
                   </a>
               </li>
 
@@ -578,6 +586,91 @@
     </div>
 
 
+    <div id="facet-options" class="modal fade">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h4 class="modal-title">Facet options</h4>
+          </div>
+          <div class="modal-body">
+            <div class="uform-white">
+              <form id="facet_options_form" onsubmit="console.info('submitted')">
+                 <h3 class="formcat">Edit attribute:</h3><br/>
+
+                   <div class="question">
+                     <div class="input-group">
+                       <label for="choose-attr" class="smlabel input-group-addon">Attribute</label>
+                       <select id="choose-attr" name="choose-attr"
+                               class="custom-select form-control">
+                               <option selected value="0"></option>
+                               <!-- filled by fillAttrsInForm() -->
+                       </select>
+                     </div>
+                   </div>
+
+                   <div class="question">
+                     <div class="input-group">
+                       <label for="attr-col" class="smlabel input-group-addon">Coloring function</label>
+                       <select id="attr-col" name="attr-col"
+                               class="custom-select form-control">
+                           <option selected value="0"></option>
+                           <option value="cluster">cluster</option>
+                           <option value="gradient">gradient</option>
+                           <option value="heatmap">heatmap</option>
+                       </select>
+                     </div>
+                   </div>
+
+                   <div class="question">
+                     <div class="input-group">
+                       <label for="attr-binmode" class="smlabel input-group-addon">Binning Mode</label>
+                       <select id="attr-binmode" name="attr-binmode"
+                               class="custom-select form-control" onchange="binmodeOpenNBins()">
+                           <option selected value="0"></option>
+                           <option value="off">No binning</option>
+                           <option value="samerange">Same range between ticks</option>
+                           <option value="samepop">Same population in each bin</option>
+                       </select>
+                     </div>
+                   </div>
+
+                   <div class="question conditional-q" id="attr-nbins-div">
+                     <div class="input-group">
+                       <label for="attr-nbins" class="smlabel input-group-addon">Number of bins</label>
+                       <input id="attr-nbins" name="attr-nbins" maxlength="2"
+                              type="text" class="form-control autocomp" placeholder="number of bins"
+                              onchange="let castint = parseInt(this.value) ; if (castint != this.value || castint < 2) {this.value = 2} else if(castint > 24) {this.value = 24}"
+                              >
+                      </div>
+                      <p class="legend">Please input an integer value between 2 and 24.</p>
+                   </div>
+
+                   <div class="question input-group">
+                     <label for="attr-translation" class="smlabel input-group-addon"> Title </label>
+                     <input id="attr-translation" name="attr-translation" maxlength="70"
+                            type="text" class="form-control autocomp" placeholder="a text for the color menu"
+                            >
+                   </div>
+
+              </form>
+
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-default" data-dismiss="modal">
+              Cancel
+            </button>
+            <button class="btn btn-primary"
+              type=button onclick="newAttrConf()" data-dismiss="modal">
+              Ok
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
     <div id="geomapmodal" class="modal fade">
 
         <!-- <div class="modal-content"> -->
@@ -641,8 +734,8 @@
   <script src="settings_explorerjs.js" type="text/javascript" language="javascript"></script>
   <script src="tinawebJS/enviroment.js" type="text/javascript" language="javascript"></script>
   <script src="tinawebJS/sigma.parseCustom.js" type="text/javascript" language="javascript"></script>
-  <script src="extras_explorerjs.js" type="text/javascript" language="javascript"></script>
   <script src="tinawebJS/sigmaUtils.js" type="text/javascript" language="javascript"></script>
+  <script src="extras_explorerjs.js" type="text/javascript" language="javascript"></script>
   <script src="tinawebJS/methods.js" type="text/javascript" language="javascript"></script>
   <!-- <script src="tinawebJS/asyncFA2.js" type="text/javascript" language="javascript"></script> -->
   <script src="tinawebJS/Tinaweb.js" type="text/javascript" language="javascript"></script>
