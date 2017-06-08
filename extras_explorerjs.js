@@ -286,7 +286,7 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
     }
     else {
       var LegendDiv = ""
-      LegendDiv += `    <div class="legend-title">Map Legend <small>(${daclass})</small></div>`
+      LegendDiv += `    <div class="legend-title">${daclass}</div>`
       LegendDiv += '    <div class="legend-scale">'
       LegendDiv += '      <ul class="legend-labels">'
 
