@@ -824,6 +824,11 @@ function fillAttrsInForm() {
 
     let elChooser = document.getElementById('choose-attr')
 
+    // remove the possible previous options from possible previous graphs
+    while (elChooser.lastChild) {
+      elChooser.removeChild(elChooser.lastChild)
+    }
+
     // each facet family or clustering type was already prepared
     for (let att in TW.Clusters[ty]) {
       let opt = document.createElement('option')

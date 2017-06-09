@@ -167,7 +167,7 @@ function createFilechooserEl () {
         }
         else {
           // we might have a previous graph opened
-          TW.instance.clearSigma()
+          TW.resetGraph()
 
           // run
           mainStartGraph(theFormat, rdr.result, TW.instance)
@@ -1085,8 +1085,8 @@ function jsActionOnGexfSelector(gexfBasename){
 
     var newDataRes = AjaxSync({ "url": window.location.origin+serverPrefix+'/'+gexfPath });
 
-    // remove any previous instance
-    TW.instance.clearSigma()
+    // remove any previous instance and flags
+    TW.resetGraph()
 
     mainStartGraph(newDataRes["format"], newDataRes["data"], TW.instance)
     writeLabel(gexfBasename)

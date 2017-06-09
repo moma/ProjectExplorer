@@ -80,6 +80,25 @@ TW.setState = function( args ) {
 };
 
 
+TW.resetGraph = function() {
+  // call the sigma graph clearing
+  TW.instance.clearSigma()
+
+  // TW.categories, TW.Nodes and TW.Edges will be reset by mainStartGraph
+
+  // reset remaining global vars
+  TW.labels = []
+
+  // reset rendering gui flags
+  TW.gui.selectionActive = false
+  TW.gui.handpickedcolor = false
+
+  // reset other gui flags
+  TW.gui.circleSize = 0
+  TW.gui.checkBox=false
+  TW.gui.lastFilters = {}
+}
+
 
 // settings: {norender: Bool}
 function cancelSelection (fromTagCloud, settings) {
@@ -112,6 +131,9 @@ function cancelSelection (fromTagCloud, settings) {
     }
 
     //Nodes colors go back to previous
+    // £TODO partly duplicate effort with (de)highlightSelectedNodes
+    //       => could be replaced by a (de)highlightSelectedAndNeighbors
+    //          on smaller set (here entire nodeset!)
     for(let j in TW.nodeIds){
       let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
       // console.log("cancelSelection: node", n)
@@ -120,6 +142,7 @@ function cancelSelection (fromTagCloud, settings) {
         n.color = TW.gui.handpickedcolor ? n.customAttrs['alt_color'] : n.customAttrs['true_color'];
         n.customAttrs.grey = 0
         n.customAttrs.forceLabel = 0
+        n.customAttrs.highlight = 0
       }
     }
 
