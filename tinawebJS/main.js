@@ -190,12 +190,12 @@ function syncRemoteGraphData () {
               mapLabel = '"'+elements.join('" , "')+'"';
           }
 
-          var bridgeRes = AjaxSync({ url: theurl, data:thedata, type:'GET', datatype:'json' })
+          var bridgeRes = AjaxSync({ url: theurl, data:thedata, type:'GET' })
 
           // should be a js object with 'nodes' and 'edges' properties
           inData = bridgeRes.data
 
-          if (TW.conf.debug.logFetchers)   console.info("JSON input data", inData)
+          if (TW.conf.debug.logFetchers)   console.info("JSON input str", inData)
         }
         else {
             console.warn ("=> unsupported query type !")
