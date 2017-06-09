@@ -147,20 +147,9 @@ var SigmaUtils = function () {
           context.shadowBlur = 0;
         }
 
-        // Node fill:
-        if (settings('borderSize') > 0) {
-          context.beginPath();
-          context.fillStyle = "#222";  // metro ticket
-          context.arc(
-            X,Y,
-            size + settings('borderSize'),
-            0,
-            Math.PI * 2,
-            true
-          );
-          context.closePath();
-          context.fill();
-        }
+        // active node fill (subcall):
+        var nodeRenderer = sigma.canvas.nodes.def;
+        nodeRenderer(node, context, settings);
       }
       else if (neighborFlag) {
         // larger neighbors or highlight
@@ -291,6 +280,14 @@ var SigmaUtils = function () {
         var nodeSize = node[prefix + 'size']
         var nodeColor = node.color || settings('defaultNodeColor')
 
+        // our shapes are dependant on type AND categories
+        // so unless we rename types at parsing and use sigma's
+        // "def vs someType" syntax we need the bool and conditions
+        // NB cost of this condition seems small:
+        //    - without: [11 - 30] ms for 23 nodes
+        //    - with   : [11 - 33] ms for 23 nodes
+        var catSemFlag = (TW.categories.length > 1 && node.type == TW.categories[0])
+
         // mode variants
         if (TW.gui.selectionActive) {
           // passive nodes should blend in the grey of twEdgeGreyColor
@@ -320,8 +317,8 @@ var SigmaUtils = function () {
             }
           }
           else if(node.active) {
-            borderColor = null
-            // the selected nodes: fill not important because label+background overlay
+            // called by label+background overlay cf. "subcall"
+            nodeColor = "#222" // metro ticket
           }
         }
         // highlight AND (NOT selectionActive) => highlight just this one time
@@ -335,26 +332,56 @@ var SigmaUtils = function () {
         if (settings('twNodeRendBorderSize') > 0) {
           context.fillStyle = borderColor
           context.beginPath();
-          context.arc(
-            X,Y,
-            borderSize,
-            0,
-            Math.PI * 2,
-            true
-          );
+
+          if (catSemFlag) {
+            // (Square shape)
+            // thinner borderSize for squares looks better
+            // otherwise hb = (nodeSize + borderSize) / 2
+            let hb = (nodeSize + borderSize/3) / 2
+            context.moveTo(X + hb, Y + hb);
+            context.lineTo(X + hb, Y - hb);
+            context.lineTo(X - hb, Y - hb);
+            context.lineTo(X - hb, Y + hb);
+            context.lineTo(X + hb, Y + hb);
+          }
+          else {
+            // (Circle shape)
+            context.arc(
+              X,Y,
+              borderSize,
+              0,
+              Math.PI * 2,
+              true
+            );
+          }
           context.closePath();
           context.fill();
         }
 
         context.fillStyle = nodeColor;
         context.beginPath();
-        context.arc(
-          X,Y,
-          nodeSize,
-          0,
-          Math.PI * 2,
-          true
-        );
+
+
+        if (catSemFlag) {
+          // (Square shape)
+          let hn = nodeSize / 2
+          context.moveTo(X + hn, Y + hn);
+          context.lineTo(X + hn, Y - hn);
+          context.lineTo(X - hn, Y - hn);
+          context.lineTo(X - hn, Y + hn);
+          context.lineTo(X + hn, Y + hn);
+        }
+        else {
+          // (Circle shape)
+          context.arc(
+            X,Y,
+            nodeSize,
+            0,
+            Math.PI * 2,
+            true
+          );
+        }
+
         context.closePath();
         context.fill();
     };
@@ -362,6 +389,8 @@ var SigmaUtils = function () {
 
     // hover rendering with size boost,
     // except when active because normally then active label has been rendered
+    // POSSible: we could also change the node color on hover to make it more visible
+    //           (=> just before calling nodeRenderer)
     this.twRender.canvas.hovers.largerall = function(node, context, settings) {
         var x,
             y,
@@ -442,7 +471,9 @@ var SigmaUtils = function () {
           }
 
           // Node:
-          var nodeRenderer = sigma.canvas.nodes[node.type] || sigma.canvas.nodes.def;
+          // var nodeRenderer = sigma.canvas.nodes[node.type] || sigma.canvas.nodes.def;  // <-- would become useful if we used types as *rendering types* to leverage sigma's "def vs someType" syntax
+
+          var nodeRenderer = sigma.canvas.nodes.def;
           nodeRenderer(node, context, settings);
 
           // Display the label:
@@ -870,8 +901,8 @@ function repaintEdges() {
 
 
           if (src && tgt) {
-            let src_color = src.customAttrs.alt_color || '#555'
-            let tgt_color = tgt.customAttrs.alt_color || '#555'
+            let src_color = src.customAttrs.alt_color || src.color || '#555'
+            let tgt_color = tgt.customAttrs.alt_color || tgt.color || '#555'
             e.customAttrs.alt_rgb = sigmaTools.edgeRGB(src_color,tgt_color)
             // we don't set e.color because opacity may vary if selected or not
           }

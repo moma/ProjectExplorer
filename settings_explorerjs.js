@@ -129,7 +129,6 @@ TW.conf = (function(TW){
   // when coloring method is "cluster", should the colors change each time ?
   TWConf.randomizeClusterColors = false
 
-
   // default clustering attribute (<---> used for initial node colors)
   TWConf.nodeClusAtt = "modularity_class"
 
@@ -220,12 +219,12 @@ TW.conf = (function(TW){
   // ------------------------
   TWConf.sigmaJsDrawingProperties = {
       // nodes
-      defaultNodeColor: "#333",
+      defaultNodeColor: "#ddd",
       twNodeRendBorderSize: 1,           // node borders (only iff ourRendering)
       twNodeRendBorderColor: "#222",
 
       // edges
-      minEdgeSize: 2,                    // in fact used in tina as edge size
+      minEdgeSize: 1,                    // in fact used in tina as edge size
       defaultEdgeType: 'curve',          // 'curve' or 'line' (curve only iff ourRendering)
       twEdgeDefaultOpacity: 0.4,         // initial opacity added to src/tgt colors
 
@@ -277,7 +276,7 @@ TW.conf = (function(TW){
 
   // relative sizes (iff ChangeType == both nodetypes)
   TWConf.sizeMult = [];
-  TWConf.sizeMult[0] = 1.5;    // ie for node type 0
+  TWConf.sizeMult[0] = 4.0;    // ie for node type 0
   TWConf.sizeMult[1] = 1.0;    // ie for node type 1
 
 
