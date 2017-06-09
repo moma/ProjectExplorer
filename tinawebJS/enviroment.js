@@ -1027,54 +1027,27 @@ function updateSearchLabels(id,name,type){
     });
 }
 
-function extractContext(string, context) {
-    var matched = string.toLowerCase().indexOf(context.toLowerCase());
-
-    if (matched == -1)
-        return string.slice(0, 20) + '...';
-
-    var begin_pts = '...', end_pts = '...';
-
-    if (matched - 20 > 0) {
-        var begin = matched - 20;
-    } else {
-        var begin = 0;
-        begin_pts = '';
-    }
-
-    if (matched + context.length + 20 < string.length) {
-        var end = matched + context.length + 20;
-    } else {
-        var end = string.length;
-        end_pts = '';
-    }
-
-    str = string.slice(begin, end);
-
-    if (str.indexOf(" ") != Math.max(str.lastIndexOf(" "), str.lastIndexOf(".")))
-        str = str.slice(str.indexOf(" "), Math.max(str.lastIndexOf(" "), str.lastIndexOf(".")));
-
-    return begin_pts + str + end_pts;
-}
-
-
-// TODO check duplicate function with sigmaUtils exactfind()
-function searchLabel(string){
-    var id_node = '';
-    var n;
-
-    nds = TW.partialGraph._core.graph.nodes.filter(function(x){return !x["hidden"]});
-    for(var i in nds){
-        n = nds[i]
-            if (n.label == string) {
-                return n;
-            }
-    }
-}
 //============================ < / SEARCH > ============================//
 
 
 //============================= < OTHER ACTIONS > =============================//
+function createWaitIcon(idname, width) {
+  let icon = document.createElement('img')
+
+  icon.src = TW.conf.libspath + '/img2/loader.gif'
+
+  icon.style.position = 'absolute'
+  icon.style.left = '0'
+  icon.style.width = width || '100%'
+
+  if (idname) {
+    icon.id = idname
+  }
+
+  return icon
+}
+
+
 function jsActionOnGexfSelector(gexfBasename){
     let gexfPath = TW.gexfPaths[gexfBasename] || gexfBasename+".gexf"
     let serverPrefix = ''

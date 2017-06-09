@@ -52,28 +52,12 @@ var AjaxSync = function(args) {
     return Result;
 }
 
-
-function getClientTime(){
-    var totalSec = new Date().getTime() / 1000;
-    var d = new Date();
-    var hours = d.getHours();
-    var minutes = parseInt( totalSec / 60 ) % 60;
-    var seconds = (totalSec % 60).toFixed(4);
-    var result = (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds  < 10 ? "0" + seconds : seconds);
-    return result;
-}
-
 function compareNumbers(a, b) {
     return a - b;
 }
 
 function isNumeric(a) {
     return parseFloat(a) == a ;
-}
-
-// seconds since page load
-function tstamp() {
-    return parseInt(performance.now()) ;
 }
 
 //python range(a,b) | range(a)
@@ -88,40 +72,40 @@ function calc_range(begin, end) {
   return result;
 }
 
-
-//to general utils (not used btw)
-function cloneObject(source) {
-    for (i in source) {
-        if (typeof source[i] == 'source') {
-            this[i] = new cloneObject(source[i]);
-        }
-        else{
-            this[i] = source[i];
-  }
-    }
-}
-
 function isUndef(variable){
     if(typeof(variable)==="undefined") return true;
     else return false;
 }
 
 
-$.fn.toggleClick = function(){
-        methods = arguments, // store the passed arguments for future reference
-            count = methods.length; // cache the number of methods
+function stringToSomeInt (anyString) {
+  let charCodeSum = 0
+  for (let i = 0 ; i < anyString.length ; i++) {
+    charCodeSum += anyString.charCodeAt(i)
+  }
+  return charCodeSum
+}
 
-        //use return this to maintain jQuery chainability
-        return this.each(function(i, item){
-            // for each element you bind to
-            index = 0; // create a local counter for that element
-            $(item).click(function(){ // bind a click handler to that element
-                return methods[index++ % count].apply(this,arguments); // that when called will apply the 'index'th method to that element
-                // the index % count means that we constrain our iterator between 0 and (count-1)
-            });
-        });
-};
+// shuffle algo from stackoverflow.com/a/6274398/2489184
+function shuffle(array) {
+    var counter = array.length;
 
+    // While there are elements in the array
+    while (counter > 0) {
+        // Pick a random index
+        let index = Math.floor(Math.random() * counter);
+
+        // Decrease counter by 1
+        counter--;
+
+        // And swap the last element with it
+        let temp = array[counter];
+        array[counter] = array[index];
+        array[index] = temp;
+    }
+
+    return array;
+}
 
 getUrlParam = (function () {
     var get = {
@@ -207,24 +191,11 @@ function ArraySortByValue(array, sortFunc){
 }
 
 
-function is_empty(obj) {
-    // Assume if it has a length property with a non-zero value
-    // that that property is correct.
-    if (obj.length && obj.length > 0)    return false;
-    if (obj.length && obj.length === 0)  return true;
-
-    for (var key in obj) {
-        if (hasOwnProperty.call(obj, key))    return false;
-    }
-    return true;
-}
-
-
 function getByID(elem) {
     return document.getElementById(elem);
 }
 
-
+// NB: check if we could use sigma.plugins.animate.parseColor instead
 // hex can be RGB (3 or 6 chars after #) or RGBA (4 or 8 chars)
 function hex2rgba(sent_hex) {
     if (!sent_hex) {
@@ -347,6 +318,7 @@ var linkCheck = function(url) {
 
  /**
   * function to load a given css file
+  * cf. activateModules()
   */
  loadCSS = function(href) {
      var cssLink = $("<link rel='stylesheet' type='text/css' href='"+href+"'>");
@@ -355,6 +327,7 @@ var linkCheck = function(url) {
 
 /**
  * function to load a given js file
+ * cf. activateModules()
  */
  loadJS = function(src) {
      var jsLink = $("<script type='text/javascript' src='"+src+"'>");

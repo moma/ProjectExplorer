@@ -82,11 +82,11 @@ function SelectionEngine() {
         }
         else {
             var id_node = '';
-            var results = find(string)
+            var resultNids = find(string)
 
             var coincd=[]
-            for(var i in results) {
-                coincd.push(results[i].id)
+            for(var i in resultNids) {
+                coincd.push(resultNids[i])
             }
             var targeted = this.SelectorEngine( {
                             addvalue:TW.gui.checkBox,

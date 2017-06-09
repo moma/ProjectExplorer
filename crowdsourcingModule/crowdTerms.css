@@ -11,9 +11,6 @@
   margin: 2px 0;
 }
 
-#savesuggestion.btn {
-}
-
 #savesuggestion.btn[disabled], #savesuggestion.btn.disabled {
   background-color: #B0B0B0 ;
   background-image: none ;

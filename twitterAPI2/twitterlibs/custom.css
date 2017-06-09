@@ -23,9 +23,6 @@ p.Tweet-text {
   min-height: 90px !important;
 }
 
-.SandboxRoot { display: none !important; }
-
-
 blockquote.Tweet a {
   color: inherit !important;
   font-weight: normal !important;

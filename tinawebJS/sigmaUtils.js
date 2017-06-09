@@ -574,88 +574,10 @@ var SigmaUtils = function () {
 } // /SigmaUtils object
 
 
-function createWaitIcon(idname, width) {
-  let icon = document.createElement('img')
-
-  icon.src = TW.conf.libspath + '/img2/loader.gif'
-
-  icon.style.position = 'absolute'
-  icon.style.left = '0'
-  icon.style.width = width || '100%'
-
-  if (idname) {
-    icon.id = idname
-  }
-
-  return icon
-}
-//
-// //for socialgraph
-// function showMeSomeLabels(N){
-//   // NB why is this not using methods.manualForceLabel ?!
-//
-//         /*======= Show some labels at the beginning =======*/
-//         var minIn=50,
-//             maxIn=0,
-//             minOut=50,
-//             maxOut=0;
-//
-//         // new sigma.js accessor
-//         var allNodes = TW.partialGraph.graph.nodes()
-//         for( j=0 ; j < allNodes.length ; j++ ) {
-//             n = allNodes[j]
-//             if(n.hidden==false){
-//                 if(parseInt(n.inDegree) < minIn) minIn= n.inDegree;
-//                 if(parseInt(n.inDegree) > maxIn) maxIn= n.inDegree;
-//                 if(parseInt(n.outDegree) < minOut) minOut= n.outDegree;
-//                 if(parseInt(n.outDegree) > maxOut) maxOut= n.outDegree;
-//             }
-//         }
-//         counter=0;
-//         n = getVisibleNodes();
-//         for(i=0;i<n.length;i++) {
-//             if(n[i].hidden==false){
-//                 if(n[i].inDegree==minIn && n[i].customAttrs.forceLabel==false) {
-//                     n[i].customAttrs.forceLabel=true;
-//                     counter++;
-//                 }
-//                 if(n[i].inDegree==maxIn && n[i].customAttrs.forceLabel==false) {
-//                     n[i].customAttrs.forceLabel=true;
-//                     counter++;
-//                 }
-//                 if(n[i].outDegree==minOut && n[i].customAttrs.forceLabel==false) {
-//                     n[i].customAttrs.forceLabel=true;
-//                     counter++;
-//                 }
-//                 if(n[i].outDegree==maxOut && n[i].customAttrs.forceLabel==false) {
-//                     n[i].customAttrs.forceLabel=true;
-//                     counter++;
-//                 }
-//                 if(counter==N) break;
-//             }
-//         }
-//         // new sigma.js
-//         TW.partialGraph.render();
-//         /*======= Show some labels at the beginning =======*/
-// }
-
-
 // ===============================
 // GLOBAL-SCOPE (window) variables
 
 // (TODO REFA make them inside TW.- ns)
-
-// getnodes => preferably use TW.partialGraph.graph.nodes(some_node_id) as accessor
-// (not often necessary + costly in mem because is a clone)
-function getnodes(){
-    // new sigma.js
-    return TW.partialGraph.graph.nodes();
-}
-
-// idem
-function getedges(){
-    return TW.partialGraph.graph.edges();
-}
 
 // used for saving to gexf
 function getVisibleEdges() {
@@ -673,50 +595,27 @@ function getVisibleNodes() {
   });
 }
 
-
-function getNodesByAtt(att) {
-    return TW.partialGraph.graph.nodes().filter(function(n) {
-                return n['type']==att;
-    });
-}
-
 // fulltext search handler for #searchinput
 function find(lquery){
     var results=[];
     if (typeof lquery == 'string' && lquery.length > 0) {
         lquery=lquery.toLowerCase() ;
-        var nds = getnodes()
-        // console.log("FIND: looking among nodes", nds)
-        for(var i in nds){
-            var n=nds[i];
-            if(! n.hidden){
-                var possiblematch=n.label.toLowerCase()
+        // console.log("FIND: looking among TW.labels", TW.labels)
+        for(var i in TW.labels){
+            var labObj = TW.labels[i]
+            if(labObj && labObj.label){
+                var possiblematch = labObj.label.toLowerCase()
                 // ------------------
                 //  substring search
                 // ------------------
                 if (possiblematch.indexOf(lquery)!==-1) {
-                    results.push(n);
+                    results.push(labObj.id);
                 }
             }
         }
     }
     return results;
 }
-
-function exactfind(label) {
-    if (typeof lquery == 'string' && lquery.length > 0) {
-        for(var i in TW.nodeIds){
-            n=TW.partialGraph.graph.nodes(TW.nodeIds[i]);
-            if(!n.hidden){
-                if (n.label==label) {
-                    return n;
-                }
-            }
-        }
-    }
-    return null;
-}
-
 
 function getNodeLabels(elems){
     var labelss=[]
@@ -733,50 +632,6 @@ function getSelections(){
             selLabels.push(TW.Nodes[nid].label);
         }
         return selLabels;
-}
-
-
-//This receives an array not a dict!
-//  i added an excpt... why
-function getNeighs(sels,arr) {
-    neighDict={};
-    for(var i in sels) {
-        id = sels[i]
-        if(!isUndef(arr[id])) {
-            A=arr[id].neighbours;
-            for(var j in A){
-                neighDict[A[j]]=1
-            }
-            neighDict[id]=1;
-        }
-    }
-    return Object.keys(neighDict);
-}//It returns an array not a dict!
-
-//Using bipartiteN2D or bipartiteD2N
-//This receives an array not a dict!
-function getNeighs2(sels,arr){
-    neighDict={};
-    for(var i in sels) {
-        id = sels[i]
-        if(!isUndef(arr[id])) {
-            A=arr[id].neighbours;
-            for(var j in A){
-                neighDict[A[j]]=1
-            }
-            // neighDict[id]=1;
-        }
-    }
-    return Object.keys(neighDict);
-}//It returns an array not a dict!
-
-//to general utils
-function getArrSubkeys(arr,id) {
-    var result = []
-    for(var i in arr) {
-        result.push(arr[i][id])
-    }
-    return result;
 }
 
 // for logs
@@ -1089,42 +944,4 @@ function clusterColoring(daclass) {
 
     set_ClustersLegend ( daclass )
     TW.partialGraph.render();
-}
-
-
-function stringToSomeInt (anyString) {
-  let charCodeSum = 0
-  for (let i = 0 ; i < anyString.length ; i++) {
-    charCodeSum += anyString.charCodeAt(i)
-  }
-  return charCodeSum
-}
-
-//just for fun
-function makeEdgeWeightUndef() {
-    for(var e in TW.partialGraph._core.graph.edges) {
-        TW.partialGraph._core.graph.edges[e].weight=1;
-    }
-}
-
-
-// shuffle algo from stackoverflow.com/a/6274398/2489184
-function shuffle(array) {
-    var counter = array.length;
-
-    // While there are elements in the array
-    while (counter > 0) {
-        // Pick a random index
-        let index = Math.floor(Math.random() * counter);
-
-        // Decrease counter by 1
-        counter--;
-
-        // And swap the last element with it
-        let temp = array[counter];
-        array[counter] = array[index];
-        array[index] = temp;
-    }
-
-    return array;
 }

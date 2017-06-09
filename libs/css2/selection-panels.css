@@ -89,36 +89,6 @@
   }
 
 
-/*.btn-sm[normal] {*/
-/*  background-image: -webkit-linear-gradient(#5f8ab9, #3e648d 50%, #385a7f);*/
-/*  background-image: linear-gradient(#5f8ab9, #3e648d 50%, #385a7f);*/
-/*  background-repeat: no-repeat;*/
-/*  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff5f8ab9', endColorstr='#ff385a7f', GradientType=0);*/
-/*  filter: none;*/
-/*  border: 1px solid #2e4b69;*/
-/*}*/
-
-
-.panel-heading a:before {
-    font-family:'Glyphicons Halflings';
-    content:"\e114 ";
-    float: right;
-    color: #E3A13D;
-}
-.panel-heading a {
-    text-decoration: none !important;
-}
-
-.panel-heading a.collapsed:before {
-    font-family:'Glyphicons Halflings';
-    content:"\e114 ";
-    float: right;
-    color:grey;
-}
-
-
-
-
 /* ZOOMBAR */
 
 #ctlzoom {
@@ -139,8 +109,6 @@
     text-align: center;
 }
 
-#zoomSliderzone {
-}
 
 .zoombarbuttons {
   position:relative;  /* b/c they can contain absolute wait icon */
@@ -150,12 +118,6 @@
     opacity: .7;
 }
 
-#edgesButton {
-    display: block;
-    width: 24px;
-    height: 24px;
-    margin: 0 auto;
-}
 #zoomMinusButton, #zoomPlusButton {
     display: block;
     width: 24px;
@@ -189,27 +151,12 @@
 #aUnfold {
     display: none; width: 12px; height: 12px; background-image: url("../img2/fleches-horiz.png");  margin: 0 auto;
 }
-/*
-#saveAs {
-    display: block; width: 30px; height: 30px; background:url("../libs/img2/Save.png"); margin: 0 auto;
-}
-*/
 
 #zoomSlider {
     background:#fff;
     border:1px solid #aaa;
     height: 90px; margin: 0 auto;
 }
-
-
-#showChat{
-    position: absolute; top: 16px; right: -14px; width: 20px; height: 100px; background: rgb(250, 250, 252); padding: 2px 2px 2px 0; border-top-left-radius: 5px; border-bottom-left-radius: 5px; box-shadow: 1px 1px 2px #808090;
-}
-
-#aShowChat {
-    float: right; width: 100%; height: 100%; background-image: url("../libs/img2/chat.png");
-}
-
 
 /* GESTION DES PAVES DE GAUCHE (conteneur encore vide)*/
 #lefttopbox {

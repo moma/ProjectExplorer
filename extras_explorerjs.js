@@ -2,12 +2,6 @@
  * Customize as you want ;)
  */
 
-
-function newPopup(url) {
-	popupWindow = window.open(url,'popUpWindow','height=700,width=800,left=10,top=10,resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,directories=no,status=no')
-}
-
-
 // = = = = = = = = = = = [ Clusters Plugin ] = = = = = = = = = = = //
 // Execution:    changeGraphAppearanceByFacets( true )
 // It reads scanned node-attributes and prepared legends in TW.Clusters
@@ -104,21 +98,6 @@ function changeGraphAppearanceByFacets( manualflag ) {
 
 }
 
-
-// creates TW.conf.legendsBins bins
-// @sortedValues array, mandatory
-function intervalsInventory(sortedValues) {
-  var binmins = []
-  var len = sortedValues.length
-  for (var l=0 ; l < TW.conf.legendsBins ; l++) {
-    let nthVal = Math.floor(len * l / TW.conf.legendsBins)
-    binmins.push(sortedValues[nthVal])
-  }
-  // console.info("legendRefTicks", binmins)
-  return binmins
-}
-
-
 function RunLouvain() {
 
   var node_realdata = []
@@ -139,8 +118,14 @@ function RunLouvain() {
   }
     var community = jLouvain().nodes(node_realdata).edges(edge_realdata);
     var results = community();
-    for(var i in results)
-        TW.Nodes[i].attributes["clust_louvain"]=results[i]
+
+    for(var i in results) {
+      let n = TW.partialGraph.graph.nodes(i)
+      if (n) {
+        n.attributes["clust_louvain"] = results[i]
+        // TW.Nodes[i].attributes["clust_louvain"]=results[i]
+      }
+    }
 }
 
 
@@ -212,17 +197,6 @@ function SomeEffect( ValueclassCode ) {
             an_edge.customAttrs['activeEdge'] = 1;
         }
     }
-
-
-    // // force 3 first labels
-    // for(var j in nodes_2_label) {
-    //     if(j==3)
-    //         break
-    //     var ID = nodes_2_label[j].key
-    //     TW.partialGraph.graph.nodes(ID).customAttrs.forceLabel = true;
-    // }
-
-    // TW.gui.selectionActive=true;
 
     TW.partialGraph.refresh()
 }
@@ -337,38 +311,6 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
 }
 
 // = = = = = = = = = = = [ / Clusters Plugin ] = = = = = = = = = = = //
-
-//For CNRS
-// function getTopPapers(type){
-//     if(TW.conf.getRelatedDocs){
-//         console.log("getTopPapers")
-//         jsonparams=JSON.stringify(getSelections());
-//         bi=(Object.keys(categories).length==2)?1:0;
-//         //jsonparams = jsonparams.replaceAll("&","__and__");
-//         jsonparams = jsonparams.split('&').join('__and__');
-//         //dbsPaths.push(getGlobalDBs());
-//         thisgexf=JSON.stringify(decodeURIComponent(getUrlParam.file));
-//         image='<img style="display:block; margin: 0px auto;" src="'+TW.conf.relatedDocsAPI+'img/ajax-loader.gif"></img>';
-//         $("#tab-container-top").show();
-//         $("#topPapers").show();
-//         $("#topPapers").html(image);
-//         $.ajax({
-//             type: 'GET',
-//             url: TW.conf.relatedDocsAPI+'info_div.php',
-//             data: "type="+nodetype+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+TW.field[getUrlParam.file],
-//             //contentType: "application/json",
-//             //dataType: 'json',
-//             success : function(data){
-//                 console.log(TW.conf.relatedDocsAPI+'info_div.php?'+"type="+nodetype+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+TW.field[getUrlParam.file]);
-//                 $("#topPapers").html(data);
-//             },
-//             error: function(){
-//                 console.log('Page Not found: getTopPapers');
-//             }
-//         });
-//     }
-// }
-
 
 // a custom variant of twitter plugin written for politoscope
 // NB: this variant only for nodetype semantic
@@ -516,60 +458,6 @@ function RenderTweet( tweet) {
     return html;
 }
 
-
-//JUST ADEME
-function camaraButton(){
-    $("#PhotoGraph").click(function (){
-
-        //canvas=TW.partialGraph._core.domElements.nodes;
-
-
-
-        var nodesCtx = TW.partialGraph._core.domElements.nodes;
-        /*
-        var edgesCtx = document.getElementById("sigma_edges_1").getContext('2d');
-
-        var edgesImg = edgesCtx.getImageData(0, 0, document.getElementById("sigma_edges_1").width, document.getElementById("sigma_edges_1").height)
-
-        nodesCtx.putImageData(edgesImg,0,0);
-
-
-
-
-        //ctx.drawImage(TW.partialGraph._core.domElements.edges,0,0)
-        //var oCanvas = ctx;
-  */
-        //div = document.getElementById("sigma_nodes_1").getContext('2d');
-        //ctx = div.getContext("2d");
-        //oCanvas.drawImage(TW.partialGraph._core.domElements.edges,0,0);
-        Canvas2Image.saveAsPNG(nodesCtx);
-
-        /*
-        Canvas2Image.saveAsJPEG(oCanvas); // will prompt the user to save the image as JPEG.
-        // Only supported by Firefox.
-
-        Canvas2Image.saveAsBMP(oCanvas);  // will prompt the user to save the image as BMP.
-
-
-        // returns an <img> element containing the converted PNG image
-        var oImgPNG = Canvas2Image.saveAsPNG(oCanvas, true);
-
-        // returns an <img> element containing the converted JPEG image (Only supported by Firefox)
-        var oImgJPEG = Canvas2Image.saveAsJPEG(oCanvas, true);
-
-        // returns an <img> element containing the converted BMP image
-        var oImgBMP = Canvas2Image.saveAsBMP(oCanvas, true);
-
-
-        // all the functions also takes width and height arguments.
-        // These can be used to scale the resulting image:
-
-        // saves a PNG image scaled to 100x100
-        Canvas2Image.saveAsPNG(oCanvas, false, 100, 100);
-        */
-    });
-}
-
 function getTips(){
     param='';
 
@@ -598,21 +486,6 @@ function getTips(){
     $("#tab-container").hide();
     $("#tab-container-top").hide();
     return text;
-}
-
-
-
-function draw1Circle(ctx , x , y , color) {
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 1;
-    ctx.fillStyle = color;
-    ctx.globalAlpha = 0.5;
-
-    ctx.beginPath();
-    ctx.arc(x, y, 10, 0, Math.PI * 2, true);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
 }
 
 
@@ -744,31 +617,6 @@ function circleLocalSubset(camX0, camY0 , camRay) {
   return areaNodes
 }
 
-
-// not used but useful to quickly make visible any nodes[]
-function flashNodesArray (nodesArray) {
-  // for diagnostic
-  var minX = 1000000
-  var minY = 1000000
-  var maxX = 0
-  var maxY = 0
-  for (var j in nodesArray) {
-    var n = nodesArray[j]
-
-    if (minX > n.x)   minX = n.x
-    if (minY > n.y)   minY = n.y
-    if (maxX < n.x)   maxX = n.x
-    if (maxY < n.y)   maxY = n.y
-
-    n.size = 300
-    n.label = "> " + n.label + "< "
-    n.color = "yellow"
-
-  }
-
-  console.log("nodesArray encompassed by:", minX, minY,';', maxX, maxY)
-  TW.partialGraph.render()
-}
 
 // BASIC MODULARITY
 // =================

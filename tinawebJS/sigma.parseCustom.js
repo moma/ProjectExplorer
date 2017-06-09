@@ -212,7 +212,6 @@ function scanGexf(gexfContent) {
 //       (current expected structure in 'categories' can only accomodate 2 types
 //        and the way it and catDict are used is not entirely coherent throughout
 //        the project, cf. among others: - the effect on 'typestring'
-//                                       - the effect on 'swclickActual'
 //                                       - the way default cat is handled as 0...)
 // -------------------
 // expected content: usually a just a few cats over all nodes
@@ -980,103 +979,6 @@ function updateValueFacets(facetIdx, aNode, optionalFilter) {
   return facetIdx
 
 }
-
-
-// creates and updates nodes1 nodes2 and bipartiteN2D and bipartiteD2N
-// but seems useless because all info is already in each nodes.type and edge.categ
-// (especially when changeType uses a loop on all nodes anyway)
-// (was previously done at the same time that updateRelations)
-// (could be restored if we needed faster changeType)
-function sortNodesByTypeDeprecated() {
-  // Doc <-> Doc
-  // if(srcType==categories[0] && tgtType==categories[0] ) {
-  //
-  //     edge.label = "nodes1";
-  //     if(isUndef(nodes1[source])) {
-  //         nodes1[source] = {
-  //             label: nodes[source].label,
-  //             neighbours: []
-  //         };
-  //     }
-  //     if(isUndef(nodes1[target])) {
-  //         nodes1[target] = {
-  //             label: nodes[target].label,
-  //             neighbours: []
-  //         };
-  //     }
-  //     nodes1[source].neighbours.push(target);
-  //     nodes1[target].neighbours.push(source);
-  // }
-  //
-  // if(categories.length>1) {
-  //
-  //     // Term <-> Term
-  //     if(srcType==categories[1] && tgtType==categories[1]){
-  //         edge.label = "nodes2";
-  //
-  //         if(isUndef(nodes2[source])) {
-  //             nodes2[source] = {
-  //                 label: nodes[source].label,
-  //                 neighbours: []
-  //             };
-  //         }
-  //         if(isUndef(nodes2[target])) {
-  //             nodes2[target] = {
-  //                 label: nodes[target].label,
-  //                 neighbours: []
-  //             };
-  //         }
-  //         nodes2[source].neighbours.push(target);
-  //         nodes2[target].neighbours.push(source);
-  //     }
-  //
-  //     // Doc <-> Term
-  //     if((srcType==categories[0] && tgtType==categories[1]) ||
-  //         (srcType==categories[1] && tgtType==categories[0])) {
-  //         edge.label = "bipartite";
-  //
-  //         // // Source is Document
-  //         if(srcType == categories[0]) {
-  //
-  //             if(isUndef(bipartiteD2N[source])) {
-  //                 bipartiteD2N[source] = {
-  //                     label: nodes[source].label,
-  //                     neighbours: []
-  //                 };
-  //             }
-  //             if(isUndef(bipartiteN2D[target])) {
-  //                 bipartiteN2D[target] = {
-  //                     label: nodes[target].label,
-  //                     neighbours: []
-  //                 };
-  //             }
-  //
-  //             bipartiteD2N[source].neighbours.push(target);
-  //             bipartiteN2D[target].neighbours.push(source);
-  //
-  //         // // Source is NGram
-  //         } else {
-  //
-  //             if(isUndef(bipartiteN2D[source])) {
-  //                 bipartiteN2D[source] = {
-  //                     label: nodes[source].label,
-  //                     neighbours: []
-  //                 };
-  //             }
-  //             if(isUndef(bipartiteD2N[target])) {
-  //                 bipartiteD2N[target] = {
-  //                     label: nodes[target].label,
-  //                     neighbours: []
-  //                 };
-  //             }
-  //             bipartiteN2D[source].neighbours.push(target);
-  //             bipartiteD2N[target].neighbours.push(source);
-  //         }
-  //     }
-  // }
-}
-
-
 
 
 // Level-00
