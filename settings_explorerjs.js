@@ -214,6 +214,7 @@ TW.conf = (function(TW){
                                   //         better labels, etc)
 
   TWConf.overSampling = true      // hi-def rendering (true => pixelRatio x 2)
+                                  // (/!\ costly)
 
   // sigma rendering settings
   // ------------------------
@@ -266,6 +267,7 @@ TW.conf = (function(TW){
   // circle selection cursor
   TWConf.circleSizeMin = 0;
   TWConf.circleSizeMax = 100;
+  TWConf.moreLabelsUnderArea = true; // show 3x more labels under area (/!\ costly)
 
   // em size range for neighbor nodes "tagcloud"  (1 = "normal size")
   TWConf.tagcloudFontsizeMin = .5  ;

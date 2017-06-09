@@ -7,6 +7,7 @@ var theHtml = document.getElementsByTagName('html')[0]
 TW.gui = {}
 TW.gui.selectionActive = false  // <== changes rendering mode
 TW.gui.circleSize = 0;
+TW.gui.circleSlider = null
 TW.gui.checkBox=false;
 TW.gui.shiftKey=false;
 TW.gui.manuallyChecked = false;

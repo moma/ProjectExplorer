@@ -709,7 +709,7 @@ var TinaWebJS = function ( sigmacanvas ) {
 
 
         //Cursor Size slider
-        var cursorSlider = $("#unranged-value").freshslider({
+        TW.gui.circleSlider = $("#unranged-value").freshslider({
             step: 1,
             min:TW.conf.circleSizeMin,
             max:TW.conf.circleSizeMax,
@@ -722,7 +722,7 @@ var TinaWebJS = function ( sigmacanvas ) {
 
         // double click on cursor selector slider => set it to 0
         $("#areacircle-size").dblclick(function(){
-            cursorSlider.setValue(0)
+            TW.gui.circleSlider.setValue(0)
         });
 
         // //finished

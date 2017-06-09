@@ -634,46 +634,42 @@ function circleTrackMouse(e) {
     x = sigma.utils.getX(e);
     y = sigma.utils.getY(e);
 
-    // console.log("trackMouse mod: x", x, "y", y)
+    // optional: make more labels appear on circle hover (/!\ costly /!\ esp. on large graphs)
+    if (TW.conf.moreLabelsUnderArea) {
+      // convert screen => mouse => cam
+      var mouseCoords = sigma.utils.mouseCoords(e)
+      var camCoords = TW.cam.cameraPosition(mouseCoords.x, mouseCoords.y)
 
+      var exactNodeset = circleGetAreaNodes(
+        camCoords.x,
+        camCoords.y
+      )
+      // console.log("nodes under circle:", exactNodeset)
+
+      // we'll use labelThreshold / 3 as the "boosted" cam:size threshold
+      let pfx = TW.cam.readPrefix
+      let toRedraw = []
+      for (var k in exactNodeset) {
+        let n = TW.partialGraph.graph.nodes(exactNodeset[k])
+        if(n[pfx+'size'] > (TW.customSettings.labelThreshold / 3)) {
+          toRedraw.push(n)
+        }
+      }
+      redrawNodesInHoverLayer(toRedraw, "hovers")
+    }
+
+    // draw the circle itself
     ctx.strokeStyle = '#000';
     ctx.lineWidth = 1;
     ctx.fillStyle = "#71C3FF";
     ctx.globalAlpha = 0.5;
     ctx.beginPath();
+    ctx.arc(x, y, TW.gui.circleSize, 0, Math.PI * 2, true);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.globalAlpha = 1
 
-      // // labels appear on circle hover : OFF
-
-      // convert (TODO CHECK IN THIS CONTEXT)
-      // var camCoords = TW.cam.cameraPosition(x,y)
-      //
-      // var exactNodeset = circleGetAreaNodes(
-      //   camCoords.x,
-      //   camCoords.y
-      // )
-      // // using settings_explorerjs.showLabelsIfZoom as cam.ratio threshold
-      // if(TW.partialGraph.camera.ratio < showLabelsIfZoom){
-      //   for (var k of exactNodeset) {
-      //     // if (! exactNodeset[k].hidden) {
-      //       exactNodeset[k].customAttrs.forceLabel=true;
-      //     // }
-      //   }
-      // }
-      // else {
-      //   for(var k in exactNodeset){
-      //     n = exactNodeset[k]
-      //     n.customAttrs.forceLabel=false;
-      //   }
-      //   if(TW.partialGraph.forceatlas2 && TW.partialGraph.forceatlas2.count<=1) {
-      //     TW.partialGraph.render()
-      //   }
-      // }
-
-  ctx.arc(x, y, TW.gui.circleSize, 0, Math.PI * 2, true);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-  ctx.globalAlpha = 1
 }
 
 
@@ -706,9 +702,6 @@ function circleGetAreaNodes(camX0, camY0) {
         exactNodeset.push(n.id)
       }
     }
-  }
-  if(TW.partialGraph.forceatlas2 && TW.partialGraph.forceatlas2.count<=1) {
-      TW.partialGraph.render()
   }
 
   return exactNodeset

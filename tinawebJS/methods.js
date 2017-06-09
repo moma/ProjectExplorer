@@ -93,8 +93,11 @@ TW.resetGraph = function() {
   TW.gui.selectionActive = false
   TW.gui.handpickedcolor = false
 
-  // reset other gui flags
+  // reset circle size and cursor
   TW.gui.circleSize = 0
+  TW.gui.circleSlider.setValue(0)
+
+  // reset other gui flags
   TW.gui.checkBox=false
   TW.gui.lastFilters = {}
 }
@@ -393,10 +396,18 @@ function manualForceLabel(nodeid, active, justHover) {
 
 // Here we draw within hover layer instead of nodes layer, labels layer
 //
+// args:
+//   - someNodes: an array of actual nodes (not nids)
+//   - canvasDrawer: (optional) one of drawing methods from sigma.canvas
 // Explanation: it's perfect for temporary change cases because hover layer
 //              is *over* all other layers and contains nothing by default
 //              (this way step A can reset B avoiding whole graph refresh)
-function redrawNodesInHoverLayer(someNodes) {
+function redrawNodesInHoverLayer(someNodes, canvasDrawer) {
+
+  if (!canvasDrawer) {
+    canvasDrawer = "hovers"
+  }
+
   var targetLayer = TW.rend.contexts.hover
 
   // A - clear entire targetLayer
@@ -406,11 +417,11 @@ function redrawNodesInHoverLayer(someNodes) {
     targetLayer.canvas.height
   )
 
-  var locSettings = TW.partialGraph.settings.embedObjects({prefix:'renderer1:'})
+  var locSettings = TW.partialGraph.settings.embedObjects({prefix:TW.rend.options.prefix})
 
   for (var k in someNodes) {
     // B - we use our largerall renderer to write single nodes to overlay
-    sigma.canvas.hovers.def( someNodes[k], targetLayer, locSettings)
+    sigma.canvas[canvasDrawer].def( someNodes[k], targetLayer, locSettings)
   }
 }
 
