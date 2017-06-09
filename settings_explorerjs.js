@@ -134,6 +134,10 @@ TW.conf = (function(TW){
   TWConf.nodeClusAtt = "modularity_class"
 
 
+  // for binning decision and nbins (fallbacks <=> if the attr is not in facetOptions)
+  TWConf.maxDiscreteValues = 15
+  TWConf.legendsBins = 7
+
   // to normalize node sizes: (NB not very useful because tina normalizes them at display)
   TWConf.desirableNodeSizeMin=1;
   TWConf.desirableNodeSizeMax=12;

@@ -26,7 +26,8 @@
 	"data/test": {
 		"first" : "test_with_various_atts.gexf",
 		"gexfs": {
-			"test_with_various_atts.gexf": {}
+			"test_with_various_atts.gexf": {},
+			"sire_oe.gexf": {}
 		}
 	},
 	"data/AXA": {

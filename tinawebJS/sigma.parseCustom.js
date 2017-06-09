@@ -339,8 +339,8 @@ function facetsBinning (valuesIdx) {
 
       if (TW.conf.debug.logFacets)  {
         console.debug("datatyping:", dataType)
-        // console.debug("valuesIdx after datatyping:", valuesIdx[cat][at])
-        // console.debug("workingVals after datatyping:", workingVals)
+        console.debug("valuesIdx after datatyping:", valuesIdx[cat][at])
+        console.debug("workingVals after datatyping:", workingVals)
       }
 
       // default options
@@ -666,8 +666,12 @@ function dictfyGexf( gexf , categories ){
               // if (size > sizeStats.max)  sizeStats.max = size
               // --------------------------------------------
 
+            }
+            // fallback
+            else {
+              size = 1
+              console.log(`node without size: ${id} <= 1`);
             }// [ / get Size ]
-            // console.debug('>>> tr: node size', size)
 
             // [ get Coordinates ]
             var x = 100 - 200*Math.random();
@@ -736,7 +740,6 @@ function dictfyGexf( gexf , categories ){
             node.type = node_cat;
 
             // node.id = (node_cat==categories[0])? ("D:"+node.id) : ("N:"+node.id);
-            if(!node.size) console.log("node without size: "+node.id+" : "+node.label);
 
             // user-indicated default => copy for old default accessors
             if (node.attributes[TW.conf.nodeClusAtt]) {
@@ -764,14 +767,7 @@ function dictfyGexf( gexf , categories ){
 
     // console.warn ('parseCustom output nodes', nodes)
 
-
-
-
-
     console.warn ('parseCustom inverted index: vals to srcType', tmpVals)
-
-
-
 
 
     // -------------- debug: for local stats ----------------
@@ -784,18 +780,27 @@ function dictfyGexf( gexf , categories ){
     // ------------- /debug: for local stats ----------------
 
 
-
-
     // clusters and other facets => type => name => [{label,val/range,nodeids}]
-    TW.Clusters = facetsBinning(tmpVals)
-
+    if (TW.conf.scanClusters) {
+      TW.Clusters = facetsBinning(tmpVals)
+    }
 
     // linear rescale node sizes
     if (!isUndef(TW.conf.desirableNodeSizeMin) && !isUndef(TW.conf.desirableNodeSizeMax)) {
       let desiSizeRange = TW.conf.desirableNodeSizeMax-TW.conf.desirableNodeSizeMin
       let realSizeRange = maxNodeSize - minNodeSize
-      for(var nid in nodes){
-          nodes[nid].size = parseInt(1000 * ((parseFloat(nodes[nid].size) - minNodeSize) / realSizeRange * desiSizeRange + TW.conf.desirableNodeSizeMin)) / 1000
+
+      // all nodes have same size
+      if (realSizeRange == 0) {
+        for(var nid in nodes){
+          nodes[nid].size  = TW.conf.desirableNodeSizeMin
+        }
+      }
+      // normal case => rescaling
+      else {
+        for(var nid in nodes){
+            nodes[nid].size = parseInt(1000 * ((parseFloat(nodes[nid].size) - minNodeSize) / realSizeRange * desiSizeRange + TW.conf.desirableNodeSizeMin)) / 1000
+        }
       }
     }
 
@@ -813,9 +818,16 @@ function dictfyGexf( gexf , categories ){
 
         for(j=0; j<edgeNodes.length; j++) {
             var edgeNode = edgeNodes[j];
-            var source = parseInt( edgeNode.getAttribute('source') );
-            var target = parseInt( edgeNode.getAttribute('target') );
+            var source = edgeNode.getAttribute('source')
+            var target = edgeNode.getAttribute('target')
             var type = edgeNode.getAttribute('type');//line or curve
+
+            if (/;/.test(source)) {
+              console.warn (`edge source id has ";" ${source}` )
+            }
+            if (/;/.test(target)) {
+              console.warn (`edge target id has ";" ${target}` )
+            }
 
             var indice=source+";"+target;
 
@@ -1142,15 +1154,17 @@ function dictfyJSON( data , categories ) {
         nodes[node.id] = node;
 
         // creating a faceted index from node.attributes
-        if (TW.scanClusters) {
+        if (TW.conf.scanClusters) {
           tmpVals = updateValueFacets(tmpVals, node)
         }
     }
 
     // test: json with string facet (eg lab affiliation in comex)
-    console.log(tmpVals['Document'])
+    // console.log(tmpVals['Document'])
 
-    TW.Clusters = facetsBinning (tmpVals)
+    if (TW.conf.scanClusters) {
+      TW.Clusters = facetsBinning (tmpVals)
+    }
 
     // £TODO ask if wanted
     // if we wanted linear rescale node sizes like dictfyGexf:
