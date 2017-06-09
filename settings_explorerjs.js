@@ -172,6 +172,8 @@ TW.conf = (function(TW){
 
   TWConf.clusterColorsAtt = true;      // show "Set colors" menu
 
+  TWConf.dragNodesAvailable = true;    // allow dragging nodes
+
   TWConf.deselectOnclickStage = true   // click on background remove selection ?
                                        // (except when dragging)
 

@@ -893,6 +893,12 @@ var TinaWebJS = function ( sigmacanvas ) {
         $("#zoomSlider").slider("value",1/TW.cam.ratio)
       })
 
+
+      // dragNodes plugin
+      if (TW.conf.dragNodesAvailable) {
+        var dragListener = sigma.plugins.dragNodes(partialGraph, partialGraph.renderers[0]);
+      }
+
       // ---------------------------------------------------------------------
 
       // POSS: bind to captors  (0=>mouse, 1=>touch)
