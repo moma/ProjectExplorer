@@ -897,6 +897,16 @@ var TinaWebJS = function ( sigmacanvas ) {
       // dragNodes plugin
       if (TW.conf.dragNodesAvailable) {
         var dragListener = sigma.plugins.dragNodes(partialGraph, partialGraph.renderers[0]);
+
+        // intercept dragNodes events if not CTRL+click
+        document.getElementById('sigma-contnr').addEventListener(
+          'mousemove',
+          function(ev) {
+            if (!ev.ctrlKey) {
+              ev.stopPropagation()
+            }
+          }
+        )
       }
 
       // ---------------------------------------------------------------------
