@@ -159,6 +159,10 @@ function RunLouvain() {
     if (menu) {
       menu.innerHTML = nClasses
     }
+
+    if (! TW.conf.facetOptions['clust_louvain']) {
+      TW.conf.facetOptions['clust_louvain'] = {'col': 'cluster'}
+    }
     // NB the LouvainFait flag is updated by caller fun
 }
 
