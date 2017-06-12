@@ -249,9 +249,6 @@ function graphResetLabelsAndSizes(){
 // @daclass: the name of a numeric/categorical attribute from node.attributes
 // @groupingTicks: an optional threshold's array expressing ranges with their low/up bounds label and ref to matchin nodeIds
 function set_ClustersLegend ( daclass, groupedByTicks ) {
-
-    //TW.partialGraph.states.slice(-1)[0].LouvainFait = true
-
     $("#legend-for-clusters").removeClass( "my-legend" )
     $("#legend-for-clusters").html("")
     if(daclass==null) return;
@@ -305,25 +302,39 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
           // create the legend item
           var preparedLabel = legendInfo[l]['labl']
 
-          // we add a title to cluster classes
+          // we add a title to cluster classes by ranking their nodes and taking k best labels
           if (TW.conf.facetOptions[daclass] && TW.conf.facetOptions[daclass].col == 'cluster') {
 
             // let t0 = performance.now()
 
             let titles = []
             let theRankingAttr = TW.conf.facetOptions[daclass].titlingMetric
-            let maxLen = TW.conf.facetOptions[daclass].titlingNTerms
+            let maxLen = TW.conf.facetOptions[daclass].titlingNTerms || 2
+
+            // custom accessor (user settings or by default)
+            let getVal
+            if(theRankingAttr) {
+              getVal = function(node) {return node.attributes[theRankingAttr]}
+            }
+            else {
+              // default ranking: by size
+              getVal = function(node) {return node.size}
+            }
 
             for (let j in legendInfo[l]['nids']) {
               let n = TW.partialGraph.graph.nodes(legendInfo[l]['nids'][j])
 
-              let lastMax = 0
-              if (titles.length) {
-                // we keep titles sorted for this
-                lastMax = titles.slice(-1)[0].val
+              let theRankingVal = getVal(n)
+
+              if (titles.length < maxLen) {
+                titles.push({'key':n.label, 'val':theRankingVal})
               }
-              if (n.attributes[theRankingAttr] > lastMax) {
-                titles.push({'key':n.label, 'val':n.attributes[theRankingAttr]})
+              else {
+                // we keep titles sorted for this
+                let lastMax = titles.slice(-1)[0].val
+                if (theRankingVal > lastMax) {
+                  titles.push({'key':n.label, 'val':theRankingVal})
+                }
               }
 
               titles.sort(function(a,b) {return b.val - a.val})
