@@ -30,7 +30,6 @@ sigmaTools = (function(stools) {
           customAttrs: {
             grey: false,
             highlight: false,
-            true_color: rawNode.viz.color,
             defgrey_color : "rgba("+rgbStr+",.4)"
           },
           // for metrics like centrality

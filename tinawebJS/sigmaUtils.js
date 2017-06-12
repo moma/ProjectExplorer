@@ -280,15 +280,27 @@ var SigmaUtils = function () {
         var nodeSize = node[prefix + 'size']
         var nodeColor = node.color || settings('defaultNodeColor')
 
-        // our shapes are dependant on type AND categories
-        // so unless we rename types at parsing and use sigma's
-        // "def vs someType" syntax we need the bool and conditions
+        // our shapes are dependant on flags, type AND categories
+        // so we need the bool and conditions
+
+        // other POSS: we rename n.type at parsing
+        // and each action (recoloring/selection)
+        // to use sigma's "def vs someType" syntax
         // NB cost of this condition seems small:
         //    - without: [11 - 30] ms for 23 nodes
         //    - with   : [11 - 33] ms for 23 nodes
         var catSemFlag = (TW.categories.length > 1 && node.type == TW.categories[0])
 
-        // mode variants
+
+        // mode variants 1: if a coloringFunction is active
+        if (! TW.gui.handpickedcolor) {
+          nodeColor = node.color
+        }
+        else {
+          nodeColor = node.customAttrs.alt_color
+        }
+
+        // mode variants 2: if node is selected, highlighted or unselected
         if (TW.gui.selectionActive) {
           // passive nodes should blend in the grey of twEdgeGreyColor
           // cf settings_explorerjs, defgrey_color and greyEverything()
@@ -297,28 +309,19 @@ var SigmaUtils = function () {
               nodeColor = node.customAttrs.defgrey_color
             }
             else {
-              // #C01O3 += alpha 55
-              //                     => #C01O355
-
-              if (!node.customAttrs.altgrey_color) {
-                node.customAttrs.altgrey_color = "rgba("+(hex2rgba(node.customAttrs.alt_color).slice(0,3).join(','))+",0.4)"
-              }
               nodeColor = node.customAttrs.altgrey_color
             }
             // nice looking uniform grey
             borderColor = TW.conf.sigmaJsDrawingProperties.twBorderGreyColor
           }
-          // neighbor nodes <=> (highlight flag AND selectionActive)
-          else if(node.customAttrs.highlight) {
+          else {
             nodeSize *= 1.4
             borderSize *= 1.4
-            if (TW.gui.handpickedcolor) {
-              nodeColor = node.customAttrs.alt_color
-            }
-          }
-          else if(node.active) {
+
+            if(node.active) {
             // called by label+background overlay cf. "subcall"
             nodeColor = "#222" // metro ticket
+            }
           }
         }
         // highlight AND (NOT selectionActive) => highlight just this one time
@@ -642,7 +645,9 @@ function edgeInfos(anEdge) {
 
 function gradientColoring(daclass) {
 
+    // £TODO group as an option of cancelSelection to avoid 2 loops
     cancelSelection(false);
+    graphResetLabelsAndSizes()
 
     TW.gui.handpickedcolor = true
 
@@ -709,8 +714,8 @@ function gradientColoring(daclass) {
           n.color = hex_color
           n.customAttrs.alt_color = hex_color
 
-          // FIXME not used ?
-          n.customAttrs.altgrey_color = false
+          // also recalculating the "unselected" color for next renders
+          n.customAttrs.altgrey_color = "rgba("+(hex2rgba(hex_color).slice(0,3).join(','))+",0.4)"
 
           // £TODO SETTING SIZE HERE SHOULD BE OPTIONAL
           var newval_size = Math.round( ( Min_size+(NodeID_Val[nid]["round"]-real_min)*((Max_size-Min_size)/(real_max-real_min)) ) );
@@ -808,11 +813,10 @@ function heatmapColoring(daclass) {
 
   binColors = getHeatmapColors(nColors)
 
-  // for debug of heatmapColoring
-  var totalsPerBinMin = {}
-
   // let's go
+  // £TODO group as an option of cancelSelection to avoid 2 loops
   cancelSelection(false);
+  graphResetLabelsAndSizes()
 
   // global flag
   TW.gui.handpickedcolor = true
@@ -829,15 +833,12 @@ function heatmapColoring(daclass) {
 
     // ex: {labl: "terms||growth_rate||[0 ; 0.583]", nids: Array(99), range: [0 ; 0.583210]}
 
-    totalsPerBinMin[tickThresholds[k].range[0]] = tickThresholds[k].nids.length
-
     // color the referred nodes
     for (var j in tickThresholds[k].nids) {
       let n = TW.partialGraph.graph.nodes(tickThresholds[k].nids[j])
 
-      n.color = binColors[k]
       n.customAttrs.alt_color = binColors[k]
-      n.customAttrs.altgrey_color = false
+      n.customAttrs.altgrey_color = "rgba("+(hex2rgba(binColors[k]).slice(0,3).join(','))+",0.4)"
 
       var originalLabel = TW.Nodes[n.id].label
       if (doModifyLabel) {
@@ -850,8 +851,6 @@ function heatmapColoring(daclass) {
 
     }
   }
-
-  // console.info('coloring distribution per tick thresholds' , totalsPerBinMin)
 
   // Edge precompute alt_rgb by new source-target nodes-colours combination
   repaintEdges()
@@ -872,11 +871,22 @@ function clusterColoring(daclass) {
     console.log(" = = = = = = = = = = = = = = = = = ")
     console.log("")
 
+    // £TODO group as an option of cancelSelection to avoid 2 loops
+    cancelSelection(false);
+    graphResetLabelsAndSizes()
+
     // louvain needs preparation
     if(daclass=="clust_louvain") {
         if(!TW.states.slice(-1)[0].LouvainFait) {
-            RunLouvain()
-            TW.states.slice(-1)[0].LouvainFait = true
+            try {
+              RunLouvain()
+              TW.states.slice(-1)[0].LouvainFait = true
+            }
+            catch(e) {
+              TW.states.slice(-1)[0].LouvainFait = false
+              console.warn("skipped error on louvain, falling back to default colors")
+              daclass == 'clust_default'
+            }
         }
     }
 
@@ -906,33 +916,32 @@ function clusterColoring(daclass) {
       let nColors = TW.gui.colorList.length
 
       for(var j in TW.nodeIds) {
-          var the_node = TW.Nodes[ TW.nodeIds[j] ]
+          var the_node = TW.partialGraph.graph.nodes(TW.nodeIds[j])
 
-          // ££TODO put louvain in graph.nodes() like other attrs ??
-          // then possible to use TW.partialGraph.graph.nodes(TW.nodeIds[j])
+          if (the_node) {
 
-          // if (j< 15)
-          //   console.log(` ${TW.nodeIds[j]} : hidden?${the_node.hidden} the_node.attributes[daclass] = ${the_node.attributes[daclass]}`) // final val=${attval}
+            // POSS: use "hidden" in filters instead of remove/readd
+            //       then this condition would be more useful here
+            if (! the_node.hidden) {
+              var attval = ( !isUndef(the_node.attributes) && !isUndef(the_node.attributes[daclass]) )? the_node.attributes[daclass] : TW.partialGraph.graph.nodes(TW.nodeIds[j])[daclass];
 
-          if (! the_node.hidden) {
-            var attval = ( !isUndef(the_node.attributes) && !isUndef(the_node.attributes[daclass]) )? the_node.attributes[daclass] : TW.partialGraph.graph.nodes(TW.nodeIds[j])[daclass];
+              let theColor
 
-            let theColor
+              if (attval == '_non_numeric_') {
+                theColor = '#bbb'
+              }
+              else if (! isNaN(parseInt(attval))) {
+                theColor = colList[ attval ]
+              }
+              else {
+                let someRepresentativeInt = stringToSomeInt(attval) % nColors
+                theColor = colList[ someRepresentativeInt ]
+              }
 
-            if (attval == '_non_numeric_') {
-              theColor = '#bbb'
+              // TW.partialGraph.graph.nodes(TW.nodeIds[j]).color = theColor
+              the_node.customAttrs.alt_color = theColor
+              the_node.customAttrs.altgrey_color = "rgba("+(hex2rgba(theColor).slice(0,3).join(','))+",0.4)"
             }
-            else if (! isNaN(parseInt(attval))) {
-              theColor = colList[ attval ]
-            }
-            else {
-              let someRepresentativeInt = stringToSomeInt(attval) % nColors
-              theColor = colList[ someRepresentativeInt ]
-            }
-
-            TW.partialGraph.graph.nodes(TW.nodeIds[j]).color = theColor
-            TW.partialGraph.graph.nodes(TW.nodeIds[j]).customAttrs.alt_color = theColor
-            TW.partialGraph.graph.nodes(TW.nodeIds[j]).customAttrs.altgrey_color = false
           }
       }
       // set the global state

@@ -142,10 +142,17 @@ function cancelSelection (fromTagCloud, settings) {
       // console.log("cancelSelection: node", n)
       if (n) {
         n.active = false;
-        n.color = TW.gui.handpickedcolor ? n.customAttrs['alt_color'] : n.customAttrs['true_color'];
         n.customAttrs.grey = 0
         n.customAttrs.forceLabel = 0
         n.customAttrs.highlight = 0
+
+        // some colorings cases also modify size and label
+        if (settings.resetLabels) {
+          n.label = TW.Nodes[n.id].label
+        }
+        if (settings.resetSizes) {
+          n.size = TW.Nodes[n.id].size
+        }
       }
     }
 
@@ -441,8 +448,8 @@ function LevelButtonDisable( TF ){
 //     renderer will see the flags and handle the case accordingly
 function greyEverything(){
 
-  for(var j in TW.nodeIds){
-    let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
+  for(var nid in TW.Nodes){
+    let n = TW.partialGraph.graph.nodes(nid)
 
     if (n && !n.hidden) {
       // normal case handled by node renderers
@@ -520,15 +527,22 @@ function prepareNodesRenderingProperties(nodesDict) {
       n.color = `rgb(${rgbStr})`
     }
     else {
+      // will not be modified
       n.color = TW.conf.sigmaJsDrawingProperties.defaultNodeColor
       rgbStr = n.color.split(',').splice(0, 3).join(',');
     }
 
     n.customAttrs = {
-      grey: false,
-      highlight: false,
-      true_color : n.color,
-      defgrey_color : "rgba("+rgbStr+","+TW.conf.sigmaJsDrawingProperties.twNodesGreyOpacity+")"
+      // status flags
+      grey: false,                // deselected
+      highlight: false,           // neighbors or legend's click
+
+      // default unselected color
+      defgrey_color : "rgba("+rgbStr+","+TW.conf.sigmaJsDrawingProperties.twNodesGreyOpacity+")",
+
+      // will be used for repainting (read when TW.gui.handpickedcolor flag)
+      alt_color: null,
+      altgrey_color: null,
     }
 
     // POSS n.type: distinguish rendtype and twtype

@@ -204,15 +204,9 @@ function scanGexf(gexfContent) {
     return sortNodeTypes(categoriesDict)
 }
 
-// sorting observed node types into Sem/Soc (factorized 11/05/2017)
-// --------------------
-// FIXME this factorizes what we had twice (json & gexf scanFile workflows),
-//       and we just added missing TW.conf.catSoc/Sem comparisons
-//       *but it doesn't fix the underlying logic*
-//       (current expected structure in 'categories' can only accomodate 2 types
-//        and the way it and catDict are used is not entirely coherent throughout
-//        the project, cf. among others: - the effect on 'typestring'
-//                                       - the way default cat is handled as 0...)
+// sorting observed node types into Sem/Soc
+// NB: tina structure in 'categories' can only accomodate 2 types
+//   - default cat is handled as cat 0...
 // -------------------
 // expected content: usually a just a few cats over all nodes
 // ex: terms

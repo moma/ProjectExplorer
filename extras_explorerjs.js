@@ -20,8 +20,8 @@ function changeGraphAppearanceByFacets( manualflag ) {
 
     let currentNbNodes = TW.partialGraph.graph.nNodes()
 
-    // create colormenu
-    var color_menu_info = '<li><a href="#" onclick="graphResetColor()">By Default</a></li>';
+    // create colormenu and 1st default entry
+    var color_menu_info = '<li><a href="#" onclick="TW.gui.handpickedcolor = false ; graphResetLabelsAndSizes()">By Default</a></li>';
 
     if( $( "#colorgraph-menu" ).length>0 ) {
 
@@ -86,7 +86,7 @@ function changeGraphAppearanceByFacets( manualflag ) {
       }
 
       // we also add clust_louvain in all cases
-      color_menu_info += `<li><a href="#" onclick='clusterColoring("clust_louvain")'>By Louvain clustering ( ? | ${currentNbNodes})</a></li>`
+      color_menu_info += `<li><a href="#" onclick='clusterColoring("clust_louvain")'>By Louvain clustering ( <span id="louvainN">?</span> | ${currentNbNodes})</a></li>`
 
       // for debug
       // console.warn('color_menu_info', color_menu_info)
@@ -119,13 +119,45 @@ function RunLouvain() {
     var community = jLouvain().nodes(node_realdata).edges(edge_realdata);
     var results = community();
 
+    var louvainValNids = {}
+
     for(var i in results) {
-      let n = TW.partialGraph.graph.nodes(i)
+      let n = TW.partialGraph.graph.nodes(i) // <= new way: like all other colors
       if (n) {
         n.attributes["clust_louvain"] = results[i]
-        // TW.Nodes[i].attributes["clust_louvain"]=results[i]
+      }
+
+      // also create legend's facets
+      louvainValNids = updateValueFacets(louvainValNids, n, "clust_louvain")
+    }
+
+    let nClasses = 0
+    for (let typ in louvainValNids)  {
+      let revIdx = louvainValNids[typ]["clust_louvain"]['map']
+
+      // init a new legend in TW.Clusters
+      TW.Clusters[typ]['clust_louvain'] = []
+
+      for (let entry in revIdx) {
+        let len = revIdx[entry].length
+        if (len) {
+          TW.Clusters[typ]['clust_louvain'].push({
+            'labl': `${entry} (${len})`,
+            'fullLabl': `${typ}||Louvain||${entry} (${len})`,
+            'nids': revIdx[entry],
+            'val': entry
+          })
+          nClasses ++
+        }
       }
     }
+
+    // finally update the html menu
+    let menu = document.getElementById('louvainN')
+    if (menu) {
+      menu.innerHTML = nClasses
+    }
+    // NB the LouvainFait flag is updated by caller fun
 }
 
 
@@ -136,6 +168,8 @@ function SomeEffect( ValueclassCode ) {
     // console.debug("highlighting:", ValueclassCode )
 
     greyEverything();
+
+    TW.gui.selectionActive = true
 
     var nodes_2_colour = {};
     var edges_2_colour = {};
@@ -201,37 +235,11 @@ function SomeEffect( ValueclassCode ) {
     TW.partialGraph.refresh()
 }
 
-function graphResetColor(){
+// some colorings cases also modify size and label
+function graphResetLabelsAndSizes(){
 
-    // reset global var
-    TW.gui.handpickedcolor = false
-
-    // reset each node's color and label
-    for (var j in TW.nodeIds) {
-      let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
-      // as usual, n can be absent if not in current subset !
-      if (n) {
-        n.color = n.customAttrs["true_color"];
-
-        n.customAttrs.alt_color = false
-        n.customAttrs.altgrey_color = false
-
-        n.label = TW.Nodes[n.id].label
-
-        // some colorings also modified size
-        n.size = TW.Nodes[n.id].size
-      }
-
-    }
-    // if (TW.partialGraph.settings('drawEdges')) {
-    //   for(var x in eds){
-    //       e=eds[x];
-    //       e.customAttrs["grey"] = 0;
-    //       e.color = e.customAttrs["true_color"];
-    //   }
-    // }
-
-    TW.partialGraph.render()
+    // NB could be also merged with greyEverything and highlightSelectedNodes(false)
+    cancelSelection(false, {'render':true, 'resetSizes':true, 'resetLabels': true})
 }
 
 
@@ -244,9 +252,6 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
     $("#legend-for-clusters").removeClass( "my-legend" )
     $("#legend-for-clusters").html("")
     if(daclass==null) return;
-
-    if (daclass=="clust_louvain")
-        daclass = "louvain"
 
     var actypes = getActivetypes()
 
@@ -285,7 +290,14 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
 
         if (nMatchedNodes) {
           var midNid = legendInfo[l]['nids'][Math.floor(3*nMatchedNodes/4)]
-          var exampleColor = TW.partialGraph.graph.nodes(midNid).color
+          var exampleColor
+
+          if (TW.gui.handpickedcolor) {
+            exampleColor = TW.partialGraph.graph.nodes(midNid).customAttrs.alt_color
+          }
+          else {
+            exampleColor = TW.partialGraph.graph.nodes(midNid).color
+          }
 
           // create the legend item
           var preparedLabel = legendInfo[l]['labl']

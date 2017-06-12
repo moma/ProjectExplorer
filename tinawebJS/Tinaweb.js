@@ -248,7 +248,7 @@ function SelectionEngine() {
             if(nid) {
                 n = TW.partialGraph.graph.nodes(nid)
                 if(n) {
-                    n.color = n.customAttrs['true_color'];
+                    // our deselected flag
                     n.customAttrs['grey'] = 0;
 
                     // it's a selected node
@@ -877,7 +877,7 @@ var TinaWebJS = function ( sigmacanvas ) {
           // console.log("clickStage event e", e)
 
           if (! e.data.captor.isDragging
-            && TW.SystemState.selectionNids.length
+            && TW.gui.selectionActive
             && ! TW.gui.circleSize) {
 
             // we clear selections and all its effects
