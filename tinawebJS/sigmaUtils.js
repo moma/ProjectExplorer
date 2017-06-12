@@ -803,7 +803,7 @@ function heatmapColoring(daclass) {
   var ty = actypes[0]
 
   // our binning
-  var tickThresholds = TW.Clusters[ty][daclass]
+  var tickThresholds = TW.Clusters[ty][daclass].invIdx
 
   // verifications
   if (tickThresholds.length - 1 != nColors) {

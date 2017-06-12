@@ -294,7 +294,7 @@ TW.conf = (function(TW){
     // show verbose console logs...
     logFetchers: false,              // ...about ajax/fetching of graph data
     logParsers: false,               // ...about parsing said data
-    logFacets: false,                // ...about parsing node attribute:value facets
+    logFacets: true,                // ...about parsing node attribute:value facets
     logSettings: false,              // ...about settings at Tina and Sigma init time
     logSelections: false
   }

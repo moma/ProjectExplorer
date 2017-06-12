@@ -1028,7 +1028,8 @@ var TinaWebJS = function ( sigmacanvas ) {
 
 
       // attributes' facet-options init & handler
-      fillAttrsInForm()
+      fillAttrsInForm('choose-attr')
+      fillAttrsInForm('choose-titling-metric', 'metric')
       document.getElementById('choose-attr').onchange = showAttrConf
 
       // cancelSelection(false);

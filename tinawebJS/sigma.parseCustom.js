@@ -291,8 +291,8 @@ function facetsBinning (valuesIdx) {
 
       // console.warn("all raw vals before binning" valuesIdx[cat][at].vals)
 
-      // new array of valueclass/interval/bin objects
-      facetIdx[cat][at] = []
+      // meta + new array of values/intervals with inverted index to node ids
+      facetIdx[cat][at] = {meta:{}, invIdx:[]}
 
 
       // the full array of values of the accepted type
@@ -376,7 +376,7 @@ function facetsBinning (valuesIdx) {
         for (var pval in valuesIdx[cat][at].map) {
 
           var idList = valuesIdx[cat][at].map[pval]
-          facetIdx[cat][at].push({
+          facetIdx[cat][at].invIdx.push({
             // simple label
             'labl': `${pval} (${idList.length})`,
             // verbose label
@@ -550,12 +550,12 @@ function facetsBinning (valuesIdx) {
 
           // save these bins as the cluster index (aka faceting)
           if (newTick.nids.length) {
-            facetIdx[cat][at].push(newTick)
+            facetIdx[cat][at].invIdx.push(newTick)
           }
         }
 
         // finally add the 'trash' category with any non_numeric vals
-        facetIdx[cat][at].push({
+        facetIdx[cat][at].invIdx.push({
           'labl':'_non_numeric_',
           'fullLabl':'`${cat}||${at}||_non_numeric_',
           'nids': valuesIdx[cat][at].map['_non_numeric_'],

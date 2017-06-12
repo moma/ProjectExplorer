@@ -35,11 +35,11 @@ function changeGraphAppearanceByFacets( manualflag ) {
 
           // attribute counts: nb of classes
           // POSS here distinguish [ty][attTitle].classes.length and ranges.length
-          var attNbClasses = TW.Clusters[ty][attTitle].length
+          var attNbClasses = TW.Clusters[ty][attTitle].invIdx.length
           var attNbNodes = currentNbNodes
 
           if (attNbClasses) {
-            let lastClass = TW.Clusters[ty][attTitle][attNbClasses-1]
+            let lastClass = TW.Clusters[ty][attTitle].invIdx[attNbClasses-1]
             if (lastClass.labl && lastClass.labl == '_non_numeric_' && lastClass.nids) {
               if (lastClass.nids.length) {
                 attNbNodes -= lastClass.nids.length
@@ -133,18 +133,18 @@ function RunLouvain() {
 
     let nClasses = 0
     for (let typ in louvainValNids)  {
-      let revIdx = louvainValNids[typ]["clust_louvain"]['map']
+      let reinvIdx = louvainValNids[typ]["clust_louvain"]['map']
 
       // init a new legend in TW.Clusters
-      TW.Clusters[typ]['clust_louvain'] = []
+      TW.Clusters[typ]['clust_louvain'] = {'meta':{}, 'invIdx':[]}
 
-      for (let entry in revIdx) {
-        let len = revIdx[entry].length
+      for (let entry in reinvIdx) {
+        let len = reinvIdx[entry].length
         if (len) {
-          TW.Clusters[typ]['clust_louvain'].push({
+          TW.Clusters[typ]['clust_louvain'].invIdx.push({
             'labl': `${entry} (${len})`,
             'fullLabl': `${typ}||Louvain||${entry} (${len})`,
-            'nids': revIdx[entry],
+            'nids': reinvIdx[entry],
             'val': entry
           })
           nClasses ++
@@ -191,10 +191,11 @@ function SomeEffect( ValueclassCode ) {
     var activetypesKey = getActivetypesKey()
     // console.log( "\t"+activetypesKey)
 
+
     // we have our precomputed idmaps for nodes_2_colour
     // -------------------------------------------------
-    for (var k in TW.Clusters[nodeType][cluType][iClu].nids) {
-      var nid = TW.Clusters[nodeType][cluType][iClu].nids[k]
+    for (var k in TW.Clusters[nodeType][cluType].invIdx[iClu].nids) {
+      var nid = TW.Clusters[nodeType][cluType].invIdx[iClu].nids[k]
       nodes_2_colour[nid] = true
     }
 
@@ -280,7 +281,7 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
       LegendDiv += '    <div class="legend-scale">'
       LegendDiv += '      <ul class="legend-labels">'
 
-      var legendInfo = groupedByTicks || TW.Clusters[curType][daclass]
+      var legendInfo = groupedByTicks || TW.Clusters[curType][daclass].invIdx
 
       // valueclasses (values or intervals or classes) are already sorted in TW.Clusters
       for (var l in legendInfo) {
