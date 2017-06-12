@@ -99,5 +99,16 @@ These choices can be specified in the conf `facetOptions` entry.
 If an attribute is **not** described in `facetOptions`, it will get `"gradient"` coloration and will be binned iff it has more disctinct values than `maxDiscreteValues`, into `legendBins` intervals.
 
 These indexes are stored in TW.Clusters and provide an access to sets of nodes that have a given value or range of values
-  - the mapping from attribute values to matching nodes is always in TW.Clusters.aType.anAttr.aClass.map
+  - the mapping from attribute values to matching nodes is always in `TW.Clusters.aType.anAttr.invIdx.aClass.nids`
     (where aClass is the chosen interval or distinct value)
+
+
+We currently store the datatype of the observed values in `TW.Clusters.aType.anAttr.meta`
+    - the source datatype is always string in gexf, but real type ("vtype") can be numeric
+    - (ie numeric cast doesn't give NaN or it do so very rarely over the values)
+
+NB: the use cases for stats go beyond numeric vs string ! we could easily autodiagnose in facetsBinning between :
+    - vnum with many distinct values => assumed continuous metric (useful for gradient or titling)
+    - vnum with few  distinct values => assumed classes var
+    - vstr with few  distinct values => assumed classes var
+    - vstr with many distinct values => assumed classes with zipf freq => create an "others" for the tail

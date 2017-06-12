@@ -1026,11 +1026,10 @@ var TinaWebJS = function ( sigmacanvas ) {
         }
       }
 
-
       // attributes' facet-options init & handler
       fillAttrsInForm('choose-attr')
-      fillAttrsInForm('choose-titling-metric', 'metric')
       document.getElementById('choose-attr').onchange = showAttrConf
+      fillAttrsInForm('attr-titling-metric', 'num')
 
       // cancelSelection(false);
     }

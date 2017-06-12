@@ -561,6 +561,13 @@ function facetsBinning (valuesIdx) {
           'nids': valuesIdx[cat][at].map['_non_numeric_'],
         })
       }
+
+      // store this attribute's metadata
+      facetIdx[cat][at].meta.dataType = dataType
+
+      // POSS: here we could distinguish more precise attr types
+      //       numeric continuous vs. discrete etc.
+      //       cf. doc/developer_manual.md autodiagnose remark
     }
 
     // 'clust_default' is an alias to the user-defined default clustering
