@@ -187,6 +187,9 @@ TW.conf = (function(TW){
   // TW.geomap = false;
   // TW.twittertimeline = false;
 
+  TWConf.maxPastStates = 5 ;      // number of TW.states to remember (~CTRL-Z)
+
+
   // Layout options
   // --------------
   TWConf.fa2Available=true;        // show/hide fa2Button
@@ -294,8 +297,9 @@ TW.conf = (function(TW){
     // show verbose console logs...
     logFetchers: false,              // ...about ajax/fetching of graph data
     logParsers: false,               // ...about parsing said data
-    logFacets: true,                // ...about parsing node attribute:value facets
+    logFacets: false,                // ...about parsing node attribute:value facets
     logSettings: false,              // ...about settings at Tina and Sigma init time
+    logStates: true,                 // ...about TW.states array
     logSelections: false
   }
 

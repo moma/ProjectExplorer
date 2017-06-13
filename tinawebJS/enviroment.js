@@ -191,11 +191,8 @@ function createFilechooserEl () {
 
 // Documentation Level: *****
 function changeType() {
-    var present = TW.states.slice(-1)[0]; // Last
-    var past = TW.states.slice(-2)[0] // avant Last
-    var lastpos = TW.states.length-1;
-    var avantlastpos = lastpos-1;
 
+    var present = TW.SystemState() ; // current state before the change
 
     var level = present.level;
     var sels = present.selectionNids
@@ -229,15 +226,8 @@ function changeType() {
     if(level) nextState = t1Activetypes;
     else nextState = binSumCats;
 
-    if(!level && past!=false) {
-        var sum_past = present.activetypes.map(Number).reduce(function(a, b){return a+b;})
-        console.log("sum_past:")
-        console.log(sum_past)
-        console.log("past.activetypes:")
-        console.log(past.activetypes)
-        if(sum_past>1) {
-            nextState = past.activetypes;
-        }
+    if(!level && t0ActivetypesKey == '1|1') {
+      nextState = [true, false];
     }
     var str_nextState = nextState.map(Number).join("|")
 
@@ -289,15 +279,6 @@ function changeType() {
         }
     } else /* Local level, change to previous or alter component*/ {
         if(sels.length==0) {
-            console.log(" * * * * * * * * * * * * * * ")
-            console.log("the past: ")
-            console.log(past.activetypes.map(Number)+" , "+past.level)
-            console.log(past)
-
-            console.log("the present: ")
-            console.log(present.activetypes.map(Number)+" , "+present.level)
-            console.log(present)
-
             console.log("t0ActivetypesKey: "+t0ActivetypesKey)
             console.log("t1ActivetypesKey: "+t1ActivetypesKey)
             console.log("str_nextState: "+str_nextState)
@@ -355,8 +336,6 @@ function changeType() {
         var sumFutureCats = nextState.map(Number).reduce(function(a, b){return a+b;})
 
         nextState = (sumFutureCats==2 && !level && sumCats==1 )? nextState : t1Activetypes;
-        if(t1ActivetypesKey=="0|0" ) nextState=past.activetypes;
-        // nextState = ( past.activetypes && !level && sumCats==1 )? past.activetypes : t1Activetypes;
         str_nextState = nextState.map(Number).join("|")
         var sumNextState = nextState.map(Number).reduce(function(a, b){return a+b;})
 
@@ -442,17 +421,10 @@ function changeType() {
         TW.gui.selectionActive=true;
     }
 
-    // £TODO this should be done by setState()
-    TW.states[avantlastpos] = {};
-    TW.states[avantlastpos].LouvainFait = false;
-    TW.states[avantlastpos].level = present.level;
-    TW.states[avantlastpos].selectionNids = selsbackup;
-    TW.states[avantlastpos].activetypes = present.activetypes;
     // possible: integrated highlighted opposite- and same-side neighbours from MS2
     // (var used to exist but wasn't filled and used consistently)
-    TW.setState({
+    TW.pushState({
         activetypes: nextState,
-        level: level,
         sels: sels,
         oppos: []
     })
@@ -487,12 +459,8 @@ function changeLevel() {
 
     // let the waiting cursor appear
     setTimeout(function() {
-      var present = TW.states.slice(-1)[0]; // Last
-      var past = TW.states.slice(-2)[0] // avant Last
-      var lastpos = TW.states.length-1;
-      var avantlastpos = lastpos-1;
+      var present = TW.SystemState(); // Last
 
-      var level = present.level;
       var sels = present.selectionNids ;//[144, 384, 543]//TW.states[last].selectionNids;
 
       let selsChecker = {}
@@ -506,13 +474,8 @@ function changeLevel() {
       // types eg [true]          <=> '1'
       //          [true, true]    <=> '1|1'
 
-      var t0Activetypes = present.activetypes;
-      var t0ActivetypesKey = t0Activetypes.map(Number).join("|")
-
-      // [X|Y]-change (NOT operation over the received state [X\Y] )
-      var t1Activetypes = []
-      for(var i in t0Activetypes) t1Activetypes[i] = !t0Activetypes[i]
-      var t1ActivetypesKey = t1Activetypes.map(Number).join("|")
+      var activetypes = present.activetypes;
+      var activetypesKey = activetypes.map(Number).join("|")
 
       TW.partialGraph.graph.clear();
 
@@ -524,7 +487,7 @@ function changeLevel() {
       // POSS: factorize with same strategy in MultipleSelection2 beginning
       for(var i in sels) {
           s = sels[i];
-          neigh = TW.Relations[t0ActivetypesKey][s]
+          neigh = TW.Relations[activetypesKey][s]
           if(neigh) {
               for(var j in neigh) {
                   t = neigh[j]
@@ -540,7 +503,7 @@ function changeLevel() {
           nodes_2_colour[sels[i]]=true;
 
 
-      var futurelevel = []
+      var futurelevel = null
 
       if(present.level) { // [Change to Local] when level=Global(1)
           for(var nid in nodes_2_colour)
@@ -568,12 +531,12 @@ function changeLevel() {
 
           // var t0 = performance.now()
           for(var nid in TW.Nodes) {
-              if(t0Activetypes[TW.catDict[TW.Nodes[nid].type]])
+              if(activetypes[TW.catDict[TW.Nodes[nid].type]])
                   // we add 1 by 1
                   add1Elem(nid)
           }
           for(var eid in TW.Edges) {
-              if(TW.Edges[eid].categ==t0ActivetypesKey)
+              if(TW.Edges[eid].categ == activetypesKey)
                   add1Elem(eid)
           }
 
@@ -593,17 +556,8 @@ function changeLevel() {
           }
       }
 
-      // console.log("enviroment changeLevel nodes_2_colour", nodes_2_colour)
-      TW.states[avantlastpos] = {};
-      TW.states[avantlastpos].level = present.level;
-      TW.states[avantlastpos].activetypes = present.activetypes;
-      TW.states[avantlastpos].selectionNids = present.selectionNids;
-
-      TW.setState({
-          activetypes: present.activetypes,
-          level: futurelevel,
-          sels: sels,
-          oppos: []
+      TW.pushState({
+          level: futurelevel
       })
 
       TW.partialGraph.camera.goTo({x:0, y:0, ratio:1.2, angle: 0})

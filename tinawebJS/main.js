@@ -15,17 +15,21 @@ TW.gexfPaths={};        // for file selectors iff servermenu
 TW.categories = [];     // possible node types and their inverted map
 TW.catDict = {};
 
-// SystemState is a summary of current situation
-TW.SystemState = {}
-TW.SystemState.activetypes = []           // <== filled from TW.categories
-TW.SystemState.level = true;
-TW.SystemState.selectionNids = [];        // <== current selection !!
-TW.SystemState.LouvainFait = false;
 
-// states[] is an array of SystemStates for future CTRL+Z or usage track
-TW.states = []
-TW.states[0] = false;
-TW.states[1] = TW.SystemState
+// a system state is the summary of tina situation
+TW.initialSystemState = {
+  activetypes: [],          // <== filled from TW.categories
+  level:      true,
+  selectionNids: [],        // <== current selection !!
+  LouvainFait: false,
+  id: 0                     // simple incremental stateid
+}
+
+// states[] is an array of system states for future CTRL+Z or usage track
+TW.states = [TW.initialSystemState]
+
+// SystemState() returns the current situation
+TW.SystemState = function() { return TW.states.slice(-1)[0] }
 
 // -------------------------------8<--------------
 // £TODO remove deprecated here and in parseCustom
@@ -357,7 +361,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
       var possibleActivetypes = TW.instance.allPossibleActivetypes( TW.categories )
 
       // remember it
-      TW.states[1].activetypes = initialActivetypes ;
+      TW.pushState({'activetypes': initialActivetypes})
 
       // XML parsing from ParseCustom
       var dicts = start.makeDicts(TW.categories); // > parse json or gexf, dictfy

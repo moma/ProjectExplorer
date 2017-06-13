@@ -69,7 +69,7 @@ function SelectionEngine() {
     // we assume string is normalized
     this.search_n_select = function(string) {
 
-        let previousSelections = TW.SystemState.selectionNids
+        let previousSelections = TW.SystemState().selectionNids
 
         cancelSelection(false, {norender:true});
 
@@ -147,8 +147,7 @@ function SelectionEngine() {
      *
      * @nodes: eg targeted array (only ids)
      *
-     *  external usage : partialGraph.states,
-     *                   updateRelatedNodesPanel();
+     *  external usage : clickHandler, search, changeType, filters, tag click...
      */
      // ====================
     this.MultipleSelection2 = function(args) {
@@ -170,7 +169,7 @@ function SelectionEngine() {
         var sameSideNeighbors = {}
         var oppositeSideNeighbors = {}
 
-        // TW.states.slice(-1)[0] is the present graph state
+        // TW.SystemState() is the present graph state
         // eg
         // {categories: ["someNodeCat"]
         // categoriesDict: {"someNodeCat":0}  // where val 0 or 1 is type sem or soc
@@ -277,32 +276,24 @@ function SelectionEngine() {
         // show the button to remove selection
         $("#unselectbutton").show() ;
 
+        let theSelection = Object.keys(selections)
 
-        // £TODO: all this should be done in one line via TW.setState or ref
-        TW.SystemState.selectionNids = Object.keys(selections)
-        TW.states.slice(-1)[0].selectionNids = TW.SystemState.selectionNids;
-        TW.setState( { sels: TW.SystemState.selectionNids} )
-
-        if (TW.SystemState.selectionNids.length
-             && TW.SystemState.selectionNids[0] == 'NaN') {
-          console.error("NaN selection key error")
-        }
-
-        // alert("MultipleSelection2=======\nthe_new_sels:" + JSON.stringify(TW.SystemState.selectionNids))
+        // it's a new SystemState
+        TW.pushState( { sels: theSelection } )
 
         // we send our "gotNodeSet" event
         // (signal for plugins that a search-selection was done or a new hand picked selection)
         $('#searchinput').trigger({
             type: "tw:gotNodeSet",
             q: $("#searchinput").val(),
-            nodeIds: TW.SystemState.selectionNids
+            nodeIds: theSelection
         });
         // console.log("Event [gotNodeSet] sent from Tinaweb MultipleSelection2")
 
         // neighbors of the opposite type
         if(TW.Relations["1|1"]) {
-            for(var s in TW.SystemState.selectionNids) {
-                var bipaNeighs = TW.Relations["1|1"][TW.SystemState.selectionNids[s]];
+          for(var s in theSelection) {
+                var bipaNeighs = TW.Relations["1|1"][theSelection[s]];
 
                 for(var n in bipaNeighs) {
                     if (typeof oppositeSideNeighbors[bipaNeighs[n]] == "undefined")
@@ -324,7 +315,7 @@ function SelectionEngine() {
         });
 
         if (TW.conf.debug.logSelections) {
-          console.debug('TW.SystemState.selectionNids', TW.SystemState.selectionNids)
+          console.debug('new states\'s selectionNids', theSelection)
           console.debug('oppos', oppos)
           console.debug('same', same)
         }
@@ -334,7 +325,7 @@ function SelectionEngine() {
 
         TW.partialGraph.render();
 
-        updateRelatedNodesPanel( TW.SystemState.selectionNids , same, oppos )
+        updateRelatedNodesPanel( theSelection , same, oppos )
 
         if (TW.conf.debug.logSelections) {
           var tMS2_fin = performance.now()
@@ -831,7 +822,7 @@ var TinaWebJS = function ( sigmacanvas ) {
           var targeted = selInst.SelectorEngine( {
                               addvalue:TW.gui.checkBox,
                               currsels:circleNodes,
-                              prevsels:TW.SystemState.selectionNids
+                              prevsels:TW.SystemState().selectionNids
                           } )
 
           // 2) clear previous selection
@@ -847,7 +838,7 @@ var TinaWebJS = function ( sigmacanvas ) {
       // when one node and normal click
       // ===============================
       partialGraph.bind('clickNode', function(e) {
-        // console.log("clickNode event e", e.data.node)
+        console.log("clickNode event e", e.data.node)
 
         // new sigma.js gives easy access to clicked node!
         var theNodeId = e.data.node.id
@@ -857,10 +848,10 @@ var TinaWebJS = function ( sigmacanvas ) {
           var targeted = selInst.SelectorEngine( {
                               addvalue:TW.gui.checkBox,
                               currsels:[theNodeId],
-                              prevsels: TW.SystemState.selectionNids
+                              prevsels: TW.SystemState().selectionNids
                           } )
           // 2)
-          cancelSelection(false, {norender:true}); // no need to render before MS2
+          // cancelSelection(false, {norender:true}); // no need to render before MS2
           // 3)
           if(targeted.length>0) {
             selInst.MultipleSelection2( {nodes:targeted} )
@@ -1040,7 +1031,9 @@ var TinaWebJS = function ( sigmacanvas ) {
       if (TW.partialGraph && TW.partialGraph.graph) {
         TW.partialGraph.graph.clear()
         TW.partialGraph.refresh()
-        TW.SystemState.selectionNids = []
+
+        // ££TODO push state
+        TW.SystemState().selectionNids = []
       }
     }
 

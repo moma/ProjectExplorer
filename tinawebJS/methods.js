@@ -5,47 +5,44 @@
 //     ex: new selections:  {sels: [268]}
 //     ex: new activetypes: {activetypes:[false, true]}
 //     ex: new level:       {level:false}
-TW.setState = function( args ) {
-    var bistate=false, typesKey=false;
+TW.pushState = function( args ) {
 
-    // £TODO we could append the new state in this function too
-    var present = TW.states.slice(-1)[0]; // Last
-    var past = TW.states.slice(-2)[0] // avant Last
+
+    let lastState = TW.states.slice(-1)[0]   // <=> TW.SystemState()
 
     if (TW.conf.debug.logSelections) console.log("setState args: ", args);
 
-    if(!isUndef(args.activetypes)) {
+    // 1) we start from a copy
+    let newState = Object.assign({}, lastState)
 
-        // record into last state
-        present.activetypes = args.activetypes;
+    // counter à toutes fins utiles
+    newState.id ++
+
+    // 2) we update it with provided args
+    if (!isUndef(args.sels))         newState.selectionNids = args.sels;
+    if (!isUndef(args.activetypes))  newState.activetypes = args.activetypes
+    if (!isUndef(args.level))        newState.level = args.level;
+
+    // POSS1: add neighbors (of both types) in a .neighborsNids[type] slot
+    // POSS2: add filterSliders params to be able to recreate subsets at a given time
+
+    // useful shortcut
+    let typesKey = newState.activetypes.map(Number).join("|")
+
+    // legacy : we prefer to redo louvain than to miss a new nodeset
+    //          (wouldn't be needed if POSS2 implemented)
+    newState.LouvainFait = false;
 
 
-        bistate= present.activetypes.map(Number).reduce(
-          function(a, b){return a+b;}
-        )
-        typesKey = present.activetypes.map(Number).join("|")
-    }
-    // console.log("printing the typesKey:", typesKey)
+    // 3) apply all GUI effects
 
-    if(!isUndef(args.level)) present.level = args.level;
-    if(!isUndef(args.sels))  present.selectionNids = args.sels;
-    present.LouvainFait = false;
-
-    // change level needs a selection
-    LevelButtonDisable(false);  // £TODO rename toggleLevelButton
-    if(   present.level
-       && present.selectionNids
-       && present.selectionNids.length==0)
-        LevelButtonDisable(true);
-
-    // case to go back
-    if(present.level==false && bistate>1)
-        LevelButtonDisable(true)
+    // change level depends on a selection
+    LevelButtonDisable( (newState.selectionNids.length == 0) );
 
     // recreate sliders after activetype or level changes
     if (TW.conf.filterSliders
-        && (present.level != past.level
-            || present.activetypes.map(Number).join("|") != past.activetypes.map(Number).join("|"))) {
+        && (newState.level != lastState.level
+            || typesKey != lastState.activetypes.map(Number).join("|"))) {
 
       // terms
       if(typesKey=="0|1") {
@@ -77,7 +74,18 @@ TW.setState = function( args ) {
       }
     }
 
+    // 4) store it in TW.states
+    TW.states.push(newState)
+
+    // 5) forget oldest states if needed
+    while (TW.states.length > TW.conf.maxPastStates) {
+      TW.states.shift()
+    }
+
+    if (TW.conf.debug.logStates)
+      console.log(`updated states: ${JSON.stringify(TW.states)}`)
 };
+
 
 
 TW.resetGraph = function() {
@@ -88,6 +96,8 @@ TW.resetGraph = function() {
 
   // reset remaining global vars
   TW.labels = []
+  TW.Relations = {}
+  TW.states = [TW.initialSystemState]
 
   // reset rendering gui flags
   TW.gui.selectionActive = false
@@ -111,7 +121,9 @@ function cancelSelection (fromTagCloud, settings) {
     highlightSelectedNodes(false); //Unselect the selected ones :D
 
     // clear the current state's selection and neighbors arrays
-    TW.SystemState.selectionNids.splice(0, TW.SystemState.selectionNids.length)
+
+    // new state
+    TW.pushState({sels:[]})
 
     // global flag
     TW.gui.selectionActive = false
@@ -228,10 +240,11 @@ function swActual(aNodetype) {
 
 
 function highlightSelectedNodes(flag){
+    let sels = TW.SystemState().selectionNids
     if (TW.conf.debug.logSelections)
-      console.log("\t***methods.js:highlightSelectedNodes(flag)"+flag+" sel:"+TW.SystemState.selectionNids)
-    for(let i in TW.SystemState.selectionNids) {
-      let nid = TW.SystemState.selectionNids[i]
+      console.log("\t***methods.js:highlightSelectedNodes(flag)"+flag+" sel:"+sels)
+    for(let i in sels) {
+      let nid = sels[i]
       TW.partialGraph.graph.nodes(nid).active = flag
     }
 }

@@ -630,8 +630,9 @@ function getNodeLabels(elems){
 
 function getSelections(){
         let selLabels=[];
-        for(let i in TW.SystemState.selectionNids){
-            let nid = TW.SystemState.selectionNids[i]
+        let sels = TW.SystemState().selectionNids
+        for(let i in sels ){
+            let nid = sels[i]
             selLabels.push(TW.Nodes[nid].label);
         }
         return selLabels;
