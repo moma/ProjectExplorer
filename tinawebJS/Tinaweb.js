@@ -260,8 +260,9 @@ function SelectionEngine() {
 
           activeRelations["1|1"] = {}
 
-          for(var srcnid in theSelection) {
-                var bipaNeighs = TW.Relations["1|1"][theSelection[srcnid]];
+          for(var i in theSelection) {
+                let srcnid = theSelection[i]
+                var bipaNeighs = TW.Relations["1|1"][srcnid];
 
                 activeRelations["1|1"][srcnid] = {}
                 // shortcut
