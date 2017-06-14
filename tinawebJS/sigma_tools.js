@@ -25,10 +25,9 @@ sigmaTools = (function(stools) {
           y: rawNode.viz.position.y,
           color: rawNode.viz.color,
           size: Math.round(rawNode.viz.size*1000)/1000,
-          active: false,
           hidden: false,
           customAttrs: {
-            grey: false,
+            active: false,
             highlight: false,
             defgrey_color : "rgba("+rgbStr+",.4)"
           },
@@ -54,7 +53,6 @@ sigmaTools = (function(stools) {
           color: leColor,
           weight: Math.round(rawEdge.weight*1000)/1000,
           customAttrs: {
-            grey: false,
             activeEdge: false,
             true_color: leColor,
             rgb: rgbStr

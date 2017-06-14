@@ -74,7 +74,7 @@ var SigmaUtils = function () {
       var fontSize,
           prefix = settings('prefix') || '',
           size = node[prefix + 'size'],
-          activeFlag = node['active'] || node.customAttrs['forceLabel'],
+          activeFlag = node.customAttrs['active'] || node.customAttrs['forceLabel'],
           neighborFlag = node.customAttrs['highlight'],
           labelColor = (settings('labelColor') === 'node') ?
             (node.color || settings('defaultNodeColor')) :
@@ -153,7 +153,7 @@ var SigmaUtils = function () {
       }
       else if (neighborFlag) {
         // larger neighbors or highlight
-        fontSize *= 1.4
+        fontSize *= 1.3
       }
 
       context.font = (settings('fontStyle') ? settings('fontStyle') + ' ' : '') +
@@ -191,12 +191,8 @@ var SigmaUtils = function () {
 
         // console.debug(`t=${tstamp()} curve render activeedge: ${edgeInfos(edge)})`)
       }
-      else if (edge.customAttrs.grey) {
-        color = settings('twEdgeGreyColor')
-        size = 1
-      }
       else {
-        color = "rgba( "+baseRGB+" , "+TW.conf.sigmaJsDrawingProperties.twEdgeDefaultOpacity+")";
+        color = settings('twEdgeGreyColor')
         size = defSize
       }
 
@@ -243,13 +239,8 @@ var SigmaUtils = function () {
         // cf. sigmaTools.edgeColor
         color = 'rgba('+rgb.join()+',.7)'
       }
-      else if (edge.customAttrs.grey) {
-        color = settings('twEdgeGreyColor')
-        size = 1
-      }
       else {
-        // color = "rgba( "+rgb.join()+" , "+TW.conf.sigmaJsDrawingProperties.twEdgeDefaultOpacity+")";
-        color = edge.customAttrs.true_color
+        color = settings('twEdgeGreyColor')
         size = defSize
       }
 
@@ -302,9 +293,23 @@ var SigmaUtils = function () {
 
         // mode variants 2: if node is selected, highlighted or unselected
         if (TW.gui.selectionActive) {
+
+
+          // the selected node(s)
+          if (node.customAttrs.active) {
+            // called by label+background overlay cf. "subcall"
+            nodeSize *= 1.1
+            borderSize *= 1.1
+            nodeColor = "#222" // metro ticket
+          }
+          // the neighbor node(s)
+          else if (node.customAttrs.highlight) {
+            nodeSize *= 1.3
+            borderSize *= 1.3
+          }
           // passive nodes should blend in the grey of twEdgeGreyColor
           // cf settings_explorerjs, defgrey_color and greyEverything()
-          if (node.customAttrs.grey) {
+          else {
             if (! TW.gui.handpickedcolor) {
               nodeColor = node.customAttrs.defgrey_color
             }
@@ -314,20 +319,11 @@ var SigmaUtils = function () {
             // nice looking uniform grey
             borderColor = TW.conf.sigmaJsDrawingProperties.twBorderGreyColor
           }
-          else {
-            nodeSize *= 1.4
-            borderSize *= 1.4
-
-            if(node.active) {
-            // called by label+background overlay cf. "subcall"
-            nodeColor = "#222" // metro ticket
-            }
-          }
         }
         // highlight AND (NOT selectionActive) => highlight just this one time
         else if (node.customAttrs.highlight) {
-          nodeSize *= 1.4
-          borderSize *= 1.4
+          nodeSize *= 1.3
+          borderSize *= 1.3
           node.customAttrs.highlight = false
         }
 
@@ -408,8 +404,8 @@ var SigmaUtils = function () {
               settings('labelSizeRatio') * size;
 
         // largerall: our customized size boosts
-        if (!node.active) {
-          fontSize *= 1.4
+        if (!node.customAttrs.active) {
+          fontSize *= 1.3
 
           let X = node[prefix + 'x']
           let Y = node[prefix + 'y']

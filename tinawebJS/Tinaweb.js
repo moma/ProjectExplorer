@@ -154,8 +154,6 @@ function SelectionEngine() {
 
       if (!args)                      args = {}
       if (isUndef(args.nodes))        args.nodes = []
-      if (isUndef(args.nodesDict))    args.nodesDict = {}
-      if (isUndef(args.edgesDict))    args.edgesDict = {}
 
       if (TW.conf.debug.logSelections) {
         var tMS2_deb = performance.now()
@@ -164,6 +162,8 @@ function SelectionEngine() {
         console.log("nodes", args.nodes)
       }
 
+
+        console.warn('££TODO we could grey only active and neighbors if we kept neighbors')
         greyEverything();
 
         var sameSideNeighbors = {}
@@ -179,16 +179,10 @@ function SelectionEngine() {
 
 
         var activetypesKey = getActivetypesKey()
-        // console.log ("console.loging the Type:")
-        // console.log (activetypesKey)
-        // console.log (" - - - - - - ")
+
+
         // Dictionaries of: selection+neighbors
-
-        var nodes_2_colour = args.nodesDict
-        var edges_2_colour = args.edgesDict
-
         let selections = {}
-
 
         // targeted arg 'nodes' can be nid array or single nid
         var ndsids=[]
@@ -197,79 +191,57 @@ function SelectionEngine() {
             else ndsids=args.nodes;
 
             for(var i in ndsids) {
-                var s = ndsids[i];
+                var srcnid = ndsids[i];
 
-                if(TW.Relations[activetypesKey] && TW.Relations[activetypesKey][s] ) {
-                    var neigh = TW.Relations[activetypesKey][s]
-                    if(neigh) {
-                        for(var j in neigh) {
-                            var t = neigh[j]
+                if(TW.Relations[activetypesKey] && TW.Relations[activetypesKey][srcnid] ) {
+                    var neighs = TW.Relations[activetypesKey][srcnid]
+                    if(neighs) {
+                        for(var j in neighs) {
+                            var tgtnid = neighs[j]
+
+                            let tgt = TW.partialGraph.graph.nodes(tgtnid)
                             // highlight edges (except if n hidden or e dropped (<=> lock))
-                            // POSS: use sigma's own index to avoid checking if node exists or edge dropped
-                            if (TW.partialGraph.graph.nodes(t)
-                                && ! TW.partialGraph.graph.nodes(t).hidden
-                                && (
-                                    (TW.Edges[s+";"+t] && !TW.Edges[s+";"+t].lock)
-                                      ||
-                                    (TW.Edges[t+";"+s] && !TW.Edges[t+";"+s].lock)
-                                )
-                              ) {
-                                edges_2_colour[s+";"+t]=true;
-                                edges_2_colour[t+";"+s]=true;
+                            // POSS: use sigma's own index to avoid checking if edge dropped
+                            if (tgt && !tgt.hidden) {
+
+                              let eid1 = srcnid+';'+tgtnid
+                              let eid2 = tgtnid+';'+srcnid
+
+                              if ( (TW.Edges[eid1] && !TW.Edges[eid1].lock)
+                                     ||
+                                   (TW.Edges[eid2] && !TW.Edges[eid2].lock) ) {
+
+                                let e1 = TW.partialGraph.graph.edges(eid1)
+                                let e2 = TW.partialGraph.graph.edges(eid2)
+
+                                // since we're there we'll also keep the neighbors info
+                                if (typeof sameSideNeighbors[tgtnid] == 'undefined') {
+                                  sameSideNeighbors[tgtnid]=0
+                                }
+
+                                // **make the edge active**
+                                if (e1 && !e1.hidden) {
+                                  e1.customAttrs.activeEdge = 1;
+                                  sameSideNeighbors[tgtnid] += e1.weight || 1
+                                }
+                                if (e2 && !e2.hidden) {
+                                   e2.customAttrs.activeEdge = 1;
+                                   sameSideNeighbors[tgtnid] += e2.weight || 1
+                                }
 
                                 // we add as neighbor to color it (except if already in targeted)
-                                if (!nodes_2_colour[t]) nodes_2_colour[t]=false;
-
-                              // since we're there we keep the neighbors info
-                              if (typeof sameSideNeighbors[t] == 'undefined') {
-                                sameSideNeighbors[t]=0
+                                if (!tgt.customAttrs.active)    tgt.customAttrs.highlight = 1;
                               }
-
-                              if (TW.Edges[s+";"+t])
-                                sameSideNeighbors[t] += TW.Edges[s+";"+t].weight || 1
-
-                              if (TW.Edges[t+";"+s])
-                                sameSideNeighbors[t] += TW.Edges[t+";"+s].weight || 1
                             }
                         }
                     }
                 }
                 // we make the selected (source) node active too
-                nodes_2_colour[s]=true;
+                let src = TW.partialGraph.graph.nodes(srcnid)
+                src.customAttrs.active = true;
 
                 // update local selections dict
                 selections[ndsids[i]]=1;
-            }
-        }
-
-        // separate loop to allow nodes_2_colour without nodes as args (only used in changeType)
-        for(var nid in nodes_2_colour) {
-            if(nid) {
-                n = TW.partialGraph.graph.nodes(nid)
-                if(n) {
-                    // our deselected flag
-                    n.customAttrs['grey'] = 0;
-
-                    // it's a selected node
-                    if(nodes_2_colour[nid]) {
-                        n.active = true;
-                    }
-                    // it's a neighbor
-                    else {
-                        n.customAttrs.highlight = true;
-                    }
-                }
-            }
-        }
-
-        for(var eid in edges_2_colour) {
-
-            // at this point all edges are grey b/c greyEverything() was called
-            let an_edge = TW.partialGraph.graph.edges(eid)
-            if(!isUndef(an_edge) && !an_edge.hidden){
-
-                an_edge.customAttrs['grey'] = 0;
-                an_edge.customAttrs['activeEdge'] = 1;
             }
         }
 
@@ -278,29 +250,17 @@ function SelectionEngine() {
 
         let theSelection = Object.keys(selections)
 
-        // it's a new SystemState
-        TW.pushState( { sels: theSelection } )
-
-        // we send our "gotNodeSet" event
-        // (signal for plugins that a search-selection was done or a new hand picked selection)
-        $('#searchinput').trigger({
-            type: "tw:gotNodeSet",
-            q: $("#searchinput").val(),
-            nodeIds: theSelection
-        });
-        // console.log("Event [gotNodeSet] sent from Tinaweb MultipleSelection2")
-
         // neighbors of the opposite type
         if(TW.Relations["1|1"]) {
-          for(var s in theSelection) {
-                var bipaNeighs = TW.Relations["1|1"][theSelection[s]];
+          for(var srcnid in theSelection) {
+                var bipaNeighs = TW.Relations["1|1"][theSelection[srcnid]];
 
-                for(var n in bipaNeighs) {
-                    if (typeof oppositeSideNeighbors[bipaNeighs[n]] == "undefined")
-                        oppositeSideNeighbors[bipaNeighs[n]] = 0;
+                for(var k in bipaNeighs) {
+                    if (typeof oppositeSideNeighbors[bipaNeighs[k]] == "undefined")
+                        oppositeSideNeighbors[bipaNeighs[k]] = 0;
 
                     // £TODO weighted increment
-                    oppositeSideNeighbors[bipaNeighs[n]]++;
+                    oppositeSideNeighbors[bipaNeighs[k]]++;
                 }
             }
         }
@@ -315,10 +275,21 @@ function SelectionEngine() {
         });
 
         if (TW.conf.debug.logSelections) {
-          console.debug('new states\'s selectionNids', theSelection)
-          console.debug('oppos', oppos)
-          console.debug('same', same)
+          console.log('new states\'s selectionNids', theSelection)
+          console.log('oppos', oppos)
+          console.log('same', same)
         }
+
+        // it's a new SystemState
+        TW.pushState( { 'sels': theSelection, 'same': same, 'oppos': oppos } )
+
+        // we send our "gotNodeSet" event
+        // (signal for plugins that a search-selection was done or a new hand picked selection)
+        $('#searchinput').trigger({
+            type: "tw:gotNodeSet",
+            q: $("#searchinput").val(),
+            nodeIds: theSelection
+        });
 
         // global flag
         TW.gui.selectionActive = true
@@ -466,13 +437,14 @@ var TinaWebJS = function ( sigmacanvas ) {
 
       // custom labels rendering
       //  - based on the normal one sigma.canvas.labels.def
-      //  - additionnaly supports 'active/forcelabel' node property (magnify x 3)
+      //  - additionnaly supports 'active/highlight' node property (magnify x 3)
+      //  - also handles 'forceLabel' property
       sigmaModule.canvas.labels.def = tempo.twRender.canvas.labels.largeractive
 
       // custom hovers rendering
       //  - based on the normal one sigma.canvas.hovers.def
       //  - additionnaly magnifies all labels x 2
-      //  - additionnaly supports 'active/forcelabel' node property (magnify x 3)
+      //  - additionnaly supports 'active/highlight' node property (magnify x 3)
       sigmaModule.canvas.hovers.def = tempo.twRender.canvas.hovers.largerall
 
       if (TW.conf.debug.logSettings) console.log('tw renderers registered in sigma module')
@@ -576,6 +548,8 @@ var TinaWebJS = function ( sigmacanvas ) {
             console.log(" ############  changeTYPE click");
             if (TW.partialGraph.isForceAtlas2Running())
                 sigma_utils.ourStopFA2();
+
+            console.log("DBG before changeType SystemState:", TW.SystemState())
             changeType();
 
             setTimeout(function(){
@@ -851,11 +825,6 @@ var TinaWebJS = function ( sigmacanvas ) {
                               currsels:[theNodeId],
                               prevsels: TW.SystemState().selectionNids
                           } )
-          // 
-          // not needed because selInst calls greyEverything
-          // cancelSelection(false, {norender:true}); // no need to render before MS2
-          
-          
           // 2)
           if(targeted.length>0) {
             selInst.MultipleSelection2( {nodes:targeted} )

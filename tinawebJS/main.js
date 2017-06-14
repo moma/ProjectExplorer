@@ -374,7 +374,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
       TW.nodeIds = Object.keys(dicts.nodes)  // useful for loops
       TW.edgeIds = Object.keys(dicts.edges)
 
-      // in-place: pre-compute all color/grey/size properties
+      // in-place: pre-compute all color/unselected color/size properties
       prepareNodesRenderingProperties(TW.Nodes)
       prepareEdgesRenderingProperties(TW.Edges, TW.Nodes)
 

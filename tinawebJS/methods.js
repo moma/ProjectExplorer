@@ -23,7 +23,10 @@ TW.pushState = function( args ) {
     if (!isUndef(args.activetypes))  newState.activetypes = args.activetypes
     if (!isUndef(args.level))        newState.level = args.level;
 
-    // POSS1: add neighbors (of both types) in a .neighborsNids[type] slot
+    // neighbors (of both types) in a .neighborsNids[type] slot
+    if(!isUndef(args.same))          newState.samesideSortdNeighs = args.same;
+    if(!isUndef(args.oppos))         newState.opposideSortdNeighs = args.oppos;
+
     // POSS2: add filterSliders params to be able to recreate subsets at a given time
 
     // useful shortcut
@@ -124,7 +127,7 @@ function cancelSelection (fromTagCloud, settings) {
     // clear the current state's selection and neighbors arrays
 
     // new state
-    TW.pushState({sels:[]})
+    TW.pushState({sels:[], oppos:[], same:[]})
 
     // global flag
     TW.gui.selectionActive = false
@@ -137,7 +140,6 @@ function cancelSelection (fromTagCloud, settings) {
         // console.log("cancelSelection: edge", e)
         if (e) {
           e.color = e.customAttrs['true_color'];
-          e.customAttrs.grey = 0;
 
           if (e.customAttrs.activeEdge) {
             e.customAttrs.activeEdge = 0;
@@ -147,17 +149,16 @@ function cancelSelection (fromTagCloud, settings) {
     }
 
     //Nodes colors go back to previous
-    // £TODO partly duplicate effort with (de)highlightSelectedNodes and greyEverything
+    // ££TODO partly duplicate effort with (de)highlightSelectedNodes and greyEverything
     //       => could be replaced by a (de)highlightSelectedAndNeighbors
     //          on smaller set (here entire nodeset!)
     for(let j in TW.nodeIds){
       let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
       // console.log("cancelSelection: node", n)
       if (n) {
-        n.active = false;
-        n.customAttrs.grey = 0
-        n.customAttrs.forceLabel = 0
+        n.customAttrs.active = 0
         n.customAttrs.highlight = 0
+        n.customAttrs.forceLabel = 0
 
         // some colorings cases also modify size and label
         if (settings.resetLabels) {
@@ -246,19 +247,14 @@ function highlightSelectedNodes(flag){
       console.log("\t***methods.js:highlightSelectedNodes(flag)"+flag+" sel:"+sels)
     for(let i in sels) {
       let nid = sels[i]
-      TW.partialGraph.graph.nodes(nid).active = flag
+      TW.partialGraph.graph.nodes(nid).customAttrs.active = flag
     }
 }
 
 function manualForceLabel(nodeid, active, justHover) {
-	// console.log("manual|"+nodeid+"|"+active)
-  var nd = TW.partialGraph.graph.nodes(nodeid)
+  let nd = TW.partialGraph.graph.nodes(nodeid)
 
-  // TODO harmonize with other status => bien re-distinguer neighbor et active
-  // nd.active=active;
-
-  // console.log('justHover', justHover)
-  // var t0, t1
+  nd.customAttrs.forceLabel = true
 
   if (justHover) {
     // using single node redraw in hover layer (much faster ~ 0.5ms)
@@ -461,7 +457,7 @@ function LevelButtonDisable( TF ){
 // NB: we just change the flags, not the colors
 //     renderer will see the flags and handle the case accordingly
 
-// £TODO rendering optimization: reduce effort by looping only on previously selected and neighbors
+// ££TODO rendering optimization: reduce effort by looping only on previously selected and neighbors
 //       and having (!active && !highlight) tested instead of then useless grey flag
 function greyEverything(){
 
@@ -470,10 +466,8 @@ function greyEverything(){
 
     if (n && !n.hidden) {
       // normal case handled by node renderers
-      // will see the n.customAttrs.grey flag => use n.customAttrs.defgrey_color
-      n.customAttrs.grey=1
-
-      n.active = false
+      // will trigger defgrey_color if (!active && !highlight)
+      n.customAttrs.active = false
       n.customAttrs.forceLabel = false;
       n.customAttrs.highlight = false;
     }
@@ -482,8 +476,7 @@ function greyEverything(){
   if (TW.partialGraph.settings('drawEdges')) {
     for(var i in TW.edgeIds){
       let e = TW.partialGraph.graph.edges(TW.edgeIds[i])
-      if (e && !e.hidden && !e.customAttrs.grey) {
-        e.customAttrs.grey = 1
+      if (e && !e.hidden && e.customAttrs.activeEdge) {
         e.customAttrs.activeEdge = 0
       }
     }
@@ -508,7 +501,6 @@ function prepareNodesRenderingProperties(nodesDict) {
     n.size = Math.round(n.size*sizeFactor*1000)/1000
 
     // new initial setup of properties
-    n.active = false
 
     var rgba, rgbStr, invalidFormat = false;
 
@@ -551,8 +543,8 @@ function prepareNodesRenderingProperties(nodesDict) {
 
     n.customAttrs = {
       // status flags
-      grey: false,                // deselected
-      highlight: false,           // neighbors or legend's click
+      active: false,              // when selected
+      highlight: false,           // when neighbors or legend's click
 
       // default unselected color
       defgrey_color : "rgba("+rgbStr+","+TW.conf.sigmaJsDrawingProperties.twNodesGreyOpacity+")",
@@ -565,14 +557,13 @@ function prepareNodesRenderingProperties(nodesDict) {
     // POSS n.type: distinguish rendtype and twtype
 
     // POSS flags like this
-    // // sigma's flags: active and hidden
-    // active: false,
+    // // sigma's flag: hidden (not used)
     // hidden: false,
     // customFlags : {
     //   // our status flags
-    //   grey: false,
+    //   active: false,
     //   highlight: false,
-    //   // forceLabel: false,
+    //   forceLabel: false,
     // }
   }
 }
@@ -588,7 +579,6 @@ function prepareEdgesRenderingProperties(edgesDict, nodesDict) {
 
     e.color = "rgba("+rgbStr+","+TW.conf.sigmaJsDrawingProperties.twEdgeDefaultOpacity+")"
     e.customAttrs = {
-      grey: false,
       activeEdge : false,
       true_color : e.color,
       rgb : rgbStr
