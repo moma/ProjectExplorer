@@ -199,74 +199,61 @@ function changeType() {
     var t0Activetypes = present.activetypes;
     var t0ActivetypesKey = t0Activetypes.map(Number).join("|")
 
-
-    // console.debug("CHANGE TYPE, present.selections", present.selectionNids)
-
-    var selsbackup = present.selectionNids.slice();
-
-
     // type "grammar"
     //     used to distinguish types in TW.Relations
 
-    // activetypes eg [true]          <=> key '1'
-    //                [true, true]    <=> key '1|1'
-    //                [true, false]   <=> key '1|0'
+    // activetypes eg [true]          <=> key '1'         => this function is not accessible
+    //                [true, false]   <=> key '1|0'      <=> just sem
+    //                [true, true]    <=> key '1|1'      <=> both types
 
-    // Complement of the received state ~[X\Y] )
+
+    // normal case
+    // new state is the complement of the received state ~[X\Y]
     var t1Activetypes = []
     for(var i in t0Activetypes) t1Activetypes[i] = !t0Activetypes[i]
     var t1ActivetypesKey = t1Activetypes.map(Number).join("|")
 
-    var binSumCats = []
-    for(var i in t0Activetypes)
-        binSumCats[i] = (t0Activetypes[i]||t1Activetypes[i])
-    var str_binSumCats = binSumCats.map(Number).join("|")
+    // "union realm" (where we'll search the real bipartite Relations)
+    var bipartiteKey = "1|1"
 
-    var nextState = []
-    if(level) nextState = t1Activetypes;
-    else nextState = binSumCats;
+    let mixedStart = false
 
-    if(!level && t0ActivetypesKey == '1|1') {
-      nextState = [true, false];
-    }
-    var str_nextState = nextState.map(Number).join("|")
+    // special case: "both were active"
+    //    when t0Activetypes is both (aka "1|1")
+    //    the complement is "0|0" aka **none**    :-/
+    //    so => we set here a fallback to "1|0"
+    if (t1ActivetypesKey == "0|0") {
+      t1Activetypes = [true, false]
+      t1ActivetypesKey = "1|0"
 
-    var prevnodes = {}
-    var prevedges = {}
-
-    // for all possible nodes, which ones actually in the graph atm
-    for(var i in TW.nodeIds) {
-        let nid = TW.nodeIds[i]
-        let anode = TW.partialGraph.graph.nodes(nid);
-        if(anode) {
-            prevnodes[nid] = true
-        }
+      // this case "0|0" => "1|0" won't have a unique edge realm to look at
+      // nodes of "1|0" will need their "1|0" neighbors
+      // and other nodes will need their "1|1" neighbors
+      mixedStart = true
     }
 
-    var links_sels = {}
+    // special case: "macro level opens bipartite possibilities"
+    if(!level)   t1Activetypes = [true, true];
 
-    for(var i in TW.edgeIds) {
-        let eid = TW.edgeIds[i]
-        let anedge = TW.partialGraph.graph.edges(eid);
-        if(anedge) {
-            prevedges[eid] = true;
-            if(anedge.customAttrs) {
-                if(anedge.customAttrs["grey"]==0) {
-                    links_sels[eid] = true;
-                }
-            }
-        }
+
+    // list of present nodes: needed *before* clearing
+    // (but only needed if local and no selections)
+    let prevnodes = []
+    if (!level && !sels.length) {
+      // simple fix: a source set with all the (few) local nodes
+      prevnodes = TW.partialGraph.graph.nodes()
     }
 
+    // we start from blank
     TW.partialGraph.graph.clear();
 
-    var nodes_2_colour = {}
-    var edges_2_colour = {}
+    var sourceNodes = []
 
-    console.log("CHanging the TYpE!!: "+present.level)
+    // console.log("CHanging the TYpE!! => ",t1Activetypes, sels.length, present.level)
+
 
     if(present.level) { //If level=Global, fill all {X}-component
-
+        // POSS full index by type could be useful here
         for(var nid in TW.Nodes) {
             if(t1Activetypes[TW.catDict[TW.Nodes[nid].type]]) {
               add1Elem(nid)
@@ -276,160 +263,121 @@ function changeType() {
 
             if(TW.Edges[eid].categ==t1ActivetypesKey)
                 add1Elem(eid)
+
+            // NB ie we don't add sameside edges "1|0" or "0|1" when target
+            //       activetypes is "1|1" (aka "both")
         }
-    } else /* Local level, change to previous or alter component*/ {
+
+        sourceNodes = sels
+    }
+
+    /* Local level but nothing selected*/
+    else {
         if(sels.length==0) {
-            console.log("t0ActivetypesKey: "+t0ActivetypesKey)
-            console.log("t1ActivetypesKey: "+t1ActivetypesKey)
-            console.log("str_nextState: "+str_nextState)
-
-            var newsels = {}
-            var sumpastcat = t0Activetypes.map(Number).reduce(function(a, b){return a+b;})
-            if(sumpastcat==1) /* change to alter comp*/ {
-                for(var nid in prevnodes) {
-                    let neigh = TW.Relations[str_nextState][nid]
-                    if(neigh) {
-                        for(var j in neigh) {
-                            let tid = neigh[j]
-                            nodes_2_colour[tid]=true;
-                        }
-                    }
-                }
-
-                for(var nid in nodes_2_colour) {
-                    let neigh = TW.Relations[t1ActivetypesKey][nid]
-                    if(neigh) {
-                        for(var j in neigh) {
-                            let tid = neigh[j]
-                            if(nodes_2_colour[tid]) {
-                                edges_2_colour[nid+";"+tid]=true;
-                                edges_2_colour[tid+";"+nid]=true;
-                            }
-                        }
-                    }
-                    nodes_2_colour[nid] = false;
-                }
-
-                for(var nid in nodes_2_colour)
-                    add1Elem(nid)
-                for(var eid in edges_2_colour)
-                    add1Elem(eid)
-
-                nextState = t1Activetypes;
-
+            // NB: In macro level, the target subset (ie nodes of opposite type
+            //     to show) is defined by the selections's opposite neighbors.
+            //     It means here the target would be empty b/c we have no sels now,
+            for (let j in prevnodes) {
+              sourceNodes.push(prevnodes[j].id)
             }
-
-            if(sumpastcat==2) {
-
-            }
-            console.log(" * * * * * * * * * * * * * * ")
+        }
+        else {
+          sourceNodes = sels
         }
     }
 
-    if(sels.length>0) { // and if there's some selection:
+    // console.log('starting point nodes', sourceNodes)
 
-        // console.log("active selection 01:")
-        // console.log(sels)
+    // Projection
+    // -----------
+    // now we have a set of source nodes
+    // we'll use Relations to define the new selected nodeset
+    //                 (or if !present.level, the new nodeset to *display*)
 
-        // Defining the new selection (if it's necessary)
-        var sumCats = t0Activetypes.map(Number).reduce(function(a, b){return a+b;})
-        var sumFutureCats = nextState.map(Number).reduce(function(a, b){return a+b;})
+    // [ ChangeType: incremental selection ;]
 
-        nextState = (sumFutureCats==2 && !level && sumCats==1 )? nextState : t1Activetypes;
-        str_nextState = nextState.map(Number).join("|")
-        var sumNextState = nextState.map(Number).reduce(function(a, b){return a+b;})
+    // Dictionaries of: opposite-neighs of current source nodes
+    var newsels = {}
+    var edgesToAdd = {}
+    for(var i in sourceNodes) {
+        let srcnid = sourceNodes[i];
+        let srctyp = TW.Nodes[srcnid].type
+        let neighs = []
+        if (!mixedStart) {
+          // case where we have an single kind of Relations to consider
+          // ie the realm of the bipartite relations called "1|1"
+          neighs = TW.Relations[bipartiteKey][srcnid]
+        }
+        else {
+          // case with a mixed starting point
+          // => kind of Relation depends on node
+          if (t1Activetypes[TW.catDict[srctyp]]) {
+            // here src node is already within the target active type
+            // so we look for neighbors in there
+            neighs = TW.Relations[t1ActivetypesKey][srcnid]
+          }
+          else {
+            // here src node is of the other type so we use the bipartite relations
+            neighs = TW.Relations[bipartiteKey][srcnid]
+          }
+        }
+        if(neighs) {
+          for(var j in neighs) {
+            let tgtnid = neighs[j]
+            let tgttyp = TW.Nodes[tgtnid].type
 
-        // [ ChangeType: incremental selection ;]
-        if(sumCats==1 && sumNextState<2) {
+            // add neighbors of the good target type(s)
+            if (t1Activetypes[TW.catDict[tgttyp]]) {
+              newsels[tgtnid]=true;
 
-            var indexCat = str_binSumCats;//(level)? t1ActivetypesKey : str_binSumCats ;
-            // Dictionaries of: opposite-neighs of current selection
-            var newsels = {}
-            for(var i in sels) {
-                s = sels[i];
-                neigh = TW.Relations[indexCat][s]
-                if(neigh) {
-                    for(var j in neigh) {
-                        t = neigh[j]
-                        newsels[t]=true;
-                    }
-                }
+              // since we're here we keep the edges if needed
+              if (!present.level) {
+                edgesToAdd[`${srcnid};${tgtnid}`] = true
+                edgesToAdd[`${tgtnid};${srcnid}`] = true
+              }
             }
-            for(var i in sels) {
-                delete newsels[sels[i]];
-                // if(level) delete newsels[sels[i]];
-                // else newsels[sels[i]]=true;
-            }
-
-            sels = Object.keys(newsels);
-            // output: newsels=[opposite-neighs]
-        } // [ / ChangeType: incremental selection ]
-
-        if (TW.conf.debug.logSelections)
-          console.log("new virtually selected nodes:", sels)
-
-        var selDict={}
-        for(var i in sels) // useful for case: (sumNextState==2)
-            selDict[sels[i]]=true
-
-        if(sumNextState==1) { // we're moving to {X}-subgraph
-            // Saving all the nodes&edges to be highlighted.
-            for(var i in sels) {
-                s = sels[i];
-                neigh = TW.Relations[str_nextState][s]
-                if(neigh) {
-                    for(var j in neigh) {
-                        t = neigh[j]
-                        nodes_2_colour[t]=false;
-                        edges_2_colour[s+";"+t]=true;
-                        edges_2_colour[t+";"+s]=true;
-                    }
-                }
-            }
-            for(var i in sels)
-                nodes_2_colour[sels[i]]=true;
-            // output: nodes_2_colour and edges_2_colour
+          }
         }
 
-        if(sumNextState==2) { // we're moving to bipartite subgraph
-            for(var i in TW.Edges) {
-                n = i.split(";")
-                if( selDict[ n[0] ] || selDict[ n[1] ]  ) {
-                    nodes_2_colour[n[0]]=false;
-                    nodes_2_colour[n[1]]=false;
-                    edges_2_colour[n[0]+";"+n[1]]=true;
-                }
-            }
-            for(var i in sels)
-                nodes_2_colour[sels[i]] = true;
+        // also add self if of the good target type
+        if (t1Activetypes[TW.catDict[srctyp]]) {
+          newsels[srcnid]=true;
         }
+    }
 
+    // our result is newsels: the projected + filtered selection
+
+    // [ / ChangeType: incremental selection ]
+
+    // finally in macro case we still need to add the actual nodes & edges
+    if(!present.level) {
         // Adding just selection+neighs
-        if(!present.level) {
-            for(var nid in nodes_2_colour)
-                add1Elem(nid)
-            for(var eid in edges_2_colour)
-                add1Elem(eid)
+        for(var nid in newsels) {
+          add1Elem(nid)
         }
-
-        // to recreate the selection in the new type graph
-        TW.instance.selNgn.MultipleSelection2({
-                    nodes: sels,
-                    nodesDict:nodes_2_colour,
-                    edgesDict:edges_2_colour
-                });
-        TW.gui.selectionActive=true;
+        for(var eid in edgesToAdd) {
+          add1Elem(eid)
+        }
     }
 
-    // possible: integrated highlighted opposite- and same-side neighbours from MS2
-    // (var used to exist but wasn't filled and used consistently)
+    let newselsArr = Object.keys(newsels)
+
     TW.pushState({
-        activetypes: nextState,
-        sels: sels,
+        activetypes: t1Activetypes,
+        sels: newselsArr,
         oppos: []
+        // possible: integrated highlighted opposite- and same-side neighbours from MS2
+        // (var used to exist but wasn't filled and used consistently)
     })
 
-    // REFA new sigma.js
+    // to recreate the new selection in the new type graph, if we had one before
+    // NB relies on new actypes so should be after pushState
+    if (newselsArr.length && sels.length) {
+      TW.instance.selNgn.MultipleSelection2({nodes: newselsArr});
+      if (TW.conf.debug.logSelections)
+        console.log("selection transitive projection from",sels, "to", newsels)
+    }
+
     TW.partialGraph.camera.goTo({x:0, y:0, ratio:1, angle: 0})
     TW.partialGraph.refresh()
 
@@ -444,15 +392,12 @@ function changeType() {
 
 
 //
-// changeLevel :     macro selection SysSt = {level: true, type:XY}
+// changeLevel :     macro selection SysSt = {level: true, activetypes:XY}
 //                         ^
 //                         |
 //                         v
-//                   local selection SysSt = {level: false, type:XY}
+//                   local selection SysSt = {level: false, activetypes:XY}
 //
-//  where SysSt is the last state aka TW.states.slice(-1)[0]
-//    and SysSt.level is aka swMacro
-
 function changeLevel() {
     // show waiting cursor
     theHtml.classList.add('waiting');

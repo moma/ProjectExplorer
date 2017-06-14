@@ -283,7 +283,7 @@ TW.conf = (function(TW){
 
   // relative sizes (iff ChangeType == both nodetypes)
   TWConf.sizeMult = [];
-  TWConf.sizeMult[0] = 4.0;    // ie for node type 0
+  TWConf.sizeMult[0] = 3.0;    // ie for node type 0
   TWConf.sizeMult[1] = 1.0;    // ie for node type 1
 
 

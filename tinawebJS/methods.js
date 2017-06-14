@@ -36,8 +36,9 @@ TW.pushState = function( args ) {
 
     // 3) apply all GUI effects
 
-    // change level depends on a selection
-    LevelButtonDisable( (newState.selectionNids.length == 0) );
+    // if global level, change level depends on a selection
+    // if local then it's always available to go back to global
+    LevelButtonDisable( newState.level && newState.selectionNids.length == 0 );
 
     // recreate sliders after activetype or level changes
     if (TW.conf.filterSliders
