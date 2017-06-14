@@ -299,7 +299,7 @@ TW.conf = (function(TW){
     logParsers: false,               // ...about parsing said data
     logFacets: false,                // ...about parsing node attribute:value facets
     logSettings: false,              // ...about settings at Tina and Sigma init time
-    logStates: true,                 // ...about TW.states array
+    logStates: false,                // ...about TW.states array
     logSelections: false
   }
 

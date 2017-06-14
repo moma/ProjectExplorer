@@ -147,7 +147,7 @@ function cancelSelection (fromTagCloud, settings) {
     }
 
     //Nodes colors go back to previous
-    // £TODO partly duplicate effort with (de)highlightSelectedNodes
+    // £TODO partly duplicate effort with (de)highlightSelectedNodes and greyEverything
     //       => could be replaced by a (de)highlightSelectedAndNeighbors
     //          on smaller set (here entire nodeset!)
     for(let j in TW.nodeIds){
@@ -460,6 +460,9 @@ function LevelButtonDisable( TF ){
 // edges greyish color for unselected, when we have a selection
 // NB: we just change the flags, not the colors
 //     renderer will see the flags and handle the case accordingly
+
+// £TODO rendering optimization: reduce effort by looping only on previously selected and neighbors
+//       and having (!active && !highlight) tested instead of then useless grey flag
 function greyEverything(){
 
   for(var nid in TW.Nodes){

@@ -161,7 +161,7 @@ function SelectionEngine() {
         var tMS2_deb = performance.now()
 
         console.log("IN SelectionEngine.MultipleSelection2:")
-        console.log("args", args)
+        console.log("nodes", args.nodes)
       }
 
         greyEverything();
@@ -325,6 +325,7 @@ function SelectionEngine() {
 
         TW.partialGraph.render();
 
+        // TODO FIX
         updateRelatedNodesPanel( theSelection , same, oppos )
 
         if (TW.conf.debug.logSelections) {
@@ -838,7 +839,7 @@ var TinaWebJS = function ( sigmacanvas ) {
       // when one node and normal click
       // ===============================
       partialGraph.bind('clickNode', function(e) {
-        console.log("clickNode event e", e.data.node)
+        // console.log("clickNode event e", e.data.node)
 
         // new sigma.js gives easy access to clicked node!
         var theNodeId = e.data.node.id
@@ -850,9 +851,12 @@ var TinaWebJS = function ( sigmacanvas ) {
                               currsels:[theNodeId],
                               prevsels: TW.SystemState().selectionNids
                           } )
-          // 2)
+          // 
+          // not needed because selInst calls greyEverything
           // cancelSelection(false, {norender:true}); // no need to render before MS2
-          // 3)
+          
+          
+          // 2)
           if(targeted.length>0) {
             selInst.MultipleSelection2( {nodes:targeted} )
           }
@@ -1032,7 +1036,7 @@ var TinaWebJS = function ( sigmacanvas ) {
         TW.partialGraph.graph.clear()
         TW.partialGraph.refresh()
 
-        // ££TODO push state
+        TW.pushState({'sels':[]})
         TW.SystemState().selectionNids = []
       }
     }

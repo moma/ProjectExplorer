@@ -32,7 +32,7 @@ TW.states = [TW.initialSystemState]
 TW.SystemState = function() { return TW.states.slice(-1)[0] }
 
 // -------------------------------8<--------------
-// £TODO remove deprecated here and in parseCustom
+// £TODO remove deprecated here and in parseCustom or change to an index by type
 var nodes1 = {};
 var nodes2 = {};
 var bipartiteD2N = {};
