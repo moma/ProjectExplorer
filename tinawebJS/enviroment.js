@@ -365,9 +365,8 @@ function changeType() {
     TW.pushState({
         activetypes: t1Activetypes,
         sels: newselsArr,
-        oppos: []
-        // possible: integrated highlighted opposite- and same-side neighbours from MS2
-        // (var used to exist but wasn't filled and used consistently)
+        // rels: added by MS2 (highlighted opposite- and same-side neighbours)
+        // possible: add it in an early way here and request that MS2 doesn't change state
     })
 
     // to recreate the new selection in the new type graph, if we had one before
@@ -429,7 +428,7 @@ function changeLevel() {
       var nodes_2_colour = {}
       var edges_2_colour = {}
 
-      // POSS: factorize with same strategy in MultipleSelection2 beginning
+      // £TODO: factorize with same strategy in MultipleSelection2 beginning
       for(var i in sels) {
           s = sels[i];
           neigh = TW.Relations[activetypesKey][s]
@@ -494,8 +493,8 @@ function changeLevel() {
           if(sels.length>0) {
               TW.instance.selNgn.MultipleSelection2({
                           nodes:sels,
-                          nodesDict:nodes_2_colour,
-                          edgesDict:edges_2_colour
+                          // nodesDict:nodes_2_colour,
+                          // edgesDict:edges_2_colour
                       });
               TW.gui.selectionActive=true;
           }

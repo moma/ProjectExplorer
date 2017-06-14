@@ -21,6 +21,7 @@ TW.initialSystemState = {
   activetypes: [],          // <== filled from TW.categories
   level:      true,
   selectionNids: [],        // <== current selection !!
+  selectionRels: [],        // <== current highlighted neighbors
   LouvainFait: false,
   id: 0                     // simple incremental stateid
 }

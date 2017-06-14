@@ -80,7 +80,7 @@ var SigmaUtils = function () {
             (node.color || settings('defaultNodeColor')) :
             settings('defaultLabelColor') ;
           // NB active is used in all TW selections
-          //    forceLabel is used in cluster highlighting
+          //    forceLabel is used in manualForceLabel (fake hover)
           //    highlight is used for selection's neighbors or cluster highlighting
 
       let X = node[prefix + 'x']
@@ -308,7 +308,7 @@ var SigmaUtils = function () {
             borderSize *= 1.3
           }
           // passive nodes should blend in the grey of twEdgeGreyColor
-          // cf settings_explorerjs, defgrey_color and greyEverything()
+          // cf settings_explorerjs, defgrey_color and deselectNodes()
           else {
             if (! TW.gui.handpickedcolor) {
               nodeColor = node.customAttrs.defgrey_color

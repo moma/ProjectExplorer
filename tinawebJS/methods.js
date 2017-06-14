@@ -10,7 +10,7 @@ TW.pushState = function( args ) {
 
     let lastState = TW.states.slice(-1)[0]   // <=> TW.SystemState()
 
-    if (TW.conf.debug.logSelections) console.log("setState args: ", args);
+    if (TW.conf.debug.logStates) console.log("setState args: ", args);
 
     // 1) we start from a copy
     let newState = Object.assign({}, lastState)
@@ -19,13 +19,12 @@ TW.pushState = function( args ) {
     newState.id ++
 
     // 2) we update it with provided args
-    if (!isUndef(args.sels))         newState.selectionNids = args.sels;
     if (!isUndef(args.activetypes))  newState.activetypes = args.activetypes
     if (!isUndef(args.level))        newState.level = args.level;
+    if (!isUndef(args.sels))         newState.selectionNids = args.sels;
 
-    // neighbors (of both types) in a .neighborsNids[type] slot
-    if(!isUndef(args.same))          newState.samesideSortdNeighs = args.same;
-    if(!isUndef(args.oppos))         newState.opposideSortdNeighs = args.oppos;
+    // neighbors (of any type) and their edges in an .selectionRels[type] slot
+    if(!isUndef(args.rels))          newState.selectionRels = args.rels;
 
     // POSS2: add filterSliders params to be able to recreate subsets at a given time
 
@@ -122,53 +121,18 @@ function cancelSelection (fromTagCloud, settings) {
     if (TW.conf.debug.logSelections) { console.log("\t***in cancelSelection"); }
     if (!settings) settings = {}
 
-    highlightSelectedNodes(false); //Unselect the selected ones :D
-
+    // SystemState effects
+    // -------------------
     // clear the current state's selection and neighbors arrays
+    deselectNodes(TW.SystemState())    //Unselect the selected ones :D
 
     // new state
-    TW.pushState({sels:[], oppos:[], same:[]})
+    TW.pushState({sels:[], rels:{}})
 
+    // GUI effects
+    // -----------
     // global flag
     TW.gui.selectionActive = false
-
-
-    //Edges colors go back to normal
-    if (TW.partialGraph.settings('drawEdges')) {
-      for(let i in TW.edgeIds){
-        let e = TW.partialGraph.graph.edges(TW.edgeIds[i])
-        // console.log("cancelSelection: edge", e)
-        if (e) {
-          e.color = e.customAttrs['true_color'];
-
-          if (e.customAttrs.activeEdge) {
-            e.customAttrs.activeEdge = 0;
-          }
-        }
-      }
-    }
-
-    //Nodes colors go back to previous
-    // ££TODO partly duplicate effort with (de)highlightSelectedNodes and greyEverything
-    //       => could be replaced by a (de)highlightSelectedAndNeighbors
-    //          on smaller set (here entire nodeset!)
-    for(let j in TW.nodeIds){
-      let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
-      // console.log("cancelSelection: node", n)
-      if (n) {
-        n.customAttrs.active = 0
-        n.customAttrs.highlight = 0
-        n.customAttrs.forceLabel = 0
-
-        // some colorings cases also modify size and label
-        if (settings.resetLabels) {
-          n.label = TW.Nodes[n.id].label
-        }
-        if (settings.resetSizes) {
-          n.size = TW.Nodes[n.id].size
-        }
-      }
-    }
 
     // hide all selection panels
     if(fromTagCloud==false){
@@ -241,20 +205,62 @@ function swActual(aNodetype) {
 
 
 
-function highlightSelectedNodes(flag){
-    let sels = TW.SystemState().selectionNids
+// changes attributes of nodes and edges to remove active, highlight and activeEdge flags
+
+// NB: "low-level" <=> by design, does NOT change the state, gui nor global flag
+//                     but ought to be called by "scenario" functions that do
+
+// fast because works on the subset of active nodes indicated in SystemState()
+function deselectNodes(aSystemState){
+    if (isUndef(aSystemState))   aSystemState = TW.SystemState()
+
+    // active nodes
+    let sels = aSystemState.selectionNids
     if (TW.conf.debug.logSelections)
-      console.log("\t***methods.js:highlightSelectedNodes(flag)"+flag+" sel:"+sels)
+      console.log("deselecting using SystemState's lists")
+
     for(let i in sels) {
       let nid = sels[i]
-      TW.partialGraph.graph.nodes(nid).customAttrs.active = flag
+
+      // mark as unselected!
+      TW.partialGraph.graph.nodes(nid).customAttrs.active = 0
+
+      // for only case legend highlight...
+      TW.partialGraph.graph.nodes(nid).customAttrs.highlight = 0
+    }
+
+    // active relations
+    // (give us neighbors and edges to dehighlight/deactivate)
+    let rels = aSystemState.selectionRels
+
+    for (var reltyp in rels) {
+      for (var srcnid in rels[reltyp]) {
+        for (var tgtnid in rels[reltyp][srcnid]) {
+          let tgt = TW.partialGraph.graph.nodes(tgtnid)
+          if (tgt) {
+            tgt.customAttrs.highlight = 0
+            let eid1 = `${srcnid};${tgtnid}`
+            let eid2 = `${tgtnid};${srcnid}`
+
+            let e1 = TW.partialGraph.graph.edges(`${srcnid};${tgtnid}`)
+            if(e1) {
+              e1.customAttrs.activeEdge = 0
+            }
+            let e2 = TW.partialGraph.graph.edges(`${tgtnid};${srcnid}`)
+            if(e2) {
+              e2.customAttrs.activeEdge = 0
+            }
+          }
+        }
+      }
     }
 }
 
-function manualForceLabel(nodeid, active, justHover) {
+
+function manualForceLabel(nodeid, flagToSet, justHover) {
   let nd = TW.partialGraph.graph.nodes(nodeid)
 
-  nd.customAttrs.forceLabel = true
+  nd.customAttrs.forceLabel = flagToSet
 
   if (justHover) {
     // using single node redraw in hover layer (much faster ~ 0.5ms)
@@ -350,9 +356,12 @@ function htmlfied_nodesatts(elems){
 
 
 function manualSelectNode ( nodeid ) {
-    cancelSelection(false);
+    // it was hovered but with no hover:out so we first remove hover effect
+    manualForceLabel(nodeid, false, true)
+
+    // and it's a new selection
     TW.instance.selNgn.MultipleSelection2({nodes:[nodeid]});
-    // (MultipleSelection2 will do the re-rendering)
+    // (MultipleSelection2 will do the re-rendering and push the new state)
 }
 
 function htmlProportionalLabels(elems , limit, selectableFlag) {
@@ -453,37 +462,6 @@ function LevelButtonDisable( TF ){
 	$('#changelevel').prop('disabled', TF);
 }
 
-// edges greyish color for unselected, when we have a selection
-// NB: we just change the flags, not the colors
-//     renderer will see the flags and handle the case accordingly
-
-// ££TODO rendering optimization: reduce effort by looping only on previously selected and neighbors
-//       and having (!active && !highlight) tested instead of then useless grey flag
-function greyEverything(){
-
-  for(var nid in TW.Nodes){
-    let n = TW.partialGraph.graph.nodes(nid)
-
-    if (n && !n.hidden) {
-      // normal case handled by node renderers
-      // will trigger defgrey_color if (!active && !highlight)
-      n.customAttrs.active = false
-      n.customAttrs.forceLabel = false;
-      n.customAttrs.highlight = false;
-    }
-  }
-
-  if (TW.partialGraph.settings('drawEdges')) {
-    for(var i in TW.edgeIds){
-      let e = TW.partialGraph.graph.edges(TW.edgeIds[i])
-      if (e && !e.hidden && e.customAttrs.activeEdge) {
-        e.customAttrs.activeEdge = 0
-      }
-    }
-  }
-
-}
-
 
 // Converts from read nodes (sigma.parseCustom )
 // Remarks:
@@ -555,16 +533,6 @@ function prepareNodesRenderingProperties(nodesDict) {
     }
 
     // POSS n.type: distinguish rendtype and twtype
-
-    // POSS flags like this
-    // // sigma's flag: hidden (not used)
-    // hidden: false,
-    // customFlags : {
-    //   // our status flags
-    //   active: false,
-    //   highlight: false,
-    //   forceLabel: false,
-    // }
   }
 }
 

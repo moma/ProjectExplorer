@@ -152,22 +152,18 @@ function SelectionEngine() {
      // ====================
     this.MultipleSelection2 = function(args) {
 
-      if (!args)                      args = {}
-      if (isUndef(args.nodes))        args.nodes = []
+        if (!args)                      args = {}
+        if (isUndef(args.nodes))        args.nodes = []
 
-      if (TW.conf.debug.logSelections) {
-        var tMS2_deb = performance.now()
+        if (TW.conf.debug.logSelections) {
+          var tMS2_deb = performance.now()
 
-        console.log("IN SelectionEngine.MultipleSelection2:")
-        console.log("nodes", args.nodes)
-      }
+          console.log("IN SelectionEngine.MultipleSelection2:")
+          console.log("nodes", args.nodes)
+        }
 
-
-        console.warn('££TODO we could grey only active and neighbors if we kept neighbors')
-        greyEverything();
-
-        var sameSideNeighbors = {}
-        var oppositeSideNeighbors = {}
+        // deselects only the active ones (based on SystemState())
+        deselectNodes()
 
         // TW.SystemState() is the present graph state
         // eg
@@ -181,8 +177,10 @@ function SelectionEngine() {
         var activetypesKey = getActivetypesKey()
 
 
-        // Dictionaries of: selection+neighbors
+        // Dictionaries of: selection+neighbors for the new state and updateRelatedNodesPanel
         let selections = {}
+        let activeRelations = {}
+            activeRelations[activetypesKey] = {}
 
         // targeted arg 'nodes' can be nid array or single nid
         var ndsids=[]
@@ -195,6 +193,13 @@ function SelectionEngine() {
 
                 if(TW.Relations[activetypesKey] && TW.Relations[activetypesKey][srcnid] ) {
                     var neighs = TW.Relations[activetypesKey][srcnid]
+
+                    // for state cache
+                    activeRelations[activetypesKey][srcnid] = {}
+
+                    // shortcut
+                    let sameSideNeighbors = activeRelations[activetypesKey][srcnid]
+
                     if(neighs) {
                         for(var j in neighs) {
                             var tgtnid = neighs[j]
@@ -252,8 +257,15 @@ function SelectionEngine() {
 
         // neighbors of the opposite type
         if(TW.Relations["1|1"]) {
+
+          activeRelations["1|1"] = {}
+
           for(var srcnid in theSelection) {
                 var bipaNeighs = TW.Relations["1|1"][theSelection[srcnid]];
+
+                activeRelations["1|1"][srcnid] = {}
+                // shortcut
+                let oppositeSideNeighbors = activeRelations["1|1"][srcnid]
 
                 for(var k in bipaNeighs) {
                     if (typeof oppositeSideNeighbors[bipaNeighs[k]] == "undefined")
@@ -267,10 +279,16 @@ function SelectionEngine() {
 
         // Sort by descending value
         //   and rewrites dict[id]: val as array[order]: {key:id, value:val}
-        var oppos = ArraySortByValue(oppositeSideNeighbors, function(a,b){
+        let oppos = []
+        let same = []
+
+        if (activeRelations["1|1"]) {
+          oppos = ArraySortByValue(activeRelations["1|1"][srcnid], function(a,b){
             return b-a
-        });
-        var same = ArraySortByValue(sameSideNeighbors, function(a,b){
+          });
+        }
+
+        same = ArraySortByValue(activeRelations[activetypesKey][srcnid], function(a,b){
             return b-a
         });
 
@@ -281,7 +299,8 @@ function SelectionEngine() {
         }
 
         // it's a new SystemState
-        TW.pushState( { 'sels': theSelection, 'same': same, 'oppos': oppos } )
+        TW.pushState( { 'sels': theSelection,
+                        'rels': activeRelations } )
 
         // we send our "gotNodeSet" event
         // (signal for plugins that a search-selection was done or a new hand picked selection)

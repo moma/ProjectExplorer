@@ -173,7 +173,7 @@ function RunLouvain() {
 function SomeEffect( ValueclassCode ) {
     // console.debug("highlighting:", ValueclassCode )
 
-    greyEverything();
+    deselectNodes(TW.SystemState())
 
     TW.gui.selectionActive = true
 
@@ -191,64 +191,36 @@ function SomeEffect( ValueclassCode ) {
         iClu=Number(raw[2]);
 
 
-
-    // £TODO factorizable: always the same loop for neighbors this should be handled by a sub of MultipleSelection2
-    // get the active types code from current state (ie "1", "1|1", etc for TW.Relations lookup)
     var activetypesKey = getActivetypesKey()
-    // console.log( "\t"+activetypesKey)
-
 
     // we have our precomputed idmaps for nodes_2_colour
     // -------------------------------------------------
     for (var k in TW.Clusters[nodeType][cluType].invIdx[iClu].nids) {
       var nid = TW.Clusters[nodeType][cluType].invIdx[iClu].nids[k]
       nodes_2_colour[nid] = true
+      n = TW.partialGraph.graph.nodes(nid)
+      if(n) {
+        n.customAttrs['highlight'] = true;
+      }
     }
 
-    for(var nid in nodes_2_colour) {
-        n = TW.partialGraph.graph.nodes(nid)
-        if(n) {
-            // new sigma js: we change only flags, rendering will adapt color accordingly
-            n.customAttrs['grey'] = false;
-
-            // highlight (like neighbors but with no selection)
-            n.customAttrs['highlight'] = true;
-        }
-
-        if(TW.Relations[activetypesKey] && TW.Relations[activetypesKey][nid] ) {
-            neigh = TW.Relations[activetypesKey][nid]
-            if(neigh) {
-                for(j in neigh) {
-                    tgt_nid = neigh[j]
-                    if( !isUndef(nodes_2_colour[tgt_nid]) ) {
-                        edges_2_colour[nid+";"+tgt_nid]=true;
-                        edges_2_colour[tgt_nid+";"+nid]=true;
-                    }
-                }
-            }
-        }
-    }
-
-
-    for(var eid in edges_2_colour) {
-        an_edge = TW.partialGraph.graph.edges(eid)
-        if(!isUndef(an_edge) && !an_edge.hidden){
-            // new sigma js: we change only flags, rendering will adapt color accordingly
-            an_edge.customAttrs['grey'] = 0;
-            an_edge.customAttrs['activeEdge'] = 1;
-        }
-    }
-
+    TW.pushState({
+      sels:TW.Clusters[nodeType][cluType].invIdx[iClu].nids,
+      rels:{}
+    })
     TW.partialGraph.refresh()
 }
 
 // some colorings cases also modify size and label
 function graphResetLabelsAndSizes(){
-
-    // NB could be also merged with greyEverything and highlightSelectedNodes(false)
-    cancelSelection(false, {'render':true, 'resetSizes':true, 'resetLabels': true})
+  for(let j in TW.nodeIds){
+    let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
+    if (n) {
+      n.label = TW.Nodes[n.id].label
+      n.size = TW.Nodes[n.id].size
+    }
+  }
 }
-
 
 // @daclass: the name of a numeric/categorical attribute from node.attributes
 // @groupingTicks: an optional threshold's array expressing ranges with their low/up bounds label and ref to matchin nodeIds
