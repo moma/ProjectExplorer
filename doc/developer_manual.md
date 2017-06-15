@@ -60,7 +60,7 @@ They are handled in Tinaweb.MultipleSelection2.
 
 ###### module flags and events
   - for a new selection:
-    - `TW.selectionActive` is set to `true` when there is a selection
+    - `TW.gui.selectionActive` is set to `true` when there is a selection
     - `tw:gotNodeSet` event is sent
   - when deselecting
     - `tw:eraseNodeSet` event is sent
@@ -71,6 +71,15 @@ For any node `n` the relevant flags at selection are:
   - `n.active` iff node is selected
   - `n.customAttrs.highlight` if  node is a neighbor of a selected node
 
+###### system states
+At any given time, we keep the current state accesible via `TW.SystemState()`
+  - it uses a `TW.states` array to remember the last k steps
+  - the value of k can be set in `TW.conf.maxPastStates` variable
+  - each state contains info about:
+    - the current selection in state`.selectionNids`
+    - the current neighborhood in state`.selectionRels`
+    - the current node types displayed in state`.activetypes`
+    - the current display level (aka macro/micro) in state`.level`
 
 ## Variae
 
@@ -101,9 +110,7 @@ If an attribute is **not** described in `facetOptions`, it will get `"gradient"`
 These indexes are stored in TW.Clusters and provide an access to sets of nodes that have a given value or range of values
   - the mapping from attribute values to matching nodes is always in `TW.Clusters.aType.anAttr.invIdx.aClass.nids`
     (where aClass is the chosen interval or distinct value)
-
-
-We currently store the datatype of the observed values in `TW.Clusters.aType.anAttr.meta`
+  - the datatype of the observed values is in `TW.Clusters.aType.anAttr.meta`
     - the source datatype is always string in gexf, but real type ("vtype") can be numeric
     - (ie numeric cast doesn't give NaN or it do so very rarely over the values)
 
@@ -112,3 +119,14 @@ NB: the use cases for stats go beyond numeric vs string ! we could easily autodi
     - vnum with few  distinct values => assumed classes var
     - vstr with few  distinct values => assumed classes var
     - vstr with many distinct values => assumed classes with zipf freq => create an "others" for the tail
+
+
+#### Custom indices
+Tina initialization registers one custom index of nodes by type and size (`nodesByTypeNSize`). It's a "live index" as it is updated at each add/remove.
+  NB: it will thus contain only the nodes currently in the sigma instance.
+Access usage exemples:
+  - `TW.partialGraph.graph.getNodesByType('terms')`: all term nodes
+  - `TW.partialGraph.graph.getNodesBySize('terms', 1)`:  all term nodes of size 1
+  - `TW.partialGraph.graph.getNodesBySize('terms', [1,2])`: all term nodes of size comprised between 1 and 2
+
+(cf. [`addIndex` in sigma documentation](https://github.com/jacomyal/sigma.js/wiki/Graph-API#static-methods))

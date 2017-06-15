@@ -689,7 +689,10 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
                               for(var i in eids) {
                                   let eid = eids[i]
 
-                                  TW.Edges[eid].lock = false;
+                                  if (TW.Edges[eid])
+                                    TW.Edges[eid].lock = false;
+                                  else
+                                    console.warn("skipped missing eid", eid)
 
                                   // global level case
                                   if(present.level) {
@@ -810,8 +813,8 @@ function NodeWeightFilter( sliderDivID , tgtNodeType ,  criteria) {
 
     // ids per weight level
     // we use live index from prepareSigmaCustomIndices
-    let nodesBySize = TW.partialGraph.graph.getNodesBySize(tgtNodeType)
-    var sortedSizes = Object.keys(nodesBySize).sort(function(a,b){return a-b})
+    let nodesByTypeNSize = TW.partialGraph.graph.getNodesBySize(tgtNodeType)
+    var sortedSizes = Object.keys(nodesByTypeNSize).sort(function(a,b){return a-b})
 
     var stepToIdsArr = []
 

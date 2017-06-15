@@ -739,6 +739,25 @@ function conditiOpen(subQId, mainQId, mainQOkValues) {
   subq.style.display = triggerVal ? 'block' : 'none'
 }
 
+// attr-col change has complex consequences
+function colChangedHandler() {
+  // for titling subquestion open
+  conditiOpen('choose-titling-div', 'attr-col',['cluster'])
+
+  // for the implication [cluster => binmode off]
+  let elColQ = document.getElementById('attr-col')
+  let elBinmodeQ = document.getElementById('attr-binmode')
+  if (elColQ.value == 'cluster') {
+    elBinmodeQ.value = "off"
+    elBinmodeQ.disabled = true
+    document.getElementById("attr-nbins-div").style.display = 'none'
+  }
+  else {
+    elBinmodeQ.disabled = false
+  }
+}
+
+
 function showAttrConf() {
   let attrTitle = this.value
   let settings = TW.conf.facetOptions[attrTitle]

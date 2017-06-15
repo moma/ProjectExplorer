@@ -371,19 +371,18 @@ var TinaWebJS = function ( sigmacanvas ) {
       });
 
       // register an index for nodes by type and size (<= origNode.size||origNode.weight)
-      // £TODO use it for type-constrained loops
-      sigmaModule.classes.graph.addIndex('nodesBySize', {
+      sigmaModule.classes.graph.addIndex('nodesByTypeNSize', {
         constructor: function() {
-          this.nodesBySize = {};
+          this.nodesByTypeNSize = {};
         },
         addNode: function(n) {
           if (n.type && n.size) {
             let sizekey = parseFloat(n.size)
-            if (!this.nodesBySize[n.type])
-              this.nodesBySize[n.type] = {}
-            if (!this.nodesBySize[n.type][sizekey])
-              this.nodesBySize[n.type][sizekey] = {}
-            this.nodesBySize[n.type][sizekey][n.id] = true
+            if (!this.nodesByTypeNSize[n.type])
+              this.nodesByTypeNSize[n.type] = {}
+            if (!this.nodesByTypeNSize[n.type][sizekey])
+              this.nodesByTypeNSize[n.type][sizekey] = {}
+            this.nodesByTypeNSize[n.type][sizekey][n.id] = true
           }
           else {
             // should never happen
@@ -392,7 +391,7 @@ var TinaWebJS = function ( sigmacanvas ) {
         },
         dropNode: function(n) {
           if (n.type && n.size) {
-            delete(this.nodesBySize[n.type][n.size][n.id])
+            delete(this.nodesByTypeNSize[n.type][n.size][n.id])
           }
         }
       });
@@ -406,14 +405,14 @@ var TinaWebJS = function ( sigmacanvas ) {
 
         // shortcut case for commodity: entire index if no arg
         if (isUndef(aSizeSelector)) {
-          res = this.nodesBySize[ntype]
+          res = this.nodesByTypeNSize[ntype]
         }
 
         // normal cases
         else if (isNumeric(aSizeSelector)) {
           let sizekey = parseFloat(aSizeSelector)
-          if (this.nodesBySize[ntype][sizekey]) {
-            res = Object.keys(this.nodesBySize[ntype][sizekey])
+          if (this.nodesByTypeNSize[ntype][sizekey]) {
+            res = Object.keys(this.nodesByTypeNSize[ntype][sizekey])
           }
         }
         else if (Array.isArray(aSizeSelector)
@@ -425,7 +424,7 @@ var TinaWebJS = function ( sigmacanvas ) {
           let sizeMax = parseFloat(aSizeSelector[1])
 
           // the available sizes
-          let sortedSizes = Object.keys(this.nodesBySize[ntype]).sort(function(a,b){return a-b})
+          let sortedSizes = Object.keys(this.nodesByTypeNSize[ntype]).sort(function(a,b){return a-b})
 
           // the nodes with sizes in range
           for (var k in sortedSizes) {
@@ -434,9 +433,22 @@ var TinaWebJS = function ( sigmacanvas ) {
               break
             }
             if (val >= sizeMin) {
-              res = res.concat(Object.keys(this.nodesBySize[ntype][val]))
+              res = res.concat(Object.keys(this.nodesByTypeNSize[ntype][val]))
             }
           }
+        }
+        return res;
+      });
+
+      // All nodes *in the instance* by type
+      // NB: not used at the moment but easy and perhaps very useful in future
+      // arg:
+      //   @ntype: a node type from TW.categories
+      sigmaModule.classes.graph.addMethod('getNodesByType', function(ntype) {
+        let res = []
+        // concatenate all sizes because this detail doesn't matter to us here
+        for (let szk in this.nodesByTypeNSize[ntype]) {
+          res = res.concat(Object.keys(this.nodesByTypeNSize[ntype][szk]))
         }
         return res;
       });

@@ -1004,7 +1004,7 @@ function dictfyJSON( data , categories ) {
     var edges={}, nodes={}
 
     // NB old additional objects by type nodes1 and nodes2 not necessary
-    //    (can use TW.partialGraph.graph.nodesBySize faster custom index)
+    //    (can use TW.partialGraph.graph.nodesByTypeNSize faster custom index)
 
     // normalization, same as parseGexf
     let minNodeSize = Infinity
