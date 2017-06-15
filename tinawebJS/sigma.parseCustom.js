@@ -218,12 +218,11 @@ function sortNodeTypes(observedTypesDict) {
   var nTypes = observedTypes.length
 
   if(nTypes==0) {
-      observedTypes[0]="Document";
-      catDict["Document"] = 0;
+      observedTypes[0]="Terms";
+      catDict["Terms"] = 0;
   }
   if(nTypes==1) {
-      // if we have only one category, it gets the same code 0 as Document
-      // but in practice it's more often terms. anyways doesn't affect much
+      // if we have only one category, it gets code 0 as Terms
       catDict[observedTypes[0]] = 0;
 
       if (TW.conf.debug.logParsers)
@@ -232,16 +231,17 @@ function sortNodeTypes(observedTypesDict) {
   if(nTypes>1) {
       var newcats = []
 
-      // POSSible: allow more than 2 cats
+      // NB: only 2 cat labels are allowed by this
       for(var i in observedTypes) {
           let c = observedTypes[i]
-          if(c == TW.conf.catSoc || (c != TW.conf.catSem && c.indexOf("term")==-1)) {// NOT a term-category
+          if(c == TW.conf.catSoc) {// conf says that it's not a term-category
+              newcats[1] = c;
+              catDict[c] = 1;
+          }
+          // else: term-category is the new default
+          else {
               newcats[0] = c;
               catDict[c] = 0;
-          }
-          else {
-              newcats[1] = c; // IS a term-category
-              catDict[c] = 1;
           }
       }
       observedTypes = newcats;

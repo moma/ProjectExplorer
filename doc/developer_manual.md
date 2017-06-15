@@ -38,8 +38,8 @@ This will still evolve but the main steps for any graph initialization messily u
 
 #### About source data
  - doc/sem typing: follows the node property "`type`" or if absent, "`category`"
-   - if the category name is "document"  => catSoc (type 0)
-   - if the category name contains the str "term"  => catSem (type 1)
+   - if the category name contains the str "term"  => catSem (type 0)
+   - if the category name is "document"  => catSoc (type 1)
 
  - `somenode.attributes`: the `attributes` property is always an object
    - any attribute listed in the sourcenode.attributes will be indexed if the TW.scanClusters flag is true

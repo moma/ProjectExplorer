@@ -27,7 +27,7 @@ function changeGraphAppearanceByFacets( manualflag ) {
 
     if( $( "#colorgraph-menu" ).length>0 ) {
 
-      var actypes = getActivetypes()
+      var actypes = getActivetypesNames()
       for (var tid in actypes) {
         let ty = actypes[tid]
 
@@ -229,7 +229,7 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
     $("#legend-for-clusters").html("")
     if(daclass==null) return;
 
-    var actypes = getActivetypes()
+    var actypes = getActivetypesNames()
 
     // we have no specifications yet for colors (and legends) on multiple types
     if (actypes.length > 1) {
@@ -697,7 +697,7 @@ function activateModules() {
 //  NB condition on dataType could be on an extended meta "attrType"
 //     cf. doc/developer_manual.md autodiagnose remark)
 function fillAttrsInForm(menuId, optionalAttTypeConstraint) {
-  var actypes = getActivetypes()
+  var actypes = getActivetypesNames()
   for (let tid in actypes) {
     let ty = actypes[tid]
 

@@ -610,8 +610,8 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
         range: true,
         step: 1,
         min:0,
-        // green for docs, orange for terms
-        bgcolor: (typestr=="1|0" || typestr=="1")?"#27c470":"#FFA500" ,
+        // green for docs/people, orange for terms
+        bgcolor: (typestr=="1|0" || typestr=="1")?"#FFA500":"#27c470" ,
         max:steps-1,
         value:[0,steps-1],
         onchange:function(low, high) {
@@ -688,6 +688,7 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
                               // console.log("adding "+ids.join())
                               for(var i in eids) {
                                   let eid = eids[i]
+
                                   TW.Edges[eid].lock = false;
 
                                   // global level case
@@ -844,7 +845,7 @@ function NodeWeightFilter( sliderDivID , tgtNodeType ,  criteria) {
         step: 1,
         min:0,
         max:steps-1,
-        bgcolor:( tgtNodeType==TW.categories[0] )?"#27c470":"#FFA500" ,
+        bgcolor:( tgtNodeType==TW.categories[0] )?"#FFA500":"#27c470" ,
         value:[0,steps-1],
 
         // handler

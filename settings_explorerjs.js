@@ -146,13 +146,11 @@ TW.conf = (function(TW){
   // TINA BEHAVIOR
   // =============
 
-  // Node typology (searched in nodes data, overridden if data has other types)
-
-  // (FIXME cf. comment in sortNodeTypes and swActual functions
-  //            about the limits of how these 2 values and
-  //            TW.categories are used in older functions)
+  // Node typology: categories (resp. 0 and 1) will get these default labels
+  TWConf.catSem = "Terms";
   TWConf.catSoc = "Document";
-  TWConf.catSem = "NGram";
+  // NB: these labels may be superseded by the input data's node types values
+  //     cf. sortNodeTypes()
 
   // Active modules
   // --------------
@@ -283,8 +281,8 @@ TW.conf = (function(TW){
 
   // relative sizes (iff ChangeType == both nodetypes)
   TWConf.sizeMult = [];
-  TWConf.sizeMult[0] = 3.0;    // ie for node type 0
-  TWConf.sizeMult[1] = 1.0;    // ie for node type 1
+  TWConf.sizeMult[0] = 1.0;     // ie for node type 0 (<=> sem)
+  TWConf.sizeMult[1] = 3.0;    // ie for node type 1 (<=> soc)
 
 
 

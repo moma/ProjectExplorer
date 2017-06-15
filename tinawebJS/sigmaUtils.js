@@ -9,8 +9,10 @@ var SigmaUtils = function () {
         console.log("FillGraph catDict",catDict)
         // console.log("FillGraph nodes",nodes)
         // console.log("FillGraph edges",edges)
-        for(var i in nodes) {
-            var n = nodes[i];
+
+        let i = 0
+        for(var nid in nodes) {
+            var n = nodes[nid];
             // console.debug('tr >>> fgr node', n)
 
             if(initialActivetypes[catDict[n.type]] || TW.conf.debug.initialShowAll) {
@@ -36,6 +38,8 @@ var SigmaUtils = function () {
 
                 // fill the "labels" global variable
                 updateSearchLabels( n.id , n.label , n.type);
+
+                i++
             }
         }
 
@@ -43,11 +47,10 @@ var SigmaUtils = function () {
         // the typestring of the activetypes is the key to stored Relations (<=> edges)
         var activetypesKey = initialActivetypes.map(Number).join("|")
 
-        for(var i in TW.Relations[activetypesKey]) {
-            let s = i;
-            for(var j in TW.Relations[activetypesKey][i]) {
-                let t = TW.Relations[activetypesKey][i][j]
-                let e = TW.Edges[s+";"+t]
+        for(let srcnid in TW.Relations[activetypesKey]) {
+            for(var j in TW.Relations[activetypesKey][srcnid]) {
+                let tgtnid = TW.Relations[activetypesKey][srcnid][j]
+                let e = TW.Edges[srcnid+";"+tgtnid]
                 if(e) {
                     if(e.source != e.target) {
                         graph.edges.push( e);
@@ -280,7 +283,7 @@ var SigmaUtils = function () {
         // NB cost of this condition seems small:
         //    - without: [11 - 30] ms for 23 nodes
         //    - with   : [11 - 33] ms for 23 nodes
-        var catSemFlag = (TW.categories.length > 1 && node.type == TW.categories[0])
+        var catSocFlag = (node.type != TW.categories[0])
 
 
         // mode variants 1: if a coloringFunction is active
@@ -332,7 +335,7 @@ var SigmaUtils = function () {
           context.fillStyle = borderColor
           context.beginPath();
 
-          if (catSemFlag) {
+          if (catSocFlag) {
             // (Square shape)
             // thinner borderSize for squares looks better
             // otherwise hb = (nodeSize + borderSize) / 2
@@ -361,7 +364,7 @@ var SigmaUtils = function () {
         context.beginPath();
 
 
-        if (catSemFlag) {
+        if (catSocFlag) {
           // (Square shape)
           let hn = nodeSize / 2
           context.moveTo(X + hn, Y + hn);
@@ -777,7 +780,7 @@ function repaintEdges() {
 function heatmapColoring(daclass) {
   var binColors
   var doModifyLabel = false
-  var actypes = getActivetypes()
+  var actypes = getActivetypesNames()
 
   // default value
   let nColors = TW.conf.legendsBins || 5

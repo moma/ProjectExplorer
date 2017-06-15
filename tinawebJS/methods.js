@@ -48,22 +48,21 @@ TW.pushState = function( args ) {
             || typesKey != lastState.activetypes.map(Number).join("|"))) {
 
       // terms
-      if(typesKey=="0|1") {
-          $(".for-nodecategory-0").hide()
-          $(".for-nodecategory-1").show();
-
-
-          NodeWeightFilter( "#slidercat1nodesweight" ,  TW.categories[1], "size");
-          EdgeWeightFilter("#slidercat1edgesweight", typesKey, "weight");
-      }
-
-      // docs
       if(typesKey=="1|0") {
         $(".for-nodecategory-0").show()
         $(".for-nodecategory-1").hide();
 
-          NodeWeightFilter( "#slidercat0nodesweight" ,  TW.categories[0], "size");
-          EdgeWeightFilter("#slidercat0edgesweight", typesKey, "weight");
+        NodeWeightFilter( "#slidercat0nodesweight" ,  TW.categories[0], "size");
+        EdgeWeightFilter("#slidercat0edgesweight", typesKey, "weight");
+      }
+
+      // docs
+      if(typesKey=="0|1") {
+          $(".for-nodecategory-0").hide()
+          $(".for-nodecategory-1").show();
+
+          NodeWeightFilter( "#slidercat1nodesweight" ,  TW.categories[1], "size");
+          EdgeWeightFilter("#slidercat1edgesweight", typesKey, "weight");
       }
 
       // terms and docs
@@ -163,14 +162,13 @@ function cancelSelection (fromTagCloud, settings) {
 // this area is quite underspecified so we assume here
 //   - that all typenames have a mapping to cat[0] (terms) or cat[1] (contexts)
 //   - that currentState.activetypes is an array of 2 bools for the currently displayed cat(s)
-function getActivetypes() {
+function getActivetypesNames() {
   let currentTypes = []
   let currentTypeIdx
-  let lastState = TW.states.slice(-1)[0]
 
   for (var possType in TW.catDict) {
     currentTypeIdx = TW.catDict[possType]
-    if (lastState.activetypes[currentTypeIdx]) {
+    if (TW.SystemState().activetypes[currentTypeIdx]) {
       currentTypes.push(possType)
     }
   }
@@ -195,12 +193,7 @@ function getActivetypesKey() {
 //                - 1st change: types described as type 0 and type 1 and possible default type
 //                - 2nd change default type of monopartite case changed from document to semantic
 function swActual(aNodetype) {
-  if (TW.categories.length == 1) {
-    return 'semantic'
-  }
-  else if (TW.categories.length == 2) {
-    return (aNodetype == TW.categories[0]) ? 'social' : 'semantic'
-  }
+  return (aNodetype == TW.categories[0]) ? 'semantic' : 'social'
 }
 
 
@@ -329,7 +322,7 @@ function htmlfied_nodesatts(elems){
         var id=elems[i]
         var node = TW.Nodes[id]
 
-        if(node.type==TW.conf.catSoc){
+        if(swActual(node.type) == 'social'){
             information += '<li><b>' + node.label + '</b></li>';
             if(node.htmlCont==""){
                 if (!isUndef(node.level)) {
@@ -341,7 +334,7 @@ function htmlfied_nodesatts(elems){
             socnodes.push(information)
         }
 
-        if(node.type==TW.conf.catSem){
+        if(swActual(node.type) == 'semantic'){
             information += '<li><b>' + node.label + '</b></li>';
             let google='<a href=http://www.google.com/#hl=en&source=hp&q=%20'+node.label.replace(" ","+")+'%20><img src="'+'img/google.png"></img></a>';
             let wiki = '<a href=http://en.wikipedia.org/wiki/'+node.label.replace(" ","_")+'><img src="'+'img/wikipedia.png"></img></a>';
@@ -452,7 +445,7 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
     $("#tips").html("");
 
     if(TW.categories.length==1) getTopPapers("semantic");
-    else getTopPapers(swActual(getActivetypes()[0]));
+    else getTopPapers(swActual(getActivetypesNames()[0]));
 }
 
 //	just css

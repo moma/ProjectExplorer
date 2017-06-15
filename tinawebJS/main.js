@@ -359,7 +359,6 @@ function mainStartGraph(inFormat, inData, twInstance) {
       // activetypes: the node categorie(s) that is (are) currently displayed
       // ex: [true,false] = [nodes of type 0 shown  ; nodes of type 1 not drawn]
       var initialActivetypes = TW.instance.initialActivetypes( TW.categories )
-      var possibleActivetypes = TW.instance.allPossibleActivetypes( TW.categories )
 
       // remember it
       TW.pushState({'activetypes': initialActivetypes})
@@ -381,38 +380,21 @@ function mainStartGraph(inFormat, inData, twInstance) {
 
       if (inData.clusters) TW.Clusters = inData.clusters
 
-      // £TODO remove from parseCustom or start using
-      // TW.nodes1 = dicts.n1;//not used
-
       // main console info
       // ===================
-      console.info(`== new graph ${TW.nodeIds.length} nodes, ${TW.edgeIds.length} edges ==`)
+      console.info(`== new graph ${TW.nodeIds.length} nodes (${TW.categories.length > 1 ? 'bipartite': 'monopartite'}), ${TW.edgeIds.length} edges ==`)
 
       // a posteriori categories diagnostic
       // ----------------------------------
       // by default TW.categories now match user-suggested catSoc/Sem if present
       // so we just need to handle mismatches here (when user-suggested cats were absent)
-      if (TW.categories.length == 2) {
-        console.info("== 'bipartite' case ==")
-        if (TW.conf.catSoc != TW.categories[0]) {
-          console.warn(`Observed social category "${TW.categories[0]}" overwrites user-suggested TW.conf.catSoc ("${TW.conf.catSoc}")`)
-          TW.conf.catSoc = TW.categories[0]
-        }
-        if (TW.conf.catSem != TW.categories[1]) {
-          console.warn(`Observed semantic category "${TW.categories[1]}" overwrites user-suggested TW.conf.catSem "(${TW.conf.catSem})"`)
-          TW.conf.catSem = TW.categories[1]
-        }
+      if (TW.conf.catSem != TW.categories[0]) {
+        console.warn(`Observed semantic category "${TW.categories[0]}" overwrites user-suggested TW.conf.catSem "(${TW.conf.catSem})"`)
+        TW.conf.catSem = TW.categories[0]
       }
-      else if (TW.categories.length == 1) {
-        console.info("== monopartite case ==")
-        // FIXME it would be more coherent with all tina usecases (like gargantext or tweetoscope) for the default category to be catSem instead of Soc
-        if (TW.conf.catSoc != TW.categories[0]) {
-          console.warn(`Observed unique category "${TW.categories[0]}" overwrites user-suggested TW.conf.catSoc ("${TW.conf.catSoc}")`)
-          TW.conf.catSoc = TW.categories[0]
-        }
-      }
-      else {
-        console.error("== currently unhandled categorization of node types ==", TW.categories)
+      if (TW.categories.length > 1 && TW.conf.catSoc != TW.categories[1]) {
+        console.warn(`Observed social category "${TW.categories[1]}" overwrites user-suggested TW.conf.catSoc ("${TW.conf.catSoc}")`)
+        TW.conf.catSoc = TW.categories[1]
       }
 
       // [ Poblating the Sigma-Graph ]

@@ -371,6 +371,7 @@ var TinaWebJS = function ( sigmacanvas ) {
       });
 
       // register an index for nodes by type and size (<= origNode.size||origNode.weight)
+      // £TODO use it for type-constrained loops
       sigmaModule.classes.graph.addIndex('nodesBySize', {
         constructor: function() {
           this.nodesBySize = {};
@@ -383,6 +384,10 @@ var TinaWebJS = function ( sigmacanvas ) {
             if (!this.nodesBySize[n.type][sizekey])
               this.nodesBySize[n.type][sizekey] = {}
             this.nodesBySize[n.type][sizekey][n.id] = true
+          }
+          else {
+            // should never happen
+            console.warn("warning: couldn't add node to index ?", n)
           }
         },
         dropNode: function(n) {
@@ -711,33 +716,6 @@ var TinaWebJS = function ( sigmacanvas ) {
             TW.gui.circleSlider.setValue(0)
         });
 
-        // //finished
-        // $("#slidercat1nodessize").freshslider({
-        //     step:1,
-        //     min:-20,
-        //     max:20,
-        //     value:0,
-        //     bgcolor:"#FFA500",
-        //     onchange:function(value){
-        //         setTimeout(function (){
-        //             // new sigma.js loop on nodes POSS optimize
-        //             nds  = TW.partialGraph.graph.nodes()
-        //             console.log("init: slider resize")
-        //             for(j=0 ; j<TW.partialGraph.nNodes ; j++){
-        //                 if (nds[j]
-        //                  && nds[j].type == TW.conf.catSem) {
-        //                      var n = nds[j]
-        //                      var newval = parseFloat(TW.Nodes[n.id].size) + parseFloat((value-1))*0.3
-        //                      n.size = (newval<1.0)?1:newval;
-        //                      sizeMult[TW.conf.catSem] = parseFloat(value-1)*0.3;
-        //                 }
-        //             }
-        //             partialGraph.render()
-        //         },
-        //         100);
-        //     }
-        // });
-
 
         // costly entire refresh (~400ms) only after stopped resizing for 3s
         // NB: rescale middleware already reacted and, except for large win size changes, it handles the resize fine
@@ -775,6 +753,8 @@ var TinaWebJS = function ( sigmacanvas ) {
     // to init local, instance-related listeners (need to run at new sigma instance)
     // args: @partialGraph = a sigma instance
     this.initSigmaListeners = function(partialGraph, initialActivetypes) {
+
+      console.log("initSigmaListeners TW.categories", TW.categories)
 
       var selInst = this.selNgn
 
@@ -958,15 +938,19 @@ var TinaWebJS = function ( sigmacanvas ) {
 
       if (TW.conf.filterSliders) {
 
+        // the indice of the first cat to be active (ex: '1')
+        let activeId = initialActivetypes.indexOf(true)
+
         // args: for display: target div ,
         //       for context: family/type prop value,
         //       for values:  the property to filter
-        NodeWeightFilter ( "#slidercat0nodesweight" ,
-                              TW.categories[0] ,
+        NodeWeightFilter ( `#slidercat${activeId}nodesweight` ,
+                              TW.categories[activeId] ,
                              "size"
                            );
 
-        EdgeWeightFilter("#slidercat0edgesweight",
+        // ex: #slidercat1edgesweight
+        EdgeWeightFilter(`#slidercat${activeId}edgesweight`,
                           getActivetypesKey(),
                           "weight"
                         );
@@ -1031,45 +1015,15 @@ var TinaWebJS = function ( sigmacanvas ) {
     }
 
 
+    // our current choice: show only the last cat
+    // POSS make it a configuration settings
     this.initialActivetypes = function( categories ) {
         var firstActivetypes = []
         for(var i=0; i<categories.length ; i++) {
-            if(i==0) firstActivetypes.push(true)  // <==> show the cat stored in 0
-            else firstActivetypes.push(false)     // <==> hide the cat stored in 1
+          if(i==categories.length-1) firstActivetypes.push(true)
+          else firstActivetypes.push(false)
         }
         return firstActivetypes;
     }
-
-    this.allPossibleActivetypes = function (cats) {
-        if (TW.conf.debug.logSettings) console.debug(`allPossibleActivetypes(cats=${cats})`)
-        var possibleActivetypes = {}
-        var N=Math.pow(2 , cats.length);
-
-        for (var i = 0; i < N; i++) {
-
-            let bin = (i).toString(2)
-            let bin_splitted = []
-            for(var j in bin)
-                bin_splitted.push(bin[j])
-
-            let bin_array = [];
-            let toadd = cats.length-bin_splitted.length;
-            for (var k = 0; k < toadd; k++)
-                bin_array.push("0")
-
-            for(var j in bin)
-                bin_array.push(bin[j])
-
-            bin_array = bin_array.map(Number)
-            let sum = bin_array.reduce(function(a, b){return a+b;})
-
-            if( sum != 0 && sum < 3) {
-                let id = bin_array.join("|")
-                possibleActivetypes[id] = bin_array.map(Boolean)
-            }
-        }
-        return possibleActivetypes;
-    }
-
 
 };
