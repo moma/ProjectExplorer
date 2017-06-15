@@ -23,7 +23,7 @@ var ParseCustom = function ( format , data ) {
     // input = [ "cat1" , "cat2" , ...]
     this.parseGEXF = function(categories ) {
         return dictfyGexf( this.data , categories );
-    }// output = [ nodes, edges, nodes1, ... ]
+    }// output = { nodes, edges }
 
 
 
@@ -36,7 +36,7 @@ var ParseCustom = function ( format , data ) {
     // input = [ "cat1" , "cat2" , ...]
     this.parseJSON = function(categories ) {
         return dictfyJSON( this.data , categories );
-    }// output = [ nodes, edges, nodes1, ... ]
+    }// output = { nodes, edges }
 
 };
 
@@ -603,10 +603,7 @@ function dictfyGexf( gexf , categories ){
     var catCount = {}
     for(var i in categories)  catDict[categories[i]] = i;
 
-    var edges={}, nodes={}, nodes1={}, nodes2=false, bipartiteD2N=false, bipartiteN2D=false;
-    if(categories.length>1) {
-        nodes2={}, bipartiteD2N={}, bipartiteN2D={}
-    }
+    var edges={}, nodes={}
 
     var declaredAtts = gexfCheckAttributesMap(gexf)
     var nodesAttributes = declaredAtts.nodeAttrs
@@ -885,10 +882,6 @@ function dictfyGexf( gexf , categories ){
     resDict.catCount = catCount;        // ex:  {'ISIterms':1877}  ie #nodes
     resDict.nodes = nodes;              //  { nid1: {label:"...", size:"11.1", attributes:"...", color:"#aaa", etc}, nid2: ...}
     resDict.edges = edges;
-    resDict.n1 = nodes1;       // relations
-    if(nodes2) resDict.n2 = nodes2;
-    if(bipartiteD2N) resDict.D2N = bipartiteD2N;
-    if(bipartiteN2D) resDict.N2D = bipartiteN2D;
 
     return resDict;
 }
@@ -1008,11 +1001,10 @@ function dictfyJSON( data , categories ) {
     var catCount = {}
     for(var i in categories)  catDict[categories[i]] = i;
 
-    var edges={}, nodes={}, nodes1={}, nodes2=false, bipartiteD2N=false, bipartiteN2D=false;
+    var edges={}, nodes={}
 
-    if(categories.length>1) {
-        nodes2={}, bipartiteD2N={}, bipartiteN2D={}
-    }
+    // NB old additional objects by type nodes1 and nodes2 not necessary
+    //    (can use TW.partialGraph.graph.nodesBySize faster custom index)
 
     // normalization, same as parseGexf
     let minNodeSize = Infinity
@@ -1133,10 +1125,6 @@ function dictfyJSON( data , categories ) {
     resDict.catCount = catCount;
     resDict.nodes = nodes;
     resDict.edges = edges;
-    resDict.n1 = nodes1;
-    if(nodes2) resDict.n2 = nodes2;
-    if(bipartiteD2N) resDict.D2N = bipartiteD2N;
-    if(bipartiteN2D) resDict.N2D = bipartiteN2D;
 
     return resDict;
 }

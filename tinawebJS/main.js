@@ -32,14 +32,6 @@ TW.states = [TW.initialSystemState]
 // SystemState() returns the current situation
 TW.SystemState = function() { return TW.states.slice(-1)[0] }
 
-// -------------------------------8<--------------
-// £TODO remove deprecated here and in parseCustom or change to an index by type
-var nodes1 = {};
-var nodes2 = {};
-var bipartiteD2N = {};
-var bipartiteN2D = {};
-// -------------------------------8<--------------
-
 //  ======== [   what to do at start ] ========= //
 console.log("Starting TWJS")
 
