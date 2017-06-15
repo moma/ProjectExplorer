@@ -202,9 +202,10 @@ TW.conf = (function(TW){
 
   // Full-text search
   // ----------------
-  TWConf.maxSearchResults = 10;           // how many "top papers" to display
-  TWConf.minLengthAutoComplete = 1;       // how many chars to type for autocomp
-  TWConf.strSearchBar = "Select topics";
+  TWConf.maxSearchResults = 10            // how many "top papers" to display
+  TWConf.minLengthAutoComplete = 1        // how many chars to type for autocomp
+  TWConf.maxSuggestionsAutoComplete = 10  // how many suggestions by autocomp
+  TWConf.strSearchBar = "Select topics"
 
 
   // ===================

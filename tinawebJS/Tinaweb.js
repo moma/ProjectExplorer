@@ -507,7 +507,7 @@ var TinaWebJS = function ( sigmacanvas ) {
                 } else {
                     $("#noresults").empty();
                 }
-                matches = results.slice(0, TW.conf.minLengthAutoComplete);
+                matches = results.slice(0, TW.conf.maxSuggestionsAutoComplete);
                 response(matches);
 
             },
