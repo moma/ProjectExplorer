@@ -370,7 +370,7 @@ function getTopPapers(nodetypeLegacy){
                 if (data.length) {
                   for (var k in data) {
                     let tweetJson = data[k]
-                    topTweetsHtml += RenderTweet(tweetJson)
+                    topTweetsHtml += renderTweet(tweetJson)
                   }
                 }
                 else {
@@ -388,17 +388,80 @@ function getTopPapers(nodetypeLegacy){
 }
 
 function clickInsideTweet(e, tweetSrcUrl) {
-    console.debug('inside tweet tagName', e.target.tagName)
+    e.preventDefault()
     var tgt = e.target
-    if (tgt.tagName.toLowerCase() == "a")
-        window.open(tgt.href, "Link in tweet")
-    else
+    let max = 5
+    if (tgt.tagName.toLowerCase() == "a") {
+      window.open(tgt.href, "Link in tweet")
+    }
+    else {
+      while (tgt = tgt.parentElement) {
+        if (tgt.tagName.toLowerCase() == "a"
+            || tgt.classList.contains('Tweet')
+            || tgt.id == 'topPapers'
+            || max <= 0) {
+          break
+        }
+        else {
+          max--
+        }
+      }
+      if (tgt.tagName.toLowerCase() == "a") {
+        window.open(tgt.href, "Parent Link in tweet")
+      }
+      else {
         window.open(tweetSrcUrl, "Source Tweet")
+      }
+    }
 }
 
-function RenderTweet( tweet) {
+function formatDateLikeTwitter (aDate) {
+  // partly inspired by https://github.com/hijonathan/moment.twitter/
+  let msDiff = Date.now() - aDate
 
+  let resStr = ''
+  if (msDiff < 6000) {
+    resStr = parseInt(msDiff/1000)+'s'
+  }
+  else if (msDiff < 36000) {
+    resStr = parseInt(msDiff/6000)+'m'
+  }
+  else if (msDiff < 86400000) {
+    resStr = parseInt(msDiff/36000)+'h'
+  }
+  else if (msDiff < 86400000) {
+    resStr = parseInt(msDiff/36000)+'h'
+  }
+  else if (msDiff < 6048e5) {
+    resStr = parseInt(msDiff/86400000)+'d'
+  }
+  else {
+    resStr = aDate.asDate.toLocaleDateString(
+                'en-US',
+                { 'year': 'numeric',
+                  'month': 'short',
+                  'day': 'numeric' }
+              )
+  }
+  return '&nbsp;·&nbsp;'+resStr
+}
+
+function renderTweet( tweet) {
     var tweet_links = true
+
+    var tweetText = tweet.text
+
+    // raw links
+    tweetText = tweetText.replace(/(https?:\/\/[\w\.\/\_]+)/, '<a href="$1">$1</a>')
+
+    // #hashtags
+    tweetText = tweetText.replace(/#(\w+)/, '<a href="https://twitter.com/hashtag/$1">#$1</a>')
+
+    // @users
+    tweetText = tweetText.replace(/@(\w+)/, '<a href="https://twitter.com/$1">@$1</a>')
+
+    // date
+    var tweetDate = new Date(tweet.created_at)
 
     var author_url = "http://twitter.com/"+tweet["user"]["screen_name"];
     var tweet_url = author_url+"/status/"+tweet["id_str"]
@@ -417,9 +480,8 @@ function RenderTweet( tweet) {
 
     html += '\t\t\t\t'+ '<span class="Tweet-metadata dateline">' + '\n';
 
-    // TODO check datetime iso dates here
-    html += '\t\t\t\t\t'+ '<a target="_blank" class="u-linkBlend u-url customisable-highlight long-permalink" data-datetime="2012-12-03T18:51:11+000" data-scribe="element:full_timestamp" href="'+tweet_url+'">' + '\n';
-    html += '\t\t\t\t\t\t'+ '<time class="dt-updated" datetime="2012-12-03T18:51:11+0000" title="'+tweet["created_at"]+'">'+tweet["created_at"]+'</time>' + '\n';
+    html += '\t\t\t\t\t'+ '<a target="_blank" class="u-linkBlend u-url customisable-highlight long-permalink" data-datetime="'+tweetDate.toISOString()+'" data-scribe="element:full_timestamp" href="'+tweet_url+'">' + '\n';
+    html += '\t\t\t\t\t\t'+ '<time class="dt-updated" datetime="'+tweetDate.toISOString()+'" title="'+tweet["created_at"]+'">'+formatDateLikeTwitter(tweetDate)+'</time>' + '\n';
     html += '\t\t\t\t\t'+ '</a>' + '\n';
     html += '\t\t\t\t'+ '</span>' + '\n';
 
@@ -444,7 +506,7 @@ function RenderTweet( tweet) {
 
     html += '\t\t\t'+ '<div class="Tweet-body e-entry-content" data-scribe="component:tweet">' + '\n';
 
-    html += '\t\t\t\t'+ '<p class="Tweet-text e-entry-title" lang="en" dir="ltr">' + tweet["text"] + '</p>' + '\n';
+    html += '\t\t\t\t'+ '<p class="Tweet-text e-entry-title" lang="en" dir="ltr">' + tweetText + '</p>' + '\n';
 
     if( !isUndef(tweet["retweet_count"]) || !isUndef(tweet["favourites_count"])  ) {
         html += '\t\t\t\t'+ '<ul class="Tweet-actions" data-scribe="component:actions" role="menu" aria-label="Tweet actions">' + '\n';

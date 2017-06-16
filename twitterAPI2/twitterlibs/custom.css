@@ -34,3 +34,10 @@ blockquote.Tweet a:hover,
 blockquote.Tweet a:focus {
   text-decoration: underline !important;
 }
+
+.Tweet-metadata {
+  font-size: 1em
+}
+.Tweet-authorScreenName {
+  font-size: .9em;
+}
