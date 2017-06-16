@@ -355,6 +355,20 @@ var TinaWebJS = function ( sigmacanvas ) {
           }
         }
 
+        $('#tab-container').easytabs({
+          updateHash:false,
+          defaultTab: 'li#tabneigh'
+        });
+
+        // show any already existing panel
+        document.getElementById("graph-panels").style.display = "block"
+
+        // grey message in the search bar from settings
+        $("#searchinput").attr('placeholder', TW.conf.strSearchBar) ;
+
+        // load optional modules
+        activateModules() ;
+
         if (initErrMsg) {
           console.error(initErrMsg)
         }
@@ -811,12 +825,13 @@ var TinaWebJS = function ( sigmacanvas ) {
                               prevsels:TW.SystemState().selectionNids
                           } )
 
-          // 2) clear previous selection
-          cancelSelection(false)
-
-          // 3) show new selection + do all related effects
+          // 2) show new selection + do all related effects
           if(targeted.length>0) {
             selInst.MultipleSelection2( {nodes:targeted} )
+          }
+          // or clear previous selection
+          else {
+            cancelSelection(false)
           }
         }
       })
