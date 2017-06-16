@@ -316,7 +316,6 @@ function SelectionEngine() {
 
         TW.partialGraph.render();
 
-        // TODO FIX
         updateRelatedNodesPanel( theSelection , same, oppos )
 
         if (TW.conf.debug.logSelections) {
@@ -573,7 +572,7 @@ var TinaWebJS = function ( sigmacanvas ) {
         $('.etabs').click(function(){
             setTimeout(
               function() {
-                $("#opossiteNodes").readmore({maxHeight:200});
+                $("#oppositeNodes").readmore({maxHeight:200});
                 $("#sameNodes").readmore({maxHeight:200});
               },
               500

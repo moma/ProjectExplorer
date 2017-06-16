@@ -91,6 +91,9 @@ TW.pushState = function( args ) {
 
 
 TW.resetGraph = function() {
+  // remove the selection
+  cancelSelection(false, {norender: true})
+
   // call the sigma graph clearing
   TW.instance.clearSigma()
 
@@ -376,7 +379,13 @@ function htmlProportionalLabels(elems , limit, selectableFlag) {
         let id=elems[i].key
         let frec=elems[i].value
 
-        fontSize = ((frec - frecMin) * (targetRange) / (sourceRange)) + TW.conf.tagcloudFontsizeMin
+        if (sourceRange) {
+          fontSize = ((frec - frecMin) * (targetRange) / (sourceRange)) + TW.conf.tagcloudFontsizeMin
+        }
+        else {
+          // 1em when all elements have the same freq
+          fontSize = 1
+        }
 
         // debug
         // console.log('htmlfied_tagcloud (',id, TW.Nodes[id].label,') freq',frec,' fontSize', fontSize)
@@ -418,7 +427,7 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
     }
 
     if(sels.length>0) {
-        sameNodesDIV+='<div id="sameNodes">';//tagcloud
+        sameNodesDIV+='<div id="relatedBox">';//tagcloud
         var sameNeighTagcloudHtml = htmlProportionalLabels( same , TW.conf.tagcloudSameLimit, true )
         sameNodesDIV+= (sameNeighTagcloudHtml!=false) ? sameNeighTagcloudHtml.join("\n")  : "No related items.";
         sameNodesDIV+= '</div>';
@@ -430,16 +439,13 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
     informationDIV += htmlfied_nodesatts( sels ).join("<br>\n")
     informationDIV += '</ul><br>';
 
-    //using the readmore.js
-    // ive put a limit for nodes-name div
-    // and opposite-nodes div aka tagcloud div
-    // and im commenting now because github is not
-    // pushing my commit
-    // because i need more lines, idk
+    //using the readmore.js (NB readmore and easytabs are not easy to harmonize)
     $("#lefttopbox").show();
-    $("#names").html(namesDIV).readmore({maxHeight:100});
     $("#tab-container").show();
-    $("#oppositeNodes").html(alterNodesDIV).readmore({maxHeight:200});
+    $("#names").html(namesDIV).readmore({maxHeight:100});
+    if(oppos.length>0) {
+      $("#oppositeNodes").html(alterNodesDIV).readmore({maxHeight:200});
+    }
     $("#sameNodes").html(sameNodesDIV).readmore({maxHeight:200});
     $("#information").html(informationDIV);
     $("#tips").html("");

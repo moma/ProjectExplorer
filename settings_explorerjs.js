@@ -280,7 +280,7 @@ TW.conf = (function(TW){
   TWConf.moreLabelsUnderArea = true; // show 3x more labels under area (/!\ costly)
 
   // em size range for neighbor nodes "tagcloud"  (1 = "normal size")
-  TWConf.tagcloudFontsizeMin = .5  ;
+  TWConf.tagcloudFontsizeMin = .8  ;
   TWConf.tagcloudFontsizeMax = 2 ;
 
   TWConf.tagcloudSameLimit = 50     // max displayed neighbors of the same type
