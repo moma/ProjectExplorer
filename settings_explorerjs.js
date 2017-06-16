@@ -40,7 +40,6 @@ TW.conf = (function(TW){
   // £TODO : allow to choose between twitter or elasticsearch topPapers (choic of post-process function in extras_explorer)
   // TWConf.relatedDocsType
 
-
   // =======================
   // DATA FACETS AND LEGENDS
   // =======================
@@ -152,13 +151,20 @@ TW.conf = (function(TW){
   // NB: these labels may be superseded by the input data's node types values
   //     cf. sortNodeTypes()
 
+  // Modules path
+  // ------------
+  TWConf.paths = {
+    'modules': 'twmodules'
+  }
+  Object.freeze(TWConf.paths)  // /!\ to prevent path modification before load
+
   // Active modules
   // --------------
   TWConf.ModulesFlags = {} ;
   // flag name is div class to be removed if false
-  //        *and* subdirectory to import if true
+  //        *and* subdirectory of modules path to import if true
   // see also activateModules()
-  TWConf.ModulesFlags["histogramModule"] = false ;
+  TWConf.ModulesFlags["histogramModule"] = true ;
   TWConf.ModulesFlags["histogramDailyVariantModule"] = false ;
   // TODO more generic module integrating the variants cf. experiments/histogramModule_STUB_GENERIQUE
   TWConf.ModulesFlags["crowdsourcingModule"] = true ;
@@ -286,7 +292,6 @@ TW.conf = (function(TW){
   TWConf.sizeMult[1] = 3.0;    // ie for node type 1 (<=> soc)
 
 
-
   // ===========
   // DEBUG FLAGS
   // ===========
@@ -301,13 +306,6 @@ TW.conf = (function(TW){
     logStates: false,                // ...about TW.states array
     logSelections: false
   }
-
-
-  // £TODO: fix these 2 settings with a better dir structure
-  //        + but avoid path injection
-  //        + find a place for modules *INSIDE* tinawebJS dir for easier deployment
-  TWConf.ModulesPath = ''
-  TWConf.libspath = 'libs'
 
 
   return TWConf

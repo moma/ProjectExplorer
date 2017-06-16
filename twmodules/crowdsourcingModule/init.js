@@ -7,11 +7,12 @@
 //   - our current dir for this module's files (and this init.js)
 //   - the class of module's html elements
 module_name="crowdsourcingModule"
+module_dir=TW.conf.paths.modules+'/'+module_name
 
 // ---- INIT main part -------- (listing all things to load)
 
-loadCSS(module_name+"/crowdTerms.css")
-loadJS(module_name+"/suggest.js") ;
+loadCSS(module_dir+"/crowdTerms.css")
+loadJS(module_dir+"/suggest.js") ;
 
 
 

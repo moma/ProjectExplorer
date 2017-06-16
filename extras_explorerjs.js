@@ -666,7 +666,7 @@ function activateModules() {
         else {
             // console.log("extras:activateModules: key is true: "+key)
             // load JS+CSS items corresponding to the flagname
-            let my_src_dir = key
+            let my_src_dir = TW.conf.paths.modules + '/'+ key
 
             // synchronous ajax
             let moduleIsPresent = linkCheck(my_src_dir+"/init.js")
