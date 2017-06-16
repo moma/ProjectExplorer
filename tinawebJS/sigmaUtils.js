@@ -620,11 +620,11 @@ function find(lquery){
 }
 
 function getNodeLabels(elems){
-    var labelss=[]
+    var labels=[]
     for(let i in elems){
-        labelss.push(TW.Nodes[elems[i]].label)
+        labels.push(TW.Nodes[elems[i]].label)
     }
-    return labelss
+    return labels
 }
 
 function getSelections(){

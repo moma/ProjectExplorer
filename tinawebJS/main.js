@@ -15,7 +15,6 @@ TW.gexfPaths={};        // for file selectors iff servermenu
 TW.categories = [];     // possible node types and their inverted map
 TW.catDict = {};
 
-
 // a system state is the summary of tina situation
 TW.initialSystemState = {
   activetypes: [],          // <== filled from TW.categories
@@ -589,17 +588,6 @@ function mainStartGraph(inFormat, inData, twInstance) {
   }
 
 }
-
-
-// load optional modules
-activateModules() ;
-
-// show any already existing panel
-document.getElementById("graph-panels").style.display = "block"
-
-// grey message in the search bar from settings
-$("#searchinput").attr('placeholder', TW.conf.strSearchBar) ;
-
 
 setTimeout( function() {
   theHtml.classList.remove('waiting')
