@@ -97,11 +97,23 @@ function getHeatmapColors(nClasses) {
   }
 
   // floor
-  let skipStep = parseInt(listsLen / nHalfToPick)
+  let exactStep = listsLen / nHalfToPick
+  let skipStep = parseInt(exactStep)    // incrmt must be int (used for arr idx)
 
-  // cold colors
+  // to compensate for the fractional part
+  let delta = exactStep - skipStep
+  let drift = 0
+
+  // cold colors, starting from deepest color
   for (let i = listsLen-1 ; i > 0 ; i -= skipStep ) {
     outColors.push(TW.gui.heatmapColorListToColdest[i])
+
+    // catching back one step from time to time
+    drift += delta
+    if (drift >= 1) {
+      i--
+      drift -= 1
+    }
   }
 
   // white

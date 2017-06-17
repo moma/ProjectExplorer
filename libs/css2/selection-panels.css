@@ -40,7 +40,7 @@
     max-height: 30%;
     padding: 0 5px;
     overflow-y:scroll;
-    bottom:0;
+    bottom:18px;
     left:0;
     border:solid 1px black;
     background-color:white;

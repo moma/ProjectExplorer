@@ -410,9 +410,8 @@ function facetsBinning (valuesIdx) {
 
           // same interval each time
           let step = (vMax - vMin) / nBins
-
-          for (var k=vMin ; k < vMax ; k += step ){
-            legendRefTicks.push(k)
+          for (var i = 0 ; i < nBins ; i++) {
+            legendRefTicks.push(vMin + i*step)
           }
           // NB these ticks are *minimums* so we stop one step *before* vMax
           //    and simply include it in last interval
