@@ -31,6 +31,10 @@ TW.states = [TW.initialSystemState]
 // SystemState() returns the current situation
 TW.SystemState = function() { return TW.states.slice(-1)[0] }
 
+// gracefully degrade our most costly settings if the user agent is mobile
+if (/mobile/i.test(navigator.userAgent))   mobileAdaptConf()
+
+
 //  ======== [   what to do at start ] ========= //
 console.log("Starting TWJS")
 

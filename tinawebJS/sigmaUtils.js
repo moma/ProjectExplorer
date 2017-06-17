@@ -954,3 +954,34 @@ function clusterColoring(daclass) {
     set_ClustersLegend ( daclass )
     TW.partialGraph.render();
 }
+
+
+// mobile versions should get lighter settings
+function mobileAdaptConf() {
+
+    TW.conf.overSampling = false
+    TW.conf.dragNodesAvailable = false
+
+    TW.conf.fa2Available = false
+    TW.conf.filterSliders = false
+    TW.conf.moreLabelsUnderArea = false
+
+    TW.conf.maxPastStates = 2
+
+    TW.conf.minLengthAutoComplete = 2
+    TW.conf.maxSuggestionsAutoComplete = 4
+
+    TW.conf.sigmaJsDrawingProperties.drawEdges = false
+    TW.conf.sigmaJsDrawingProperties.enableHovering = false
+
+    TW.conf.sigmaJsDrawingProperties.touchEnabled = true
+    TW.conf.sigmaJsDrawingProperties.animationsTime = 0
+    TW.conf.sigmaJsDrawingProperties.mouseZoomDuration = 0
+    // TW.conf.sigmaJsDrawingProperties.defaultEdgeType = 'line'
+
+    // TW.conf.scanClusters = false
+    // TW.conf.twRendering = false
+
+    // £TODO better CSS for histogram on mobile
+    TW.conf.ModulesFlags.histogramModule = false
+}
