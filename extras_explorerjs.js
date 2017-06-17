@@ -452,13 +452,13 @@ function renderTweet( tweet) {
     var tweetText = tweet.text
 
     // raw links
-    tweetText = tweetText.replace(/(https?:\/\/[\w\.\/\_]+)/, '<a href="$1">$1</a>')
+    tweetText = tweetText.replace(/(https?:\/\/[\w\.\/\_]+)/g, '<a href="$1">$1</a>')
 
     // #hashtags
-    tweetText = tweetText.replace(/#(\w+)/, '<a href="https://twitter.com/hashtag/$1">#$1</a>')
+    tweetText = tweetText.replace(/#(\w+)/g, '<a href="https://twitter.com/hashtag/$1">#$1</a>')
 
     // @users
-    tweetText = tweetText.replace(/@(\w+)/, '<a href="https://twitter.com/$1">@$1</a>')
+    tweetText = tweetText.replace(/@(\w+)/g, '<a href="https://twitter.com/$1">@$1</a>')
 
     // date
     var tweetDate = new Date(tweet.created_at)
