@@ -264,74 +264,73 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
         // get a sample node color for each bin/class
         var nMatchedNodes = legendInfo[l]['nids'].length
 
-        if (nMatchedNodes) {
-          var midNid = legendInfo[l]['nids'][Math.floor(3*nMatchedNodes/4)]
-          var exampleColor
+        let theColor = legendInfo[l].col || "#111"   // black if empty
 
-          if (TW.gui.handpickedcolor) {
-            exampleColor = TW.partialGraph.graph.nodes(midNid).customAttrs.alt_color
+        // create the legend item
+        var preparedLabel = legendInfo[l]['labl']
+
+        if (preparedLabel == '_non_numeric_') {
+          if (!nMatchedNodes) {
+            continue                // we skip "trash" category if empty
           }
           else {
-            exampleColor = TW.partialGraph.graph.nodes(midNid).color
+            preparedLabel = "not numeric"
+          }
+        }
+
+        // we add a title to cluster classes by ranking their nodes and taking k best labels
+        if (TW.conf.facetOptions[daclass] && TW.conf.facetOptions[daclass].col == 'cluster') {
+
+          // let t0 = performance.now()
+
+          let titles = []
+          let theRankingAttr = TW.conf.facetOptions[daclass].titlingMetric
+          let maxLen = TW.conf.facetOptions[daclass].titlingNTerms || 2
+
+          // custom accessor (user settings or by default)
+          let getVal
+          if(theRankingAttr) {
+            getVal = function(node) {return node.attributes[theRankingAttr]}
+          }
+          else {
+            // default ranking: by size
+            getVal = function(node) {return node.size}
           }
 
-          // create the legend item
-          var preparedLabel = legendInfo[l]['labl']
+          for (let j in legendInfo[l]['nids']) {
+            let n = TW.partialGraph.graph.nodes(legendInfo[l]['nids'][j])
 
-          // we add a title to cluster classes by ranking their nodes and taking k best labels
-          if (TW.conf.facetOptions[daclass] && TW.conf.facetOptions[daclass].col == 'cluster') {
+            let theRankingVal = getVal(n)
 
-            // let t0 = performance.now()
-
-            let titles = []
-            let theRankingAttr = TW.conf.facetOptions[daclass].titlingMetric
-            let maxLen = TW.conf.facetOptions[daclass].titlingNTerms || 2
-
-            // custom accessor (user settings or by default)
-            let getVal
-            if(theRankingAttr) {
-              getVal = function(node) {return node.attributes[theRankingAttr]}
+            if (titles.length < maxLen) {
+              titles.push({'key':n.label, 'val':theRankingVal})
             }
             else {
-              // default ranking: by size
-              getVal = function(node) {return node.size}
-            }
-
-            for (let j in legendInfo[l]['nids']) {
-              let n = TW.partialGraph.graph.nodes(legendInfo[l]['nids'][j])
-
-              let theRankingVal = getVal(n)
-
-              if (titles.length < maxLen) {
+              // we keep titles sorted for this
+              let lastMax = titles.slice(-1)[0].val
+              if (theRankingVal > lastMax) {
                 titles.push({'key':n.label, 'val':theRankingVal})
               }
-              else {
-                // we keep titles sorted for this
-                let lastMax = titles.slice(-1)[0].val
-                if (theRankingVal > lastMax) {
-                  titles.push({'key':n.label, 'val':theRankingVal})
-                }
-              }
-
-              titles.sort(function(a,b) {return b.val - a.val})
-              titles = titles.slice(0,maxLen)
             }
 
-            // adding those k best titles to the legend
-            preparedLabel += " ["+titles.map(function(x){return x.key}).join('/')+"...]"
-
-            // console.log("finding title perf", performance.now() - t0, titles)
+            titles.sort(function(a,b) {return b.val - a.val})
+            titles = titles.slice(0,maxLen)
           }
 
-          // all-in-one argument for SomeEffect
-          var valueclassId = `${curType}::${daclass}::${l}`
+          // adding those k best titles to the legend
+          preparedLabel += " ["+titles.map(function(x){return x.key}).join('/')+"...]"
 
-          var colorBg = `<span style="background:${exampleColor};"></span>`
-
-          LegendDiv += `<li onclick='SomeEffect("${valueclassId}")'>`
-          LegendDiv += colorBg + preparedLabel
-          LegendDiv += "</li>\n"
+          // console.log("finding title perf", performance.now() - t0, titles)
         }
+
+        // all-in-one argument for SomeEffect
+        var valueclassId = `${curType}::${daclass}::${l}`
+
+        var colorBg = `<span class="lgdcol" style="background:${theColor};"></span>`
+
+        LegendDiv += `<li onclick='SomeEffect("${valueclassId}")'>`
+        LegendDiv += colorBg + preparedLabel
+        LegendDiv += "</li>\n"
       }
       LegendDiv += '      </ul>'
       LegendDiv += '    </div>'

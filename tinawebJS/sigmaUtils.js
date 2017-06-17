@@ -645,9 +645,8 @@ function edgeInfos(anEdge) {
 
 function gradientColoring(daclass) {
 
-    // £TODO group as an option of cancelSelection to avoid 2 loops
-    cancelSelection(false);
-    graphResetLabelsAndSizes()
+    cancelSelection(false);       // loops only on selected
+    graphResetLabelsAndSizes()    // full loop
 
     TW.gui.handpickedcolor = true
 
@@ -672,8 +671,6 @@ function gradientColoring(daclass) {
     var themult = Math.pow(10,min_pow);
     // console.log('themult', themult)
 
-
-    // £TODO should use TW.Clusters here
     for(var j in TW.nodeIds) {
         var the_node = TW.Nodes[ TW.nodeIds[j] ]
         var attval = the_node.attributes[daclass];
@@ -731,6 +728,28 @@ function gradientColoring(daclass) {
 
     // Edge precompute alt_rgb by new source-target nodes-colours combination
     repaintEdges()
+
+    // remember in clusters
+    let bins = TW.Clusters[getActivetypesNames()[0]][daclass]
+    if (bins && bins.invIdx) {
+      for (var i in bins.invIdx) {
+        if (bins.invIdx[i].labl != '_non_numeric_') {
+          let nidList = bins.invIdx[i]['nids']
+          if (nidList.length) {
+            // we take an exemplar in the range, further than middle
+            // (result optically more representative than with 1/2 of len)
+            let aNid = nidList[Math.floor(3*nidList.length/4)]
+            bins.invIdx[i].col = TW.partialGraph.graph.nodes(aNid).color
+          }
+          else {
+            bins.invIdx[i].col = "#111" // empty bin
+          }
+        }
+        else {
+          bins.invIdx[i].col = "#bbb" // non numeric values bin
+        }
+      }
+    }
 
     // NB legend will group different possible values using
     //    precomputed ticks from TW.Clusters.terms[daclass]
@@ -814,9 +833,8 @@ function heatmapColoring(daclass) {
   binColors = getHeatmapColors(nColors)
 
   // let's go
-  // £TODO group as an option of cancelSelection to avoid 2 loops
-  cancelSelection(false);
-  graphResetLabelsAndSizes()
+  cancelSelection(false);       // loops only on selected
+  graphResetLabelsAndSizes()    // full loop
 
   // global flag
   TW.gui.handpickedcolor = true
@@ -825,31 +843,39 @@ function heatmapColoring(daclass) {
   for (var k in tickThresholds) {
 
     // console.debug('tick infos', tickThresholds[k])
+    // ex: {labl: "terms||growth_rate||[0 ; 0.583]", nids: Array(99), range: [0 ; 0.583210]}
+
+    let theColor
 
     // skip grouped NaN values case => grey
     if (tickThresholds[k].labl == '_non_numeric_') {
-      continue
+      theColor = '#bbb'
+    }
+    else {
+      theColor = binColors[k]
     }
 
-    // ex: {labl: "terms||growth_rate||[0 ; 0.583]", nids: Array(99), range: [0 ; 0.583210]}
+    if (tickThresholds[k].nids.length) {
+      let rgbColStr = hex2rgba(binColors[k]).slice(0,3).join(',')
 
-    // color the referred nodes
-    for (var j in tickThresholds[k].nids) {
-      let n = TW.partialGraph.graph.nodes(tickThresholds[k].nids[j])
+      // color the referred nodes
+      for (var j in tickThresholds[k].nids) {
+        let n = TW.partialGraph.graph.nodes(tickThresholds[k].nids[j])
+        if (n) {
+          n.customAttrs.alt_color = binColors[k]
+          n.customAttrs.altgrey_color = "rgba("+rgbColStr+",0.4)"
 
-      n.customAttrs.alt_color = binColors[k]
-      n.customAttrs.altgrey_color = "rgba("+(hex2rgba(binColors[k]).slice(0,3).join(','))+",0.4)"
-
-      var originalLabel = TW.Nodes[n.id].label
-      if (doModifyLabel) {
-        var valSt = n.attributes[daclass]
-        n.label = `(${valSt}) ${originalLabel}`
+          var originalLabel = TW.Nodes[n.id].label
+          if (doModifyLabel) {
+            var valSt = n.attributes[daclass]
+            n.label = `(${valSt}) ${originalLabel}`
+          }
+        }
       }
-      else {
-        n.label = originalLabel
-      }
-
     }
+
+    // remember
+    tickThresholds[k].col = theColor
   }
 
   // Edge precompute alt_rgb by new source-target nodes-colours combination
@@ -871,19 +897,18 @@ function clusterColoring(daclass) {
     console.log(" = = = = = = = = = = = = = = = = = ")
     console.log("")
 
-    // £TODO group as an option of cancelSelection to avoid 2 loops
-    cancelSelection(false);
-    graphResetLabelsAndSizes()
+    cancelSelection(false);       // now loops only on selected
+    graphResetLabelsAndSizes()    // full loop
 
     // louvain needs preparation
     if(daclass=="clust_louvain") {
-        if(!TW.states.slice(-1)[0].LouvainFait) {
+        if(!TW.SystemState().LouvainFait) {
             try {
               RunLouvain()
-              TW.states.slice(-1)[0].LouvainFait = true
+              TW.SystemState().LouvainFait = true
             }
             catch(e) {
-              TW.states.slice(-1)[0].LouvainFait = false
+              TW.SystemState().LouvainFait = false
               console.warn("skipped error on louvain, falling back to default colors")
               daclass == 'clust_default'
             }
@@ -915,35 +940,71 @@ function clusterColoring(daclass) {
 
       let nColors = TW.gui.colorList.length
 
-      for(var j in TW.nodeIds) {
-          var the_node = TW.partialGraph.graph.nodes(TW.nodeIds[j])
 
-          if (the_node) {
+      let facets = TW.Clusters[getActivetypesNames()[0]][daclass]
+      if (facets && facets.invIdx) {
+        for (var i in facets.invIdx) {
+          let valGroup = facets.invIdx[i]
+          let theColor
+          if (valGroup.labl == "_non_numeric_") {
+            theColor == '#bbb'
+          }
+          else if (valGroup.val) {
+            theColor = colList[ valGroup.val ]
+          }
+          else if (valGroup.range) {
+            let someRepresentativeInt = stringToSomeInt(valGroup.range) % nColors
+            theColor = colList[ someRepresentativeInt ]
+          }
 
-            // POSS: use "hidden" in filters instead of remove/readd
-            //       then this condition would be more useful here
-            if (! the_node.hidden) {
-              var attval = ( !isUndef(the_node.attributes) && !isUndef(the_node.attributes[daclass]) )? the_node.attributes[daclass] : TW.partialGraph.graph.nodes(TW.nodeIds[j])[daclass];
-
-              let theColor
-
-              if (attval == '_non_numeric_') {
-                theColor = '#bbb'
+          if (valGroup.nids.length) {
+            let rgbColStr = hex2rgba(theColor).slice(0,3).join(',')
+            for (let j in valGroup.nids) {
+              let theNode = TW.partialGraph.graph.nodes(valGroup.nids[j])
+              if (theNode) {
+                theNode.customAttrs.alt_color = theColor
+                theNode.customAttrs.altgrey_color = "rgba("+rgbColStr+",0.4)"
               }
-              else if (! isNaN(parseInt(attval))) {
-                theColor = colList[ attval ]
-              }
-              else {
-                let someRepresentativeInt = stringToSomeInt(attval) % nColors
-                theColor = colList[ someRepresentativeInt ]
-              }
-
-              // TW.partialGraph.graph.nodes(TW.nodeIds[j]).color = theColor
-              the_node.customAttrs.alt_color = theColor
-              the_node.customAttrs.altgrey_color = "rgba("+(hex2rgba(theColor).slice(0,3).join(','))+",0.4)"
             }
           }
+
+          // rembember in TW.Clusters
+          valGroup.col = theColor
+        }
       }
+      // fallback on old, slower strategy if scanClusters inactive
+      else {
+        for(var j in TW.nodeIds) {
+            var the_node = TW.partialGraph.graph.nodes(TW.nodeIds[j])
+
+            if (the_node) {
+
+              // POSS: use "hidden" in filters instead of remove/readd
+              //       then this condition would be more useful here
+              if (! the_node.hidden) {
+                var attval = ( !isUndef(the_node.attributes) && !isUndef(the_node.attributes[daclass]) )? the_node.attributes[daclass] : TW.partialGraph.graph.nodes(TW.nodeIds[j])[daclass];
+
+                let theColor
+
+                if (attval == '_non_numeric_') {
+                  theColor = '#bbb'
+                }
+                else if (! isNaN(parseInt(attval))) {
+                  theColor = colList[ attval ]
+                }
+                else {
+                  let someRepresentativeInt = stringToSomeInt(attval) % nColors
+                  theColor = colList[ someRepresentativeInt ]
+                }
+
+                // TW.partialGraph.graph.nodes(TW.nodeIds[j]).color = theColor
+                the_node.customAttrs.alt_color = theColor
+                the_node.customAttrs.altgrey_color = "rgba("+(hex2rgba(theColor).slice(0,3).join(','))+",0.4)"
+              }
+            }
+        }
+      }
+
       // set the global state
       TW.gui.handpickedcolor = true
     }

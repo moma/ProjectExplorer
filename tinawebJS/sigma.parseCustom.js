@@ -416,6 +416,8 @@ function facetsBinning (valuesIdx) {
           }
           // NB these ticks are *minimums* so we stop one step *before* vMax
           //    and simply include it in last interval
+
+          // console.warn(`samerange nBins:${nBins}, n distinct:${workingVals.length} => got n ticks:${legendRefTicks.length}`)
         }
 
         else if (binningMode == 'samepop') {
@@ -545,13 +547,11 @@ function facetsBinning (valuesIdx) {
             bracket = ']'
           }
 
-          newTick.labl = `[${labLowThres} ; ${labHiThres}${bracket} (${newTick.nids.length})`
-          newTick.fullLabl = `${cat}||${at}||[${labLowThres} ; ${labHiThres}${bracket} (${newTick.nids.length})`
+          newTick.labl = `[<span title="${lowThres}">${labLowThres}</span> ; <span title="${hiThres}">${labHiThres}</span>${bracket} (${newTick.nids.length})`
+          // newTick.fullLabl = `${cat}||${at}||[${lowThres} ; ${hiThres}${bracket} (${newTick.nids.length})`
 
-          // save these bins as the cluster index (aka faceting)
-          if (newTick.nids.length) {
-            facetIdx[cat][at].invIdx.push(newTick)
-          }
+          // faceting: save these bins as the cluster index (even if empty)
+          facetIdx[cat][at].invIdx.push(newTick)
         }
 
         // finally add the 'trash' category with any non_numeric vals
