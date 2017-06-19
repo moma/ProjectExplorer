@@ -347,15 +347,11 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
 // NB: this variant only for nodetype semantic
 function getTopPapers(nodetypeLegacy){
 
-    if (nodetypeLegacy == 'semantic' && TW.conf.getRelatedDocs) {
+  if (TW.conf.getRelatedDocs) {
 
-        jsonparams=getSelections();
-
-        var joined_q = jsonparams.map(function(w) {return '('+w+')'}).join(' AND ')
-
-        // console.log(jsonparams)
-        // theHtml = "<p> jsonparams:"+jsonparams+" </p>"
-        //
+    if (TW.conf.relatedDocsType == "twitter") {
+      // POSS remove restriction on 'semantic' nodes for twitter results about authors
+      if (nodetypeLegacy == 'semantic') {
         $.ajax({
             type: 'GET',
             url: TW.conf.relatedDocsAPI,
@@ -383,7 +379,46 @@ function getTopPapers(nodetypeLegacy){
                 console.log('Page Not found: getTopPapers');
             }
         });
+      }
     }
+    else if (TW.conf.relatedDocsType == "wosLocalDB") {
+      let thisgexf= TW.File;
+      let gexfinfos = TW.fields[thisgexf]
+      if (!gexfinfos || !gexfinfos[nodetypeLegacy]) {
+        $("#topPapers").show();
+        $("#topPapers").html(
+          `<p>Your settings for relatedDocsType are set on a local wos database, but your servermenu file does not provide any information about the wosLocalDB table to query for related documents on nodetype ${nodetypeLegacy}</p>`
+        );
+      }
+      else {
+        let jsonparams=JSON.stringify(TW.SystemState().selectionNids.map(function(nid){return TW.Nodes[nid].label}));
+        let bi=(TW.categories.length==2)?1:0;
+        jsonparams = jsonparams.split('&').join('__and__');
+        let querytable = gexfinfos[nodetypeLegacy]
+        let image='<img style="display:block; margin: 0px auto;" src="libs/img2/loader.gif"></img>';
+        $("#topPapers").show();
+        $("#topPapers").html(image);
+        $.ajax({
+            type: 'GET',
+            url: 'LOCALDB/info_div.php',
+            data: "type="+nodetypeLegacy+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+querytable,
+            //contentType: "application/json",
+            //dataType: 'json',
+            success : function(data){
+                console.log('LOCALDB/info_div.php?'+"type="+nodetypeLegacy+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+querytable);
+                $("#topPapers").html(data);
+            },
+            error: function(){
+                console.log('Page Not found: getTopPapers');
+            }
+        });
+      }
+    }
+  }
+}
+
+function newPopup(url) {
+	popupWindow = window.open(url,'popUpWindow','height=700,width=800,left=10,top=10,resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,directories=no,status=no')
 }
 
 function clickInsideTweet(e, tweetSrcUrl) {

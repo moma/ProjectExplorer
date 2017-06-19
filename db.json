@@ -8,11 +8,11 @@
 		"gexfs": {
 			"ProgrammeDesCandidats.enrichi.gexf": {
 				"social": {},
-				"semantic": {"table":"terms"}
+				"semantic": {}
 			},
 			"ProgrammeDesCandidats.gexf": {
 				"social": {},
-				"semantic": {"table":"terms"}
+				"semantic": {}
 			}
 		}
 	},
@@ -33,8 +33,14 @@
 	"data/AXA": {
 		"first" : "RiskV2PageRank1000.gexf",
 		"gexfs": {
-			"RiskV2PageRank1000.gexf": {},
-			"RiskV2PageRank5000.gexf": {}
+			"RiskV2PageRank1000.gexf": {
+        		"social": { "table":"ISIAUTHOR" , "textCol":"data","forkeyCol":"id"},
+        		"semantic": { "table":"ISItermsAxa_2015" , "textCol":"data","forkeyCol":"id"}
+			},
+			"RiskV2PageRank5000.gexf": {
+				"social": { "table":"ISIAUTHOR" , "textCol":"data","forkeyCol":"id"},
+				"semantic": { "table":"ISItermsAxa_2015" , "textCol":"data","forkeyCol":"id"}
+			}
 		}
 	}
 }

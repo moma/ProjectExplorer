@@ -7,10 +7,14 @@ TW.Edges = [];
 TW.Relations = {}       // edges sorted by source/target type
 TW.Clusters = [];       // "by value" facet index built in parseCustom
 
+TW.File = ""            // remember the currently opened file
+
 TW.partialGraph = null  // will contain the sigma visible graph instance
 
 TW.labels=[];           // fulltext search list
 TW.gexfPaths={};        // for file selectors iff servermenu
+TW.fields={};           // for related db tablenames
+                        //  (iff servermenu && relatedDocsType == 'wosLocalDB')
 
 TW.categories = [];     // possible node types and their inverted map
 TW.catDict = {};
@@ -217,10 +221,6 @@ function syncRemoteGraphData () {
     //      -> gexf file path is in the urlparam @file
     //      -> gexf file path is already specified in TW.conf.sourceFile
 
-    // ===================
-    var the_file = "";
-    // ===================
-
     // menufile case : a list of source files in ./db.json
     if (sourcemode == 'servermenu') {
         console.log("reading from FILEMENU TW.conf.sourceMenu")
@@ -246,11 +246,11 @@ function syncRemoteGraphData () {
 
         // the first or a specified one (ie both mode and file params are present)
         if( isUndef(getUrlParam.file) ) {
-            the_file = first_path+"/"+first_file
+            TW.File = first_path+"/"+first_file
             mapLabel = first_file
         } else {
             // £POSS; match on the full paths from db.json
-            the_file = first_path+"/"+getUrlParam.file
+            TW.File = first_path+"/"+getUrlParam.file
             mapLabel = getUrlParam.file
         }
 
@@ -268,18 +268,24 @@ function syncRemoteGraphData () {
                 if (TW.conf.debug.logFetchers)
                   console.log("\t\t\t"+gexfBasename)
 
+                // for associated wosLocalDBs sql queries
+                if (theGexfs[aGexf]) {
 
-                // -------------------------->8------------------------------------------
-                // £TODO this part is underspecified
-                // if used in some usecases, port it to nodetypes
-                // otherwise remove
-                // console.log("\t\t\ttable:"+theGexfs[aGexf]["semantic"]["table"])
-                // TW.field[path+"/"+aGexf] = theGexfs[aGexf]["semantic"]["table"]
-                // ex : data/AXA/RiskV2PageRank5000.gexf:"ISItermsAxa_2015"
-                // -------------------------->8------------------------------------------
+                  TW.fields[path+"/"+aGexf] = {"semantic":null, "social":null}
+                  if (theGexfs[aGexf]["semantic"] && theGexfs[aGexf]["semantic"]["table"]) {
+                    TW.fields[path+"/"+aGexf]['semantic'] = theGexfs[aGexf]["semantic"]["table"]
+                  }
+                  if (theGexfs[aGexf]["social"] && theGexfs[aGexf]["social"]["table"]) {
+                    TW.fields[path+"/"+aGexf]['social'] = theGexfs[aGexf]["social"]["table"]
+                  }
+                }
+                else {
+                  TW.fields[path+"/"+aGexf] = null
+                }
+                // ^^^^^^ FIXME see if we got the expected behavior right
+                //             (? specifications ?)
 
-
-                let cssFileSelected = (the_file==(path+"/"+aGexf))?"selected":""
+                let cssFileSelected = (TW.File==(path+"/"+aGexf))?"selected":""
                 files_selector += '<option '+cssFileSelected+'>'+gexfBasename+'</option>'
             }
             // console.log( files_selector )
@@ -290,23 +296,23 @@ function syncRemoteGraphData () {
 
     // direct urlparam file case
     else if( !isUndef(getUrlParam.file)  ) {
-      the_file = getUrlParam.file
+      TW.File = getUrlParam.file
     }
     // direct file fallback case: specified file in settings_explorer
     else if (TW.conf.sourceFile && linkCheck(TW.conf.sourceFile)) {
       console.log("no @file arg: trying TW.conf.sourceFile from settings")
-      the_file = TW.conf.sourceFile;
+      TW.File = TW.conf.sourceFile;
     }
     else {
       console.error(`No specified input and neither db.json nor TW.conf.sourceFile ${TW.conf.sourceFile} are present`)
     }
 
-    var finalRes = AjaxSync({ url: the_file });
+    var finalRes = AjaxSync({ url: TW.File });
     inData = finalRes["data"]
     inFormat = finalRes["format"]
 
     if (TW.conf.debug.logFetchers) {
-      console.warn('@the_file', finalRes["OK"], the_file)
+      console.warn('@TW.File', finalRes["OK"], TW.File)
       console.log('  fetch result: format', inFormat)
       console.log('  fetch result: typeof data', typeof inData)
       console.log("\n============================\n")

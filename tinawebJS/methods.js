@@ -433,8 +433,6 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
         sameNodesDIV+= '</div>';
     }
 
-        // getTopPapers("semantic");
-
     informationDIV += '<br><h4>Information:</h4><ul>';
     informationDIV += htmlfied_nodesatts( sels ).join("<br>\n")
     informationDIV += '</ul><br>';

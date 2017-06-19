@@ -36,9 +36,8 @@ TW.conf = (function(TW){
   TWConf.getRelatedDocs = true
   TWConf.relatedDocsAPI = "http://127.0.0.1:5000/twitter_search"
 
-
-  // £TODO : allow to choose between twitter or elasticsearch topPapers (choic of post-process function in extras_explorer)
-  // TWConf.relatedDocsType
+  TWConf.relatedDocsType = "wosLocalDB"      // accepted: "twitter" | "wosLocalDB"
+                                          // POSSible: "elastic"
 
   // =======================
   // DATA FACETS AND LEGENDS

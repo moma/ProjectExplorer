@@ -1,8 +1,7 @@
 <?php
 
 
-# £TODO WTF ??? => move params to settings_explorerjs ???
-
+# loading an associated db for a given gexf as relatedDocs php API
 $gexf_db = array();
 
 # $gexf_db["data/terrorism/terrorism_bi.gexf"] = "data/terrorism/data.db";
@@ -15,7 +14,7 @@ $gexf_db["data/AXA/RiskV2PageRank5000.gexf"] = "data/AXA/data.db";
 
 
 // TESTS
-$gexf_db["data/ProgrammeDesCandidats.gexf"] = "foobar";
+// $gexf_db["data/ProgrammeDesCandidats.gexf"] = "foobar";
 
 $gexf= str_replace('"','',$_GET["gexf"]);
 

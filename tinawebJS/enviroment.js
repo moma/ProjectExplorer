@@ -978,5 +978,6 @@ function jsActionOnGexfSelector(gexfBasename){
 
     mainStartGraph(newDataRes["format"], newDataRes["data"], TW.instance)
     writeLabel(gexfBasename)
+    TW.File = gexfPath
 }
 //============================= </OTHER ACTIONS > =============================//

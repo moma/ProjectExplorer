@@ -12,6 +12,9 @@
 include('parameters_details.php');
 
 $max_item_displayed=6;
+
+echo('graphdb: '. $graphdb.'<br/>');
+
 $base = new PDO("sqlite:../" .$graphdb);
 
 include('default_div.php');
