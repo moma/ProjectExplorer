@@ -34,6 +34,7 @@ TW.conf = (function(TW){
   // -----------------------------------------
 
   TWConf.getRelatedDocs = true
+  TWConf.relatedDocsMax = 10
   TWConf.relatedDocsAPI = "http://127.0.0.1:5000/twitter_search"
 
   TWConf.relatedDocsType = "wosLocalDB"      // accepted: "twitter" | "wosLocalDB"

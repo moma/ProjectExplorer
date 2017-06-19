@@ -446,7 +446,19 @@
        </div>
     </div>
 
-    <div id="topPapers"></div>
+    <div class="question">
+      <div class="input-group">
+        <label for="reldocs-type" class="smlabel input-group-addon">Related documents type</label>
+        <select id="reldocs-type" name="reldocs-type"
+                class="custom-select form-control"
+                 onchange="TW.conf.relatedDocsType=this.value; getTopPapers()">
+            <option value="twitter">Twitter API</option>
+            <option value="wosLocalDB">Local DB query</option>
+        </select>
+      </div>
+    </div>
+    <div id="topPapers">
+    </div>
 
     <div id="localInput"></div>
 

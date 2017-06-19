@@ -577,7 +577,7 @@ var TinaWebJS = function ( sigmacanvas ) {
         });
     }
 
-    // to init handlers for tina GUI environment (run once on page load)
+    // to init handlers + elts for tina GUI environment (run once on page load)
     this.initGUIListeners = function () {
 
         var body=document.getElementsByTagName('body')[0];
@@ -660,6 +660,10 @@ var TinaWebJS = function ( sigmacanvas ) {
                 },{ duration: 400, queue: false });
             }
         });
+
+        if (TW.conf.getRelatedDocs) {
+          document.getElementById('reldocs-type').value = TW.conf.relatedDocsType
+        }
 
         $("#tips").html(getTips());
 

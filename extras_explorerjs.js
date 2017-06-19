@@ -343,78 +343,149 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
 
 // = = = = = = = = = = = [ / Clusters Plugin ] = = = = = = = = = = = //
 
-// a custom variant of twitter plugin written for politoscope
-// NB: this variant only for nodetype semantic
-function getTopPapers(nodetypeLegacy){
 
-  if (TW.conf.getRelatedDocs) {
+// getTopPapersCurrentTypes:
+//    recursive caller of topPapers (makes it work for both types)
 
-    if (TW.conf.relatedDocsType == "twitter") {
-      // POSS remove restriction on 'semantic' nodes for twitter results about authors
-      if (nodetypeLegacy == 'semantic') {
-        $.ajax({
-            type: 'GET',
-            url: TW.conf.relatedDocsAPI,
-            data: {'query': joined_q},
-            contentType: "application/json",
-            success : function(data){
-                // console.log(data);
+// idea:
+//  function myCaller(n) {
+//    if (n == 1)
+//      myFetcher('START', 'hello', displayFun)
+//    else if (n == 2)
+//      myFetcher('START', 'hello', function(aStr) {myFetcher(aStr, "world", displayFun)})
+//   }
 
-                var topTweetsHtml = ''
+function getTopPapers(){
+  // waiting image
+  let image='<img style="display:block; margin: 0px auto;" src="libs/img2/loader.gif"></img>';
+  $("#topPapers").html(image);
 
-                if (data.length) {
-                  for (var k in data) {
-                    let tweetJson = data[k]
-                    topTweetsHtml += renderTweet(tweetJson)
-                  }
-                }
-                else {
-                  topTweetsHtml = `<p class="micromessage centered">The query <span class=code>${joined_q}</span> delivers no results on Twitter.</p>`
-                }
+  // swNodetypes <=> active types expressed as "semantic" and "social"
+  // ------------------------------------------------------------------
+  // according to directives types should only be called type 0 or 1
+  // but in the case of topPapers this "legacy" form is good sense
+  // and it is used elsewhere (external APIs and DBs)
+  var swNodetypes = getActivetypesNames().map(function(t){return swActual(t)})
 
-                $("#topPapers").html(topTweetsHtml);
-                $("#topPapers").show()
-            },
-            error: function(){
-                console.log('Page Not found: getTopPapers');
-            }
-        });
-      }
+  let sels = TW.SystemState().selectionNids
+
+  // traditional case run once and display
+  if (swNodetypes.length == 1) {
+    topPapersFetcher(swNodetypes[0], getNodeLabels(sels))
+  }
+  // if both types we call 2 nested times
+  else {
+    // prepare: sort selections' labels as query words by swtype
+    var qWordsbySwType = {'semantic': [], 'social': []}
+    for (var swtype in swNodetypes) {
+      qWordsbySwType[swtype] = []
     }
-    else if (TW.conf.relatedDocsType == "wosLocalDB") {
-      let thisgexf= TW.File;
-      let gexfinfos = TW.fields[thisgexf]
-      if (!gexfinfos || !gexfinfos[nodetypeLegacy]) {
-        $("#topPapers").show();
-        $("#topPapers").html(
-          `<p>Your settings for relatedDocsType are set on a local wos database, but your servermenu file does not provide any information about the wosLocalDB table to query for related documents on nodetype ${nodetypeLegacy}</p>`
-        );
+    for (var j in sels) {
+      let n = TW.Nodes[sels[j]]
+      qWordsbySwType[swActual(n.type)].push(n.label)
+    }
+
+    // do the first then the nested call
+    topPapersFetcher(
+      swNodetypes[0],
+      qWordsbySwType[swNodetypes[0]],
+      `<h2>${swNodetypes[0]}</h2>`,
+      function(enrichedHtml) {
+        topPapersFetcher(
+          swNodetypes[1],
+          qWordsbySwType[swNodetypes[1]],
+          enrichedHtml+`<p class=centered>---</p><h2>${swNodetypes[1]}</h2>`,
+          displayTopPapers
+        )
       }
-      else {
-        let jsonparams=JSON.stringify(TW.SystemState().selectionNids.map(function(nid){return TW.Nodes[nid].label}));
-        let bi=(TW.categories.length==2)?1:0;
-        jsonparams = jsonparams.split('&').join('__and__');
-        let querytable = gexfinfos[nodetypeLegacy]
-        let image='<img style="display:block; margin: 0px auto;" src="libs/img2/loader.gif"></img>';
-        $("#topPapers").show();
-        $("#topPapers").html(image);
-        $.ajax({
-            type: 'GET',
-            url: 'LOCALDB/info_div.php',
-            data: "type="+nodetypeLegacy+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+querytable,
-            //contentType: "application/json",
-            //dataType: 'json',
-            success : function(data){
-                console.log('LOCALDB/info_div.php?'+"type="+nodetypeLegacy+"&bi="+bi+"&query="+jsonparams+"&gexf="+thisgexf+"&index="+querytable);
-                $("#topPapers").html(data);
-            },
-            error: function(){
-                console.log('Page Not found: getTopPapers');
+    )
+  }
+}
+
+
+// consult search API or DB data of TW.conf.relatedDocsType
+// for a given "legacy" type ("semantic" or "social")
+
+// args:
+//  - using qWords array as a search engine query
+//  - and enriching the corresponding matches' HTML
+//  - cbNext is a partial function to handle the follow-up
+//    (just pass it resHTML, to continue enriching or display)
+//
+function topPapersFetcher(swType, qWords, priorHtml, cbNext){
+
+  if (isUndef(priorHtml))    priorHtml = ''
+  if (isUndef(cbNext))       cbNext = displayTopPapers
+
+  let stockErrMsg = `<p class="micromessage">
+    Your settings for relatedDocsType are set on ${TW.conf.relatedDocsType}
+    API but it couldn't be connected to.<br >Check if it is running and
+    accessible:<br><span class=code>${TW.conf.relatedDocsAPI}</span></p>`
+
+  let resHTML = ''
+
+  if (TW.conf.relatedDocsType == "twitter") {
+    let joinedQ = qWords.map(function(w){return'('+w+')'}).join(' AND ')
+    $.ajax({
+        type: 'GET',
+        url: TW.conf.relatedDocsAPI,
+        data: {'query': joinedQ},
+        contentType: "application/json",
+        success : function(data){
+            if (data.length) {
+              for (var k in data) {
+                let tweetJson = data[k]
+                resHTML += renderTweet(tweetJson)
+              }
             }
-        });
-      }
+            else {
+              resHTML += `<p class="micromessage centered">The query
+                         <span class=code>${joinedQ}</span> delivers
+                         no results on Twitter.</p>`
+            }
+            cbNext(priorHtml + resHTML)
+        },
+        error: function(){
+          console.log(`Not found: relatedDocs for ${TW.conf.relatedDocsAPI}`)
+          cbNext(priorHtml + stockErrMsg)
+        }
+    });
+  }
+  else if (TW.conf.relatedDocsType == "wosLocalDB") {
+    let gexfinfos = TW.fields[TW.File]
+    if (!gexfinfos || !gexfinfos[swType]) {
+      resHTML =
+        `<p>Your settings for relatedDocsType are set on a local wos database,
+            but your servermenu file does not provide any information about
+            the DB table to query for related documents
+            (on nodetype ${swType})</p>`
+            cbNext(priorHtml + resHTML)
+            return
+    }
+    else {
+      let joinedQ = JSON.stringify(qWords).split('&').join('__and__');
+      let querytable = gexfinfos[swType]
+      let urlParams = "type="+swType+"&query="+joinedQ+"&gexf="+TW.File+"&index="+querytable+"&n="+TW.conf.relatedDocsMax
+      $.ajax({
+          type: 'GET',
+          url: 'LOCALDB/info_div.php',
+          data: urlParams,
+          success : function(data){
+              // console.log('relatedDocs: LOCALDB/info_div.php?'+ urlParams);
+              resHTML = data
+              cbNext(priorHtml + resHTML)
+          },
+          error: function(){
+            console.log(`Not found: relatedDocs for ${TW.conf.relatedDocsAPI}`)
+            cbNext(priorHtml + stockErrMsg)
+          }
+      });
     }
   }
+}
+
+function displayTopPapers(enrichedHtml) {
+  $("#topPapers").html(enrichedHtml);
 }
 
 function newPopup(url) {

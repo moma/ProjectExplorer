@@ -405,8 +405,6 @@ function htmlProportionalLabels(elems , limit, selectableFlag) {
     return resHtml
 }
 
-//missing: getTopPapers for both node types
-//considering complete graphs case! <= maybe i should mv it
 function updateRelatedNodesPanel( sels , same, oppos ) {
 
     var namesDIV=''
@@ -448,8 +446,13 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
     $("#information").html(informationDIV);
     $("#tips").html("");
 
-    if(TW.categories.length==1) getTopPapers("semantic");
-    else getTopPapers(swActual(getActivetypesNames()[0]));
+    if (TW.conf.getRelatedDocs) {
+      $("#topPapers").show();
+      getTopPapers()
+    }
+    else {
+      $("#topPapers").hide()
+    }
 }
 
 //	just css
