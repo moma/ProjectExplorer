@@ -16,31 +16,28 @@
 			}
 		}
 	},
+  "data/ClimateChange": {
+        "dbname":"wos_climate-change_title_2014-2015.db",
+        "title":"ISITITLE",
+        "date":"ISIpubdate",
+        "abstract":"ISIABSTRACT",
+        "gexfs": {
+                "Maps_S_800.gexf": {
+                        "social": { "table":"ISIAUTHOR" , "textCol":"data","forkeyCol":"id"},
+                        "semantic": { "table":"ISItermsWhitelistV2Oct_5" , "textCol":"data","forkeyCol":"id"}
+                }
+        }
+  },
 	"data/comexjsons": {
 		"first" : "graph_example.json",
 		"gexfs": {
 			"graph_example.json": {},
-			"graph_example_attrs.json": {}
 		}
 	},
 	"data/test": {
 		"first" : "test_with_various_atts.gexf",
 		"gexfs": {
-			"test_with_various_atts.gexf": {},
-			"sire_oe.gexf": {}
-		}
-	},
-	"data/AXA": {
-		"first" : "RiskV2PageRank1000.gexf",
-		"gexfs": {
-			"RiskV2PageRank1000.gexf": {
-        		"social": { "table":"ISIAUTHOR" , "textCol":"data","forkeyCol":"id"},
-        		"semantic": { "table":"ISItermsAxa_2015" , "textCol":"data","forkeyCol":"id"}
-			},
-			"RiskV2PageRank5000.gexf": {
-				"social": { "table":"ISIAUTHOR" , "textCol":"data","forkeyCol":"id"},
-				"semantic": { "table":"ISItermsAxa_2015" , "textCol":"data","forkeyCol":"id"}
-			}
+			"test_with_various_atts.gexf": {}
 		}
 	}
 }
