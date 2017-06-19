@@ -31,7 +31,7 @@
 	"data/comexjsons": {
 		"first" : "graph_example.json",
 		"gexfs": {
-			"graph_example.json": {},
+			"graph_example.json": {}
 		}
 	},
 	"data/test": {
