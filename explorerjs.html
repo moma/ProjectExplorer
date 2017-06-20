@@ -1,414 +1,763 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <title>TinawebJS</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta charset="utf-8">
+  <meta charset="utf-8">
+  <meta name="language" content='EN'>
+  <meta name="language" content='FR'>
+  <meta name="keywords"  content="dataviz, graph, data exploration, sigmajs, tinawebjs">
+  <meta name="copyright" content="ISCPIF - UPS 3611 CNRS - 2017">
+  <meta name="revised"   content="2017-04-01/rloth">
+  <meta name="viewport"  content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-    <!-- ## fonts ## -->
-    <link type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
-    <!-- <link type="text/css" href="https://fonts.googleapis.com/css?family=Droid%20Sans" rel="stylesheet"> -->
+  <!--   ========================     -->
+  <title>TinaWebJS Graph Explorer</title>
+  <!--   ========================     -->
 
-    <link rel="stylesheet" href="static/explorerlibs/jquery/jquery-ui.css" media="screen">
-    <link rel="stylesheet" href="static/explorerlibs/bootstrap/css/bootstrap.css" media="screen">
-    <link rel="stylesheet" href="static/explorerlibs/css2/freshslider.css" media="screen">
-    <link rel="stylesheet" href="static/explorerlibs/css2/custom.css" media="screen">
-    <link rel="stylesheet" href="static/explorerlibs/css2/sidebar.css" media="screen">
-    <link rel="stylesheet" href="static/explorerlibs/css2/font.css" type="text/css">
-    <!-- <link rel="stylesheet" href="static/css/comex.css" type="text/css"> -->
+  <!-- Fonts -->
+
+  <!-- Ubuntu Condensed
+       Widely available font (possibly available without this cdn request, actually).
+       Also condensed is good for labels in crowded graphs
+  -->
+  <!-- <link href="https://fonts.googleapis.com/css?family=Ubuntu+Condensed" rel="stylesheet" type='text/css'> -->
+
+  <!-- Droid Sans -->
+  <link href="https://fonts.googleapis.com/css?family=Droid+Sans" rel="stylesheet">
+
+   <!-- Roboto
+        Good for tweets if Helvetica is not present
+   -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type='text/css'>
+
+  <!-- Crete Round
+       Original *and* informative :) -->
+  <!-- <link href='https://fonts.googleapis.com/css?family=Crete+Round:400,400italic&subset=latin-ext' rel='stylesheet' type='text/css'> -->
+
+  <!-- Lora
+      "book" (roman style) + nice heading -->
+  <!-- <link href="https://fonts.googleapis.com/css?family=Lora:700" rel="stylesheet" type='text/css'> -->
+
+  <!-- Aref Ruqaa
+       "book" (light ornamental) + arabic support -->
+  <!-- <link href="https://fonts.googleapis.com/css?family=Aref+Ruqaa" rel="stylesheet" type='text/css'> -->
+
+  <!-- Sahitya & Gurajada
+       "book" (beautiful quality roman) + devanagari support + telugu -->
+  <link href="https://fonts.googleapis.com/css?family=Gurajada" rel="stylesheet">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Sahitya" rel="stylesheet"> -->
+
+  <!-- Itim
+       cursive (refined and very readable but a bit too wide for us) + thai support -->
+  <!-- <link href="https://fonts.googleapis.com/css?family=Itim" rel="stylesheet" type='text/css'> -->
 
 
+  <!-- CSS -->
+  <link rel="stylesheet" href="static/explorerlibs/css2/twjs.css">
+  <link rel="stylesheet" href="static/explorerlibs/css2/selection-panels.css">
+  <link rel="stylesheet" href="static/explorerlibs/jquery-3/jquery-ui-1.12.1/jquery-ui.min.css" media="screen">
+  <link rel="stylesheet" href="static/explorerlibs/bootstrap-3/css/bootstrap.min.css" media="screen">
+  <!-- NB bs2/3 not used for main grid (graph + bars) but inside the bars -->
+  <link rel="stylesheet" href="static/explorerlibs/css2/freshslider.css" media="screen">
+
+  <link type="text/css" href="static/twitterextapilibs/tweet.light.ltr.css" rel="stylesheet"/>
+  <link type="text/css" href="static/twitterextapilibs/custom.css" rel="stylesheet"/>
+  <link type="text/css" href="static/explorerlibs/css2/user_form.css" rel="stylesheet"/>
+
+  <!-- JS -->
+  <!-- <script src="script.js"></script> -->
 </head>
 
-  <body>
-  	<!-- this is the topbar -->
-    <div id="fixedtop" class="navbar navbar-default navbar-fixed-top">
-      <div class="container">
 
-        <div class="navbar-header">
-          <a href="/" class="navbar-brand"> <img style="width:20px;" src="static/explorerlibs/img2/home.png"> ComexJS</a>
-          <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-        </div>
+<body>
+  <div id="topbar" class="navbar navbar-default">
+    <div class="container">
 
-        <div class="navbar-collapse collapse" id="navbar-main">
+      <div class="navbar-collapse collapse" id="navbar-main">
+        <ul class="nav navbar-nav navbar-left">
+          <li class="navbar-middle">
+            <img style="width:20px" src="static/explorerlibs/img2/home.png">
+          </li>
+          <li style="margin-left:10px;">
+            <a href="#" class="navbar-middle navbar-brand">
+              <!-- will be replaced by TW.conf.branding -->
+              <span id="twbrand">TinaWebJS</span>
+            </a>
+          </li>
+
+          <li class="disabled">
+            <a class="navbar-middle">
+              <span class="label label-default label-lg">MAP: <span id="maplabel"></span></span>
+            </a>
+          </li>
+
+          <li>
+            <a class="navbar-middle">
+              <span id="network" ></span>
+            </a>
+          </li>
+        </ul>
+
+
+        <ul class="nav navbar-nav">
+          <li>
+            <div id="log"></div>
+          </li>
+
+          <li>
+            <a>
+              <div id="gexfs"></div>
+            </a>
+          </li>
+        </ul>
+
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="http://www.cnrs.fr" target="_blank"
+                class="navbar-higher"
+                title="CNRS">
+                <img src="static/explorerlibs/img2/logo_cnrs_transparent.gif" height="23"></a></li>
+          <li><a href="http://iscpif.fr" target="_blank"
+                class="navbar-higher"
+                title="ISC-PIF">
+                <img src="static/explorerlibs/img2/logo_ISCPIF_small.svg"height="23"></a></li>
+
+        </ul>
+
+      </div><!--navbar-main-->
+    </div><!--container-->
+  </div><!--navbar-fixed-top-->
+
+
+  <!-- ex-defaultop -->
+  <div id="toolbar" class="navbar navbar-default">
+    <div id="defaultop" class="container">
+
+      <div class="navbar-header">
+        <button id="toolbar-open" type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#left" aria-expanded="false" aria-controls="navbar">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+
+        <div id="left" class="navbar-collapse collapse">
+
           <ul class="nav navbar-nav">
 
-            <li class="disabled">
-		          <a>
-                <span class="label label-default">NETWORK: </span>
-              </a>
+            <!--
+            <li>
+               <a>
+                <select id="aselector" onchange="console.log('salut monde')" class="selectpicker"  data-style="btn btn-success btn-sm"  data-width="auto">
+                  <option value="Document" selected>Scholars</option>
+                  <option value="NGram">Keywords</option>
+                </select>
+               </a>
+            </li>
+            -->
+
+            <li><a href="http://www.politoscope.org"
+                  class="navbar-higher"
+                  title="Politoscope">
+                  <img src="static/explorerlibs/img2/politoscope_logo.jpg"
+                       style="width:60px; position:absolute; top:-60px; left:-75px; z-index:5; overflow:visible; background-color:white">
+            </a></li>
+
+            <li>
+               <a>
+                <button type="button" id="changetype" class="btn btn-success btn-sm">Change<br>Type</button>
+               </a>
             </li>
 
             <li>
-              <a>
-                <span id="network" class="label label-success"></span>
-              </a>
+               <a>
+                <button type="button" id="changelevel" class="btn btn-primary btn-sm" title="sélectionnez des sommets pour changer de niveau" disabled>Change<br>Level</button>
+               </a>
             </li>
 
+            <!-- <li>
+               <a>
+                <button type="button" id="doTest" class="btn btn-sm">Run Test</button>
+               </a>
+            </li> -->
 
-            <li>
-            .
-            <div id="log"></div>
+            <li id="areacircle-size"><a>
+              Selector size<br>
+              <div id="unranged-value" class="settingslider"></div>
+            </a></li>
+
+            <li><a>
+              Label size<br>
+              <div id="sliderlabelsize" class="settingslider"></div>
+            </a></li>
+
+             <li id="setcolorsMenu" class="dropdown">
+               <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+               Set Colors <img title="Set Colors" src="static/explorerlibs/img2/colors.png" width="20px"><span class="caret"></span>
+               </a>
+                <ul id="colorgraph-menu" class="dropdown-menu">
+                </ul>
+             </a></li>
+
+            <li class="weight-selectors for-nodecategory-0">
+              <!-- Create a subgraph over nodes from TW.categories[0] (terms or def nodes)-->
+              <table>
+                <tr>
+                  <td class="slider-legend">
+                    Nodes
+                  </td>
+                  <td id="slidercat0nodesweight" class="settingslider">
+                  </td>
+                </tr>
+                <tr>
+                  <td class="slider-legend">
+                    Edges
+                  </td>
+                  <td id="slidercat0edgesweight" class="settingslider">
+                  </td>
+                </tr>
+              </table>
+            </li>
+            <li class="weight-selectors for-nodecategory-1">
+              <!-- Create a subgraph over nodes from TW.categories[1] (docs or people)-->
+              <table>
+                <tr class="weight-selector">
+                  <td class="slider-legend">
+                    Nodes
+                  </td>
+                  <td id="slidercat1nodesweight" class="settingslider">
+                  </td>
+                </tr>
+                <tr class="weight-selector">
+                  <td class="slider-legend">
+                    Edges
+                  </td>
+                  <td id="slidercat1edgesweight" class="settingslider">
+                  </td>
+                </tr>
+              </table>
             </li>
 
           </ul>
 
-          <ul class="nav navbar-nav navbar-right">
-            <li><a href="http://www.cnrs.fr" target="_blank">CNRS</a></li>
-            <li><a href="http://iscpif.fr" target="_blank">ISC-PIF</a></li>
+
+
+          <ul id="searchnav" class='nav navbar-nav'>
+            <li class="navbar-lower">
+              <div id="search_input_group" class="input-group input-group-sm my-nav-input-group">
+                <span class="input-group-btn crowdsourcingModule">
+                  <button id="savesuggestion"
+                          disabled
+                          title="Save this topic as a new suggestion"
+                          class="btn btn-default"
+                          type="button">
+                    <span class="glyphicon glyphicon-save"
+                           id="saveicon">
+                    </span>
+                  </button>
+                </span>
+
+                <span class="input-group-btn">
+                  <button id="searchbutton"
+                          title="Search the topic in the map"
+                          class="btn btn-primary"
+                          type="button">
+                    <span class="glyphicon glyphicon-search">
+                    </span>
+                  </button>
+                </span>
+
+                <!-- ########## THE SEARCH BAR ########## -->
+
+                <input id="searchinput"
+                        type="text"
+                        class="form-control"
+                        placeholder="Select node(s)" />
+
+                <!-- strSearchBar will replace placeholder value -->
+
+                <!-- #################################### -->
+
+              </div>
+            </li>
+
+            <!-- messages below the search bar -->
+            <!-- say thanks for the suggestion, etc. -->
+            <li id="crowdsourcing_answer" class="nav crowdsourcingModule navbar-lower"></li>
+
+            <!-- checkbox -->
+            <li class="navbar-lower">
+              <input id="checkboxdiv" onclick="alertCheckBox(this);"
+                    title="Add next search results to current selection"
+                    class="nav btn btn-info"
+                    type="checkbox">
+              <span style="position: relative; top: 4px;">Add to selection</span>
+            </li>
+
           </ul>
 
-        </div><!--navbar-main-->
-      </div><!--container-->
-    </div><!--navbar-fixed-top-->
 
-    <!-- this is the tweakbar -->
-    <div id="defaultop" class="navbar navbar-default">
-        <div class="navbar-collapse collapse navbar-responsive-collapse">
-        	<div id="left" style="margin:0em 2em;">
-                  <ul class="nav navbar-nav">
-                      <!--
-
-                      <li>
-                         <a>
-                          <select id="aselector" onchange="console.log('salut monde')" class="selectpicker"  data-style="btn btn-success btn-sm"  data-width="auto">
-                            <option value="Document" selected>Scholars</option>
-                            <option value="NGram">Keywords</option>
-                          </select>
-                         </a>
-                      </li> -->
-
-                      <li>
-                         <a>
-                         	<button type="button" id="changetype" class="btn btn-success btn-sm">Change Type</button>
-                         </a>
-                      </li>
+        </div><!-- /div#left -->
 
 
-                      <li>
-                         <a>
-                         	<button type="button" id="changelevel" class="btn btn-info btn-sm" disabled>Change Level</button>
-                         </a>
-                      </li>
+    </div>  <!-- /#defaultop -->
+  </div> <!-- /toolbar -->
 
 
-                       <li>
-                         <a>
-                          <div style="margin:0em 2em;" id="unranged-value"></div>
-                          <label style="margin:0em 2em;" for="unranged-value">selector size</label>
-                         </a>
-                       </li>
+  </div>
+  <div id="sigma-contnr">
+    <div id="graph-panels">
 
-                      <!--
-                      <li>
-                         <a>
-                          <button type="button" onclick="partialGraph.stopForceAtlas2();" class="btn btn-sm">wu</button>
-                         </a>
-                      </li>
-                      -->
+      <ul id="ctlzoom">
 
-
-                  </ul>
-
-
-                  <ul id="category-A" class="nav navbar-nav navbar-right">
-                        <li>
-                            <ul style="list-style-type: none; margin:0em .7em;">
-                                <li><div id="sliderANodeWeight"></div></li>
-                                <li><div id="sliderAEdgeWeight"></div></li>
-                                <li><div id="sliderANodeSize"></div></li>
-                            </ul>
-                        </li>
-                  </ul>
-
-                  <ul id="filterslegend" class="nav navbar-nav navbar-right">
-                        <li>
-                            <ul style="list-style-type: none;">
-                                <li>Nodes</li>
-                                <li>Edges</li>
-                                <li>Size</li>
-                            </ul>
-                        </li>
-                  </ul>
-
-                  <ul id="category-B" class="nav navbar-nav navbar-right">
-                        <li>
-                            <ul style="list-style-type: none; margin:0em .7em;">
-                                <li><div id="sliderBNodeWeight"></div></li>
-                                <li><div id="sliderBEdgeWeight"></div></li>
-                                <li><div id="sliderBNodeSize"></div></li>
-                            </ul>
-                        </li>
-                  </ul>
-
-                  <ul class="nav navbar-nav navbar-right">
-                     <li><a>
-                          <input type="checkbox" id="checkboxdiv" onclick="alertCheckBox(this);"> Add
-                     </a></li>
-                  </ul>
-                  <ul class="nav navbar-nav navbar-right">
-                     <li><a>
-                              <input id="searchinput"  autocomplete="off" class="form-control input-sm col-lg-8" placeholder="Search" type="text">
-                     </a></li>
-                  </ul>
-
-                  <ul id="colorGraph" class="nav navbar-nav navbar-right">
-                     <li class="dropdown">
-                     	<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                              <img title="Set Colors" src="static/explorerlibs/img2/colors.png" width="20px"><b class="caret"></b>
-                     	</a>
-      				        <ul class="dropdown-menu">
-      				          <li><a href="#" onclick='clustersBy("country")'>By Country</a></li>
-      				          <li><a href="#" onclick='clustersBy("acronym")'>By Acronym</a></li>
-      				          <li><a href="#" onclick='clustersBy("default")'>By Default</a></li>
-      				          <li class="divider"></li>
-      				          <li><a href="#"> <span class="glyphicon glyphicon-repeat"></span> <strike>Properties</strike></a></li>
-      				        </ul>
-                     </li>
-                  </ul>
+            <!-- <div class="content-header">
+                    <button id="menu-toggle">X</button>
+            </div> -->
+               <li>
+                  <div id="unfold">
+                      <a href="#" id="aUnfold" class="rightarrow"></a>
+                  </div>
+              </li>
+              <!--
+               <li>
+                  <a href="#" id="geomapicon" onclick="$('#geomapmodal').modal('show'); callGeomapADEME();">
+                    <img title="World Map Distribution" width="34px" src="static/explorerlibs/img2/world.png"></img>
+                  </a>
+              </li>
+              -->
 
 
+               <li>
+                  <a href="#" id="snapicon" onclick="saveGraphIMG();" class="zoombarbuttons">
+                    <img title="Take a photo!" style="width:30px" src="static/explorerlibs/img2/camera.png"></img>
+                  </a>
+              </li>
 
+               <li>
+                  <a href="#savemodal" id="saveAs" class="zoombarbuttons" data-toggle="modal">
+                    <img style="width:28px" title="Save As..." src="static/explorerlibs/img2/save.png"></img>
+                  </a>
+              </li>
+
+              <li>
+                  <a href="#" id="zoomPlusButton" title="Zoom In"> </a>
+              </li>
+
+              <li id="zoomSliderzone">
+                  <div id="zoomSlider"></div>
+              </li>
+
+              <li>
+                  <a href="#" id="zoomMinusButton" title="Zoom Out"> </a>
+              </li>
+
+
+              <li>
+                  <a href="#" id="lensButton" class="zoombarbuttons"
+                     title="Center View">
+                    <img src="static/explorerlibs/img2/target.png">
+                  </a>
+              </li>
+
+              <li>
+                  <a href="#" id="layoutButton" class="zoombarbuttons"
+                     title="Force Atlas Layout">
+                    <img src="static/explorerlibs/img2/edges.png">
+                  </a>
+              </li>
+
+              <li>
+                  <a href="#" id="noverlapButton" class="zoombarbuttons"
+                     title="Disperse Overlapping Nodes">
+                    <img src="static/explorerlibs/img2/disperse.png" style="width:32px">
+                  </a>
+              </li>
+
+
+              <li>
+                  <a href="#facet-options" id="facets" class="zoombarbuttons" data-toggle="modal" data-target="#facet-options">
+                    <img style="width:32px" title="Facets coloring options" src="static/explorerlibs/img2/facet_options.png"></img>
+                  </a>
+              </li>
+
+              <li>
+                <div class="onoffswitch">
+                  <input type="checkbox" name="edges-switch" class="onoffswitch-checkbox" id="edges-switch" checked>
+                  <label class="onoffswitch-label" for="edges-switch">
+                    <span id="edges-switch-inner-label" class="onoffswitch-inner"></span>
+                    <span class="onoffswitch-switch"></span>
+                  </label>
                 </div>
+              </li>
 
-                  <!--
-                  <ul class="nav navbar-nav navbar-right">
-                    <li><a href="#">Link</a></li>
-                    <li class="dropdown">
-                      <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
-                      <ul class="dropdown-menu">
-                        <li><a href="#">Action</a></li>
-                        <li><a href="#">Another action</a></li>
-                        <li><a href="#">Something else here</a></li>
-                        <li class="divider"></li>
-                        <li><a href="#">Separated link</a></li>
-                      </ul>
-                    </li>
-                  </ul>
-                  -->
+      </ul>
 
-        </div><!-- /.nav-collapse -->
-    </div><!-- /.navbar -->
+      <!-- inline *after* sigma-contnr for better overlay positioning -->
+      <!-- Sidebar top left -->
+      <div id="lefttopbox">
 
-
-    <div id="wrapper">
-
-
-	    <div id="zonecentre">
-
-
-	        <!-- Page content -->
-	        <div id="sigma-example"></div>
-
-          <div style="visibility: hidden;" id="sigma-othergraph"></div>
-
-          <div id="semLoader" style="position:absolute; top:50%; left:40%; width:80px; visibility: hidden;">
-            <img src="static/explorerlibs/img2/loading-bar.gif">
-          </div>
-
-	        <ul id="ctlzoom">
-
-		            <!-- <div class="content-header">
-		                    <button id="menu-toggle">X</button>
-		            </div> -->
-					         <li>
-	                    <div id="unfold">
-	                        <a href="#" id="aUnfold" class="rightarrow"></a>
-	                    </div>
-	                </li>
-
-                   <!-- <li>
-                      <a href="#" id="geomapicon" onclick="$('#geomapmodal').modal('show'); callGeomap();">
-                        <img title="World Map Distribution" width="34px" src="static/explorerlibs/img2/world.png">
-                      </a>
-                  </li> -->
-
-
-                   <li>
-                      <a href="#" id="snapicon" onclick="saveGraphIMG();" >
-                        <img title="Take a photo!" width="34px" src="static/explorerlibs/img2/camera.png">
-                      </a>
-                  </li>
-
-                   <li>
-                      <a href="#savemodal" id="saveAs"
-                         data-toggle="modal">
-                        <img style="width:30px" title="Save As..." src="static/explorerlibs/img2/save.png">
-                      </a>
-                  </li>
-
-	                <li>
-	                    <a href="#" id="zoomPlusButton" title="S'approcher"> </a>
-	                </li>
-
-	                <li id="zoomSliderzone">
-	                    <div id="zoomSlider"></div>
-	                </li>
-
-	                <li>
-	                    <a href="#" id="zoomMinusButton" title="S'éloigner"> </a>
-	                </li>
-
-
-	                <li>
-	                    <a href="#" id="lensButton"> </a>
-	                </li>
-
-	                <li>
-	                    <a href="#" id="edgesButton"> </a>
-	                </li>
-	        </ul>
-	    </div>
-
-
-	    <!-- Sidebar -->
-	    <div id="leftcolumn">
-        <div id="tips"></div>
-        <div id="names"></div>
-
-        <br>
-        <div id="tab-container" class='tab-container' style="display: none;">
-
-           <ul class='etabs'>
-             <li id="taboppos" class='tab'><a href="#tabs1">Opposite-Neighbors</a></li>
-             <li id="tabneigh" class='tab'><a href="#tabs2">Neighbors</a></li>
-           </ul>
-
-           <div class='panel-container'>
-              <div id="tabs1">
-                <div id="opossiteNodes"></div>
-              </div>
-              <div id="tabs2">
-                <div id="sameNodes"></div>
-              </div>
-           </div>
-
+        <!-- selected nodes -->
+        <div id="tw-current-selection">
+            <button id="unselectbutton" class="btn-xs"
+                onclick='cancelSelection(false);'
+                title="Unselect these terms">
+              <span class="glyphicon glyphicon-remove" alt="X"></span>
+            </button>
+            <div id="names"></div>
         </div>
 
+        <!-- histogram of selected nodes -->
+        <div class="histogramModule">
+          <!-- filled by query (user search value) to wos api -->
+          <div id="search_histogram" class="over-panels"></div>
+        </div><!-- /row -->
+
+        <!-- histogram of selected nodes, variant ; TODO unify -->
+        <div class="histogramDailyVariantModule">
+          <!-- filled by query (user search value) to wos api -->
+          <div id="search_histogram2" class="over-panels"></div>
+        </div><!-- /row -->
+      </div>
 
 
-        <!-- <div id="opossiteNodes"></div> -->
-        <!-- <div id="topPapers"></div> -->
-        <div id="information"></div>
-	    </div>
+      <!-- class="my-legend" (absolute position bottom left) -->
+      <div id="legend-for-clusters" class="over-panels"></div>
 
     </div>
+  </div>
+  <div id="sidebar">
+    <div id="tab-container" class='tab-container'>
 
-<div id="savemodal" class="modal fade" tabindex="-1" role="dialog"  aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-        <h4 class="modal-title">Exporting GEXF file</h4>
+       <ul class='etabs'>
+         <!-- for related elements from the combined graph (eg soc => sem) -->
+         <li id="taboppos" class='tab'><a href="#tabs1">Opposite-Neighbors</a></li>
+         <!-- for neighbors within this graph -->
+         <li id="tabneigh" class='tab'><a href="#tabs2">Related</a></li>
+       </ul>
+
+       <div class='panel-container'>
+          <div id="tabs1">
+            <div id="oppositeNodes"></div>
+          </div>
+          <div id="tabs2">
+            <div id="sameNodes"></div>
+          </div>
+       </div>
+    </div>
+
+    <div id="topPapers">
+    </div>
+
+    <div id="localInput"></div>
+
+    <div id="information"></div>
+
+    <!--
+      bottom right column as panels
+
+      open/close panel from: jsfiddle.net/KyleMit/kcpma
+    -->
+    <div class="panel-group" id="accordion">
+
+
+      <div class="panel panel-default" id="video_explanation">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-target="#le_tutorial" href="#le_tutorial">
+              <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+              &nbsp;Tutorial video
+            </a>
+          </h4>
+        </div>
+
+        <!-- TODO: outcloud the video for better stream+player -->
+        <!-- <div class="panel-collapse collapse" id="le_tutorial">
+          <video width="100%"
+            src="video/AXA2015.mp4" controls=""  frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></video>
+        </div> -->
       </div>
-      <div class="modal-body form-horizontal">
-          What do you want to save?:
-          <div class="form-group">
-            <label class="col-lg-2 control-label"> </label>
-            <div class="col-lg-10">
-              <div class="radio">
-                <label>
-                  <input type="radio" name="optionsRadios" id="fullgraph" value="option1" checked="true">
-                  Full Graph
-                </label>
-              </div>
-              <div class="radio">
-                <label>
-                  <input type="radio" name="optionsRadios" id="visgraph" value="option2">
-                  Visible Graph
-                </label>
+
+      <div class="panel panel-default" id="tips_panel">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-target="#tips" href="#tips">
+              <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+              &nbsp;Tips
+            </a>
+          </h4>
+        </div>
+
+        <div class="panel-collapse collapse in" id="tips"></div>
+      </div>
+
+      <div class="panel panel-default" id="credits_panel">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-target="#credits" href="#credits">
+              <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+              &nbsp;Credits
+            </a>
+          </h4>
+        </div>
+
+        <div class="panel-collapse collapse" id="credits">
+          <a href="https://bigdata.iscpif.fr/" target="_blank">
+              <img src="https://bigdata.iscpif.fr/images/logos/BIGDATA-Logo-PoweredBy-light.jpg"
+              alt="Powered by Big Data at ISCPIF"
+              style="width:85%; ">
+          </a>
+          <a href="https://github.com/moma" target="_blank">
+              <img src="static/explorerlibs/img2/moma.png"
+              alt="Sciencemapping"
+              style="width:85%; ">
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <br><br>
+  </div>
+  <div id="hidden-elements">
+    <div id="savemodal" class="modal fade">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h4 class="modal-title">Exporting GEXF file</h4>
+          </div>
+
+          <div class="modal-body form-horizontal">
+            What do you want to save?:
+            <div class="form-group">
+              <label class="col-lg-2 control-label"> </label>
+              <div class="col-lg-10">
+                <div class="radio">
+                  <label>
+                    <input type="radio" name="optionsRadios" id="fullgraph" value="option1" checked="true">
+                    Full Graph
+                  </label>
+                </div>
+                <div class="radio">
+                  <label>
+                    <input type="radio" name="optionsRadios" id="visgraph" value="option2">
+                    Visible Graph
+                  </label>
+                </div>
               </div>
             </div>
           </div>
+
+          <div class="modal-body form-horizontal">
+            Which attributes do you want to keep?:
+            <div class="form-group">
+              <label class="col-lg-2 control-label"> </label>
+              <div class="col-lg-10">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="optionsRadios" id="check_size" value="option1">
+                    Size
+                  </label>
+                </div>
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="optionsRadios" id="check_color" value="option2">
+                    Color
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button id="closesavemodal" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" onclick="saveGraph();">Save File</button>
+          </div>
+
+        </div>
       </div>
-      <div class="modal-body form-horizontal">
-        Which attributes do you want to keep?:
-        <div class="form-group">
-          <label class="col-lg-2 control-label"> </label>
-          <div class="col-lg-10">
-            <div class="checkbox">
-              <label>
-                <input type="checkbox" name="optionsRadios" id="check_size" value="option1">
-                Size
-              </label>
+    </div>
+
+
+    <div id="modalloader" class="modal fade">
+        <div id="loader" class="loader">
+            <img src="static/explorerlibs/img2/loader.gif"></img>
+        </div>
+        <div id="closeloader" data-dismiss="modal"></div>
+    </div>
+
+
+    <div id="facet-options" class="modal fade">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h4 class="modal-title">Facet options</h4>
+          </div>
+          <div class="modal-body">
+            <div class="uform-white">
+              <form id="facet_options_form" onsubmit="console.info('submitted')">
+                 <h3 class="formcat">Edit attribute:</h3><br/>
+
+                   <div class="question">
+                     <div class="input-group">
+                       <label for="choose-attr" class="smlabel input-group-addon">Attribute</label>
+                       <select id="choose-attr" name="choose-attr"
+                               class="custom-select form-control">
+                               <option selected value="0"></option>
+                               <!-- filled by fillAttrsInForm(.) -->
+                       </select>
+                     </div>
+                   </div>
+
+                   <div class="question">
+                     <div class="input-group">
+                       <label for="attr-col" class="smlabel input-group-addon">Coloring function</label>
+                       <select id="attr-col" name="attr-col"
+                               class="custom-select form-control"
+                                onchange="colChangedHandler()">
+                           <option selected value="0"></option>
+                           <option value="cluster">cluster</option>
+                           <option value="gradient">gradient</option>
+                           <option value="heatmap">heatmap</option>
+                       </select>
+                     </div>
+                   </div>
+
+
+                   <!-- this titling functionality is like a head -n inside each class -->
+                   <div class="question conditional-q"  id="choose-titling-div">
+                     <p class="legend">Please choose a size/weight metric used to rank the "title-candidates" inside each cluster.</p>
+
+                     <div class="input-group">
+                       <label for="attr-titling-metric" class="smlabel input-group-addon">Titling metric</label>
+                       <select id="attr-titling-metric" name="attr-titling-metric"
+                               class="custom-select form-control">
+                               <option selected value="size">Current size</option>
+                               <!-- other attrs filled by fillAttrsInForm(., 'num') -->
+                       </select>
+                     </div>
+                     <div class="input-group" style="margin-top:.5em;">
+                       <label for="attr-titling-n" class="smlabel input-group-addon">Number of terms</label>
+                       <input id="attr-titling-n" name="attr-titling-n" maxlength="2"
+                              type="text" class="form-control autocomp" placeholder="number of node labels to pick as title (1-10)"
+                              onchange="let castint = parseInt(this.value) ; if (castint != this.value || castint < 1) {this.value = 1} else if(castint > 10) {this.value = 10}"
+                              >
+                      </div>
+                   </div>
+
+                   <div class="question">
+                     <div class="input-group">
+                       <label for="attr-binmode" class="smlabel input-group-addon">Binning Mode</label>
+                       <select id="attr-binmode" name="attr-binmode"
+                               class="custom-select form-control" onchange="conditiOpen('attr-nbins-div', 'attr-binmode',['samerange', 'samepop'])">
+                           <option selected value="0"></option>
+                           <option value="off">No binning</option>
+                           <option value="samerange">Same range between ticks</option>
+                           <option value="samepop">Same population in each bin</option>
+                       </select>
+                     </div>
+                   </div>
+
+                   <div class="question conditional-q" id="attr-nbins-div">
+                     <div class="input-group">
+                       <label for="attr-nbins" class="smlabel input-group-addon">Number of bins</label>
+                       <input id="attr-nbins" name="attr-nbins" maxlength="2"
+                              type="text" class="form-control autocomp" placeholder="number of bins"
+                              onchange="let castint = parseInt(this.value) ; if (castint != this.value || castint < 2) {this.value = 2} else if(castint > 24) {this.value = 24}"
+                              >
+                      </div>
+                      <p class="legend">Please input an integer value between 2 and 24.</p>
+                   </div>
+
+                   <div class="question input-group">
+                     <label for="attr-translation" class="smlabel input-group-addon"> Title </label>
+                     <input id="attr-translation" name="attr-translation" maxlength="70"
+                            type="text" class="form-control autocomp" placeholder="a text for the color menu"
+                            >
+                   </div>
+
+              </form>
+
             </div>
-            <div class="checkbox">
-              <label>
-                <input type="checkbox" name="optionsRadios" id="check_color" value="option2">
-                Color
-              </label>
-            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-default" data-dismiss="modal">
+              Cancel
+            </button>
+            <button class="btn btn-primary"
+              type=button onclick="newAttrConfAndColor()" data-dismiss="modal">
+              Ok
+            </button>
           </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" onclick="saveGraph();">Save File</button>
-      </div>
     </div>
+
+
+    <div id="geomapmodal" class="modal fade">
+
+        <!-- <div class="modal-content"> -->
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h4 class="modal-title">Geomap</h4>
+          </div>
+          <div class="modal-body">
+            <div class="geomapCont"></div>
+          </div>
+        <!-- </div> -->
+          <!-- <div class="geomapCont"></div> -->
+          <div id="closegeomap" data-dismiss="modal"></div>
+    </div>
+
+    <div id="heatgraph"></div>
+
   </div>
-</div>
 
-<div id="modalloader" class="modal fade in" tabindex="-1" role="dialog" aria-hidden="false">
-  <div class="modal-dialog" style="padding-top:15em;">
-      <img src="static/explorerlibs/img2/loader.gif">
-  </div>
-</div>
+  <!--         SCRIPTS        -->
+  <script src="static/explorerlibs/jquery-3/jquery-3.2.0.min.js" type="text/javascript"></script>
+  <script src="static/explorerlibs/jquery-3/jquery-ui-1.12.1/jquery-ui.min.js" type="text/javascript"></script>
+  <script src="static/explorerlibs/jquery-3/jquery.easytabs.js" type="text/javascript"></script>
+  <script src="static/explorerlibs/freshslider.1.0.js" type="text/javascript" ></script>
+  <script src="static/explorerlibs/readmore.js" type="text/javascript"></script>
 
-<div id="geomapmodal" class="modal fade">
+  <script src="static/explorerlibs/bootstrap-native/bootstrap-native.min.js"></script>
 
-    <!-- <div class="modal-content"> -->
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h4 class="modal-title">Geomap</h4>
-      </div>
-      <div class="modal-body">
-        <div class="geomapCont"></div>
-      </div>
-    <!-- </div> -->
-  <!-- <div class="geomapCont"></div> -->
-      <div id="closegeomap" data-dismiss="modal"></div>
-</div>
+  <script src="static/tinawebJS/globalUtils.js" type="text/javascript"></script>
 
-    <script src="static/js/jquery/jquery-3.1.1.min.js" type="text/javascript"></script>
-    <script src="static/js/jquery-ui-1.12.1/jquery-ui.min.js" type="text/javascript"></script>
-
-    <script src="static/explorerlibs/jquery/jquery.ba-dotimeout.min.js" type="text/javascript"></script>
-    <script src="static/explorerlibs/jquery/jquery.mousewheel.min.js" type="text/javascript"></script>
-
-    <script type="text/javascript" src="static/explorerlibs/freshslider.1.0.js"></script>
-    <script src="static/explorerlibs/readmore.js" type="text/javascript"></script>
-
-    <!-- version 3.2 -->
-    <script src="static/explorerlibs/jquery/jquery.easytabs.min.js" type="text/javascript"></script>
-
-    <script src="static/js/bootstrap-native-1.1.min.js"></script>
+  <!-- new sigma 1.2 imports -->
+  <script src="static/tinawebJS/sigma_v1.2/sigma.noIndexes.js" type="text/javascript" language="javascript"></script>
+  <!--
+  NB: our sigma.noIndexes.js has exactly the same functions & varnames as
+      the v1.2 stock sigma.(min).js but with a much lighter RAM footprint!
+      cf. https://github.com/jacomyal/sigma.js/issues/340
+  -->
+  <script src="static/tinawebJS/sigma_v1.2/plugins/sigma.plugins.animate/sigma.plugins.animate.js"></script>
+  <script src="static/tinawebJS/sigma_v1.2/plugins/sigma.layout.noverlap/sigma.layout.noverlap.js"></script>
+  <script src="static/tinawebJS/sigma_v1.2/plugins/sigma.layout.forceAtlas2/supervisor.js"></script>
+  <script src="static/tinawebJS/sigma_v1.2/plugins/sigma.layout.forceAtlas2/worker.js"></script>
+  <script src="static/tinawebJS/sigma_v1.2/plugins/sigma.renderers.snapshot/sigma.renderers.snapshot.js"></script>
+  <script src="static/tinawebJS/sigma_v1.2/plugins/sigma.plugins.dragNodes/sigma.plugins.dragNodes.js"></script>
 
 
-    <script src="static/tinawebJS/globalUtils.js" type="text/javascript"></script>
+  <!-- new sigma (1.0c => 1.2) compatibility imports -->
+  <script src="static/tinawebJS/sigma_tools.js"></script>
 
-
-    <script src="static/tinawebJS/sigma.js" type="text/javascript"></script>
-    <script src="static/tinawebJS/sigma.forceatlas2.js" type="text/javascript"></script>
-    <script src="static/tinawebJS/settings_explorerjs.js" type="text/javascript"></script>
-    <script src="static/tinawebJS/sigma.parseCustom.js" type="text/javascript"></script>
-    <script src="static/tinawebJS/extras_explorerjs.js" type="text/javascript"></script>
-    <script src="static/tinawebJS/sigmaUtils.js" type="text/javascript"></script>
-    <script src="static/tinawebJS/methods.js" type="text/javascript"></script>
-    <script src="static/tinawebJS/minimap.js" type="text/javascript"></script>
-    <script src="static/tinawebJS/enviroment.js" type="text/javascript"></script>
-    <script src="static/tinawebJS/asyncFA2.js" type="text/javascript"></script>
-    <script src="static/tinawebJS/DataScanner.js" type="text/javascript"></script>
-    <script src="static/tinawebJS/main.js" type="text/javascript"></script>
-
-  <script type="text/javascript">
-      $('#tab-container').easytabs({updateHash:false});
-  </script>
+  <!-- classic tinawebJS imports -->
+  <script type="text/javascript" src="static/tinawebJS/jLouvain.js"></script>
+  <script src="static/tinawebJS/settings_explorerjs.js" type="text/javascript" language="javascript"></script>
+  <script src="static/tinawebJS/enviroment.js" type="text/javascript" language="javascript"></script>
+  <script src="static/tinawebJS/sigma.parseCustom.js" type="text/javascript" language="javascript"></script>
+  <script src="static/tinawebJS/sigmaUtils.js" type="text/javascript" language="javascript"></script>
+  <script src="static/tinawebJS/extras_explorerjs.js" type="text/javascript" language="javascript"></script>
+  <script src="static/tinawebJS/methods.js" type="text/javascript" language="javascript"></script>
+  <script src="static/tinawebJS/Tinaweb.js" type="text/javascript" language="javascript"></script>
+  <script src="static/tinawebJS/main.js" type="text/javascript" language="javascript"></script>
+  <script src="static/twitterextapilibs/widgets.js" type="text/javascript" language="javascript"></script>
+  <!--        /SCRIPTS        -->
 </body>
+
 </html>

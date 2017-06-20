@@ -1,6 +1,7 @@
 .fsslider {
 position: relative;
-min-width: 100px;
+/* min-width: 100px; */
+min-width: 75px;
 height: 8px;
 display: inline-block;
 width: 100%;
@@ -15,9 +16,8 @@ color: #000;
 .fsslider {
 text-align: center;
 line-height: 8px;
-font-size: 8px;
+font-size: 10px;
 font-family: "Lucida Grande", "Trebuchet MS";
-padding: 13px 0 0 0;
 }
 .fsslider > * {
 position: absolute;

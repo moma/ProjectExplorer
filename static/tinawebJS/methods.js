@@ -1,487 +1,458 @@
+'use strict';
 
 
-function cancelSelection (fromTagCloud) {
-    pr("\t***in cancelSelection");
-    highlightSelectedNodes(false); //Unselect the selected ones :D
-    opossites = [];
-    selections = [];
-    //selections.length = 0;
-    selections.splice(0, selections.length);
-    partialGraph.refresh();
+// @args is an object with 4 possible properties that define the new state
+//     ex: new selections:  {sels: [268]}
+//     ex: new activetypes: {activetypes:[false, true]}
+//     ex: new level:       {level:false}
+TW.pushState = function( args ) {
 
 
-    //Nodes colors go back to normal
-    overNodes=false;
-    e = partialGraph._core.graph.edges;
-    for(i=0;i<e.length;i++){
-            e[i].color = e[i].attr['grey'] ? e[i].attr['true_color'] : e[i].color;
-            e[i].attr['grey'] = 0;
+    let lastState = TW.states.slice(-1)[0]   // <=> TW.SystemState()
+
+    if (TW.conf.debug.logStates) console.log("setState args: ", args);
+
+    // 1) we start from a copy
+    let newState = Object.assign({}, lastState)
+
+    // counter à toutes fins utiles
+    newState.id ++
+
+    // 2) we update it with provided args
+    if (!isUndef(args.activetypes))  newState.activetypes = args.activetypes
+    if (!isUndef(args.level))        newState.level = args.level;
+    if (!isUndef(args.sels))         newState.selectionNids = args.sels;
+
+    // neighbors (of any type) and their edges in an .selectionRels[type] slot
+    if(!isUndef(args.rels))          newState.selectionRels = args.rels;
+
+    // POSS2: add filterSliders params to be able to recreate subsets at a given time
+
+    // useful shortcut
+    let typesKey = newState.activetypes.map(Number).join("|")
+
+    // legacy : we prefer to redo louvain than to miss a new nodeset
+    //          (wouldn't be needed if POSS2 implemented)
+    newState.LouvainFait = false;
+
+
+    // 3) apply all GUI effects
+
+    // if global level, change level depends on a selection
+    // if local then it's always available to go back to global
+    LevelButtonDisable( newState.level && newState.selectionNids.length == 0 );
+
+    // recreate sliders after activetype or level changes
+    if (TW.conf.filterSliders
+        && (newState.level != lastState.level
+            || typesKey != lastState.activetypes.map(Number).join("|"))) {
+
+      // terms
+      if(typesKey=="1|0") {
+        $(".for-nodecategory-0").show()
+        $(".for-nodecategory-1").hide();
+
+        NodeWeightFilter( "#slidercat0nodesweight" ,  TW.categories[0], "size");
+        EdgeWeightFilter("#slidercat0edgesweight", typesKey, "weight");
+      }
+
+      // docs
+      if(typesKey=="0|1") {
+          $(".for-nodecategory-0").hide()
+          $(".for-nodecategory-1").show();
+
+          NodeWeightFilter( "#slidercat1nodesweight" ,  TW.categories[1], "size");
+          EdgeWeightFilter("#slidercat1edgesweight", typesKey, "weight");
+      }
+
+      // terms and docs
+      if(typesKey=="1|1") {
+        $(".for-nodecategory-0").show()
+        $(".for-nodecategory-1").show();
+          NodeWeightFilter( "#slidercat0nodesweight" ,  TW.categories[0], "size");
+          NodeWeightFilter( "#slidercat1nodesweight" ,  TW.categories[1], "size");
+          EdgeWeightFilter("#slidercat0edgesweight", "1|0", "weight");
+          EdgeWeightFilter("#slidercat1edgesweight", "0|1", "weight");
+      }
     }
-    partialGraph.draw(2,1,2);
 
-    partialGraph.iterNodes(function(n){
-            n.active=false;
-            n.color = n.attr['grey'] ? n.attr['true_color'] : n.color;
-            n.attr['grey'] = 0;
-    }).draw(2,1,2);
-    //Nodes colors go back to normal
+    // 4) store it in TW.states
+    TW.states.push(newState)
+
+    // 5) forget oldest states if needed
+    while (TW.states.length > TW.conf.maxPastStates) {
+      TW.states.shift()
+    }
+
+    if (TW.conf.debug.logStates)
+      console.log(`updated states: ${JSON.stringify(TW.states)}`)
+};
 
 
+
+TW.resetGraph = function() {
+  // remove the selection
+  cancelSelection(false, {norender: true})
+
+  // call the sigma graph clearing
+  TW.instance.clearSigma()
+
+  // TW.categories, TW.Nodes and TW.Edges will be reset by mainStartGraph
+
+  // reset remaining global vars
+  TW.labels = []
+  TW.Relations = {}
+  TW.states = [TW.initialSystemState]
+
+  // reset rendering gui flags
+  TW.gui.selectionActive = false
+  TW.gui.handpickedcolor = false
+
+  // reset circle size and cursor
+  TW.gui.circleSize = 0
+  TW.gui.circleSlider.setValue(0)
+
+  // reset other gui flags
+  TW.gui.checkBox=false
+  TW.gui.lastFilters = {}
+}
+
+
+// settings: {norender: Bool}
+function cancelSelection (fromTagCloud, settings) {
+    if (TW.conf.debug.logSelections) { console.log("\t***in cancelSelection"); }
+    if (!settings) settings = {}
+
+    // SystemState effects
+    // -------------------
+    // clear the current state's selection and neighbors arrays
+    deselectNodes(TW.SystemState())    //Unselect the selected ones :D
+
+    // new state
+    TW.pushState({sels:[], rels:{}})
+
+    // GUI effects
+    // -----------
+    // global flag
+    TW.gui.selectionActive = false
+
+    // hide all selection panels
     if(fromTagCloud==false){
         $("#names").html("");
         $("#topPapers").html(""); $("#topPapers").hide();
         $("#opossiteNodes").html(""); $("#tab-container").hide();
         $("#information").html("");
         $("#searchinput").val("");
-        $("#switchbutton").hide();
+        $("#unselectbutton").hide();
+        $("#lefttopbox").hide();
         $("#tips").html(getTips());
     }
-    for(var i in deselections){
-        if( !isUndef(partialGraph._core.graph.nodesIndex[i]) ) {
-            partialGraph._core.graph.nodesIndex[i].forceLabel=false;
-            partialGraph._core.graph.nodesIndex[i].neighbour=false;
-        }
-    }
-    deselections={};
-    // leftPanel("close");
-    if(swMacro) LevelButtonDisable(true);
-    partialGraph.draw();
-}
 
-function highlightSelectedNodes(flag){
-    pr("\t***methods.js:highlightSelectedNodes(flag)"+flag+" selEmpty:"+is_empty(selections))
-    if(!is_empty(selections)){
-        for(var i in selections) {
-            if(Nodes[i].type==catSoc && swclickActual=="social"){
-                node = partialGraph._core.graph.nodesIndex[i];
-                node.active = flag;
-            }
-            else if(Nodes[i].type==catSem && swclickActual=="semantic") {
-                node = partialGraph._core.graph.nodesIndex[i];
-                node.active = flag;
-            }
-            else if(swclickActual=="sociosemantic") {
-                node = partialGraph._core.graph.nodesIndex[i];
-                node.active = flag;
-            }
-            else break;
-        }
+    // send "eraseNodeSet" event
+    $('#searchinput').trigger("tw:eraseNodeSet");
+    // (signal for plugins that any selection behavior is finished)
 
-    }
-}
-
-function alertCheckBox(eventCheck){
-    if(!isUndef(eventCheck.checked)) checkBox=eventCheck.checked;
-}
-
-// States:
-// A : Macro-Social
-// B : Macro-Semantic
-// A*: Macro-Social w/selections
-// B*: Macro-Semantic w/selections
-// a : Meso-Social
-// b : Meso-Semantic
-// AaBb: Socio-Semantic
-function RefreshState(newNOW){
-
-    pr("\t\t\tin RefreshState newNOW:_"+newNOW+"_.")
-
-	if (newNOW!="") {
-	    PAST = NOW;
-	    NOW = newNOW;
-
-		// if(NOW=="a" || NOW=="A" || NOW=="AaBb") {
-		// 	$("#category-A").show();
-		// }
-		// if(NOW=="b" || NOW=="B" || NOW=="AaBb") {
-		// 	$("#category-B").show();
-		// }
-	}
-
-    $("#category-A").hide();
-    $("#category-B").hide();
-    // i=0; for(var s in selections) { i++; break;}
-    // if(is_empty(selections) || i==0) LevelButtonDisable(true);
-    // else LevelButtonDisable(false);
-
-    //complete graphs case
-    // sels=getNodeIDs(selections).length
-    if(NOW=="A" || NOW=="a") {
-    	// N : number of nodes
-    	// k : number of ( selected nodes + their neighbors )
-    	// s : number of selections
-        var N=( Object.keys(Nodes).filter(function(n){return Nodes[n].type==catSoc}) ).length
-        var k=Object.keys(getNeighs(Object.keys(selections),nodes1)).length
-        var s=Object.keys(selections).length
-        pr("in social N: "+N+" - k: "+k+" - s: "+s)
-        if(NOW=="A"){
-            if( (s==0 || k>=(N-1)) ) {
-                LevelButtonDisable(true);
-            } else LevelButtonDisable(false);
-            if(s==N) LevelButtonDisable(false);
-        }
-
-        if(NOW=="a") {
-            LevelButtonDisable(false);
-        }
-
-        $("#semLoader").hide();
-        $("#category-A").show();
-        $("#colorGraph").show();
-
-    }
-    if(NOW=="B" || NOW=="b") {
-        var N=( Object.keys(Nodes).filter(function(n){return Nodes[n].type==catSem}) ).length
-        var k=Object.keys(getNeighs(Object.keys(selections),nodes2)).length
-        var s=Object.keys(selections).length
-        pr("in semantic N: "+N+" - k: "+k+" - s: "+s)
-        if(NOW=="B") {
-            if( (s==0 || k>=(N-1)) ) {
-                LevelButtonDisable(true);
-            } else LevelButtonDisable(false);
-            if(s==N) LevelButtonDisable(false);
-        }
-
-        if(NOW=="b") {
-            LevelButtonDisable(false);
-        }
-        if ( semanticConverged ) {
-            $("#semLoader").hide();
-            $("#category-B").show();
-            $.doTimeout(30,function (){
-                EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
-                NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size");
-                NodeSizeSlider("#sliderBNodeSize","NGram", 10, "#FFA500")
-
-            });
-        } else {
-            $("#semLoader").css('visibility', 'visible');
-            $("#semLoader").show();
-        }
-
-    }
-    if(NOW=="AaBb"){
+    if(TW.states.slice(-1)[0].level)
         LevelButtonDisable(true);
-        $("#category-A").show();
-        $("#category-B").show();
+
+    if (!settings.norender) {
+      // finally redraw
+      TW.partialGraph.render();
     }
-
-    partialGraph.draw();
-
 }
 
-function pushSWClick(arg){
-    swclickPrev = swclickActual;
-    swclickActual = arg;
+// returns an array of the name(s) of active type(s)
+// this area is quite underspecified so we assume here
+//   - that all typenames have a mapping to cat[0] (terms) or cat[1] (contexts)
+//   - that currentState.activetypes is an array of 2 bools for the currently displayed cat(s)
+function getActivetypesNames() {
+  let currentTypes = []
+  let currentTypeIdx
+
+  for (var possType in TW.catDict) {
+    currentTypeIdx = TW.catDict[possType]
+    if (TW.SystemState().activetypes[currentTypeIdx]) {
+      currentTypes.push(possType)
+    }
+  }
+
+  // ex: ['Document'] or ['Ngrams'] or ['Document','Ngrams']
+  return currentTypes
 }
 
-// it receives entire node
-function selection(currentNode){
-    if(checkBox==false && cursor_size==0) {
-        highlightSelectedNodes(false);
-        opossites = [];
-        selections = [];
-        partialGraph.refresh();
-    }
-    if(socsemFlag==false){
-        if(isUndef(selections[currentNode.id])){
-            selections[currentNode.id] = 1;
-            if(Nodes[currentNode.id].type==catSoc && !isUndef(bipartiteD2N[currentNode.id])){
-                for(i=0;i<bipartiteD2N[currentNode.id].neighbours.length;i++) {
-                    if(isUndef(opossites[bipartiteD2N[currentNode.id].neighbours[i]])){
-                        opossites[bipartiteD2N[currentNode.id].neighbours[i]]=1;
-                    }
-                    else {
-                        opossites[bipartiteD2N[currentNode.id].neighbours[i]]++;
-                    }
-                }
-            }
-            if(Nodes[currentNode.id].type==catSem){
-                if(!isUndef(bipartiteN2D[currentNode.id])){
-                    for(i=0;i<bipartiteN2D[currentNode.id].neighbours.length;i++) {
-                        if(isUndef(opossites[bipartiteN2D[currentNode.id].neighbours[i]])){
-                            opossites[bipartiteN2D[currentNode.id].neighbours[i]]=1;
-                        }
-                        else opossites[bipartiteN2D[currentNode.id].neighbours[i]]++;
+function getActivetypesKey() {
+  let lastState = TW.states.slice(-1)[0]
 
-                    }
-                }
-            }
-            currentNode.active=true;
-        }
-        else {
-            delete selections[currentNode.id];
-            markAsSelected(currentNode.id,false);
-            if(Nodes[currentNode.id].type==catSoc){
-                for(i=0;i<bipartiteD2N[currentNode.id].neighbours.length;i++) {
-                    if(isUndef(opossites[bipartiteD2N[currentNode.id].neighbours[i]])) {
-                        console.log("lala");
-                    }
-                    if(opossites[bipartiteD2N[currentNode.id].neighbours[i]]==1){
-                        delete opossites[bipartiteD2N[currentNode.id].neighbours[i]];
-                    }
-                    if(opossites[bipartiteD2N[currentNode.id].neighbours[i]]>1){
-                        opossites[bipartiteD2N[currentNode.id].neighbours[i]]--;
-                    }
-                }
-            }
-            if(Nodes[currentNode.id].type==catSem){
-                for(i=0;i<bipartiteN2D[currentNode.id].neighbours.length;i++) {
-                    if(isUndef(opossites[bipartiteN2D[currentNode.id].neighbours[i]])) {
-                        console.log("lala");
-                    }
-                    if(opossites[bipartiteN2D[currentNode.id].neighbours[i]]==1){
-                        delete opossites[bipartiteN2D[currentNode.id].neighbours[i]];
-                    }
-                    if(opossites[bipartiteN2D[currentNode.id].neighbours[i]]>1){
-                        opossites[bipartiteN2D[currentNode.id].neighbours[i]]--;
-                    }
-                }
-            }
-
-            currentNode.active=false;
-        }
-    }
-
-    /* ============================================================================================== */
-
-    else {
-        if(isUndef(selections[currentNode.id])){
-            selections[currentNode.id] = 1;
-
-            if(Nodes[currentNode.id].type==catSoc){
-                for(i=0;i<bipartiteD2N[currentNode.id].neighbours.length;i++) {
-                    //opossitesbipartiteD2N[currentNode.id].neighbours[i]];
-                    if(isUndef(opossites[bipartiteD2N[currentNode.id].neighbours[i].toString()])){
-                        opossites[bipartiteD2N[currentNode.id].neighbours[i]]=1;
-                    }
-                    else {
-                        opossites[bipartiteD2N[currentNode.id].neighbours[i]]++;
-                    }
-                }
-            }
-            if(Nodes[currentNode.id].type==catSem){
-                for(i=0;i<nodes2[currentNode.id].neighbours.length;i++) {
-                    if(isUndef(opossites[nodes2[currentNode.id].neighbours[i]])){
-                        opossites[nodes2[currentNode.id].neighbours[i]]=1;
-                    }
-                    else opossites[nodes2[currentNode.id].neighbours[i]]++;
-
-                }
-            }
-
-            currentNode.active=true;
-        }
-        else {
-            delete selections[currentNode.id];
-            markAsSelected(currentNode.id,false);
-
-            if(Nodes[currentNode.id].type==catSoc){
-                for(i=0;i<bipartiteD2N[currentNode.id].neighbours.length;i++) {
-                    if(isUndef(opossites[bipartiteD2N[currentNode.id].neighbours[i]])) {
-                        console.log("lala");
-                    }
-                    if(opossites[bipartiteD2N[currentNode.id].neighbours[i]]==1){
-                        delete opossites[bipartiteD2N[currentNode.id].neighbours[i]];
-                    }
-                    if(opossites[bipartiteD2N[currentNode.id].neighbours[i]]>1){
-                        opossites[bipartiteD2N[currentNode.id].neighbours[i]]--;
-                    }
-                }
-            }
-            if(Nodes[currentNode.id].type==catSem){
-                for(i=0;i<nodes2[currentNode.id].neighbours.length;i++) {
-                    if(isUndef(opossites[nodes2[currentNode.id].neighbours[i]])) {
-                        console.log("lala");
-                    }
-                    if(opossites[nodes2[currentNode.id].neighbours[i]]==1){
-                        delete opossites[nodes2[currentNode.id].neighbours[i]];
-                    }
-                    if(opossites[nodes2[currentNode.id].neighbours[i]]>1){
-                        opossites[nodes2[currentNode.id].neighbours[i]]--;
-                    }
-                }
-            }
-
-            currentNode.active=false;
-        }
-    }
-    // partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
-    partialGraph.refresh();
+  // ex: '1'        or  '0|1'   or   '1|1'
+  return lastState.activetypes.map(Number).join('|')
 }
 
-function getOpossitesNodes(node_id, entireNode) {
-    node="";
-    if(entireNode==true) node=node_id;
-    else node = partialGraph._core.graph.nodesIndex[node_id];
-    if(socsemFlag==true) {
-        pr("wtf is this -> if(socsemFlag==true) {");
-        cancelSelection(false);
-        socsemFlag=false;
+// transitional function:
+// ----------------------
+// Goal: determine if a single nodetype or global activetype is semantic or social
+// Explanation: some older functions (eg topPapers) used this distinction
+//              (via semi-deprecated global swclickActual),
+//              but the specification changed twice since then:
+//                - 1st change: types described as type 0 and type 1 and possible default type
+//                - 2nd change default type of monopartite case changed from document to semantic
+function swActual(aNodetype) {
+  return (aNodetype == TW.categories[0]) ? 'semantic' : 'social'
+}
+
+
+
+// changes attributes of nodes and edges to remove active, highlight and activeEdge flags
+
+// NB: "low-level" <=> by design, does NOT change the state, gui nor global flag
+//                     but ought to be called by "scenario" functions that do
+
+// fast because works on the subset of active nodes indicated in SystemState()
+function deselectNodes(aSystemState){
+    if (isUndef(aSystemState))   aSystemState = TW.SystemState()
+
+    // active nodes
+    let sels = aSystemState.selectionNids
+    if (TW.conf.debug.logSelections)
+      console.log("deselecting using SystemState's lists")
+
+    for(let i in sels) {
+      let nid = sels[i]
+
+      // mark as unselected!
+      TW.partialGraph.graph.nodes(nid).customAttrs.active = 0
+
+      // for only case legend highlight...
+      TW.partialGraph.graph.nodes(nid).customAttrs.highlight = 0
     }
 
-    if (!node) return null;
-    //selection(node);
-    if(categoriesIndex.length==1) selectionUni(node);
-    if(categoriesIndex.length==2) selection(node);
+    // active relations
+    // (give us neighbors and edges to dehighlight/deactivate)
+    let rels = aSystemState.selectionRels
 
-    opos = ArraySortByValue(opossites, function(a,b){
-        return b-a
-    });
-}
+    for (var reltyp in rels) {
+      for (var srcnid in rels[reltyp]) {
+        for (var tgtnid in rels[reltyp][srcnid]) {
+          let tgt = TW.partialGraph.graph.nodes(tgtnid)
+          if (tgt) {
+            tgt.customAttrs.highlight = 0
+            let eid1 = `${srcnid};${tgtnid}`
+            let eid2 = `${tgtnid};${srcnid}`
 
-//	tag cloud div
-//missing: the graphNGrams javascript
-function htmlfied_alternodes(elems) {
-    var oppositesNodes=[]
-    js1='onclick="graphTagCloudElem(\'';
-    js2="');\""
-    frecMAX=elems[0].value
-    for(var i in elems){
-        id=elems[i].key
-        frec=elems[i].value
-        if(frecMAX==1) fontSize=desirableTagCloudFont_MIN;
-        else {
-            fontSize=
-            desirableTagCloudFont_MIN+
-            (frec-1)*
-            ((desirableTagCloudFont_MAX-desirableTagCloudFont_MIN)/(frecMAX-1));
-        }
-        if(!isUndef(Nodes[id])){
-            //          js1            js2
-            // onclick="graphNGrams('  ');
-            htmlfied_alternode = '<span class="tagcloud-item" style="font-size:'+fontSize+'px;" '+js1+id+js2+'>'+ Nodes[id].label+ '</span>';
-            oppositesNodes.push(htmlfied_alternode)
-        }
-    }
-    return oppositesNodes
-}
-
-function manualForceLabel(nodeid,active) {
-	// pr("manual|"+nodeid+"|"+active)
-	partialGraph._core.graph.nodesIndex[nodeid].active=active;
-	partialGraph.draw();
-}
-
-function htmlfied_samenodes(elems) {
-    var sameNodes=[]
-    js1=' onmouseover="manualForceLabel(this.id,true);" ';
-    js2=' onmouseout="manualForceLabel(this.id,true);" ';
-    if(elems.length>0) {
-        var A = getVisibleNodes()
-        for (var a in A){
-            n = A[a]
-            if(!n.active && n.color.charAt(0)=="#" ) {
-                sameNodes.push('<li onmouseover="manualForceLabel(\''+n.id+'\',true)"  onmouseout="manualForceLabel(\''+n.id+'\',false)" >'+ n.label+ '</li>')
+            let e1 = TW.partialGraph.graph.edges(`${srcnid};${tgtnid}`)
+            if(e1) {
+              e1.customAttrs.activeEdge = 0
             }
+            let e2 = TW.partialGraph.graph.edges(`${tgtnid};${srcnid}`)
+            if(e2) {
+              e2.customAttrs.activeEdge = 0
+            }
+          }
         }
+      }
     }
-    return sameNodes
 }
+
+
+function manualForceLabel(nodeid, flagToSet, justHover) {
+  let nd = TW.partialGraph.graph.nodes(nodeid)
+
+  nd.customAttrs.forceLabel = flagToSet
+
+  if (justHover) {
+    // using single node redraw in hover layer (much faster ~ 0.5ms)
+    redrawNodesInHoverLayer([nd])
+  }
+  else {
+    // using full redraw in permanent layers (slow ~ 70ms)
+    TW.partialGraph.render();
+  }
+}
+
+// Here we draw within hover layer instead of nodes layer, labels layer
+//
+// args:
+//   - someNodes: an array of actual nodes (not nids)
+//   - canvasDrawer: (optional) one of drawing methods from sigma.canvas
+// Explanation: it's perfect for temporary change cases because hover layer
+//              is *over* all other layers and contains nothing by default
+//              (this way step A can reset B avoiding whole graph refresh)
+function redrawNodesInHoverLayer(someNodes, canvasDrawer) {
+
+  if (!canvasDrawer) {
+    canvasDrawer = "hovers"
+  }
+
+  var targetLayer = TW.rend.contexts.hover
+
+  // A - clear entire targetLayer
+  targetLayer.clearRect(
+    0, 0,
+    targetLayer.canvas.width,
+    targetLayer.canvas.height
+  )
+
+  var locSettings = TW.partialGraph.settings.embedObjects({prefix:TW.rend.options.prefix})
+
+  for (var k in someNodes) {
+    // B - we use our largerall renderer to write single nodes to overlay
+    sigma.canvas[canvasDrawer].def( someNodes[k], targetLayer, locSettings)
+  }
+}
+
+
+function clearHover() {
+  var hoverLayer = TW.rend.contexts.hover
+  hoverLayer.clearRect(
+    0, 0,
+    hoverLayer.canvas.width,
+    hoverLayer.canvas.height
+  )
+}
+
 
 // nodes information div
 function htmlfied_nodesatts(elems){
 
     var socnodes=[]
     var semnodes=[]
+
+    if (TW.conf.debug.logSelections) console.log("htmlfied_nodesatts", elems)
+
     for(var i in elems) {
 
-        information=[]
+        var information=[]
 
         var id=elems[i]
-        var node = Nodes[id]
+        var node = TW.Nodes[id]
 
-        if (mainfile) {
+        if(swActual(node.type) == 'social'){
             information += '<li><b>' + node.label + '</b></li>';
-            for (var i in node.attributes) {
-                information += '<li>&nbsp;&nbsp;'+i +" : " + node.attributes[i] + '</li>';
-            }
-            socnodes.push(information);
-        } else {
-            if(node.type==catSoc){
-                if(node.htmlCont==""){
-                    information += '<li><b>' + node.label + '</b></li>';
-                    if (!isUndef(node.level)) {
-                        information += '<li>' + node.level + '</li>';
-                    }
-                } else {
-                    information += $("<div/>").html(node.htmlCont).text() ;
+            if(node.htmlCont==""){
+                if (!isUndef(node.level)) {
+                    information += '<li>' + node.level + '</li>';
                 }
-                socnodes.push(information)
+            } else {
+                information += '<li>' + $("<div/>").html(node.htmlCont).text() + '</li>';
             }
-
-            if(node.type==catSem){
-                information += '<li><b>' + node.label + '</b>';
-                google='<a href=http://www.google.com/#hl=en&source=hp&q=%20'+node.label.replace(" ","+")+'%20><img src="'+'static/img/google.png"></img></a>';
-                wiki = '<a href=http://en.wikipedia.org/wiki/'+node.label.replace(" ","_")+'><img src="'+'static/img/wikipedia.png"></img></a>';
-                flickr= '<a href=http://www.flickr.com/search/?w=all&q='+node.label.replace(" ","+")+'><img src="'+'static/img/flickr.png"></img></a>';
-                information += "<p class='information-links'>"+google+"&nbsp;"+wiki+"&nbsp;"+flickr+'</p>';
-                information += '</li>' ;
-                semnodes.push(information) ;
-            }
+            socnodes.push(information)
         }
+
+        if(swActual(node.type) == 'semantic'){
+            information += '<li><b>' + node.label + '</b></li>';
+            let google='<a href=http://www.google.com/#hl=en&source=hp&q=%20'+node.label.replace(" ","+")+'%20><img src="libs/img2/google.png"></img></a>';
+            let wiki = '<a href=http://en.wikipedia.org/wiki/'+node.label.replace(" ","_")+'><img src="libs/img2/wikipedia.png"></img></a>';
+            let flickr= '<a href=http://www.flickr.com/search/?w=all&q='+node.label.replace(" ","+")+'><img src="libs/img2/flickr.png"></img></a>';
+            information += '<li>'+google+"&nbsp;"+wiki+"&nbsp;"+flickr+'</li><br>';
+            semnodes.push(information)
+        }
+
     }
     return socnodes.concat(semnodes)
 }
 
 
-//missing: getTopPapers for both node types
-//considering complete graphs case! <= maybe i should mv it
-function updateLeftPanel_fix() {
-    pr("\t ** in updateLeftPanel() corrected version** ")
+function manualSelectNode ( nodeid ) {
+    // it was hovered but with no hover:out so we first remove hover effect
+    manualForceLabel(nodeid, false, true)
+
+    // and it's a new selection
+    TW.instance.selNgn.MultipleSelection2({nodes:[nodeid]});
+    // (MultipleSelection2 will do the re-rendering and push the new state)
+}
+
+function htmlProportionalLabels(elems , limit, selectableFlag) {
+    if(elems.length==0) return false;
+    let resHtml=[]
+
+    let fontSize   // <-- normalized for display
+
+    // we assume already sorted
+    let frecMax = elems[0].value
+    let frecMin = elems.slice(-1)[0].value
+
+    let sourceRange = frecMax - frecMin
+    let targetRange = TW.conf.tagcloudFontsizeMax - TW.conf.tagcloudFontsizeMin
+
+    for(var i in elems){
+        if(i==limit)
+            break
+        let id=elems[i].key
+        let frec=elems[i].value
+
+        if (sourceRange) {
+          fontSize = ((frec - frecMin) * (targetRange) / (sourceRange)) + TW.conf.tagcloudFontsizeMin
+        }
+        else {
+          // 1em when all elements have the same freq
+          fontSize = 1
+        }
+
+        // debug
+        // console.log('htmlfied_tagcloud (',id, TW.Nodes[id].label,') freq',frec,' fontSize', fontSize)
+
+        if(!isUndef(TW.Nodes[id])){
+            var jspart = ''
+
+            if (selectableFlag) {
+              jspart = ' onclick="manualSelectNode(\''+id+'\')" onmouseover="manualForceLabel(\''+id+'\',true, true)"  onmouseout="manualForceLabel(\''+id+'\',false, true)"'
+            }
+
+            // using em instead of px to allow global x% resize at css box level
+            let htmlLabel = '<span class="tagcloud-item" style="font-size:'+fontSize+'em;" '+jspart+'>'+ TW.Nodes[id].label+ '</span>';
+            resHtml.push(htmlLabel)
+        }
+    }
+    return resHtml
+}
+
+function updateRelatedNodesPanel( sels , same, oppos ) {
+
     var namesDIV=''
     var alterNodesDIV=''
     var informationDIV=''
+    var sameNodesDIV = '';
 
     // var alternodesname=getNodeLabels(opos)
 
     namesDIV+='<div id="selectionsBox"><h4>';
-    namesDIV+= getNodeLabels( selections ).join(', ')//aqui limitar
+    namesDIV+= getNodeLabels( sels ).join(' <b>/</b> ')//aqui limitar
     namesDIV += '</h4></div>';
 
-    if(opos.length>0) {
-	    alterNodesDIV+='<div id="opossitesBox">';//tagcloud
-	    alterNodesDIV+= htmlfied_alternodes( opos ).join("\n")
-	    alterNodesDIV+= '</div>';
-	}
+    if(oppos.length>0) {
+      alterNodesDIV+='<div id="oppositesBox">';//tagcloud
+      alterNodesDIV+= htmlProportionalLabels( oppos , TW.conf.tagcloudOpposLimit, false).join("\n")
+      alterNodesDIV+= '</div>';
+    }
 
-    sameNodesDIV = "";
-    sameNodesDIV+='<div id="sameNodes"><ul style="list-style: none;">';//tagcloud
-    sameNodesDIV += htmlfied_samenodes( getNodeIDs(selections) ).join("\n") ;
-    sameNodesDIV+= '</ul></div>';
+    if(sels.length>0) {
+        sameNodesDIV+='<div id="relatedBox">';//tagcloud
+        var sameNeighTagcloudHtml = htmlProportionalLabels( same , TW.conf.tagcloudSameLimit, true )
+        sameNodesDIV+= (sameNeighTagcloudHtml!=false) ? sameNeighTagcloudHtml.join("\n")  : "No related items.";
+        sameNodesDIV+= '</div>';
+    }
 
-        // getTopPapers("semantic");
+    informationDIV += '<br><h4>Information:</h4><ul>';
+    informationDIV += htmlfied_nodesatts( sels ).join("<br>\n")
+    informationDIV += '</ul><br>';
 
-    informationDIV = htmlfied_nodesatts( getNodeIDs(selections) ).join("<br>\n")
-
-    //using the readmore.js
-    // ive put a limit for nodes-name div
-    // and opposite-nodes div aka tagcloud div
-    // and im commenting now because github is not
-    // pushing my commit
-    // because i need more lines, idk
-    $("#names").html(namesDIV).readmore({maxHeight:100});
+    //using the readmore.js (NB readmore and easytabs are not easy to harmonize)
+    $("#lefttopbox").show();
     $("#tab-container").show();
-    $("#opossiteNodes").html(alterNodesDIV).readmore({maxHeight:200});
+    $("#names").html(namesDIV).readmore({maxHeight:100});
+    if(oppos.length>0) {
+      $("#oppositeNodes").html(alterNodesDIV).readmore({maxHeight:200});
+    }
     $("#sameNodes").html(sameNodesDIV).readmore({maxHeight:200});
     $("#information").html(informationDIV);
     $("#tips").html("");
 
-    if(categoriesIndex.length==1) getTopPapers("semantic");
-    else getTopPapers(swclickActual);
-
-}
-
-function printStates() {
-	pr("\t\t\t\t---------"+getClientTime()+"---------")
-	pr("\t\t\t\tswMacro: "+swMacro)
-	pr("\t\t\t\tswActual: "+swclickActual+" |  swPrev: "+swclickPrev)
-	pr("\t\t\t\tNOW: "+NOW+" |  PAST: "+PAST)
-	pr("\t\t\t\tselections: ")
-	pr(Object.keys(selections))
-	pr("\t\t\t\topposites: ")
-	pr(Object.keys(opossites))
-	pr("\t\t\t\t------------------------------------")
+    if (TW.conf.getRelatedDocs) {
+      $("#topPapers").show();
+      getTopPapers()
+    }
+    else {
+      $("#topPapers").hide()
+    }
 }
 
 //	just css
@@ -491,1428 +462,181 @@ function LevelButtonDisable( TF ){
 	$('#changelevel').prop('disabled', TF);
 }
 
-//tofix!
-function graphTagCloudElem(nodes) {
-    pr("in graphTagCloudElem, nodae_id: "+nodes);
-    cancelSelection();
-    partialGraph.emptyGraph();
 
+// Converts from read nodes (sigma.parseCustom )
+// Remarks:
+//  - modifies nodesDict in-place
+//  - run it once at init
+//  - it will be used by FillGraph and add1Elem
+function prepareNodesRenderingProperties(nodesDict) {
+  for (var nid in nodesDict) {
+    var n = nodesDict[nid]
 
-    var ndsids=[]
-    if(! $.isArray(nodes)) ndsids.push(nodes);
-    else ndsids=nodes;
+    let sizeFactor = TW.conf.sizeMult[TW.catDict[n.type]] || 1
 
-    var voisinage = []
-    var vars = []
+    // 3 decimals is way more tractable
+    // and quite enough in precision !!
+    n.size = Math.round(n.size*sizeFactor*1000)/1000
 
-    node_id = ndsids[0]
+    // new initial setup of properties
 
-    if(Nodes[node_id].type==catSoc) {
-    	voisinage = nodes1;
-    	vars = ["social","a"]
-    	$("#colorGraph").show();
-    } else {
-    	voisinage = nodes2;
-    	vars = ["semantic","b"]
-    	$("#colorGraph").hide();
-    }
+    var rgba, rgbStr, invalidFormat = false;
 
-    var finalnodes={}
-
-    for (var i in ndsids) {
-        node_id = ndsids[i]
-    	finalnodes[node_id]=1
-    	if(voisinage[node_id]) {
-    		for(var j in voisinage[node_id].neighbours) {
-    		    id=voisinage[node_id].neighbours[j];
-    		    s = node_id;
-    		    t = id;
-    		    edg1 = Edges[s+";"+t];
-    		    if(edg1){
-    		        if(!edg1.lock) finalnodes[t] = 1;
-    		    }
-    		    edg2 = Edges[t+";"+s];
-    		    if(edg2){
-    		        if(!edg2.lock) finalnodes[t] = 1;
-    		    }
-    		}
-    	}
-    }
-    for (var Nk in finalnodes) unHide(Nk);
-    createEdgesForExistingNodes(vars[0]);
-
-	pushSWClick(vars[0]);
-	RefreshState(vars[1]);
-	swMacro=false;
-
-	MultipleSelection(ndsids , false);//false-> dont apply deselection algorithm
-
-	$.doTimeout(10,function (){
-		fa2enabled=true; partialGraph.startForceAtlas2();
-	});
-
-	$('.gradient').css({"background-size":"90px 90px"});
-}
-
-function updateDownNodeEvent(selectionRadius){
-    pr("actualizando eventos downode");
-    partialGraph.unbind("downnodes");
-    partialGraph.unbind("overnodes");
-    partialGraph.unbind("outnodes");
-    hoverNodeEffectWhileFA2(selectionRadius);
-}
-
-
-function greyEverything(){
-
-    nds = partialGraph._core.graph.nodes.filter(function(n) {
-                            return !n['hidden'];
-                        });
-    for(var i in nds){
-            if(!nds[i].attr['grey']){
-                nds[i].attr['true_color'] = nds[i].color;
-                alphacol = "rgba("+hex2rga(nds[i].color)+",0.5)";
-                nds[i].color = alphacol;
-            }
-            nds[i].attr['grey'] = 1;
-    }
-
-    eds = partialGraph._core.graph.edges.filter(function(e) {
-                            return !e['hidden'];
-                        });
-    for(var i in eds){
-            if(!eds[i].attr['grey']){
-                eds[i].attr['true_color'] = eds[i].color;
-                eds[i].color = greyColor;
-            }
-            eds[i].attr['grey'] = 1;
-    }
-
-    //		deselect neighbours of previous selection i think
-    // for(var i in selections){
-    //     if(!isUndef(nodes1[i])){
-    //         if(!isUndef(nodes1[i]["neighbours"])){
-    //             nb=nodes1[i]["neighbours"];
-    //             for(var j in nb){
-    //                 deselections[nb[j]]=1;
-    //                 partialGraph._core.graph.nodesIndex[nb[j]].forceLabel=true;
-    //                 partialGraph._core.graph.nodesIndex[nb[j]].neighbour=true;
-    //             }
-    //         }
-    //     }
-    // }
-}
-
-
-//it is a mess but it works.
-// TODO: refactor this
-function markAsSelected(n_id,sel) {
-    if(!isUndef(n_id.id)) nodeSel=n_id;
-    else nodeSel = partialGraph._core.graph.nodesIndex[n_id];
-
-    if(sel) {
-        nodeSel.color = nodeSel.attr['true_color'];
-        nodeSel.attr['grey'] = 0;
-
-        if(categoriesIndex.length==1) {
-        	pr("jeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeere")
-            if( !isUndef(nodes1[nodeSel.id]) &&
-                    !isUndef(nodes1[nodeSel.id].neighbours)
-                  ){
-                    neigh=nodes1[nodeSel.id].neighbours;/**/
-                    for(var i in neigh){
-
-                        vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-                        if(vec) {
-                            vec.color = vec.attr['true_color'];
-                            vec.attr['grey'] = 0;
-                            an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-                            if(!isUndef(an_edge) && !an_edge.hidden){
-                                an_edge.color = an_edge.attr['true_color'];
-                                an_edge.attr['grey'] = 0;
-                            }
-                            an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-                            if(!isUndef(an_edge) && !an_edge.hidden){
-                                an_edge.color = an_edge.attr['true_color'];
-                                an_edge.attr['grey'] = 0;
-                            }
-                        }
-                    }
-                }
-        } // two categories network:
+    if (n.color) {
+      // rgb[a] color string ex: "19,180,244"
+      if (/^\d{1,3},\d{1,3},\d{1,3}$/.test(n.color)) {
+        rgba = n.color.split(',')
+        if (rgba.length = 3) {
+          rgbStr = n.color
+          rgba.push(255)
+        }
+        else if (rgba.length == 4) {
+          rgbStr = rgba.splice(0, 3).join(',');
+        }
         else {
-            if(swclickActual=="social") {
-                if(nodeSel.type==catSoc){
-                    if( !isUndef(nodes1[nodeSel.id]) &&
-                        !isUndef(nodes1[nodeSel.id].neighbours)
-                      ){
-                        neigh=nodes1[nodeSel.id].neighbours;/**/
-                        for(var i in neigh) {
-
-
-                            if( !isUndef(partialGraph._core.graph.nodesIndex[neigh[i]]) ) {
-
-                                nodeVec = partialGraph._core.graph.nodesIndex[neigh[i]];
-                                // vec.color = vec.attr['true_color'];
-                                // vec.attr['grey'] = 0;
-                                // pr("nodeselected: "+nodeSel.id+"\t"+nodeSel.label+"\t\t||\t\tvecino: "+vec.id+"\t"+vec.label)
-
-                                possibledge1 = partialGraph._core.graph.edgesIndex[nodeVec.id+";"+nodeSel.id]
-                                possibledge2 = partialGraph._core.graph.edgesIndex[nodeSel.id+";"+nodeVec.id]
-
-                                an_edge = (!isUndef(possibledge1))?possibledge1:possibledge2;
-                                if(!isUndef(an_edge) && !an_edge.hidden) {
-
-                                    //highlight node
-                                    // nodeVec.hidden = false;
-                                    nodeVec.color = nodeVec.attr['true_color'];
-                                    nodeVec.attr['grey'] = 0;
-
-                                    //highlight edge
-                                    an_edge.color = an_edge.attr['true_color'];
-                                    an_edge.attr['grey'] = 0;
-                                }
-
-                                // if ( (NOW=="a" || NOW=="b") && nodeVec.color==grey)
-                                //  pr(nodeVec)
-                                    // nodeVec.hidden = true
-
-                                // an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-                                // if(!isUndef(an_edge) && !an_edge.hidden){
-                                //     an_edge.color = an_edge.attr['true_color'];
-                                //     an_edge.attr['grey'] = 0;
-                                // }
-                                // an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-                                // if(!isUndef(an_edge) && !an_edge.hidden){
-                                //     an_edge.color = an_edge.attr['true_color'];
-                                //     an_edge.attr['grey'] = 0;
-                                // }
-                            }
-                        }
-                    }
-                } else {
-
-                    if( !isUndef(bipartiteN2D[nodeSel.id]) &&
-                        !isUndef(bipartiteN2D[nodeSel.id].neighbours)
-                      ){
-                        neigh=bipartiteN2D[nodeSel.id].neighbours;/**/
-                        for(var i in neigh){
-
-                            if( !isUndef(partialGraph._core.graph.nodesIndex[neigh[i]]) ){
-                                vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-                                vec.color = vec.attr['true_color'];
-                                vec.attr['grey'] = 0;
-                                an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-                                if(!isUndef(an_edge) && !an_edge.hidden){
-                                    an_edge.color = an_edge.attr['true_color'];
-                                    an_edge.attr['grey'] = 0;
-                                }
-                                an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-                                if(!isUndef(an_edge) && !an_edge.hidden){
-                                    an_edge.color = an_edge.attr['true_color'];
-                                    an_edge.attr['grey'] = 0;
-                                }
-                            }
-                        }
-                      }
-                }
-            }
-            if(swclickActual=="semantic") {
-                if(nodeSel.type==catSoc){
-                    if( !isUndef(bipartiteD2N[nodeSel.id]) &&
-                        !isUndef(bipartiteD2N[nodeSel.id].neighbours)
-                      ){
-                        neigh=bipartiteD2N[nodeSel.id].neighbours;/**/
-                        for(var i in neigh) {
-
-                            if( !isUndef(partialGraph._core.graph.nodesIndex[neigh[i]]) ) {
-                                vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-                                vec.color = vec.attr['true_color'];
-                                vec.attr['grey'] = 0;
-                                an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-                                if(!isUndef(an_edge) && !an_edge.hidden){
-                                    an_edge.color = an_edge.attr['true_color'];
-                                    an_edge.attr['grey'] = 0;
-                                }
-                                an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-                                if(!isUndef(an_edge) && !an_edge.hidden){
-                                    an_edge.color = an_edge.attr['true_color'];
-                                    an_edge.attr['grey'] = 0;
-                                }
-                            }
-
-                        }
-                      }
-                }
-                else {
-                    if( !isUndef(nodes2[nodeSel.id]) &&
-                        !isUndef(nodes2[nodeSel.id].neighbours)
-                      ){
-                        neigh=nodes2[nodeSel.id].neighbours;/**/
-                        for(var i in neigh){
-
-                            if( !isUndef(partialGraph._core.graph.nodesIndex[neigh[i]]) ) {
-                                nodeVec = partialGraph._core.graph.nodesIndex[neigh[i]];
-                                // vec.color = vec.attr['true_color'];
-                                // vec.attr['grey'] = 0;
-                                // pr("nodeselected: "+nodeSel.id+"\t"+nodeSel.label+"\t\t||\t\tvecino: "+vec.id+"\t"+vec.label)
-
-                                possibledge1 = partialGraph._core.graph.edgesIndex[nodeVec.id+";"+nodeSel.id]
-                                possibledge2 = partialGraph._core.graph.edgesIndex[nodeSel.id+";"+nodeVec.id]
-
-                                an_edge = (!isUndef(possibledge1))?possibledge1:possibledge2;
-                                if(!isUndef(an_edge) && !an_edge.hidden) {
-
-                                	//highlight node
-                                	// nodeVec.hidden = false;
-    	                            nodeVec.color = nodeVec.attr['true_color'];
-    	                            nodeVec.attr['grey'] = 0;
-
-                                	//highlight edge
-                                    an_edge.color = an_edge.attr['true_color'];
-                                    an_edge.attr['grey'] = 0;
-                                }
-
-                                // if ( (NOW=="a" || NOW=="b") && nodeVec.color==grey)
-                                // 	pr(nodeVec)
-                                	// nodeVec.hidden = true
-
-
-                                // vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-                                // vec.color = vec.attr['true_color'];
-                                // vec.attr['grey'] = 0;
-                                // an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-                                // if(!isUndef(an_edge) && !an_edge.hidden){
-                                //     an_edge.color = an_edge.attr['true_color'];
-                                //     an_edge.attr['grey'] = 0;
-                                // }
-                                // an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-                                // if(!isUndef(an_edge) && !an_edge.hidden){
-                                //     an_edge.color = an_edge.attr['true_color'];
-                                //     an_edge.attr['grey'] = 0;
-                                // }
-                            }
-                        }
-                      }
-                }
-            }
-            if(swclickActual=="sociosemantic") {
-                if(nodeSel.type==catSoc){
-
-                    if( !isUndef(nodes1[nodeSel.id]) &&
-                        !isUndef(nodes1[nodeSel.id].neighbours)
-                      ){
-                        neigh=nodes1[nodeSel.id].neighbours;/**/
-                        for(var i in neigh){
-                            if( !isUndef(partialGraph._core.graph.nodesIndex[neigh[i]]) ) {
-                                vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-                                vec.color = vec.attr['true_color'];
-                                vec.attr['grey'] = 0;
-                                an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-                                if(!isUndef(an_edge) && !an_edge.hidden){
-                                    an_edge.color = an_edge.attr['true_color'];
-                                    an_edge.attr['grey'] = 0;
-                                }
-                                an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-                                if(!isUndef(an_edge) && !an_edge.hidden){
-                                    an_edge.color = an_edge.attr['true_color'];
-                                    an_edge.attr['grey'] = 0;
-                                }
-                            }
-                        }
-                    }
-
-                    if( !isUndef(bipartiteD2N[nodeSel.id]) &&
-                        !isUndef(bipartiteD2N[nodeSel.id].neighbours)
-                      ){
-                        neigh=bipartiteD2N[nodeSel.id].neighbours;/**/
-                        for(var i in neigh) {
-                            if( !isUndef(partialGraph._core.graph.nodesIndex[neigh[i]]) ) {
-                                vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-                                vec.color = vec.attr['true_color'];
-                                vec.attr['grey'] = 0;
-                                an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-                                if(!isUndef(an_edge) && !an_edge.hidden){
-                                    an_edge.color = an_edge.attr['true_color'];
-                                    an_edge.attr['grey'] = 0;
-                                }
-                                an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-                                if(!isUndef(an_edge) && !an_edge.hidden){
-                                    an_edge.color = an_edge.attr['true_color'];
-                                    an_edge.attr['grey'] = 0;
-                                }
-                            }
-                        }
-                      }
-                }
-                else {
-                    if( !isUndef(nodes2[nodeSel.id]) &&
-                        !isUndef(nodes2[nodeSel.id].neighbours)
-                      ){
-                        neigh=nodes2[nodeSel.id].neighbours;/**/
-                        for(var i in neigh) {
-                            if( !isUndef(partialGraph._core.graph.nodesIndex[neigh[i]]) ) {
-                                vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-                                vec.color = vec.attr['true_color'];
-                                vec.attr['grey'] = 0;
-                                an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-                                if(!isUndef(an_edge) && !an_edge.hidden){
-                                    an_edge.color = an_edge.attr['true_color'];
-                                    an_edge.attr['grey'] = 0;
-                                }
-                                an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-                                if(!isUndef(an_edge) && !an_edge.hidden){
-                                    an_edge.color = an_edge.attr['true_color'];
-                                    an_edge.attr['grey'] = 0;
-                                }
-                            }
-                        }
-                    }
-
-                    if( !isUndef(bipartiteN2D[nodeSel.id]) &&
-                        !isUndef(bipartiteN2D[nodeSel.id].neighbours)
-                      ){
-                        neigh=bipartiteN2D[nodeSel.id].neighbours;/**/
-                        for(var i in neigh){
-                            if( !isUndef(partialGraph._core.graph.nodesIndex[neigh[i]]) ) {
-                                vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-                                vec.color = vec.attr['true_color'];
-                                vec.attr['grey'] = 0;
-                                an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-                                if(!isUndef(an_edge) && !an_edge.hidden){
-                                    an_edge.color = an_edge.attr['true_color'];
-                                    an_edge.attr['grey'] = 0;
-                                }
-                                an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-                                if(!isUndef(an_edge) && !an_edge.hidden) {
-                                    an_edge.color = an_edge.attr['true_color'];
-                                    an_edge.attr['grey'] = 0;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-    	}
-    }
-    //    /* Just in case of unselection */
-    //    /* Finally I decide not using this unselection. */
-    //    /* We just greyEverything and color the selections[] */
-    //    else { //   sel=false <-> unselect(nodeSel)
-    //
-    //        nodeSel.color = greyColor;
-    //        nodeSel.attr['grey'] = 1;
-    //
-    //        if(swclickActual=="social") {
-    //            if(nodeSel.type==catSoc){
-    //                neigh=nodes1[nodeSel.id].neighbours;/**/
-    //                for(var i in neigh){
-    //                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-    //                    vec.color = greyColor;
-    //                    vec.attr['grey'] = 1;
-    //                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-    //                        an_edge.color = greyColor;
-    //                        an_edge.attr['grey'] = 1;
-    //                    }
-    //                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-    //                        an_edge.color = greyColor;
-    //                        an_edge.attr['grey'] = 1;
-    //                    }
-    //                }
-    //            }
-    //            else {
-    //                neigh=bipartiteN2D[nodeSel.id].neighbours;/**/
-    //                for(var i in neigh){
-    //                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-    //                    vec.color = greyColor;
-    //                    vec.attr['grey'] = 1;
-    //                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-    //                        an_edge.color = greyColor;
-    //                        an_edge.attr['grey'] = 1;
-    //                    }
-    //                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-    //                        an_edge.color = greyColor;
-    //                        an_edge.attr['grey'] = 1;
-    //                    }
-    //                }
-    //            }
-    //        }
-    //        if(swclickActual=="semantic") {
-    //            if(nodeSel.type==catSoc){
-    //                neigh=bipartiteD2N[nodeSel.id].neighbours;/**/
-    //                for(var i in neigh){
-    //                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-    //                    vec.color = greyColor;
-    //                    vec.attr['grey'] = 1;
-    //                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-    //                        an_edge.color = greyColor;
-    //                        an_edge.attr['grey'] = 1;
-    //                    }
-    //                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-    //                        an_edge.color = greyColor;
-    //                        an_edge.attr['grey'] = 1;
-    //                    }
-    //                }
-    //            }
-    //            else {
-    //                neigh=nodes2[nodeSel.id].neighbours;/**/
-    //                for(var i in neigh){
-    //                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-    //                    vec.color = greyColor;
-    //                    vec.attr['grey'] = 1;
-    //                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-    //                        an_edge.color = greyColor;
-    //                        an_edge.attr['grey'] = 1;
-    //                    }
-    //                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-    //                        an_edge.color = greyColor;
-    //                        an_edge.attr['grey'] = 1;
-    //                    }
-    //                }
-    //            }
-    //        }
-    //        if(swclickActual=="sociosemantic") {
-    //            if(nodeSel.type==catSoc){
-    //                neigh=nodes1[nodeSel.id].neighbours;/**/
-    //                for(var i in neigh){
-    //                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-    //                    vec.color = greyColor;
-    //                    vec.attr['grey'] = 1;
-    //                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-    //                        an_edge.color = greyColor;
-    //                        an_edge.attr['grey'] = 1;
-    //                    }
-    //                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-    //                        an_edge.color = greyColor;
-    //                        an_edge.attr['grey'] = 1;
-    //                    }
-    //                }
-    //                neigh=bipartiteD2N[nodeSel.id].neighbours;/**/
-    //                for(var i in neigh){
-    //                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-    //                    vec.color = greyColor;
-    //                    vec.attr['grey'] = 1;
-    //                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-    //                        an_edge.color = greyColor;
-    //                        an_edge.attr['grey'] = 1;
-    //                    }
-    //                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-    //                        an_edge.color = greyColor;
-    //                        an_edge.attr['grey'] = 1;
-    //                    }
-    //                }
-    //            }
-    //            else {
-    //                neigh=nodes2[nodeSel.id].neighbours;/**/
-    //                for(var i in neigh){
-    //                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-    //                    vec.color = greyColor;
-    //                    vec.attr['grey'] = 1;
-    //                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-    //                        an_edge.color = greyColor;
-    //                        an_edge.attr['grey'] = 1;
-    //                    }
-    //                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-    //                        an_edge.color = greyColor;
-    //                        an_edge.attr['grey'] = 1;
-    //                    }
-    //                }
-    //                neigh=bipartiteN2D[nodeSel.id].neighbours;/**/
-    //                for(var i in neigh){
-    //                    vec = partialGraph._core.graph.nodesIndex[neigh[i]];
-    //                    vec.color = greyColor;
-    //                    vec.attr['grey'] = 1;
-    //                    an_edge=partialGraph._core.graph.edgesIndex[vec.id+";"+nodeSel.id];
-    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-    //                        an_edge.color = greyColor;
-    //                        an_edge.attr['grey'] = 1;
-    //                    }
-    //                    an_edge=partialGraph._core.graph.edgesIndex[nodeSel.id+";"+vec.id];
-    //                    if(typeof(an_edge)!="undefined" && an_edge.hidden==false){
-    //                        an_edge.color = greyColor;
-    //                        an_edge.attr['grey'] = 1;
-    //                    }
-    //                }
-    //            }
-    //        }
-    //    }
-}
-
-//obsolete au non
-function DrawAsSelectedNodes( nodeskeys ) {
-    greyEverything();
-
-    var ndsids=[]
-    if( $.isArray(nodeskeys) ) {
-
-    	if(nodeskeys.length==0 && !is_empty(nodeskeys))
-    		ndsids = Object.keys(nodeskeys)
-    	else
-    		ndsids=nodeskeys;
-
-    } else ndsids.push(nodeskeys);
-
-    if(!checkBox) {
-        checkBox=true;
-        for(var i in ndsids){
-            nodeid = ndsids[i]
-            markAsSelected(nodeid,true);
+          invalidFormat = true
         }
-        checkBox=false;
-    }
-    overNodes=true;
-}
-
-function MultipleSelection(nodes , desalg){
-
-	pr("IN MULTIPLE SELECTION: checkbox="+checkBox)
-
-    var prevsels = selections;
-
-	if(!checkBox) cancelSelection(false);
-
-	greyEverything();
-
-	var ndsids=[]
-	if(! $.isArray(nodes)) ndsids.push(nodes);
-	else ndsids=nodes;
-
-	if(!checkBox) {
-		checkBox=true;
-        printStates();
-        pr("prevsels:")
-        pr(Object.keys(prevsels))
-        pr("ndsids:")
-        pr(ndsids)
-
-        if (desalg && !is_empty(prevsels) ) {
-            pr("DOING THE WEIRD ALGORITHM")
-            var blacklist = {};
-            for(var i in ndsids) {
-                ID = ndsids[i];
-                if ( prevsels[ID] ) {
-                    delete prevsels[ID];
-                    blacklist[ID] = true;
-                }
-            }
-
-            if(Object.keys(blacklist).length>0) {
-                tmparr = Object.keys(prevsels);
-                for (var i in ndsids) {
-                    ID = ndsids[i];
-                    if(isUndef(blacklist[ID])) {
-                        tmparr.push(ID)
-                    }
-                }
-                ndsids = tmparr;
-            }
-        } else pr("CASE NOT COVERED")
-
-
-        if (ndsids.length>0) {
-    		for(var i in ndsids) {
-    		 	nodeid = ndsids[i]
-    		 	getOpossitesNodes(nodeid,false); //false -> just nodeid
-    		 	markAsSelected(nodeid,true);
-    		}
-        } else {
-            cancelSelection(false);
-            partialGraph.draw();
-            RefreshState("")
-            checkBox=false;
-            return;
-        }
-		checkBox=false;
-
-	} else {
-	  //checkbox = true
-		cancelSelection(false);
-		greyEverything();
-
-		for(var i in ndsids){
-		 	nodeid = ndsids[i]
-		 	getOpossitesNodes(nodeid,false); //false -> just nodeid
-		 	markAsSelected(nodeid,true);
-		}
-    }
-
-	overNodes=true;
-
-	partialGraph.draw();
-
-    updateLeftPanel_fix();
-
-    RefreshState("")
-}
-
-//test-function
-function genericHighlightSelection( nodes ) {
-
-	for( var n in nodes ) {
-		pr(n)
-	}
-
-        // nodeSel.color = nodeSel.attr['true_color'];
-        // nodeSel.attr['grey'] = 0;
-
-        //     if(swclickActual=="social") {
-        //         if(nodeSel.type==catSoc){
-        //             if( !isUndef(nodes1[nodeSel.id]) &&
-        //                 !isUndef(nodes1[nodeSel.id].neighbours)
-        //               ) {
-        //                 neigh=nodes1[nodeSel.id].neighbours;/**/
-        //                 for(var i in neigh) {
-
-
-        //                     if( !isUndef(partialGraph._core.graph.nodesIndex[neigh[i]]) ) {
-
-        //                         nodeVec = partialGraph._core.graph.nodesIndex[neigh[i]];
-        //                         possibledge1 = partialGraph._core.graph.edgesIndex[nodeVec.id+";"+nodeSel.id]
-        //                         possibledge2 = partialGraph._core.graph.edgesIndex[nodeSel.id+";"+nodeVec.id]
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-}
-
-function hoverNodeEffectWhileFA2(selectionRadius) {
-
-    partialGraph.bind('downnodes', function (event) {
-        var nodeID = event.content;
-        if(nodeID.length>0) {
-
-            console.log("hoverNodeEffectWhileFA2: node", Nodes[nodeID])
-            pr("\t\t\t\t"+nodeID+" -> "+Nodes[nodeID].label);
-            pr(getn(nodeID))
-
-            if(cursor_size==0 && !checkBox){
-                //Normal click on a node
-                $.doTimeout(30,function (){
-                    MultipleSelection(nodeID , true);//true-> apply deselection algorithm
-                });
-            }
-
-            if(cursor_size==0 && checkBox){
-                //Normal click on a node, but we won't clean the previous selections
-			    selections[nodeID] = 1;
-                $.doTimeout(30,function (){
-                    MultipleSelection( Object.keys(selections) , true );//true-> apply deselection algorithm
-                });
-            }
-        }
-    });
-}
-
-function graphResetColor(){
-    nds = partialGraph._core.graph.nodes.filter(function(x) {
-                            return !x['hidden'];
-          });
-    eds = partialGraph._core.graph.edges.filter(function(x) {
-                            return !x['hidden'];
-          });
-
-    for(var x in nds){
-        n=nds[x];
-        n.attr["grey"] = 0;
-        n.color = n.attr["true_color"];
-    }
-
-    for(var x in eds){
-        e=eds[x];
-        e.attr["grey"] = 0;
-        e.color = e.attr["true_color"];
-    }
-}
-
-function createEdgesForExistingNodes (typeOfNodes) {
-
-	if(typeOfNodes=="social") typeOfNodes="Scholars"
-	if(typeOfNodes=="semantic") typeOfNodes="Keywords"
-	if(typeOfNodes=="sociosemantic") typeOfNodes="Bipartite"
-
-    existingNodes = partialGraph._core.graph.nodes;
-
-
-
-    if( categoriesIndex.length==1 ) {
-
-        var pairdict = {}
-        for(var n in existingNodes) {
-            ID = existingNodes[n].id;
-            vois = nodes1[ID].neighbours;
-
-            for(var v in vois) {
-                pair = [ parseInt(ID) , parseInt(vois[v]) ].sort(compareNumbers)
-                pairdict [ pair[0]+";"+pair[1] ] = 1
-            }
-        }
-
-        for (var e in pairdict) {
-
-            edge = "";
-            if(isUndef(Edges[e])) {
-                E = e.split(";")
-                edge = E[1]+";"+E[0];
-            } else edge=e;
-
-            E = edge.split(";")
-            if( getn(E[0]) && getn(E[1]) )
-                unHide(edge)
-
-            // pr("antes:"+e+"\t|\tdespues:"+edge)
-            // pr("\t\t\t\t\t----- decision final "+edge)
-            // unHide(edge)
-        }
-
-        return;
-    }
-
-
-
-    if(typeOfNodes=="Bipartite"){
-        for(i=0; i < existingNodes.length ; i++){
-            for(j=0; j < existingNodes.length ; j++){
-
-                i1=existingNodes[i].id+";"+existingNodes[j].id;
-                i2=existingNodes[j].id+";"+existingNodes[i].id;
-
-                indexS1 = existingNodes[i].id;
-                indexT1 = existingNodes[j].id;
-
-                indexS2 = existingNodes[j].id;
-                indexT2 = existingNodes[i].id;
-
-                if(!isUndef(Edges[i1]) && !isUndef(Edges[i2])){
-                    if(Edges[i1].weight > Edges[i2].weight ){
-                        unHide(indexS1+";"+indexT1);
-                    }
-                    if(Edges[i1].weight < Edges[i2].weight){
-                        unHide(indexS2+";"+indexT2);
-                    }
-                    if(Edges[i1].weight == Edges[i2].weight){
-                        if(Edges[i1].label!="bipartite") {  /*danger*/
-                            if( isUndef(partialGraph._core.graph.edgesIndex[indexS1+";"+indexT1]) &&
-                                isUndef(partialGraph._core.graph.edgesIndex[indexT1+";"+indexS1]) ){
-                                unHide(indexS1+";"+indexT1);
-                            }
-                        }
-                    }
-
-
-                }
-                else {
-                    if(!isUndef(Edges[i1])){// && Edges[i1].label=="bipartite"){
-                        //I've found a source Node
-                        unHide(indexS1+";"+indexT1);
-                    }
-                    if(!isUndef(Edges[i2])){// && Edges[i2].label=="bipartite"){
-                        //I've found a target Node
-                        unHide(indexS2+";"+indexT2);
-                    }
-                }
-            }
-        }
+      }
+      // hex color ex "#eee or #AA00AA"
+      else if (/^#[A-Fa-f0-9]{3,6}$/.test(n.color)) {
+        rgba = hex2rgba(n.color)
+        rgbStr = rgba.splice(0, 3).join(',');
+      }
+      else {
+        invalidFormat = true
+      }
     }
     else {
-        for(i=0; i < existingNodes.length ; i++){
-            for(j=(i+1); j < existingNodes.length ; j++){
-
-                i1=existingNodes[i].id+";"+existingNodes[j].id;
-                i2=existingNodes[j].id+";"+existingNodes[i].id;
-
-                // pr("Edges[i1]:")
-                // pr(Edges[i1])
-
-                // pr("Edges[i2]:")
-                // pr(Edges[i2])
-                // pr(".")
-                // pr(".")
-
-                // if(!isUndef(Edges[i1]) && !isUndef(Edges[i2]) && i1!=i2){
-
-                //         if(typeOfNodes=="Scholars") {
-                //             if(Edges[i1].label=="nodes1" && Edges[i2].label=="nodes1"){
-                //                 pr(Edges[i1])
-                //                 if(Edges[i1].weight > Edges[i2].weight){
-                //                     unHide(i1);
-                //                 }
-                //                 if(Edges[i1].weight < Edges[i2].weight){
-                //                     unHide(i2);
-                //                 }
-                //                 if(Edges[i1].weight == Edges[i2].weight){
-                //                     unHide(i1);
-                //                 }
-                //             }
-                //         }
-                //         if(typeOfNodes=="Keywords") {
-                //             if(Edges[i1].label=="nodes2" && Edges[i2].label=="nodes2"){
-                //                 pr(Edges[i1]);
-                //                 if(Edges[i1].weight > Edges[i2].weight){
-                //                     unHide(i1);
-                //                 }
-                //                 if(Edges[i1].weight < Edges[i2].weight){
-                //                     unHide(i2);
-                //                 }
-                //                 if(Edges[i1].weight == Edges[i2].weight){
-                //                     unHide(i1);
-                //                 }
-                //             }
-                //         }
-                // }
-                // else {
-                    e=(!isUndef(Edges[i1]))?Edges[i1]:Edges[i2]
-                    if(!isUndef(e)){
-                        if(typeOfNodes=="Scholars" && e.label=="nodes1") unHide(e.id)
-                        if(typeOfNodes=="Keywords" && e.label=="nodes2") unHide(e.id)
-                    }
-                // }
-            }
-        }
+      invalidFormat = true
     }
+
+    if (!invalidFormat) {
+      n.color = `rgb(${rgbStr})`
+    }
+    else {
+      // will not be modified
+      n.color = TW.conf.sigmaJsDrawingProperties.defaultNodeColor
+      rgbStr = n.color.split(',').splice(0, 3).join(',');
+    }
+
+    n.customAttrs = {
+      // status flags
+      active: false,              // when selected
+      highlight: false,           // when neighbors or legend's click
+
+      // default unselected color
+      defgrey_color : "rgba("+rgbStr+","+TW.conf.sigmaJsDrawingProperties.twNodesGreyOpacity+")",
+
+      // will be used for repainting (read when TW.gui.handpickedcolor flag)
+      alt_color: null,
+      altgrey_color: null,
+    }
+
+    // POSS n.type: distinguish rendtype and twtype
+  }
 }
 
-function hideEverything(){
-    pr("\thiding all");
-    nodeslength=0;
-    for(var n in partialGraph._core.graph.nodesIndex){
-        partialGraph._core.graph.nodesIndex[n].hidden=true;
+function prepareEdgesRenderingProperties(edgesDict, nodesDict) {
+  for (var eid in edgesDict) {
+    var e = edgesDict[eid]
+
+    e.weight = Math.round(e.weight*1000)/1000
+    // e.size = e.weight // REFA s/weight/size/ ?
+
+    var rgbStr = sigmaTools.edgeRGB(nodesDict[e.source].color, nodesDict[e.target].color)
+
+    e.color = "rgba("+rgbStr+","+TW.conf.sigmaJsDrawingProperties.twEdgeDefaultOpacity+")"
+    e.customAttrs = {
+      activeEdge : false,
+      true_color : e.color,
+      rgb : rgbStr
     }
-    for(var e in partialGraph._core.graph.edgesIndex){
-        partialGraph._core.graph.edgesIndex[e].hidden=true;
-    }
-    overNodes=false;//magic line!
-    pr("\tall hidded");
-    //Remember that this function is the analogy of EmptyGraph
-    //"Saving node positions" should be applied in this function, too.
+  }
 }
 
-function unHide(id){
-	// pr("unhide "+id)
+
+// use case: slider, changeLevel re-add nodes
+function add1Elem(id) {
     id = ""+id;
-    if(id.split(";").length==1) {
-    // i've received a NODE
-        if(!isUndef(getn(id))) return;
-        if(Nodes[id]) {
-            var tt = Nodes[id].type
-            var anode = ({
-                id:id,
-                label: Nodes[id].label,
-                size: (parseFloat(Nodes[id].size)+sizeMult[tt])+"",
-                x: Nodes[id].x,
-                y: Nodes[id].y,
-                hidden:  (Nodes[id].lock)?true:false,
-                type: Nodes[id].type,
-                color: Nodes[id].color,
-                shape: Nodes[id].shape
-            });  // The graph node
 
-            if(!Nodes[id].lock) {
-                updateSearchLabels(id,Nodes[id].label,Nodes[id].type);
-                nodeslength++;
+    if(id.split(";").length==1) { // i've received a NODE
+
+        // if already exists
+        if(!isUndef(TW.partialGraph.graph.nodes(id))) return;
+
+        if(TW.Nodes[id]) {
+            var n = TW.Nodes[id]
+
+            // WE AVOIDED A COPY HERE BECAUSE properties are already complete
+            // ... however, TODO check if we shouldn't remove the n.attributes Obj
+
+            // var anode = {}
+            // anode.id = n.id;
+            // anode.label = n.label;
+            // anode.size = n.size;
+            // anode.x = n.x;
+            // anode.y = n.y;
+            // anode.hidden= n.lock ;
+            // anode.type = n.type;
+            // anode.color = n.color;
+            // if( n.shape ) n.shape = n.shape;
+            // anode.customAttrs = n.customAttrs
+
+            // if(Number(anode.id)==287) console.log("coordinates of node 287: ( "+anode.x+" , "+anode.y+" ) ")
+
+            if(!n.lock) {
+                updateSearchLabels(id,n.label,n.type);
             }
+            // TW.partialGraph.graph.addNode(anode);
+            TW.partialGraph.graph.addNode(n);
+            return;
+        }
+    } else { // It's an edge!
+        if(!isUndef(TW.partialGraph.graph.edges(id))) return;
+        var e  = TW.Edges[id]
+        if(e && !e.lock){
+            // var anedge = {
+            //     id:         id,
+            //     source: e.source,
+            //     target: e.target,
+            //     lock : false,
+            //     hidden: false,
+            //     label:  e.label,
+            //     type:   e.type,
+            //     // categ:  e.categ,
+            //     weight: e.weight,
+            //     customAttrs : e.customAttrs
+            // };
 
-            partialGraph.addNode(id,anode);
+            // TW.partialGraph.graph.addEdge(anedge);
+            TW.partialGraph.graph.addEdge(e);
             return;
         }
     }
-    else {// It's an edge!
-        //visibleEdges.push(id);
-        if(!isUndef(gete(id))) return;
-        if(Edges[id] && !Edges[id].lock){
-
-            var anedge = {
-                id:         id,
-                sourceID:   Edges[id].sourceID,
-                targetID:   Edges[id].targetID,
-                lock : false,
-                label:      Edges[id].label,
-                weight: (swMacro && (iwantograph=="sociosemantic"))?Edges[id].bweight:Edges[id].weight
-            };
-
-        	partialGraph.addEdge(id , anedge.sourceID , anedge.targetID , anedge);
-            return;
-        }
-    }
 }
 
-function pushFilterValue(filtername,arg){
-	lastFilter[filtername] = arg;
-}
-
-function add1Edge(ID) {
-	if(gete(ID)) return;
-	var s = Edges[ID].sourceID
-	var t = Edges[ID].targetID
-    var edge = {
-        id:         ID,
-        sourceID:   s,
-        targetID:   t,
-        label:      Edges[ID].label,
-        weight: Edges[ID].weight,
-        hidden : false
-    };
-
-    if(getn(s) && getn(t)) {
-
-        partialGraph.addEdge(ID,s,t,edge);
-
-        if(!isUndef(getn(s))) {
-            partialGraph._core.graph.nodesIndex[s].x = Nodes[s].x
-            partialGraph._core.graph.nodesIndex[s].y = Nodes[s].y
-        }
-        if(!isUndef(getn(t))) {
-            partialGraph._core.graph.nodesIndex[t].x = Nodes[t].x
-            partialGraph._core.graph.nodesIndex[t].y = Nodes[t].y
-        }
-    }
-}
-
-
-//obsolete au non
-function hideElem(id){
-    if(id.split(";").length==1){
-        //updateSearchLabels(id,Nodes[id].label,Nodes[id].type);
-        partialGraph._core.graph.nodesIndex[id].hidden=true;
-    }
-    else {// It's an edge!
-        partialGraph._core.graph.edgesIndex[id].hidden=true;
-        // partialGraph._core.graph.edgesIndex[id].dead=true;
-    }
-}
-
-//obsolete au non
-function unHideElem(id){
-    if(id.split(";").length==1){
-        //updateSearchLabels(id,Nodes[id].label,Nodes[id].type);
-        partialGraph._core.graph.nodesIndex[id].hidden=false;
-    }
-    else {// It's an edge!
-        partialGraph._core.graph.edgesIndex[id].hidden=false;
-        // partialGraph._core.graph.edgesIndex[id].dead=false;
-    }
-}
-
-function changeToMeso(iwannagraph) {
-
-    labels=[]
-
-    iwantograph=iwannagraph;//just a mess
-
-    partialGraph.emptyGraph();
-
-    pr("changing to Meso-"+iwannagraph);
-
-    if(iwannagraph=="social") {
-        if(!is_empty(selections)) {
-
-            if(swclickPrev=="social") {
-
-                var finalnodes={}
-                for(var i in selections) {
-                   finalnodes[i]=1
-                   if(nodes1[i]) {
-                       for(var j in nodes1[i].neighbours) {
-                            id=nodes1[i].neighbours[j];
-                            s = i;
-                            t = id;
-                            edg1 = Edges[s+";"+t];
-                            if(edg1){
-                                // pr("\tunhide "+edg1.id)
-                                if(!edg1.lock){
-                                    finalnodes[t] = 1;
-                                }
-                            }
-                            edg2 = Edges[t+";"+s];
-                            if(edg2){
-                                // pr("\tunhide "+edg2.id)
-                                if(!edg2.lock){
-                                    finalnodes[t] = 1;
-                                }
-                            }
-                       }
-                   }
-                }
-                for (var Nk in finalnodes) unHide(Nk);
-                createEdgesForExistingNodes(iwannagraph);/**/
-            }
-
-            if(swclickPrev=="semantic") {
-
-                var finalnodes={}
-                for(var i in selections) {
-                    if(Nodes[i].type==catSem){
-                        for(var j in opossites) {
-                            // unHide(j);
-                            finalnodes[j] = 1;
-                        }
-                    }
-                    else {
-                        // unHide(i);
-                        finalnodes[i]=1;
-                        if(nodes1[i]) {
-                            neigh=nodes1[i].neighbours;
-                            for(var j in neigh) {
-                                // unHide(neigh[j]);
-                                finalnodes[neigh[j]] = 1;
-                            }
-                        }
-                    }
-                }
-                for (var Nk in finalnodes) unHide(Nk);
-                createEdgesForExistingNodes(iwannagraph);/**/
-            }
-
-            if(swclickPrev=="sociosemantic") {
-
-                var finalnodes={}
-
-                for(var i in selections) {
-                    if(Nodes[i].type==catSoc){
-                        // unHide(i);
-                        finalnodes[i] = 1;
-                        if(nodes1[i]) {
-                            for(var j in nodes1[i].neighbours) {
-                                id=nodes1[i].neighbours[j];
-                                // unHide(id);
-                                finalnodes[id] = 1;
-                            }
-                        }
-                        // createEdgesForExistingNodes(iwannagraph);
-                    }
-                    if(Nodes[i].type==catSem){
-                        for(var j in opossites) {
-                            // unHide(j);
-                            finalnodes[j] = 1;
-                        }
-                    }
-                }
-                for (var Nk in finalnodes) unHide(Nk);
-                createEdgesForExistingNodes(iwannagraph);
-            }
-        }
-
-        // EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
-        $("#colorGraph").show();
-    }
-
-    if(iwannagraph=="sociosemantic") {
-
-        if(!is_empty(selections) && !is_empty(opossites)){
-
-            for(var i in selections) {
-                unHide(i);
-            }
-
-            for(var i in opossites) {
-                unHide(i);
-            }
-
-            createEdgesForExistingNodes(iwannagraph);
-
-            socsemFlag=true;
-        }
-
-        $("#category-B").show();
-        EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
-        NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size");
-        NodeSizeSlider("#sliderBNodeSize","NGram", 10, "#FFA500")
-        $("#colorGraph").hide();
-    }
-
-    if(iwannagraph=="semantic") {
-        if(!is_empty(opossites)){
-            // hideEverything()
-            //pr("2. swclickPrev: "+swclickPrev+" - swclickActual: "+swclickActual);
-
-            var finalnodes = {}
-            if(swclickPrev=="semantic") {
-
-
-
-                var finalnodes={}
-                for(var i in selections) {
-                   finalnodes[i]=1
-                   if(nodes2[i]) {
-                       for(var j in nodes2[i].neighbours) {
-                            id=nodes2[i].neighbours[j];
-                            s = i;
-                            t = id;
-                            edg1 = Edges[s+";"+t];
-                            if(edg1){
-                                // pr("\tunhide "+edg1.id)
-                                if(!edg1.lock){
-                                    finalnodes[t] = 1;
-                                }
-                            }
-                            edg2 = Edges[t+";"+s];
-                            if(edg2){
-                                // pr("\tunhide "+edg2.id)
-                                if(!edg2.lock){
-                                    finalnodes[t] = 1;
-                                }
-                            }
-                       }
-                   }
-                }
-
-                for (var Nk in finalnodes) unHide(Nk);
-                createEdgesForExistingNodes(iwannagraph);/**/
-
-                // for(var i in selections) {
-                //     // unHide(i);
-                //     finalnodes[i] = 1;
-                //     if(nodes2[i]) {
-                //         neigh=nodes2[i].neighbours;
-                //         for(var j in neigh) {
-                //             // unHide(neigh[j]);
-                //             finalnodes[neigh[j]] = 1;
-                //         }
-                //     }
-                // }
-                // for (var Nk in finalnodes) unHide(Nk);
-                // createEdgesForExistingNodes(iwannagraph);
-            }
-            if(swclickPrev=="social") {
-                var finalnodes = {}
-                for(var i in selections) {
-                    if(Nodes[i].type==catSoc){
-                        for(var j in opossites) {
-                            // unHide(j);
-                            finalnodes[j] = 1;
-                        }
-                    } else {
-                        // unHide(i);
-                        finalnodes[i] = 1;
-                        if(nodes2[i]) {
-                            neigh=nodes2[i].neighbours;
-                            for(var j in neigh) {
-                                // unHide(neigh[j]);
-                                finalnodes[neigh[j]] = 1;
-                            }
-                        }
-                    }
-                }
-                for (var Nk in finalnodes) unHide(Nk);
-                createEdgesForExistingNodes(iwannagraph);
-            }
-            if(swclickPrev=="sociosemantic") {
-                var finalnodes = {}
-                for(var i in selections) {
-                    if(Nodes[i].type==catSoc){
-                        for(var j in opossites) {
-                            // unHide(j);
-                            finalnodes[i] = 1;
-                        }
-                    }
-                    if(Nodes[i].type==catSem){
-                        // unHide(i);//sneaky bug!
-                        finalnodes[i] = 1;
-                        if(nodes2[i]) {
-                            for(var j in nodes2[i].neighbours) {
-                                id=nodes2[i].neighbours[j];
-                                // unHide(id);
-                                finalnodes[id] = 1;
-                            }
-                        }
-                    }
-                }
-                for (var Nk in finalnodes) unHide(Nk);
-                createEdgesForExistingNodes(iwannagraph);
-            }
-        }
-
-        $("#category-B").show();
-        EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
-        NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size");
-        NodeSizeSlider("#sliderBNodeSize","NGram", 10, "#FFA500")
-        $("#colorGraph").hide();
-    }
-
-    fa2enabled=true; partialGraph.startForceAtlas2();
-
-    MultipleSelection(Object.keys(selections) , false);//false-> dont apply deselection algorithm
-
-    $('.gradient').css({"background-size":"90px 90px"});
-}
-
-function changeToMacro(iwannagraph) {
-    labels=[]
-    pr("CHANGING TO Macro-"+iwannagraph);
-
-    iwantograph=iwannagraph;//just a mess
-
-    partialGraph.emptyGraph();
-
-    if ( iwannagraph=="semantic" && !semanticConverged ) {
-
-        partialGraph.draw();
-        partialGraph.refresh();
-
-        $("#semLoader").css('visibility', 'visible');
-        $("#semLoader").show();
-
-        return;
-
-    }
-
-    //iwantograph Social OR Semantic
-    if(iwannagraph!="sociosemantic") {
-    	socsemFlag=false;
-        category = (iwannagraph=="social")?catSoc:catSem;
-        pr("CHANGING TO Macro-"+iwannagraph+" __ [category: "+category+"] __ [actualsw: "+swclickActual+"] __ [prevsw: "+swclickPrev+"]")
-        //show semantic nodes
-        for(var n in Nodes) {
-            if(Nodes[n].type==category){
-                unHide(n);
-            }
-        } // and semantic edges
-
-        createEdgesForExistingNodes(iwannagraph);
-
-        if(iwannagraph=="social") showMeSomeLabels(6);
-        else {
-            $("#category-B").show();
-            EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
-            NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size");
-            NodeSizeSlider("#sliderBNodeSize","NGram", 10, "#FFA500")
-        }
-
-        swMacro=true;
-
-        if (!is_empty(selections))
-        	$.doTimeout(10,function (){
-        		chosenones=(PAST=="a"||PAST=="b")?selections:opossites;
-        		MultipleSelection(Object.keys(chosenones) , false)//false-> dont apply deselection algorithm
-        	});
-
-    } else {
-        //iwantograph socio-semantic
-        for(var n in Nodes) unHide(n);
-
-        for(var e in Edges) {
-            if(Edges[e].label=="nodes1" || Edges[e].label=="nodes2"){
-
-                st=e.split(";");
-                if(Edges[st[0]+";"+st[1]] && Edges[st[1]+";"+st[0]] &&
-                   Edges[st[0]+";"+st[1]].hidden==true &&
-                   Edges[st[1]+";"+st[0]].hidden==true
-                    ){
-                    if(Edges[st[0]+";"+st[1]].weight == Edges[st[1]+";"+st[0]].weight){
-                        unHide(st[0]+";"+st[1]);
-                    }
-                    else {
-                        if(Edges[st[0]+";"+st[1]].weight > Edges[st[1]+";"+st[0]].weight){
-                            unHide(st[0]+";"+st[1]);
-                        }
-                        else {
-                            unHide(st[1]+";"+st[0]);
-                        }
-                    }
-                }
-            }
-            if(Edges[e].label=="bipartite"){
-                unHide(e);
-            }
-        }
-
-        if (!is_empty(selections))
-            MultipleSelection(Object.keys(selections) , false);//false-> dont apply deselection algorithm
-    }
-
-    $.doTimeout(30,function (){
-
-        if(iwannagraph=="social") {
-            // EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
-            $("#colorGraph").show();
-        }
-
-        if(iwannagraph=="semantic") {
-            // EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
-            // NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size")
-            $("#colorGraph").hide();
-
-
-        }
-
-        if(iwannagraph=="sociosemantic") {
-            // EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
-            // NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size")
-            // EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
-            $("#colorGraph").hide();
-        }
-    });
-
-    // fa2enabled=true; partialGraph.startForceAtlas2();
-
-    $('.gradient').css({"background-size":"40px 40px"});
-
-    var activefilterscount=0;
-    for(var i in lastFilter) {
-
-    	if(iwannagraph=="social" && i.indexOf("sliderA")!=-1 )
-    		if(lastFilter[i].charAt(0)!="0")
-    			activefilterscount++;
-
-    	if(iwannagraph=="semantic" && i.indexOf("sliderb")!=-1)
-    		if(lastFilter[i].charAt(0)!="0")
-    			activefilterscount++;
-
-    	if(iwannagraph=="sociosemantic")
-    		if(lastFilter[i].charAt(0)!="0")
-    			activefilterscount++;
-    }
-
-    // for 1 second, activate FA2 if there is any filter applied
-    if(activefilterscount>0) {
-    	partialGraph.startForceAtlas2();
-    	$.doTimeout(2000,function (){
-    		partialGraph.stopForceAtlas2()
-    	});
-    }
-}
-
-function highlightOpossites (list){/*here*/
-    for(var n in list){
-        if(!isUndef(partialGraph._core.graph.nodesIndex[n])){
-            partialGraph._core.graph.nodesIndex[n].active=true;
-        }
-    }
-}
 
 function saveGraph() {
 
-    size = getByID("check_size").checked
-    color = getByID("check_color").checked
-    atts = {"size":size,"color":color}
+    let size = getByID("check_size").checked
+    let color = getByID("check_color").checked
+    let atts = {"size":size,"color":color}
 
     if(getByID("fullgraph").checked) {
-        saveGEXF ( getnodes() , getedges() , atts);
+        saveGEXF ( TW.Nodes , TW.Edges , atts);
     }
 
     if(getByID("visgraph").checked) {
-        saveGEXF ( getVisibleNodes() , getVisibleEdges(), atts )
+        saveGEXF ( TW.partialGraph.graph.nodes() , TW.partialGraph.graph.edges(), atts )
     }
 
-    $("#savemodal").hide();
+    $("#closesavemodal").click();
 }
 
+
+// £TODO: we should use https://github.com/Linkurious/linkurious.js/tree/develop/plugins/sigma.exporters.gexf
 function saveGEXF(nodes,edges,atts){
-    gexf = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    let gexf = '<?xml version="1.0" encoding="UTF-8"?>\n';
     gexf += '<gexf xmlns="http://www.gexf.net/1.1draft" xmlns:viz="http://www.gephi.org/gexf/viz" version="1.1">\n';
     gexf += '<graph defaultedgetype="undirected" type="static">\n';
     gexf += '<attributes class="node" type="static">\n';
@@ -1933,50 +657,73 @@ function saveGEXF(nodes,edges,atts){
         gexf += ' <viz:position x="'+nodes[n].x+'"    y="'+nodes[n].y+'"  z="0" />\n';
         if(atts["color"]) gexf += ' <viz:size value="'+nodes[n].size+'" />\n';
         if(atts["color"]) {
-            col = hex2rga(nodes[n].color);
-            gexf += ' <viz:color r="'+col[0]+'" g="'+col[1]+'" b="'+col[2]+'" a="1"/>\n';
+            if (nodes[n].color && nodes[n].color.charAt(0) == '#') {
+              col = hex2rgba(nodes[n].color);
+              gexf += ' <viz:color r="'+col[0]+'" g="'+col[1]+'" b="'+col[2]+'" a='+col[3]+'/>\n';
+            }
         }
         gexf += ' <attvalues>\n';
         gexf += ' <attvalue for="0" value="'+nodes[n].type+'"/>\n';
-        gexf += ' <attvalue for="1" value="'+Nodes[nodes[n].id].CC+'"/>\n';
+        gexf += ' <attvalue for="1" value="'+TW.Nodes[nodes[n].id].CC+'"/>\n';
         gexf += ' </attvalues>\n';
         gexf += '</node>\n';
     }
     gexf += "\n</nodes>\n";
     gexf += "<edges>\n";
-    cont = 1;
+    let cont = 1;
     for(var e in edges){
-        gexf += '<edge id="'+cont+'" source="'+edges[e].source.id+'"  target="'+edges[e].target.id+'" weight="'+edges[e].weight+'">\n';
+        gexf += '<edge id="'+cont+'" source="'+edges[e].source+'"  target="'+edges[e].target+'" weight="'+edges[e].weight+'">\n';
         gexf += '<attvalues> <attvalue for="6" value="'+edges[e].label+'"/></attvalues>';
         gexf += '</edge>\n';
         cont++;
     }
     gexf += "\n</edges>\n</graph>\n</gexf>";
-    uriContent = "data:application/octet-stream," + encodeURIComponent(gexf);
-    newWindow=window.open(uriContent, 'neuesDokument');
+    let uriContent = "data:application/octet-stream," + encodeURIComponent(gexf);
+    let newWindow=window.open(uriContent, 'neuesDokument');
 }
 
 function saveGraphIMG(){
+    TW.rend.snapshot({
+      format:'png',
+      filename:'tinawebjs-graph.png',
+      background:'white',
+      download:'true'
+    });
+}
 
-        var strDownloadMime = "image/octet-stream"
-
-        var nodesDiv = partialGraph._core.domElements.nodes;
-        var nodesCtx = nodesDiv.getContext("2d");
-
-        var edgesDiv = partialGraph._core.domElements.edges;
-        var edgesCtx = edgesDiv.getContext("2d");
 
 
-        var hoverDiv = partialGraph._core.domElements.hover;
-        var hoverCtx = hoverDiv.getContext("2d");
+// reInitFa2 : to call after changeType/changeLevel
+// ------------------------------------------------
+// sigma 1.2 FA2 supervisor is lazily inited at the
+// first call (startForceAtlas2 or configForceAtlas2)
+// but it keeps its own node index (as byteArray) and
+// so needs to be recreated when nodes change
+function reInitFa2 (params) {
+  if (!params)  params = {}
 
-        var labelsDiv = partialGraph._core.domElements.labels;
-        var labelsCtx = labelsDiv.getContext("2d");
+  if (params.useSoftMethod) {
+    // soft method: we just update FA2 internal index
+    // (is good enough if new nodes are subset of previous nodes)
+    TW.partialGraph.supervisor.graphToByteArrays()
 
-        nodesCtx.drawImage(hoverDiv,0,0);
-        nodesCtx.drawImage(labelsDiv,0,0);
-        edgesCtx.drawImage(nodesDiv,0,0);
+    // now cb
+    if (params.callback) {
+      params.callback()
+    }
+  }
+  else {
+    TW.partialGraph.killForceAtlas2()
 
-        var strData = edgesDiv.toDataURL("image/png");
-        document.location.href = strData.replace("image/png", strDownloadMime)
+    // after 1s to let killForceAtlas2 finish
+    setTimeout ( function() {
+      // init FA2
+      TW.partialGraph.configForceAtlas2(TW.FA2Params)
+
+      // now cb
+      if (params.callback) {
+        params.callback()
+      }
+    }, 1000)
+  }
 }

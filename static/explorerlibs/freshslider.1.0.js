@@ -120,6 +120,9 @@
 
             caretRight.css({
                 left:values[1] * realWidth + caretRightWidth / 2,
+
+                // this line is a mistake by freshslider dev but instead of
+                // modifying it here we override it in our own css with "important"
                 "margin-left": -(caretRightWidth/2),
                 'z-index':isRight?1:0
             });

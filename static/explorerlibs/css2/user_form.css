@@ -1,0 +1,189 @@
+/* ================= MAIN COMEX SERVICES STYLESHEET ================= */
+
+
+@media all {
+/* form content for reg, profile, login, etc.... */
+div.uform {
+  /*padding: 15px 30px 53px 30px;*/
+  padding: 0px 5px 3px 5px;
+  margin: 7px auto 3px auto;
+  background-color: #ddd;
+}
+
+/* form content for reg, profile, login, etc.... */
+div.uform-white {
+  padding: 0px 5px 3px 5px;
+  margin: 7px auto 3px auto;
+  background-color: #fff;
+  border-radius: 5px;
+}
+
+
+
+div.uform-white .ccsection-heading,
+div.uform-white .ccsection-uform-body {
+    background-color: #fff;
+}
+
+/*div.uform::before {
+    content: "F O R M";
+    font-family: monospace;
+    font-size: 1em;
+    float: right;
+    color: #000;
+}*/
+
+
+button.clean-btn
+
+/* not used at present but could be useful for autompleted inputs */
+.autocomp {
+}
+
+/* a "subpage" container UNUSED */
+.subpage {
+  width: 100%;
+  max-width: 65em;
+  display: none ;  /*switching page <=> displaying it */
+}
+
+
+.cartouche {
+  border: .2em dotted #988 ;
+  border-radius: 2em;
+  padding: 1em 3em;
+  text-align: center;
+  /*max-width: 40em;*/
+}
+
+/* ex: profile overview in readonly */
+.readonly.panel-body {
+    background-color: #ddd;
+}
+
+/* a fixed div for validation messages */
+.menu-left-fixed {
+    position: fixed;
+    top: 4em;
+    left: 0;
+    display:block;
+    z-index: 4;
+    opacity: .8;
+}
+
+
+/* ==> a question + input block <== */
+.question {
+  padding: 0 1em;
+  margin-bottom: 2em;
+  max-width: 57em !important;           /* FORMWIDTH */
+}
+
+/* we center the questions
+    when there is a visible wrapping */
+div.uform .question,
+.ccsection-wrap .question {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+.conditional-q {
+  display: none;
+}
+
+/* small label inside addon group*/
+.smlabel {
+  min-width: 7.5em;
+}
+
+/* the question's additional legend or caption */
+.legend {
+  font-family: Cambria, serif;
+  color: #554 ;
+  font-style: italic;
+  text-align:right;
+  padding: .5em 0 .5em .5em ;
+  margin: 0;
+}
+
+/* floats on the right of the question if set after it */
+.legend-float {
+  float:right;
+  text-align:center;
+  font-size: 70%;
+  padding-right: 2.1em;
+}
+
+.legend-alone {
+  font-family: Cambria, serif;
+  color: #554 ;
+  font-style: italic;
+  text-align: center;
+  font-size: 120%;
+  padding-bottom: 1em;
+  font-weight: 500;
+}
+
+/* for code blocks or urls */
+.code {
+  font-family: "Fira Mono", "Droid Sans Mono", monospace;
+  font-weight: 500;
+  font-size: 75% ;
+  background-color: #ACA;
+  padding: .2em;
+  border-radius: .2em;
+}
+
+/* form categories: like form sections etc. */
+h3.formcat {
+  font-size: 16px;
+  padding-top: 1em;
+  font-weight: bold;
+  color: #910;
+}
+
+h3.formcatfirst {
+  font-size: 16px;
+  margin-top: .2em;
+  font-weight: bold;
+  color: #910;
+}
+
+.debug-info {
+  font-family: monospace ;
+  max-width: 55em;
+  font-size: 80%;
+  line-height: 90% ;
+  background-color: #555;
+  color: #fff;
+
+  /* to stay invisible when no debug message */
+  padding: 0 ;
+  min-height: 0px;
+}
+
+
+/* md and smaller */
+@media(max-width:991px){
+    div.uform, div.uform-nobg {
+        padding: 0;
+        margin-top: 5px;
+        margin-bottom: 0;
+    }
+
+    .menu-left-fixed {
+        top: 11em;
+    }
+
+    .question {
+      padding: 0;
+    }
+
+    #main_message {
+      font-size: 110%;
+      line-height: 1em;
+      padding: .1em .3em ;
+      margin: 0;
+    }
+}

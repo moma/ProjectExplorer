@@ -1,876 +1,605 @@
-//  === monitor windows resize === //
-var counterrrr=0;
-$( window ).resize(function() {
-  counterrrr++;
-  $("#log").html("redimension nro: "+counterrrr);
-  sigmaLimits();
-});//  === / monitor windows resize === //
+'use strict';
+
+//  ======= [ main TW properties initialization ] ======== //
+
+TW.Nodes = [];
+TW.Edges = [];
+TW.Relations = {}       // edges sorted by source/target type
+TW.Clusters = [];       // "by value" facet index built in parseCustom
+
+TW.File = ""            // remember the currently opened file
+
+TW.partialGraph = null  // will contain the sigma visible graph instance
+
+TW.labels=[];           // fulltext search list
+TW.gexfPaths={};        // for file selectors iff servermenu
+TW.fields={};           // for related db tablenames
+                        //  (iff servermenu && relatedDocsType == 'wosLocalDB')
+
+TW.categories = [];     // possible node types and their inverted map
+TW.catDict = {};
+
+// a system state is the summary of tina situation
+TW.initialSystemState = {
+  activetypes: [],          // <== filled from TW.categories
+  level:      true,
+  selectionNids: [],        // <== current selection !!
+  selectionRels: [],        // <== current highlighted neighbors
+  LouvainFait: false,
+  id: 0                     // simple incremental stateid
+}
+
+// states[] is an array of system states for future CTRL+Z or usage track
+TW.states = [TW.initialSystemState]
+
+// SystemState() returns the current situation
+TW.SystemState = function() { return TW.states.slice(-1)[0] }
+
+// gracefully degrade our most costly settings if the user agent is mobile
+if (/mobile/i.test(navigator.userAgent))   mobileAdaptConf()
 
 
+//  ======== [   what to do at start ] ========= //
+console.log("Starting TWJS")
 
+// NB this method-holding instance could be initialized just once or even removed?
+var sigma_utils = new SigmaUtils();
 
-mainfile = (isUndef(ourGetUrlParam.file))?false:true;
+// POSS: ideally this should take a TW.conf as parameter
+TW.instance = new TinaWebJS('#sigma-contnr');
 
+// add once our tw rendering and index customizations into sigma module
+TW.instance.init()
 
-//  === [what to do at start] === //
-if (mainfile) {
+// init the button, sliders and search handlers, also only once
+TW.instance.initGUIListeners();
+TW.instance.initSearchListeners();
 
-	if(!isUndef(ourGetUrlParam.file)){
-	    $.doTimeout(30,function (){
+// show the custom name of the app
+writeBrand(TW.conf.branding)
 
-            var filename = ourGetUrlParam.file;
-            if( filename.indexOf(".json") > -1 ) {
-                bringTheNoise( filename , "mono");
+// choosing the input
+// -------------------
+// type of input
+var sourcemode = isUndef(getUrlParam.sourcemode) ? TW.conf.sourcemode : getUrlParam.sourcemode
 
-            } else {
-                listGexfs();
-        		parse(filename);
-        		nb_cats = scanCategories();
-        		pr("nb_cats: "+nb_cats);
+// if page is being run locally ==> only possible source shall be via file input
+if (window.location.protocol == 'file:' || sourcemode == 'localfile') {
 
-                graphtype=(nb_cats==1)?"mono":"bi";
-        		bringTheNoise(filename,graphtype);
+  let inputDiv = document.getElementById('localInput')
+  inputDiv.style.display = 'block'
 
-        		$.doTimeout(30,function (){
-                    var filename = ourGetUrlParam.file
-        		    if(!isUndef(gexfDict[filename])){
-        		        $("#currentGraph").html(gexfDict[filename.file]);
-        		    } else $("#currentGraph").html(filename);
-        		    scanDataFolder();
-                    listGexfs();
-        		});
-            }
-	    });
-	} else {
-	    window.location.href=window.location.origin+window.location.pathname+"?file="+mainfile;
-	}
-} //url-mode
+  if (window.location.protocol == 'file:') {
+    var remark = document.createElement("p")
+    remark.innerHTML = `You're running project explorer as a local html file (no syncing).`
+    remark.classList.add('comment')
+    remark.classList.add('centered')
+    inputDiv.appendChild(remark)
+  }
+
+  // user can open a gexf or json from his fs
+  var graphFileInput = createFilechooserEl()
+  inputDiv.appendChild(graphFileInput)
+}
+// traditional cases: remote read from API or prepared server-side file
 else {
+  // NB it will use global urlParams and TW.settings to choose the source
+  var [inFormat, inData, mapLabel] = syncRemoteGraphData()
+  mainStartGraph(inFormat, inData, TW.instance)
+  writeLabel(mapLabel)
+}
 
-    var param = ourGetUrlParam.nodeidparam
-    var qtype = ourGetUrlParam.type
+//  === [ / what to do at start ] === //
 
-    if(isUndef(param) || isUndef(qtype)) {
-        console.warn("missing nodes filter/id param");
+
+
+
+function syncRemoteGraphData () {
+  var inFormat;            // = { db|api.json , somefile.json|gexf }
+  var inData;              // = {nodes: [....], edges: [....], cats:...}
+
+  var mapLabel;            // user displayed label for this input dataset
+
+  // case (1) read from remote DB via API bridge fetching
+  // ex: /services/api/graph?q=filters...
+  if (sourcemode == "api") {
+    console.log("input case: api, using TW.conf.sourceAPI")
+
+    // the only API format, cf. inData
+    inFormat = 'json'
+
+    // TODO-rename: s/nodeidparam/srcparams
+    var sourceinfo = getUrlParam.nodeidparam
+    var qtype = getUrlParam.type
+    if(isUndef(sourceinfo) || isUndef(qtype)) {
+        console.warn("missing nodes filter/id param to transmit to source api");
     }
     else {
         console.log("Received query of type:", qtype)
         if(qtype == "filter" || qtype == "uid"){
-            bringTheNoise(param,qtype);
+          var theurl,thedata
+
+          // console.warn("===> PASSING ON QUERY (type "+qtype+") TO BRIDGE <===")
+          if (qtype=="uid") {
+              // pr("bring the noise, case: unique_id");
+              // pr(getClientTime()+" : DataExt Ini");
+              // < === DATA EXTRACTION === >
+              theurl = TW.conf.sourceAPI["forNormalQuery"]
+
+              // NB before also passed it for Fa2 iterations (useless?)
+              thedata = "qtype=uid&unique_id="+sourceinfo;
+              mapLabel = "unique scholar";
+          }
+
+          if (qtype=="filter") {
+              // pr("bring the noise, case: multipleQuery");
+              // pr(getClientTime()+" : DataExt Ini");
+              theurl = TW.conf.sourceAPI["forFilteredQuery"];
+
+              // json is twice URI encoded by whoswho to avoid both '"' and '%22'
+              var json_constraints = decodeURIComponent(sourceinfo)
+
+              // console.log("multipleQuery RECEIVED", json_constraints)
+
+              // safe parsing of the URL's untrusted JSON
+              var filteringKeyArrayPairs = JSON.parse( json_constraints)
+
+              // INPUT json: <= { keywords: ['complex systems', 'something'],
+              //                  countries: ['France', 'USA'], laboratories: []}
+
+              // we build 2 OUTPUT strings:
+
+              // => thedata (for comexAPI):
+              //   keywords[]="complex systems"&keywords[]="something"&countries="France"&countries[]="USA"
+
+              // => mapLabel (for user display):
+              //   ("complex systems" or "something") and ("France" or "USA")
+
+              // console.log("decoded filtering query", filteringKeyArrayPairs)
+
+              var restParams = []
+              var nameElts = []
+              // build REST parameters from filtering arrays
+              // and name from each filter value
+              for (var fieldName in filteringKeyArrayPairs) {
+                  var nameSubElts = []
+                  for (var value of filteringKeyArrayPairs[fieldName]) {
+                      // exemple: "countries[]=France"
+                      restParams.push(fieldName+'[]='+encodeURIComponent(value))
+                      nameSubElts.push ('"'+value+'"')
+                  }
+                  nameElts.push("("+nameSubElts.join(" or ")+")")
+              }
+
+              if (restParams.length) {
+                  thedata = "qtype=filters&" + restParams.join("&")
+                  mapLabel = nameElts.join(" and ")
+              }
+              else {
+                  thedata = "qtype=filters&query=*"
+                  mapLabel = "(ENTIRE NETWORK)"
+              }
+          }
+
+          // Assigning name for the network
+          if (! mapLabel) {
+              elements = []
+              queryarray = JSON.parse(ourGetUrlParam.nodeidparam)
+              for(var i in queryarray) {
+                  item = queryarray[i]
+                  if(Array.isArray(item) && item.length>0) {
+                      for(var j in item) elements.push(item[j])
+                  }
+              }
+              mapLabel = '"'+elements.join('" , "')+'"';
+          }
+
+          var bridgeRes = AjaxSync({ url: theurl, data:thedata, type:'GET' })
+
+          // should be a js object with 'nodes' and 'edges' properties
+          inData = bridgeRes.data
+
+          if (TW.conf.debug.logFetchers)   console.info("JSON input str", inData)
         }
         else {
             console.warn ("=> unsupported query type !")
         }
     }
-}//  === [ / what to do at start ] === //
+  }
 
 
-//just CSS
-function sigmaLimits(){
-    pr("\t*** sigmaLimits()")
+  // cases            (2)       and     (3) : we'll read a file from server
+  // sourcemode == "serverfile" or "servermenu" (several files with <select>)
+  else {
+    console.log("input case: server-side file, using TW.conf.sourceMenu or getUrlParam.file or TW.conf.sourceFile")
 
-    pw=$('#sigma-example').width();
-    ph=$('#sigma-example').height();
-    pr("\t\tprevsigma:("+pw+","+ph+")");
+    // -> @mode is servermenu, files are listed in db.json file (preRes ajax)
+    //      --> if @file also in url, choose the db.json one matching
+    //      --> otherwise, choose the "first_file" from db.json list
 
-    sidebar=$('#leftcolumn').width();
-    anchototal=$('#fixedtop').width();
-    altototal=$('#leftcolumn').height();
-    altofixtop=$('#fixedtop').height()
-    altodeftop=$('#defaultop').height()
-    $('#sigma-example').width(anchototal-sidebar);
-    $('#sigma-example').height(altototal-altofixtop-altodeftop-4);
+    // -> @mode is serverfile
+    //      -> gexf file path is in the urlparam @file
+    //      -> gexf file path is already specified in TW.conf.sourceFile
 
-    pw=$('#sigma-example').width();
-    ph=$('#sigma-example').height();
-    pr("\t\tnowsigma:("+pw+","+ph+")");
-}
+    // menufile case : a list of source files in ./db.json
+    if (sourcemode == 'servermenu') {
+        console.log("reading from FILEMENU TW.conf.sourceMenu")
+        // we'll first retrieve the menu of available files in db.json, then get the real data in a second ajax
+        var infofile = TW.conf.sourceMenu
 
-function bringTheNoise(sourceinfo,type){
+        if (TW.conf.debug.logFetchers)  console.info(`attempting to load filemenu ${infofile}`)
+        var preRES = AjaxSync({ url: infofile, datatype:"json" });
 
-    $("#semLoader").hide();
-
-
-    // $('.selectpicker').selectpicker();
-
-
-    //  === get width and height   === //
-    sigmaLimits();
-
-    //  === sigma canvas resize  with previous values === //
-    partialGraph = sigma.init(document.getElementById('sigma-example'))
-    .drawingProperties(sigmaJsDrawingProperties)
-    .graphProperties(sigmaJsGraphProperties)
-    .mouseProperties(sigmaJsMouseProperties);
-
-    partialGraph._core.graph.tinaGraphType = swclickActual
-
-    //dummy graph (semantic layouting in background)
-    otherGraph = sigma.init(document.getElementById('sigma-othergraph'));
-
-    //  ===  resize topbar and tweakbar  === //
-    var body=document.getElementsByTagName('body')[0];
-    body.style.paddingTop="41px";
-
-
-    $('.etabs').click(function(){
-        $.doTimeout(500,function (){
-            $("#opossiteNodes").readmore({maxHeight:200});
-            $("#sameNodes").readmore({maxHeight:200});
-        });
-    });
-
-    $("#changetype").click(function(){
-    	pr("")
-    	pr(" ############  changeTYPE click");
-		printStates()
-
-        partialGraph._core.graph.tinaGraphType = changeType();
-
-        // FIXME not defined (what purpose?)
-        // $.doTimeout(500,function (){
-        //     $('.etabs a[href="#tabs1"]').trigger('click');
-        // });
-
-		// printStates()
-    	pr(" ############  / changeTYPE click");
-    	pr("")
-    });
-
-
-    $("#changelevel").click(function(){
-    	pr("")
-    	pr(" ############  changeLEVEL click");
-    	printStates()
-
-        changeLevel();
-        // $("#tabs1").click()
-
-        printStates()
-    	pr(" ############  / changeLEVEL click");
-    	pr("")
-    });
-
-    //  ===  un/hide leftpanel  === //
-    $("#aUnfold").click(function(e) {
-        //SHOW leftcolumn
-        sidebar = $("#leftcolumn");
-        fullwidth=$('#fixedtop').width();
-        e.preventDefault();
-        // $("#wrapper").toggleClass("active");
-        if(parseFloat(sidebar.css("right"))<0){
-            $("#aUnfold").attr("class","rightarrow");
-            sidebar.animate({
-                "right" : sidebar.width()+"px"
-            }, { duration: 400, queue: false });
-
-            $("#ctlzoom").animate({
-                    "right": (sidebar.width()+10)+"px"
-            }, { duration: 400, queue: false });
-
-            // $('#sigma-example').width(fullwidth-sidebar.width());
-            $('#sigma-example').animate({
-                    "width": fullwidth-sidebar.width()+"px"
-            }, { duration: 400, queue: false });
-            setTimeout(function() {
-                  partialGraph.resize();
-                  partialGraph.refresh();
-            }, 400);
-        }
-        else {
-            //HIDE leftcolumn
-            $("#aUnfold").attr("class","leftarrow");
-            sidebar.animate({
-                "right" : "-" + sidebar.width() + "px"
-            }, { duration: 400, queue: false });
-
-            $("#ctlzoom").animate({
-                    "right": "0px"
-            }, { duration: 400, queue: false });
-
-                // $('#sigma-example').width(fullwidth);
-            $('#sigma-example').animate({
-                    "width": fullwidth+"px"
-            },{ duration: 400, queue: false });
-            setTimeout(function() {
-                  partialGraph.resize();
-                  partialGraph.refresh();
-            }, 400);
-
-        }
-    });
-
-
-    // $("#statsicon").click(function(){
-    //     $('#statsmodal').modal('show');
-    // });
-
-
-    //  === start minimap library... currently off  === //
-    startMiniMap();
-
-
-    console.log("parsing...");
-    // < === EXTRACTING DATA === >
-    if(mainfile) {
-        pr("mainfile: "+mainfile)
-
-        var pathfile = sourceinfo
-
-        if(gexfDict[pathfile]) $("#network").html(gexfDict[pathfile]);
-        else $("#network").html(pathfile);
-
-    	// $('#modalloader').modal('show');
-	    parse(decodeURIComponent(pathfile));
-
-	    if(type=="mono") {
-
-	    	$("#changetype").hide();
-
-            if( pathfile.indexOf(".json") > -1 ) {
-                JSONFile( pathfile )
-            } else {
-                onepartiteExtract();
-            }
-
-            pushSWClick("social");
-
-            $("#taboppos").remove();
-            $.doTimeout(500,function (){
-                $('.etabs a[href="#tabs2"]').trigger('click');
-            });
-
-            pr(partialGraph._core.graph.nodes.length)
-            pr(partialGraph._core.graph.edges.length)
-	    }
-
-        if(type=="bi")  {
-
-            semanticConverged=true;
-            pr("here in fullextract")
-            fullExtract();
-            pushSWClick("social");
-            pr(partialGraph._core.graph.nodes.length)
-            pr(partialGraph._core.graph.edges.length)
+        if (preRES['OK'] && preRES.data) {
+          if (TW.conf.debug.logFetchers) console.log('initial AjaxSync result preRES', preRES)
         }
 
+        var first_file = "" , first_path = ""
+        for( var path in preRES.data ) {
 
-        partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8).draw(2,2,2);
-        theListeners();
-        $('#modalloader').hide();
+            if (TW.conf.debug.logFetchers) console.log("db.json path", path)
 
-    } else {
-        var theurl,thedata,thename;
-
-        $('#modalloader').show();
-
-        console.warn("===> PASSING ON QUERY (type "+type+") TO BRIDGE <===")
-        if(type=="uid") {
-            // pr("bring the noise, case: unique_id");
-            // pr(getClientTime()+" : DataExt Ini");
-            // < === DATA EXTRACTION === >
-            theurl = bridge["forNormalQuery"]
-            thedata = "qtype=uid&unique_id="+sourceinfo+"&it="+iterationsFA2;
-            thename = "unique scholar";
+            first_file = preRES.data[path]["first"]
+            first_path = path
+            break;
         }
 
-        if (type=="filter") {
-            // pr("bring the noise, case: multipleQuery");
-            // pr(getClientTime()+" : DataExt Ini");
-            theurl = bridge["forFilteredQuery"];
+        // the first or a specified one (ie both mode and file params are present)
+        if( isUndef(getUrlParam.file) ) {
+            TW.File = first_path+"/"+first_file
+            mapLabel = first_file
+        } else {
+            // £POSS; match on the full paths from db.json
+            TW.File = first_path+"/"+getUrlParam.file
+            mapLabel = getUrlParam.file
+        }
 
-            // json is twice URI encoded by whoswho to avoid both '"' and '%22'
-            var json_constraints = decodeURIComponent(sourceinfo)
+        var files_selector = '<select onchange="jsActionOnGexfSelector(this.value);">'
 
-            console.log("multipleQuery RECEIVED", json_constraints)
+        for( var path in preRES.data ) {
+            var theGexfs = preRES.data[path]["gexfs"]
+            for(var aGexf in theGexfs) {
+                var gexfBasename = aGexf.replace(/\.gexf$/, "") // more human-readable in the menu
+                TW.gexfPaths[gexfBasename] = path+"/"+aGexf
+                // ex : "RiskV2PageRank1000.gexf":data/AXA/RiskV2PageRank1000.gexf
+                // (we assume there's no duplicate basenames)
 
-            // safe parsing of the URL's untrusted JSON
-            var filteringKeyArrayPairs = JSON.parse( json_constraints)
 
-            // INPUT json: <= { keywords: ['complex systems', 'something'],
-            //                  countries: ['France', 'USA'], laboratories: []}
+                if (TW.conf.debug.logFetchers)
+                  console.log("\t\t\t"+gexfBasename)
 
-            // we build 2 OUTPUT strings:
+                // for associated wosLocalDBs sql queries
+                if (theGexfs[aGexf]) {
 
-            // => thedata (for comexAPI):
-            //   keywords[]="complex systems"&keywords[]="something"&countries="France"&countries[]="USA"
-
-            // => thename (for user display):
-            //   ("complex systems" or "something") and ("France" or "USA")
-
-            // console.log("decoded filtering query", filteringKeyArrayPairs)
-
-            var restParams = []
-            var nameElts = []
-            // build REST parameters from filtering arrays
-            // and name from each filter value
-            for (var fieldName in filteringKeyArrayPairs) {
-                var nameSubElts = []
-                for (var value of filteringKeyArrayPairs[fieldName]) {
-                    // exemple: "countries[]=France"
-                    restParams.push(fieldName+'[]='+encodeURIComponent(value))
-                    nameSubElts.push ('"'+value+'"')
+                  TW.fields[path+"/"+aGexf] = {"semantic":null, "social":null}
+                  if (theGexfs[aGexf]["semantic"] && theGexfs[aGexf]["semantic"]["table"]) {
+                    TW.fields[path+"/"+aGexf]['semantic'] = theGexfs[aGexf]["semantic"]["table"]
+                  }
+                  if (theGexfs[aGexf]["social"] && theGexfs[aGexf]["social"]["table"]) {
+                    TW.fields[path+"/"+aGexf]['social'] = theGexfs[aGexf]["social"]["table"]
+                  }
                 }
-                nameElts.push("("+nameSubElts.join(" or ")+")")
-            }
-
-            if (restParams.length) {
-                thedata = "qtype=filters&" + restParams.join("&")
-                thename = nameElts.join(" and ")
-            }
-            else {
-                thedata = "qtype=filters&query=*"
-                thename = "(ENTIRE NETWORK)"
-            }
-        }
-
-        // Assigning name for the network
-        if (! thename) {
-            elements = []
-            queryarray = JSON.parse(ourGetUrlParam.nodeidparam)
-            for(var i in queryarray) {
-                item = queryarray[i]
-                if(Array.isArray(item) && item.length>0) {
-                    for(var j in item) elements.push(item[j])
+                else {
+                  TW.fields[path+"/"+aGexf] = null
                 }
-            }
-            thename = '"'+elements.join('" , "')+'"';
-        }
+                // ^^^^^^ FIXME see if we got the expected behavior right
+                //             (? specifications ?)
 
-        SigmaLayouting( theurl , thedata , thename );
+                let cssFileSelected = (TW.File==(path+"/"+aGexf))?"selected":""
+                files_selector += '<option '+cssFileSelected+'>'+gexfBasename+'</option>'
+            }
+            // console.log( files_selector )
+        }
+        files_selector += "</select>"
+        $("#network").html(files_selector)
     }
-}
 
+    // direct urlparam file case
+    else if( !isUndef(getUrlParam.file)  ) {
+      TW.File = getUrlParam.file
+    }
+    // direct file fallback case: specified file in settings_explorer
+    else if (TW.conf.sourceFile && linkCheck(TW.conf.sourceFile)) {
+      console.log("no @file arg: trying TW.conf.sourceFile from settings")
+      TW.File = TW.conf.sourceFile;
+    }
+    else {
+      console.error(`No specified input and neither db.json nor TW.conf.sourceFile ${TW.conf.sourceFile} are present`)
+    }
 
-function theListeners(){
-    pr("in THELISTENERS");
-    // leftPanel("close");
+    var finalRes = AjaxSync({ url: TW.File });
+    inData = finalRes["data"]
+    inFormat = finalRes["format"]
 
-    $('#modalloader').hide();
+    if (TW.conf.debug.logFetchers) {
+      console.warn('@TW.File', finalRes["OK"], TW.File)
+      console.log('  fetch result: format', inFormat)
+      console.log('  fetch result: typeof data', typeof inData)
+      console.log("\n============================\n")
+    }
+  }
 
-    cancelSelection(false);
-    $("#tips").html(getTips());
-    //$('#sigma-example').css('background-color','white');
-    $("#category-B").hide();
-    $("#labelchange").hide();
-    $("#availableView").hide();
-    showMeSomeLabels(6);
-    initializeMap();
-    updateMap();
-    updateDownNodeEvent(false);
-    partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8).draw(2,2,2);
-
-        /******************* /SEARCH ***********************/
-    $.ui.autocomplete.prototype._renderItem = function(ul, item) {
-        var searchVal = $("#searchinput").val();
-        var desc = extractContext(item.desc, searchVal);
-        // pr("desc:")
-        // pr(desc)
-        return $('<li onclick=\'var s = "'+item.label+'"; search(s);$("#searchinput").val(strSearchBar);\'></li>')
-        .data('item.autocomplete', item)
-        .append("<a><span class=\"labelresult\">" + item.label + "</span></a>" )
-        .appendTo(ul);
-    };
-
-    $('input#searchinput').autocomplete({
-        source: function(request, response) {
-            matches = [];
-            var matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i");
-            var results = $.grep(labels, function(e) {
-                return matcher.test(e.label); //|| matcher.test(e.desc);
-            });
-
-            if (!results.length) {
-                $("#noresults").text("Pas de résultats");
-            } else {
-                $("#noresults").empty();
-            }
-            matches = results.slice(0, maxSearchResults);
-            response(matches);
-
-        },
-        minLength: minLengthAutoComplete
-    });
-
-    $('#searchinput').bind('autocompleteopen', function(event, ui) {
-        $(this).data('is_open',true);
-    });
-    $('#searchinput').bind('autocompleteclose', function(event, ui) {
-        $(this).data('is_open',false);
-    });
-    $("#searchinput").focus(function () {
-        if ($(this).val() == strSearchBar) {
-            $(this).val('');
-        }
-    });
-    $("#searchinput").blur(function () {
-        if ($(this).val() == '') {
-            $(this).val(strSearchBar);
-        }
-    });
-
-    // i've a list of coincidences and i press enter like a boss
-    $("#searchinput").keydown(function (e) {
-        if (e.keyCode == 13 && $("input#searchinput").data('is_open') === true) {
-            // Search has several results and you pressed ENTER
-            if(!is_empty(matches)) {
-                var coincidences = []
-                for(j=0;j<matches.length;j++){
-                	coincidences.push(matches[j].id)
-                }
-                $.doTimeout(30,function (){
-                	MultipleSelection(coincidences , true);//true-> apply deselection algorithm
-                    $("input#searchinput").val("");
-                    $("input#searchinput").autocomplete( "close" );
-                });
-                //$("input#searchinput").trigger('autocompleteclose');
-            }
-        }
-    });
-
-    $("#searchinput").keyup(function (e) {
-        if (e.keyCode == 13 && $("input#searchinput").data('is_open') !== true) {
-            pr("search KEY UP");
-            var exfnd = exactfind( $("#searchinput").val() )
-
-			$.doTimeout(30,function (){
-                	MultipleSelection(exfnd.id , true);//true-> apply deselection algorithm
-                    $("input#searchinput").val("");
-                    $("input#searchinput").autocomplete( "close" );
-            });
-        }
-    });
-
-    $("#searchsubmit").click(function () {
-        pr("searchsubmit CLICK");
-        var s = $("#searchinput").val();
-        search(s);
-        $("#searchinput").val("");
-    });
-    /******************* /SEARCH ***********************/
-
-    // button CENTER
-    $("#lensButton").click(function () {
-        // for precision we'll use scalingMode inside temporarily
-        partialGraph._core.graph.p.scalingMode = "inside"
-        partialGraph.position(0,0,1);
-        partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, 0.8);
-        partialGraph.refresh();
-
-        // in consideration of auto layout algos we'll restore "outside"
-        window.setTimeout (
-            function() {
-                partialGraph._core.graph.p.scalingMode = "outside"
-            },
-            502
-        )
-        // partialGraph.startForceAtlas2();
-    });
-
-    $('#sigma-example').dblclick(function(event) {
-        pr("in the double click event");
-
-        var targeted = [];
-
-        if(cursor_size>0) {
-                    //Multiple selection
-            x1 = partialGraph._core.mousecaptor.mouseX;
-            y1 = partialGraph._core.mousecaptor.mouseY;
-            var counter=0;
-            var actualSel=[];
-            partialGraph.iterNodes(function(n){
-                if(!n.hidden){
-                    distance = Math.sqrt(
-                        Math.pow((x1-parseInt(n.displayX)),2) +
-                        Math.pow((y1-parseInt(n.displayY)),2)
-                        );
-                    if(parseInt(distance)<=cursor_size) {
-                        counter++;
-                        actualSel.push(n.id);
-                    }
-                }
-            });
-
-            targeted = actualSel;
-
-        } else {
-
-            targeted = partialGraph._core.graph.nodes.filter(function(n) {
-                    return !!n['hover'];
-                }).map(function(n) {
-                    return n.id;
-            });
-        }
-
-        if(!is_empty(targeted)) {
-            graphTagCloudElem(targeted);
-        } else {
-            if(!is_empty(selections)){
-                cancelSelection(false);
-            }
-        }
-    });
-
-    // minimap stuff
-    // $("#overview")
-    //    .mousemove(onOverviewMove)
-    //    .mousedown(startMove)
-    //    .mouseup(endMove)
-    //    .mouseout(endMove)
-    //    .mousewheel(onGraphScroll);
-
-    $("#sigma-example")
-        .mousemove(function(){
-            if(!isUndef(partialGraph)) {
-                if(cursor_size>0) trackMouse();
-            }
-        })
-        .contextmenu(function(){
-            return false;
-        })
-        .mousewheel(onGraphScroll)
-        .mousedown(function(e){
-
-            //left click!<- normal click
-            if(e.which==1){
-
-
-                var targeted = partialGraph._core.graph.nodes.filter(function(n) {
-                    return !!n['hover'];
-                }).map(function(n) {
-                    return n.id;
-                });
-
-                partialGraph.dispatch(
-                    e['type'] == 'mousedown' ?
-                    'downgraph' :
-                    'upgraph'
-                );
-
-                if(cursor_size>0) {
-                    //Multiple selection
-                    x1 = partialGraph._core.mousecaptor.mouseX;
-                    y1 = partialGraph._core.mousecaptor.mouseY;
-                    var counter=0;
-                    var actualSel=[];
-                    partialGraph.iterNodes(function(n){
-                        if(!n.hidden){
-                            distance = Math.sqrt(
-                                Math.pow((x1-parseInt(n.displayX)),2) +
-                                Math.pow((y1-parseInt(n.displayY)),2)
-                                );
-                            if(parseInt(distance)<=cursor_size) {
-                                counter++;
-                                actualSel.push(n.id);
-                            }
-                        }
-                    });
-
-                    if(checkBox) {
-
-                        var dummyarray = {};
-                        for(var i in actualSel) dummyarray[ actualSel[i] ]=1;
-                        for(var i in selections) dummyarray[ i ]=1;
-
-                        var countTypes = {};
-                        for(var i in dummyarray) {
-                            if( isUndef(countTypes[Nodes[i].type]) )
-                                countTypes[Nodes[i].type]=1;
-                            else
-                                countTypes[Nodes[i].type]++;
-                        }
-                        cancelSelection(false);
-                        cpCountTypes = Object.keys(countTypes);
-                        if(cpCountTypes.length==1)
-                            MultipleSelection(Object.keys(dummyarray) , true);//true-> apply deselection algorithm
-                        else
-                            MultipleSelection(actualSel , true);//true-> apply deselection algorithm
-
-                    } else MultipleSelection(actualSel , true);//true-> apply deselection algorithm
-
-                    // //The most brilliant way of knowing if an array is empty in the world of JavaScript
-                    i=0; for(var s in actualSel) { i++; break;}
-
-                    if(is_empty(actualSel) || i==0){
-                        pr("cursor radius ON, mouseDown -> selecciones vacias");
-                        cancelSelection(false);
-                        //$("#names").html("");
-                        //$("#opossiteNodes").html("");
-                        //$("#information").html("");
-                        //$("#topPapers").html("");
-                        //$("#tips").html(getTips());
-                        //changeButton("unselectNodes");
-                        //if(counter>0) graphResetColor();
-                    }
-
-                } else {
-                    //Unique Selection
-                    partialGraph.dispatch(
-                        e['type'] == 'mousedown' ? 'downnodes' : 'upnodes',
-                        targeted
-                        );
-                }
-
-                partialGraph.draw();
-                trackMouse();
-
-
-            }
-        });
-
-    $("#zoomSlider").slider({
-        orientation: "vertical",
-        value: partialGraph.position().ratio,
-        min: sigmaJsMouseProperties.minRatio,
-        max: sigmaJsMouseProperties.maxRatio,
-        range: "min",
-        step: 0.1,
-        slide: function( event, ui ) {
-        	// pr("*******lalala***********")
-        	// pr(partialGraph.position().ratio)
-        	// pr(sigmaJsMouseProperties.minRatio)
-        	// pr(sigmaJsMouseProperties.maxRatio)
-            partialGraph.zoomTo(
-                partialGraph._core.width / 2,
-                partialGraph._core.height / 2,
-                ui.value);
-        }
-    });
-
-    $("#zoomPlusButton").click(function () {
-        partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, partialGraph._core.mousecaptor.ratio * 1.5);
-        $("#zoomSlider").slider("value",partialGraph.position().ratio);
-        return false;
-    });
-
-    $("#zoomMinusButton").click(function () {
-        partialGraph.zoomTo(partialGraph._core.width / 2, partialGraph._core.height / 2, partialGraph._core.mousecaptor.ratio * 0.5);
-        $("#zoomSlider").slider("value",partialGraph.position().ratio);
-        return false;
-    });
-
-    $("#edgesButton").click(function () {
-        fa2enabled=true;
-        if(!isUndef(partialGraph.forceatlas2)) {
-
-            if(partialGraph.forceatlas2.active) {
-                partialGraph.stopForceAtlas2();
-                partialGraph.draw();
-                return;
-            } else {
-                partialGraph.startForceAtlas2();
-                return;
-            }
-
-        } else {
-            partialGraph.startForceAtlas2();
-            return;
-        }
-
-    });
-
-
-
-    //  finished but not used
-    //  NodeWeightFilter ( "#sliderANodeWeight" ,  "Document" , "type" , "size")
-    $("#sliderANodeWeight").freshslider({
-        range: true,
-        step:1,
-        value:[10, 60],
-        enabled: false,
-        onchange:function(low, high){
-            console.log(low, high);
-        }
-    });
-
-    //  finished
-    //this should be available at start!!
-    // pr("applying edge weith filter")
-    EdgeWeightFilter("#sliderAEdgeWeight", "label" , "nodes1", "weight");
-
-
-    //finished
-    NodeSizeSlider("#sliderANodeSize","Document", 10, "#27c470")
-
-    //finished     TODO check if doing it is useful at init
-    NodeSizeSlider("#sliderBNodeSize","NGram", 1, "#FFA500")
-
-    // NodeWeightFilter ( "#sliderBNodeWeight" ,  "NGram" , "type" , "size")
-
-    // EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
-
-
-    //finished
-    $("#unranged-value").freshslider({
-        step: 1,
-        min:cursor_size_min,
-        max:cursor_size_max,
-        value:cursor_size,
-        onchange:function(value){
-            // console.log("en cursorsize: "+value);
-            cursor_size=value;
-            if(cursor_size==0) partialGraph.draw();
-        }
-    });
-
-
-    $.doTimeout(5,function (){
-        fa2enabled=true; partialGraph.startForceAtlas2();
-        $.doTimeout(5,function (){
-            partialGraph.stopForceAtlas2();
-        });
-    });
+  return [inFormat, inData, mapLabel]
 
 }
 
-// extractFromJson()
-//      Social Spatialization
-//          Semantic Spatialization
-function SigmaLayouting( URL, DATA, NAME) {
-	console.log("_  /"+URL+"?"+DATA)
-    return $.ajax({
-        type: 'GET',
-        url: "/"+URL,
-        data: DATA,
-        contentType: "application/json",
-        dataType: 'json',
-        async: true,
-        success : function(data) {
-        	        pr(data)
-                    if(!isUndef(ourGetUrlParam.seed))seed=ourGetUrlParam.seed;
-                    extractFromJson(data,seed);
-                    pr(getClientTime()+" : DataExt Fin");
-                    // < === DATA EXTRACTED!! === >
 
-                    // changeToMacro("social");
-                    pushSWClick("social");
+//  mainStartGraph
+// ===============
+//  main function  (once we have some gexf or json data)
+// ===============
+// 1 - parses the graph data
+// 2 - starts the sigma instance in TW.partialGraph
+// 3 - starts the tinaweb instance
+// 4 - finishes setting up the environment
+// (NB inspired by Samuel's legacy bringTheNoise() function)
+function mainStartGraph(inFormat, inData, twInstance) {
 
-                    if(fa2enabled==="off") $("#edgesButton").hide();
+  if (! inFormat || ! inData) {
+    alert("error on data load")
+  }
+  else {
 
-                    pr(partialGraph._core.graph.nodes.length)
-                    pr(partialGraph._core.graph.edges.length)
+      if (TW.conf.debug.logParsers)   console.log("parsing the data")
 
-                    nbnodes = partialGraph._core.graph.nodes.length
-                    if(nbnodes>=400 && nbnodes<1000) {
-                        snbnodes = nbnodes+"";
-                        cut1 = snbnodes[0];
-                        cut2 = snbnodes.length;
-                        pr("cut1: "+cut1)
-                        pr("cut2: "+cut2)
-                        iterationsFA2 = Math.round(iterationsFA2/(cut1/cut2))
-                    }
-                    if(nbnodes>=1000) iterationsFA2 = 150;
-                    pr("iterationsFA2: "+iterationsFA2)
+      let start = new ParseCustom(  inFormat , inData );
+      let catsInfos = start.scanFile();
 
-                    $("#network").html(NAME);
-                    // < === ASYNCHRONOUS FA2.JS === >
+      TW.categories = catsInfos.categories
+      if (TW.conf.debug.logParsers){
+        console.log(`Source scan found ${TW.categories.length} node categories: ${TW.categories}`)
+      }
 
-                    pr(getClientTime()+" : Ini FA2");
-                    var ForceAtlas2 = new Worker("static/tinawebJS/asyncFA2.js");
-                    ForceAtlas2.postMessage({
-                        "nodes": partialGraph._core.graph.nodes,
-                        "edges": partialGraph._core.graph.edges,
-                        "it":iterationsFA2,
-                        "graph_type": swclickActual
-                    });
-                    ForceAtlas2.addEventListener('message', function(e) {
-                        iterations=e.data.it;
-                        nds=e.data.nodes;
-                        for(var n in nds){
-                            id=nds[n].id;
-                            x=nds[n].x
-                            y=nds[n].y
-                            partialGraph._core.graph.nodes[n].x=x;
-                            partialGraph._core.graph.nodes[n].y=y;
-                            partialGraph._core.graph.nodesIndex[id].x=x
-                            partialGraph._core.graph.nodesIndex[id].y=y
-                            Nodes[id].x=x;
-                            Nodes[id].y=y;
-                        }
-                        pr("\ttotalIterations: "+iterations)
-                        pr(getClientTime()+" : Fin FA2");
-                        console.log("Parsing and FA2 complete.");
-                        pr("\n=================\n")
-                        // < === ASYNCHRONOUS FA2.JS DONE!! === >
+      // reverse lookup: category name => category indice
+      TW.catDict = catsInfos.lookup_dict
 
+      if (! TW.categories) {
+        console.warn ('ParseCustom scanFile found no categories!!')
+      }
 
-                        // [ calculate iterations for semanticgraph ]
-                        pr(getClientTime()+" : Ini FA2 for SemanticGraph");
-                        var cut1_,cut2_,iterationsFA2_=iterationsFA2;
-                        pr(otherGraph._core.graph.nodes.length)
-                        pr(otherGraph._core.graph.edges.length)
-                        nbnodes = otherGraph._core.graph.nodes.length
-                        if(nbnodes>=400 && nbnodes<1000) {
-                            snbnodes = nbnodes+"";
-                            cut1_ = snbnodes[0];
-                            cut2_ = snbnodes.length;
-                            pr("cut1 sem: "+cut1_)
-                            pr("cut2 sem: "+cut2_)
-                            iterationsFA2_ = Math.round(iterationsFA2/(5*cut1_/cut2_))
-                        }
-                        if(nbnodes>=1000) iterationsFA2_ = 150;
-                        pr("iterationsFA2 sem: "+iterationsFA2_)
-                        // [ / calculate iterations for semanticgraph ]
+      // activetypes: the node categorie(s) that is (are) currently displayed
+      // ex: [true,false] = [nodes of type 0 shown  ; nodes of type 1 not drawn]
+      var initialActivetypes = TW.instance.initialActivetypes( TW.categories )
+
+      // XML parsing from ParseCustom
+      var dicts = start.makeDicts(TW.categories); // > parse json or gexf, dictfy
+
+      if (TW.conf.debug.logParsers)   console.info("parsing result:", dicts)
+
+      TW.Nodes = dicts.nodes;
+      TW.Edges = dicts.edges;
+
+      TW.nodeIds = Object.keys(dicts.nodes)  // useful for loops
+      TW.edgeIds = Object.keys(dicts.edges)
+
+      // in-place: pre-compute all color/unselected color/size properties
+      prepareNodesRenderingProperties(TW.Nodes)
+      prepareEdgesRenderingProperties(TW.Edges, TW.Nodes)
+
+      if (inData.clusters) TW.Clusters = inData.clusters
+
+      // main console info
+      // ===================
+      console.info(`== new graph ${TW.nodeIds.length} nodes (${TW.categories.length > 1 ? 'bipartite': 'monopartite'}), ${TW.edgeIds.length} edges ==`)
+
+      // a posteriori categories diagnostic
+      // ----------------------------------
+      // by default TW.categories now match user-suggested catSoc/Sem if present
+      // so we just need to handle mismatches here (when user-suggested cats were absent)
+      if (TW.conf.catSem != TW.categories[0]) {
+        console.warn(`Observed semantic category "${TW.categories[0]}" overwrites user-suggested TW.conf.catSem "(${TW.conf.catSem})"`)
+        TW.conf.catSem = TW.categories[0]
+      }
+      if (TW.categories.length > 1 && TW.conf.catSoc != TW.categories[1]) {
+        console.warn(`Observed social category "${TW.categories[1]}" overwrites user-suggested TW.conf.catSoc ("${TW.conf.catSoc}")`)
+        TW.conf.catSoc = TW.categories[1]
+      }
+
+      // [ Poblating the Sigma-Graph ]
+
+      // preparing the data (TW.Nodes and TW.Edges filtered by initial type)
+      // POSS: avoid this step and use the filters at rendering time!
+      TW.graphData = {nodes: [], edges: []}
+      TW.graphData = sigma_utils.FillGraph( initialActivetypes , TW.catDict  , TW.Nodes , TW.Edges , TW.graphData );
 
 
-                        // [ semantic layouting ]
-                        var ForceAtlas2_ = new Worker("static/tinawebJS/asyncFA2.js");
-                        ForceAtlas2_.postMessage({
-                            "nodes": otherGraph._core.graph.nodes,
-                            "edges": otherGraph._core.graph.edges,
-                            "it":iterationsFA2,
-                            "graph_type": swclickActual  // test usage_
-                        });
-                        ForceAtlas2_.addEventListener('message', function(e) {
-                            iterations=e.data.it;
-                            nds=e.data.nodes;
-                            for(var n in nds){
-                                id=nds[n].id;
-                                x=nds[n].x
-                                y=nds[n].y
-                                Nodes[id].x=x;
-                                Nodes[id].y=y;
-                            }
+          // // ----------- TEST stock parse gexf and use nodes to replace TW's ---------
+          // var gexfData = gexf.fetch('data/politoscope/ProgrammeDesCandidats.gexf')
+          //
+          // TW.graphData = sigmaTools.myGexfParserReplacement(
+          //     gexfData.nodes,
+          //     gexfData.edges
+          // )
+          // console.log ('ex in TW.graphData.nodes[0]', TW.graphData.nodes[0])
+          //
+          // // our holey id-indexed arrays
+          // TW.Nodes = {}
+          // TW.Edges = {}
+          // TW.nodeIds = []
+          // TW.edgeIds = []
+          // for (var j in TW.graphData.nodes) {
+          //   var nid = TW.graphData.nodes[j].id
+          //   TW.Nodes[nid] = TW.graphData.nodes[j]
+          //   TW.nodeIds.push(nid)
+          // }
+          // for (var i in TW.graphData.edges) {
+          //   var eid = TW.graphData.edges[i].id
+          //   TW.Edges[eid] = TW.graphData.edges[i]
+          //   TW.edgeIds.push(eid)
+          // }
+          //
+          //
+          // // -------------------------------------------------------------------------
 
-                            pr("\ttotalIterations: "+iterations)
-                            pr(getClientTime()+" : Fin FA2 for SemanticGraph");
+        if (TW.graphData.nodes.length == 0) console.error("empty graph")
+        if (TW.graphData.edges.length == 0) console.error("no edges in graph")
+
+      // our final sigma params (cf github.com/jacomyal/sigma.js/wiki/Settings)
+      TW.customSettings = Object.assign(
+
+          // 1) optimal low-level values (was: "developer settings")
+          {
+              drawEdges: true,
+              drawNodes: true,
+              drawLabels: true,
+
+              labelSize: "proportional",
+
+              // nodesPowRatio: .3,
+              batchEdgesDrawing: false,
+              hideEdgesOnMove: true,
+
+              enableHovering: true,
+              singleHover: true,
+              enableEdgeHovering: false,
+
+              autoResize: true,
+              rescaleIgnoreSize: true,
+
+              mouseEnabled: true,
+              touchEnabled: true,
+
+              animationsTime:150,
+              mouseZoomDuration:250,
+
+              zoomMin: TW.conf.zoomMin,
+              zoomMax: TW.conf.zoomMax
+          },
+
+          // 2) user-configurable values (cf. settings_explorer)
+          TW.conf.sigmaJsDrawingProperties,
+      )
 
 
-                            otherGraph.emptyGraph();
-                            otherGraph = null;
-                            $("#sigma-othergraph").html("");
+      if (TW.conf.debug.logSettings) console.info("sigma settings", TW.customSettings)
 
 
-                            semanticConverged = true;
-                            $("#semLoader").hide();
-                            if( NOW=="B" ) {
+      // ==================================================================
+      // sigma js library invocation (https://github.com/jacomyal/sigma.js)
+      // ==================================================================
+      TW.partialGraph = new sigma({
+          graph: TW.graphData,
+          container: 'sigma-contnr',
+          renderer: {
+              container: document.getElementById('sigma-contnr'),
+              type: sigma.renderers.canvas
+              // type: sigma.renderers.webgl // POSS if write custom renderers
+          },
+          settings: TW.customSettings
+      });
+      // ==================================================================
 
-                                changeToMacro("semantic");
-                                partialGraph.draw();
-                                // $("#sliderBEdgeWeight").html("");
-                                // $("#sliderBNodeWeight").html("");
-                                $("#category-B").show();
-                                EdgeWeightFilter("#sliderBEdgeWeight", "label" , "nodes2", "weight");
-                                NodeWeightFilter ( "#sliderBNodeWeight" , "type" , "NGram" , "size");
-                                $("#colorGraph").hide();
+      // a new state
+      TW.pushState({'activetypes': initialActivetypes})
 
+      // NB the list of nodes and edges from TW.graphData will be changed
+      //    by changeLevel, changeType or subset sliders => no need to keep it
+      delete TW.graphData
 
-                            }
+      // shortcuts to the renderer and camera
+      TW.cam  = TW.partialGraph.camera
+      TW.rend = TW.partialGraph.renderers[0]
 
-                            console.log("Parsing and FA2 complete for SemanticGraph.");
-                        });
-                        // [ / semantic layouting ]
+      // NB : camera positions are fix if the node is fixed => they only depend on layout
+      //      renderer position depend on viewpoint/zoom (like ~ html absolute positions of the node in the div)
 
+      // now that we have a sigma instance, let's bind our click handlers to it
+      TW.instance.initSigmaListeners(TW.partialGraph, initialActivetypes)
 
+      // [ / Poblating the Sigma-Graph ]
 
-                        theListeners();
-                    });
-        },
-        error: function(){
-	    console.log("in the main.js")
-	    console.log(URL)
-            pr("Page Not found. parseCustom, inside the IF");
+      if (!TW.conf.filterSliders) {
+
+        var filterEls = document.getElementsByClassName('weight-selectors')
+
+        for (var k in filterEls) {
+          if (filterEls[k] && filterEls[k].style) filterEls[k].style.display="none"
         }
-    });
+      }
+
+      TW.FA2Params = {
+        // adapting speed -------------
+        slowDown: 1.5,
+        startingIterations: 2,             // keep it an even number to reduce visible oscillations at rendering
+        iterationsPerRender: 4,            // idem
+        barnesHutOptimize: false,
+        // barnesHutTheta: .5,
+
+        // global behavior -----------
+        linLogMode: true,
+        edgeWeightInfluence: .3,
+        gravity: .8,
+        strongGravityMode: false,
+        scalingRatio: 1,
+
+        adjustSizes: false,     // ~ messy but sort of in favor of overlap prevention
+
+        // favors global centrality
+        // (but rather not needed when data already shows topic-centered
+        //  node groups and/nor when preferential attachment type of data)
+        outboundAttractionDistribution: false
+      }
+
+      if (TW.conf.debug.logSettings) console.info("FA2 settings", TW.FA2Params)
+
+      // init FA2 for any future forceAtlas2 calls
+      TW.partialGraph.configForceAtlas2(TW.FA2Params)
+
+
+      // init noverlap for any future calls
+      TW.partialGraph.configNoverlap({
+        nodeMargin: .4,
+        scaleNodes: 1.5,
+        gridSize: 400,
+        speed: 5,
+        maxIterations: 10,
+        easing: 'quadraticOut', // animation transition function
+        duration: 1500   // animation duration
+                         // NB animation happens *after* processing
+      });
+
+      // REFA new sigma.js
+      TW.partialGraph.camera.goTo({x:0, y:0, ratio:0.9, angle: 0})
+
+      // mostly json data are extracts provided by DB apis => no positions
+      // if (inFormat == "json")  TW.conf.fa2Enabled = true
+
+      // will run fa2 if enough nodes and TW.conf.fa2Enabled == true
+      sigma_utils.smartForceAtlas()
+
+
+      // adapt the enviroment to monopartite vs. bipartite cases
+      if( TW.categories.length==1 ) {
+          $("#changetype").hide();
+          $("#taboppos").hide();
+
+          // if (TW.conf.catSem && TW.conf.catSoc) {
+            setTimeout(function () {
+                // tabneigh: show "Related" tab
+                document.querySelector('.etabs a[href="#tabs2"]').click()
+            }, 500);
+          // }
+      }
+      // for elements hidden by default (cf. css) but useful in bipartite case
+      else {
+        $("#changetype").show();
+        $("#taboppos").show();
+        $("#taboppos").css('display', 'inline-block');
+      }
+
+
+      // should prepare the colors/clusters menu once and for all
+      // (previously, needed to be called after changeType/changeLevel)
+      changeGraphAppearanceByFacets(true)
+
+      // set the default legend
+      set_ClustersLegend ( "clust_default" )
+  }
 
 }
+
+setTimeout( function() {
+  theHtml.classList.remove('waiting')
+}, 20)
+
+console.log("finish")
