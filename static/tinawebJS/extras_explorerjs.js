@@ -220,6 +220,7 @@ function graphResetLabelsAndSizes(){
       n.size = TW.Nodes[n.id].size
     }
   }
+  set_ClustersLegend()
 }
 
 // @daclass: the name of a numeric/categorical attribute from node.attributes

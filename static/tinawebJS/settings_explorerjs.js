@@ -37,7 +37,7 @@ TW.conf = (function(TW){
   TWConf.relatedDocsMax = 10
   TWConf.relatedDocsAPI = "http://127.0.0.1:5000/twitter_search"
 
-  TWConf.relatedDocsType = "wosLocalDB"      // accepted: "twitter" | "wosLocalDB"
+  TWConf.relatedDocsType = "twitter"      // accepted: "twitter" | "wosLocalDB"
                                           // POSSible: "elastic"
 
   // =======================
@@ -201,8 +201,8 @@ TW.conf = (function(TW){
 
   // if fa2Available, the auto-run config:
 
-    TWConf.fa2Enabled= false;        // fa2 auto-run at start and after graph modified ?
-    TWConf.fa2Milliseconds=5000;    // duration of auto-run
+    TWConf.fa2Enabled= true;        // fa2 auto-run at start and after graph modified ?
+    TWConf.fa2Milliseconds=2000;    // duration of auto-run
     TWConf.minNodesForAutoFA2 = 5   // graph size threshold to auto-run
 
 
@@ -281,7 +281,7 @@ TW.conf = (function(TW){
 
   // em size range for neighbor nodes "tagcloud"  (1 = "normal size")
   TWConf.tagcloudFontsizeMin = .8  ;
-  TWConf.tagcloudFontsizeMax = 2 ;
+  TWConf.tagcloudFontsizeMax = 1.5 ;
 
   TWConf.tagcloudSameLimit = 50     // max displayed neighbors of the same type
   TWConf.tagcloudOpposLimit = 10    // max displayed neighbors of the opposite type
@@ -289,7 +289,7 @@ TW.conf = (function(TW){
   // relative sizes (iff ChangeType == both nodetypes)
   TWConf.sizeMult = [];
   TWConf.sizeMult[0] = 1.0;     // ie for node type 0 (<=> sem)
-  TWConf.sizeMult[1] = 3.0;    // ie for node type 1 (<=> soc)
+  TWConf.sizeMult[1] = 2.0;    // ie for node type 1 (<=> soc)
 
 
   // ===========

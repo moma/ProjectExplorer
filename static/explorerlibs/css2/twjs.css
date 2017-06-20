@@ -25,7 +25,7 @@ html.waiting {
   top: 105px;
   bottom: 0;
   left: 0;
-  right: 400px;
+  right: 300px;
   z-index: 1;
 
   /* non selectable: we've got our own events here */
@@ -40,7 +40,7 @@ html.waiting {
   top: 105px;
   bottom: 0;
   right: 0;
-  width: 400px;
+  width: 300px;
   z-index: 2;
   border-left: 1px #222 solid;
   overflow-y: scroll;
