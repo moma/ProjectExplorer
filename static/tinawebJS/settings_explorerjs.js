@@ -6,7 +6,7 @@ TW.conf = (function(TW){
 
   let TWConf = {}
 
-  TWConf.branding = 'ProjectExplorer'   // <--- the name displayed in upper left
+  TWConf.branding = 'Community Explorer 2'   // <--- the name displayed in upper left
 
 
   // ==========================
@@ -33,7 +33,7 @@ TW.conf = (function(TW){
   // Related documents (topPapers) data source
   // -----------------------------------------
 
-  TWConf.getRelatedDocs = true
+  TWConf.getRelatedDocs = false
   TWConf.relatedDocsMax = 10
   TWConf.relatedDocsAPI = "http://127.0.0.1:5000/twitter_search"
 

@@ -661,7 +661,7 @@ var TinaWebJS = function ( sigmacanvas ) {
             }
         });
 
-        if (TW.conf.getRelatedDocs) {
+        if (TW.conf.getRelatedDocs && document.getElementById('reldocs-type')) {
           document.getElementById('reldocs-type').value = TW.conf.relatedDocsType
         }
 
