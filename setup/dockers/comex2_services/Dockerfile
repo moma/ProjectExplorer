@@ -36,16 +36,16 @@ RUN ln -s ../sites-available/comex2_php_and_services.nginx.conf
 WORKDIR /
 
 # pull the comex server from repository...
+RUN echo "updating"
 RUN git clone https://github.com/moma/comex2.git
 
 # activate the tina 2 variant
+WORKDIR /comex2
 RUN git checkout with_tina_1.2
 
 # ...or copy it locally
 # ADD comex2 /comex2
 
-# main CMD to start the app
-WORKDIR /comex2
 
 # start nginx inner wrapper and gunicorn production server
 CMD bash comex-run.sh -p
