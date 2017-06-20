@@ -38,6 +38,9 @@ WORKDIR /
 # pull the comex server from repository...
 RUN git clone https://github.com/moma/comex2.git
 
+# activate the tina 2 variant
+RUN git checkout with_tina_1.2
+
 # ...or copy it locally
 # ADD comex2 /comex2
 
