@@ -55,8 +55,8 @@ TW.instance.init()
 TW.instance.initGUIListeners();
 TW.instance.initSearchListeners();
 
-// show the custom name of the app
-writeBrand(TW.conf.branding)
+// show the custom name + home link of the app
+writeBrand(TW.conf.branding, TW.conf.brandingLink)
 
 // choosing the input
 // -------------------

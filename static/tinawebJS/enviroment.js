@@ -131,8 +131,14 @@ function getHeatmapColors(nClasses) {
 }
 
 
-function writeBrand (brandString) {
+function writeBrand (brandString, brandLink) {
   document.getElementById('twbrand').innerHTML = brandString
+  let anchors = document.getElementsByClassName('twbrand-link')
+  for (var k in anchors) {
+    if (anchors[k] && anchors[k].href) {
+      anchors[k].href = brandLink
+    }
+  }
 }
 
 function writeLabel (aMapLabel) {
@@ -948,7 +954,7 @@ function updateSearchLabels(id,name,type){
 function createWaitIcon(idname, width) {
   let icon = document.createElement('img')
 
-  icon.src = TW.conf.libspath + '/img2/loader.gif'
+  icon.src = 'static/explorerlibs/img2/loader.gif'
 
   icon.style.position = 'absolute'
   icon.style.left = '0'
