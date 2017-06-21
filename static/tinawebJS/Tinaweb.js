@@ -188,18 +188,17 @@ function SelectionEngine() {
             if(! $.isArray(args.nodes)) ndsids.push(args.nodes);
             else ndsids=args.nodes;
 
+            // for state cache
+            activeRelations[activetypesKey] = {}
+
+            // shortcut
+            var sameSideNeighbors = activeRelations[activetypesKey]
+
             for(var i in ndsids) {
                 var srcnid = ndsids[i];
 
                 if(TW.Relations[activetypesKey] && TW.Relations[activetypesKey][srcnid] ) {
                     var neighs = TW.Relations[activetypesKey][srcnid]
-
-                    // for state cache
-                    activeRelations[activetypesKey][srcnid] = {}
-
-                    // shortcut
-                    let sameSideNeighbors = activeRelations[activetypesKey][srcnid]
-
                     if(neighs) {
                         for(var j in neighs) {
                             var tgtnid = neighs[j]
@@ -264,16 +263,12 @@ function SelectionEngine() {
                 let srcnid = theSelection[i]
                 var bipaNeighs = TW.Relations["1|1"][srcnid];
 
-                activeRelations["1|1"][srcnid] = {}
-                // shortcut
-                let oppositeSideNeighbors = activeRelations["1|1"][srcnid]
-
                 for(var k in bipaNeighs) {
-                    if (typeof oppositeSideNeighbors[bipaNeighs[k]] == "undefined")
-                        oppositeSideNeighbors[bipaNeighs[k]] = 0;
+                    if (typeof activeRelations["1|1"][bipaNeighs[k]] == "undefined")
+                        activeRelations["1|1"][bipaNeighs[k]] = 0;
 
-                    // £TODO weighted increment
-                    oppositeSideNeighbors[bipaNeighs[k]]++;
+                    // cumulated for all srcnids
+                    activeRelations["1|1"][bipaNeighs[k]]++;
                 }
             }
         }
@@ -284,12 +279,12 @@ function SelectionEngine() {
         let same = []
 
         if (activeRelations["1|1"]) {
-          oppos = ArraySortByValue(activeRelations["1|1"][srcnid], function(a,b){
+          oppos = ArraySortByValue(activeRelations["1|1"], function(a,b){
             return b-a
           });
         }
 
-        same = ArraySortByValue(activeRelations[activetypesKey][srcnid], function(a,b){
+        same = ArraySortByValue(activeRelations[activetypesKey], function(a,b){
             return b-a
         });
 
