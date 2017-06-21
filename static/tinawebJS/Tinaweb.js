@@ -179,8 +179,14 @@ function SelectionEngine() {
 
         // Dictionaries of: selection+neighbors for the new state and updateRelatedNodesPanel
         let selections = {}
+
+        // detailed relations sorted by types and srcid (for state cache, deselects etc)
         let activeRelations = {}
             activeRelations[activetypesKey] = {}
+
+        // cumulated neighbor weights no matter what srcid (for tagCloud etc)
+        let sameSideNeighbors = {}
+        let oppoSideNeighbors = {}
 
         // targeted arg 'nodes' can be nid array or single nid
         var ndsids=[]
@@ -188,17 +194,14 @@ function SelectionEngine() {
             if(! $.isArray(args.nodes)) ndsids.push(args.nodes);
             else ndsids=args.nodes;
 
-            // for state cache
-            activeRelations[activetypesKey] = {}
-
-            // shortcut
-            var sameSideNeighbors = activeRelations[activetypesKey]
-
             for(var i in ndsids) {
                 var srcnid = ndsids[i];
 
                 if(TW.Relations[activetypesKey] && TW.Relations[activetypesKey][srcnid] ) {
                     var neighs = TW.Relations[activetypesKey][srcnid]
+
+                    activeRelations[activetypesKey][srcnid] = {}
+
                     if(neighs) {
                         for(var j in neighs) {
                             var tgtnid = neighs[j]
@@ -223,14 +226,21 @@ function SelectionEngine() {
                                   sameSideNeighbors[tgtnid]=0
                                 }
 
+                                // and the detailed info
+                                if (typeof activeRelations[activetypesKey][srcnid][tgtnid] == 'undefined') {
+                                  activeRelations[activetypesKey][srcnid][tgtnid]=0
+                                }
+
                                 // **make the edge active**
                                 if (e1 && !e1.hidden) {
                                   e1.customAttrs.activeEdge = 1;
                                   sameSideNeighbors[tgtnid] += e1.weight || 1
+                                  activeRelations[activetypesKey][srcnid][tgtnid] += e1.weight || 1
                                 }
                                 if (e2 && !e2.hidden) {
                                    e2.customAttrs.activeEdge = 1;
                                    sameSideNeighbors[tgtnid] += e2.weight || 1
+                                   activeRelations[activetypesKey][srcnid][tgtnid] += e2.weight || 1
                                 }
 
                                 // we add as neighbor to color it (except if already in targeted)
@@ -263,12 +273,21 @@ function SelectionEngine() {
                 let srcnid = theSelection[i]
                 var bipaNeighs = TW.Relations["1|1"][srcnid];
 
+                activeRelations["1|1"][srcnid] = {}
+
                 for(var k in bipaNeighs) {
-                    if (typeof activeRelations["1|1"][bipaNeighs[k]] == "undefined")
-                        activeRelations["1|1"][bipaNeighs[k]] = 0;
+                    if (typeof activeRelations["1|1"][srcnid][bipaNeighs[k]] == "undefined") {
+                      activeRelations["1|1"][srcnid][bipaNeighs[k]] = 0;
+                    }
+                    if (typeof oppoSideNeighbors[bipaNeighs[k]] == "undefined") {
+                      oppoSideNeighbors[bipaNeighs[k]] = 0 ;
+                    }
 
                     // cumulated for all srcnids
-                    activeRelations["1|1"][bipaNeighs[k]]++;
+                    oppoSideNeighbors[bipaNeighs[k]]++
+
+                    // and the details
+                    activeRelations["1|1"][srcnid][bipaNeighs[k]]++;
                 }
             }
         }
@@ -279,12 +298,12 @@ function SelectionEngine() {
         let same = []
 
         if (activeRelations["1|1"]) {
-          oppos = ArraySortByValue(activeRelations["1|1"], function(a,b){
+          oppos = ArraySortByValue(oppoSideNeighbors, function(a,b){
             return b-a
           });
         }
 
-        same = ArraySortByValue(activeRelations[activetypesKey], function(a,b){
+        same = ArraySortByValue(sameSideNeighbors, function(a,b){
             return b-a
         });
 
@@ -310,6 +329,7 @@ function SelectionEngine() {
         TW.gui.selectionActive = true
 
         TW.partialGraph.render();
+
 
         updateRelatedNodesPanel( theSelection , same, oppos )
 

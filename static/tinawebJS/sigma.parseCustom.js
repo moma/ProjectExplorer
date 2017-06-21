@@ -1015,7 +1015,6 @@ function dictfyJSON( data , categories ) {
     for(var nid in data.nodes) {
         let n = data.nodes[nid];
 
-        console.log(">>", n)
         let node = {}
 
         node.id = (n.id) ? n.id : nid ; // use the key if no id

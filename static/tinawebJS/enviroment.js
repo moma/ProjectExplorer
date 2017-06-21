@@ -427,6 +427,8 @@ function changeLevel() {
 
       var sels = present.selectionNids ;//[144, 384, 543]//TW.states[last].selectionNids;
 
+      deselectNodes()
+
       let selsChecker = {}
       for (let i in sels) {
         selsChecker[sels[i]] = true
@@ -448,7 +450,6 @@ function changeLevel() {
       var nodes_2_colour = {}
       var edges_2_colour = {}
 
-      // £TODO: factorize with same strategy in MultipleSelection2 beginning
       for(var i in sels) {
           s = sels[i];
           neigh = TW.Relations[activetypesKey][s]
@@ -463,9 +464,6 @@ function changeLevel() {
               }
           }
       }
-      for(var i in sels)
-          nodes_2_colour[sels[i]]=true;
-
 
       var futurelevel = null
 
