@@ -380,6 +380,8 @@ function changeType() {
 
     let newselsArr = Object.keys(newsels)
 
+    TW.gui.handpickedcolor = false
+
     TW.pushState({
         activetypes: t1Activetypes,
         sels: newselsArr,

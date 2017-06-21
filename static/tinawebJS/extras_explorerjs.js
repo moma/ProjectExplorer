@@ -280,7 +280,7 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
         }
 
         // we add a title to cluster classes by ranking their nodes and taking k best labels
-        if (TW.conf.facetOptions[daclass] && TW.conf.facetOptions[daclass].col == 'cluster') {
+        if (TW.conf.facetOptions[daclass] && TW.conf.facetOptions[daclass].col == 'cluster' && getActivetypesKey() != "0|1" ) {
 
           // let t0 = performance.now()
 
