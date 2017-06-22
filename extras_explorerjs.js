@@ -220,6 +220,7 @@ function graphResetLabelsAndSizes(){
       n.size = TW.Nodes[n.id].size
     }
   }
+  set_ClustersLegend()
 }
 
 // @daclass: the name of a numeric/categorical attribute from node.attributes
@@ -279,7 +280,7 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
         }
 
         // we add a title to cluster classes by ranking their nodes and taking k best labels
-        if (TW.conf.facetOptions[daclass] && TW.conf.facetOptions[daclass].col == 'cluster') {
+        if (TW.conf.facetOptions[daclass] && TW.conf.facetOptions[daclass].col == 'cluster' && getActivetypesKey() != "0|1" ) {
 
           // let t0 = performance.now()
 

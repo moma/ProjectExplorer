@@ -1014,6 +1014,7 @@ function dictfyJSON( data , categories ) {
 
     for(var nid in data.nodes) {
         let n = data.nodes[nid];
+
         let node = {}
 
         node.id = (n.id) ? n.id : nid ; // use the key if no id
@@ -1027,6 +1028,13 @@ function dictfyJSON( data , categories ) {
         if(n.attributes) node.attributes = n.attributes
         else             node.attributes = {}
         node.type = (n.type)? n.type : categories[0] ;
+
+        // any content to display on side panel (eg: comex v-card)
+        node.htmlCont = n.content || '';
+
+        // 2x use-case-specific attributes (comex)
+        node.CC = n.CC || '';
+        node.ACR = n.ACR || '';
 
         // £TODO REFA new sigma.js: shape is not attr but custom type linked to a renderer's name
         // node.shape = "square";

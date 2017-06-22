@@ -76,12 +76,9 @@
 
       <div class="navbar-collapse collapse" id="navbar-main">
         <ul class="nav navbar-nav navbar-left">
-          <li class="navbar-middle">
-            <img style="width:20px" src="libs/img2/home.png">
-          </li>
           <li style="margin-left:10px;">
-            <a href="#" class="navbar-middle navbar-brand">
-              <!-- will be replaced by TW.conf.branding -->
+            <!-- name will be replaced by TW.conf.branding, link by TW.conf.brandingLink -->
+            <a href="#" class="navbar-middle navbar-brand twbrand-link">
               <span id="twbrand">TinaWebJS</span>
             </a>
           </li>
@@ -157,10 +154,10 @@
             </li>
             -->
 
-            <li><a href="http://www.politoscope.org"
+            <li><a href="https://communityexplorer.org"
                   class="navbar-higher"
-                  title="Politoscope">
-                  <img src="libs/img2/logo.png"
+                  title="Community Explorer">
+                  <img src="static/explorerlibs/img2/logo.png"
                        style="width:60px; position:absolute; top:-60px; left:-75px; z-index:5; overflow:visible;">
             </a></li>
 
@@ -356,28 +353,30 @@
               <li>
                   <a href="#" id="lensButton" class="zoombarbuttons"
                      title="Center View">
-                    <img src="libs/img2/target.png" style="width:32px">
+                    <img src="libs/img2/target.png">
                   </a>
               </li>
 
               <li>
                   <a href="#" id="layoutButton" class="zoombarbuttons"
                      title="Force Atlas Layout">
-                    <img src="libs/img2/edges.png" style="width:32px">
+                    <img src="libs/img2/edges.png">
                   </a>
               </li>
 
               <li>
                   <a href="#" id="noverlapButton" class="zoombarbuttons"
                      title="Disperse Overlapping Nodes">
-                    <img src="libs/img2/disperse.png" style="width:32px">
+                    <img src="libs/img2/disperse.png">
                   </a>
               </li>
 
 
               <li>
-                  <a href="#facet-options" id="facets" class="zoombarbuttons" data-toggle="modal" data-target="#facet-options">
-                    <img style="width:32px" title="Facets coloring options" src="libs/img2/facet_options.png"></img>
+                  <a href="#facet-options" id="facets" class="zoombarbuttons"
+                     title="Facets coloring options"
+                     data-toggle="modal" data-target="#facet-options">
+                    <img src="libs/img2/facet_options.png"></img>
                   </a>
               </li>
 
@@ -755,13 +754,6 @@
   <script src="tinawebJS/sigma_v1.2/plugins/sigma.renderers.snapshot/sigma.renderers.snapshot.js"></script>
   <script src="tinawebJS/sigma_v1.2/plugins/sigma.plugins.dragNodes/sigma.plugins.dragNodes.js"></script>
 
-  <!-- Tested as replacement for parseCustom -->
-  <!-- <script src="tinawebJS/sigma_v1.2/plugins/sigma.parsers.gexf/gexf-parser.js"></script> -->
-  <!-- <script src="tinawebJS/sigma_v1.2/plugins/sigma.parsers.gexf/sigma.parsers.gexf.js"></script> -->
-
-  <!-- testing sigma 1.5 imports from linkurious src -->
-  <!-- <script src="tinawebJS/sigma_v1.5/sigma.js" type="text/javascript" language="javascript"></script>
-  <script src="tinawebJS/sigma_v1.5/plugins.js" type="text/javascript" language="javascript"></script> -->
 
   <!-- new sigma (1.0c => 1.2) compatibility imports -->
   <script src="tinawebJS/sigma_tools.js"></script>

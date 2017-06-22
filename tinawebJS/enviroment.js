@@ -380,6 +380,8 @@ function changeType() {
 
     let newselsArr = Object.keys(newsels)
 
+    TW.gui.handpickedcolor = false
+
     TW.pushState({
         activetypes: t1Activetypes,
         sels: newselsArr,
@@ -425,6 +427,8 @@ function changeLevel() {
 
       var sels = present.selectionNids ;//[144, 384, 543]//TW.states[last].selectionNids;
 
+      deselectNodes()
+
       let selsChecker = {}
       for (let i in sels) {
         selsChecker[sels[i]] = true
@@ -443,35 +447,38 @@ function changeLevel() {
 
       var voisinage = {}
       // Dictionaries of: selection+neighbors
-      var nodes_2_colour = {}
-      var edges_2_colour = {}
+      var nodesToAdd = {}
+      var edgesToAdd = {}
 
-      // £TODO: factorize with same strategy in MultipleSelection2 beginning
       for(var i in sels) {
           s = sels[i];
-          neigh = TW.Relations[activetypesKey][s]
-          if(neigh) {
-              for(var j in neigh) {
-                  t = neigh[j]
-                  nodes_2_colour[t]=false;
-                  edges_2_colour[s+";"+t]=true;
-                  edges_2_colour[t+";"+s]=true;
-                  if( !selsChecker[t]  )
-                      voisinage[ t ] = true;
-              }
+          nodesToAdd[s]=true;
+          if (TW.Relations[activetypesKey]) {
+            neigh = TW.Relations[activetypesKey][s]
+            if(neigh) {
+                for(var j in neigh) {
+                    t = neigh[j]
+                    nodesToAdd[t]=true;
+                    edgesToAdd[s+";"+t]=true;
+                    edgesToAdd[t+";"+s]=true;
+                    if( !selsChecker[t]  )
+                        voisinage[ t ] = true;
+                }
+            }
+          }
+          else {
+            // case where no edges at all (ex: scholars have no common keywords)
+            console.log("no edges between these nodes")
           }
       }
-      for(var i in sels)
-          nodes_2_colour[sels[i]]=true;
-
 
       var futurelevel = null
 
       if(present.level) { // [Change to Local] when level=Global(1)
-          for(var nid in nodes_2_colour)
-              add1Elem(nid)
-          for(var eid in edges_2_colour)
-              add1Elem(eid)
+        for(var nid in nodesToAdd)
+          add1Elem(nid)
+        for(var eid in edgesToAdd)
+          add1Elem(eid)
 
           // Adding intra-neighbors edges O(voisinage²)
           voisinage = Object.keys(voisinage)
@@ -481,7 +488,6 @@ function changeLevel() {
                       // console.log( "\t" + voisinage[i] + " vs " + voisinage[j] )
                       add1Elem( voisinage[i]+";"+voisinage[j] )
                   }
-
               }
           }
 
@@ -509,11 +515,7 @@ function changeLevel() {
 
           // Nodes Selection now:
           if(sels.length>0) {
-              TW.instance.selNgn.MultipleSelection2({
-                          nodes:sels,
-                          // nodesDict:nodes_2_colour,
-                          // edgesDict:edges_2_colour
-                      });
+              TW.instance.selNgn.MultipleSelection2({nodes:sels});
               TW.gui.selectionActive=true;
           }
       }
@@ -954,7 +956,7 @@ function updateSearchLabels(id,name,type){
 function createWaitIcon(idname, width) {
   let icon = document.createElement('img')
 
-  icon.src = TW.conf.libspath + '/img2/loader.gif'
+  icon.src = 'libs/img2/loader.gif'
 
   icon.style.position = 'absolute'
   icon.style.left = '0'

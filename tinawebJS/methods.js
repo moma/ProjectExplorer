@@ -329,10 +329,10 @@ function htmlfied_nodesatts(elems){
             information += '<li><b>' + node.label + '</b></li>';
             if(node.htmlCont==""){
                 if (!isUndef(node.level)) {
-                    information += '<li>' + node.level + '</li>';
+                    information += '<li class="infosoc">' + node.level + '</li>';
                 }
             } else {
-                information += '<li>' + $("<div/>").html(node.htmlCont).text() + '</li>';
+                information += '<li class="infosoc">' + $("<div/>").html(node.htmlCont).text() + '</li>';
             }
             socnodes.push(information)
         }
@@ -431,7 +431,7 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
         sameNodesDIV+= '</div>';
     }
 
-    informationDIV += '<br><h4>Information:</h4><ul>';
+    informationDIV += '<br><h4>Information:</h4><ul class="infoitems">';
     informationDIV += htmlfied_nodesatts( sels ).join("<br>\n")
     informationDIV += '</ul><br>';
 
