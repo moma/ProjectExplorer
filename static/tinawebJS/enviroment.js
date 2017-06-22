@@ -463,6 +463,7 @@ function changeLevel() {
                       voisinage[ t ] = true;
               }
           }
+          nodes_2_colour[s]=true;
       }
 
       var futurelevel = null
@@ -470,8 +471,11 @@ function changeLevel() {
       if(present.level) { // [Change to Local] when level=Global(1)
           for(var nid in nodes_2_colour)
               add1Elem(nid)
-          for(var eid in edges_2_colour)
-              add1Elem(eid)
+          for(var eid in edges_2_colour) {
+            console.log(eid)
+            let ns = eid.split(';')
+            add1Elem(eid)
+          }
 
           // Adding intra-neighbors edges O(voisinage²)
           voisinage = Object.keys(voisinage)
