@@ -55,8 +55,8 @@ TW.instance.init()
 TW.instance.initGUIListeners();
 TW.instance.initSearchListeners();
 
-// show the custom name of the app
-writeBrand(TW.conf.branding)
+// show the custom name + home link of the app
+writeBrand(TW.conf.branding, TW.conf.brandingLink)
 
 // choosing the input
 // -------------------
@@ -361,9 +361,6 @@ function mainStartGraph(inFormat, inData, twInstance) {
       // ex: [true,false] = [nodes of type 0 shown  ; nodes of type 1 not drawn]
       var initialActivetypes = TW.instance.initialActivetypes( TW.categories )
 
-      // remember it
-      TW.pushState({'activetypes': initialActivetypes})
-
       // XML parsing from ParseCustom
       var dicts = start.makeDicts(TW.categories); // > parse json or gexf, dictfy
 
@@ -437,7 +434,6 @@ function mainStartGraph(inFormat, inData, twInstance) {
         if (TW.graphData.nodes.length == 0) console.error("empty graph")
         if (TW.graphData.edges.length == 0) console.error("no edges in graph")
 
-
       // our final sigma params (cf github.com/jacomyal/sigma.js/wiki/Settings)
       TW.customSettings = Object.assign(
 
@@ -492,6 +488,9 @@ function mainStartGraph(inFormat, inData, twInstance) {
           settings: TW.customSettings
       });
       // ==================================================================
+
+      // a new state
+      TW.pushState({'activetypes': initialActivetypes})
 
       // NB the list of nodes and edges from TW.graphData will be changed
       //    by changeLevel, changeType or subset sliders => no need to keep it

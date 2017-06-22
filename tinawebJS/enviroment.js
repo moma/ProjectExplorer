@@ -131,8 +131,14 @@ function getHeatmapColors(nClasses) {
 }
 
 
-function writeBrand (brandString) {
+function writeBrand (brandString, brandLink) {
   document.getElementById('twbrand').innerHTML = brandString
+  let anchors = document.getElementsByClassName('twbrand-link')
+  for (var k in anchors) {
+    if (anchors[k] && anchors[k].href) {
+      anchors[k].href = brandLink
+    }
+  }
 }
 
 function writeLabel (aMapLabel) {
