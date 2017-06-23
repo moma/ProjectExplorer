@@ -27,7 +27,7 @@ else {
   else {
     $idxcolsbytype = json_decode($_GET['toindex']);
 
-    echodump("columns to index",$idxcolsbytype);
+    // echodump("columns to index",$idxcolsbytype);
 
     include('csv_indexation.php');
 
@@ -42,8 +42,8 @@ else {
     $base = $csv_search_base[0];
     $postings = $csv_search_base[1];
 
-    echodump("postings", $postings);
-    echodump("base", $base);
+    // echodump("postings", $postings);
+    // echodump("base", $base);
 
     // DO THE SEARCH
 
@@ -52,78 +52,83 @@ else {
     // a - split the query
     $qtokens = preg_split('/\W/', $_GET["query"]);
 
-    // b - compute tfidfs
-    $tfs_per_tok_and_doc = array();
-    $dfs_per_tok = array();
-
+    // b - compute freq similarity per doc
+    $sims = array();
 
     // for each token
-    for ($k=0 ; $k < count($qtokens) ; $k) {
+    for ($k=0 ; $k < count($qtokens) ; $k++) {
 
       $tok = $qtokens[$k];
+
+      if (! strlen($tok)) {
+        continue;
+      }
+
+      // echodump("tok", $tok);
+      // echodump("searchcols", $searchcols);
 
       $tfs_per_tok_and_doc[$tok] = array();
 
       for ($l=0 ; $l < count($searchcols) ; $l++) {
 
+        // set of values we could find a match in
         $searchable = $postings[$_GET['type']][$searchcols[$l]];
-        echodump("searchable", $searchable);
 
-        //
-        // if (array_key_exists($tok, $searchable)) {
-        //   for ($m ; $m < count($searchable[$tok]) ; $m++) {
-        //     $doc_id = $searchable[$tok][$m];
-        //
-        //     // freq of token per doc
-        //     if (array_key_exists($doc_id, $tfs_per_tok_and_doc[$tok])) {
-        //       $tfs_per_tok_and_doc[$tok][$doc_id]++;
-        //     }
-        //     else {
-        //       $tfs_per_tok_and_doc[$tok][$doc_id] = 1;
-        //     }
-        //
-        //     // global doc freqs
-        //     if (array_key_exists($tok, $dfs_per_tok)) {
-        //       $dfs_per_tok[$tok]++;
-        //     }
-        //     else {
-        //       $dfs_per_tok[$tok] = 1;
-        //     }
-        //   }
-        // }
+        if (array_key_exists($tok, $searchable)) {
+
+          // matches
+          $matching_docs = $searchable[$tok];
+
+          foreach ($matching_docs as $doc_id => $freq) {
+
+            // echodump("tok freq in this doc", $freq);
+
+            // cumulated freq of tokens per doc
+            if (array_key_exists($doc_id, $sims)) {
+              $sims[$doc_id]++;
+            }
+            else {
+              $sims[$doc_id] = 1;
+            }
+          }
+        }
 
       }
-      // $qtokens[k];
     }
 
-    // c - score per doc
+    // c - sorted score per doc
     //
-    // $nbdoc = count($base);
-    // for ($i=0; $i < $nbdoc; $i++) {
-    // }
-    // dfs = array();
-
-
-
-
+    arsort($sims);
+    // echodump("sims", $sims);
 
     // DISPLAY THE RESULTS
-    // function displayDoc($docId, $score, $base) {
-    //
-    //   // POSS score should have a data-score attribute
-    //   $output ="<li title='".$score."'>";
-    //
-    //   $output.="<p><b>".$base[$docId]['title']."</b></p>"
-    //   $output.="<p>".$base[$docId]['author']." [".$base[$docId]['pubdate']."], <i>(".$base[$docId]['journal'].")</i></p>";
-    //   $output.="<p>".$base[$docId]['keywords']."</p>";
-    //
-    //   $output.="</li>";
-    //
-    //   return $output
-    // }
+    function displayDoc($docId, $score, $base) {
+
+      $output = "";
+
+      // POSS score should have a data-score attribute
+      $output = "<li title='".$score."'>";
+
+      $output.="<p><b>".$base[$docId]['title']."</b></p>";
+      $output.="<p>".$base[$docId]['author']." [".$base[$docId]['pubdate']."], <i>(".$base[$docId]['journal'].")</i></p>";
+      $output.="<p>".$base[$docId]['keywords']."</p>";
+      $output.="<p>".$base[$docId]['text']."</p>";
+      $output.="</li>";
 
 
+      return $output;
+    }
 
+    $htmlout = "<ul>\n";
+    foreach ($sims as $doc => $freq) {
+      $rowid = ltrim($doc, 'd');
+      $thisdoc = displayDoc($rowid, $freq, $base);
+      echodump("doc", $thisdoc);
+      $htmlout .= $thisdoc;
+    }
+    $htmlout = "</ul>\n";
+
+    echo '<br/><h4><font color="#0000FF"> Full text of top '.count($sims).' related publications:</font></h4>'.$htmlout;
 
   }
 }

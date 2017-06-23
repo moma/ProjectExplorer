@@ -40,6 +40,8 @@ function parse_and_index_csv($filename, $typed_cols_to_index, $separator, $quote
         $num = count($line_fields);
         // echo "<p> $num fields in line $rowid: <br /></p>\n";
 
+        $docid = 'd'.$rowid;
+
         // keep the row in "database"
         $base[$rowid] = array();
         for ($c=0; $c < $num; $c++) {
@@ -71,10 +73,15 @@ function parse_and_index_csv($filename, $typed_cols_to_index, $separator, $quote
                     if (! array_key_exists($tok, $postings[$swtype][$colname])) {
                       $postings[$swtype][$colname][$tok] = array();
                     }
-                    // rowid is a pointer to the document
-                    array_push($postings[$swtype][$colname][$tok], $rowid);
+                    // in a csv, rowid is a pointer to the document
+                    if (array_key_exists($docid, $postings[$swtype][$colname][$tok])) {
+                      // we keep the frequencies
+                      $postings[$swtype][$colname][$tok][$docid]++ ;
+                    }
+                    else {
+                      $postings[$swtype][$colname][$tok][$docid] = 1;
+                    }
                   }
-
                 }
               }
             }
