@@ -789,6 +789,40 @@ var TinaWebJS = function ( sigmacanvas ) {
 
           // show it in the real TW.gui.checkBox too
           $('#checkboxdiv').prop("checked", TW.gui.manuallyChecked || e.shiftKey)
+
+          // also listen for CTRL+Z  17 + 90
+          if (e.type == "keyup"
+              && (e.which == 90 || e.keyCode == 90) && e.ctrlKey
+              && TW.states.length > 2
+            ) {
+
+            if (timeoutIdCTRLZ) {
+              window.clearTimeout(timeoutIdCTRLZ)
+            }
+
+            var timeoutIdCTRLZ = window.setTimeout(function() {
+
+              if (TW.gui.selectionActive) {
+                deselectNodes(TW.SystemState())
+                TW.gui.selectionActive = false
+              }
+
+              console.log("pop state")
+
+              TW.states.pop()
+
+              let returningState = TW.SystemState()
+              if (returningState.selectionNids.length) {
+                TW.instance.selNgn.MultipleSelection2({nodes:returningState.selectionNids})
+              }
+              else {
+                cancelSelection()
+              }
+              TW.partialGraph.refresh()
+
+            }, 100)
+
+          }
         } );
 
     } // finish envListeners
