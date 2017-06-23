@@ -36,11 +36,12 @@ TW.conf = (function(TW){
 
   TWConf.getRelatedDocs = true
   TWConf.relatedDocsMax = 10
-  TWConf.relatedDocsAPI = "http://127.0.0.1:5000/twitter_search"
 
-  TWConf.relatedDocsType = "wosLocalDB"      // accepted: "twitter" | "wosLocalDB"
+  TWConf.relatedDocsType = "wosLocalDB"   // accepted: "twitter" | "wosLocalDB"
                                           // POSSible: "elastic"
 
+  // TWConf.relatedDocsAPI = "http://127.0.0.1:5000/twitter_search"
+  TWConf.relatedDocsAPI = "LOCALDB"
   // =======================
   // DATA FACETS AND LEGENDS
   // =======================
@@ -147,8 +148,8 @@ TW.conf = (function(TW){
   // =============
 
   // Node typology: categories (resp. 0 and 1) will get these default labels
-  TWConf.catSem = "Terms";
-  TWConf.catSoc = "Document";
+  TWConf.catSem = "term";
+  TWConf.catSoc = "person";
   // NB: these labels may be superseded by the input data's node types values
   //     cf. sortNodeTypes()
 
@@ -290,7 +291,7 @@ TW.conf = (function(TW){
   // relative sizes (iff ChangeType == both nodetypes)
   TWConf.sizeMult = [];
   TWConf.sizeMult[0] = 1.0;     // ie for node type 0 (<=> sem)
-  TWConf.sizeMult[1] = 3.0;    // ie for node type 1 (<=> soc)
+  TWConf.sizeMult[1] = 2.0;    // ie for node type 1 (<=> soc)
 
 
   // ===========

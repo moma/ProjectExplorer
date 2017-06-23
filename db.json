@@ -1,5 +1,19 @@
 {
-	"data/politoscope": {
+  "data/test": {
+    "first" : "mini_for_csv.gexf",
+    "gexfs": {
+      "mini_for_csv.gexf": {
+        "_comment": "NB: underspecified for csv and for db.json !! so this is a prototype structure",
+        "_comment": "POSS: weighted columns for matching importance",
+        "dbtype": "csv",
+        "semantic":["title","keywords","text"],
+        "social":["author"],
+        "dbfile": "mini_for_csv.csv"
+      },
+      "test_with_various_atts.gexf": {}
+    }
+  },
+  "data/politoscope": {
 		"dbname":null,
 		"title":"Politoscope",
 		"date":"2017",
@@ -32,12 +46,6 @@
 		"first" : "graph_example.json",
 		"gexfs": {
 			"graph_example.json": {}
-		}
-	},
-	"data/test": {
-		"first" : "test_with_various_atts.gexf",
-		"gexfs": {
-			"test_with_various_atts.gexf": {}
 		}
 	}
 }

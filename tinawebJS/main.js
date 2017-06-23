@@ -13,7 +13,9 @@ TW.partialGraph = null  // will contain the sigma visible graph instance
 
 TW.labels=[];           // fulltext search list
 TW.gexfPaths={};        // for file selectors iff servermenu
-TW.fields={};           // for related db tablenames
+TW.relDocsInfos={};           // map [graphsource => relatedDocs db fields or tables names]
+                        // TODO requires specifications !!
+
                         //  (iff servermenu && relatedDocsType == 'wosLocalDB')
 
 TW.categories = [];     // possible node types and their inverted map
@@ -258,6 +260,7 @@ function syncRemoteGraphData () {
 
         for( var path in preRES.data ) {
             var theGexfs = preRES.data[path]["gexfs"]
+
             for(var aGexf in theGexfs) {
                 var gexfBasename = aGexf.replace(/\.gexf$/, "") // more human-readable in the menu
                 TW.gexfPaths[gexfBasename] = path+"/"+aGexf
@@ -271,16 +274,41 @@ function syncRemoteGraphData () {
                 // for associated wosLocalDBs sql queries
                 if (theGexfs[aGexf]) {
 
-                  TW.fields[path+"/"+aGexf] = {"semantic":null, "social":null}
-                  if (theGexfs[aGexf]["semantic"] && theGexfs[aGexf]["semantic"]["table"]) {
-                    TW.fields[path+"/"+aGexf]['semantic'] = theGexfs[aGexf]["semantic"]["table"]
+                  let gSrcEntry = theGexfs[aGexf]
+
+                  TW.relDocsInfos[path+"/"+aGexf] = {"semantic":null, "social":null, "dbtype": null}
+
+                  // POSS have this type attribute in db.json *for all the entries*
+
+                  // ----------------------------------------------------------------------------------
+                  // choice: we'll keep a flat structure by source unless some use cases need otherwise
+                  // ----------------------------------------------------------------------------------
+                  // csv LocalDB ~ gargantext
+                  if(gSrcEntry["dbtype"] && gSrcEntry["dbtype"] == "csv") {
+                    TW.relDocsInfos[path+"/"+aGexf]['dbtype'] = "csv"
+
+                    // it's CSV columns here
+                    TW.relDocsInfos[path+"/"+aGexf]['semantic'] = gSrcEntry["semantic"]
+                    TW.relDocsInfos[path+"/"+aGexf]['social'] = gSrcEntry["social"]
                   }
-                  if (theGexfs[aGexf]["social"] && theGexfs[aGexf]["social"]["table"]) {
-                    TW.fields[path+"/"+aGexf]['social'] = theGexfs[aGexf]["social"]["table"]
+
+                  // sqlite LocalDB ~ wos
+                  else {
+                    TW.relDocsInfos[path+"/"+aGexf]['dbtype'] = "sql"
+                    if (theGexfs[aGexf]["semantic"] && theGexfs[aGexf]["semantic"]["table"]) {
+                      TW.relDocsInfos[path+"/"+aGexf]['semantic'] = theGexfs[aGexf]["semantic"]["table"]
+                    }
+                    if (theGexfs[aGexf]["social"] && theGexfs[aGexf]["social"]["table"]) {
+                      TW.relDocsInfos[path+"/"+aGexf]['social'] = theGexfs[aGexf]["social"]["table"]
+                    }
                   }
+
+                  console.log("TW.relDocsInfos", TW.relDocsInfos)
+
+
                 }
                 else {
-                  TW.fields[path+"/"+aGexf] = null
+                  TW.relDocsInfos[path+"/"+aGexf] = null
                 }
                 // ^^^^^^ FIXME see if we got the expected behavior right
                 //             (? specifications ?)

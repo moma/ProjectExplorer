@@ -11,7 +11,6 @@ TW.gui.colorFuns = {
   'cluster': "clusterColoring"
 }
 
-
 // Execution:    changeGraphAppearanceByFacets( true )
 // It reads scanned node-attributes and prepared legends in TW.Clusters
 //  to add the button in the html with the sigmaUtils.gradientColoring(x) listener.
@@ -420,8 +419,12 @@ function topPapersFetcher(swType, qWords, priorHtml, cbNext){
 
   let stockErrMsg = `<p class="micromessage">
     Your settings for relatedDocsType are set on ${TW.conf.relatedDocsType}
-    API but it couldn't be connected to.<br >Check if it is running and
+    API but it couldn't be connected to.</p>`
+
+  if (TW.conf.relatedDocsType == "api") {
+    stockErrMsg += `<p class="micromessage">Check if it is running and
     accessible:<br><span class=code>${TW.conf.relatedDocsAPI}</span></p>`
+  }
 
   let resHTML = ''
 
@@ -453,7 +456,7 @@ function topPapersFetcher(swType, qWords, priorHtml, cbNext){
     });
   }
   else if (TW.conf.relatedDocsType == "wosLocalDB") {
-    let gexfinfos = TW.fields[TW.File]
+    let gexfinfos = TW.relDocsInfos[TW.File]
     if (!gexfinfos || !gexfinfos[swType]) {
       resHTML =
         `<p>Your settings for relatedDocsType are set on a local wos database,
@@ -464,15 +467,40 @@ function topPapersFetcher(swType, qWords, priorHtml, cbNext){
             return
     }
     else {
+
+      // /!\ documentation and specification needed for the php use cases /!\
       let joinedQ = JSON.stringify(qWords).split('&').join('__and__');
-      let querytable = gexfinfos[swType]
-      let urlParams = "type="+swType+"&query="+joinedQ+"&gexf="+TW.File+"&index="+querytable+"&n="+TW.conf.relatedDocsMax
+      // cf. the php code for these url args:
+      //   - type: the node type (social/semantic)
+      //   - dbtype: 'sql' (classic sqlite like wos)
+      //          or 'csv' (like gargantext exports)
+
+      // POSS object + join.map(join)
+      let urlParams = "type="+swType+"&query="+joinedQ+"&gexf="+TW.File+"&n="+TW.conf.relatedDocsMax+"&dbtype="+gexfinfos.dbtype
+
+      if (gexfinfos.dbtype == "sql") {
+        var qIndex = gexfinfos[swType]    // a table
+        urlParams += `&index=${qIndex}`
+      }
+      else {
+        // a list of csv columns to search in
+        // ex: for semantic nodes matching we look in 'title', 'keywords' cols
+        //     for social nodes matching we look in 'authors' col... etc.
+        let joinedSearchCols = JSON.stringify(gexfinfos[swType])
+        urlParams += `&searchin=${joinedSearchCols}`
+
+        let joinedAllCols = JSON.stringify(gexfinfos)
+        urlParams += `&toindex=${joinedAllCols}`
+        // POSS use a direct access from php to db.json to avoid toindex
+        // POSS make it a REST array like: index[]=title&index[]=keywords
+      }
+
       $.ajax({
           type: 'GET',
-          url: 'LOCALDB/info_div.php',
+          url: TW.conf.relatedDocsAPI + '/info_div.php',
           data: urlParams,
           success : function(data){
-              // console.log('relatedDocs: LOCALDB/info_div.php?'+ urlParams);
+              console.log(`relatedDocs: ${TW.conf.relatedDocsAPI}/info_div.php?${urlParams}`);
               resHTML = data
               cbNext(priorHtml + resHTML)
           },
@@ -481,6 +509,12 @@ function topPapersFetcher(swType, qWords, priorHtml, cbNext){
             cbNext(priorHtml + stockErrMsg)
           }
       });
+
+
+
+
+
+
     }
   }
 }
