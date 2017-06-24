@@ -428,11 +428,17 @@ function topPapersFetcher(swType, qWords, priorHtml, cbNext){
 
   let resHTML = ''
 
+  let apiurl = TW.conf.relatedDocsAPIS[TW.conf.relatedDocsType]
+
+  if (! apiurl) {
+    apiurl = TW.conf.relatedDocsAPI
+  }
+
   if (TW.conf.relatedDocsType == "twitter") {
     let joinedQ = qWords.map(function(w){return'('+w+')'}).join(' AND ')
     $.ajax({
         type: 'GET',
-        url: TW.conf.relatedDocsAPI,
+        url: apiurl,
         data: {'query': joinedQ},
         contentType: "application/json",
         success : function(data){
@@ -450,7 +456,7 @@ function topPapersFetcher(swType, qWords, priorHtml, cbNext){
             cbNext(priorHtml + resHTML)
         },
         error: function(){
-          console.log(`Not found: relatedDocs for ${TW.conf.relatedDocsAPI}`)
+          console.log(`Not found: relatedDocs for ${apiurl}`)
           cbNext(priorHtml + stockErrMsg)
         }
     });
@@ -497,15 +503,15 @@ function topPapersFetcher(swType, qWords, priorHtml, cbNext){
 
       $.ajax({
           type: 'GET',
-          url: TW.conf.relatedDocsAPI + '/info_div.php',
+          url: apiurl + '/info_div.php',
           data: urlParams,
           success : function(data){
-              console.log(`relatedDocs: ${TW.conf.relatedDocsAPI}/info_div.php?${urlParams}`);
+              console.log(`relatedDocs: ${apiurl}/info_div.php?${urlParams}`);
               resHTML = data
               cbNext(priorHtml + resHTML)
           },
           error: function(){
-            console.log(`Not found: relatedDocs for ${TW.conf.relatedDocsAPI}`)
+            console.log(`Not found: relatedDocs for ${apiurl}`)
             cbNext(priorHtml + stockErrMsg)
           }
       });
