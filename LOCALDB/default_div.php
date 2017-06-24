@@ -112,6 +112,7 @@ foreach ($wos_ids as $id => $score) {
 
 				$sql = 'SELECT data FROM ISITITLE WHERE id='.$id.' group by data';
 
+        $output = "";
 				foreach ($base->query($sql) as $row) {
 					$external_link="<a href=http://google.com/webhp?#q=".urlencode('"'.$row['data'].'"')." target=blank>".' <img width=15px src="libs/img2/google.png"></a>';
 					$output.="<li title='".$score."'>";
@@ -134,11 +135,6 @@ foreach ($wos_ids as $id => $score) {
 	} else{
 		continue;
 	}
-}
-if ($total_count<$count_max){
-	$related .= $total_count;
-}else{
-	$related .= ">".$count_max;
 }
 
 $output .= "</ul>"; #####
@@ -306,7 +302,8 @@ function imagestar($score,$factor,$twjs) {
 	}
 	return $star_image;
 }
-if($max_item_displayed>$related) $max_item_displayed=$related;
-echo $news.'<br/><h4><font color="#0000FF"> Full text of top '.$max_item_displayed.'/'.$related.' related publications:</font></h4>'.$output;
+if($max_item_displayed>$total_count) $max_item_displayed=$total_count;
+// echo $news.'<br/><h4><font color="#0000FF"> Full text of top '.$max_item_displayed.'/'.$related.' related publications:</font></h4>'.$output;
+echo '<br/><h4><font color="#0000FF"> Full text of top '.$max_item_displayed.'/'.$total_count.' related publications:</font></h4>'.$output;
 //pt - 301 ; 15.30
 ?>

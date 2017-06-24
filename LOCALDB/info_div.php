@@ -12,8 +12,6 @@ $project_root = "../";
 
 include('parameters_details.php');
 
-$max_item_displayed=6;
-
 if ($_GET['dbtype'] == "sql") {
   $base = new PDO("sqlite:".$project_root.$graphdb);
   include('default_div.php');
@@ -101,34 +99,7 @@ else {
     arsort($sims);
     // echodump("sims", $sims);
 
-    // DISPLAY THE RESULTS
-    function displayDoc($docId, $score, $base) {
-
-      $output = "";
-
-      // POSS score should have a data-score attribute
-      $output = "<li title='".$score."'>";
-
-      $output.="<p><b>".$base[$docId]['title']."</b></p>";
-      $output.="<p>".$base[$docId]['author']." [".$base[$docId]['pubdate']."], <i>(".$base[$docId]['journal'].")</i></p>";
-      $output.="<p>".$base[$docId]['keywords']."</p>";
-      $output.="<p>".$base[$docId]['text']."</p>";
-      $output.="</li>";
-
-
-      return $output;
-    }
-
-    $htmlout = "<ul>\n";
-    foreach ($sims as $doc => $freq) {
-      $rowid = ltrim($doc, 'd');
-      $thisdoc = displayDoc($rowid, $freq, $base);
-      echodump("doc", $thisdoc);
-      $htmlout .= $thisdoc;
-    }
-    $htmlout = "</ul>\n";
-
-    echo '<br/><h4><font color="#0000FF"> Full text of top '.count($sims).' related publications:</font></h4>'.$htmlout;
+    include ('csv_div.php');
 
   }
 }

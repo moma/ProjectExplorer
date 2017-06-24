@@ -18,6 +18,9 @@ $gexf= str_replace('"','',$_GET["gexf"]);
 $mainpath=dirname(getcwd())."/";
 $graphdb = $gexf_db[$gexf];
 
+// number of docs to display setting
+$max_item_displayed = 7;
+
 // echodump("graphdb", $graphdb);
 
 function echodump($title, $anyObj) {

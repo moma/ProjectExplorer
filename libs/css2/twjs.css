@@ -172,6 +172,22 @@ html.waiting {
     cursor: pointer;
 }
 
+.author {
+  font-variant: small-caps;
+}
+
+.searchhit {
+  font-family: "Roboto", "Droid Sans", sans-serif;
+  border: 1px solid #222;
+  padding: 7px 0 7px 12px;
+  margin: 10px 10px 0 0;
+}
+
+.hit-text {
+  color: #444;
+  font-family: "Crete Round", "garamond", serif ;
+  padding: 5px;
+}
 
 #tab-container {
   margin: 7px;
@@ -258,6 +274,20 @@ p.micromessage{
   color: '#222'
 }
 
+#information .information-vcard {
+    border: 2px solid #555;
+    padding: 2em 1em .3em 1em;
+    background-color:#fff;
+    border-radius: .3em;
+}
+
+#information .information-links {
+    padding: 7px 0 0 20px;
+}
+
+ul.infoitems {
+  list-style: none;
+}
 
 /* switch css -- generic (src: proto.io/freebies/onoff/)*/
 .onoffswitch {
