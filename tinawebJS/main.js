@@ -256,7 +256,9 @@ function syncRemoteGraphData () {
             mapLabel = getUrlParam.file
         }
 
-        var files_selector = '<select onchange="jsActionOnGexfSelector(this.value);">'
+        var files_selector = '<div class="question input-group">'
+            files_selector.= '<label for="twfile" class="smlabel input-group-addon">Source file:</label>'
+            files_selector.= '<select id="twfile" onchange="jsActionOnGexfSelector(this.value);">'
 
         for( var path in preRES.data ) {
             var theGexfs = preRES.data[path]["gexfs"]
@@ -303,7 +305,7 @@ function syncRemoteGraphData () {
                     }
                   }
 
-                  console.log("TW.relDocsInfos", TW.relDocsInfos)
+                  // console.log("TW.relDocsInfos", TW.relDocsInfos)
 
 
                 }
@@ -318,7 +320,7 @@ function syncRemoteGraphData () {
             }
             // console.log( files_selector )
         }
-        files_selector += "</select>"
+        files_selector += "</select></div>"
         $("#network").html(files_selector)
     }
 
