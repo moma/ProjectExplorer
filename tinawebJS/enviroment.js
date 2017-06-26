@@ -1,10 +1,19 @@
 'use strict;'
 
-// always useful
-var theHtml = document.getElementsByTagName('html')[0]
+// GUI commodity pointers
+TW.gui = {}
+TW.gui.elHtml = document.getElementsByTagName('html')[0]
+TW.gui.sheets = {}
+for (var i in document.styleSheets) {
+  if (/twjs.css$/.test(document.styleSheets[i].href)) {
+    TW.gui.sheets.main = document.styleSheets[i]
+  }
+  else if (/selection-panels.css$/.test(document.styleSheets[i].href)) {
+    TW.gui.sheets.panels = document.styleSheets[i]
+  }
+}
 
 // GUI vars
-TW.gui = {}
 TW.gui.selectionActive = false  // <== changes rendering mode
 TW.gui.circleSize = 0;
 TW.gui.circleSlider = null
@@ -430,7 +439,7 @@ function changeType() {
 //
 function changeLevel() {
     // show waiting cursor
-    theHtml.classList.add('waiting');
+    TW.gui.elHtml.classList.add('waiting');
 
     // let the waiting cursor appear
     setTimeout(function() {
@@ -542,7 +551,7 @@ function changeLevel() {
       reInitFa2({
         useSoftMethod: !futurelevel,
         callback: function() {
-          theHtml.classList.remove('waiting');
+          TW.gui.elHtml.classList.remove('waiting');
 
           // when going local, it's nice to see the selected nodes rearrange
           if (!futurelevel) {
@@ -646,7 +655,7 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
         max:steps-1,
         value:[0,steps-1],
         onchange:function(low, high) {
-          theHtml.classList.add('waiting');
+          TW.gui.elHtml.classList.add('waiting');
 
           // 40ms timeout to let the waiting cursor appear
           setTimeout(function() {
@@ -813,7 +822,7 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
 
                 // in any case
                 setTimeout( function() {
-                  theHtml.classList.remove('waiting')
+                  TW.gui.elHtml.classList.remove('waiting')
                 }, 20)
 
             }, 1500) // large-ish debounce timeout

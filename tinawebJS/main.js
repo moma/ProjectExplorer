@@ -627,7 +627,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
 }
 
 setTimeout( function() {
-  theHtml.classList.remove('waiting')
+  TW.gui.elHtml.classList.remove('waiting')
 }, 20)
 
 console.log("finish")

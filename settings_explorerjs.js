@@ -179,9 +179,11 @@ TW.conf = (function(TW){
   TWConf.ModulesFlags["crowdsourcingModule"] = true ;
 
 
-  // Other optional functionalities
-  // -----------------------------
-  TWConf.filterSliders = true     // show sliders for nodes/edges subsets
+  // Other GUI options
+  // ------------------
+  TWConf.sidePanelSize = "300px"       // width of the side panel (def: 400px)
+
+  TWConf.filterSliders = true          // show sliders for nodes/edges subsets
 
   TWConf.clusterColorsAtt = true;      // show "Set colors" menu
 
@@ -199,6 +201,7 @@ TW.conf = (function(TW){
   //       ==> ask if need to be restored
   // TW.geomap = false;
   // TW.twittertimeline = false;
+
 
   TWConf.maxPastStates = 5 ;      // number of TW.states to remember (~CTRL-Z)
 

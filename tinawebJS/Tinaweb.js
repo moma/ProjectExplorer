@@ -598,6 +598,40 @@ var TinaWebJS = function ( sigmacanvas ) {
         var body=document.getElementsByTagName('body')[0];
         body.style.paddingTop="41px";
 
+
+        // side panel width
+        if(TW.conf.sidePanelSize && TW.conf.sidePanelSize != "400px") {
+          // change stylesheet rules preferably to element style directly
+          //    (this way we don't block the mobile-variants CSS effects,
+          //     b/c twjs-mobile.css is loaded after twjs.css in the html)
+          if (TW.gui.sheets) {
+            if (TW.gui.sheets.main) {
+              TW.gui.sheets.main.insertRule(
+                `#sidebar {width: ${TW.conf.sidePanelSize};}`,
+                TW.gui.sheets.main.cssRules.length
+              )
+              TW.gui.sheets.main.insertRule(
+                `#sigma-contnr {right: ${TW.conf.sidePanelSize};}`,
+                TW.gui.sheets.main.cssRules.length
+              )
+            }
+            if (TW.gui.sheets.panels) {
+              TW.gui.sheets.panels.insertRule(
+                `#ctlzoom {right: calc(${TW.conf.sidePanelSize} + 10px);}`,
+                TW.gui.sheets.panels.cssRules.length
+              )
+            }
+          }
+          // otherwise we do it the easy way
+          else {
+            console.warn("Couldn't identify twjs.css and selection-panels.css")
+            document.getElementById('sidebar').style.width = TW.conf.sidePanelSize
+            document.getElementById('sigma-contnr').style.right = TW.conf.sidePanelSize
+            document.getElementById('ctlzoom').style.right = `calc(${TW.conf.sidePanelSize} + 10px)`
+          }
+        }
+
+        // tab handlers
         $('.etabs').click(function(){
             setTimeout(
               function() {
@@ -713,7 +747,7 @@ var TinaWebJS = function ( sigmacanvas ) {
           $("#noverlapButton").click(function () {
             if(! TW.partialGraph.isNoverlapRunning()) {
                 // show waiting cursor on page and button
-                theHtml.classList.add('waiting');
+                TW.gui.elHtml.classList.add('waiting');
                 this.style.cursor = 'wait'
                 // and waiting icon
                 this.insertBefore(createWaitIcon('noverlapwait'), this.children[0])
@@ -723,7 +757,7 @@ var TinaWebJS = function ( sigmacanvas ) {
                 listener.bind('stop', function(event) {
                   var stillRunning = document.getElementById('noverlapwait')
                   if (stillRunning) {
-                    theHtml.classList.remove('waiting');
+                    TW.gui.elHtml.classList.remove('waiting');
                     noverButton.style.cursor = 'auto'
                     stillRunning.remove()
                   }
@@ -775,8 +809,8 @@ var TinaWebJS = function ( sigmacanvas ) {
             if (window.TW.partialGraph && window.TW.partialGraph.refresh) {
               window.TW.partialGraph.refresh()
             }
-            if (theHtml.classList) {
-              theHtml.classList.remove('waiting');
+            if (TW.gui.elHtml.classList) {
+              TW.gui.elHtml.classList.remove('waiting');
             }
           }, 3000)
         }, true)
