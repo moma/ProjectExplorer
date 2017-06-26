@@ -11,6 +11,7 @@ $gexf_db["data/AXA/RiskV2PageRank2500.gexf"] = "data/AXA/data.db";
 $gexf_db["data/AXA/RiskV2PageRank5000.gexf"] = "data/AXA/data.db";
 $gexf_db["data/test/mini_for_csv.gexf"] = "data/test/mini_for_csv.csv";
 $gexf_db["data/gargistex/shale_and_ice.gexf"] = "data/gargistex/shale_and_ice.csv";
+$gexf_db["data/gargistex/model_calibration.gexf"] = "data/gargistex/model_calibration.csv";
 
 // $gexf_db["data/ProgrammeDesCandidats.gexf"] = "foobar";
 
@@ -19,8 +20,14 @@ $gexf= str_replace('"','',$_GET["gexf"]);
 $mainpath=dirname(getcwd())."/";
 $graphdb = $gexf_db[$gexf];
 
+
+// for csv parsing
 $csvsep = "\t";
 $csvquote = '"';
+
+// for csv caching (optional)
+$memserver = 'localhost';
+$memport = 11211;
 
 // number of docs to display setting
 $max_item_displayed = 7;

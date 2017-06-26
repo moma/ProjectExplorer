@@ -3,7 +3,6 @@
 // default informations
 $thedb = $graphdb;
 $gexf=$_GET["gexf"];
-$max_item_displayed=6;
 $type = $_GET["type"];
 $TITLE="ISITITLE";
 $query = str_replace( '__and__', '&', $_GET["query"] );
@@ -97,9 +96,10 @@ $count=0;
 
 $all_terms_from_selected_projects=array();// list of terms for the top 6 project selected
 
+$output = "";
+
 // to filter under some conditions
 $to_display=true;
-$count=0;
 foreach ($wos_ids as $id => $score) {
 	if ($total_count<$count_max) {
 		// retrieve publication year
@@ -112,7 +112,6 @@ foreach ($wos_ids as $id => $score) {
 
 				$sql = 'SELECT data FROM ISITITLE WHERE id='.$id.' group by data';
 
-        $output = "";
 				foreach ($base->query($sql) as $row) {
 					$external_link="<a href=http://google.com/webhp?#q=".urlencode('"'.$row['data'].'"')." target=blank>".' <img width=15px src="libs/img2/google.png"></a>';
 					$output.="<li title='".$score."'>";
@@ -133,7 +132,7 @@ foreach ($wos_ids as $id => $score) {
 		}
 
 	} else{
-		continue;
+		break;
 	}
 }
 
