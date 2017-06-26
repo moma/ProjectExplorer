@@ -1,4 +1,15 @@
 {
+  "data/gargistex": {
+    "first" : "shale_and_ice.gexf",
+    "gexfs": {
+      "shale_and_ice.gexf": {
+        "dbtype": "csv",
+        "semantic":["title","keywords","abstract"],
+        "social":["authors"],
+        "dbfile": "shale_and_ice.csv"
+      }
+    }
+  },
   "data/test": {
     "first" : "mini_for_csv.gexf",
     "gexfs": {

@@ -35,7 +35,7 @@ else {
 
     // £TODO use memcached or something to store a serialized version of csv_search_base
     // + add all (sem+soc) columns for the index to work !!
-    $csv_search_base = parse_and_index_csv($project_root.$graphdb, $idxcolsbytype, ";", '"');
+    $csv_search_base = parse_and_index_csv($project_root.$graphdb, $idxcolsbytype, $csvsep, $csvquote);
 
     $base = $csv_search_base[0];
     $postings = $csv_search_base[1];
