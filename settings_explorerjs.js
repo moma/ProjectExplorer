@@ -37,7 +37,7 @@ TW.conf = (function(TW){
   TWConf.getRelatedDocs = true
   TWConf.relatedDocsMax = 10
 
-  TWConf.relatedDocsType = "twitter"   // accepted: "twitter" | "wosLocalDB"
+  TWConf.relatedDocsType = "wosLocalDB"   // accepted: "twitter" | "wosLocalDB"
                                           // POSSible: "elastic"
 
   TWConf.relatedDocsAPIS = {

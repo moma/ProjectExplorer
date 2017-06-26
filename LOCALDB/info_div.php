@@ -2,7 +2,7 @@
 // manage the dynamical additional information in the left panel.
 ini_set('display_errors',1);
 ini_set('display_startup_errors',1);
-error_reporting(-1);
+// error_reporting(-1);
 
 // relative path to dirname "/line"
 $project_root = "../";
@@ -27,24 +27,49 @@ else {
 
     // echodump("columns to index",$idxcolsbytype);
 
+
+    // DO THE INDEXATION (or RETRIEVE CACHED ONE)
+    // we use cache if memcached is present (and if we indexed the csv already)
     include('csv_indexation.php');
 
-    // DO THE INDEXATION
-    // we use cache if memcached is present (and if we indexed the csv already)
-    // $can_use_cache = False
+    $csv_search_base = NULL;
+    if(class_exists('Memcached')){
+      $mcd = new Memcached;
+      $mcd->addServer($memserver, $memport);
 
-    // £TODO use memcached or something to store a serialized version of csv_search_base
-    // + add all (sem+soc) columns for the index to work !!
-    $csv_search_base = parse_and_index_csv($project_root.$graphdb, $idxcolsbytype, $csvsep, $csvquote);
+      // test if we indexed it already
+      $csv_search_base_seri = $mcd->get(mem_entry_name($graphdb));
+
+      if ($csv_search_base_seri !== False) {
+        // echo("Using cached base<br>");
+        $csv_search_base = json_decode($csv_search_base_seri, $assoc=true);
+      }
+    }
+
+    if (! $csv_search_base) {
+      // echo("Creating new base<br>");
+
+      // indexing ----------------------------------------------------------------------
+      // must know about all (sem+soc) cols typed, even if each search doesn't need them
+      $csv_search_base = parse_and_index_csv($project_root.$graphdb,
+                                             $idxcolsbytype,
+                                            $csvsep, $csvquote);
+      // -------------------------------------------------------------------------------
+
+      if(class_exists('Memcached')){
+        // **store** in cache for 1/2h
+        $mcd->set(mem_entry_name($graphdb), json_encode($csv_search_base), 1800);
+      }
+    }
 
     $base = $csv_search_base[0];
     $postings = $csv_search_base[1];
-
     // echodump("postings", $postings);
     // echodump("base", $base);
 
-    // DO THE SEARCH
 
+    // DO THE SEARCH
+    // -------------
     $searchcols = json_decode($_GET['searchin']);
 
     // a - split the query
@@ -102,6 +127,12 @@ else {
     include ('csv_div.php');
 
   }
+}
+
+
+// just to make sure we use the same conventional name at cache read/write
+function mem_entry_name($graphdbname) {
+  return "twbackendmem/".$graphdbname."/csv_search_base";
 }
 
 
