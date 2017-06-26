@@ -145,6 +145,17 @@ function writeLabel (aMapLabel) {
   document.getElementById('maplabel').innerHTML = aMapLabel
 }
 
+
+function alertCheckBox(eventCheck){
+    // NB: we use 2 booleans to adapt to SHIFT checking
+    //      - var TW.gui.checkBox  ---------> has the real box state
+    //      - var TW.gui.manuallyChecked  --> remembers if it was changed here
+    if(!isUndef(eventCheck.checked)) {
+        TW.gui.checkBox=eventCheck.checked;
+        TW.gui.manuallyChecked = eventCheck.checked
+    }
+}
+
 function createFilechooserEl () {
 
   var inputComment = document.createElement("p")
