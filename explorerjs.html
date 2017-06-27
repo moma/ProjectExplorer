@@ -311,14 +311,6 @@
 
       <ul id="ctlzoom">
 
-            <!-- <div class="content-header">
-                    <button id="menu-toggle">X</button>
-            </div> -->
-               <li>
-                  <div id="unfold">
-                      <a href="#" id="aUnfold" class="rightarrow"></a>
-                  </div>
-              </li>
               <!--
                <li>
                   <a href="#" id="geomapicon" onclick="$('#geomapmodal').modal('show'); callGeomapADEME();">
@@ -426,6 +418,11 @@
       <!-- class="my-legend" (absolute position bottom left) -->
       <div id="legend-for-clusters" class="over-panels"></div>
 
+      <!-- to reopen the panel -->
+      <div id="sideunfold">
+        <img title="Open sidepanel" src="libs/img2/unfold2.png"></img>
+      </div>
+
     </div>
   </div>
   <div id="sidebar">
@@ -531,6 +528,9 @@
     </div>
 
     <br><br>
+    <div id="sidefold">
+      <img title="Close sidepanel" src="libs/img2/fold2.png"></img>
+    </div>
   </div>
   <div id="hidden-elements">
     <div id="savemodal" class="modal fade">

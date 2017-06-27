@@ -11,6 +11,12 @@
     font-size: 10px;
   }
 
+  /* sidepanel folding deactivated (+ in js: foldingReset fun)*/
+  #sidefold, #sideunfold {
+    display: none;
+  }
+
+
   /* zoombar re-positioned */
   #ctlzoom {
     right: 5px ;

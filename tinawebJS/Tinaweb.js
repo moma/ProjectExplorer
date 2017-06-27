@@ -670,45 +670,45 @@ var TinaWebJS = function ( sigmacanvas ) {
             console.log("")
         });
 
-        //  ===  un/hide leftpanel  === //
-        $("#aUnfold").click(function(e) {
-            //SHOW rightcolumn
-            sidebar = $("#rightcolumn");
-            fullwidth=$('#fixedtop').width();
-            e.preventDefault();
-            // $("#wrapper").toggleClass("active");
-            if(parseFloat(sidebar.css("right"))<0){
-                $("#aUnfold").attr("class","rightarrow");
-                sidebar.animate({
-                    "right" : sidebar.width()+"px"
-                }, { duration: 400, queue: false });
+        // sidepanel folding
+        $('#sidefold').click(function(){
+          if (window.innerWidth >= 768) {
+            let width = TW.conf.sidePanelSize || '400px'
+            // $("#ctlzoom").css('right','10px')
+            $("#ctlzoom").animate(
+              {"right": "10px"}, "slow"
+            )
+            $("#sidebar").animate(
+              {"right":`-${width}`}, "slow",
+              function(){
+                $("#sigma-contnr").css('right',0)
+                $("#sidebar").hide()
+                TW.partialGraph.refresh()
+                $("#sidefold").hide()
+                $("#sideunfold").show()
+              }
+            );
+            TW.gui.foldedSide = true
+          }
+        })
 
-                $("#ctlzoom").animate({
-                        "right": (sidebar.width()+10)+"px"
-                }, { duration: 400, queue: false });
-
-                // $('#sigma-contnr').width(fullwidth-sidebar.width());
-                $('#sigma-contnr').animate({
-                        "width": fullwidth-sidebar.width()+"px"
-                }, { duration: 400, queue: false });
-            }
-            else {
-                //HIDE rightcolumn
-                $("#aUnfold").attr("class","leftarrow");
-                sidebar.animate({
-                    "right" : "-" + sidebar.width() + "px"
-                }, { duration: 400, queue: false });
-
-                $("#ctlzoom").animate({
-                        "right": "0px"
-                }, { duration: 400, queue: false });
-
-                    // $('#sigma-contnr').width(fullwidth);
-                $('#sigma-contnr').animate({
-                        "width": fullwidth+"px"
-                },{ duration: 400, queue: false });
-            }
-        });
+        $('#sideunfold').click(function(){
+          if (window.innerWidth >= 768) {
+            let width = TW.conf.sidePanelSize || '400px'
+            $("#sidebar").show()
+            $("#sidebar").animate(
+              {"right": 0}, "slow",
+              function(){
+                $("#sigma-contnr").css('right', width)
+                TW.partialGraph.refresh()
+                $("#sideunfold").hide()
+                $("#sidefold").show()
+                $("#ctlzoom").css('right',`calc(${width} + 10px)`)
+              }
+            );
+            TW.gui.foldedSide = false
+          }
+        })
 
         if (TW.conf.getRelatedDocs && document.getElementById('reldocs-type')) {
           document.getElementById('reldocs-type').value = TW.conf.relatedDocsType
@@ -794,25 +794,38 @@ var TinaWebJS = function ( sigmacanvas ) {
             TW.gui.circleSlider.setValue(0)
         });
 
-
         // costly entire refresh (~400ms) only after stopped resizing for 3s
         // NB: rescale middleware already reacted and, except for large win size changes, it handles the resize fine
         //     (so this fragment is only to accomodate the large changes)
         var winResizeTimeout = null
-        window.addEventListener('resize', function(){
+        window.addEventListener('resize', function(ev){
           if (winResizeTimeout) {
             clearTimeout(winResizeTimeout)
           }
           winResizeTimeout = setTimeout(function() {
-            console.log('did refresh')
 
             if (window.TW.partialGraph && window.TW.partialGraph.refresh) {
               window.TW.partialGraph.refresh()
+              // console.log('did refresh')
             }
             if (TW.gui.elHtml.classList) {
               TW.gui.elHtml.classList.remove('waiting');
             }
-          }, 3000)
+
+
+            // monitor passing out of or into smaller width
+            // (along with twjs-mobile.css and selection-panels.mobile.css)
+            if (ev.target.innerWidth < 768 && !TW.gui.smallView) {
+              TW.gui.smallView = true
+              cssReset()
+              $('#sideunfold,#sidefold').hide()
+            }
+            else if (ev.target.innerWidth >= 768 && TW.gui.smallView) {
+              TW.gui.smallView = false
+              foldingReset()
+            }
+
+          }, 1000)
         }, true)
 
 

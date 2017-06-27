@@ -15,10 +15,12 @@ for (var i in document.styleSheets) {
 
 // GUI vars
 TW.gui.selectionActive = false  // <== changes rendering mode
+TW.gui.smallView=false;         // tracks if small width
 TW.gui.circleSize = 0;
 TW.gui.circleSlider = null
 TW.gui.checkBox=false;
 TW.gui.shiftKey=false;
+TW.gui.foldedSide=false;
 TW.gui.manuallyChecked = false;
 TW.gui.handpickedcolor = false;     // <= changes edge rendering strategy
 TW.gui.lastFilters = {}
@@ -154,6 +156,28 @@ function writeLabel (aMapLabel) {
   document.getElementById('maplabel').innerHTML = aMapLabel
 }
 
+
+// some actions handled by js overrides the CSS from our stylesheets
+// => this function removes all these changes to restore stylesheet rules
+function cssReset() {
+  $("#sigma-contnr").css('right', '')
+  $("#ctlzoom").css('right','')
+  $("#sidebar").css('right','')
+  $("#sidebar").show()
+  TW.gui.foldedSide = false
+}
+
+
+function foldingReset() {
+  if (TW.gui.foldedSide) {
+    $("#sideunfold").show()
+    $("#sidefold").hide()
+  }
+  else {
+    $("#sideunfold").hide()
+    $("#sidefold").show()
+  }
+}
 
 function alertCheckBox(eventCheck){
     // NB: we use 2 booleans to adapt to SHIFT checking
