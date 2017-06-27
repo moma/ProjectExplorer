@@ -949,12 +949,17 @@ function clusterColoring(daclass) {
           if (valGroup.labl == "_non_numeric_") {
             theColor == '#bbb'
           }
-          else if (valGroup.val) {
-            theColor = colList[ valGroup.val ]
-          }
-          else if (valGroup.range) {
-            let someRepresentativeInt = stringToSomeInt(valGroup.range) % nColors
-            theColor = colList[ someRepresentativeInt ]
+          else {
+            let val = valGroup.val || valGroup.range
+            // use the int as an index between 0 and nColors
+            if (parseInt(val) == val) {
+              theColor = colList [val] % nColors
+            }
+            // or create a representative int on the same range
+            else {
+              let someRepresentativeInt = stringToSomeInt(val) % nColors
+              theColor = colList[ someRepresentativeInt ]
+            }
           }
 
           if (valGroup.nids.length) {
