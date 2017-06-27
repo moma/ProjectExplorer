@@ -106,8 +106,8 @@ TW.conf = (function(TW){
     'weight'          : {'col': "heatmap" , 'n': 5,  'binmode': 'samerange'  },
     'Weighted Degree' : {'col': "heatmap", 'n': 8,  'binmode': 'samerange'  },
     'out-degree'      : {'col': "heatmap" , 'n': 3,  'binmode': 'samepop'  },
-    'countryuniform'  : {'col': "cluster" ,          'binmode': 'off'},
-    'countrypareto'    : {'col': "cluster" ,          'binmode': 'off'},
+    'CC'              : {'col': "cluster" ,          'binmode': 'off'},
+    'ACR'             : {'col': "cluster" ,          'binmode': 'off'},
 'cluster_universal_index': {'col': "cluster" ,         'binmode': 'off'      },
        'community_orphan' : {'col': "cluster" ,        'binmode': 'off'      }
 
@@ -127,7 +127,7 @@ TW.conf = (function(TW){
 
 
   // when coloring method is "cluster", should the colors change each time ?
-  TWConf.randomizeClusterColors = false
+  TWConf.randomizeClusterColors = true
 
   // default clustering attribute (<---> used for initial node colors)
   TWConf.nodeClusAtt = "modularity_class"
