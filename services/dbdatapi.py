@@ -1050,14 +1050,16 @@ class BipartiteExtractor:
                 dacountry = self.scholars[idNode]["country"]
                 code=inst.searchCode(dacountry)
 
+                # new tina: any values under .attributes can be mapped to a color
+                node["attributes"] = {}
+
                 # country code
-                if code: node["CC"] = code
-                else: node["CC"]="-"
+                if code: node["attributes"]["CC"] = code
+                else: node["attributes"]["CC"]="-"
 
                 # Affiliation
-                node["ACR"] = self.scholars[idNode]["org"]
-                if node["ACR"]=="": node["ACR"]="-"
-
+                node["attributes"]["ACR"] = self.scholars[idNode]["org"]
+                if node["attributes"]["ACR"]=="": node["attributes"]["ACR"]="-"
 
                 # /!\ Fixed weight for all SOC nodes /!\
                 # cf. node.size in sigma.parseCustom.js
