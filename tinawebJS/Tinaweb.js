@@ -146,6 +146,7 @@ function SelectionEngine() {
      * Main function for any selecting action
      *
      * @nodes: eg targeted array (only ids)
+     * @noState: bool flag to avoid registering new state (useful for CTRL+Z)
      *
      *  external usage : clickHandler, search, changeType, filters, tag click...
      */
@@ -154,12 +155,14 @@ function SelectionEngine() {
 
         if (!args)                      args = {}
         if (isUndef(args.nodes))        args.nodes = []
+        if (isUndef(args.noState))      args.noState = false
 
         if (TW.conf.debug.logSelections) {
           var tMS2_deb = performance.now()
 
           console.log("IN SelectionEngine.MultipleSelection2:")
           console.log("nodes", args.nodes)
+          console.log("noState", args.noState)
         }
 
         // deselects only the active ones (based on SystemState())
@@ -314,8 +317,10 @@ function SelectionEngine() {
         }
 
         // it's a new SystemState
-        TW.pushState( { 'sels': theSelection,
-                        'rels': activeRelations } )
+        if (! args.noState) {
+          TW.pushState( { 'sels': theSelection,
+                          'rels': activeRelations } )
+        }
 
         // we send our "gotNodeSet" event
         // (signal for plugins that a search-selection was done or a new hand picked selection)
@@ -329,7 +334,6 @@ function SelectionEngine() {
         TW.gui.selectionActive = true
 
         TW.partialGraph.render();
-
 
         updateRelatedNodesPanel( theSelection , same, oppos )
 
@@ -848,24 +852,33 @@ var TinaWebJS = function ( sigmacanvas ) {
             }
 
             var timeoutIdCTRLZ = window.setTimeout(function() {
+              // console.log("pop state")
+              let previousState = TW.states.pop()
 
-              if (TW.gui.selectionActive) {
-                deselectNodes(TW.SystemState())
-                TW.gui.selectionActive = false
-              }
-
-              console.log("pop state")
-
-              TW.states.pop()
+              deselectNodes(previousState)
 
               let returningState = TW.SystemState()
+
+              // restoring selection
               if (returningState.selectionNids.length) {
-                TW.instance.selNgn.MultipleSelection2({nodes:returningState.selectionNids})
+                TW.gui.selectionActive = true
+                // changes active/highlight and refresh
+                // POSS turn the nostate version into a select fun like deselect (ie no state, no refresh)
+                TW.instance.selNgn.MultipleSelection2({
+                  nodes: returningState.selectionNids,
+                  noState: true
+                })
               }
               else {
-                cancelSelection()
+                TW.gui.selectionActive = false
+                TW.partialGraph.refresh()
               }
-              TW.partialGraph.refresh()
+
+              // restoring level
+              if (returningState.level != previousState.level) {
+                changeLevel(returningState)
+              }
+
 
             }, 100)
 

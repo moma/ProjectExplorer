@@ -461,17 +461,29 @@ function changeType() {
 //                         v
 //                   local selection SysSt = {level: false, activetypes:XY}
 //
-function changeLevel() {
+//  optional args:
+//    @optionalTargetState: in rare cases we already have it (like CTRL+Z)
+//                       (=> avoid redoing property computations and state push)
+function changeLevel(optionalTargetState) {
+
+    console.log('got optionalTargetState', optionalTargetState)
+
     // show waiting cursor
     TW.gui.elHtml.classList.add('waiting');
 
     // let the waiting cursor appear
     setTimeout(function() {
-      var present = TW.SystemState(); // Last
 
-      var sels = present.selectionNids ;//[144, 384, 543]//TW.states[last].selectionNids;
+      var sels
 
-      deselectNodes()
+      if (optionalTargetState) {
+        sels = optionalTargetState.selectionNids
+      }
+      else {
+        var present = TW.SystemState(); // Last
+        sels = present.selectionNids
+        deselectNodes()
+      }
 
       let selsChecker = {}
       for (let i in sels) {
@@ -484,7 +496,14 @@ function changeLevel() {
       // types eg [true]          <=> '1'
       //          [true, true]    <=> '1|1'
 
-      var activetypes = present.activetypes;
+      var activetypes;
+
+      if (optionalTargetState) {
+        activetypes = optionalTargetState.activetypes
+      }
+      else {
+        activetypes = present.activetypes;
+      }
       var activetypesKey = activetypes.map(Number).join("|")
 
       TW.partialGraph.graph.clear();
@@ -516,28 +535,33 @@ function changeLevel() {
           }
       }
 
-      var futurelevel = null
 
-      if(present.level) { // [Change to Local] when level=Global(1)
+
+      var futurelevel
+
+      if (optionalTargetState) {
+        futurelevel = optionalTargetState.level
+      }
+      else {
+        futurelevel = ! present.level
+      }
+
+      if(! futurelevel) { // [Change to Local] when level=Global(1)
         for(var nid in nodesToAdd)
           add1Elem(nid)
         for(var eid in edgesToAdd)
           add1Elem(eid)
 
-          // Adding intra-neighbors edges O(voisinage²)
-          voisinage = Object.keys(voisinage)
-          for(var i=0;i<voisinage.length;i++) {
-              for(var j=1;j<voisinage.length;j++) {
-                  if( voisinage[i]!=voisinage[j] ) {
-                      // console.log( "\t" + voisinage[i] + " vs " + voisinage[j] )
-                      add1Elem( voisinage[i]+";"+voisinage[j] )
-                  }
-              }
-          }
-
-          futurelevel = false;
-          // Selection is unchanged, no need to call MultipleSelection2
-
+        // Adding intra-neighbors edges O(voisinage²)
+        voisinage = Object.keys(voisinage)
+        for(var i=0;i<voisinage.length;i++) {
+            for(var j=1;j<voisinage.length;j++) {
+                if( voisinage[i]!=voisinage[j] ) {
+                    // console.log( "\t" + voisinage[i] + " vs " + voisinage[j] )
+                    add1Elem( voisinage[i]+";"+voisinage[j] )
+                }
+            }
+        }
 
       } else { // [Change to Global] when level=Local(0)
 
@@ -553,20 +577,19 @@ function changeLevel() {
           }
 
           // var t1 = performance.now()
-          futurelevel = true;
-
           // console.log("returning to global took:", t1-t0)
 
-          // Nodes Selection now:
-          if(sels.length>0) {
-              TW.instance.selNgn.MultipleSelection2({nodes:sels});
-              TW.gui.selectionActive=true;
-          }
       }
 
-      TW.pushState({
-          level: futurelevel
-      })
+      // Selection is unchanged, but all the nodes are new
+      // so we call MultipleSelection2 to set up node attributes
+      TW.instance.selNgn.MultipleSelection2({nodes:sels, noState:true});
+
+      if (! optionalTargetState) {
+        TW.pushState({
+            level: futurelevel
+        })
+      }
 
       TW.partialGraph.camera.goTo({x:0, y:0, ratio:1.2, angle: 0})
       TW.partialGraph.refresh()
