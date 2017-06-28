@@ -1,1 +1,0 @@
-dockers/comex2_services/requirements.txt

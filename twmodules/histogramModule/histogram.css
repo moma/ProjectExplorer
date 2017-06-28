@@ -1,0 +1,16 @@
+/* ------------- module dygraph charts pour histogramme WOS ----------------- */
+
+/* graph div */
+#search_histogram {
+  min-height: 12em ;
+  font-size: 75%;
+  background-color: #F9F9F9 ;
+  display: none;
+  position:relative;
+  padding: 0 15px;
+  max-width: 100%;
+}
+#search_histogram canvas {
+  padding-right: 1em;
+  margin-left: -1em;
+}

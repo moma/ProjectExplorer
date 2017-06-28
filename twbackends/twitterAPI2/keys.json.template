@@ -1,0 +1,6 @@
+{
+  "consumer_key": "something_something",
+  "consumer_secret": "something_something_something",
+  "access_token_key": "something_else",
+  "access_token_secret": "something_else_something_else"
+}

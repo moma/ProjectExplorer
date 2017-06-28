@@ -1,1 +1,0 @@
-../static/js/comex_menubar_login_controllers.js

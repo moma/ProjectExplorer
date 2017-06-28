@@ -1,0 +1,62 @@
+{
+  "data/gargistex": {
+    "first" : "shale_and_ice.gexf",
+    "gexfs": {
+      "shale_and_ice.gexf": {
+        "dbtype": "csv",
+        "semantic":["title","keywords","abstract"],
+        "social":["authors"],
+        "dbfile": "shale_and_ice.csv"
+      }
+    }
+  },
+  "data/test": {
+    "first" : "mini_for_csv.gexf",
+    "gexfs": {
+      "mini_for_csv.gexf": {
+        "_comment": "NB: underspecified for csv and for db.json !! so this is a prototype structure",
+        "_comment": "POSS: weighted columns for matching importance",
+        "dbtype": "csv",
+        "semantic":["title","keywords","text"],
+        "social":["author"],
+        "dbfile": "mini_for_csv.csv"
+      },
+      "test_with_various_atts.gexf": {}
+    }
+  },
+  "data/politoscope": {
+		"dbname":null,
+		"title":"Politoscope",
+		"date":"2017",
+		"abstract":"",
+		"first" : "ProgrammeDesCandidats.enrichi.gexf",
+		"gexfs": {
+			"ProgrammeDesCandidats.enrichi.gexf": {
+				"social": {},
+				"semantic": {}
+			},
+			"ProgrammeDesCandidats.gexf": {
+				"social": {},
+				"semantic": {}
+			}
+		}
+	},
+  "data/ClimateChange": {
+        "dbname":"wos_climate-change_title_2014-2015.db",
+        "title":"ISITITLE",
+        "date":"ISIpubdate",
+        "abstract":"ISIABSTRACT",
+        "gexfs": {
+                "Maps_S_800.gexf": {
+                        "social": { "table":"ISIAUTHOR" , "textCol":"data","forkeyCol":"id"},
+                        "semantic": { "table":"ISItermsWhitelistV2Oct_5" , "textCol":"data","forkeyCol":"id"}
+                }
+        }
+  },
+	"data/comexjsons": {
+		"first" : "graph_example.json",
+		"gexfs": {
+			"graph_example.json": {}
+		}
+	}
+}

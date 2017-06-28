@@ -1,0 +1,43 @@
+blockquote.Tweet {
+  display: inline-block !important;
+  font-family: Roboto, "Helvetica Neue", "Segoe UI", Calibri, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+  line-height: 16px !important;
+  border-color: #eee #ddd #bbb !important;
+  border-radius: 5px !important;
+  border-style: solid !important;
+  border-width: 1px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+  margin: 10px 5px !important;
+  padding: 0 16px 16px 16px !important;
+  min-width: 330px !important;
+  width: 330px !important;
+  max-width: 330px !important;
+}
+
+p.Tweet-text {
+  font-size: 16px !important;
+  font-weight: normal !important;
+  line-height: 20px !important;
+  min-height: 90px !important;
+}
+
+blockquote.Tweet a {
+  color: inherit !important;
+  font-weight: normal !important;
+  text-decoration: none !important;
+  outline: 0 none !important;
+}
+
+blockquote.Tweet a:hover,
+blockquote.Tweet a:focus {
+  text-decoration: underline !important;
+}
+
+.Tweet-metadata {
+  font-size: 1em
+}
+.Tweet-authorScreenName {
+  font-size: .9em;
+}

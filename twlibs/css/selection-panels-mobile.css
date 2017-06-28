@@ -1,0 +1,158 @@
+/* viewport-specific variants */
+
+/* sm and smaller: for mobile */
+@media(max-width:768px){
+  #lefttopbox {
+    top: 105px;
+    left: 0;
+    width:30% ;
+  }
+  #lefttopbox h4 {
+    font-size: 10px;
+  }
+
+  /* sidepanel folding deactivated (+ in js: foldingReset fun)*/
+  #sidefold, #sideunfold {
+    display: none;
+  }
+
+
+  /* zoombar re-positioned */
+  #ctlzoom {
+    right: 5px ;
+    bottom: calc(40% - 105px);
+    /* bot just above #sidebar which has top at calc(105px + 60%); */
+  }
+
+  /* "top left" */
+  #selectionsBox{
+      margin: 0;
+      padding: 3px 0;
+  }
+
+  #unselectbutton {
+    font-size: 60%;
+    right: 17px;
+    top: 7px;
+  }
+
+  .readmore-js-toggle {
+    font-size: 10px;
+  }
+
+  #defaultop #searchnav {
+    padding-left: 15px !important;
+  }
+  #defaultop .weight-selectors {
+    padding-left: 15px !important;
+    margin-left: 0 !important;
+  }
+
+  /* legend re-positioned */
+  .my-legend {
+    bottom: calc(40% - 105px);
+    /* bot just above #sidebar which has top at calc(105px + 60%); */
+  }
+
+  /* collapsed menu styling */
+  #left {
+    max-width: 320px;
+    background-color: #ddd;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    z-index: 3;
+    padding: 5px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -border-radius: 3px;
+    -moz-box-shadow: 0px 2px 6px #000;
+    -webkit-box-shadow: 0px 2px 6px #000;
+    box-shadow: 0px 2px 6px #000;
+  }
+
+}
+
+
+
+/* small width or small height */
+@media(max-width:768px), (max-height:550px) {
+
+  /* zoombar reduction */
+  .zoombarbuttons img {
+    width: 20px !important;
+  }
+
+  #ctlzoom li:not(#zoomSliderzone) {
+    margin: 5px 0;
+    height: 18px;
+    width: 18px;
+  }
+
+  #zoomMinusButton, #zoomPlusButton {
+    margin-left: -2px;
+  }
+
+  #zoomSliderzone {
+    display: none;
+  }
+
+  /* legend reduction */
+  .my-legend {
+    max-width: 27%;
+    max-height: 25%;
+    padding: 0 2px;
+    font-size: 85%;
+    margin: 0 0 5px 0;
+  }
+
+  .my-legend .legend-title {
+      margin-bottom: 0;
+      font-size: 90%;
+   }
+  .my-legend .legend-scale ul {
+    margin-bottom: 0;
+  }
+  .my-legend .legend-scale ul li {
+    margin-left: 0;
+    line-height: 12px;
+    margin-bottom: 0;
+  }
+
+  .my-legend ul.legend-labels li span.lgdcol {
+    height: 11px;
+    width: 11px;
+    border: 1px solid #999;
+  }
+
+  /* smaller switch */
+  .onoffswitch {
+    width: 20px;
+    padding-left: 0px;
+  }
+  .onoffswitch-inner:before, .onoffswitch-inner:after {
+      height: 10px;
+      line-height: 10px;
+      font-size: 6px;
+  }
+  .onoffswitch-switch {
+      width: 5px;
+      border-radius: 20px;
+  }
+
+  .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+      margin-left: 0;
+  }
+  .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+      left: 16px;
+  }
+
+  /* switch css -- Edges instance */
+  #edges-switch-inner-label:before {
+      font-size: 4px;
+      padding-left: 2px;
+  }
+  #edges-switch-inner-label:after {
+      font-size: 4px;
+      padding-right: 2px;
+  }
+}
