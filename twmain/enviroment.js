@@ -1017,8 +1017,8 @@ function createWaitIcon(idname, width) {
 }
 
 
-function jsActionOnGexfSelector(gexfBasename){
-    let gexfPath = TW.gexfPaths[gexfBasename] || gexfBasename+".gexf"
+function jsActionOnGexfSelector(graphBasename){
+    let graphPath = TW.gmenuPaths[graphBasename] || graphBasename+".gexf"
     let serverPrefix = ''
     var pathcomponents = window.location.pathname.split('/')
     for (var i in pathcomponents) {
@@ -1026,13 +1026,19 @@ function jsActionOnGexfSelector(gexfBasename){
         serverPrefix += '/'+pathcomponents[i]
     }
 
-    var newDataRes = AjaxSync({ "url": window.location.origin+serverPrefix+'/'+gexfPath });
+    var newDataRes = AjaxSync({ "url": window.location.origin+serverPrefix+'/'+graphPath });
 
     // remove any previous instance and flags
     TW.resetGraph()
 
+    // override default categories with the ones from db.json
+    if (TW.gmenuInfos[graphPath].nodetypes) {
+      TW.conf.catSem = TW.gmenuInfos[graphPath].nodetypes.node0
+      TW.conf.catSoc = TW.gmenuInfos[graphPath].nodetypes.node1
+    }
+
     mainStartGraph(newDataRes["format"], newDataRes["data"], TW.instance)
-    writeLabel(gexfBasename)
-    TW.File = gexfPath
+    writeLabel(graphBasename)
+    TW.File = graphPath
 }
 //============================= </OTHER ACTIONS > =============================//

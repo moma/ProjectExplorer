@@ -156,9 +156,10 @@ TW.conf = (function(TW){
 
   // Node typology: categories (resp. 0 and 1) will get these default labels
   TWConf.catSem = "term";
-  TWConf.catSoc = "person";
-  // NB: these labels may be superseded by the input data's node types values
-  //     cf. sortNodeTypes()
+  TWConf.catSoc = "document";
+  // NB: these labels may be superseded by:
+  //   - the input data's node types values cf. sortNodeTypes()
+  //   - in servermenu mode, by the node0 & node1 properties
 
   // Modules path
   // ------------

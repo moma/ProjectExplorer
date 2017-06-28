@@ -449,8 +449,8 @@ function topPapersFetcher(swType, qWords, priorHtml, cbNext){
     });
   }
   else if (TW.conf.relatedDocsType == "wosLocalDB") {
-    let gexfinfos = TW.relDocsInfos[TW.File]
-    if (!gexfinfos || !gexfinfos[swType]) {
+    let thisRelDocsConf = TW.gmenuInfos[TW.File].relDocsConf
+    if (!thisRelDocsConf || !thisRelDocsConf[swType]) {
       resHTML =
         `<p>Your settings for relatedDocsType are set on a local wos database,
             but your servermenu file does not provide any information about
@@ -460,7 +460,6 @@ function topPapersFetcher(swType, qWords, priorHtml, cbNext){
             return
     }
     else {
-
       // /!\ documentation and specification needed for the php use cases /!\
       let joinedQ = JSON.stringify(qWords).split('&').join('__and__');
       // cf. the php code for these url args:
@@ -469,20 +468,20 @@ function topPapersFetcher(swType, qWords, priorHtml, cbNext){
       //          or 'csv' (like gargantext exports)
 
       // POSS object + join.map(join)
-      let urlParams = "type="+swType+"&query="+joinedQ+"&gexf="+TW.File+"&n="+TW.conf.relatedDocsMax+"&dbtype="+gexfinfos.dbtype
+      let urlParams = "type="+swType+"&query="+joinedQ+"&gexf="+TW.File+"&n="+TW.conf.relatedDocsMax+"&dbtype="+thisRelDocsConf.dbtype
 
-      if (gexfinfos.dbtype == "sql") {
-        var qIndex = gexfinfos[swType]    // a table
+      if (thisRelDocsConf.dbtype == "sql") {
+        var qIndex = thisRelDocsConf[swType]    // a table
         urlParams += `&index=${qIndex}`
       }
       else {
         // a list of csv columns to search in
         // ex: for semantic nodes matching we look in 'title', 'keywords' cols
         //     for social nodes matching we look in 'authors' col... etc.
-        let joinedSearchCols = JSON.stringify(gexfinfos[swType])
+        let joinedSearchCols = JSON.stringify(thisRelDocsConf[swType])
         urlParams += `&searchin=${joinedSearchCols}`
 
-        let joinedAllCols = JSON.stringify(gexfinfos)
+        let joinedAllCols = JSON.stringify(thisRelDocsConf)
         urlParams += `&toindex=${joinedAllCols}`
         // POSS use a direct access from php to db.json to avoid toindex
         // POSS make it a REST array like: index[]=title&index[]=keywords
@@ -502,12 +501,6 @@ function topPapersFetcher(swType, qWords, priorHtml, cbNext){
             cbNext(priorHtml + stockErrMsg)
           }
       });
-
-
-
-
-
-
     }
   }
 }

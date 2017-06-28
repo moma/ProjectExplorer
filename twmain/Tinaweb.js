@@ -643,31 +643,22 @@ var TinaWebJS = function ( sigmacanvas ) {
         });
 
         $("#changetype").click(function(){
-            console.log("")
-            console.log(" ############  changeTYPE click");
+            console.log("changeTYPE click");
             if (TW.partialGraph.isForceAtlas2Running())
                 sigma_utils.ourStopFA2();
 
-            console.log("DBG before changeType SystemState:", TW.SystemState())
             changeType();
 
             setTimeout(function(){
               $('.etabs a[href="#tabs1"]').trigger('click');
             },500)
-
-            console.log(" ############  / changeTYPE click");
-            console.log("")
         });
 
         $("#changelevel").click(function(){
-            console.log("")
-            console.log(" ############  changeLEVEL click");
+            console.log("changeLEVEL click");
             if (TW.partialGraph.isForceAtlas2Running())
                 sigma_utils.ourStopFA2();
             changeLevel();
-
-            console.log(" ############  / changeLEVEL click");
-            console.log("")
         });
 
         // sidepanel folding
