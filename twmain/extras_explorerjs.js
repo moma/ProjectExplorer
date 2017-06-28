@@ -357,7 +357,7 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
 
 function getTopPapers(){
   // waiting image
-  let image='<img style="display:block; margin: 0px auto;" src="libs/img2/loader.gif"></img>';
+  let image='<img style="display:block; margin: 0px auto;" src="twlibs/img/loader.gif"></img>';
   $("#topPapers").html(image);
 
   // swNodetypes <=> active types expressed as "semantic" and "social"

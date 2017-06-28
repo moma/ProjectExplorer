@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="language" content='EN'>
   <meta name="language" content='FR'>
-  <meta name="keywords"  content="dataviz, graph, data exploration, sigmajs, tinawebjs">
+  <meta name="keywords"  content="dataviz, graph, data exploration, sigmajs, tinawebjs, projectExplorer">
   <meta name="copyright" content="ISCPIF - UPS 3611 CNRS - 2017">
   <meta name="revised"   content="2017-04-01/rloth">
   <meta name="viewport"  content="width=device-width, initial-scale=1">
@@ -54,19 +54,18 @@
 
 
   <!-- CSS -->
-  <link rel="stylesheet" href="twlibs/css2/twjs.css">
-  <link rel="stylesheet" href="twlibs/css2/twjs-mobile.css">
-  <link rel="stylesheet" href="twlibs/css2/selection-panels.css">
-  <link rel="stylesheet" href="twlibs/css2/selection-panels-mobile.css">
+  <link rel="stylesheet" href="twlibs3/jquery-3/jquery-ui-1.12.1/jquery-ui.min.css" media="screen">
+  <!-- NB bootstrap 3 not used for main grid (graph + bars) but inside the bars -->
+  <link rel="stylesheet" href="twlibs3/bootstrap-3/css/bootstrap.min.css" media="screen">
+  <link rel="stylesheet" href="twlibs3/css/freshslider/freshslider.css" media="screen">
+  <link rel="stylesheet" href="twlibs3/tweets/tweet.light.ltr.css" />
+  <link rel="stylesheet" href="twlibs3/tweets/custom.css"/>
 
-  <link rel="stylesheet" href="twlibs/jquery-3/jquery-ui-1.12.1/jquery-ui.min.css" media="screen">
-  <link rel="stylesheet" href="twlibs/bootstrap-3/css/bootstrap.min.css" media="screen">
-  <!-- NB bs2/3 not used for main grid (graph + bars) but inside the bars -->
-  <link rel="stylesheet" href="twlibs/css2/freshslider.css" media="screen">
-
-  <link type="text/css" href="twlibs/tweets/tweet.light.ltr.css" rel="stylesheet"/>
-  <link type="text/css" href="twlibs/tweets/custom.css" rel="stylesheet"/>
-  <link type="text/css" href="twlibs/css2/user_form.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="twlibs/css/twjs.css">
+  <link rel="stylesheet" href="twlibs/css/twjs-mobile.css">
+  <link rel="stylesheet" href="twlibs/css/selection-panels.css">
+  <link rel="stylesheet" href="twlibs/css/selection-panels-mobile.css">
+  <link rel="stylesheet" href="twlibs/css/user_form.css" />
 
   <!-- JS -->
   <!-- <script src="script.js"></script> -->
@@ -116,11 +115,11 @@
           <li><a href="http://www.cnrs.fr" target="_blank"
                 class="navbar-higher"
                 title="CNRS">
-                <img src="twlibs/img2/logo_cnrs_transparent.gif" height="23"></a></li>
+                <img src="twlibs/img/logo_cnrs_transparent.gif" height="23"></a></li>
           <li><a href="http://iscpif.fr" target="_blank"
                 class="navbar-higher"
                 title="ISC-PIF">
-                <img src="twlibs/img2/logo_ISCPIF_small.svg" height="23"></a></li>
+                <img src="twlibs/img/logo_ISCPIF_small.svg" height="23"></a></li>
 
         </ul>
 
@@ -160,7 +159,7 @@
             <li><a href="https://communityexplorer.org"
                   class="navbar-higher"
                   title="Community Explorer">
-                  <img src="twlibs/img2/logo.png"
+                  <img src="twlibs/img/logo.png"
                        style="width:60px; position:absolute; top:-60px; left:-75px; z-index:5; overflow:visible;">
             </a></li>
 
@@ -194,7 +193,7 @@
 
              <li id="setcolorsMenu" class="dropdown">
                <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-               Set Colors <img title="Set Colors" src="twlibs/img2/colors.png" width="20px"><span class="caret"></span>
+               Set Colors <img title="Set Colors" src="twlibs/img/colors.png" width="20px"><span class="caret"></span>
                </a>
                 <ul id="colorgraph-menu" class="dropdown-menu">
                 </ul>
@@ -314,7 +313,7 @@
               <!--
                <li>
                   <a href="#" id="geomapicon" onclick="$('#geomapmodal').modal('show'); callGeomapADEME();">
-                    <img title="World Map Distribution" width="34px" src="twlibs/img2/world.png"></img>
+                    <img title="World Map Distribution" width="34px" src="twlibs/img/world.png"></img>
                   </a>
               </li>
               -->
@@ -322,13 +321,13 @@
 
                <li>
                   <a href="#" id="snapicon" onclick="saveGraphIMG();" class="zoombarbuttons">
-                    <img title="Take a photo!" style="width:30px" src="twlibs/img2/camera.png"></img>
+                    <img title="Take a photo!" style="width:30px" src="twlibs/img/camera.png"></img>
                   </a>
               </li>
 
               <li>
                   <a href="#savemodal" id="saveAs" class="zoombarbuttons" data-toggle="modal" data-target="#savemodal">
-                    <img style="width:28px" title="Save As..." src="twlibs/img2/save.png"></img>
+                    <img style="width:28px" title="Save As..." src="twlibs/img/save.png"></img>
                   </a>
               </li>
 
@@ -348,21 +347,21 @@
               <li>
                   <a href="#" id="lensButton" class="zoombarbuttons"
                      title="Center View">
-                    <img src="twlibs/img2/target.png">
+                    <img src="twlibs/img/target.png">
                   </a>
               </li>
 
               <li>
                   <a href="#" id="layoutButton" class="zoombarbuttons"
                      title="Force Atlas Layout">
-                    <img src="twlibs/img2/edges.png">
+                    <img src="twlibs/img/edges.png">
                   </a>
               </li>
 
               <li>
                   <a href="#" id="noverlapButton" class="zoombarbuttons"
                      title="Disperse Overlapping Nodes">
-                    <img src="twlibs/img2/disperse.png">
+                    <img src="twlibs/img/disperse.png">
                   </a>
               </li>
 
@@ -371,7 +370,7 @@
                   <a href="#facet-options" id="facets" class="zoombarbuttons"
                      title="Facets coloring options"
                      data-toggle="modal" data-target="#facet-options">
-                    <img src="twlibs/img2/facet_options.png"></img>
+                    <img src="twlibs/img/facet_options.png"></img>
                   </a>
               </li>
 
@@ -420,7 +419,7 @@
 
       <!-- to reopen the panel -->
       <div id="sideunfold">
-        <img title="Open sidepanel" src="twlibs/img2/unfold2.png"></img>
+        <img title="Open sidepanel" src="twlibs/img/unfold2.png"></img>
       </div>
 
     </div>
@@ -518,7 +517,7 @@
               style="width:85%; ">
           </a>
           <a href="https://github.com/moma" target="_blank">
-              <img src="twlibs/img2/moma.png"
+              <img src="twlibs/img/moma.png"
               alt="Sciencemapping"
               style="width:85%; ">
           </a>
@@ -529,7 +528,7 @@
 
     <br><br>
     <div id="sidefold">
-      <img title="Close sidepanel" src="twlibs/img2/fold2.png"></img>
+      <img title="Close sidepanel" src="twlibs/img/fold2.png"></img>
     </div>
   </div>
   <div id="hidden-elements">
@@ -597,7 +596,7 @@
 
     <div id="modalloader" class="modal fade">
         <div id="loader" class="loader">
-            <img src="twlibs/img2/loader.gif"></img>
+            <img src="twlibs/img/loader.gif"></img>
         </div>
         <div id="closeloader" data-dismiss="modal"></div>
     </div>
@@ -731,46 +730,45 @@
   </div>
 
   <!--         SCRIPTS        -->
-  <script src="twlibs/jquery-3/jquery-3.2.0.min.js" type="text/javascript"></script>
-  <script src="twlibs/jquery-3/jquery-ui-1.12.1/jquery-ui.min.js" type="text/javascript"></script>
-  <script src="twlibs/jquery-3/jquery.easytabs.js" type="text/javascript"></script>
-  <script src="twlibs/freshslider.1.0.js" type="text/javascript" ></script>
-  <script src="twlibs/readmore.js" type="text/javascript"></script>
-  <script src="twlibs/tweets/widgets.js" type="text/javascript" language="javascript"></script>
-  <script src="twlibs/bootstrap-native/bootstrap-native.min.js"></script>
-
-  <script src="tinawebJS/globalUtils.js" type="text/javascript"></script>
-
+  <script src="twlibs3/jquery-3/jquery-3.2.0.min.js" type="text/javascript"></script>
+  <script src="twlibs3/jquery-3/jquery-ui-1.12.1/jquery-ui.min.js" type="text/javascript"></script>
+  <script src="twlibs3/jquery-3/jquery.easytabs.js" type="text/javascript"></script>
+  <script src="twlibs3/freshslider/freshslider.1.0.js" type="text/javascript" ></script>
+  <script src="twlibs3/readmore.js" type="text/javascript"></script>
+  <script src="twlibs3/tweets/widgets.js" type="text/javascript" language="javascript"></script>
+  <script src="twlibs3/bootstrap-native/bootstrap-native.min.js"></script>
   <!-- new sigma 1.2 imports -->
-  <!-- <script src="tinawebJS/sigma_v1.2/sigma.min.js" type="text/javascript" language="javascript"></script> -->
-  <!-- <script src="tinawebJS/sigma_v1.2/sigma.noIndexes.js" type="text/javascript" language="javascript"></script> -->
-  <script src="tinawebJS/sigma_v1.5/sigma.js" type="text/javascript" language="javascript"></script>
+  <!-- <script src="twlibs3/sigma_v1.2/sigma.min.js" type="text/javascript" language="javascript"></script> -->
+  <!-- <script src="twlibs3/sigma_v1.2/sigma.noIndexes.js" type="text/javascript" language="javascript"></script> -->
+  <script src="twlibs3/sigma_v1.5/sigma.js" type="text/javascript" language="javascript"></script>
   <!--
   NB: our sigma.noIndexes.js has exactly the same functions & varnames as
       the v1.2 stock sigma.(min).js but with a much lighter RAM footprint!
       cf. https://github.com/jacomyal/sigma.js/issues/340
   -->
-  <script src="tinawebJS/sigma_v1.2/plugins/sigma.plugins.animate/sigma.plugins.animate.js"></script>
-  <script src="tinawebJS/sigma_v1.2/plugins/sigma.layout.noverlap/sigma.layout.noverlap.js"></script>
-  <script src="tinawebJS/sigma_v1.2/plugins/sigma.layout.forceAtlas2/supervisor.js"></script>
-  <script src="tinawebJS/sigma_v1.2/plugins/sigma.layout.forceAtlas2/worker.js"></script>
-  <script src="tinawebJS/sigma_v1.2/plugins/sigma.renderers.snapshot/sigma.renderers.snapshot.js"></script>
-  <script src="tinawebJS/sigma_v1.2/plugins/sigma.plugins.dragNodes/sigma.plugins.dragNodes.js"></script>
+  <script src="twlibs3/sigma_v1.2/plugins/sigma.plugins.animate/sigma.plugins.animate.js"></script>
+  <script src="twlibs3/sigma_v1.2/plugins/sigma.layout.noverlap/sigma.layout.noverlap.js"></script>
+  <script src="twlibs3/sigma_v1.2/plugins/sigma.layout.forceAtlas2/supervisor.js"></script>
+  <script src="twlibs3/sigma_v1.2/plugins/sigma.layout.forceAtlas2/worker.js"></script>
+  <script src="twlibs3/sigma_v1.2/plugins/sigma.renderers.snapshot/sigma.renderers.snapshot.js"></script>
+  <script src="twlibs3/sigma_v1.2/plugins/sigma.plugins.dragNodes/sigma.plugins.dragNodes.js"></script>
 
 
+
+  <script src="twmain/globalUtils.js"></script>
   <!-- new sigma (1.0c => 1.2) compatibility imports -->
-  <script src="tinawebJS/sigma_tools.js"></script>
+  <script src="twmain/sigma_tools.js"></script>
 
   <!-- classic tinawebJS imports -->
-  <script type="text/javascript" src="tinawebJS/jLouvain.js"></script>
-  <script src="settings_explorerjs.js" type="text/javascript" language="javascript"></script>
-  <script src="tinawebJS/enviroment.js" type="text/javascript" language="javascript"></script>
-  <script src="tinawebJS/sigma.parseCustom.js" type="text/javascript" language="javascript"></script>
-  <script src="tinawebJS/sigmaUtils.js" type="text/javascript" language="javascript"></script>
-  <script src="extras_explorerjs.js" type="text/javascript" language="javascript"></script>
-  <script src="tinawebJS/methods.js" type="text/javascript" language="javascript"></script>
-  <script src="tinawebJS/Tinaweb.js" type="text/javascript" language="javascript"></script>
-  <script src="tinawebJS/main.js" type="text/javascript" language="javascript"></script>
+  <script src="settings_explorerjs.js"></script>
+  <script src="twmain/jLouvain.js"></script>
+  <script src="twmain/enviroment.js"></script>
+  <script src="twmain/sigma.parseCustom.js"></script>
+  <script src="twmain/sigmaUtils.js"></script>
+  <script src="twmain/extras_explorerjs.js"></script>
+  <script src="twmain/methods.js"></script>
+  <script src="twmain/Tinaweb.js"></script>
+  <script src="twmain/main.js"></script>
   <!--        /SCRIPTS        -->
 </body>
 

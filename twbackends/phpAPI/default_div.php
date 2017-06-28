@@ -113,7 +113,7 @@ foreach ($wos_ids as $id => $score) {
 				$sql = 'SELECT data FROM ISITITLE WHERE id='.$id.' group by data';
 
 				foreach ($base->query($sql) as $row) {
-					$external_link="<a href=http://google.com/webhp?#q=".urlencode('"'.$row['data'].'"')." target=blank>".' <img width=15px src="libs/img2/google.png"></a>';
+					$external_link="<a href=http://google.com/webhp?#q=".urlencode('"'.$row['data'].'"')." target=blank>".' <img width=15px src="twlibs/img/google.png"></a>';
 					$output.="<li title='".$score."'>";
 					$output.=$external_link.imagestar($score,$factor,$twjs).' ';
 					$output.='<a href="JavaScript:newPopup(\''.$twjs.'default_doc_details.php?gexf='.urlencode($gexf).'&index='.$table.'&query='.urlencode($query).'&type='.urlencode($_GET["type"]).'&id='.$id.'	\')">'.$row['data']." </a> ";
@@ -294,10 +294,10 @@ function imagestar($score,$factor,$twjs) {
 	if ($score > .5) {
 		$star_image = '';
 		for ($s = 0; $s < min(5,$score/$factor); $s++) {
-			$star_image.='<img src="libs/img2/star.gif" border="0" >';
+			$star_image.='<img src="twlibs/img/star.gif" border="0" >';
 		}
 	} else {
-		$star_image.='<img src="libs/img2/stargrey.gif" border="0">';
+		$star_image.='<img src="twlibs/img/stargrey.gif" border="0">';
 	}
 	return $star_image;
 }
