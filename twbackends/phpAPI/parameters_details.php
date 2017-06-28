@@ -17,7 +17,10 @@ $gexf_db["data/gargistex/model_calibration.gexf"] = "data/gargistex/model_calibr
 
 $gexf= str_replace('"','',$_GET["gexf"]);
 
-$mainpath=dirname(getcwd())."/";
+// default path to ProjectExplorer root
+// (where data directory and db.json file reside)
+$mainpath=dirname(getcwd())."/../";
+
 $graphdb = $gexf_db[$gexf];
 
 

@@ -42,7 +42,7 @@ TW.conf = (function(TW){
 
   TWConf.relatedDocsAPIS = {
     // routes by corresponding type
-    "wosLocalDB": "LOCALDB",
+    "wosLocalDB": "twbackends/phpAPI",
     "twitter": "http://127.0.0.1:5000/twitter_search"
   }
 

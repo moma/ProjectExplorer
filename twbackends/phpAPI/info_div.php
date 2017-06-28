@@ -4,16 +4,13 @@ ini_set('display_errors',1);
 ini_set('display_startup_errors',1);
 // error_reporting(-1);
 
-// relative path to dirname "/line"
-$project_root = "../";
-
 // exemple call:
 // http://blabla/LOCALDB/info_div.php?type=semantic&bi=0&query=[%22Monte%20Carlo%22]&gexf=%22line/AXA/RiskV2PageRank1000.gexf%22&index=ISItermsAxa_2015
 
 include('parameters_details.php');
 
 if ($_GET['dbtype'] == "sql") {
-  $base = new PDO("sqlite:".$project_root.$graphdb);
+  $base = new PDO("sqlite:".$mainpath.$graphdb);
   include('default_div.php');
 }
 
@@ -51,7 +48,8 @@ else {
 
       // indexing ----------------------------------------------------------------------
       // must know about all (sem+soc) cols typed, even if each search doesn't need them
-      $csv_search_base = parse_and_index_csv($project_root.$graphdb,
+      // echodump("filename CSV", $mainpath.$graphdb);
+      $csv_search_base = parse_and_index_csv($mainpath.$graphdb,
                                              $idxcolsbytype,
                                             $csvsep, $csvquote);
       // -------------------------------------------------------------------------------

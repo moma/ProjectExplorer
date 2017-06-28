@@ -31,7 +31,9 @@ There are two exceptions are:
 
   - optionally, the backends under `twbackends`:
     - they are the only server-side elements of the tina distribution
+    - while part of the distribution, they are **standalone micro-servers**
     - they contain their own readme as to how to run them on a server
+    - once they are configured or run, the communication between them and the main tinaweb client module happens via XHR requests: therefore they can actually reside in any convenient place for your deployment.
 
 
 
