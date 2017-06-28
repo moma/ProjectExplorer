@@ -1000,7 +1000,7 @@ function updateSearchLabels(id,name,type){
 function createWaitIcon(idname, width) {
   let icon = document.createElement('img')
 
-  icon.src = TW.conf.path.ourlibs+'/img/loader.gif'
+  icon.src = TW.conf.paths.ourlibs+'/img/loader.gif'
 
   icon.style.position = 'absolute'
   icon.style.left = '0'
