@@ -6,8 +6,8 @@ TW.conf = (function(TW){
 
   let TWConf = {}
 
-  TWConf.branding = 'ProjectExplorer'   // <--- the name displayed in upper left
-  TWConf.brandingLink = 'https://github.com/moma/ProjectExplorer'   // <--- link to "home"
+  TWConf.branding = 'Community Explorer 2'  // <--- name displayed in upper left
+  TWConf.brandingLink = 'https://communityexplorer.org'   // <--- link to "home"
 
 
   // ==========================
@@ -17,10 +17,10 @@ TW.conf = (function(TW){
   // Graph data source
   // -----------------
   // the graph input depends on TWConf.sourcemode (or manual url arg 'sourcemode')
-  TWConf.sourcemode = "servermenu"   // accepted: "api" | "serverfile" | "servermenu" | "localfile"
+  TWConf.sourcemode = "api"   // accepted: "api" | "serverfile" | "servermenu" | "localfile"
 
   // server-side .gexf|.json default source
-  TWConf.sourceFile = "data/politoscope/ProgrammeDesCandidats.enrichi.gexf"
+  TWConf.sourceFile = ""
 
   // ...or server-side gexf default source list
   TWConf.sourceMenu = "db.json"
@@ -34,20 +34,12 @@ TW.conf = (function(TW){
   // Related documents (topPapers) data source
   // -----------------------------------------
 
-  TWConf.getRelatedDocs = true
+  TWConf.getRelatedDocs = false
   TWConf.relatedDocsMax = 10
+  TWConf.relatedDocsAPI = "http://127.0.0.1:5000/twitter_search"
 
-  TWConf.relatedDocsType = "wosLocalDB"   // accepted: "twitter" | "wosLocalDB"
+  TWConf.relatedDocsType = "twitter"      // accepted: "twitter" | "wosLocalDB"
                                           // POSSible: "elastic"
-
-  TWConf.relatedDocsAPIS = {
-    // routes by corresponding type
-    "wosLocalDB": "twbackends/phpAPI",
-    "twitter": "http://127.0.0.1:5000/twitter_search"
-  }
-
-  // fallback topPapers API if none found by type
-  TWConf.relatedDocsAPI = "LOCALDB"
 
   // =======================
   // DATA FACETS AND LEGENDS
@@ -114,8 +106,8 @@ TW.conf = (function(TW){
     'weight'          : {'col': "heatmap" , 'n': 5,  'binmode': 'samerange'  },
     'Weighted Degree' : {'col': "heatmap", 'n': 8,  'binmode': 'samerange'  },
     'out-degree'      : {'col': "heatmap" , 'n': 3,  'binmode': 'samepop'  },
-    'countryuniform'  : {'col': "cluster" ,          'binmode': 'off'},
-    'countrypareto'    : {'col': "cluster" ,          'binmode': 'off'},
+    'CC'              : {'col': "cluster" ,          'binmode': 'off'},
+    'ACR'             : {'col': "cluster" ,          'binmode': 'off'},
 'cluster_universal_index': {'col': "cluster" ,         'binmode': 'off'      },
        'community_orphan' : {'col': "cluster" ,        'binmode': 'off'      }
 
@@ -135,7 +127,7 @@ TW.conf = (function(TW){
 
 
   // when coloring method is "cluster", should the colors change each time ?
-  TWConf.randomizeClusterColors = false
+  TWConf.randomizeClusterColors = true
 
   // default clustering attribute (<---> used for initial node colors)
   TWConf.nodeClusAtt = "modularity_class"
@@ -155,14 +147,15 @@ TW.conf = (function(TW){
   // =============
 
   // Node typology: categories (resp. 0 and 1) will get these default labels
-  TWConf.catSem = "term";
-  TWConf.catSoc = "person";
+  TWConf.catSem = "Terms";
+  TWConf.catSoc = "Document";
   // NB: these labels may be superseded by the input data's node types values
   //     cf. sortNodeTypes()
 
   // Modules path
   // ------------
   TWConf.paths = {
+    'ourlibs': 'static/tinawebJS/twlibs',
     'modules': 'twmodules'
   }
   Object.freeze(TWConf.paths)  // /!\ to prevent path modification before load
@@ -202,7 +195,6 @@ TW.conf = (function(TW){
   // TW.geomap = false;
   // TW.twittertimeline = false;
 
-
   TWConf.maxPastStates = 5 ;      // number of TW.states to remember (~CTRL-Z)
 
 
@@ -213,8 +205,8 @@ TW.conf = (function(TW){
 
   // if fa2Available, the auto-run config:
 
-    TWConf.fa2Enabled= false;        // fa2 auto-run at start and after graph modified ?
-    TWConf.fa2Milliseconds=5000;    // duration of auto-run
+    TWConf.fa2Enabled= true;        // fa2 auto-run at start and after graph modified ?
+    TWConf.fa2Milliseconds=10000;    // duration of auto-run
     TWConf.minNodesForAutoFA2 = 5   // graph size threshold to auto-run
 
 
@@ -293,7 +285,7 @@ TW.conf = (function(TW){
 
   // em size range for neighbor nodes "tagcloud"  (1 = "normal size")
   TWConf.tagcloudFontsizeMin = .8  ;
-  TWConf.tagcloudFontsizeMax = 2 ;
+  TWConf.tagcloudFontsizeMax = 1.5 ;
 
   TWConf.tagcloudSameLimit = 50     // max displayed neighbors of the same type
   TWConf.tagcloudOpposLimit = 10    // max displayed neighbors of the opposite type
@@ -311,7 +303,7 @@ TW.conf = (function(TW){
     initialShowAll: false,           // show all nodes on bipartite case init (docs + terms in one view)
 
     // show verbose console logs...
-    logFetchers: false,              // ...about ajax/fetching of graph data
+    logFetchers: false,               // ...about ajax/fetching of graph data
     logParsers: false,               // ...about parsing said data
     logFacets: false,                // ...about parsing node attribute:value facets
     logSettings: false,              // ...about settings at Tina and Sigma init time

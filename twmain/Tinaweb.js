@@ -1062,6 +1062,15 @@ var TinaWebJS = function ( sigmacanvas ) {
         }
       });
 
+      if (TW.conf.getRelatedDocs) {
+        let reldocsEls = document.querySelectorAll('.reldocs')
+        for (var k in reldocsEls) {
+          if (reldocsEls[k].style) {
+            reldocsEls[k].style.display = 'block'
+          }
+        }
+      }
+
       if (TW.conf.filterSliders) {
 
         // the indice of the first cat to be active (ex: '1')

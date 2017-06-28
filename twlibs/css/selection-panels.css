@@ -150,6 +150,11 @@
 /* ----------- */
 
 
+.reldocs {
+  display: none;
+}
+
+
 #sidefold {
   position: absolute;
   left: 0;

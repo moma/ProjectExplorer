@@ -46,7 +46,22 @@ There are two exceptions are:
       # - explorerjs.html -> static/ProjectExplorer/explorerjs.prod.html
       ```
 
+      4) finally update the settings property `ourlibs` (path to twlibs) with the same URL prefix
+      ```
+      nano static/ProjectExplorer/settings_explorerjs.js
+
+        ----------------- [IN NANO] --------------------
+         (...)
+         TWConf.paths = {
+           'ourlibs': 'static/ProjectExplorer/twlibs',    // <=== here
+           ...
+         }
+         (...)
+        -----------------------------------------------
+      ```
+
     - to use it within a different GUI layout: take our html as an exemple and create your own html importing the same libs and exposing the same div ids.
+    - the directory `twpresets/` contains specific variants of `settings_explorerjs` for some common deployment tasks of the ISCPIF (comex, gargantext)
 
   - optionally, the backends under `twbackends`:
     - they are the only server-side elements of the tina distribution
