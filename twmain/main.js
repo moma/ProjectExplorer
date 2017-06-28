@@ -302,10 +302,6 @@ function syncRemoteGraphData () {
                       TW.relDocsInfos[path+"/"+aGexf]['social'] = theGexfs[aGexf]["social"]["table"]
                     }
                   }
-
-                  console.log("TW.relDocsInfos", TW.relDocsInfos)
-
-
                 }
                 else {
                   TW.relDocsInfos[path+"/"+aGexf] = null
@@ -618,7 +614,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
 
       // should prepare the colors/clusters menu once and for all
       // (previously, needed to be called after changeType/changeLevel)
-      changeGraphAppearanceByFacets(true)
+      changeGraphAppearanceByFacets()
 
       // set the default legend
       set_ClustersLegend ( "clust_default" )

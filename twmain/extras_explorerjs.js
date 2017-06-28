@@ -14,10 +14,10 @@ TW.gui.colorFuns = {
 // Execution:    changeGraphAppearanceByFacets( true )
 // It reads scanned node-attributes and prepared legends in TW.Clusters
 //  to add the button in the html with the sigmaUtils.gradientColoring(x) listener.
-function changeGraphAppearanceByFacets( manualflag ) {
-
-    if ( !isUndef(manualflag) && !TW.conf.colorByAtt ) TW.conf.colorByAtt = manualflag;
+function changeGraphAppearanceByFacets(actypes) {
     if(!TW.conf.colorByAtt) return;
+
+    if (!actypes)            actypes = getActivetypesNames()
 
     let currentNbNodes = TW.partialGraph.graph.nNodes()
 
@@ -25,14 +25,11 @@ function changeGraphAppearanceByFacets( manualflag ) {
     var color_menu_info = '<li><a href="#" onclick="TW.gui.handpickedcolor = false ; graphResetLabelsAndSizes()">By Default</a></li>';
 
     if( $( "#colorgraph-menu" ).length>0 ) {
-
-      var actypes = getActivetypesNames()
       for (var tid in actypes) {
         let ty = actypes[tid]
 
         // each facet family or clustering type was already prepared
         for (var attTitle in TW.Clusters[ty]) {
-
 
           // attribute counts: nb of classes
           // POSS here distinguish [ty][attTitle].classes.length and ranges.length
@@ -192,21 +189,11 @@ function SomeEffect( ValueclassCode ) {
 
     var activetypesKey = getActivetypesKey()
 
-    // we have our precomputed idmaps for nodes_2_colour
-    // -------------------------------------------------
-    for (var k in TW.Clusters[nodeType][cluType].invIdx[iClu].nids) {
-      var nid = TW.Clusters[nodeType][cluType].invIdx[iClu].nids[k]
-      nodes_2_colour[nid] = true
-      n = TW.partialGraph.graph.nodes(nid)
-      if(n) {
-        n.customAttrs['highlight'] = true;
-      }
-    }
-
-    TW.pushState({
-      sels:TW.Clusters[nodeType][cluType].invIdx[iClu].nids,
-      rels:{}
-    })
+    // we have our precomputed idmaps for nodes_2_colour => full selection
+    // /!\ nodeset can be quite big
+    TW.instance.selNgn.MultipleSelection2(
+      {nodes: TW.Clusters[nodeType][cluType].invIdx[iClu].nids}
+    )
     TW.partialGraph.refresh()
 }
 
@@ -1035,7 +1022,7 @@ function newAttrConfAndColor() {
   // console.log("reparse binned result", newClustering)
 
   // update the GUI menu
-  changeGraphAppearanceByFacets(true)
+  changeGraphAppearanceByFacets()
 
   // run the new color
   let colMethod = TW.gui.colorFuns[TW.conf.facetOptions[attrTitle]['col']]
