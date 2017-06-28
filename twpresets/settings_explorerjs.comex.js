@@ -155,6 +155,7 @@ TW.conf = (function(TW){
   // Modules path
   // ------------
   TWConf.paths = {
+    'ourlibs': 'static/tinawebJS/twlibs',
     'modules': 'twmodules'
   }
   Object.freeze(TWConf.paths)  // /!\ to prevent path modification before load
