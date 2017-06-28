@@ -433,6 +433,9 @@ function changeType() {
         // possible: add it in an early way here and request that MS2 doesn't change state
     })
 
+    // update the color menu
+    changeGraphAppearanceByFacets( getActivetypesNames() )
+
     // to recreate the new selection in the new type graph, if we had one before
     // NB relies on new actypes so should be after pushState
     if (newselsArr.length && sels.length) {

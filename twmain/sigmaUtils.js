@@ -889,13 +889,7 @@ function heatmapColoring(daclass) {
 
 function clusterColoring(daclass) {
 
-    console.log("")
-    console.log(" = = = = = = = = = = = = = = = = = ")
-    console.log(" = = = = = = = = = = = = = = = = = ")
     console.log("clusterColoring (    "+daclass+"    )")
-    console.log(" = = = = = = = = = = = = = = = = = ")
-    console.log(" = = = = = = = = = = = = = = = = = ")
-    console.log("")
 
     cancelSelection(false);       // now loops only on selected
     graphResetLabelsAndSizes()    // full loop
@@ -953,7 +947,7 @@ function clusterColoring(daclass) {
             let val = valGroup.val || valGroup.range
             // use the int as an index between 0 and nColors
             if (parseInt(val) == val) {
-              theColor = colList [val] % nColors
+              theColor = colList [val % nColors]
             }
             // or create a representative int on the same range
             else {
@@ -973,7 +967,7 @@ function clusterColoring(daclass) {
             }
           }
 
-          // rembember in TW.Clusters
+          // remember in TW.Clusters
           valGroup.col = theColor
         }
       }

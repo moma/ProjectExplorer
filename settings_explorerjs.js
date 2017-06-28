@@ -187,7 +187,7 @@ TW.conf = (function(TW){
 
   TWConf.filterSliders = true          // show sliders for nodes/edges subsets
 
-  TWConf.clusterColorsAtt = true;      // show "Set colors" menu
+  TWConf.colorByAtt = true;            // show "Set colors" menu
 
   TWConf.dragNodesAvailable = true;    // allow dragging nodes with CTRL+click
 

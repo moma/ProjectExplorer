@@ -730,7 +730,7 @@ var TinaWebJS = function ( sigmacanvas ) {
             TW.partialGraph.camera.goTo({x:0, y:0, ratio:1.2})
         });
 
-        if (!TW.conf.clusterColorsAtt) {
+        if (!TW.conf.colorByAtt) {
           $("#setcolorsMenu").hide()
         }
 
