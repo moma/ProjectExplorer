@@ -26,7 +26,8 @@ fi
 
 if [ -e explorerjs.html ]
   then
-    perl -pse 's/ ((?:href|src)=[\x22\x27]?)(twlibs|twmain)/ $1$pathprefix$2/g' -- -pathprefix=$newpathprefix < explorerjs.html > explorerjs.prod.html
+    perl -pse 's/ ((?:href|src)=[\x22\x27]?)(twlibs3?|twmain)/ $1$pathprefix$2/g' -- -pathprefix=$newpathprefix < explorerjs.html > explorerjs.prod.html
+    echo 'created: explorerjs.prod.html'
     exit 0
   else
     echo 'Please run this script from the ProjectExplorer root'
