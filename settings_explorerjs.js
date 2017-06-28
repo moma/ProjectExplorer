@@ -6,8 +6,8 @@ TW.conf = (function(TW){
 
   let TWConf = {}
 
-  TWConf.branding = 'Community Explorer 2'  // <--- name displayed in upper left
-  TWConf.brandingLink = 'https://communityexplorer.org'   // <--- link to "home"
+  TWConf.branding = 'ProjectExplorer'   // <--- the name displayed in upper left
+  TWConf.brandingLink = 'https://github.com/moma/ProjectExplorer'   // <--- link to "home"
 
 
   // ==========================
@@ -17,10 +17,10 @@ TW.conf = (function(TW){
   // Graph data source
   // -----------------
   // the graph input depends on TWConf.sourcemode (or manual url arg 'sourcemode')
-  TWConf.sourcemode = "api"   // accepted: "api" | "serverfile" | "servermenu" | "localfile"
+  TWConf.sourcemode = "servermenu"   // accepted: "api" | "serverfile" | "servermenu" | "localfile"
 
   // server-side .gexf|.json default source
-  TWConf.sourceFile = ""
+  TWConf.sourceFile = "data/politoscope/ProgrammeDesCandidats.enrichi.gexf"
 
   // ...or server-side gexf default source list
   TWConf.sourceMenu = "db.json"
@@ -34,12 +34,20 @@ TW.conf = (function(TW){
   // Related documents (topPapers) data source
   // -----------------------------------------
 
-  TWConf.getRelatedDocs = false
+  TWConf.getRelatedDocs = true
   TWConf.relatedDocsMax = 10
-  TWConf.relatedDocsAPI = "http://127.0.0.1:5000/twitter_search"
 
   TWConf.relatedDocsType = "twitter"      // accepted: "twitter" | "wosLocalDB"
                                           // POSSible: "elastic"
+
+  TWConf.relatedDocsAPIS = {
+    // routes by corresponding type
+    "wosLocalDB": "twbackends/phpAPI",
+    "twitter": "http://127.0.0.1:5000/twitter_search"
+  }
+
+  // fallback topPapers API if none found by type
+  TWConf.relatedDocsAPI = "twbackends/phpAPI"
 
   // =======================
   // DATA FACETS AND LEGENDS
@@ -147,15 +155,15 @@ TW.conf = (function(TW){
   // =============
 
   // Node typology: categories (resp. 0 and 1) will get these default labels
-  TWConf.catSem = "Terms";
-  TWConf.catSoc = "Document";
+  TWConf.catSem = "term";
+  TWConf.catSoc = "person";
   // NB: these labels may be superseded by the input data's node types values
   //     cf. sortNodeTypes()
 
   // Modules path
   // ------------
   TWConf.paths = {
-    'ourlibs': 'static/tinawebJS/twlibs',
+    'ourlibs': 'twlibs',
     'modules': 'twmodules'
   }
   Object.freeze(TWConf.paths)  // /!\ to prevent path modification before load

@@ -36,10 +36,18 @@ TW.conf = (function(TW){
 
   TWConf.getRelatedDocs = false
   TWConf.relatedDocsMax = 10
-  TWConf.relatedDocsAPI = "http://127.0.0.1:5000/twitter_search"
 
   TWConf.relatedDocsType = "twitter"      // accepted: "twitter" | "wosLocalDB"
                                           // POSSible: "elastic"
+
+  TWConf.relatedDocsAPIS = {
+    // routes by corresponding type
+    "wosLocalDB": "twbackends/phpAPI",
+    "twitter": "http://127.0.0.1:5000/twitter_search"
+  }
+
+  // fallback topPapers API if none found by type
+  TWConf.relatedDocsAPI = "twbackends/phpAPI"
 
   // =======================
   // DATA FACETS AND LEGENDS
