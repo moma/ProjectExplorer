@@ -570,7 +570,9 @@ var SigmaUtils = function () {
                   this.toggleEdges(false)
                 }
 
-                TW.partialGraph.startForceAtlas2();
+                try {
+                  TW.partialGraph.startForceAtlas2();
+                } catch(e) {return}
 
                 var icon = createWaitIcon('layoutwait')
                 var btn = document.querySelector('#layoutButton')

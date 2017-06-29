@@ -52,7 +52,7 @@ TW.pushState = function( args ) {
         $(".for-nodecategory-0").show()
         $(".for-nodecategory-1").hide();
 
-        NodeWeightFilter( "#slidercat0nodesweight" ,  TW.categories[0], "size");
+        NodeWeightFilter( "#slidercat0nodesweight" ,  TW.categories[0]);
         EdgeWeightFilter("#slidercat0edgesweight", typesKey, "weight");
       }
 
@@ -61,7 +61,7 @@ TW.pushState = function( args ) {
           $(".for-nodecategory-0").hide()
           $(".for-nodecategory-1").show();
 
-          NodeWeightFilter( "#slidercat1nodesweight" ,  TW.categories[1], "size");
+          NodeWeightFilter( "#slidercat1nodesweight" ,  TW.categories[1]);
           EdgeWeightFilter("#slidercat1edgesweight", typesKey, "weight");
       }
 
@@ -69,10 +69,11 @@ TW.pushState = function( args ) {
       if(typesKey=="1|1") {
         $(".for-nodecategory-0").show()
         $(".for-nodecategory-1").show();
-          NodeWeightFilter( "#slidercat0nodesweight" ,  TW.categories[0], "size");
-          NodeWeightFilter( "#slidercat1nodesweight" ,  TW.categories[1], "size");
+          NodeWeightFilter( "#slidercat0nodesweight" ,  TW.categories[0]);
+          NodeWeightFilter( "#slidercat1nodesweight" ,  TW.categories[1]);
 
           // only truly bipartite edges => only one GUI slider
+          showDisabledSlider("#slidercat0edgesweight")
           EdgeWeightFilter("#slidercat1edgesweight", "1|1", "weight");
       }
     }

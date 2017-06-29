@@ -599,28 +599,29 @@ function changeLevel() {
 
 //=========================== < FILTERS-SLIDERS > ===========================//
 
-// census of edges by type and by size
+// census of edges by property criterion (eg 'weight'), for a given type
 // (replaces deprecated AlgorithmForSliders, but without the sqrt transform)
-function edgeSizesLookup() {
+function edgeSizesLookup(eTypeStrs, criterion) {
   var edgeweis = {}
 
   for (let i in TW.edgeIds) {
     let e = TW.partialGraph.graph.edges(TW.edgeIds[i])
-    if (e) {
-      if (!edgeweis[e.categ])           edgeweis[e.categ] = {}
-      if (!edgeweis[e.categ][e.weight]) edgeweis[e.categ][e.weight] = []
 
-      edgeweis[e.categ][e.weight].push(e.id)
+    for (var etype_i in eTypeStrs) {
+      let eTypeStr = eTypeStrs[etype_i]
+      if (e && e.categ && e.categ == eTypeStr) {
+        if (!edgeweis[e.categ])               edgeweis[e.categ] = {}
+        if (!edgeweis[e.categ][e[criterion]]) edgeweis[e.categ][e[criterion]] = []
+
+        edgeweis[e.categ][e[criterion]].push(e.id)
+      }
     }
   }
   return edgeweis
 }
 
-function edgeSizesSteps(eTypeStr) {
-  let esizesCensus = edgeSizesLookup()
+function edgeSizesSteps(eTypeStr, esizesCensus) {
   var stepToIdsArray = []
-
-
   if (esizesCensus[eTypeStr]) {
     var sortedSizes = Object.keys(
                         esizesCensus[eTypeStr]
@@ -631,7 +632,7 @@ function edgeSizesSteps(eTypeStr) {
     }
   }
 
-  // console.warn ("edgeSizesSteps:", eTypeStr, stepToIdsArray)
+  // console.warn (`edgeSizesSteps: for etype ${eTypeStr}` , stepToIdsArray)
 
   return stepToIdsArray
 }
@@ -653,8 +654,11 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
         return;
     }
 
-    // building the index
-    var stepToIdsArr = edgeSizesSteps(typestr)
+    // building the index with the generic indexing function
+    var esizesCensus = edgeSizesLookup([typestr], criteria)
+
+    // sorting it for the type we need
+    var stepToIdsArr = edgeSizesSteps(typestr, esizesCensus)
     var steps = stepToIdsArr.length
 
     if(steps<2) {
@@ -725,10 +729,6 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
                 var filtervalue = low+"-"+high
                 var lastvalue = TW.gui.lastFilters[`${sliderDivID}/${typestr}`]
 
-                // sliderDivID+"_"+filtervalue
-
-                console.debug("\nprevious value "+lastvalue+" | current value "+filtervalue)
-
                 if(filtervalue!=lastvalue) {
 
                   // [ Stopping FA2 ]
@@ -746,11 +746,11 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
                   if(mint0!=mint1) {
                       if(mint0<mint1) {
                           delflag = true;
-                          console.log("cotainferior   --||>--------||   a la derecha")
+                          // console.log("cotainferior   --||>--------||   a la derecha")
                       }
                       if(mint0>mint1) {
                           addflag = true;
-                          console.log("cotainferior   --<||--------||   a la izquierda")
+                          // console.log("cotainferior   --<||--------||   a la izquierda")
                       }
                       iterarr = calc_range(mint0,mint1).sort(compareNumbers);
                   }
@@ -758,11 +758,11 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
                   if(maxt0!=maxt1) {
                       if(maxt0<maxt1) {
                           addflag = true;
-                          console.log("cotasuperior   ||--------||>--   a la derecha")
+                          // console.log("cotasuperior   ||--------||>--   a la derecha")
                       }
                       if(maxt0>maxt1) {
                           delflag = true;
-                          console.log("cotasuperior   ||--------<||--   a la izquierda")
+                          // console.log("cotasuperior   ||--------<||--   a la izquierda")
                       }
                       iterarr = calc_range(maxt0,maxt1).sort(compareNumbers);
                   }
@@ -786,23 +786,14 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
                                   else
                                     console.warn("skipped missing eid", eid)
 
-                                  // global level case
-                                  if(present.level) {
-                                      console.log("\tADD "+eid)
-                                      // n = eid.split(";")
-                                      // if(n.length>1)
-                                      //     console.log("\t\tsource:("+TW.Nodes[n[0]].x+","+TW.Nodes[n[0]].y+") ||| target:("+TW.Nodes[n[1]].x+","+TW.Nodes[n[1]].y+")")
-                                      add1Elem(eid)
-                                  }
-
-
                                   // local level case
                                   // stepToIdsArr is full of edges that don't really exist at this point
-                                  else {
+                                  // we need to distinguish between absent edges => keep them absent because of local
+                                  //         and edges with hidden nodes => effect of a node slider => make them appear
+                                  if (! present.level) {
 
                                     // NB we assume the sigma convention eid = "nid1;nid2"
                                     let nidkeys = eid.split(';')
-                                    console.log(nidkeys)
 
                                     if (nidkeys.length != 2) {
                                       console.error("invalid edge id:" + eid)
@@ -816,31 +807,39 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
                                           && TW.partialGraph.graph.nodes(tid)) {
                                             if(TW.partialGraph.graph.nodes(sid).hidden) unHide(sid)
                                             if(TW.partialGraph.graph.nodes(tid).hidden) unHide(tid)
-                                            add1Elem(eid)
+                                            if (! TW.partialGraph.graph.edges(eid)) {
+                                              add1Elem(eid)
+                                            }
+                                            TW.partialGraph.graph.edges(eid).hidden = false
+                                            TW.Edges[eid].lock = false;
                                       }
                                     }
                                   }
-
+                                  // in any case we show the edge
+                                  // global level case
+                                  if (! TW.partialGraph.graph.edges(eid)) {
+                                    // legacy fallback shouldn't be necessary
+                                    add1Elem(eid)
+                                  }
+                                  TW.partialGraph.graph.edges(eid).hidden = false
+                                  TW.Edges[eid].lock = false;
                               }
                           }
-
                       } else {
                           if(delflag) {
-                              console.log("deleting "+eids.join())
                               for(var i in eids) {
-                                  ID = eids[i]
-                                  if(!isUndef(TW.partialGraph.graph.edges(ID))) {
+                                  let eid = eids[i]
+                                  if(!isUndef(TW.partialGraph.graph.edges(eid))) {
                                       var t0 = performance.now()
-                                      TW.partialGraph.graph.dropEdge(ID)
+                                      if (TW.partialGraph.graph.edges(eid)) {
+                                        TW.partialGraph.graph.edges(eid).hidden = true
+                                        TW.Edges[eid].lock = true;
+                                      }
                                       var t1 = performance.now()
-                                      TW.Edges[ID].lock = true;
 
-                                      // usually very long b/c sigma has to update indexes
-                                      // <=> shift same arrays many times
                                       totalDeletingTime += (t1-t0)
-                                      // POSS ideally: use .hidden
 
-                                      console.log("\tDEL "+ID)
+                                      // console.log("\thiding "+eid)
 
                                       // n = ID.split(";")
                                       // if(n.length>1)
@@ -851,11 +850,11 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
                       }
                   }
 
-                  if (delflag)
-                      console.info('totalDeletingTime', totalDeletingTime)
+                  if(delflag) {
+                    console.info('totalDeletingTime', totalDeletingTime)
+                    // NB: performance with hiding: more or less 8x faster than with dropEdge on large graphs
+                  }
 
-                  // console.log("\t\tedgesfilter:")
-                  // console.log("\t\t[ Starting FA2 ]")
                   // [ Starting FA2 ]
                   setTimeout(function() {
                     sigma_utils.smartForceAtlas({'duration': 2000}) // shorter FA2 sufficient
@@ -866,31 +865,26 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
                   TW.gui.lastFilters[`${sliderDivID}/${typestr}`] = filtervalue
                 }
 
-                else {
-                  // console.log('edges:::same position')
-                }
-
                 // in any case
                 setTimeout( function() {
                   TW.partialGraph.refresh()
                   TW.gui.elHtml.classList.remove('waiting')
-                }, 20)
+                }, 40)
 
-            }, 1500) // large-ish debounce timeout
+            }, 1000) // large-ish debounce timeout
 
           }, 40)  // wait cursor timeout
 
         }
     });
-
 }
 
 
 
 //   Execution modes:
-// NodeWeightFilter ( "#sliderANodeWeight" , "Document"  , "size")
-// NodeWeightFilter ( "#sliderBNodeWeight" ,  "NGram"   , "size")
-function NodeWeightFilter( sliderDivID , tgtNodeType ,  criteria) {
+// NodeWeightFilter ( "#sliderANodeWeight" , "Document")
+// NodeWeightFilter ( "#sliderBNodeWeight" ,  "NGram")
+function NodeWeightFilter( sliderDivID , tgtNodeType) {
 
     if (typeof tgtNodeType == "undefined") {
       throw 'no nodetype'
