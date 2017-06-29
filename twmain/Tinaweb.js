@@ -751,7 +751,6 @@ var TinaWebJS = function ( sigmacanvas ) {
                 this.style.cursor = 'wait'
                 // and waiting icon
                 this.insertBefore(createWaitIcon('noverlapwait'), this.children[0])
-
                 var listener = TW.partialGraph.startNoverlap();
                 var noverButton = this
                 listener.bind('stop', function(event) {
@@ -1080,8 +1079,7 @@ var TinaWebJS = function ( sigmacanvas ) {
         //       for context: family/type prop value,
         //       for values:  the property to filter
         NodeWeightFilter ( `#slidercat${activeId}nodesweight` ,
-                              TW.categories[activeId] ,
-                             "size"
+                              TW.categories[activeId]
                            );
 
         // ex: #slidercat1edgesweight
