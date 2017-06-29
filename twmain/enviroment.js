@@ -631,6 +631,8 @@ function edgeSizesSteps(eTypeStr) {
     }
   }
 
+  // console.warn ("edgeSizesSteps:", eTypeStr, stepToIdsArray)
+
   return stepToIdsArray
 }
 
@@ -639,22 +641,24 @@ function edgeSizesSteps(eTypeStr) {
 //	EdgeWeightFilter("#sliderAEdgeWeight", "1",   "weight");
 //	EdgeWeightFilter("#sliderAEdgeWeight", "1|0", "weight");
 //	EdgeWeightFilter("#sliderBEdgeWeight", "0|1", "weight");
+//	EdgeWeightFilter("#sliderBEdgeWeight", "1|1", "weight");
 
 // NB new sigma js: dropEdge is quite slow so we add a waiting cursor
 
 function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
+
     if(TW.partialGraph.graph.nEdges()<2) {
-        console.warn('not enough edges for subsets: skipping GUI slider init')
+        console.log('not enough edges for subsets: skipping GUI slider init')
         showDisabledSlider(sliderDivID)
         return;
     }
 
-
+    // building the index
     var stepToIdsArr = edgeSizesSteps(typestr)
     var steps = stepToIdsArr.length
 
     if(steps<2) {
-        console.warn('no size steps for edges: skipping GUI slider init')
+        console.log('no size steps for edges: skipping GUI slider init')
         showDisabledSlider(sliderDivID)
         return;
     }
@@ -662,7 +666,7 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
 
     // cache initial value
     var initialValue=("0-"+(steps-1));
-    TW.gui.lastFilters[sliderDivID] = initialValue
+    TW.gui.lastFilters[`${sliderDivID}/${typestr}`] = initialValue
 
     var present = TW.states.slice(-1)[0];
 
@@ -674,13 +678,31 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
       return
     }
 
-    //finished
+
+    // Relations are of 3 kinds: within nodes0, within nodes1, true bipartite
+    //                                1|0            0|1            1|1
+
+    // three-way slider colors to represent that
+    // orange for terms, green for docs/people/contexts, violet for bipartite
+    switch (typestr) {
+      case '1':
+      case '1|0':
+        edgeTypeColor = "#FFA500"
+        break;
+      case '0|1':
+        edgeTypeColor = "#27c470"
+        break;
+      case '1|1':
+        edgeTypeColor = "#A40DFF"   // or "#E8200C"
+        break;
+    }
+
+    // legacy technique (should use .hidden more and possibly edg indx by sizes)
     $(sliderDivID).freshslider({
         range: true,
         step: 1,
         min:0,
-        // green for docs/people, orange for terms
-        bgcolor: (typestr=="1|0" || typestr=="1")?"#FFA500":"#27c470" ,
+        bgcolor: edgeTypeColor,
         max:steps-1,
         value:[0,steps-1],
         onchange:function(low, high) {
@@ -701,10 +723,11 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
             edgeSlideTimeout = setTimeout ( function () {
 
                 var filtervalue = low+"-"+high
-                var lastvalue = TW.gui.lastFilters[sliderDivID]
+                var lastvalue = TW.gui.lastFilters[`${sliderDivID}/${typestr}`]
+
                 // sliderDivID+"_"+filtervalue
 
-                // console.debug("\nprevious value "+lastvalue+" | current value "+filtervalue)
+                console.debug("\nprevious value "+lastvalue+" | current value "+filtervalue)
 
                 if(filtervalue!=lastvalue) {
 
@@ -765,7 +788,7 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
 
                                   // global level case
                                   if(present.level) {
-                                      // console.log("\tADD "+eid)
+                                      console.log("\tADD "+eid)
                                       // n = eid.split(";")
                                       // if(n.length>1)
                                       //     console.log("\t\tsource:("+TW.Nodes[n[0]].x+","+TW.Nodes[n[0]].y+") ||| target:("+TW.Nodes[n[1]].x+","+TW.Nodes[n[1]].y+")")
@@ -779,7 +802,7 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
 
                                     // NB we assume the sigma convention eid = "nid1;nid2"
                                     let nidkeys = eid.split(';')
-                                    // console.log(nidkeys)
+                                    console.log(nidkeys)
 
                                     if (nidkeys.length != 2) {
                                       console.error("invalid edge id:" + eid)
@@ -803,7 +826,7 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
 
                       } else {
                           if(delflag) {
-                              // console.log("deleting "+ids.join())
+                              console.log("deleting "+eids.join())
                               for(var i in eids) {
                                   ID = eids[i]
                                   if(!isUndef(TW.partialGraph.graph.edges(ID))) {
@@ -815,10 +838,9 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
                                       // usually very long b/c sigma has to update indexes
                                       // <=> shift same arrays many times
                                       totalDeletingTime += (t1-t0)
-                                      // POSS ideally: implement a batch dropEdges
-                                      //                or use graph.clear and rebuild the rest
+                                      // POSS ideally: use .hidden
 
-                                      // console.log("\tDEL "+ID)
+                                      console.log("\tDEL "+ID)
 
                                       // n = ID.split(";")
                                       // if(n.length>1)
@@ -840,9 +862,8 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
                   }, 10)
                 // [ / Starting FA2 ]
 
-                  console.log("lastvalue===", lastvalue)
-                  TW.gui.lastFilters[sliderDivID] = lastvalue
-                  // pushFilterValue( sliderDivID , lastvalue )
+                  // memoize as last value
+                  TW.gui.lastFilters[`${sliderDivID}/${typestr}`] = filtervalue
                 }
 
                 else {
@@ -851,6 +872,7 @@ function EdgeWeightFilter(sliderDivID , typestr ,  criteria) {
 
                 // in any case
                 setTimeout( function() {
+                  TW.partialGraph.refresh()
                   TW.gui.elHtml.classList.remove('waiting')
                 }, 20)
 
@@ -946,6 +968,11 @@ function NodeWeightFilter( sliderDivID , tgtNodeType ,  criteria) {
                       if(i>=low && i<=high){
                           for(var id in ids) {
                               ID = ids[id]
+                              if (! TW.Nodes[ID]) {
+                                console.warn ('nodeslider asks for nonexistatn ID', ID)
+                                continue;
+                              }
+
                               TW.Nodes[ID].lock = false;
                               if(TW.partialGraph.graph.nodes(ID))
                                   TW.partialGraph.graph.nodes(ID).hidden = false;
