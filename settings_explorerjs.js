@@ -147,7 +147,7 @@ TW.conf = (function(TW){
 
   // to normalize node sizes: (NB not very useful because tina normalizes them at display)
   TWConf.desirableNodeSizeMin=1;
-  TWConf.desirableNodeSizeMax=12;
+  TWConf.desirableNodeSizeMax=2;
 
 
   // =============
@@ -155,8 +155,8 @@ TW.conf = (function(TW){
   // =============
 
   // Node typology: categories (resp. 0 and 1) will get these default labels
-  TWConf.catSem = "term";
-  TWConf.catSoc = "person";
+  TWConf.catSem = "NGram";
+  TWConf.catSoc = "Document";
   // NB: these labels may be superseded by the input data's node types values
   //     cf. sortNodeTypes()
 
@@ -316,7 +316,7 @@ TW.conf = (function(TW){
     logFacets: false,                // ...about parsing node attribute:value facets
     logSettings: false,              // ...about settings at Tina and Sigma init time
     logStates: false,                // ...about TW.states array
-    logSelections: false
+    logSelections: true
   }
 
 
