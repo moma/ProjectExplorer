@@ -71,8 +71,9 @@ TW.pushState = function( args ) {
         $(".for-nodecategory-1").show();
           NodeWeightFilter( "#slidercat0nodesweight" ,  TW.categories[0], "size");
           NodeWeightFilter( "#slidercat1nodesweight" ,  TW.categories[1], "size");
-          EdgeWeightFilter("#slidercat0edgesweight", "1|0", "weight");
-          EdgeWeightFilter("#slidercat1edgesweight", "0|1", "weight");
+
+          // only truly bipartite edges => only one GUI slider
+          EdgeWeightFilter("#slidercat1edgesweight", "1|1", "weight");
       }
     }
 
