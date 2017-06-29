@@ -1095,7 +1095,7 @@ var TinaWebJS = function ( sigmacanvas ) {
       var labelSizeTimeout = null
       $("#sliderlabelsize0").freshslider({
           step:.25,
-          min:0,
+          min:.25,
           max:5,
           value: 1,
           bgcolor:"#FFA500",
@@ -1121,7 +1121,7 @@ var TinaWebJS = function ( sigmacanvas ) {
       var labelSizeTimeout = null
       $("#sliderlabelsize1").freshslider({
           step:.25,
-          min:0,
+          min:.25,
           max:5,
           value: 1,
           bgcolor:"#27c470",
