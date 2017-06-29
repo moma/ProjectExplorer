@@ -1093,27 +1093,48 @@ var TinaWebJS = function ( sigmacanvas ) {
 
       // node's label size
       var labelSizeTimeout = null
-      $("#sliderlabelsize").freshslider({
+      $("#sliderlabelsize0").freshslider({
           step:.25,
           min:0,
           max:5,
-          value: TW.conf.sigmaJsDrawingProperties['labelSizeRatio'] || 1,
+          value: 1,
+          bgcolor:"#FFA500",
+          onchange:function(value){
+            if (labelSizeTimeout) {
+              clearTimeout(labelSizeTimeout)
+            }
+            labelSizeTimeout = setTimeout(function(){
+              if (TW.gui.sizeRatios[0] != value) {
+                TW.gui.sizeRatios[0] = value
+                // -------------------------------------------------------------
+                // generic efficient method acting on entire graphs label ratio
+                // (can't use it b/c we need to distinguish by type)
+                // var adaptedLabelThreshold = 7 - value
+                // TW.partialGraph.settings('labelSizeRatio', value)
+                // TW.partialGraph.settings('labelThreshold', adaptedLabelThreshold)
+                // -------------------------------------------------------------
+                TW.partialGraph.render()
+              }
+            }, 200)
+          }
+      });
+      var labelSizeTimeout = null
+      $("#sliderlabelsize1").freshslider({
+          step:.25,
+          min:0,
+          max:5,
+          value: 1,
           bgcolor:"#27c470",
           onchange:function(value){
             if (labelSizeTimeout) {
               clearTimeout(labelSizeTimeout)
             }
             labelSizeTimeout = setTimeout(function(){
-              if (TW.partialGraph.settings('labelSizeRatio') != value) {
-                var adaptedLabelThreshold = 7 - value
-                // console.log("value", value, "thres", adaptedLabelThreshold)
-
-                TW.partialGraph.settings('labelSizeRatio', value)
-                TW.partialGraph.settings('labelThreshold', adaptedLabelThreshold)
+              if (TW.gui.sizeRatios[1] != value) {
+                TW.gui.sizeRatios[1] = value
                 TW.partialGraph.render()
               }
             }, 200)
-
           }
       });
 

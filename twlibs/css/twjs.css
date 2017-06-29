@@ -104,13 +104,13 @@ html.waiting {
   max-width: 300px;
 }
 
-#defaultop .weight-selectors {
+#defaultop .tworow-selectors {
   width: 135px !important;
   padding-top: 15px;
   margin: 0 25px ;
 }
 
-#defaultop .weight-selectors td {
+#defaultop .tworow-selectors td {
   width: 135px !important;
   padding: 0 0 10px 0 ;
 }

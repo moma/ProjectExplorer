@@ -186,10 +186,26 @@
               <div id="unranged-value" class="settingslider"></div>
             </a></li>
 
-            <li><a>
-              Label size<br>
-              <div id="sliderlabelsize" class="settingslider"></div>
-            </a></li>
+            <li class="tworow-selectors">
+              <!-- Adjust the node sizes per nodetype-->
+              <table>
+                <tr class="for-nodecategory-0">
+                  <td class="slider-legend">
+                    Node 0 Size
+                  </td>
+                  <td id="sliderlabelsize0" class="settingslider">
+                  </td>
+                </tr>
+                <tr class="for-nodecategory-1">
+                  <td class="slider-legend">
+                    Node 1 Size
+                  </td>
+                  <td id="sliderlabelsize1" class="settingslider">
+                  </td>
+                </tr>
+              </table>
+            </li>
+
 
              <li id="setcolorsMenu" class="dropdown">
                <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
@@ -199,7 +215,7 @@
                 </ul>
              </a></li>
 
-            <li class="weight-selectors for-nodecategory-0">
+            <li class="tworow-selectors for-nodecategory-0">
               <!-- Create a subgraph over nodes from TW.categories[0] (terms or def nodes)-->
               <table>
                 <tr>
@@ -218,7 +234,7 @@
                 </tr>
               </table>
             </li>
-            <li class="weight-selectors for-nodecategory-1">
+            <li class="tworow-selectors for-nodecategory-1">
               <!-- Create a subgraph over nodes from TW.categories[1] (docs or people)-->
               <table>
                 <tr class="weight-selector">

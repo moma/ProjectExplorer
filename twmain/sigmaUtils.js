@@ -89,15 +89,20 @@ var SigmaUtils = function () {
       let X = node[prefix + 'x']
       let Y = node[prefix + 'y']
 
-      if (!activeFlag && size < settings('labelThreshold'))
-        return;
-
       if (!node.label || typeof node.label !== 'string')
         return;
 
       fontSize = (settings('labelSize') === 'fixed') ?
         settings('defaultLabelSize') :
         settings('labelSizeRatio') * size;
+
+      // apply type-specific size slider ratios
+      var typeId = TW.categories.indexOf(node.type) || 0
+      fontSize *= TW.gui.sizeRatios[typeId]
+
+
+      if (!activeFlag && fontSize < settings('labelThreshold') * settings('labelSizeRatio'))
+        return;
 
       // our customization: active nodes like zoom x2 post-its
       if (activeFlag)  {
@@ -277,14 +282,20 @@ var SigmaUtils = function () {
         // our shapes are dependant on flags, type AND categories
         // so we need the bool and conditions
 
+
+        // type-specific actions
+        // ----------------------
         // other POSS: we rename n.type at parsing
         // and each action (recoloring/selection)
         // to use sigma's "def vs someType" syntax
         // NB cost of this condition seems small:
         //    - without: [11 - 30] ms for 23 nodes
         //    - with   : [11 - 33] ms for 23 nodes
-        var catSocFlag = (node.type != TW.categories[0])
+        var typeId = TW.categories.indexOf(node.type) || 0
 
+        // apply type-specific size slider ratios
+        nodeSize *= TW.gui.sizeRatios[typeId]
+        borderSize *= TW.gui.sizeRatios[typeId]
 
         // mode variants 1: if a coloringFunction is active
         if (! TW.gui.handpickedcolor) {
@@ -335,7 +346,7 @@ var SigmaUtils = function () {
           context.fillStyle = borderColor
           context.beginPath();
 
-          if (catSocFlag) {
+          if (typeId == 1) {
             // (Square shape)
             // thinner borderSize for squares looks better
             // otherwise hb = (nodeSize + borderSize) / 2
@@ -364,7 +375,7 @@ var SigmaUtils = function () {
         context.beginPath();
 
 
-        if (catSocFlag) {
+        if (typeId == 1) {
           // (Square shape)
           let hn = nodeSize / 2
           context.moveTo(X + hn, Y + hn);
@@ -407,6 +418,11 @@ var SigmaUtils = function () {
               settings('labelSizeRatio') * size;
 
         // largerall: our customized size boosts
+
+        // apply type-specific size slider ratios
+        var typeId = TW.categories.indexOf(node.type) || 0
+        fontSize *= TW.gui.sizeRatios[typeId]
+
         if (!node.customAttrs.active) {
           fontSize *= 1.3
 
@@ -514,12 +530,14 @@ var SigmaUtils = function () {
 
 
       this.ourStopFA2 = function() {
-        TW.partialGraph.stopForceAtlas2();
-
         try {
+          TW.partialGraph.stopForceAtlas2();
+        }
+        catch(e) {console.log(e)}
+
+        if(document.getElementById('layoutwait')) {
           document.getElementById('layoutwait').remove()
         }
-        catch(e) {}
 
         // restore edges if needed
         if (document.getElementById('edges-switch').checked) {

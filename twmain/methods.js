@@ -702,6 +702,8 @@ function saveGraphIMG(){
 function reInitFa2 (params) {
   if (!params)  params = {}
 
+  sigma_utils.ourStopFA2()
+
   if (params.useSoftMethod) {
     // soft method: we just update FA2 internal index
     // (is good enough if new nodes are subset of previous nodes)

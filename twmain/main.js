@@ -534,7 +534,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
 
       if (!TW.conf.filterSliders) {
 
-        var filterEls = document.getElementsByClassName('weight-selectors')
+        var filterEls = document.getElementsByClassName('tworow-selectors')
 
         for (var k in filterEls) {
           if (filterEls[k] && filterEls[k].style) filterEls[k].style.display="none"

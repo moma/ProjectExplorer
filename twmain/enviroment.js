@@ -25,6 +25,8 @@ TW.gui.manuallyChecked = false;
 TW.gui.handpickedcolor = false;     // <= changes edge rendering strategy
 TW.gui.lastFilters = {}
 
+TW.gui.sizeRatios = [1,1]           // sizeRatios per nodetype
+
 
 // POSS: themed variants (ex: for dark bg vs light bg)
 // contrasted color list for clusterColoring()
@@ -576,7 +578,7 @@ function changeLevel() {
 
       // recreate FA2 nodes array after you change the nodes
       reInitFa2({
-        useSoftMethod: !futurelevel,
+        useSoftMethod: false,
         callback: function() {
           TW.gui.elHtml.classList.remove('waiting');
 
