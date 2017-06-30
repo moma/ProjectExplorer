@@ -195,7 +195,10 @@ function scanGexf(gexfContent) {
                 // console.log('attr', attr)
 
                 // THIS WILL BECOME catDict (if ncats == 1 => monopart)
-                if (attr=="category") categoriesDict[val]=val;
+                if (attr=="category" || attr=="type") {
+                  if (!categoriesDict[val])    categoriesDict[val] = 0
+                  categoriesDict[val]++;
+                }
             }
         }
     }
@@ -213,6 +216,8 @@ function scanGexf(gexfContent) {
 // ex: ISItermsriskV2_140 & ISItermsriskV2_140
 function sortNodeTypes(observedTypesDict) {
   var observedTypes = Object.keys(observedTypesDict)
+  observedTypes.sort(function(a,b) {return observedTypesDict[b] - observedTypesDict[a]})
+
   var catDict = {}
 
   var nTypes = observedTypes.length
@@ -231,22 +236,39 @@ function sortNodeTypes(observedTypesDict) {
   if(nTypes>1) {
       var newcats = []
 
-      // NB: only 2 cat labels are allowed by this
-      for(var i in observedTypes) {
-          let c = observedTypes[i]
-          if(c == TW.conf.catSoc) {// conf says that it's not a term-category
-              newcats[1] = c;
-              catDict[c] = 1;
-          }
-          // else: term-category is the new default
-          else {
-              newcats[0] = c;
-              catDict[c] = 0;
-          }
+      // allows multiple node types, with an "all the rest" node1
+
+      // try stipulated cats, then fallbacks
+      if (observedTypesDict[TW.conf.catSem]) {
+        newcats[0] = c;
+        catDict[c] = 0;
       }
-      observedTypes = newcats;
+      if (observedTypesDict[TW.conf.catSoc]) {
+        newcats[1] = c;
+        catDict[c] = 1;
+      }
+
+      // NB: type for nodes0 will be the majoritary by default, unless taken
+      if (!newcats[0]) {
+        if (observedTypes[0] != newcats[1])
+            newcats[0] = observedTypes[0]
+        else
+            newcats[0] = observedTypes[1]
+      }
+
+      // all the rest
+      for(var i in observedTypes) {
+        let c = observedTypes[i]
+        // or c is in "all the rest" group
+        // (POSS extend to multitypes)
+        if (c != newcats[0] && c != newcats[1]) {
+            if (!newcats[1])    newcats[1] = c;
+            else newcats[1] += '/'+c
+            catDict[c] = 1;
+        }
+      }
   }
-  return {'categories': observedTypes, 'lookup_dict': catDict}
+  return {'categories': newcats, 'lookup_dict': catDict}
 }
 
 
@@ -981,8 +1003,11 @@ function scanJSON( data ) {
     var nodes = data.nodes;
 
     for(var i in nodes) {
-        let n = nodes[i];
-        if(n.type) categoriesDict[n.type]=n.type;
+        let ntype = nodes[i].type;
+        if(ntype) {
+          if (!categoriesDict[ntype])    categoriesDict[ntype] = 0
+          categoriesDict[ntype]++;
+        }
     }
 
     // sorting observed json node types into Sem (=> 1)/Soc (=> 0)
