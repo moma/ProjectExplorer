@@ -665,7 +665,6 @@ function edgeInfos(anEdge) {
 
 function gradientColoring(daclass) {
 
-    cancelSelection(false);       // loops only on selected
     graphResetLabelsAndSizes()    // full loop
 
     TW.gui.handpickedcolor = true
@@ -853,7 +852,6 @@ function heatmapColoring(daclass) {
   binColors = getHeatmapColors(nColors)
 
   // let's go
-  cancelSelection(false);       // loops only on selected
   graphResetLabelsAndSizes()    // full loop
 
   // global flag
@@ -909,9 +907,6 @@ function heatmapColoring(daclass) {
 
 function clusterColoring(daclass) {
 
-    console.log("clusterColoring (    "+daclass+"    )")
-
-    cancelSelection(false);       // now loops only on selected
     graphResetLabelsAndSizes()    // full loop
 
     // louvain needs preparation

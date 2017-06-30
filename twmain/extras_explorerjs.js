@@ -22,7 +22,7 @@ function changeGraphAppearanceByFacets(actypes) {
     let currentNbNodes = TW.partialGraph.graph.nNodes()
 
     // create colormenu and 1st default entry
-    var color_menu_info = '<li><a href="#" onclick="TW.gui.handpickedcolor = false ; graphResetLabelsAndSizes()">By Default</a></li>';
+    var color_menu_info = '<li><a href="#" onclick="TW.gui.handpickedcolor = false ; graphResetLabelsAndSizes() ; TW.partialGraph.refresh()">By Default</a></li>';
 
     if( $( "#colorgraph-menu" ).length>0 ) {
       for (var tid in actypes) {
