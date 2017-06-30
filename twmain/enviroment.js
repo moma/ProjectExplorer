@@ -1055,9 +1055,11 @@ function jsActionOnGexfSelector(graphBasename){
     TW.resetGraph()
 
     // override default categories with the ones from db.json
-    if (TW.gmenuInfos[graphPath].nodetypes) {
-      TW.conf.catSem = TW.gmenuInfos[graphPath].nodetypes.node0
-      TW.conf.catSoc = TW.gmenuInfos[graphPath].nodetypes.node1
+    if (TW.gmenuInfos[graphPath]) {
+      if (TW.gmenuInfos[graphPath].node0 && TW.gmenuInfos[graphPath].node0.name)
+          TW.conf.catSem = TW.gmenuInfos[graphPath].node0.name
+      if (TW.gmenuInfos[graphPath].node1 && TW.gmenuInfos[graphPath].node1.name)
+          TW.conf.catSem = TW.gmenuInfos[graphPath].node1.name
     }
 
     mainStartGraph(newDataRes["format"], newDataRes["data"], TW.instance)

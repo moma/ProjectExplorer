@@ -37,12 +37,12 @@ TW.conf = (function(TW){
   TWConf.getRelatedDocs = false
   TWConf.relatedDocsMax = 10
 
-  TWConf.relatedDocsType = "twitter"      // accepted: "twitter" | "wosLocalDB"
+  TWConf.relatedDocsType = "twitter"      // accepted: "twitter" | "LocalDB"
                                           // POSSible: "elastic"
 
   TWConf.relatedDocsAPIS = {
     // routes by corresponding type
-    "wosLocalDB": "twbackends/phpAPI",
+    "LocalDB": "twbackends/phpAPI",
     "twitter": "http://127.0.0.1:5000/twitter_search"
   }
 

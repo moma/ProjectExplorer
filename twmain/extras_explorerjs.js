@@ -404,6 +404,9 @@ function topPapersFetcher(swType, qWords, priorHtml, cbNext){
   if (isUndef(priorHtml))    priorHtml = ''
   if (isUndef(cbNext))       cbNext = displayTopPapers
 
+  // introducing the modern node type thanks to updated db.json specs
+  let nodetype = (swType == 'semantic') ? 0 : 1
+
   let stockErrMsg = `<p class="micromessage">
     Your settings for relatedDocsType are set on ${TW.conf.relatedDocsType}
     API but it couldn't be connected to.</p>`
@@ -448,14 +451,14 @@ function topPapersFetcher(swType, qWords, priorHtml, cbNext){
         }
     });
   }
-  else if (TW.conf.relatedDocsType == "wosLocalDB") {
-    let thisRelDocsConf = TW.gmenuInfos[TW.File].relDocsConf
-    if (!thisRelDocsConf || !thisRelDocsConf[swType]) {
+  else if (TW.conf.relatedDocsType == "LocalDB") {
+    let thisRelDocsConf = TW.gmenuInfos[TW.File][nodetype]
+    if (!thisRelDocsConf) {
       resHTML =
-        `<p>Your settings for relatedDocsType are set on a local wos database,
+        `<p>Your settings for relatedDocsType are set on a local database,
             but your servermenu file does not provide any information about
-            the DB table to query for related documents
-            (on nodetype ${swType})</p>`
+            the CSV or DB table to query for related documents
+            (on nodetype ${nodetype}: ${swType})</p>`
             cbNext(priorHtml + resHTML)
             return
     }
@@ -468,23 +471,31 @@ function topPapersFetcher(swType, qWords, priorHtml, cbNext){
       //          or 'csv' (like gargantext exports)
 
       // POSS object + join.map(join)
-      let urlParams = "type="+swType+"&query="+joinedQ+"&gexf="+TW.File+"&n="+TW.conf.relatedDocsMax+"&dbtype="+thisRelDocsConf.dbtype
+      let urlParams = "type="+swType+"&query="+joinedQ+"&gexf="+TW.File+"&n="+TW.conf.relatedDocsMax+"&dbtype="+thisRelDocsConf.reldbtype
 
-      if (thisRelDocsConf.dbtype == "sql") {
-        var qIndex = thisRelDocsConf[swType]    // a table
+      if (thisRelDocsConf.reldbtype == "CortextDB") {
+        var qIndex = thisRelDocsConf.reldbtable    // a table
         urlParams += `&index=${qIndex}`
       }
       else {
         // a list of csv columns to search in
         // ex: for semantic nodes matching we look in 'title', 'keywords' cols
         //     for social nodes matching we look in 'authors' col... etc.
-        let joinedSearchCols = JSON.stringify(thisRelDocsConf[swType])
+        let joinedSearchCols = JSON.stringify(thisRelDocsConf.reldbqcols)
         urlParams += `&searchin=${joinedSearchCols}`
 
-        let joinedAllCols = JSON.stringify(thisRelDocsConf)
+        // HIGHER LEVEL SCOPE (whole indexation directive) WILL BE MOVED TO PHP
+        let allCols = {}
+
+        if (TW.gmenuInfos[TW.File][0])
+          allCols.semantic = TW.gmenuInfos[TW.File][0].reldbqcols
+
+        if (TW.gmenuInfos[TW.File][1])
+          allCols.social = TW.gmenuInfos[TW.File][1].reldbqcols
+
+        let joinedAllCols = JSON.stringify(allCols)
         urlParams += `&toindex=${joinedAllCols}`
         // POSS use a direct access from php to db.json to avoid toindex
-        // POSS make it a REST array like: index[]=title&index[]=keywords
       }
 
       $.ajax({

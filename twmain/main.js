@@ -271,47 +271,20 @@ function syncRemoteGraphData () {
                 if (TW.conf.debug.logFetchers)
                   console.log("\t\t\t"+graphBasename)
 
-                // for associated wosLocalDBs sql queries
+                // for associated LocalDB php queries: CSV (or CortextDBs sql)
                 if (theGraphs[aGraph]) {
 
                   let gSrcEntry = theGraphs[aGraph]
 
-                  TW.gmenuInfos[path+"/"+aGraph] = {
-                    "nodetypes": {"node0":'', "node1":''},
-                    "relDocsConf": {
-                      "semantic":null, "social":null, "dbtype": null
-                    }
+                  TW.gmenuInfos[path+"/"+aGraph] = new Array(2)
+
+                  if (gSrcEntry.node0) {
+                    TW.gmenuInfos[path+"/"+aGraph][0] = gSrcEntry.node0
+                  }
+                  if (gSrcEntry.node1) {
+                    TW.gmenuInfos[path+"/"+aGraph][0] = gSrcEntry.node0
                   }
 
-                  // shortcut
-                  let thisInfos = TW.gmenuInfos[path+"/"+aGraph]
-
-                  // db.json flat => 2 level structure: nodetype infos and relDocsConf
-
-                  // node types (no fallback here)
-                  thisInfos.nodetypes.node0 = gSrcEntry.node0 ? gSrcEntry.node0.name : ''
-                  thisInfos.nodetypes.node1 = gSrcEntry.node1 ? gSrcEntry.node1.name : ''
-
-                  // TODO here settings + templates by type as per new specifications
-
-                  // csv LocalDB ~ gargantext
-                  if(gSrcEntry["dbtype"] && gSrcEntry["dbtype"] == "csv") {
-                    thisInfos.relDocsConf.dbtype = "csv"
-
-                    // it's CSV columns here
-                    thisInfos.relDocsConf.semantic = gSrcEntry["semantic"]
-                    thisInfos.relDocsConf.social = gSrcEntry["social"]
-                  }
-                  // sqlite LocalDB ~ wos
-                  else {
-                    thisInfos.dbtype = "sql"
-                    if (theGraphs[aGraph]["semantic"] && theGraphs[aGraph]["semantic"]["table"]) {
-                      thisInfos.relDocsConf.semantic = theGraphs[aGraph]["semantic"]["table"]
-                    }
-                    if (theGraphs[aGraph]["social"] && theGraphs[aGraph]["social"]["table"]) {
-                      thisInfos.relDocsConf.social = theGraphs[aGraph]["social"]["table"]
-                    }
-                  }
                 }
                 else {
                   TW.gmenuInfos[path+"/"+aGraph] = null
