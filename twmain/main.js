@@ -12,14 +12,14 @@ TW.File = ""            // remember the currently opened file
 TW.partialGraph = null  // will contain the sigma visible graph instance
 
 TW.labels=[];           // fulltext search list
-TW.gexfPaths={};        // for file selectors iff servermenu
-TW.relDocsInfos={};           // map [graphsource => relatedDocs db fields or tables names]
-                        // TODO requires specifications !!
-
-                        //  (iff servermenu && relatedDocsType == 'wosLocalDB')
 
 TW.categories = [];     // possible node types and their inverted map
 TW.catDict = {};
+
+// used iff servermenu
+TW.gmenuPaths={};       // map [graphname => graphsource] for file selectors
+TW.gmenuInfos={};       // map [graphsource => { node0/1 categories
+                        //                      + relatedDocs db fields names}]
 
 // a system state is the summary of tina situation
 TW.initialSystemState = {
@@ -259,58 +259,67 @@ function syncRemoteGraphData () {
         var files_selector = '<select onchange="jsActionOnGexfSelector(this.value);">'
 
         for( var path in preRES.data ) {
-            var theGexfs = preRES.data[path]["gexfs"]
+            var theGraphs = preRES.data[path]["graphs"]
 
-            for(var aGexf in theGexfs) {
-                var gexfBasename = aGexf.replace(/\.gexf$/, "") // more human-readable in the menu
-                TW.gexfPaths[gexfBasename] = path+"/"+aGexf
+            for(var aGraph in theGraphs) {
+                var graphBasename = aGraph.replace(/\.gexf$/, "") // more human-readable in the menu
+                TW.gmenuPaths[graphBasename] = path+"/"+aGraph
                 // ex : "RiskV2PageRank1000.gexf":data/AXA/RiskV2PageRank1000.gexf
                 // (we assume there's no duplicate basenames)
 
 
                 if (TW.conf.debug.logFetchers)
-                  console.log("\t\t\t"+gexfBasename)
+                  console.log("\t\t\t"+graphBasename)
 
                 // for associated wosLocalDBs sql queries
-                if (theGexfs[aGexf]) {
+                if (theGraphs[aGraph]) {
 
-                  let gSrcEntry = theGexfs[aGexf]
+                  let gSrcEntry = theGraphs[aGraph]
 
-                  TW.relDocsInfos[path+"/"+aGexf] = {"semantic":null, "social":null, "dbtype": null}
-
-                  // POSS have this type attribute in db.json *for all the entries*
-
-                  // ----------------------------------------------------------------------------------
-                  // choice: we'll keep a flat structure by source unless some use cases need otherwise
-                  // ----------------------------------------------------------------------------------
-                  // csv LocalDB ~ gargantext
-                  if(gSrcEntry["dbtype"] && gSrcEntry["dbtype"] == "csv") {
-                    TW.relDocsInfos[path+"/"+aGexf]['dbtype'] = "csv"
-
-                    // it's CSV columns here
-                    TW.relDocsInfos[path+"/"+aGexf]['semantic'] = gSrcEntry["semantic"]
-                    TW.relDocsInfos[path+"/"+aGexf]['social'] = gSrcEntry["social"]
+                  TW.gmenuInfos[path+"/"+aGraph] = {
+                    "nodetypes": {"node0":'', "node1":''},
+                    "relDocsConf": {
+                      "semantic":null, "social":null, "dbtype": null
+                    }
                   }
 
+                  // shortcut
+                  let thisInfos = TW.gmenuInfos[path+"/"+aGraph]
+
+                  // db.json flat => 2 level structure: nodetype infos and relDocsConf
+
+                  // node types (no fallback here)
+                  thisInfos.nodetypes.node0 = gSrcEntry.node0 ? gSrcEntry.node0.name : ''
+                  thisInfos.nodetypes.node1 = gSrcEntry.node1 ? gSrcEntry.node1.name : ''
+
+                  // TODO here settings + templates by type as per new specifications
+
+                  // csv LocalDB ~ gargantext
+                  if(gSrcEntry["dbtype"] && gSrcEntry["dbtype"] == "csv") {
+                    thisInfos.relDocsConf.dbtype = "csv"
+
+                    // it's CSV columns here
+                    thisInfos.relDocsConf.semantic = gSrcEntry["semantic"]
+                    thisInfos.relDocsConf.social = gSrcEntry["social"]
+                  }
                   // sqlite LocalDB ~ wos
                   else {
-                    TW.relDocsInfos[path+"/"+aGexf]['dbtype'] = "sql"
-                    if (theGexfs[aGexf]["semantic"] && theGexfs[aGexf]["semantic"]["table"]) {
-                      TW.relDocsInfos[path+"/"+aGexf]['semantic'] = theGexfs[aGexf]["semantic"]["table"]
+                    thisInfos.dbtype = "sql"
+                    if (theGraphs[aGraph]["semantic"] && theGraphs[aGraph]["semantic"]["table"]) {
+                      thisInfos.relDocsConf.semantic = theGraphs[aGraph]["semantic"]["table"]
                     }
-                    if (theGexfs[aGexf]["social"] && theGexfs[aGexf]["social"]["table"]) {
-                      TW.relDocsInfos[path+"/"+aGexf]['social'] = theGexfs[aGexf]["social"]["table"]
+                    if (theGraphs[aGraph]["social"] && theGraphs[aGraph]["social"]["table"]) {
+                      thisInfos.relDocsConf.social = theGraphs[aGraph]["social"]["table"]
                     }
                   }
                 }
                 else {
-                  TW.relDocsInfos[path+"/"+aGexf] = null
+                  TW.gmenuInfos[path+"/"+aGraph] = null
                 }
-                // ^^^^^^ FIXME see if we got the expected behavior right
-                //             (? specifications ?)
+                // ^^^^^^ FIXME finish implementing new specifications
 
-                let cssFileSelected = (TW.File==(path+"/"+aGexf))?"selected":""
-                files_selector += '<option '+cssFileSelected+'>'+gexfBasename+'</option>'
+                let cssFileSelected = (TW.File==(path+"/"+aGraph))?"selected":""
+                files_selector += '<option '+cssFileSelected+'>'+graphBasename+'</option>'
             }
             // console.log( files_selector )
         }
