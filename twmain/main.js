@@ -24,6 +24,7 @@ TW.gmenuInfos={};       // map [graphsource => { node0/1 categories
 // a system state is the summary of tina situation
 TW.initialSystemState = {
   activetypes: [],          // <== filled from TW.categories
+  activereltypes: [],       // <== same for edges
   level:      true,
   selectionNids: [],        // <== current selection !!
   selectionRels: [],        // <== current highlighted neighbors
@@ -366,6 +367,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
       // activetypes: the node categorie(s) that is (are) currently displayed
       // ex: [true,false] = [nodes of type 0 shown  ; nodes of type 1 not drawn]
       var initialActivetypes = TW.instance.initialActivetypes( TW.categories )
+      var initialActivereltypes = TW.instance.inferActivereltypes( initialActivetypes )
 
       // XML parsing from ParseCustom
       var dicts = start.makeDicts(TW.categories); // > parse json or gexf, dictfy
@@ -406,7 +408,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
       // preparing the data (TW.Nodes and TW.Edges filtered by initial type)
       // POSS: avoid this step and use the filters at rendering time!
       TW.graphData = {nodes: [], edges: []}
-      TW.graphData = sigma_utils.FillGraph( initialActivetypes , TW.catDict  , TW.Nodes , TW.Edges , TW.graphData );
+      TW.graphData = sigma_utils.FillGraph( initialActivetypes , initialActivereltypes, TW.catDict  , TW.Nodes , TW.Edges , TW.graphData );
 
 
           // // ----------- TEST stock parse gexf and use nodes to replace TW's ---------
@@ -496,7 +498,10 @@ function mainStartGraph(inFormat, inData, twInstance) {
       // ==================================================================
 
       // a new state
-      TW.pushState({'activetypes': initialActivetypes})
+      TW.pushState({
+        'activetypes': initialActivetypes,
+        'activereltypes': initialActivereltypes
+      })
 
       // NB the list of nodes and edges from TW.graphData will be changed
       //    by changeLevel, changeType or subset sliders => no need to keep it
@@ -510,7 +515,11 @@ function mainStartGraph(inFormat, inData, twInstance) {
       //      renderer position depend on viewpoint/zoom (like ~ html absolute positions of the node in the div)
 
       // now that we have a sigma instance, let's bind our click handlers to it
-      TW.instance.initSigmaListeners(TW.partialGraph, initialActivetypes)
+      TW.instance.initSigmaListeners(
+        TW.partialGraph,
+        initialActivetypes,      // to init node sliders and .class gui elements
+        initialActivereltypes    // to init edge sliders
+      )
 
       // [ / Poblating the Sigma-Graph ]
 
