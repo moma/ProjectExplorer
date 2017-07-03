@@ -863,6 +863,11 @@ function dictfyGexf( gexf , categories ){
               TW.Relations = updateRelations( TW.Relations,
                                               typestring,
                                               source, target )
+
+
+              // boost crossrels edges
+              if (edge.categ == "XR")   edge.weight *= 1.5
+
               // save
               if(!edges[target+";"+source])
                   edges[indice] = edge;
@@ -887,29 +892,21 @@ function dictfyGexf( gexf , categories ){
 
 
 
-// To find the edge type (Doc=Doc, Doc=Term...)
+// To denote the edge type (Term=Term, Doc=Doc, Doc=Term...)
+//                             00         11        XR
 function findEdgeType(nodes, srcId, tgtId) {
   let srcType=nodes[srcId].type;
   let tgtType=nodes[tgtId].type;
-
-  // if(srcId==89 || tgtId==89) console.log(edge)
-
-  // [ New Code! ]
-  let petitDict = {}
-  petitDict[ srcType ] = true;
-  petitDict[ tgtType ] = true;
-  let idInRelations = []
-  for(var c in petitDict) idInRelations[TW.catDict[c]] = true;
-  for(var c=0; c<TW.categories.length;c++) {
-      if(!idInRelations[c]) idInRelations[c] = false;
+  let strKey = ''
+  if (srcType != tgtType) {
+    strKey = "XR"
   }
-  let idArray = idInRelations.map(Number).join("|")
-  // [ / New Code! ]
-
-  // console.debug("new relation of type", idArray)
-
-  // aka edge.categ aka typestring
-  return idArray
+  else {
+    // ex: "00" <=> edge from nodetype 0 to nodetype 0
+    //     "11" <=> edge from nodetype 1 to nodetype 1
+    strKey = String(TW.catDict[srcType]).repeat(2)
+  }
+  return strKey
 }
 
 // To fill TW.Relations with edges sorted by type (Doc=Doc, Doc=Term...)
@@ -1112,10 +1109,15 @@ function dictfyJSON( data , categories ) {
           let typestring = findEdgeType(nodes, source, target)
 
           // save edge "type" in categ property
+          // ----------------------------------
           edge.categ = typestring
           TW.Relations = updateRelations( TW.Relations,
                                           typestring,
                                           source, target )
+
+          // boost crossrels edges
+          if (edge.categ == "XR")   edge.weight *= 1.5
+
           // save
           if(!edges[target+";"+source])
               edges[id] = edge;

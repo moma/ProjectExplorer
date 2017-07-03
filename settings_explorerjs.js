@@ -215,7 +215,7 @@ TW.conf = (function(TW){
 
   // if fa2Available, the auto-run config:
 
-    TWConf.fa2Enabled= true;        // fa2 auto-run at start and after graph modified ?
+    TWConf.fa2Enabled= false;        // fa2 auto-run at start and after graph modified ?
     TWConf.fa2Milliseconds=10000;    // duration of auto-run
     TWConf.minNodesForAutoFA2 = 5   // graph size threshold to auto-run
 
@@ -276,7 +276,7 @@ TW.conf = (function(TW){
       // not selected <=> (1-greyness)
       twNodesGreyOpacity: .7,                       // smaller value: more grey
       twBorderGreyColor: "rgba(100, 100, 100, 0.5)",
-      twEdgeGreyColor: "rgba(150, 150, 150, 0.5)",
+      twEdgeGreyColor: "rgba(100, 100, 100, 0.3)",
   };
   // NB: sigmaJsDrawingProperties are available as 'settings' in all renderers
   // cf. https://github.com/jacomyal/sigma.js/wiki/Settings#renderers-settings
@@ -303,7 +303,7 @@ TW.conf = (function(TW){
   // relative sizes (iff ChangeType == both nodetypes)
   TWConf.sizeMult = [];
   TWConf.sizeMult[0] = 1.0;     // ie for node type 0 (<=> sem)
-  TWConf.sizeMult[1] = 2.5;     // ie for node type 1 (<=> soc)
+  TWConf.sizeMult[1] = 5.0;     // ie for node type 1 (<=> soc)
 
 
   // ===========
