@@ -125,8 +125,8 @@ NB: the use cases for stats go beyond numeric vs string ! we could easily autodi
 Tina initialization registers one custom index of nodes by type and size (`nodesByTypeNSize`). It's a "live index" as it is updated at each add/remove.
   NB: it will thus contain only the nodes currently in the sigma instance.
 Access usage exemples:
-  - `TW.partialGraph.graph.getNodesByType('terms')`: all term nodes
-  - `TW.partialGraph.graph.getNodesBySize('terms', 1)`:  all term nodes of size 1
-  - `TW.partialGraph.graph.getNodesBySize('terms', [1,2])`: all term nodes of size comprised between 1 and 2
+  - `TW.partialGraph.graph.getNodesByType(0)`: all nodes among nodes0 set
+  - `TW.partialGraph.graph.getNodesBySize(0, 1)`:  all nodes0 of size 1
+  - `TW.partialGraph.graph.getNodesBySize(0, [1,2])`: all nodes0 of size comprised between 1 and 2
 
 (cf. [`addIndex` in sigma documentation](https://github.com/jacomyal/sigma.js/wiki/Graph-API#static-methods))

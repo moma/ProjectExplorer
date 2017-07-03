@@ -186,9 +186,6 @@ function SomeEffect( ValueclassCode ) {
         cluType=raw[1],
         iClu=Number(raw[2]);
 
-
-    var activetypesKey = getActivetypesKey()
-
     // we have our precomputed idmaps for nodes_2_colour => full selection
     // /!\ nodeset can be quite big
     TW.instance.selNgn.MultipleSelection2(
@@ -265,8 +262,8 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
           }
         }
 
-        // we add a title to cluster classes by ranking their nodes and taking k best labels
-        if (TW.conf.facetOptions[daclass] && TW.conf.facetOptions[daclass].col == 'cluster' && getActivetypesKey() != "0|1" ) {
+        // we add a title to cluster classes by ranking their nodes and taking k best labels, except if type is "social"
+        if (TW.conf.facetOptions[daclass] && TW.conf.facetOptions[daclass].col == 'cluster' && curType != TW.categories[1]) {
 
           // let t0 = performance.now()
 

@@ -174,7 +174,6 @@ function SelectionEngine() {
         // type:[0]}
 
 
-        var activetypesKey = getActivetypesKey()
         var activereltypes = TW.SystemState().activereltypes
 
 
@@ -277,19 +276,19 @@ function SelectionEngine() {
         let theSelection = Object.keys(selections)
 
         // neighbors of the opposite type
-        if(TW.Relations["1|1"]) {
+        if(TW.Relations["XR"]) {
 
-          activeRelations["1|1"] = {}
+          activeRelations["XR"] = {}
 
           for(var i in theSelection) {
                 let srcnid = theSelection[i]
-                var bipaNeighs = TW.Relations["1|1"][srcnid];
+                var bipaNeighs = TW.Relations["XR"][srcnid];
 
-                activeRelations["1|1"][srcnid] = {}
+                activeRelations["XR"][srcnid] = {}
 
                 for(var k in bipaNeighs) {
-                    if (typeof activeRelations["1|1"][srcnid][bipaNeighs[k]] == "undefined") {
-                      activeRelations["1|1"][srcnid][bipaNeighs[k]] = 0;
+                    if (typeof activeRelations["XR"][srcnid][bipaNeighs[k]] == "undefined") {
+                      activeRelations["XR"][srcnid][bipaNeighs[k]] = 0;
                     }
                     if (typeof oppoSideNeighbors[bipaNeighs[k]] == "undefined") {
                       oppoSideNeighbors[bipaNeighs[k]] = 0 ;
@@ -299,7 +298,7 @@ function SelectionEngine() {
                     oppoSideNeighbors[bipaNeighs[k]]++
 
                     // and the details
-                    activeRelations["1|1"][srcnid][bipaNeighs[k]]++;
+                    activeRelations["XR"][srcnid][bipaNeighs[k]]++;
                 }
             }
         }
@@ -309,7 +308,7 @@ function SelectionEngine() {
         let oppos = []
         let same = []
 
-        if (activeRelations["1|1"]) {
+        if (activeRelations["XR"]) {
           oppos = ArraySortByValue(oppoSideNeighbors, function(a,b){
             return b-a
           });
@@ -326,7 +325,7 @@ function SelectionEngine() {
         }
 
         // it's a new SystemState
-        TW.pushState( { 'sels': theSelection,
+        TW.pushGUIState( { 'sels': theSelection,
                         'rels': activeRelations } )
 
         // we send our "gotNodeSet" event
@@ -416,13 +415,15 @@ var TinaWebJS = function ( sigmacanvas ) {
           this.nodesByTypeNSize = {};
         },
         addNode: function(n) {
+          // POSS: index by ntypeId = 0 for nodes0 or 1 for nodes1
           if (n.type && n.size) {
+            let typekey = TW.catDict[n.type]
             let sizekey = parseFloat(n.size)
-            if (!this.nodesByTypeNSize[n.type])
-              this.nodesByTypeNSize[n.type] = {}
-            if (!this.nodesByTypeNSize[n.type][sizekey])
-              this.nodesByTypeNSize[n.type][sizekey] = {}
-            this.nodesByTypeNSize[n.type][sizekey][n.id] = true
+            if (!this.nodesByTypeNSize[typekey])
+              this.nodesByTypeNSize[typekey] = {}
+            if (!this.nodesByTypeNSize[typekey][sizekey])
+              this.nodesByTypeNSize[typekey][sizekey] = {}
+            this.nodesByTypeNSize[typekey][sizekey][n.id] = true
           }
           else {
             // should never happen
@@ -431,28 +432,29 @@ var TinaWebJS = function ( sigmacanvas ) {
         },
         dropNode: function(n) {
           if (n.type && n.size) {
-            delete(this.nodesByTypeNSize[n.type][n.size][n.id])
+            let typekey = TW.catDict[n.type]
+            delete(this.nodesByTypeNSize[typekey][n.size][n.id])
           }
         }
       });
 
-      // @ntype: a node type from TW.categories
+      // @typekey: a node type id among {0,1}
       // @aSizeSelector can be:
       //  - a numeric value
       //  - a range (ordered array of 2 numeric values)
-      sigmaModule.classes.graph.addMethod('getNodesBySize', function(ntype, aSizeSelector) {
+      sigmaModule.classes.graph.addMethod('getNodesBySize', function(typekey, aSizeSelector) {
         let res = []
 
         // shortcut case for commodity: entire index if no arg
         if (isUndef(aSizeSelector)) {
-          res = this.nodesByTypeNSize[ntype]
+          res = this.nodesByTypeNSize[typekey]
         }
 
         // normal cases
         else if (isNumeric(aSizeSelector)) {
           let sizekey = parseFloat(aSizeSelector)
-          if (this.nodesByTypeNSize[ntype][sizekey]) {
-            res = Object.keys(this.nodesByTypeNSize[ntype][sizekey])
+          if (this.nodesByTypeNSize[typekey][sizekey]) {
+            res = Object.keys(this.nodesByTypeNSize[typekey][sizekey])
           }
         }
         else if (Array.isArray(aSizeSelector)
@@ -464,7 +466,7 @@ var TinaWebJS = function ( sigmacanvas ) {
           let sizeMax = parseFloat(aSizeSelector[1])
 
           // the available sizes
-          let sortedSizes = Object.keys(this.nodesByTypeNSize[ntype]).sort(function(a,b){return a-b})
+          let sortedSizes = Object.keys(this.nodesByTypeNSize[typekey]).sort(function(a,b){return a-b})
 
           // the nodes with sizes in range
           for (var k in sortedSizes) {
@@ -473,7 +475,7 @@ var TinaWebJS = function ( sigmacanvas ) {
               break
             }
             if (val >= sizeMin) {
-              res = res.concat(Object.keys(this.nodesByTypeNSize[ntype][val]))
+              res = res.concat(Object.keys(this.nodesByTypeNSize[typekey][val]))
             }
           }
         }
@@ -483,12 +485,12 @@ var TinaWebJS = function ( sigmacanvas ) {
       // All nodes *in the instance* by type
       // NB: not used at the moment but easy and perhaps very useful in future
       // arg:
-      //   @ntype: a node type from TW.categories
-      sigmaModule.classes.graph.addMethod('getNodesByType', function(ntype) {
+      //   @typekey: a node type id among {0,1}
+      sigmaModule.classes.graph.addMethod('getNodesByType', function(typekey) {
         let res = []
         // concatenate all sizes because this detail doesn't matter to us here
-        for (let szk in this.nodesByTypeNSize[ntype]) {
-          res = res.concat(Object.keys(this.nodesByTypeNSize[ntype][szk]))
+        for (let szk in this.nodesByTypeNSize[typekey]) {
+          res = res.concat(Object.keys(this.nodesByTypeNSize[typekey][szk]))
         }
         return res;
       });
@@ -881,7 +883,7 @@ var TinaWebJS = function ( sigmacanvas ) {
     // args: @partialGraph = a sigma instance
     this.initSigmaListeners = function(partialGraph, initialActivetypes, initialActivereltypes) {
 
-      console.log("initSigmaListeners TW.categories / types array / reltypeskeys array: ", TW.categories, initialActivetypes, initialActivereltypes)
+      // console.log("initSigmaListeners TW.categories / types array / reltypeskeys array: ", TW.categories, initialActivetypes, initialActivereltypes)
 
       var selInst = this.selNgn
 
@@ -1077,29 +1079,22 @@ var TinaWebJS = function ( sigmacanvas ) {
 
         // the indice of the first cat to be active (ex: '1')
         let activeId = initialActivetypes.indexOf(true)
-
         for (let activeId in initialActivetypes) {
           if (initialActivetypes[activeId]) {
             // args: for display: target div ,
             //       for context: family/type prop value,
             //       for values:  the property to filter
-            NodeWeightFilter ( `#slidercat${activeId}nodesweight` ,
-                                  TW.categories[activeId]
-                               );
+            NodeWeightFilter (`#slidercat${activeId}nodesweight` , activeId);
+            EdgeWeightFilter(`#slidercat${activeId}edgesweight`,
+                              activeId.toString().repeat(2),
+                              "weight"
+                            );
+            $(`.for-nodecategory-${activeId}`).show()
+          }
+          else {
+            $(`.for-nodecategory-${activeId}`).hide()
           }
         }
-
-        for (var k in initialActivereltypes) {
-          let reltypeKey = initialActivereltypes[k]
-          // ex: #slidercat1edgesweight
-          EdgeWeightFilter(`#slidercat${activeId}edgesweight`,
-                            reltypeKey,
-                            "weight"
-                          );
-        }
-
-
-
       }
 
       // node's label size
@@ -1176,7 +1171,7 @@ var TinaWebJS = function ( sigmacanvas ) {
         TW.partialGraph.graph.clear()
         TW.partialGraph.refresh()
 
-        TW.pushState({'sels':[]})
+        TW.pushGUIState({'sels':[]})
         TW.SystemState().selectionNids = []
       }
     }
@@ -1198,24 +1193,24 @@ var TinaWebJS = function ( sigmacanvas ) {
     // new business logic associating some activetypes to some activerels
     // (it now allows multiple "relation-families" to be added as visible edges)
     this.inferActivereltypes = function( nodeActivetypes ) {
-        let firstActivereltypes = []
+        let activereltypes = []
         // multiple nodetypes all true => all reltypes
-        if (TW.conf.debug.initialShowAll || nodeActivetypes.indexOf(false) == -1) {
+        if (nodeActivetypes.indexOf(false) == -1) {
           let combinations = {}
           if (TW.categories.length == 1) {
-            firstActivereltypes = ['1']
+            activereltypes = ['00']
           }
           else if (TW.categories.length == 2) {
-            firstActivereltypes = ['0|1', '1|0', '1|1']
+            activereltypes = ['00', '11', 'XR']
           }
           // POSSible: generalize if length > 1: recurse to generate all true/false combinations except the all-false one
         }
         // normal case: one activereltype, equal to the initialActivetype key
         else {
-          firstActivereltypes = [nodeActivetypes.map(Number).join("|")]
+          activereltypes = [nodeActivetypes.indexOf(true).toString().repeat(2)]
         }
 
-        return firstActivereltypes;
+        return activereltypes;
     }
 
 };

@@ -369,7 +369,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
       var initialActivetypes = TW.instance.initialActivetypes( TW.categories )
       var initialActivereltypes = TW.instance.inferActivereltypes( initialActivetypes )
 
-      // XML parsing from ParseCustom
+      // XML parsing from ParseCustom into dicts of nodes by type or rels by etype
       var dicts = start.makeDicts(TW.categories); // > parse json or gexf, dictfy
 
       if (TW.conf.debug.logParsers)   console.info("parsing result:", dicts)
@@ -498,7 +498,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
       // ==================================================================
 
       // a new state
-      TW.pushState({
+      TW.pushGUIState({
         'activetypes': initialActivetypes,
         'activereltypes': initialActivereltypes
       })

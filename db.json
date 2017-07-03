@@ -1,4 +1,13 @@
 {
+  "data/comexjsons": {
+    "first" : "graph_example.json",
+    "graphs": {
+      "graph_example.json": {
+        "node0": { "name": "NGram" },
+        "node1": { "name": "Document" }
+      }
+    }
+  },
   "data/gargistex": {
     "first" : "shale_and_ice.gexf",
     "graphs":{
@@ -69,15 +78,6 @@
             "reldbname" : "wos_climate-change_title_2014-2015.db",
             "reldbtype": "CortextDB"
           }
-      }
-    }
-  },
-  "data/comexjsons": {
-    "first" : "graph_example.json",
-    "graphs": {
-      "graph_example.json": {
-        "node0": { "name": "NGram" },
-        "node1": { "name": "Document" }
       }
     }
   }

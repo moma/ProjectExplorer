@@ -5,8 +5,7 @@
 //     ex: new selections:  {sels: [268]}
 //     ex: new activetypes: {activetypes:[false, true]}
 //     ex: new level:       {level:false}
-TW.pushState = function( args ) {
-
+TW.pushGUIState = function( args ) {
 
     let lastState = TW.states.slice(-1)[0]   // <=> TW.SystemState()
 
@@ -28,9 +27,8 @@ TW.pushState = function( args ) {
     if(!isUndef(args.rels))          newState.selectionRels = args.rels;
 
     // POSS2: add filterSliders params to be able to recreate subsets at a given time
-
-    // useful shortcut
-    let typesKey = newState.activetypes.map(Number).join("|")
+    //      cf. usage of TW.partialGraph.graph.nodes() as current scope in changeType
+    //            and n.hidden usage in sliders
 
     // legacy : we prefer to redo louvain than to miss a new nodeset
     //          (wouldn't be needed if POSS2 implemented)
@@ -45,38 +43,20 @@ TW.pushState = function( args ) {
 
     // recreate sliders after activetype or level changes
     if (TW.conf.filterSliders
-        && (newState.level != lastState.level
-            || typesKey != lastState.activetypes.map(Number).join("|"))) {
+        && (!isUndef(args.level)
+            || !isUndef(args.activetypes)
+            || !isUndef(args.activereltypes))
+          ) {
 
-      // terms
-      if(typesKey=="1|0") {
-        $(".for-nodecategory-0").show()
-        $(".for-nodecategory-1").hide();
-
-        NodeWeightFilter( "#slidercat0nodesweight" ,  TW.categories[0]);
-        EdgeWeightFilter("#slidercat0edgesweight", typesKey, "weight");
-      }
-
-      // docs
-      if(typesKey=="0|1") {
-          $(".for-nodecategory-0").hide()
-          $(".for-nodecategory-1").show();
-
-          NodeWeightFilter( "#slidercat1nodesweight" ,  TW.categories[1]);
-          EdgeWeightFilter("#slidercat1edgesweight", typesKey, "weight");
-      }
-
-      // terms and docs
-      if(typesKey=="1|1") {
-        $(".for-nodecategory-0").show()
-        $(".for-nodecategory-1").show();
-          NodeWeightFilter( "#slidercat0nodesweight" ,  TW.categories[0]);
-          NodeWeightFilter( "#slidercat1nodesweight" ,  TW.categories[1]);
-
-          // one slider for each intra-type reltype
-          EdgeWeightFilter("#slidercat0edgesweight", "1|0", "weight");
-          EdgeWeightFilter("#slidercat1edgesweight", "0|1", "weight");
-          // NB: no slider for truly bipartite edges => 2 GUI sliders but 3 edge types
+      for (let actypeId in newState.activetypes) {
+        if (! newState.activetypes[actypeId]) {
+          $(".for-nodecategory-"+actypeId).hide()
+        }
+        else {
+          $(".for-nodecategory-"+actypeId).show()
+          NodeWeightFilter( `#slidercat${actypeId}nodesweight` ,  actypeId);
+          EdgeWeightFilter(`#slidercat${actypeId}edgesweight`, `${actypeId}${actypeId}`, "weight");
+        }
       }
     }
 
@@ -133,7 +113,7 @@ function cancelSelection (fromTagCloud, settings) {
     deselectNodes(TW.SystemState())    //Unselect the selected ones :D
 
     // new state
-    TW.pushState({sels:[], rels:{}})
+    TW.pushGUIState({sels:[], rels:{}})
 
     // GUI effects
     // -----------
@@ -184,11 +164,15 @@ function getActivetypesNames() {
   return currentTypes
 }
 
-function getActivetypesKey() {
-  let lastState = TW.states.slice(-1)[0]
-
-  // ex: '1'        or  '0|1'   or   '1|1'
-  return lastState.activetypes.map(Number).join('|')
+function getActiverelsKey(someState) {
+  if (! someState)   someState = TW.SystemState()
+  if (someState.activetypes.indexOf(false) != -1) {
+    // ex "00" or "11"
+    return someState.activetypes.indexOf(true).toString().repeat(2)
+  }
+  else {
+    return "XR"
+  }
 }
 
 // transitional function:
