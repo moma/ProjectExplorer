@@ -175,6 +175,7 @@ function SelectionEngine() {
 
 
         var activetypesKey = getActivetypesKey()
+        var activereltypes = TW.SystemState().activereltypes
 
 
         // Dictionaries of: selection+neighbors for the new state and updateRelatedNodesPanel
@@ -182,7 +183,11 @@ function SelectionEngine() {
 
         // detailed relations sorted by types and srcid (for state cache, deselects etc)
         let activeRelations = {}
-            activeRelations[activetypesKey] = {}
+
+        for (var k in activereltypes) {
+          let activereltype = activereltypes[k]
+          activeRelations[activereltype] = {}
+        }
 
         // cumulated neighbor weights no matter what srcid (for tagCloud etc)
         let sameSideNeighbors = {}
@@ -197,59 +202,66 @@ function SelectionEngine() {
             for(var i in ndsids) {
                 var srcnid = ndsids[i];
 
-                if(TW.Relations[activetypesKey] && TW.Relations[activetypesKey][srcnid] ) {
-                    var neighs = TW.Relations[activetypesKey][srcnid]
 
-                    activeRelations[activetypesKey][srcnid] = {}
+                for (var k in activereltypes) {
+                  let activereltype = activereltypes[k]
 
-                    if(neighs) {
-                        for(var j in neighs) {
-                            var tgtnid = neighs[j]
+                  if(TW.Relations[activereltype] && TW.Relations[activereltype][srcnid] ) {
+                      var neighs = TW.Relations[activereltype][srcnid]
 
-                            let tgt = TW.partialGraph.graph.nodes(tgtnid)
-                            // highlight edges (except if n hidden or e dropped (<=> lock))
-                            // POSS: use sigma's own index to avoid checking if edge dropped
-                            if (tgt && !tgt.hidden) {
+                      activeRelations[activereltype][srcnid] = {}
 
-                              let eid1 = srcnid+';'+tgtnid
-                              let eid2 = tgtnid+';'+srcnid
+                      if(neighs) {
+                          for(var j in neighs) {
+                              var tgtnid = neighs[j]
 
-                              if ( (TW.Edges[eid1] && !TW.Edges[eid1].lock)
-                                     ||
-                                   (TW.Edges[eid2] && !TW.Edges[eid2].lock) ) {
+                              let tgt = TW.partialGraph.graph.nodes(tgtnid)
+                              // highlight edges (except if n hidden or e dropped (<=> lock))
+                              // POSS: use sigma's own index to avoid checking if edge dropped
+                              if (tgt && !tgt.hidden) {
 
-                                let e1 = TW.partialGraph.graph.edges(eid1)
-                                let e2 = TW.partialGraph.graph.edges(eid2)
+                                let eid1 = srcnid+';'+tgtnid
+                                let eid2 = tgtnid+';'+srcnid
 
-                                // since we're there we'll also keep the neighbors info
-                                if (typeof sameSideNeighbors[tgtnid] == 'undefined') {
-                                  sameSideNeighbors[tgtnid]=0
+                                if ( (TW.Edges[eid1] && !TW.Edges[eid1].lock)
+                                       ||
+                                     (TW.Edges[eid2] && !TW.Edges[eid2].lock) ) {
+
+                                  let e1 = TW.partialGraph.graph.edges(eid1)
+                                  let e2 = TW.partialGraph.graph.edges(eid2)
+
+                                  // since we're there we'll also keep the neighbors info
+                                  if (typeof sameSideNeighbors[tgtnid] == 'undefined') {
+                                    sameSideNeighbors[tgtnid]=0
+                                  }
+
+                                  // and the detailed info
+                                  if (typeof activeRelations[activereltype][srcnid][tgtnid] == 'undefined') {
+                                    activeRelations[activereltype][srcnid][tgtnid]=0
+                                  }
+
+                                  // **make the edge active**
+                                  if (e1 && !e1.hidden) {
+                                    e1.customAttrs.activeEdge = 1;
+                                    sameSideNeighbors[tgtnid] += e1.weight || 1
+                                    activeRelations[activereltype][srcnid][tgtnid] += e1.weight || 1
+                                  }
+                                  if (e2 && !e2.hidden) {
+                                     e2.customAttrs.activeEdge = 1;
+                                     sameSideNeighbors[tgtnid] += e2.weight || 1
+                                     activeRelations[activereltype][srcnid][tgtnid] += e2.weight || 1
+                                  }
+
+                                  // we add as neighbor to color it (except if already in targeted)
+                                  if (!tgt.customAttrs.active)    tgt.customAttrs.highlight = 1;
                                 }
-
-                                // and the detailed info
-                                if (typeof activeRelations[activetypesKey][srcnid][tgtnid] == 'undefined') {
-                                  activeRelations[activetypesKey][srcnid][tgtnid]=0
-                                }
-
-                                // **make the edge active**
-                                if (e1 && !e1.hidden) {
-                                  e1.customAttrs.activeEdge = 1;
-                                  sameSideNeighbors[tgtnid] += e1.weight || 1
-                                  activeRelations[activetypesKey][srcnid][tgtnid] += e1.weight || 1
-                                }
-                                if (e2 && !e2.hidden) {
-                                   e2.customAttrs.activeEdge = 1;
-                                   sameSideNeighbors[tgtnid] += e2.weight || 1
-                                   activeRelations[activetypesKey][srcnid][tgtnid] += e2.weight || 1
-                                }
-
-                                // we add as neighbor to color it (except if already in targeted)
-                                if (!tgt.customAttrs.active)    tgt.customAttrs.highlight = 1;
                               }
-                            }
-                        }
-                    }
+                          }
+                      }
+                  }
+
                 }
+
                 // we make the selected (source) node active too
                 let src = TW.partialGraph.graph.nodes(srcnid)
                 src.customAttrs.active = true;
@@ -643,31 +655,22 @@ var TinaWebJS = function ( sigmacanvas ) {
         });
 
         $("#changetype").click(function(){
-            console.log("")
-            console.log(" ############  changeTYPE click");
+            console.log("changeTYPE click");
             if (TW.partialGraph.isForceAtlas2Running())
                 sigma_utils.ourStopFA2();
 
-            console.log("DBG before changeType SystemState:", TW.SystemState())
             changeType();
 
             setTimeout(function(){
               $('.etabs a[href="#tabs1"]').trigger('click');
             },500)
-
-            console.log(" ############  / changeTYPE click");
-            console.log("")
         });
 
         $("#changelevel").click(function(){
-            console.log("")
-            console.log(" ############  changeLEVEL click");
+            console.log("changeLEVEL click");
             if (TW.partialGraph.isForceAtlas2Running())
                 sigma_utils.ourStopFA2();
             changeLevel();
-
-            console.log(" ############  / changeLEVEL click");
-            console.log("")
         });
 
         // sidepanel folding
@@ -876,9 +879,9 @@ var TinaWebJS = function ( sigmacanvas ) {
 
     // to init local, instance-related listeners (need to run at new sigma instance)
     // args: @partialGraph = a sigma instance
-    this.initSigmaListeners = function(partialGraph, initialActivetypes) {
+    this.initSigmaListeners = function(partialGraph, initialActivetypes, initialActivereltypes) {
 
-      console.log("initSigmaListeners TW.categories", TW.categories)
+      console.log("initSigmaListeners TW.categories / types array / reltypeskeys array: ", TW.categories, initialActivetypes, initialActivereltypes)
 
       var selInst = this.selNgn
 
@@ -1075,18 +1078,28 @@ var TinaWebJS = function ( sigmacanvas ) {
         // the indice of the first cat to be active (ex: '1')
         let activeId = initialActivetypes.indexOf(true)
 
-        // args: for display: target div ,
-        //       for context: family/type prop value,
-        //       for values:  the property to filter
-        NodeWeightFilter ( `#slidercat${activeId}nodesweight` ,
-                              TW.categories[activeId]
-                           );
+        for (let activeId in initialActivetypes) {
+          if (initialActivetypes[activeId]) {
+            // args: for display: target div ,
+            //       for context: family/type prop value,
+            //       for values:  the property to filter
+            NodeWeightFilter ( `#slidercat${activeId}nodesweight` ,
+                                  TW.categories[activeId]
+                               );
+          }
+        }
 
-        // ex: #slidercat1edgesweight
-        EdgeWeightFilter(`#slidercat${activeId}edgesweight`,
-                          getActivetypesKey(),
-                          "weight"
-                        );
+        for (var k in initialActivereltypes) {
+          let reltypeKey = initialActivereltypes[k]
+          // ex: #slidercat1edgesweight
+          EdgeWeightFilter(`#slidercat${activeId}edgesweight`,
+                            reltypeKey,
+                            "weight"
+                          );
+        }
+
+
+
       }
 
       // node's label size
@@ -1170,14 +1183,39 @@ var TinaWebJS = function ( sigmacanvas ) {
 
 
     // our current choice: show only the last cat
-    // POSS make it a configuration settings
+    // except when setting TW.conf.debug.initialShowAll
     this.initialActivetypes = function( categories ) {
-        var firstActivetypes = []
+        let firstActivetypes = []
         for(var i=0; i<categories.length ; i++) {
-          if(i==categories.length-1) firstActivetypes.push(true)
+          if (TW.conf.debug.initialShowAll || i==categories.length-1) {
+            firstActivetypes.push(true)
+          }
           else firstActivetypes.push(false)
         }
         return firstActivetypes;
+    }
+
+    // new business logic associating some activetypes to some activerels
+    // (it now allows multiple "relation-families" to be added as visible edges)
+    this.inferActivereltypes = function( nodeActivetypes ) {
+        let firstActivereltypes = []
+        // multiple nodetypes all true => all reltypes
+        if (TW.conf.debug.initialShowAll || nodeActivetypes.indexOf(false) == -1) {
+          let combinations = {}
+          if (TW.categories.length == 1) {
+            firstActivereltypes = ['1']
+          }
+          else if (TW.categories.length == 2) {
+            firstActivereltypes = ['0|1', '1|0', '1|1']
+          }
+          // POSSible: generalize if length > 1: recurse to generate all true/false combinations except the all-false one
+        }
+        // normal case: one activereltype, equal to the initialActivetype key
+        else {
+          firstActivereltypes = [nodeActivetypes.map(Number).join("|")]
+        }
+
+        return firstActivereltypes;
     }
 
 };

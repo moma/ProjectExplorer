@@ -38,12 +38,12 @@ TW.conf = (function(TW){
   TWConf.relatedDocsMax = 10
   TWConf.relatedDocsAPI = "http://127.0.0.1:5000/twitter_search"
 
-  TWConf.relatedDocsType = "twitter"      // accepted: "twitter" | "wosLocalDB"
+  TWConf.relatedDocsType = "LocalDB"      // accepted: "twitter" | "LocalDB"
                                           // POSSible: "elastic"
 
   TWConf.relatedDocsAPIS = {
     // routes by corresponding type
-    "wosLocalDB": "twbackends/phpAPI",
+    "LocalDB": "twbackends/phpAPI",
     "twitter": "http://127.0.0.1:5000/twitter_search"
   }
 
@@ -158,8 +158,9 @@ TW.conf = (function(TW){
   // Node typology: categories (resp. 0 and 1) will get these default labels
   TWConf.catSem = "NGram";
   TWConf.catSoc = "Document";
-  // NB: these labels may be superseded by the input data's node types values
-  //     cf. sortNodeTypes()
+  // NB: these labels may be superseded by:
+  //   - the input data's node types values cf. sortNodeTypes()
+  //   - in servermenu mode, by the node0 & node1 properties
 
   // Modules path
   // ------------
@@ -183,7 +184,7 @@ TW.conf = (function(TW){
 
   // Other GUI options
   // ------------------
-  TWConf.sidePanelSize = "300px"       // width of the side panel (def: 400px)
+  TWConf.sidePanelSize = "400px"       // width of the side panel (def: 400px)
 
   TWConf.filterSliders = true          // show sliders for nodes/edges subsets
 
@@ -248,7 +249,7 @@ TW.conf = (function(TW){
       twNodeRendBorderColor: "#222",
 
       // edges
-      minEdgeSize: 1,                    // in fact used in tina as edge size
+      minEdgeSize: 2,                    // in fact used in tina as edge size
       defaultEdgeType: 'curve',          // 'curve' or 'line' (curve only iff ourRendering)
       twEdgeDefaultOpacity: 0.4,         // initial opacity added to src/tgt colors
 
@@ -272,8 +273,8 @@ TW.conf = (function(TW){
       twSelectedColor: "default",     // "node" for a label bg like the node color,
                                    // "default" for note-like yellow
 
-      // not selected <=> grey
-      twNodesGreyOpacity: .35,                       // smaller value: more grey
+      // not selected <=> (1-greyness)
+      twNodesGreyOpacity: .7,                       // smaller value: more grey
       twBorderGreyColor: "rgba(100, 100, 100, 0.5)",
       twEdgeGreyColor: "rgba(150, 150, 150, 0.5)",
   };
@@ -302,7 +303,7 @@ TW.conf = (function(TW){
   // relative sizes (iff ChangeType == both nodetypes)
   TWConf.sizeMult = [];
   TWConf.sizeMult[0] = 1.0;     // ie for node type 0 (<=> sem)
-  TWConf.sizeMult[1] = 2.0;    // ie for node type 1 (<=> soc)
+  TWConf.sizeMult[1] = 2.5;     // ie for node type 1 (<=> soc)
 
 
   // ===========
@@ -317,7 +318,7 @@ TW.conf = (function(TW){
     logFacets: false,                // ...about parsing node attribute:value facets
     logSettings: false,              // ...about settings at Tina and Sigma init time
     logStates: false,                // ...about TW.states array
-    logSelections: true
+    logSelections: false
   }
 
 

@@ -1,62 +1,84 @@
 {
   "data/gargistex": {
     "first" : "shale_and_ice.gexf",
-    "gexfs": {
+    "graphs":{
       "shale_and_ice.gexf": {
-        "dbtype": "csv",
-        "semantic":["title","keywords","abstract"],
-        "social":["authors"],
-        "dbfile": "shale_and_ice.csv"
+        "node0": {
+          "name": "terms",
+          "reldbtype": "csv",
+          "reldbfile": "shale_and_ice.csv",
+          "reldbqcols": ["title"],
+          "reltemplate": "_todo"
+        }
+      },
+      "model_calibration.gexf": {
+        "node0": {
+          "name": "terms",
+          "reldbtype": "csv",
+          "reldbfile": "model_calibration.csv",
+          "reldbqcols": ["title"],
+          "reltemplate": "_todo"
+        }
       }
     }
   },
   "data/test": {
     "first" : "mini_for_csv.gexf",
-    "gexfs": {
+    "graphs": {
       "mini_for_csv.gexf": {
-        "_comment": "NB: underspecified for csv and for db.json !! so this is a prototype structure",
-        "_comment": "POSS: weighted columns for matching importance",
-        "dbtype": "csv",
-        "semantic":["title","keywords","text"],
-        "social":["author"],
-        "dbfile": "mini_for_csv.csv"
+        "node0": {
+          "name": "term",
+          "reldbtype": "csv",
+          "reldbfile": "mini_for_csv.csv",
+          "reldbqcols": ["title","keywords","text"],
+          "reltemplate": "_todo"
+        },
+        "node1": {
+          "name": "person",
+          "reldbtype": "csv",
+          "reldbfile": "mini_for_csv.csv",
+          "reldbqcols": ["author"],
+          "reltemplate": "_todo"
+        }
       },
       "test_with_various_atts.gexf": {}
     }
   },
   "data/politoscope": {
-		"dbname":null,
-		"title":"Politoscope",
-		"date":"2017",
-		"abstract":"",
-		"first" : "ProgrammeDesCandidats.enrichi.gexf",
-		"gexfs": {
-			"ProgrammeDesCandidats.enrichi.gexf": {
-				"social": {},
-				"semantic": {}
-			},
-			"ProgrammeDesCandidats.gexf": {
-				"social": {},
-				"semantic": {}
-			}
-		}
-	},
-  "data/ClimateChange": {
-        "dbname":"wos_climate-change_title_2014-2015.db",
-        "title":"ISITITLE",
-        "date":"ISIpubdate",
-        "abstract":"ISIABSTRACT",
-        "gexfs": {
-                "Maps_S_800.gexf": {
-                        "social": { "table":"ISIAUTHOR" , "textCol":"data","forkeyCol":"id"},
-                        "semantic": { "table":"ISItermsWhitelistV2Oct_5" , "textCol":"data","forkeyCol":"id"}
-                }
-        }
+    "dbname":null,
+    "title":"Politoscope",
+    "date":"2017",
+    "abstract":"",
+    "first" : "ProgrammeDesCandidats.enrichi.gexf",
+    "graphs": {
+      "ProgrammeDesCandidats.enrichi.gexf": {
+        "node0": { "name": "terms" }
+      },
+      "ProgrammeDesCandidats.gexf": {
+        "node0": { "name": "terms" }
+      }
+    }
   },
-	"data/comexjsons": {
-		"first" : "graph_example.json",
-		"gexfs": {
-			"graph_example.json": {}
-		}
-	}
+  "data/ClimateChange": {
+    "abstract":"ISIABSTRACT",
+    "graphs": {
+      "Maps_S_800.gexf": {
+          "node0": {
+            "name": "ISItermsWhitelistV2Oct_5 &amp; ISItermsWhitelistV2Oct_5",
+            "reldbtable": "ISItermsWhitelistV2Oct_5",
+            "reldbname" : "wos_climate-change_title_2014-2015.db",
+            "reldbtype": "CortextDB"
+          }
+      }
+    }
+  },
+  "data/comexjsons": {
+    "first" : "graph_example.json",
+    "graphs": {
+      "graph_example.json": {
+        "node0": { "name": "NGram" },
+        "node1": { "name": "Document" }
+      }
+    }
+  }
 }

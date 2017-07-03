@@ -275,7 +275,9 @@ function changeType() {
     // new state is the complement of the received state ~[X\Y]
     var t1Activetypes = []
     for(var i in t0Activetypes) t1Activetypes[i] = !t0Activetypes[i]
-    var t1ActivetypesKey = t1Activetypes.map(Number).join("|")
+
+    // apriori key
+    let t1ActivetypesKey = t1Activetypes.map(Number).join("|")
 
     // "union realm" (where we'll search the real bipartite Relations)
     var bipartiteKey = "1|1"
@@ -288,7 +290,6 @@ function changeType() {
     //    so => we set here a fallback to "1|0"
     if (t1ActivetypesKey == "0|0") {
       t1Activetypes = [true, false]
-      t1ActivetypesKey = "1|0"
 
       // this case "0|0" => "1|0" won't have a unique edge realm to look at
       // nodes of "1|0" will need their "1|0" neighbors
@@ -299,6 +300,12 @@ function changeType() {
     // special case: "macro level opens bipartite possibilities"
     if(!level)   t1Activetypes = [true, true];
 
+    // now that we have the future types, infer associated state representations
+    // let t1ActivetypesKey = t1Activetypes.map(Number).join("|")
+    let t1Activereltypes = TW.instance.inferActivereltypes(t1Activetypes)
+
+    console.log("activetypes:", t1ActivetypesKey)
+    console.log("activereltypes:", t1Activereltypes)
 
     // list of present nodes: needed *before* clearing
     // (but only needed if local and no selections)
@@ -324,12 +331,14 @@ function changeType() {
             }
         }
         for(var eid in TW.Edges) {
-
-            if(TW.Edges[eid].categ==t1ActivetypesKey)
+          for (var k in t1Activereltypes) {
+            let reltype = t1Activereltypes[k]
+            if(TW.Edges[eid].categ==reltype)
                 add1Elem(eid)
+          }
 
-            // NB ie we don't add sameside edges "1|0" or "0|1" when target
-            //       activetypes is "1|1" (aka "both")
+            // NB ie we **do** add sameside edges "1|0" or "0|1" when target
+            //       activetypes is "1|1" (aka "both"), cf. inferActivereltypes
         }
 
         sourceNodes = sels
@@ -361,8 +370,8 @@ function changeType() {
     // [ ChangeType: incremental selection ;]
 
     // Dictionaries of: opposite-neighs of current source nodes
+    var newnodeset = {}
     var newsels = {}
-    var edgesToAdd = {}
     for(var i in sourceNodes) {
         let srcnid = sourceNodes[i];
         let srctyp = TW.Nodes[srcnid].type
@@ -370,7 +379,17 @@ function changeType() {
         if (!mixedStart) {
           // case where we have an single kind of Relations to consider
           // ie the realm of the bipartite relations called "1|1"
-          neighs = TW.Relations[bipartiteKey][srcnid]
+
+          for (var k in t1Activereltypes) {
+            let reltype = t1Activereltypes[k]
+            if (TW.Relations[reltype] && TW.Relations[reltype][srcnid])
+              neighs = neighs.concat(TW.Relations[reltype][srcnid])
+          }
+
+          console.log("=> neighs", neighs)
+
+
+          // neighs = TW.Relations[bipartiteKey][srcnid]
         }
         else {
           // case with a mixed starting point
@@ -394,10 +413,9 @@ function changeType() {
             if (t1Activetypes[TW.catDict[tgttyp]]) {
               newsels[tgtnid]=true;
 
-              // since we're here we keep the edges if needed
+              // since we're here we keep in the new scope (nodeset) if local
               if (!present.level) {
-                edgesToAdd[`${srcnid};${tgtnid}`] = true
-                edgesToAdd[`${tgtnid};${srcnid}`] = true
+                newnodeset[tgtnid] = true
               }
             }
           }
@@ -419,8 +437,23 @@ function changeType() {
         for(var nid in newsels) {
           add1Elem(nid)
         }
-        for(var eid in edgesToAdd) {
-          add1Elem(eid)
+
+        // new loop on current scope to add sels edges and intra-neighbors edges
+        for(var srcnid in newnodeset) {
+          for(var tgtnid in newnodeset) {
+            let possEids = [`${srcnid};${tgtnid}`,`${tgtnid};${srcnid}`]
+            for (var l in possEids) {
+              let eid = possEids[l]
+              if (TW.Edges[eid]) {
+                let e = TW.Edges[eid]
+                for (var k in t1Activereltypes) {
+                  let reltype = t1Activereltypes[k]
+                  if (e.categ == reltype)
+                    add1Elem(eid)
+                }
+              }
+            }
+          }
         }
     }
 
@@ -430,6 +463,7 @@ function changeType() {
 
     TW.pushState({
         activetypes: t1Activetypes,
+        activereltypes: t1Activereltypes,
         sels: newselsArr,
         // rels: added by MS2 (highlighted opposite- and same-side neighbours)
         // possible: add it in an early way here and request that MS2 doesn't change state
@@ -491,6 +525,7 @@ function changeLevel() {
 
       var activetypes = present.activetypes;
       var activetypesKey = activetypes.map(Number).join("|")
+      var activereltypes = present.activereltypes
 
       TW.partialGraph.graph.clear();
 
@@ -502,22 +537,26 @@ function changeLevel() {
       for(var i in sels) {
           s = sels[i];
           nodesToAdd[s]=true;
-          if (TW.Relations[activetypesKey]) {
-            neigh = TW.Relations[activetypesKey][s]
-            if(neigh) {
-                for(var j in neigh) {
-                    t = neigh[j]
-                    nodesToAdd[t]=true;
-                    edgesToAdd[s+";"+t]=true;
-                    edgesToAdd[t+";"+s]=true;
-                    if( !selsChecker[t]  )
-                        voisinage[ t ] = true;
-                }
+          for (var k in activereltypes) {
+            let activereltype = activereltypes[k]
+            console.log("level: considering reltype ", activereltype)
+            if (TW.Relations[activereltype]) {
+              neigh = TW.Relations[activereltype][s]
+              if(neigh) {
+                  for(var j in neigh) {
+                      t = neigh[j]
+                      nodesToAdd[t]=true;
+                      edgesToAdd[s+";"+t]=true;
+                      edgesToAdd[t+";"+s]=true;
+                      if( !selsChecker[t]  )
+                          voisinage[ t ] = true;
+                  }
+              }
             }
-          }
-          else {
-            // case where no edges at all (ex: scholars have no common keywords)
-            console.log("no edges between these nodes")
+            else {
+              // case where no edges at all (ex: scholars have no common keywords)
+              console.log("no edges between these nodes")
+            }
           }
       }
 
@@ -536,6 +575,7 @@ function changeLevel() {
                   if( voisinage[i]!=voisinage[j] ) {
                       // console.log( "\t" + voisinage[i] + " vs " + voisinage[j] )
                       add1Elem( voisinage[i]+";"+voisinage[j] )
+                      add1Elem( voisinage[j]+";"+voisinage[i] )
                   }
               }
           }
@@ -1040,8 +1080,8 @@ function createWaitIcon(idname, width) {
 }
 
 
-function jsActionOnGexfSelector(gexfBasename){
-    let gexfPath = TW.gexfPaths[gexfBasename] || gexfBasename+".gexf"
+function jsActionOnGexfSelector(graphBasename){
+    let graphPath = TW.gmenuPaths[graphBasename] || graphBasename+".gexf"
     let serverPrefix = ''
     var pathcomponents = window.location.pathname.split('/')
     for (var i in pathcomponents) {
@@ -1049,13 +1089,21 @@ function jsActionOnGexfSelector(gexfBasename){
         serverPrefix += '/'+pathcomponents[i]
     }
 
-    var newDataRes = AjaxSync({ "url": window.location.origin+serverPrefix+'/'+gexfPath });
+    var newDataRes = AjaxSync({ "url": window.location.origin+serverPrefix+'/'+graphPath });
 
     // remove any previous instance and flags
     TW.resetGraph()
 
+    // override default categories with the ones from db.json
+    if (TW.gmenuInfos[graphPath]) {
+      if (TW.gmenuInfos[graphPath].node0 && TW.gmenuInfos[graphPath].node0.name)
+          TW.conf.catSem = TW.gmenuInfos[graphPath].node0.name
+      if (TW.gmenuInfos[graphPath].node1 && TW.gmenuInfos[graphPath].node1.name)
+          TW.conf.catSem = TW.gmenuInfos[graphPath].node1.name
+    }
+
     mainStartGraph(newDataRes["format"], newDataRes["data"], TW.instance)
-    writeLabel(gexfBasename)
-    TW.File = gexfPath
+    writeLabel(graphBasename)
+    TW.File = graphPath
 }
 //============================= </OTHER ACTIONS > =============================//

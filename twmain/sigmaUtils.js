@@ -3,19 +3,25 @@
 var SigmaUtils = function () {
 
     // input = GEXFstring
-    this.FillGraph = function( initialActivetypes , catDict  , nodes, edges , graph ) {
+    this.FillGraph = function( initialActivetypes , initialActivereltypes, catDict  , nodes, edges , graph ) {
 
         console.log("Filling the graaaaph:")
         console.log("FillGraph catDict",catDict)
         // console.log("FillGraph nodes",nodes)
         // console.log("FillGraph edges",edges)
 
+        // retrocompatibility  -------------------------------- 8< -------------
+        if (!initialActivereltypes.length) {
+          initialActivereltypes = [initialActivetypes.map(Number).join("|")]
+        }
+        // ---------------------------------------------------- 8< -------------
+
         let i = 0
         for(var nid in nodes) {
             var n = nodes[nid];
             // console.debug('tr >>> fgr node', n)
 
-            if(initialActivetypes[catDict[n.type]] || TW.conf.debug.initialShowAll) {
+            if(initialActivetypes[catDict[n.type]]) {
                 // var node = {
                 //     id : n.id,
                 //     label : n.label,
@@ -43,20 +49,20 @@ var SigmaUtils = function () {
             }
         }
 
-
-        // the typestring of the activetypes is the key to stored Relations (<=> edges)
-        var activetypesKey = initialActivetypes.map(Number).join("|")
-
-        for(let srcnid in TW.Relations[activetypesKey]) {
-            for(var j in TW.Relations[activetypesKey][srcnid]) {
-                let tgtnid = TW.Relations[activetypesKey][srcnid][j]
-                let e = TW.Edges[srcnid+";"+tgtnid]
-                if(e) {
-                    if(e.source != e.target) {
-                        graph.edges.push( e);
-                    }
-                }
-            }
+        // the typestrings in activereltypes are the key to stored Relations (<=> edges)
+        for (var k in initialActivereltypes) {
+          let reltype = initialActivereltypes[k]
+          for(let srcnid in TW.Relations[reltype]) {
+              for(var j in TW.Relations[reltype][srcnid]) {
+                  let tgtnid = TW.Relations[reltype][srcnid][j]
+                  let e = TW.Edges[srcnid+";"+tgtnid]
+                  if(e) {
+                      if(e.source != e.target) {
+                          graph.edges.push( e);
+                      }
+                  }
+              }
+          }
         }
         return graph;
     }// output = sigma graph
@@ -665,7 +671,6 @@ function edgeInfos(anEdge) {
 
 function gradientColoring(daclass) {
 
-    cancelSelection(false);       // loops only on selected
     graphResetLabelsAndSizes()    // full loop
 
     TW.gui.handpickedcolor = true
@@ -853,7 +858,6 @@ function heatmapColoring(daclass) {
   binColors = getHeatmapColors(nColors)
 
   // let's go
-  cancelSelection(false);       // loops only on selected
   graphResetLabelsAndSizes()    // full loop
 
   // global flag
@@ -909,9 +913,6 @@ function heatmapColoring(daclass) {
 
 function clusterColoring(daclass) {
 
-    console.log("clusterColoring (    "+daclass+"    )")
-
-    cancelSelection(false);       // now loops only on selected
     graphResetLabelsAndSizes()    // full loop
 
     // louvain needs preparation

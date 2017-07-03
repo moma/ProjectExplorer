@@ -12,18 +12,19 @@ TW.File = ""            // remember the currently opened file
 TW.partialGraph = null  // will contain the sigma visible graph instance
 
 TW.labels=[];           // fulltext search list
-TW.gexfPaths={};        // for file selectors iff servermenu
-TW.relDocsInfos={};           // map [graphsource => relatedDocs db fields or tables names]
-                        // TODO requires specifications !!
-
-                        //  (iff servermenu && relatedDocsType == 'wosLocalDB')
 
 TW.categories = [];     // possible node types and their inverted map
 TW.catDict = {};
 
+// used iff servermenu
+TW.gmenuPaths={};       // map [graphname => graphsource] for file selectors
+TW.gmenuInfos={};       // map [graphsource => { node0/1 categories
+                        //                      + relatedDocs db fields names}]
+
 // a system state is the summary of tina situation
 TW.initialSystemState = {
   activetypes: [],          // <== filled from TW.categories
+  activereltypes: [],       // <== same for edges
   level:      true,
   selectionNids: [],        // <== current selection !!
   selectionRels: [],        // <== current highlighted neighbors
@@ -259,58 +260,40 @@ function syncRemoteGraphData () {
         var files_selector = '<select onchange="jsActionOnGexfSelector(this.value);">'
 
         for( var path in preRES.data ) {
-            var theGexfs = preRES.data[path]["gexfs"]
+            var theGraphs = preRES.data[path]["graphs"]
 
-            for(var aGexf in theGexfs) {
-                var gexfBasename = aGexf.replace(/\.gexf$/, "") // more human-readable in the menu
-                TW.gexfPaths[gexfBasename] = path+"/"+aGexf
+            for(var aGraph in theGraphs) {
+                var graphBasename = aGraph.replace(/\.gexf$/, "") // more human-readable in the menu
+                TW.gmenuPaths[graphBasename] = path+"/"+aGraph
                 // ex : "RiskV2PageRank1000.gexf":data/AXA/RiskV2PageRank1000.gexf
                 // (we assume there's no duplicate basenames)
 
 
                 if (TW.conf.debug.logFetchers)
-                  console.log("\t\t\t"+gexfBasename)
+                  console.log("\t\t\t"+graphBasename)
 
-                // for associated wosLocalDBs sql queries
-                if (theGexfs[aGexf]) {
+                // for associated LocalDB php queries: CSV (or CortextDBs sql)
+                if (theGraphs[aGraph]) {
 
-                  let gSrcEntry = theGexfs[aGexf]
+                  let gSrcEntry = theGraphs[aGraph]
 
-                  TW.relDocsInfos[path+"/"+aGexf] = {"semantic":null, "social":null, "dbtype": null}
+                  TW.gmenuInfos[path+"/"+aGraph] = new Array(2)
 
-                  // POSS have this type attribute in db.json *for all the entries*
-
-                  // ----------------------------------------------------------------------------------
-                  // choice: we'll keep a flat structure by source unless some use cases need otherwise
-                  // ----------------------------------------------------------------------------------
-                  // csv LocalDB ~ gargantext
-                  if(gSrcEntry["dbtype"] && gSrcEntry["dbtype"] == "csv") {
-                    TW.relDocsInfos[path+"/"+aGexf]['dbtype'] = "csv"
-
-                    // it's CSV columns here
-                    TW.relDocsInfos[path+"/"+aGexf]['semantic'] = gSrcEntry["semantic"]
-                    TW.relDocsInfos[path+"/"+aGexf]['social'] = gSrcEntry["social"]
+                  if (gSrcEntry.node0) {
+                    TW.gmenuInfos[path+"/"+aGraph][0] = gSrcEntry.node0
+                  }
+                  if (gSrcEntry.node1) {
+                    TW.gmenuInfos[path+"/"+aGraph][0] = gSrcEntry.node0
                   }
 
-                  // sqlite LocalDB ~ wos
-                  else {
-                    TW.relDocsInfos[path+"/"+aGexf]['dbtype'] = "sql"
-                    if (theGexfs[aGexf]["semantic"] && theGexfs[aGexf]["semantic"]["table"]) {
-                      TW.relDocsInfos[path+"/"+aGexf]['semantic'] = theGexfs[aGexf]["semantic"]["table"]
-                    }
-                    if (theGexfs[aGexf]["social"] && theGexfs[aGexf]["social"]["table"]) {
-                      TW.relDocsInfos[path+"/"+aGexf]['social'] = theGexfs[aGexf]["social"]["table"]
-                    }
-                  }
                 }
                 else {
-                  TW.relDocsInfos[path+"/"+aGexf] = null
+                  TW.gmenuInfos[path+"/"+aGraph] = null
                 }
-                // ^^^^^^ FIXME see if we got the expected behavior right
-                //             (? specifications ?)
+                // ^^^^^^ FIXME finish implementing new specifications
 
-                let cssFileSelected = (TW.File==(path+"/"+aGexf))?"selected":""
-                files_selector += '<option '+cssFileSelected+'>'+gexfBasename+'</option>'
+                let cssFileSelected = (TW.File==(path+"/"+aGraph))?"selected":""
+                files_selector += '<option '+cssFileSelected+'>'+graphBasename+'</option>'
             }
             // console.log( files_selector )
         }
@@ -384,6 +367,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
       // activetypes: the node categorie(s) that is (are) currently displayed
       // ex: [true,false] = [nodes of type 0 shown  ; nodes of type 1 not drawn]
       var initialActivetypes = TW.instance.initialActivetypes( TW.categories )
+      var initialActivereltypes = TW.instance.inferActivereltypes( initialActivetypes )
 
       // XML parsing from ParseCustom
       var dicts = start.makeDicts(TW.categories); // > parse json or gexf, dictfy
@@ -424,7 +408,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
       // preparing the data (TW.Nodes and TW.Edges filtered by initial type)
       // POSS: avoid this step and use the filters at rendering time!
       TW.graphData = {nodes: [], edges: []}
-      TW.graphData = sigma_utils.FillGraph( initialActivetypes , TW.catDict  , TW.Nodes , TW.Edges , TW.graphData );
+      TW.graphData = sigma_utils.FillGraph( initialActivetypes , initialActivereltypes, TW.catDict  , TW.Nodes , TW.Edges , TW.graphData );
 
 
           // // ----------- TEST stock parse gexf and use nodes to replace TW's ---------
@@ -514,7 +498,10 @@ function mainStartGraph(inFormat, inData, twInstance) {
       // ==================================================================
 
       // a new state
-      TW.pushState({'activetypes': initialActivetypes})
+      TW.pushState({
+        'activetypes': initialActivetypes,
+        'activereltypes': initialActivereltypes
+      })
 
       // NB the list of nodes and edges from TW.graphData will be changed
       //    by changeLevel, changeType or subset sliders => no need to keep it
@@ -528,7 +515,11 @@ function mainStartGraph(inFormat, inData, twInstance) {
       //      renderer position depend on viewpoint/zoom (like ~ html absolute positions of the node in the div)
 
       // now that we have a sigma instance, let's bind our click handlers to it
-      TW.instance.initSigmaListeners(TW.partialGraph, initialActivetypes)
+      TW.instance.initSigmaListeners(
+        TW.partialGraph,
+        initialActivetypes,      // to init node sliders and .class gui elements
+        initialActivereltypes    // to init edge sliders
+      )
 
       // [ / Poblating the Sigma-Graph ]
 

@@ -52,7 +52,7 @@ To use the API for the "topPapers" embedded search in ProjectExplorer, the corre
   - via the interface (side panel menu)
   - or directly in settings_explorerjs.js:
 ```
-TWConf.relatedDocsType = "wosLocalDB"
+TWConf.relatedDocsType = "LocalDB"  (CSV or CortextDB)
 ```
 
 Finally, to match the correct DB with the correct graph file:
@@ -64,7 +64,7 @@ Finally, to match the correct DB with the correct graph file:
       "title":"yourDocumentTitlesTable",
       "date":"yourDocumentPubDatesTable",
       "abstract":"yourDocumentContentsTable",
-      "gexfs": {
+      "graphs": {
           "your.graph.gexf": {
               "semantic": { "table":"yourTableWithTerms"},
               "social": { "table":"yourTableWithSocialNodes"}

@@ -19,9 +19,10 @@ TW.pushState = function( args ) {
     newState.id ++
 
     // 2) we update it with provided args
-    if (!isUndef(args.activetypes))  newState.activetypes = args.activetypes
-    if (!isUndef(args.level))        newState.level = args.level;
-    if (!isUndef(args.sels))         newState.selectionNids = args.sels;
+    if (!isUndef(args.activetypes))    newState.activetypes = args.activetypes
+    if (!isUndef(args.activereltypes)) newState.activereltypes = args.activereltypes
+    if (!isUndef(args.level))          newState.level = args.level;
+    if (!isUndef(args.sels))           newState.selectionNids = args.sels;
 
     // neighbors (of any type) and their edges in an .selectionRels[type] slot
     if(!isUndef(args.rels))          newState.selectionRels = args.rels;
@@ -72,9 +73,10 @@ TW.pushState = function( args ) {
           NodeWeightFilter( "#slidercat0nodesweight" ,  TW.categories[0]);
           NodeWeightFilter( "#slidercat1nodesweight" ,  TW.categories[1]);
 
-          // only truly bipartite edges => only one GUI slider
-          showDisabledSlider("#slidercat0edgesweight")
-          EdgeWeightFilter("#slidercat1edgesweight", "1|1", "weight");
+          // one slider for each intra-type reltype
+          EdgeWeightFilter("#slidercat0edgesweight", "1|0", "weight");
+          EdgeWeightFilter("#slidercat1edgesweight", "0|1", "weight");
+          // NB: no slider for truly bipartite edges => 2 GUI sliders but 3 edge types
       }
     }
 
