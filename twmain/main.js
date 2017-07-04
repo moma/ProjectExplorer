@@ -284,7 +284,7 @@ function syncRemoteGraphData () {
                     TW.gmenuInfos[path+"/"+aGraph][0] = gSrcEntry.node0
                   }
                   if (gSrcEntry.node1) {
-                    TW.gmenuInfos[path+"/"+aGraph][0] = gSrcEntry.node0
+                    TW.gmenuInfos[path+"/"+aGraph][1] = gSrcEntry.node1
                   }
 
                 }

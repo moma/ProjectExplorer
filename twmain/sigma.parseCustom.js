@@ -192,8 +192,6 @@ function scanGexf(gexfContent) {
                 if (! isUndef(declaredAttrs.nodeAttrs[attr]))
                   attr = declaredAttrs.nodeAttrs[attr].title
 
-                // console.log('attr', attr)
-
                 // THIS WILL BECOME catDict (if ncats == 1 => monopart)
                 if (attr=="category") categoriesDict[val]=val;
             }
@@ -602,12 +600,18 @@ function dictfyGexf( gexf , categories ){
     var catCount = {}
     for(var i in categories)  catDict[categories[i]] = i;
 
-    var edges={}, nodes={}
+    var edges={}, nodes={}, nodesByType={}
 
     var declaredAtts = gexfCheckAttributesMap(gexf)
     var nodesAttributes = declaredAtts.nodeAttrs
     // var edgesAttributes = declaredAtts.eAttrs
 
+    // NB nodesByType lists arrays of ids per nodetype
+    // (equivalent to TW.partialGraph.graph.getNodesByType but on full nodeset)
+    for(var i in categories)  {
+      catDict[categories[i]] = i
+      nodesByType[i] = []
+    }
 
     var elsNodes = gexf.getElementsByTagName('nodes') // The list of xml nodes 'nodes' (plural)
     TW.labels = [];
@@ -744,6 +748,14 @@ function dictfyGexf( gexf , categories ){
 
             // save record
             nodes[node.id] = node
+            // console.log("catDict", catDict)
+            // console.log("node.type", node.type)
+            if (!nodesByType[catDict[node.type]]) {
+              console.warn("unrecognized type:", node.type)
+            }
+            else {
+              nodesByType[catDict[node.type]].push(node.id)
+            }
 
             if(parseFloat(node.size) < minNodeSize)
                 minNodeSize= parseFloat(node.size);
@@ -886,7 +898,7 @@ function dictfyGexf( gexf , categories ){
     resDict.catCount = catCount;        // ex:  {'ISIterms':1877}  ie #nodes
     resDict.nodes = nodes;              //  { nid1: {label:"...", size:"11.1", attributes:"...", color:"#aaa", etc}, nid2: ...}
     resDict.edges = edges;
-
+    resDict.byType = nodesByType;
     return resDict;
 }
 
@@ -1055,7 +1067,12 @@ function dictfyJSON( data , categories ) {
 
         // record
         nodes[node.id] = node;
-        nodesByType[catDict[node.type]].push(node.id)
+        if (!nodesByType[catDict[node.type]]) {
+          console.warn("unrecognized type:", node.type)
+        }
+        else {
+          nodesByType[catDict[node.type]].push(node.id)
+        }
 
         // creating a faceted index from node.attributes
         if (TW.conf.scanClusters) {

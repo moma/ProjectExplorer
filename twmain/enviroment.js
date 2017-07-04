@@ -1129,10 +1129,14 @@ function jsActionOnGexfSelector(graphBasename){
 
     // override default categories with the ones from db.json
     if (TW.gmenuInfos[graphPath]) {
-      if (TW.gmenuInfos[graphPath].node0 && TW.gmenuInfos[graphPath].node0.name)
-          TW.conf.catSem = TW.gmenuInfos[graphPath].node0.name
-      if (TW.gmenuInfos[graphPath].node1 && TW.gmenuInfos[graphPath].node1.name)
-          TW.conf.catSem = TW.gmenuInfos[graphPath].node1.name
+      if (TW.gmenuInfos[graphPath][0] && TW.gmenuInfos[graphPath][0].name) {
+        TW.conf.catSem = TW.gmenuInfos[graphPath][0].name
+        console.log("new catSem:", TW.conf.catSem)
+      }
+      if (TW.gmenuInfos[graphPath][1] && TW.gmenuInfos[graphPath][1].name) {
+        TW.conf.catSoc = TW.gmenuInfos[graphPath][1].name
+        console.log("new catSoc:", TW.conf.catSoc)
+      }
     }
 
     mainStartGraph(newDataRes["format"], newDataRes["data"], TW.instance)
