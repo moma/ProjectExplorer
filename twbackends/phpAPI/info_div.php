@@ -9,7 +9,7 @@ ini_set('display_startup_errors',1);
 
 include('parameters_details.php');
 
-if ($_GET['dbtype'] == "sql") {
+if ($_GET['dbtype'] == "CortextDB") {
   $base = new PDO("sqlite:".$mainpath.$graphdb);
   include('default_div.php');
 }
