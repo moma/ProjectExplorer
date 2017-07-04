@@ -147,7 +147,7 @@ TW.conf = (function(TW){
 
   // to normalize node sizes: (NB not very useful because tina normalizes them at display)
   TWConf.desirableNodeSizeMin=1;
-  TWConf.desirableNodeSizeMax=12;
+  TWConf.desirableNodeSizeMax=2;
 
 
   // =============
@@ -155,10 +155,11 @@ TW.conf = (function(TW){
   // =============
 
   // Node typology: categories (resp. 0 and 1) will get these default labels
-  TWConf.catSem = "Terms";
+  TWConf.catSem = "NGram";
   TWConf.catSoc = "Document";
-  // NB: these labels may be superseded by the input data's node types values
-  //     cf. sortNodeTypes()
+  // NB: these labels may be superseded by:
+  //   - the input data's node types values cf. sortNodeTypes()
+  //   - in servermenu mode, by the node0 & node1 properties
 
   // Modules path
   // ------------
@@ -186,7 +187,7 @@ TW.conf = (function(TW){
 
   TWConf.filterSliders = true          // show sliders for nodes/edges subsets
 
-  TWConf.clusterColorsAtt = true;      // show "Set colors" menu
+  TWConf.colorByAtt = true;            // show "Set colors" menu
 
   TWConf.dragNodesAvailable = true;    // allow dragging nodes with CTRL+click
 
@@ -274,7 +275,7 @@ TW.conf = (function(TW){
       // not selected <=> grey
       twNodesGreyOpacity: .35,                       // smaller value: more grey
       twBorderGreyColor: "rgba(100, 100, 100, 0.5)",
-      twEdgeGreyColor: "rgba(150, 150, 150, 0.5)",
+      twEdgeGreyColor: "rgba(100, 100, 100, 0.2)",
   };
   // NB: sigmaJsDrawingProperties are available as 'settings' in all renderers
   // cf. https://github.com/jacomyal/sigma.js/wiki/Settings#renderers-settings
@@ -301,7 +302,7 @@ TW.conf = (function(TW){
   // relative sizes (iff ChangeType == both nodetypes)
   TWConf.sizeMult = [];
   TWConf.sizeMult[0] = 1.0;     // ie for node type 0 (<=> sem)
-  TWConf.sizeMult[1] = 2.0;    // ie for node type 1 (<=> soc)
+  TWConf.sizeMult[1] = 5.0;     // ie for node type 1 (<=> soc)
 
 
   // ===========

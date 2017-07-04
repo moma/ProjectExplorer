@@ -36,9 +36,8 @@ TW.conf = (function(TW){
 
   TWConf.getRelatedDocs = false
   TWConf.relatedDocsMax = 10
-  TWConf.relatedDocsAPI = "http://127.0.0.1:5000/twitter_search"
 
-  TWConf.relatedDocsType = "LocalDB"      // accepted: "twitter" | "LocalDB"
+  TWConf.relatedDocsType = "twitter"      // accepted: "twitter" | "LocalDB"
                                           // POSSible: "elastic"
 
   TWConf.relatedDocsAPIS = {
@@ -184,7 +183,7 @@ TW.conf = (function(TW){
 
   // Other GUI options
   // ------------------
-  TWConf.sidePanelSize = "400px"       // width of the side panel (def: 400px)
+  TWConf.sidePanelSize = "300px"       // width of the side panel (def: 400px)
 
   TWConf.filterSliders = true          // show sliders for nodes/edges subsets
 
@@ -216,7 +215,7 @@ TW.conf = (function(TW){
   // if fa2Available, the auto-run config:
 
     TWConf.fa2Enabled= true;        // fa2 auto-run at start and after graph modified ?
-    TWConf.fa2Milliseconds=5000;    // duration of auto-run
+    TWConf.fa2Milliseconds=10000;    // duration of auto-run
     TWConf.minNodesForAutoFA2 = 5   // graph size threshold to auto-run
 
 
@@ -249,7 +248,7 @@ TW.conf = (function(TW){
       twNodeRendBorderColor: "#222",
 
       // edges
-      minEdgeSize: 2,                    // in fact used in tina as edge size
+      minEdgeSize: 1,                    // in fact used in tina as edge size
       defaultEdgeType: 'curve',          // 'curve' or 'line' (curve only iff ourRendering)
       twEdgeDefaultOpacity: 0.4,         // initial opacity added to src/tgt colors
 
@@ -273,10 +272,10 @@ TW.conf = (function(TW){
       twSelectedColor: "default",     // "node" for a label bg like the node color,
                                    // "default" for note-like yellow
 
-      // not selected <=> (1-greyness)
-      twNodesGreyOpacity: .7,                       // smaller value: more grey
+      // not selected <=> grey
+      twNodesGreyOpacity: .35,                       // smaller value: more grey
       twBorderGreyColor: "rgba(100, 100, 100, 0.5)",
-      twEdgeGreyColor: "rgba(100, 100, 100, 0.3)",
+      twEdgeGreyColor: "rgba(100, 100, 100, 0.2)",
   };
   // NB: sigmaJsDrawingProperties are available as 'settings' in all renderers
   // cf. https://github.com/jacomyal/sigma.js/wiki/Settings#renderers-settings
@@ -286,7 +285,7 @@ TW.conf = (function(TW){
   // -----------------------------------
   // mouse captor zoom limits
   TWConf.zoomMin = .015625         // for zoom IN   (ex: 1/64 to allow zoom x64)
-  TWConf.zoomMax = 8               // for zoom OUT
+  TWConf.zoomMax = 2               // for zoom OUT
 
   // circle selection cursor
   TWConf.circleSizeMin = 0;
