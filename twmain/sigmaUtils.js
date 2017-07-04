@@ -565,6 +565,13 @@ var SigmaUtils = function () {
           else {
               if ((TW.conf.fa2Enabled || args.manual)
                   && TW.partialGraph.graph.nNodes() >= TW.conf.minNodesForAutoFA2) {
+                setTimeout(function(){
+                  // NB in here scope: 'this' is the window
+                  if (TW.partialGraph.isForceAtlas2Running())
+                    sigma_utils.ourStopFA2()
+                },
+                args.duration)
+
                 // hide edges during work for smaller cpu load
                 if (TW.partialGraph.settings('drawEdges')) {
                   this.toggleEdges(false)
@@ -577,13 +584,6 @@ var SigmaUtils = function () {
                 var icon = createWaitIcon('layoutwait')
                 var btn = document.querySelector('#layoutButton')
                 btn.insertBefore(icon, btn.children[0])
-
-                setTimeout(function(){
-                  // NB in here scope: 'this' is the window
-                  if (TW.partialGraph.isForceAtlas2Running())
-                    sigma_utils.ourStopFA2()
-                },
-                args.duration)
 
                 return;
               }
@@ -1028,6 +1028,23 @@ function clusterColoring(daclass) {
     TW.partialGraph.render();
 }
 
+
+// for labelThreshold:
+// factor to reduce speed of growth of the amount of labels when size goes up
+// /!\ important params to avoid having unreadable mess of labels or none at all
+function getSizeFactor(val) {
+  let nActive = getNActive()
+  let sliderFactor
+  let adjustmentFactor = TW.conf.sigmaJsDrawingProperties.labelThreshold
+  if (nActive == 1) {
+    let activeId = TW.catDict[getActivetypesNames()[0]]
+    sliderFactor = TW.gui.sizeRatios[activeId]
+  }
+  else {
+    sliderFactor = Math.min.apply(null, TW.gui.sizeRatios)
+  }
+  return adjustmentFactor * (sliderFactor * 1.15)
+}
 
 // mobile versions should get lighter settings
 function mobileAdaptConf() {

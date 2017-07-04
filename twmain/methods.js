@@ -175,6 +175,11 @@ function getActiverelsKey(someState) {
   }
 }
 
+// how many types are currently active
+function getNActive(someState) {
+  return TW.SystemState().activetypes.filter(function(bool){return bool}).length
+}
+
 // transitional function:
 // ----------------------
 // Goal: determine if a single nodetype or global activetype is semantic or social

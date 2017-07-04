@@ -145,9 +145,9 @@ TW.conf = (function(TW){
   TWConf.maxDiscreteValues = 15
   TWConf.legendsBins = 7
 
-  // to normalize node sizes: (NB not very useful because tina normalizes them at display)
+  // to normalize node sizes (larger range does increase visual size difference)
   TWConf.desirableNodeSizeMin=1;
-  TWConf.desirableNodeSizeMax=2;
+  TWConf.desirableNodeSizeMax=10;
 
 
   // =============
@@ -256,8 +256,8 @@ TW.conf = (function(TW){
       font: "Droid Sans",                // font params
       fontStyle: "bold",
       defaultLabelColor: '#000',         // labels text color
-      labelSizeRatio: 1,                 // initial label size (on the slider)
-      labelThreshold: 5,                 // min node cam size to start showing label
+      labelSizeRatio: 1,                 // label size in ratio of node size
+      labelThreshold: 4,                 // min node cam size to start showing label
                                          // (old tina: showLabelsIfZoom)
 
       // hovered nodes
@@ -301,8 +301,8 @@ TW.conf = (function(TW){
 
   // relative sizes (iff ChangeType == both nodetypes)
   TWConf.sizeMult = [];
-  TWConf.sizeMult[0] = 1.0;     // ie for node type 0 (<=> sem)
-  TWConf.sizeMult[1] = 5.0;     // ie for node type 1 (<=> soc)
+  TWConf.sizeMult[0] = 1.0;      // ie for node type 0 (<=> sem)
+  TWConf.sizeMult[1] = 10.0;     // ie for node type 1 (<=> soc)
 
 
   // ===========

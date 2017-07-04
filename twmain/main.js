@@ -531,18 +531,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
       // init FA2 for any future forceAtlas2 calls
       TW.partialGraph.configForceAtlas2(TW.FA2Params)
 
-
-      // init noverlap for any future calls
-      TW.partialGraph.configNoverlap({
-        nodeMargin: .4,
-        scaleNodes: 1.5,
-        gridSize: 400,
-        speed: 5,
-        maxIterations: 10,
-        easing: 'quadraticOut', // animation transition function
-        duration: 1500   // animation duration
-                         // NB animation happens *after* processing
-      });
+      // NB: noverlap conf depends on sizeRatios so updated before each run
 
       // REFA new sigma.js
       TW.partialGraph.camera.goTo({x:0, y:0, ratio:0.9, angle: 0})

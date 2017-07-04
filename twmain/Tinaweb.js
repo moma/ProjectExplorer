@@ -756,6 +756,12 @@ var TinaWebJS = function ( sigmacanvas ) {
                 this.style.cursor = 'wait'
                 // and waiting icon
                 this.insertBefore(createWaitIcon('noverlapwait'), this.children[0])
+
+                // reconfigure to account for nodesizes (if current sizes up => margin needs up)
+                let sizeFactor = Math.max.apply(null, TW.gui.sizeRatios)
+                TW.gui.noverlapConf.nodeMargin =  .5 * sizeFactor
+                TW.gui.noverlapConf.scaleNodes = 1.5 * sizeFactor
+                TW.partialGraph.configNoverlap(TW.gui.noverlapConf)
                 var listener = TW.partialGraph.startNoverlap();
                 var noverButton = this
                 listener.bind('stop', function(event) {
@@ -1112,13 +1118,8 @@ var TinaWebJS = function ( sigmacanvas ) {
             labelSizeTimeout = setTimeout(function(){
               if (TW.gui.sizeRatios[0] != value) {
                 TW.gui.sizeRatios[0] = value
-                // -------------------------------------------------------------
-                // generic efficient method acting on entire graphs label ratio
-                // (can't use it b/c we need to distinguish by type)
-                // var adaptedLabelThreshold = 7 - value
-                // TW.partialGraph.settings('labelSizeRatio', value)
-                // TW.partialGraph.settings('labelThreshold', adaptedLabelThreshold)
-                // -------------------------------------------------------------
+                // also adapt label threshold
+                TW.partialGraph.settings('labelThreshold', getSizeFactor())
                 TW.partialGraph.render()
               }
             }, 200)
@@ -1138,6 +1139,8 @@ var TinaWebJS = function ( sigmacanvas ) {
             labelSizeTimeout = setTimeout(function(){
               if (TW.gui.sizeRatios[1] != value) {
                 TW.gui.sizeRatios[1] = value
+                // also adapt label threshold
+                TW.partialGraph.settings('labelThreshold', getSizeFactor())
                 TW.partialGraph.render()
               }
             }, 200)
@@ -1212,5 +1215,4 @@ var TinaWebJS = function ( sigmacanvas ) {
 
         return activereltypes;
     }
-
 };

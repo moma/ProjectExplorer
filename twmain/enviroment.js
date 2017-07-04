@@ -27,6 +27,17 @@ TW.gui.lastFilters = {}
 
 TW.gui.sizeRatios = [1,1]           // sizeRatios per nodetype
 
+TW.gui.noverlapConf = {
+  nodeMargin: .4,
+  scaleNodes: 1.5,
+  gridSize: 300,
+  speed: 7,
+  maxIterations: 8,
+  easing: 'quadraticOut', // animation transition function
+  duration: 1500   // animation duration
+                   // NB animation happens *after* processing
+}
+
 
 // POSS: themed variants (ex: for dark bg vs light bg)
 // contrasted color list for clusterColoring()
@@ -475,9 +486,13 @@ function changeType(optionaltypeFlag) {
         console.log("selection transitive projection from",sourceNids, "to", newselsArr)
     }
 
-    // update the color menu
+    // update the gui (POSS could be handled by TW.pushGUIState)
     TW.gui.handpickedcolor = false
     changeGraphAppearanceByFacets( getActivetypesNames() )
+    if (typeFlag != 'all') {
+      graphResetLabelsAndSizes()
+    }
+    TW.partialGraph.settings('labelThreshold', getSizeFactor())
 
     // recreates FA2 nodes array from new nodes
     reInitFa2({
