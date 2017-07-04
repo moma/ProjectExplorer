@@ -10,12 +10,6 @@ var SigmaUtils = function () {
         // console.log("FillGraph nodes",nodes)
         // console.log("FillGraph edges",edges)
 
-        // retrocompatibility  -------------------------------- 8< -------------
-        if (!initialActivereltypes.length) {
-          initialActivereltypes = [initialActivetypes.map(Number).join("|")]
-        }
-        // ---------------------------------------------------- 8< -------------
-
         let i = 0
         for(var nid in nodes) {
             var n = nodes[nid];
@@ -676,8 +670,8 @@ function gradientColoring(daclass) {
     TW.gui.handpickedcolor = true
 
     var min_pow = 0;
-    for(var j in TW.nodeIds) {
-        var the_node = TW.Nodes[ TW.nodeIds[j] ]
+    for(var nid in TW.Nodes) {
+        var the_node = TW.Nodes[ nid ]
         var attval = the_node.attributes[daclass];
         if( !isNaN(parseFloat(attval)) ) { //is float
             while(true) {
@@ -696,8 +690,8 @@ function gradientColoring(daclass) {
     var themult = Math.pow(10,min_pow);
     // console.log('themult', themult)
 
-    for(var j in TW.nodeIds) {
-        var the_node = TW.Nodes[ TW.nodeIds[j] ]
+    for(var nid in TW.Nodes) {
+        var the_node = TW.Nodes[ nid ]
         var attval = the_node.attributes[daclass];
         var attnumber = Number(attval);
         if (isNaN(attnumber)) {
@@ -706,7 +700,7 @@ function gradientColoring(daclass) {
 
         var round_number = Math.round(  attnumber*themult ) ;
 
-        NodeID_Val[TW.nodeIds[j]] = { "round":round_number , "real":attnumber };
+        NodeID_Val[nid] = { "round":round_number , "real":attnumber };
 
         if (round_number<real_min) real_min = round_number;
         if (round_number>real_max) real_max = round_number;
@@ -788,9 +782,7 @@ function gradientColoring(daclass) {
 // Edge-colour: precompute alt_rgb by source-target node.alt_color combination
 function repaintEdges() {
 
-  for (var i in TW.edgeIds) {
-    let eid = TW.edgeIds[i]
-
+  for (var eid in TW.Edges) {
     if (eid) {
       let idPair = eid.split(';')
       if (idPair.length != 2) {
@@ -931,12 +923,12 @@ function clusterColoring(daclass) {
     }
 
     if (daclass=="clust_default") {
-        for(var j in TW.nodeIds) {
-          var original_node_color = TW.Nodes[ TW.nodeIds[j] ].color
-          TW.partialGraph.graph.nodes(TW.nodeIds[j]).color = original_node_color
+        for(var nid in TW.Nodes) {
+          var original_node_color = TW.Nodes[ nid ].color
+          TW.partialGraph.graph.nodes(nid).color = original_node_color
 
           // reset the alt_color valflag
-          TW.partialGraph.graph.nodes(TW.nodeIds[j]).customAttrs.alt_color = null
+          TW.partialGraph.graph.nodes(nid).customAttrs.alt_color = null
         }
 
         // reset the global state
@@ -994,15 +986,15 @@ function clusterColoring(daclass) {
       }
       // fallback on old, slower strategy if scanClusters inactive
       else {
-        for(var j in TW.nodeIds) {
-            var the_node = TW.partialGraph.graph.nodes(TW.nodeIds[j])
+        for(var nid in TW.Nodes) {
+            var the_node = TW.partialGraph.graph.nodes(nid)
 
             if (the_node) {
 
               // POSS: use "hidden" in filters instead of remove/readd
               //       then this condition would be more useful here
               if (! the_node.hidden) {
-                var attval = ( !isUndef(the_node.attributes) && !isUndef(the_node.attributes[daclass]) )? the_node.attributes[daclass] : TW.partialGraph.graph.nodes(TW.nodeIds[j])[daclass];
+                var attval = ( !isUndef(the_node.attributes) && !isUndef(the_node.attributes[daclass]) )? the_node.attributes[daclass] : TW.partialGraph.graph.nodes(nid)[daclass];
 
                 let theColor
 
@@ -1017,7 +1009,7 @@ function clusterColoring(daclass) {
                   theColor = colList[ someRepresentativeInt ]
                 }
 
-                // TW.partialGraph.graph.nodes(TW.nodeIds[j]).color = theColor
+                // TW.partialGraph.graph.nodes(nid).color = theColor
                 the_node.customAttrs.alt_color = theColor
                 the_node.customAttrs.altgrey_color = "rgba("+(hex2rgba(theColor).slice(0,3).join(','))+",0.4)"
               }

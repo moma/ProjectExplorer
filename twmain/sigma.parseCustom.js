@@ -995,12 +995,15 @@ function dictfyJSON( data , categories ) {
 
     var catDict = {}
     var catCount = {}
-    for(var i in categories)  catDict[categories[i]] = i;
 
-    var edges={}, nodes={}
+    var edges={}, nodes={}, nodesByType={}
 
-    // NB old additional objects by type nodes1 and nodes2 not necessary
-    //    (can use TW.partialGraph.graph.nodesByTypeNSize faster custom index)
+    // NB nodesByType lists arrays of ids per nodetype
+    // (equivalent to TW.partialGraph.graph.getNodesByType but on full nodeset)
+    for(var i in categories)  {
+      catDict[categories[i]] = i
+      nodesByType[i] = []
+    }
 
     // normalization, same as parseGexf
     let minNodeSize = Infinity
@@ -1050,7 +1053,9 @@ function dictfyJSON( data , categories ) {
         if (!catCount[node.type]) catCount[node.type] = 0
         catCount[node.type]++;
 
+        // record
         nodes[node.id] = node;
+        nodesByType[catDict[node.type]].push(node.id)
 
         // creating a faceted index from node.attributes
         if (TW.conf.scanClusters) {
@@ -1133,6 +1138,7 @@ function dictfyJSON( data , categories ) {
     let resDict = {}
     resDict.catCount = catCount;
     resDict.nodes = nodes;
+    resDict.byType = nodesByType;
     resDict.edges = edges;
 
     return resDict;

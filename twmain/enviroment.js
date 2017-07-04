@@ -314,6 +314,7 @@ function changeType(optionaltypeFlag) {
     let typeFlag
     let outgoing = TW.SystemState()
     let oldTypeId = outgoing.activetypes.indexOf(true)
+    let mixedState = (outgoing.activereltypes.length > 1)
     let preservedNodes = {}
 
     // 1 - make the targetTypes choices
@@ -323,7 +324,6 @@ function changeType(optionaltypeFlag) {
     else {
       // "comeback" case: going back from mixed view to nodes0 view
       // ----------
-      let mixedState = (outgoing.activereltypes.length > 1)
       if (mixedState) {
         typeFlag = 0
       }
@@ -359,16 +359,31 @@ function changeType(optionaltypeFlag) {
 
     // 3 - define the projected selection (sourceNids => corresponding opposites)
     let sourceNids = outgoing.selectionNids
-    if (!outgoing.level && ! sourceNids.length) {
+    if (!outgoing.level && !sourceNids.length) {
+      // when local and no selection => all local graph is selection
       sourceNids = TW.partialGraph.graph.nodes().map(function(n){return n.id})
     }
-    let targetNids = getNeighbors(sourceNids, 'XR')
-
+    let targetNids = {}
+    if (!mixedState)       targetNids = getNeighbors(sourceNids, 'XR')
+    else {
+      // in mixed state we need to separate those already tgt state from others
+      let alreadyOk = TW.partialGraph.graph.getNodesByType(typeFlag)
+      let alreadyOkLookup = {}
+      for (var i in alreadyOk) {alreadyOkLookup[alreadyOk[i]] = true}
+      let needTransition = []
+      for (var i in sourceNids) {
+        let nid = sourceNids[i]
+        console.log('nid', nid)
+        if (alreadyOkLookup[nid])         targetNids[nid] = true
+        else                              needTransition.push(nid)
+      }
+      targetNids = Object.assign(targetNids, getNeighbors(needTransition, 'XR'))
+    }
 
     // 4 - define the nodes to be added
     let newNodes = {}
 
-    // when scope is "entire graph" => entire set by type
+    // when scope is "entire graph" => entire sets by type
     if (outgoing.level) {
       for (let typeId in newActivetypes) {
         if (newActivetypes[typeId]) {
@@ -384,13 +399,17 @@ function changeType(optionaltypeFlag) {
     }
     // console.log('newNodes', newNodes)
 
+    // 5 - define the new selection
+    let newselsArr = []
+    if (outgoing.selectionNids.length)  newselsArr = Object.keys(targetNids)
 
-    // 5 - effect the changes on nodes
+
+    // 6 - effect the changes on nodes
+    deselectNodes()
     if (typeFlag != "all") {
       TW.partialGraph.graph.clear()   // a new start is faster except in "jutsu"
     }
     else {
-      deselectNodes()
       TW.partialGraph.graph.getNodesByType(oldTypeId).map(
         function(nid){ preservedNodes[nid]=true }
       )
@@ -402,10 +421,10 @@ function changeType(optionaltypeFlag) {
       } catch(e) {continue}
     }
 
-    // 6 - add the relations
+    // 7 - add the relations
     let newEdges = {}
     let allNodes = TW.partialGraph
-    if (typeFlag != "all") allNodes = newNodes
+    if (typeFlag != "all")  allNodes = newNodes
     else                    allNodes = Object.assign(newNodes, preservedNodes)
     for (var srcnid in allNodes) {
       for (var k in newReltypes) {
@@ -430,23 +449,31 @@ function changeType(optionaltypeFlag) {
       }
     }
 
-    // 7 - effect the changes on edges
+    // 8 - effect the changes on edges
     for (var eid in newEdges) {
       try {
         TW.partialGraph.graph.addEdge(newEdges[eid])
       } catch(e) {continue}
     }
 
-    // 8 - refresh view and record the state
+    // 9 - refresh view and record the state
     TW.partialGraph.camera.goTo({x:0, y:0, ratio:1, angle: 0})
     TW.partialGraph.refresh()
     TW.pushGUIState({
         activetypes: newActivetypes,
         activereltypes: newReltypes,
-        sels: Object.keys(targetNids)
+        sels: newselsArr
         // rels: added by MS2 (highlighted opposite- and same-side neighbours)
         // possible: add it in an early way here and request that MS2 doesn't change state
     })
+
+    // to recreate the new selection in the new type graph, if we had one before
+    // NB relies on new actypes so should be after pushState
+    if (newselsArr.length) {
+      TW.instance.selNgn.MultipleSelection2({nodes: newselsArr});
+      if (TW.conf.debug.logSelections)
+        console.log("selection transitive projection from",sourceNids, "to", newselsArr)
+    }
 
     // update the color menu
     TW.gui.handpickedcolor = false
@@ -465,9 +492,10 @@ function changeType(optionaltypeFlag) {
 // the pool of available nodes of a given type
 function getNodesOfType (typeid){
   let res = {}
-  for (var nid in TW.Nodes) {
-    let n = TW.Nodes[nid]
-    if (TW.catDict[n.type] == typeid) {
+  if (TW.ByType[typeid]) {
+    for (var j in TW.ByType[typeid]) {
+      let nid = TW.ByType[typeid][j]
+      let n = TW.Nodes[TW.ByType[typeid][j]]
       res[nid] = n
     }
   }
@@ -500,6 +528,8 @@ function getNeighbors(sourceNids, relKey) {
 //                         v
 //                   local selection SysSt = {level: false, activetypes:XY}
 //
+//  POSS: rewrite using .hidden instead of add/remove
+//
 function changeLevel() {
     // show waiting cursor
     TW.gui.elHtml.classList.add('waiting');
@@ -522,7 +552,6 @@ function changeLevel() {
       //          [true, true]    <=> '1|1'
 
       var activetypes = present.activetypes;
-      var activetypesKey = activetypes.map(Number).join("|")
       var activereltypes = present.activereltypes
 
       TW.partialGraph.graph.clear();
@@ -616,10 +645,8 @@ function changeLevel() {
         callback: function() {
           TW.gui.elHtml.classList.remove('waiting');
 
-          // when going local, it's nice to see the selected nodes rearrange
-          if (!futurelevel) {
-            sigma_utils.smartForceAtlas()
-          }
+          // rearrange nodes in all cases (&& if fa2Enabled)
+          sigma_utils.smartForceAtlas()
         }
       })
     },500 // cursor waiting
@@ -638,8 +665,8 @@ function changeLevel() {
 function edgeSizesLookup(eTypeStrs, criterion) {
   var edgeweis = {}
 
-  for (let i in TW.edgeIds) {
-    let e = TW.partialGraph.graph.edges(TW.edgeIds[i])
+  for (let eid in TW.Edges) {
+    let e = TW.partialGraph.graph.edges(eid)
 
     for (var etype_i in eTypeStrs) {
       let eTypeStr = eTypeStrs[etype_i]
