@@ -6,8 +6,8 @@ TW.conf = (function(TW){
 
   let TWConf = {}
 
-  TWConf.branding = 'Community Explorer 2'  // <--- name displayed in upper left
-  TWConf.brandingLink = 'https://communityexplorer.org'   // <--- link to "home"
+  TWConf.branding = 'ProjectExplorer'  // <--- name displayed in upper left
+  TWConf.brandingLink = 'https://github.com/moma/ProjectExplorer'   // <--- link to "home"
 
 
   // ==========================
@@ -17,7 +17,7 @@ TW.conf = (function(TW){
   // Graph data source
   // -----------------
   // the graph input depends on TWConf.sourcemode (or manual url arg 'sourcemode')
-  TWConf.sourcemode = "api"   // accepted: "api" | "serverfile" | "servermenu" | "localfile"
+  TWConf.sourcemode = "servermenu"   // accepted: "api" | "serverfile" | "servermenu" | "localfile"
 
   // server-side .gexf|.json default source
   TWConf.sourceFile = ""
@@ -34,9 +34,8 @@ TW.conf = (function(TW){
   // Related documents (topPapers) data source
   // -----------------------------------------
 
-  TWConf.getRelatedDocs = false
+  TWConf.getRelatedDocs = true
   TWConf.relatedDocsMax = 10
-  TWConf.relatedDocsAPI = "http://127.0.0.1:5000/twitter_search"
 
   TWConf.relatedDocsType = "LocalDB"      // accepted: "twitter" | "LocalDB"
                                           // POSSible: "elastic"
@@ -48,7 +47,7 @@ TW.conf = (function(TW){
   }
 
   // fallback topPapers API if none found by type
-  TWConf.relatedDocsAPI = "twbackends/phpAPI"
+  TWConf.relatedDocsAPI = "http://127.0.0.1:5000/twitter_search"
 
   // =======================
   // DATA FACETS AND LEGENDS
@@ -165,7 +164,7 @@ TW.conf = (function(TW){
   // Modules path
   // ------------
   TWConf.paths = {
-    'ourlibs': 'static/tinawebJS/twlibs',
+    'ourlibs': 'twlibs',
     'modules': 'twmodules'
   }
   Object.freeze(TWConf.paths)  // /!\ to prevent path modification before load
