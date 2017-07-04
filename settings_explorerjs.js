@@ -215,8 +215,8 @@ TW.conf = (function(TW){
 
   // if fa2Available, the auto-run config:
 
-    TWConf.fa2Enabled= false;        // fa2 auto-run at start and after graph modified ?
-    TWConf.fa2Milliseconds=10000;    // duration of auto-run
+    TWConf.fa2Enabled= true;        // fa2 auto-run at start and after graph modified ?
+    TWConf.fa2Milliseconds=5000;    // duration of auto-run
     TWConf.minNodesForAutoFA2 = 5   // graph size threshold to auto-run
 
 

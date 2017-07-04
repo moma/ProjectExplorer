@@ -196,8 +196,8 @@ function SomeEffect( ValueclassCode ) {
 
 // some colorings cases also modify size and label
 function graphResetLabelsAndSizes(){
-  for(let j in TW.nodeIds){
-    let n = TW.partialGraph.graph.nodes(TW.nodeIds[j])
+  for(let nid in TW.Nodes) {
+    let n = TW.partialGraph.graph.nodes(nid)
     if (n) {
       n.label = TW.Nodes[n.id].label
       n.size = TW.Nodes[n.id].size

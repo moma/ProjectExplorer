@@ -4,7 +4,8 @@
 
 TW.Nodes = [];
 TW.Edges = [];
-TW.Relations = {}       // edges sorted by source/target type
+TW.ByType = {}          // node ids sorted by nodetype id   (0, 1)
+TW.Relations = {}       // edges sorted by source/target type id ("00", "11")
 TW.Clusters = [];       // "by value" facet index built in parseCustom
 
 TW.File = ""            // remember the currently opened file
@@ -377,8 +378,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
       TW.Nodes = dicts.nodes;
       TW.Edges = dicts.edges;
 
-      TW.nodeIds = Object.keys(dicts.nodes)  // useful for loops
-      TW.edgeIds = Object.keys(dicts.edges)
+      TW.ByType = dicts.byType  // useful for loops
 
       // in-place: pre-compute all color/unselected color/size properties
       prepareNodesRenderingProperties(TW.Nodes)
@@ -388,7 +388,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
 
       // main console info
       // ===================
-      console.info(`== new graph ${TW.nodeIds.length} nodes (${TW.categories.length > 1 ? 'bipartite': 'monopartite'}), ${TW.edgeIds.length} edges ==`)
+      console.info(`== new graph ${Object.keys(TW.Nodes).length} nodes (${TW.categories.length > 1 ? 'bipartite': 'monopartite'}), ${Object.keys(TW.Edges).length} edges ==`)
 
       // a posteriori categories diagnostic
       // ----------------------------------
@@ -410,37 +410,8 @@ function mainStartGraph(inFormat, inData, twInstance) {
       TW.graphData = {nodes: [], edges: []}
       TW.graphData = sigma_utils.FillGraph( initialActivetypes , initialActivereltypes, TW.catDict  , TW.Nodes , TW.Edges , TW.graphData );
 
-
-          // // ----------- TEST stock parse gexf and use nodes to replace TW's ---------
-          // var gexfData = gexf.fetch('data/politoscope/ProgrammeDesCandidats.gexf')
-          //
-          // TW.graphData = sigmaTools.myGexfParserReplacement(
-          //     gexfData.nodes,
-          //     gexfData.edges
-          // )
-          // console.log ('ex in TW.graphData.nodes[0]', TW.graphData.nodes[0])
-          //
-          // // our holey id-indexed arrays
-          // TW.Nodes = {}
-          // TW.Edges = {}
-          // TW.nodeIds = []
-          // TW.edgeIds = []
-          // for (var j in TW.graphData.nodes) {
-          //   var nid = TW.graphData.nodes[j].id
-          //   TW.Nodes[nid] = TW.graphData.nodes[j]
-          //   TW.nodeIds.push(nid)
-          // }
-          // for (var i in TW.graphData.edges) {
-          //   var eid = TW.graphData.edges[i].id
-          //   TW.Edges[eid] = TW.graphData.edges[i]
-          //   TW.edgeIds.push(eid)
-          // }
-          //
-          //
-          // // -------------------------------------------------------------------------
-
-        if (TW.graphData.nodes.length == 0) console.error("empty graph")
-        if (TW.graphData.edges.length == 0) console.error("no edges in graph")
+      if (TW.graphData.nodes.length == 0) console.error("empty graph")
+      if (TW.graphData.edges.length == 0) console.error("no edges in graph")
 
       // our final sigma params (cf github.com/jacomyal/sigma.js/wiki/Settings)
       TW.customSettings = Object.assign(
