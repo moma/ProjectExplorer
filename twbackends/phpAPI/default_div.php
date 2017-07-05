@@ -1,36 +1,25 @@
 <?php
 
 // default informations
-$TITLE="ISITITLE";              // <=== hardcoded Cortext table /!\
 $query = str_replace( '__and__', '&', $_GET["query"] );
 $elems = json_decode($query);
 
-// hardcoded CortextDB table /!\
 
-$table = "";
-$column = "";
-$id="";
+// the table used as search perimeter is from db.json conf
+$table = $my_conf[$ntid]['reldbqtable'] ;
 
-// echo("count(elems): ".count($elems)."<br/>");
-// echo("elems[0]: ".$elems[0]."<br/>");
-// echo("is_array($elems): ".is_array($elems)."<br/>");
+// values for CortextDB that seem to never change: /!\ hardcoded here /!\
+// the column accessors
+$column = "data";
+$id = "id";
 
-if($ndtype=="social"){
-  $table = "ISIAUTHOR";       // <== hardcoded CortextDB table /!\
-  $column = "data";
-  $id = "id";
-  $restriction='';
-  $factor=10;// factor for normalisation of stars
-}
+// the output tables
+$author_table = "ISIAUTHOR";
+$titles_table = "ISITITLE";
 
-if($ndtype=="semantic"){
-  $table = $_GET["index"];//"ISItermsfirstindexing";
-  $column = "data";
-  $id = "id";
-  $restriction='';
-  $factor=10;
-}
+$factor=10;// factor for normalisation of stars
 $restriction='';
+
 
 $sql="";
 //////////
@@ -105,8 +94,7 @@ foreach ($wos_ids as $id => $score) {
 			if ($count<=$max_item_displayed){
 				$count+=1;
 
-        // hardcoded CortextDB table /!\
-				$sql = 'SELECT data FROM ISITITLE WHERE id='.$id.' group by data';
+				$sql = 'SELECT data FROM '.$titles_table.' WHERE id='.$id.' group by data';
 
 				foreach ($base->query($sql) as $row) {
 					$external_link="<a href=http://google.com/webhp?#q=".urlencode('"'.$row['data'].'"')." target=blank>".' <img width=15px src="'.$our_libs_root.'/img/google.png"></a>';
@@ -115,8 +103,8 @@ foreach ($wos_ids as $id => $score) {
 					$output.='<a href="JavaScript:newPopup(\''.$our_php_root.'/default_doc_details.php?gexf='.urlencode($gexf).'&index='.$table.'&query='.urlencode($query).'&type='.urlencode($_GET["type"]).'&id='.$id.'	\')">'.$row['data']." </a> ";
 				}
 
-				// get the authors /!\ hardcoded CortextDB table /!\
-				$sql = 'SELECT data FROM ISIAUTHOR WHERE id='.$id;
+				// get the authors
+				$sql = 'SELECT data FROM '.$author_table.' WHERE id='.$id;
 				foreach ($base->query($sql) as $row) {
 					$output.=($row['data']).', ';
 				}

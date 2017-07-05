@@ -55,14 +55,14 @@ function parse_and_index_csv($filename, $typed_cols_to_index, $separator, $quote
           $base[$rowid][$colname] = $line_fields[$c];
 
           // fill our search index if the type+col was asked in postings
-          foreach (['semantic', 'social'] as $swtype){
-            if (array_key_exists($swtype, $postings)) {
-              if (array_key_exists($colname, $postings[$swtype])) {
+          for ($ndtypeid = 0 ; $ndtypeid < $GLOBALS["ntypes"] ; $ndtypeid++) {
+            if (array_key_exists($ndtypeid, $postings)) {
+              if (array_key_exists($colname, $postings[$ndtypeid])) {
                 // basic tokenisation (TODO specify tokenisation delimiters etc.)
                 $tokens = preg_split("/\W/", $line_fields[$c]);
 
                 // for debug
-                // echo("indexing column:".$colname." under type:".$swtype.'<br>');
+                // echo("indexing column:".$colname." under type:".$ndtypeid.'<br>');
                 // var_dump($tokens);
 
                 foreach($tokens as $tok) {
@@ -70,16 +70,16 @@ function parse_and_index_csv($filename, $typed_cols_to_index, $separator, $quote
                   if (strlen($tok)) {
 
                     // POSS : stopwords could be used here
-                    if (! array_key_exists($tok, $postings[$swtype][$colname])) {
-                      $postings[$swtype][$colname][$tok] = array();
+                    if (! array_key_exists($tok, $postings[$ndtypeid][$colname])) {
+                      $postings[$ndtypeid][$colname][$tok] = array();
                     }
                     // in a csv, rowid is a pointer to the document
-                    if (array_key_exists($docid, $postings[$swtype][$colname][$tok])) {
+                    if (array_key_exists($docid, $postings[$ndtypeid][$colname][$tok])) {
                       // we keep the frequencies
-                      $postings[$swtype][$colname][$tok][$docid]++ ;
+                      $postings[$ndtypeid][$colname][$tok][$docid]++ ;
                     }
                     else {
-                      $postings[$swtype][$colname][$tok][$docid] = 1;
+                      $postings[$ndtypeid][$colname][$tok][$docid] = 1;
                     }
                   }
                 }

@@ -468,32 +468,7 @@ function topPapersFetcher(swType, qWords, priorHtml, cbNext){
       //          or 'csv' (like gargantext exports)
 
       // POSS object + join.map(join)
-      let urlParams = "type="+swType+"&query="+joinedQ+"&gexf="+TW.File+"&n="+TW.conf.relatedDocsMax+"&dbtype="+thisRelDocsConf.reldbtype
-
-      if (thisRelDocsConf.reldbtype == "CortextDB") {
-        var qIndex = thisRelDocsConf.reldbtable    // a table
-        urlParams += `&index=${qIndex}`
-      }
-      else {
-        // a list of csv columns to search in
-        // ex: for semantic nodes matching we look in 'title', 'keywords' cols
-        //     for social nodes matching we look in 'authors' col... etc.
-        let joinedSearchCols = JSON.stringify(thisRelDocsConf.reldbqcols)
-        urlParams += `&searchin=${joinedSearchCols}`
-
-        // HIGHER LEVEL SCOPE (whole indexation directive) WILL BE MOVED TO PHP
-        let allCols = {}
-
-        if (TW.gmenuInfos[TW.File][0])
-          allCols.semantic = TW.gmenuInfos[TW.File][0].reldbqcols
-
-        if (TW.gmenuInfos[TW.File][1])
-          allCols.social = TW.gmenuInfos[TW.File][1].reldbqcols
-
-        let joinedAllCols = JSON.stringify(allCols)
-        urlParams += `&toindex=${joinedAllCols}`
-        // POSS use a direct access from php to db.json to avoid toindex
-      }
+      let urlParams = "type="+swType+"&query="+joinedQ+"&gexf="+TW.File+"&n="+TW.conf.relatedDocsMax ;
 
       $.ajax({
           type: 'GET',

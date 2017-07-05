@@ -71,7 +71,7 @@
       "Maps_S_800.gexf": {
           "node0": {
             "name": "ISItermsWhitelistV2Oct_5 &amp; ISItermsWhitelistV2Oct_5",
-            "reldbtable": "ISItermsWhitelistV2Oct_5",
+            "reldbqtable": "ISItermsWhitelistV2Oct_5",
             "reldbfile" : "wos_climate-change_title_2014-2015.db",
             "reldbtype": "CortextDB"
           }

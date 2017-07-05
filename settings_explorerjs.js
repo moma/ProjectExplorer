@@ -19,12 +19,6 @@ TW.conf = (function(TW){
   // the graph input depends on TWConf.sourcemode (or manual url arg 'sourcemode')
   TWConf.sourcemode = "servermenu"   // accepted: "api" | "serverfile" | "servermenu" | "localfile"
 
-  // server-side .gexf|.json default source
-  TWConf.sourceFile = ""
-
-  // ...or server-side gexf default source list
-  TWConf.sourceMenu = "db.json"
-
   // ...or remote bridge to default source api ajax queries
   TWConf.sourceAPI={};
   TWConf.sourceAPI["forNormalQuery"] = "services/api/graph";
@@ -165,7 +159,9 @@ TW.conf = (function(TW){
   // ------------
   TWConf.paths = {
     'ourlibs': 'twlibs',
-    'modules': 'twmodules'
+    'modules': 'twmodules',
+    'sourceFile': "",           // server-side .gexf|.json default source
+    'sourceMenu': "db.json"     // ...or server-side gexf default source list
   }
   Object.freeze(TWConf.paths)  // /!\ to prevent path modification before load
 
