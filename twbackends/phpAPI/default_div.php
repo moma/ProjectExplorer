@@ -11,9 +11,6 @@ $table = "";
 $column = "";
 $id="";
 
-// $twjs=end( explode("/",getcwd()) )."/"; // LOCALDB folder.
-$twjs="LOCALDB/"; // LOCALDB folder.
-
 // echo("count(elems): ".count($elems)."<br/>");
 // echo("elems[0]: ".$elems[0]."<br/>");
 // echo("is_array($elems): ".is_array($elems)."<br/>");
@@ -34,7 +31,6 @@ if($ndtype=="semantic"){
   $factor=10;
 }
 $restriction='';
-$factor=10;
 
 $sql="";
 //////////
@@ -113,11 +109,10 @@ foreach ($wos_ids as $id => $score) {
 				$sql = 'SELECT data FROM ISITITLE WHERE id='.$id.' group by data';
 
 				foreach ($base->query($sql) as $row) {
-					$external_link="<a href=http://google.com/webhp?#q=".urlencode('"'.$row['data'].'"')." target=blank>".' <img width=15px src="twlibs/img/google.png"></a>';
+					$external_link="<a href=http://google.com/webhp?#q=".urlencode('"'.$row['data'].'"')." target=blank>".' <img width=15px src="'.$our_libs_root.'/img/google.png"></a>';
 					$output.="<li title='".$score."'>";
-					$output.=$external_link.imagestar($score,$factor,$twjs).' ';
-					$output.='<a href="JavaScript:newPopup(\''.$twjs.'default_doc_details.php?gexf='.urlencode($gexf).'&index='.$table.'&query='.urlencode($query).'&type='.urlencode($_GET["type"]).'&id='.$id.'	\')">'.$row['data']." </a> ";
-					// echo '<a href="JavaScript:newPopup(\''.$twjs.'default_doc_details.php?gexf='.urlencode($gexf).'&index='.$table.'&query='.urlencode($query).'&type='.urlencode($_GET["type"]).'&id='.$id.'	\')">'.$row['data']." </a> ";
+					$output.=$external_link.imagestar($score,$factor,$our_libs_root).' ';
+					$output.='<a href="JavaScript:newPopup(\''.$our_php_root.'/default_doc_details.php?gexf='.urlencode($gexf).'&index='.$table.'&query='.urlencode($query).'&type='.urlencode($_GET["type"]).'&id='.$id.'	\')">'.$row['data']." </a> ";
 				}
 
 				// get the authors /!\ hardcoded CortextDB table /!\
@@ -196,7 +191,7 @@ $output .= "</ul>"; #####
 // // 			$sql2='SELECT ISIpubdate.id,ISIC1_1.data from ISIpubdate,ISIC1_1 where ISIC1_1.data="'.$row['data'].'" AND  ISIpubdate.id=ISIC1_1.id AND ISIpubdate.data="2013"  limit 1';
 // // 			//echo $sql2;
 // // 			foreach ($corporadb->query($sql2) as $row2){
-// // 				$nov_string.='<a href="JavaScript:newPopup(\''.$twjs.'php/default_doc_details.php?db='.urlencode($graphdb).'&gexf='.urlencode($gexf).'&query='.urlencode('["'.$res[$i].'"]').'&type='.urlencode($_GET["type"]).'&id='.$row2['id'].'	\')">'.$res[$i]."</a>, ";
+// // 				$nov_string.='<a href="JavaScript:newPopup(\''.$our_php_root.'/default_doc_details.php?db='.urlencode($graphdb).'&gexf='.urlencode($gexf).'&query='.urlencode('["'.$res[$i].'"]').'&type='.urlencode($_GET["type"]).'&id='.$row2['id'].'	\')">'.$res[$i]."</a>, ";
 // // 			}
 // // 		}
 // // 	}
@@ -215,7 +210,7 @@ $output .= "</ul>"; #####
 // // 			$sql2='SELECT ISIpubdate.id,ISIC1_1.data from ISIpubdate,ISIC1_1 where ISIC1_1.data="'.$row['data'].'" AND  ISIpubdate.id=ISIC1_1.id AND ISIpubdate.data="2013"  limit 1';
 // // 			//echo $sql2;
 // // 			foreach ($corporadb->query($sql2) as $row2){
-// // 				$res_string.='<a href="JavaScript:newPopup(\''.$twjs.'php/default_doc_details.php?db='.urlencode($graphdb).'&gexf='.urlencode($gexf).'&query='.urlencode('["'.$res[$i].'"]').'&type='.urlencode($_GET["type"]).'&id='.$row2['id'].'	\')">'.$res[$i]."</a>, ";
+// // 				$res_string.='<a href="JavaScript:newPopup(\''.$our_php_root.'/default_doc_details.php?db='.urlencode($graphdb).'&gexf='.urlencode($gexf).'&query='.urlencode('["'.$res[$i].'"]').'&type='.urlencode($_GET["type"]).'&id='.$row2['id'].'	\')">'.$res[$i]."</a>, ";
 // // 			}
 // // 		}
 // // 	}
@@ -285,22 +280,6 @@ $output .= "</ul>"; #####
 
    }
 
-
-
-
-function imagestar($score,$factor,$twjs) {
-// produit le html des images de score
-	$star_image = '';
-	if ($score > .5) {
-		$star_image = '';
-		for ($s = 0; $s < min(5,$score/$factor); $s++) {
-			$star_image.='<img src="twlibs/img/star.gif" border="0" >';
-		}
-	} else {
-		$star_image.='<img src="twlibs/img/stargrey.gif" border="0">';
-	}
-	return $star_image;
-}
 if($max_item_displayed>$total_count) $max_item_displayed=$total_count;
 // echo $news.'<br/><h4><font color="#0000FF"> Full text of top '.$max_item_displayed.'/'.$related.' related publications:</font></h4>'.$output;
 echo '<br/><h4><font color="#0000FF"> Full text of top '.$max_item_displayed.'/'.$total_count.' related publications:</font></h4>'.$output;

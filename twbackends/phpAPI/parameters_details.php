@@ -1,12 +1,37 @@
 <?php
 
-// default path to ProjectExplorer root
-// (where data directory and db.json file reside)
-$mainpath=dirname(getcwd())."/../";
-$ntypes = 2;
+
+// GLOBAL PARAMS
+// -------------
+// 1 - relative urls
+$our_php_root="twbackends/phpAPI";        // our php scripts relative URL
+$our_libs_root="twbackends/phpAPI";       // for our few icons and jquery-ui
+                                          // POSS could be merged with our_php_root
+
+
+// 2 - paths
+$mainpath=dirname(dirname(getcwd()))."/"; // default fs path to ProjectExplorer root
+                                          // (where data dir and db.json file reside)
+
 $project_menu_path = "db.json";
 
+// 3 - others
+$ntypes = 2;         // max node types
 
+// number of docs to display setting
+$max_item_displayed = 7;
+
+// for csv parsing
+$csvsep = "\t";
+$csvquote = '"';
+
+// for csv caching (optional)
+$memserver = 'localhost';
+$memport = 11211;
+
+
+// CONFIGURATION PARAMS
+// --------------------
 // reading db.json associations
 //    source graph file <=> (db, dbtype, cols) as relatedDocs php API
 $project_menu_fh = fopen($mainpath.$project_menu_path, "r");
@@ -69,6 +94,7 @@ foreach ($project_menu as $project_dir => $dir_items){
 $gexf= str_replace('"','',$_GET["gexf"]);
 $ndtype = $_GET["type"];
 $ntid = null;
+$my_conf = null;
 
 // legacy types => generic types
 if ($ndtype == 'semantic') {  $ntid = 0;  }
@@ -84,27 +110,12 @@ else {
   $graphdb = $my_conf['dir'].'/'.$my_conf['reldbfile'];
 }
 
-echodump("reldb", $graphdb);
+// echodump("params: reldb", $graphdb);
+// echodump("params: node type id", $ntid);
 
-// for csv parsing
-$csvsep = "\t";
-$csvquote = '"';
 
-// for csv caching (optional)
-$memserver = 'localhost';
-$memport = 11211;
-
-// number of docs to display setting
-$max_item_displayed = 7;
 
 // echodump("graphdb", $graphdb);
 
-function echodump($title, $anyObj) {
-  echo "<br>".$title.": ";
-  echo (preg_replace_callback("/\n(\s*)/", function($capt){
-    return('<br>'.str_repeat('&nbsp;', strlen($capt[0])));
-  }, json_encode($anyObj, JSON_PRETTY_PRINT)));
-  echo "<br>";
-}
 
 ?>

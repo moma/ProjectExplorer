@@ -13,7 +13,6 @@ $elems = json_decode($query);
 $table = "";
 $column = "";
 $id="";
-$twjs="API_CNRS/"; // submod path of TinaWebJS
 
 
 if($type=="semantic"){
@@ -65,9 +64,9 @@ $sum=0;
 //The final query!
 // array of all relevant documents with score
 
-foreach ($base->query($sql) as $row) {        
+foreach ($base->query($sql) as $row) {
         // on pondère le score par le nombre de termes mentionnés par l'article
-        
+
         //$num_rows = $result->numRows();
         $wos_ids[$row[$id]] = $row["count(*)"];
         $sum = $row["count(*)"] +$sum;
@@ -76,21 +75,21 @@ foreach ($base->query($sql) as $row) {
 
 // /// nombre de document associés $related
 $total_count=0;
-$count_max=500; 
+$count_max=500;
 $number_doc=count($wos_ids);
 $count=0;
 
 $all_terms_from_selected_projects=array();// list of terms for the top 6 project selected
 
 // to filter under some conditions
-$to_display=true; 
+$to_display=true;
 $count=0;
 
 
-foreach ($wos_ids as $id => $score) { 
+foreach ($wos_ids as $id => $score) {
   if ($total_count<$count_max) {
     // retrieve publication year
-    
+
     if ($to_display){
       $total_count+=1;
 
@@ -99,27 +98,27 @@ foreach ($wos_ids as $id => $score) {
 
         $sql = 'SELECT data FROM ISITITLE WHERE id='.$id.' group by data';
         foreach ($base->query($sql) as $row) {
-          $external_link="<a href=http://google.com/webhp?#q=".urlencode('"'.utf8_decode($row['data']).'"')." target=blank>".' <img width=15px src="twlibs/img/google.png"></a>';  
+          $external_link="<a href=http://google.com/webhp?#q=".urlencode('"'.utf8_decode($row['data']).'"')." target=blank>".' <img width=15px src="'.$our_libs_root.'/img/google.png"></a>';
           $output.="<li title='".$score."'>";
-          $output.=$external_link.imagestar($score,$factor,$twjs).' '; 
-          $output.='<a href="JavaScript:newPopup(\''.$twjs.'default_doc_details2.php?gexf='.urlencode($gexf).'&query='.urlencode($query).'&type='.urlencode($_GET["type"]).'&id='.$id.' \')">'.htmlentities($row['data'], ENT_QUOTES, "UTF-8")." </a> ";
+          $output.=$external_link.imagestar($score,$factor,$our_libs_root).' ';
+          $output.='<a href="JavaScript:newPopup(\''.$our_php_root.'default_doc_details2.php?gexf='.urlencode($gexf).'&query='.urlencode($query).'&type='.urlencode($_GET["type"]).'&id='.$id.' \')">'.htmlentities($row['data'], ENT_QUOTES, "UTF-8")." </a> ";
           // $output.='<a>'.htmlentities($row['data'], ENT_QUOTES, "UTF-8")." </a> ";
-          
+
         }
 
         $sql = 'SELECT data FROM ISIDOI WHERE id='.$id.' group by data';
         foreach ($base->query($sql) as $row) {
-          $output.=$external_link.imagestar($score,$factor,$twjs).' ';  
-          $output.='<a href="JavaScript:newPopup(\''.$twjs.'default_doc_details2.php?gexf='.urlencode($gexf).'&query='.urlencode($query).'&type='.urlencode($_GET["type"]).'&id='.$id.' \')">'.htmlentities($row['data'], ENT_QUOTES, "UTF-8")." </a> ";
-          
+          $output.=$external_link.imagestar($score,$factor,$our_libs_root).' ';
+          $output.='<a href="JavaScript:newPopup(\''.$our_php_root.'default_doc_details2.php?gexf='.urlencode($gexf).'&query='.urlencode($query).'&type='.urlencode($_GET["type"]).'&id='.$id.' \')">'.htmlentities($row['data'], ENT_QUOTES, "UTF-8")." </a> ";
+
         }        // get the authors
         $sql2 = 'SELECT data FROM ISIAUTHOR WHERE id='.$id. ' group by data';
         foreach ($base->query($sql2) as $row2) {
           $output.=(str_replace("\r", "", $row2['data'])).', ';
-          
+
         }
         $output = rtrim($output, ", ");
-        $output.="</li><br>"; 
+        $output.="</li><br>";
 
       }
     }
@@ -154,10 +153,10 @@ function getDB ($directory)  {
     $result = "";
     $handler = opendir($directory);
     while ($file = readdir($handler)) {
-      if ($file != "." && $file != ".." 
-              && 
+      if ($file != "." && $file != ".."
+              &&
         ((strpos($file,'.db~'))==false && (strpos($file,'.db'))==true )
-              || 
+              ||
         ((strpos($file,'.sqlite~'))==false && (strpos($file,'.sqlite'))==true)
       ) {
             //$results[] = $file;
@@ -168,21 +167,6 @@ function getDB ($directory)  {
     closedir($handler);
     //return $results;
     return $result;
-}
-
-
-function imagestar($score,$factor,$twjs) {
-// produit le html des images de score
-  $star_image = '';
-  if ($score > .5) {
-    $star_image = '';
-    for ($s = 0; $s < min(5,$score/$factor); $s++) {
-      $star_image.='<img src="twlibs/img/star.gif" border="0" >';
-    }
-  } else {
-    $star_image.='<img src="twlibs/img/stargrey.gif" border="0">';
-  }
-  return $star_image;
 }
 
 ?>
