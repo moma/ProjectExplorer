@@ -19,12 +19,6 @@ TW.conf = (function(TW){
   // the graph input depends on TWConf.sourcemode (or manual url arg 'sourcemode')
   TWConf.sourcemode = "api"   // accepted: "api" | "serverfile" | "servermenu" | "localfile"
 
-  // server-side .gexf|.json default source
-  TWConf.sourceFile = ""
-
-  // ...or server-side gexf default source list
-  TWConf.sourceMenu = "db.json"
-
   // ...or remote bridge to default source api ajax queries
   TWConf.sourceAPI={};
   TWConf.sourceAPI["forNormalQuery"] = "services/api/graph";
@@ -163,8 +157,10 @@ TW.conf = (function(TW){
   // Modules path
   // ------------
   TWConf.paths = {
-    'ourlibs': 'static/tinawebJS/twlibs',
-    'modules': 'twmodules'
+    'ourlibs': 'twlibs',
+    'modules': 'twmodules',
+    'sourceFile': "",           // server-side .gexf|.json default source
+    'sourceMenu': "db.json"     // ...or server-side gexf default source list
   }
   Object.freeze(TWConf.paths)  // /!\ to prevent path modification before load
 
@@ -186,7 +182,7 @@ TW.conf = (function(TW){
 
   TWConf.filterSliders = true          // show sliders for nodes/edges subsets
 
-  TWConf.clusterColorsAtt = true;      // show "Set colors" menu
+  TWConf.colorByAtt = true;            // show "Set colors" menu
 
   TWConf.dragNodesAvailable = true;    // allow dragging nodes with CTRL+click
 
