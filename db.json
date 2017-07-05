@@ -54,10 +54,8 @@
     }
   },
   "data/politoscope": {
-    "dbname":null,
     "title":"Politoscope",
     "date":"2017",
-    "abstract":"",
     "first" : "ProgrammeDesCandidats.enrichi.gexf",
     "graphs": {
       "ProgrammeDesCandidats.enrichi.gexf": {
@@ -69,13 +67,12 @@
     }
   },
   "data/ClimateChange": {
-    "abstract":"ISIABSTRACT",
     "graphs": {
       "Maps_S_800.gexf": {
           "node0": {
             "name": "ISItermsWhitelistV2Oct_5 &amp; ISItermsWhitelistV2Oct_5",
             "reldbtable": "ISItermsWhitelistV2Oct_5",
-            "reldbname" : "wos_climate-change_title_2014-2015.db",
+            "reldbfile" : "wos_climate-change_title_2014-2015.db",
             "reldbtype": "CortextDB"
           }
       }
