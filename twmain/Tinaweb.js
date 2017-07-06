@@ -381,7 +381,7 @@ var TinaWebJS = function ( sigmacanvas ) {
           }
         }
 
-        $('#tab-container').easytabs({
+        $('#selection-tabs-contnr').easytabs({
           updateHash:false,
           defaultTab: 'li#tabneigh'
         });
@@ -721,11 +721,8 @@ var TinaWebJS = function ( sigmacanvas ) {
 
         $("#tips").html(getTips());
 
-        // a bit costly, TODO make conditional or deprecated
-        // showMeSomeLabels(6);
-
-        // updateDownNodeEvent(false);
-
+        // we start with no selection
+        $("#selection-tabs-contnr").hide();
 
         // #saveAs => toggle #savemodal initialized in html + bootstrap-native
 

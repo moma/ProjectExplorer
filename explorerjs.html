@@ -441,7 +441,7 @@
     </div>
   </div>
   <div id="sidebar">
-    <div id="tab-container" class='tab-container'>
+    <div id="selection-tabs-contnr" class='selection-tabs-contnr'>
 
        <ul class='etabs'>
          <!-- for related elements from the combined graph (eg soc => sem) -->
@@ -483,13 +483,14 @@
 
       open/close panel from: jsfiddle.net/KyleMit/kcpma
     -->
-    <div class="panel-group" id="accordion">
+    <div class="panel-group" id="varinfos-accordion">
 
 
       <div class="panel panel-default" id="video_explanation">
         <div class="panel-heading">
           <h4 class="panel-title">
-            <a data-toggle="collapse" data-target="#le_tutorial" href="#le_tutorial">
+            <a data-toggle="collapse" data-target="#le_tutorial" href="#le_tutorial"
+               data-parent="#varinfos-accordion">
               <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
               &nbsp;Tutorial video
             </a>
@@ -497,29 +498,35 @@
         </div>
 
         <!-- TODO: outcloud the video for better stream+player -->
-        <!-- <div class="panel-collapse collapse" id="le_tutorial">
+        <div class="panel-collapse collapse" id="le_tutorial">
+          <p>here video</p>
           <video width="100%"
-            src="video/AXA2015.mp4" controls=""  frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></video>
-        </div> -->
+            src="" controls=""  frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></video>
+        </div>
       </div>
 
       <div class="panel panel-default" id="tips_panel">
         <div class="panel-heading">
           <h4 class="panel-title">
-            <a data-toggle="collapse" data-target="#tips" href="#tips">
+            <a data-toggle="collapse" data-target="#tips" href="#tips"
+               data-parent="#varinfos-accordion">
               <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
               &nbsp;Tips
             </a>
           </h4>
         </div>
 
-        <div class="panel-collapse collapse in" id="tips"></div>
+        <div class="panel-collapse collapse in" id="tips">
+          <p>here tips inserted by twmain/Tinaweb.js</p>
+        </div>
       </div>
 
-      <div class="panel panel-default" id="credits_panel">
+
+      <div class="panel panel-default" id="video_explanationw">
         <div class="panel-heading">
           <h4 class="panel-title">
-            <a data-toggle="collapse" data-target="#credits" href="#credits">
+            <a data-toggle="collapse" data-target="#credits" href="#credits"
+               data-parent="#varinfos-accordion">
               <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
               &nbsp;Credits
             </a>
@@ -527,19 +534,21 @@
         </div>
 
         <div class="panel-collapse collapse" id="credits">
-          <a href="https://bigdata.iscpif.fr/" target="_blank">
-              <img src="https://bigdata.iscpif.fr/images/logos/BIGDATA-Logo-PoweredBy-light.jpg"
-              alt="Powered by Big Data at ISCPIF"
-              style="width:85%; ">
-          </a>
-          <a href="https://github.com/moma" target="_blank">
-              <img src="twlibs/img/moma.png"
-              alt="Sciencemapping"
-              style="width:85%; ">
-          </a>
+          <p>
+            <a href="https://bigdata.iscpif.fr/" target="_blank">
+                <img src="https://bigdata.iscpif.fr/images/logos/BIGDATA-Logo-PoweredBy-light.jpg"
+                alt="Powered by Big Data at ISCPIF"
+                style="width:85%; ">
+            </a>
+            <a href="https://github.com/moma" target="_blank">
+                <img src="twlibs/img/moma.png"
+                alt="Sciencemapping"
+                style="width:85%; ">
+            </a>
+          </p>
         </div>
-
       </div>
+
     </div>
 
     <br><br>
@@ -610,12 +619,12 @@
     </div>
 
 
-    <div id="modalloader" class="modal fade">
+    <!-- <div id="modalloader" class="modal fade">
         <div id="loader" class="loader">
             <img src="twlibs/img/loader.gif"></img>
         </div>
         <div id="closeloader" data-dismiss="modal"></div>
-    </div>
+    </div> -->
 
 
     <div id="facet-options" class="modal fade">
@@ -725,10 +734,9 @@
       </div>
     </div>
 
-
+<!--
     <div id="geomapmodal" class="modal fade">
 
-        <!-- <div class="modal-content"> -->
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             <h4 class="modal-title">Geomap</h4>
@@ -736,12 +744,10 @@
           <div class="modal-body">
             <div class="geomapCont"></div>
           </div>
-        <!-- </div> -->
-          <!-- <div class="geomapCont"></div> -->
           <div id="closegeomap" data-dismiss="modal"></div>
-    </div>
+    </div> -->
 
-    <div id="heatgraph"></div>
+    <!-- <div id="heatgraph"></div> -->
 
   </div>
 

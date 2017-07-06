@@ -124,12 +124,11 @@ function cancelSelection (fromTagCloud, settings) {
     if(fromTagCloud==false){
         $("#names").html("");
         $("#topPapers").html(""); $("#topPapers").hide();
-        $("#opossiteNodes").html(""); $("#tab-container").hide();
+        $("#oppositeNodes").html(""); $("#selection-tabs-contnr").hide();
         $("#information").html("");
         $("#searchinput").val("");
         $("#unselectbutton").hide();
         $("#lefttopbox").hide();
-        $("#tips").html(getTips());
     }
 
     // send "eraseNodeSet" event
@@ -430,14 +429,13 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
 
     //using the readmore.js (NB readmore and easytabs are not easy to harmonize)
     $("#lefttopbox").show();
-    $("#tab-container").show();
+    $("#selection-tabs-contnr").show();
     $("#names").html(namesDIV).readmore({maxHeight:100});
     if(oppos.length>0) {
       $("#oppositeNodes").html(alterNodesDIV).readmore({maxHeight:200});
     }
     $("#sameNodes").html(sameNodesDIV).readmore({maxHeight:200});
     $("#information").html(informationDIV);
-    $("#tips").html("");
 
     if (TW.conf.getRelatedDocs) {
       $("#topPapers").show();

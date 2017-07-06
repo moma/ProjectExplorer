@@ -662,8 +662,6 @@ function renderTweet( tweet) {
 }
 
 function getTips(){
-    param='';
-
     text =
         "<br>"+
         "Basic Interactions:"+
@@ -685,9 +683,6 @@ function getTips(){
         "<li>The 'change level' button allows to change between global view and node centered view,</li>"+
         "<li>To explore the neighborhood of a selection click on the 'change level' button.</li>"+
         "</ul>";
-
-    $("#tab-container").hide();
-    $("#tab-container-top").hide();
     return text;
 }
 
