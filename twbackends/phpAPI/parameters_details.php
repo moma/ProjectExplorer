@@ -3,6 +3,11 @@
 
 // GLOBAL PARAMS
 // -------------
+// 0 - output mode: 'json' or 'html'
+//  > json is for new use cases where styling is applied via template import in the js
+//  > html is the classical use where data is styled in this php scripts
+$output_mode = "json";
+
 // 1 - relative urls
 $our_php_root="twbackends/phpAPI";        // our php scripts relative URL
 $our_libs_root="twbackends/phpAPI";       // for our few icons and jquery-ui
