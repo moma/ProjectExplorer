@@ -1,14 +1,13 @@
 <?php
 include('tools.php');
 include('parameters_details.php');
-$db = $gexf_db[$gexf];
 
-$base = new PDO("sqlite:../" .$db);
+$base = new PDO("sqlite:" .$mainpath.$graphdb);
 $query = str_replace( '__and__', '&', $_GET["query"] );
 $terms_of_query = json_decode($query);
 
 // echo "mainpath: ".$mainpath."<br>";
-// echo "thedb: ".$db."<br>";
+// echo "thedb: ".$mainpath.$graphdb."<br>";
 // echo "thequery: ".var_dump($terms_of_query);
 
 echo '

@@ -80,7 +80,8 @@ $count=0;
 
 $all_terms_from_selected_projects=array();// list of terms for the top 6 project selected
 
-$output = "";
+$htmlout = "";
+$jsonhits = array();
 
 // to filter under some conditions
 $to_display=true;
@@ -98,18 +99,42 @@ foreach ($wos_ids as $id => $score) {
 
 				foreach ($base->query($sql) as $row) {
 					$external_link="<a href=http://google.com/webhp?#q=".urlencode('"'.$row['data'].'"')." target=blank>".' <img width=15px src="'.$our_libs_root.'/img/google.png"></a>';
-					$output.="<li title='".$score."'>";
-					$output.=$external_link.imagestar($score,$factor,$our_libs_root).' ';
-					$output.='<a href="JavaScript:newPopup(\''.$our_php_root.'/default_doc_details.php?gexf='.urlencode($gexf).'&index='.$table.'&query='.urlencode($query).'&type='.urlencode($_GET["type"]).'&id='.$id.'	\')">'.$row['data']." </a> ";
-				}
+
+          $link = 'JavaScript:newPopup(\''.$our_php_root.'/default_doc_details.php?gexf='.urlencode($gexf).'&index='.$table.'&query='.urlencode($query).'&type='.urlencode($_GET['type']).'&id='.$id.'	\')';
+
+          if ($output_mode == "html") {
+            $htmlout.="<li title='".$score."'>";
+            $htmlout.=$external_link.imagestar($score,$factor,$our_libs_root).' ';
+            $htmlout.="<a href=\"$link\">".$row['data']." </a> ";
+          }
+          else {
+            $jsonhit = array(
+              'score' => $score,
+              'tit' => $row['data'],
+              'link' => $link
+            );
+          }
+        }
 
 				// get the authors
 				$sql = 'SELECT data FROM '.$author_table.' WHERE id='.$id;
 				foreach ($base->query($sql) as $row) {
-					$output.=($row['data']).', ';
+          if ($output_mode == "html") {
+            $htmlout.=($row['data']).', ';
+          }
+          else {
+            $jsonhit['au'] = $row['data'];
+          }
 				}
-				$output = rtrim($output, ", ");
-				$output.="</li><br>";
+
+
+        if ($output_mode == "html") {
+          $htmlout = rtrim($htmlout, ", ");
+          $htmlout.="</li><br>";
+        }
+        else {
+          array_push($jsonhits, $jsonhit);
+        }
 
 			}
 		}
@@ -119,135 +144,8 @@ foreach ($wos_ids as $id => $score) {
 	}
 }
 
-$output .= "</ul>"; #####
+$htmlout .= "</ul>"; #####
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // if (($project_folder=='nci')&&(count($elems)<$max_selection_size)){
-// // 	// for NCI we compare the impact and novelty score making the difference if there are more than 4 terms selected
-// // 	$news='';//new terms
-// // 	$terms_from_selected_projects=array_unique($all_terms_from_selected_projects);
-// // 	if(count($terms_from_selected_projects)>3){
-// // 	$diff=array();
-// // 	foreach ($terms_from_selected_projects as $key => $term) {
-// // 		$sql=	"select  count(*),ISIterms.id, ISIterms.data from ISIterms join ISIpubdate on (ISIterms.id=ISIpubdate.id AND ISIpubdate.data=2011 AND ISIterms.data='".$term."') group by ISIterms.data";
-// // 		$nov=0;
-// // 		foreach ($corporadb->query($sql) as $row) {
-// // 			$nov=$row['count(*)'];
-// // 		}
-// // 		$sql=	"select  count(*),ISIterms.id, ISIterms.data from ISIterms join ISIpubdate on (ISIterms.id=ISIpubdate.id AND ISIpubdate.data=2012 AND ISIterms.data='".$term."') group by ISIterms.data";
-// // 		$imp=0;
-// // 		foreach ($corporadb->query($sql) as  $row) {
-// // 			$imp=$row['count(*)'];
-// // 		}
-// // 		$diff[$term]=info($nov,$imp); //positive si c'est un term novelty, negatif si c'est un terme impact.
-// // 		//echo $term.'-nov: '.$nov.'- imp:'.$imp.'<br/>';//'-info'.$diff[$term].
-// // 	}
-
-// // if (true){
-// // 	arsort($diff);
-// // 	$res=array_keys($diff);
-// // 	//echo implode(', ', $res);
-// // 	$nov_string='';
-// // 	for ($i=0;$i<$top_displayed;$i++){
-
-// // 		// on récupère les titres du document qui a le plus for impact
-// // 		$sql="SELECT ISIterms.id,ISIC1_1.data,count(*) from ISIterms,ISIpubdate,ISIC1_1 where ISIterms.data='".$res[$i]."' AND  ISIterms.id=ISIpubdate.id AND ISIterms.id=ISIC1_1.id AND ISIpubdate.data='2011' group by ISIterms.id ORDER BY RANDOM()  limit 1";
-
-// // 		//on récupère les id associés.
-// // 		foreach ($corporadb->query($sql) as $row){
-// // 			$sql2='SELECT ISIpubdate.id,ISIC1_1.data from ISIpubdate,ISIC1_1 where ISIC1_1.data="'.$row['data'].'" AND  ISIpubdate.id=ISIC1_1.id AND ISIpubdate.data="2013"  limit 1';
-// // 			//echo $sql2;
-// // 			foreach ($corporadb->query($sql2) as $row2){
-// // 				$nov_string.='<a href="JavaScript:newPopup(\''.$our_php_root.'/default_doc_details.php?db='.urlencode($graphdb).'&gexf='.urlencode($gexf).'&query='.urlencode('["'.$res[$i].'"]').'&type='.urlencode($_GET["type"]).'&id='.$row2['id'].'	\')">'.$res[$i]."</a>, ";
-// // 			}
-// // 		}
-// // 	}
-
-// // 	$news.='<br/><b><font color="#FF0066">Top '.$top_displayed.' Novelty related terms </font></b>'.$nov_string.'<br/>';
-// // 	asort($diff);
-// // 	$res=array_keys($diff);
-// // 	$res_string='';
-// // 	for ($i=0;$i<$top_displayed;$i++){
-
-// // 		// on récupère les titres du document qui a le plus for impact
-// // 		$sql="SELECT ISIterms.id,ISIC1_1.data,count(*) from ISIterms,ISIpubdate,ISIC1_1 where ISIterms.data='".$res[$i]."' AND  ISIterms.id=ISIpubdate.id AND ISIterms.id=ISIC1_1.id AND ISIpubdate.data='2012' group by ISIterms.id ORDER BY RANDOM()limit 1";
-
-// // 		//on récupère les id associés.
-// // 		foreach ($corporadb->query($sql) as $row){
-// // 			$sql2='SELECT ISIpubdate.id,ISIC1_1.data from ISIpubdate,ISIC1_1 where ISIC1_1.data="'.$row['data'].'" AND  ISIpubdate.id=ISIC1_1.id AND ISIpubdate.data="2013"  limit 1';
-// // 			//echo $sql2;
-// // 			foreach ($corporadb->query($sql2) as $row2){
-// // 				$res_string.='<a href="JavaScript:newPopup(\''.$our_php_root.'/default_doc_details.php?db='.urlencode($graphdb).'&gexf='.urlencode($gexf).'&query='.urlencode('["'.$res[$i].'"]').'&type='.urlencode($_GET["type"]).'&id='.$row2['id'].'	\')">'.$res[$i]."</a>, ";
-// // 			}
-// // 		}
-// // 	}
-// // 	$news.='<br/><b><font color="#CF5300">Top '.$top_displayed.' Impact related terms: </font></b>'.$res_string.'<br/>';
-// // }
-// // }
-// // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // display the most occuring terms when only one is selected.
-// //elseif (count($elems)==1) {// on affiche les voisins
-// //	$terms_array=array();
-// //	$id_sql='SELECT ISIterms.id FROM ISIterms where ISIterms.data="'.$elems[0].'" group by id';
-// //	foreach ($base->query($id_sql) as $row_id) {
-// //			$sql2='SELECT ISIterms.data FROM ISIterms where ISIterms.id='.$row_id['id'];
-// //			foreach ($base->query($sql2) as $row_terms) {
-// //				if ($terms_array[$row_terms['data']]>0){
-// //					$terms_array[$row_terms['data']]=$terms_array[$row_terms['data']]+1;
-// //				}else{
-// //					$terms_array[$row_terms['data']]=1;
-// //				}
-// //			}
-// //		}
-// //		natsort($terms_array);
-// //		$terms_list=array_keys(array_slice($terms_array,-11,-1));
-// //		foreach ($terms_list as $first_term) {
-// //			$related_terms.=$first_term.', ';
-// //		}
-// //	$news.='<br/><b><font color="#CF5300">Related terms: </font></b>'.$related_terms.'<br/>';
-// //}
 
    // calculate binomial coefficient
  function binomial_coeff($n, $k) {
@@ -268,8 +166,19 @@ $output .= "</ul>"; #####
 
    }
 
-if($max_item_displayed>$total_count) $max_item_displayed=$total_count;
-// echo $news.'<br/><h4><font color="#0000FF"> Full text of top '.$max_item_displayed.'/'.$related.' related publications:</font></h4>'.$output;
-echo '<br/><h4><font color="#0000FF"> Full text of top '.$max_item_displayed.'/'.$total_count.' related publications:</font></h4>'.$output;
+
+if ($output_mode == 'html') {
+  if($max_item_displayed>$total_count) $max_item_displayed=$total_count;
+  // echo $news;
+  echo '<h4><font color="#0000FF"> Full text of top '.$max_item_displayed.'/'.$total_count.' related publications:</font></h4>';
+  echo $htmlout;
+}
+else {
+  echo json_encode(array(
+    'hits' => $jsonhits,
+    'nhits' => $max_item_displayed
+  ));
+}
+
 //pt - 301 ; 15.30
 ?>

@@ -49,9 +49,11 @@ $ndtype = $_GET["type"];
 $ntid = null;
 $my_conf = null;
 
-// legacy types => generic types
-if ($ndtype == 'semantic') {  $ntid = 0;  }
-else                       {  $ntid = 1;  }
+// legacy types => generic types with 0 as default
+if ($ndtype == 'social')   {  $ntid = 1;  }
+else                       {  $ntid = 0;  }
+
+// echodump("params: node type id", $ntid);
 
 if (! $conf[$gexf][$ntid]['active']) {
   errmsg("not active", "your graph ($gexf)");
@@ -63,11 +65,5 @@ else {
 }
 
 // echodump("params: reldb", $graphdb);
-// echodump("params: node type id", $ntid);
-
-
-
-// echodump("graphdb", $graphdb);
-
 
 ?>

@@ -47,7 +47,8 @@ function displayDoc($docId, $score, $base, $outmode) {
       "src" => $source,
       "kws" => $keywords,
       "txt" => $doccontent,
-      "date" => $date
+      "date" => $date,
+      "score" => $score
     );
   }
   return $output;
