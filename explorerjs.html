@@ -257,8 +257,6 @@
 
           </ul>
 
-
-
           <ul id="searchnav" class='nav navbar-nav navbar-left'>
             <li class="navbar-lower">
               <div id="search_input_group" class="input-group input-group-sm my-nav-input-group">
@@ -442,6 +440,9 @@
     </div>
   </div>
   <div id="sidebar">
+    <!-- manual file chooser if run locally -->
+    <div id="localInput"></div>
+
     <div id="selection-tabs-contnr" class='selection-tabs-contnr'>
 
        <ul class='etabs'>
@@ -461,21 +462,25 @@
        </div>
     </div>
 
-    <div class="question reldocs">
-      <div class="input-group">
-        <label for="reldocs-type" class="smlabel input-group-addon">Related documents type</label>
-        <select id="reldocs-type" name="reldocs-type"
-                class="custom-select form-control"
-                 onchange="TW.conf.relatedDocsType=this.value; getTopPapers()">
-            <option value="twitter">Twitter API</option>
-            <option value="LocalDB">Local DB query</option>
-        </select>
-      </div>
-    </div>
-    <div id="topPapers">
-    </div>
+    <!-- topPapers tabs -->
+    <div id="reldocs-tabs-wrapper" class="reldocs">
 
-    <div id="localInput"></div>
+      <!-- NB:  data-reldocstype should match TW.conf.relatedDocsType
+                and will be filled from TW.conf.relatedDocsAPIS keys
+          -->
+      <ul id="reldocs-tabs" class="nav nav-tabs" role="tablist">
+
+      </ul>
+
+      <!-- One tab pane
+           (only one with topPapers, we change content ourselves)
+         -->
+      <div class="tab-content">
+        <div id="topPapers" role="tabpanel" class="tab-pane active">
+        </div>
+      </div>
+
+    </div>
 
     <div id="information"></div>
 

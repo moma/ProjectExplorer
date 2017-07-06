@@ -1,5 +1,6 @@
 blockquote.Tweet {
   display: inline-block !important;
+  background-color: #FFF;
   font-family: Roboto, "Helvetica Neue", "Segoe UI", Calibri, sans-serif !important;
   font-size: 12px !important;
   font-weight: bold !important;
@@ -10,7 +11,7 @@ blockquote.Tweet {
   border-width: 1px !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
   margin: 10px 5px !important;
-  padding: 0 16px 16px 16px !important;
+  padding: 8px 16px !important;
   min-width: 330px !important;
   width: 330px !important;
   max-width: 330px !important;

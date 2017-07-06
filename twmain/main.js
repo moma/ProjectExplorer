@@ -79,6 +79,8 @@ if (window.location.protocol == 'file:' || sourcemode == 'localfile') {
     remark.classList.add('comment')
     remark.classList.add('centered')
     inputDiv.appendChild(remark)
+    inputDiv.style.height = "auto";
+    inputDiv.style.padding = "10px";
   }
 
   // user can open a gexf or json from his fs

@@ -1,13 +1,4 @@
 {
-  "data/comexjsons": {
-    "first" : "graph_example.json",
-    "graphs": {
-      "graph_example.json": {
-        "node0": { "name": "NGram" },
-        "node1": { "name": "Document" }
-      }
-    }
-  },
   "data/gargistex": {
     "first" : "shale_and_ice.gexf",
     "graphs":{
@@ -28,6 +19,15 @@
           "reldbqcols": ["title"],
           "reltemplate": "_todo"
         }
+      }
+    }
+  },
+  "data/comexjsons": {
+    "first" : "graph_example.json",
+    "graphs": {
+      "graph_example.json": {
+        "node0": { "name": "NGram" },
+        "node1": { "name": "Document" }
       }
     }
   },

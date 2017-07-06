@@ -122,9 +122,13 @@ function cancelSelection (fromTagCloud, settings) {
 
     // hide all selection panels
     if(fromTagCloud==false){
+        // £TODO give them all a common class
         $("#names").html("");
-        $("#topPapers").html(""); $("#topPapers").hide();
-        $("#oppositeNodes").html(""); $("#selection-tabs-contnr").hide();
+        $("#topPapers").html("");
+        $("#topPapers").hide();
+        $("#oppositeNodes").html("");
+        $("#selection-tabs-contnr").hide();
+        $("#reldocs-tabs-wrapper").hide();
         $("#information").html("");
         $("#searchinput").val("");
         $("#unselectbutton").hide();
@@ -438,11 +442,13 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
     $("#information").html(informationDIV);
 
     if (TW.conf.getRelatedDocs) {
+      $("#reldocs-tabs-wrapper").show();
       $("#topPapers").show();
       getTopPapers()
     }
     else {
       $("#topPapers").hide()
+      $("#reldocs-tabs-wrapper").hide();
     }
 }
 
