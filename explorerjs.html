@@ -58,7 +58,7 @@
   <!-- NB bootstrap 3 not used for main grid (graph + bars) but inside the bars -->
   <link rel="stylesheet" href="twlibs3/bootstrap-3/css/bootstrap.min.css" media="screen">
   <link rel="stylesheet" href="twlibs3/freshslider/freshslider.css" media="screen">
-  <link rel="stylesheet" href="twlibs3/tweets/tweet.light.ltr.css" />
+  <link rel="stylesheet" href="twlibs3/tweets/tweet.light.excerpt.css" />
   <link rel="stylesheet" href="twlibs3/tweets/custom.css"/>
 
   <link rel="stylesheet" href="twlibs/css/twjs.css">
@@ -73,7 +73,14 @@
 
 
 <body>
+  <a id='mainlogo' href="https://github.com/moma/ProjectExplorer"
+        class="navbar-higher"
+        title="Project Explorer">
+        <img src="twlibs/img/logo.png"
+             style="width:50px; position:absolute; top:-8px; left:-4px; z-index:5; overflow:visible;">
+  </a>
   <div id="topbar" class="navbar navbar-default">
+
     <div class="container">
 
       <div class="navbar-collapse collapse" id="navbar-main">
@@ -82,6 +89,7 @@
             <!-- name will be replaced by TW.conf.branding, link by TW.conf.brandingLink -->
             <a href="#" class="navbar-middle navbar-brand twbrand-link">
               <span id="twbrand">TinaWebJS</span>
+
             </a>
           </li>
 
@@ -130,7 +138,7 @@
 
   <!-- ex-defaultop -->
   <div id="toolbar" class="navbar navbar-default">
-    <div id="defaultop" class="container">
+    <div id="defaultop" class="container-fluid">
 
       <div class="navbar-header">
         <button id="toolbar-open" type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#left" aria-expanded="false" aria-controls="navbar">
@@ -143,7 +151,7 @@
 
         <div id="left" class="navbar-collapse collapse">
 
-          <ul class="nav navbar-nav">
+          <ul class="nav navbar-nav navbar">
 
             <!--
             <li>
@@ -155,13 +163,6 @@
                </a>
             </li>
             -->
-
-            <li><a href="https://communityexplorer.org"
-                  class="navbar-higher"
-                  title="Community Explorer">
-                  <img src="twlibs/img/logo.png"
-                       style="width:60px; position:absolute; top:-60px; left:-75px; z-index:5; overflow:visible;">
-            </a></li>
 
             <li>
                <a>
@@ -258,7 +259,7 @@
 
 
 
-          <ul id="searchnav" class='nav navbar-nav'>
+          <ul id="searchnav" class='nav navbar-nav navbar-left'>
             <li class="navbar-lower">
               <div id="search_input_group" class="input-group input-group-sm my-nav-input-group">
                 <span class="input-group-btn crowdsourcingModule">

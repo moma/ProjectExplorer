@@ -3,7 +3,7 @@ blockquote.Tweet {
   font-family: Roboto, "Helvetica Neue", "Segoe UI", Calibri, sans-serif !important;
   font-size: 12px !important;
   font-weight: bold !important;
-  line-height: 16px !important;
+  line-height: 14px !important;
   border-color: #eee #ddd #bbb !important;
   border-radius: 5px !important;
   border-style: solid !important;
@@ -17,10 +17,12 @@ blockquote.Tweet {
 }
 
 p.Tweet-text {
-  font-size: 16px !important;
+  padding: .4em 0 0 0 !important;
+  margin-bottom: -1em !important;
+  font-size: 12px !important;
   font-weight: normal !important;
-  line-height: 20px !important;
-  min-height: 90px !important;
+  line-height: 16px !important;
+  min-height: 70px !important;
 }
 
 blockquote.Tweet a {
@@ -32,7 +34,8 @@ blockquote.Tweet a {
 
 blockquote.Tweet a:hover,
 blockquote.Tweet a:focus {
-  text-decoration: underline !important;
+  /*text-decoration: underline !important;*/
+  text-decoration: none !important;
 }
 
 .Tweet-metadata {
@@ -40,4 +43,8 @@ blockquote.Tweet a:focus {
 }
 .Tweet-authorScreenName {
   font-size: .9em;
+}
+
+.Tweet-actions {
+    padding-left: .5em;
 }
