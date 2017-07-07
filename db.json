@@ -1,13 +1,4 @@
 {
-  "data/comexjsons": {
-    "first" : "graph_example.json",
-    "graphs": {
-      "graph_example.json": {
-        "node0": { "name": "NGram" },
-        "node1": { "name": "Document" }
-      }
-    }
-  },
   "data/gargistex": {
     "first" : "shale_and_ice.gexf",
     "graphs":{
@@ -17,7 +8,7 @@
           "reldbtype": "csv",
           "reldbfile": "shale_and_ice.csv",
           "reldbqcols": ["title"],
-          "reltemplate": "_todo"
+          "reltemplate": "bib_details"
         }
       },
       "model_calibration.gexf": {
@@ -26,8 +17,17 @@
           "reldbtype": "csv",
           "reldbfile": "model_calibration.csv",
           "reldbqcols": ["title"],
-          "reltemplate": "_todo"
+          "reltemplate": "bib_details"
         }
+      }
+    }
+  },
+  "data/comexjsons": {
+    "first" : "graph_example.json",
+    "graphs": {
+      "graph_example.json": {
+        "node0": { "name": "NGram" },
+        "node1": { "name": "Document" }
       }
     }
   },
@@ -40,24 +40,22 @@
           "reldbtype": "csv",
           "reldbfile": "mini_for_csv.csv",
           "reldbqcols": ["title","keywords","text"],
-          "reltemplate": "_todo"
+          "reltemplate": "bib_details"
         },
         "node1": {
           "name": "person",
           "reldbtype": "csv",
           "reldbfile": "mini_for_csv.csv",
           "reldbqcols": ["author"],
-          "reltemplate": "_todo"
+          "reltemplate": "bib_details"
         }
       },
       "test_with_various_atts.gexf": {}
     }
   },
   "data/politoscope": {
-    "dbname":null,
     "title":"Politoscope",
     "date":"2017",
-    "abstract":"",
     "first" : "ProgrammeDesCandidats.enrichi.gexf",
     "graphs": {
       "ProgrammeDesCandidats.enrichi.gexf": {
@@ -69,14 +67,14 @@
     }
   },
   "data/ClimateChange": {
-    "abstract":"ISIABSTRACT",
     "graphs": {
       "Maps_S_800.gexf": {
           "node0": {
             "name": "ISItermsWhitelistV2Oct_5 &amp; ISItermsWhitelistV2Oct_5",
-            "reldbtable": "ISItermsWhitelistV2Oct_5",
-            "reldbname" : "wos_climate-change_title_2014-2015.db",
-            "reldbtype": "CortextDB"
+            "reldbqtable": "ISItermsWhitelistV2Oct_5",
+            "reldbfile" : "wos_climate-change_title_2014-2015.db",
+            "reldbtype": "CortextDB",
+            "reltemplate": "cortext_with_link"
           }
       }
     }

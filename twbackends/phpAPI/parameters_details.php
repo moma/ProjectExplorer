@@ -1,28 +1,30 @@
 <?php
 
 
-# loading an associated db for a given gexf as relatedDocs php API
-$gexf_db = array();
+// GLOBAL PARAMS
+// -------------
+// 0 - output mode: 'json' or 'html'
+//  > json is for new use cases where styling is applied via template import in the js
+//  > html is the classical use where data is styled in this php scripts
+$output_mode = "json";
 
-# £££TODO read the db.json
-$gexf_db["data/ClimateChange/Maps_S_800.gexf"] = "data/ClimateChange/wos_climate-change_title_2014-2015.db";
-$gexf_db["data/AXA/RiskV2PageRank1000.gexf"] = "data/AXA/data.db";
-$gexf_db["data/AXA/RiskV2PageRank2500.gexf"] = "data/AXA/data.db";
-$gexf_db["data/AXA/RiskV2PageRank5000.gexf"] = "data/AXA/data.db";
-$gexf_db["data/test/mini_for_csv.gexf"] = "data/test/mini_for_csv.csv";
-$gexf_db["data/gargistex/shale_and_ice.gexf"] = "data/gargistex/shale_and_ice.csv";
-$gexf_db["data/gargistex/model_calibration.gexf"] = "data/gargistex/model_calibration.csv";
+// 1 - relative urls
+$our_php_root="twbackends/phpAPI";        // our php scripts relative URL
+$our_libs_root="twbackends/phpAPI";       // for our few icons and jquery-ui
+                                          // POSS could be merged with our_php_root
 
-// $gexf_db["data/ProgrammeDesCandidats.gexf"] = "foobar";
 
-$gexf= str_replace('"','',$_GET["gexf"]);
+// 2 - paths
+$mainpath=dirname(dirname(getcwd()))."/"; // default fs path to ProjectExplorer root
+                                          // (where data dir and db.json file reside)
 
-// default path to ProjectExplorer root
-// (where data directory and db.json file reside)
-$mainpath=dirname(getcwd())."/../";
+$project_menu_path = "db.json";
 
-$graphdb = $gexf_db[$gexf];
+// 3 - others
+$ntypes = 2;         // max node types
 
+// number of docs to display setting
+$max_item_displayed = 7;
 
 // for csv parsing
 $csvsep = "\t";
@@ -32,15 +34,36 @@ $csvquote = '"';
 $memserver = 'localhost';
 $memport = 11211;
 
-// number of docs to display setting
-$max_item_displayed = 7;
 
-// echodump("graphdb", $graphdb);
+// CONFIGURATION PARAMS
+// --------------------
+// parse db.json project menu and create a conf by file
+$conf = read_conf($mainpath.$project_menu_path, $ntypes);
 
-function echodump($title, $anyObj) {
-  echo "<br>".$title.": ";
-  echo (json_encode($anyObj, JSON_PRETTY_PRINT));
-  echo "<br>";
+// =======================================
+// echodump("== READ CONF ==<br>", $conf);
+// =======================================
+
+$gexf= str_replace('"','',$_GET["gexf"]);
+$ndtype = $_GET["type"];
+$ntid = null;
+$my_conf = null;
+
+// legacy types => generic types with 0 as default
+if ($ndtype == 'social')   {  $ntid = 1;  }
+else                       {  $ntid = 0;  }
+
+// echodump("params: node type id", $ntid);
+
+if (! $conf[$gexf][$ntid]['active']) {
+  errmsg("not active", "your graph ($gexf)");
+  exit(1);
 }
+else {
+  $my_conf = $conf[$gexf];
+  $graphdb = $my_conf[$ntid]['dir'].'/'.$my_conf[$ntid]['reldbfile'];
+}
+
+// echodump("params: reldb", $graphdb);
 
 ?>

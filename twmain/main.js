@@ -79,6 +79,8 @@ if (window.location.protocol == 'file:' || sourcemode == 'localfile') {
     remark.classList.add('comment')
     remark.classList.add('centered')
     inputDiv.appendChild(remark)
+    inputDiv.style.height = "auto";
+    inputDiv.style.padding = "10px";
   }
 
   // user can open a gexf or json from his fs
@@ -215,7 +217,7 @@ function syncRemoteGraphData () {
   // cases            (2)       and     (3) : we'll read a file from server
   // sourcemode == "serverfile" or "servermenu" (several files with <select>)
   else {
-    console.log("input case: server-side file, using TW.conf.sourceMenu or getUrlParam.file or TW.conf.sourceFile")
+    console.log("input case: server-side file, using TW.conf.paths.sourceMenu or getUrlParam.file or TW.conf.paths.sourceFile")
 
     // -> @mode is servermenu, files are listed in db.json file (preRes ajax)
     //      --> if @file also in url, choose the db.json one matching
@@ -223,13 +225,13 @@ function syncRemoteGraphData () {
 
     // -> @mode is serverfile
     //      -> gexf file path is in the urlparam @file
-    //      -> gexf file path is already specified in TW.conf.sourceFile
+    //      -> gexf file path is already specified in TW.conf.paths.sourceFile
 
     // menufile case : a list of source files in ./db.json
     if (sourcemode == 'servermenu') {
-        console.log("reading from FILEMENU TW.conf.sourceMenu")
+        console.log("reading from FILEMENU TW.conf.paths.sourceMenu")
         // we'll first retrieve the menu of available files in db.json, then get the real data in a second ajax
-        var infofile = TW.conf.sourceMenu
+        var infofile = TW.conf.paths.sourceMenu
 
         if (TW.conf.debug.logFetchers)  console.info(`attempting to load filemenu ${infofile}`)
         var preRES = AjaxSync({ url: infofile, datatype:"json" });
@@ -307,12 +309,12 @@ function syncRemoteGraphData () {
       TW.File = getUrlParam.file
     }
     // direct file fallback case: specified file in settings_explorer
-    else if (TW.conf.sourceFile && linkCheck(TW.conf.sourceFile)) {
+    else if (TW.conf.paths.sourceFile && linkCheck(TW.conf.paths.sourceFile)) {
       console.log("no @file arg: trying TW.conf.sourceFile from settings")
-      TW.File = TW.conf.sourceFile;
+      TW.File = TW.conf.paths.sourceFile;
     }
     else {
-      console.error(`No specified input and neither db.json nor TW.conf.sourceFile ${TW.conf.sourceFile} are present`)
+      console.error(`No specified input and neither db.json nor TW.conf.paths.sourceFile ${TW.conf.paths.sourceFile} are present`)
     }
 
     var finalRes = AjaxSync({ url: TW.File });

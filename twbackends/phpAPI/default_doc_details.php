@@ -1,13 +1,13 @@
 <?php
+include('tools.php');
 include('parameters_details.php');
-$db = $gexf_db[$gexf];
 
-$base = new PDO("sqlite:../" .$db);
+$base = new PDO("sqlite:" .$mainpath.$graphdb);
 $query = str_replace( '__and__', '&', $_GET["query"] );
 $terms_of_query = json_decode($query);
 
 // echo "mainpath: ".$mainpath."<br>";
-// echo "thedb: ".$db."<br>";
+// echo "thedb: ".$mainpath.$graphdb."<br>";
 // echo "thequery: ".var_dump($terms_of_query);
 
 echo '
@@ -18,7 +18,7 @@ echo '
   <link rel="stylesheet" href="js/jquery-ui.css" />
   <script src="js/jquery-1.9.1.js"></script>
   <script src="js/jquery-ui.js"></script>
-  
+
   <script>
   $(function() {
     $( "#tabs" ).tabs({
@@ -27,12 +27,12 @@ echo '
   });
   </script>
 </head>
-          
+
     <body>
     <div id="tabs">
   <ul>
     <li><a href="#tabs-1">Selected Document</a></li>
-    <li><a href="full_doc_list.php?'.'gexf='.urlencode($gexf).'&query='.urlencode($_GET["query"]).'&index='.$_GET["index"].'&type='.urlencode($_GET["type"]).'">Full list</a></li>';    
+    <li><a href="full_doc_list.php?'.'gexf='.urlencode($gexf).'&query='.urlencode($_GET["query"]).'&index='.$_GET["index"].'&type='.urlencode($_GET["type"]).'">Full list</a></li>';
   echo '</ul>';
 
 echo '<div id="tabs-1">';
@@ -43,14 +43,14 @@ $id=$_GET["id"];
 // //$elems = json_decode($query);
 //   $sql = 'SELECT data FROM ISIkeyword WHERE id='.$id;
 //         foreach ($base->query($sql) as $row) {
-//           $country=$CC[strtoupper($row['data'])];         
+//           $country=$CC[strtoupper($row['data'])];
 //         }
 
 	$sql = 'SELECT data FROM ISITITLE WHERE id='.$id.' group by data';
 
 	foreach ($base->query($sql) as $row) {
 		$output.='<h2>'.$row['data'].'</h2>';
-		$find.="<br/><a href=http://google.com/webhp?q=".urlencode('"'.$row['data'].'"')." target='blank'>[ Search on the web ] </a>";		
+		$find.="<br/><a href=http://google.com/webhp?q=".urlencode('"'.$row['data'].'"')." target='blank'>[ Search on the web ] </a>";
 	}
 
 
@@ -76,7 +76,7 @@ $id=$_GET["id"];
 //   $sql = 'SELECT data FROM ISIkeyword WHERE id='.$id;
 //   foreach ($base->query($sql) as $row) {
 //     $country=$CC[strtoupper($row['data'])];
-  
+
 //     $output.=strtoupper($country).'<br/>   ';
 //   }
 
@@ -118,7 +118,7 @@ $id=$_GET["id"];
     $abs.=". ".$row['data'];
 	}
   $abs=str_replace('ISSUES:'  ,'<br/><br/><b>Issues:</b>',$abs);
-  $abs=str_replace('INTENDED IMPACT:'  ,'<br/><br/><b>Intended impact:</b>',$abs);    
+  $abs=str_replace('INTENDED IMPACT:'  ,'<br/><br/><b>Intended impact:</b>',$abs);
   $abs=str_replace('IMPACT:'  ,'<br/><br/><b>Impact:</b>',$abs);
   $abs=str_replace('NOVELTY:'  ,'<br/><br/><b>Novelty:</b>',$abs);
   $abs=str_replace('BOLD INNOVATION:'  ,'<br/><br/><b>Bold innovation:</b>',$abs);
@@ -131,7 +131,7 @@ $id=$_GET["id"];
   $abs=str_replace('_x000D_', ' ', $abs);
   $abs=str_replace('â€¢', ' ', $abs);
   $abs=str_replace('â€™', '\'', $abs);
-  
+
   foreach ($terms_of_query as $key => $value) {
     $abs=str_ireplace($value,'<font color="green"><b> '.$value.'</b></font>',$abs);
   }
@@ -140,7 +140,7 @@ $id=$_GET["id"];
   }
 
   $output.='<br/><p align="justify"><b>Abstract : </b><i>'.$abs.' </i></p>';
-  $output.="<br>"; 
+  $output.="<br>";
 
 
 

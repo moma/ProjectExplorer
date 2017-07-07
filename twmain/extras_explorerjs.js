@@ -373,12 +373,12 @@ function getTopPapers(){
     topPapersFetcher(
       swNodetypes[0],
       qWordsbySwType[swNodetypes[0]],
-      `<h2>${swNodetypes[0]}</h2>`,
-      function(enrichedHtml) {
+      [[],[]],
+      function(priorJsonHits) {
         topPapersFetcher(
           swNodetypes[1],
           qWordsbySwType[swNodetypes[1]],
-          enrichedHtml+`<p class=centered>---</p><h2>${swNodetypes[1]}</h2>`,
+          priorJsonHits,
           displayTopPapers
         )
       }
@@ -396,30 +396,29 @@ function getTopPapers(){
 //  - cbNext is a partial function to handle the follow-up
 //    (just pass it resHTML, to continue enriching or display)
 //
-function topPapersFetcher(swType, qWords, priorHtml, cbNext){
+function topPapersFetcher(swType, qWords, accumulHits, cbNext){
 
-  if (isUndef(priorHtml))    priorHtml = ''
-  if (isUndef(cbNext))       cbNext = displayTopPapers
+  // list of json object with hit metadata (title, author, etc.) by nodetype
+  if (isUndef(accumulHits))      accumulHits = [[],[]]
+
+  // callback to continue accumulating json hits or display to html
+  if (isUndef(cbNext))           cbNext = displayTopPapers
 
   // introducing the modern node type thanks to updated db.json specs
   let nodetype = (swType == 'semantic') ? 0 : 1
-
-  let stockErrMsg = `<p class="micromessage">
-    Your settings for relatedDocsType are set on ${TW.conf.relatedDocsType}
-    API but it couldn't be connected to.</p>`
-
-  if (TW.conf.relatedDocsType == "api") {
-    stockErrMsg += `<p class="micromessage">Check if it is running and
-    accessible:<br><span class=code>${TW.conf.relatedDocsAPI}</span></p>`
-  }
-
-  let resHTML = ''
 
   let apiurl = TW.conf.relatedDocsAPIS[TW.conf.relatedDocsType]
 
   if (! apiurl) {
     apiurl = TW.conf.relatedDocsAPI
   }
+
+  let stockErrMsg = `
+  <p class="micromessage">The API ${TW.conf.relatedDocsType} couldn't be connected to.</p>
+  <p class="micromessage">The queried route found in TW.conf was: <span class=code>${apiurl}</span>
+  <br>Check if it is running and accessible.</p>`
+
+  let resHTML = ''
 
   if (TW.conf.relatedDocsType == "twitter") {
     let joinedQ = qWords.map(function(w){return'('+w+')'}).join(' AND ')
@@ -430,34 +429,37 @@ function topPapersFetcher(swType, qWords, priorHtml, cbNext){
         contentType: "application/json",
         success : function(data){
             if (data.length) {
-              for (var k in data) {
-                let tweetJson = data[k]
-                resHTML += renderTweet(tweetJson)
-              }
+              accumulHits[nodetype] = accumulHits[nodetype].concat(data)
             }
             else {
-              resHTML += `<p class="micromessage centered">The query
-                         <span class=code>${joinedQ}</span> delivers
-                         no results on Twitter.</p>`
+              accumulHits[nodetype].push({
+                "error": `<p class="micromessage centered">The query
+                           <span class=code>${joinedQ}</span> delivers
+                           no results on Twitter.</p>`
+              })
             }
-            cbNext(priorHtml + resHTML)
+            cbNext(accumulHits)
         },
         error: function(){
           console.log(`Not found: relatedDocs for ${apiurl}`)
-          cbNext(priorHtml + stockErrMsg)
+          accumulHits[nodetype].push({
+            "error": stockErrMsg
+          })
+          cbNext(accumulHits)
         }
     });
   }
   else if (TW.conf.relatedDocsType == "LocalDB") {
     let thisRelDocsConf = TW.gmenuInfos[TW.File][nodetype]
     if (!thisRelDocsConf) {
-      resHTML =
-        `<p>Your settings for relatedDocsType are set on a local database,
+      accumulHits[nodetype].push({
+        "error": `<p>Your settings for relatedDocsType are set on a local database,
             but your servermenu file does not provide any information about
             the CSV or DB table to query for related documents
             (on nodetype ${nodetype}: ${swType})</p>`
-            cbNext(priorHtml + resHTML)
-            return
+      })
+      cbNext(accumulHits)
+      return
     }
     else {
       // /!\ documentation and specification needed for the php use cases /!\
@@ -468,53 +470,101 @@ function topPapersFetcher(swType, qWords, priorHtml, cbNext){
       //          or 'csv' (like gargantext exports)
 
       // POSS object + join.map(join)
-      let urlParams = "type="+swType+"&query="+joinedQ+"&gexf="+TW.File+"&n="+TW.conf.relatedDocsMax+"&dbtype="+thisRelDocsConf.reldbtype
-
-      if (thisRelDocsConf.reldbtype == "CortextDB") {
-        var qIndex = thisRelDocsConf.reldbtable    // a table
-        urlParams += `&index=${qIndex}`
-      }
-      else {
-        // a list of csv columns to search in
-        // ex: for semantic nodes matching we look in 'title', 'keywords' cols
-        //     for social nodes matching we look in 'authors' col... etc.
-        let joinedSearchCols = JSON.stringify(thisRelDocsConf.reldbqcols)
-        urlParams += `&searchin=${joinedSearchCols}`
-
-        // HIGHER LEVEL SCOPE (whole indexation directive) WILL BE MOVED TO PHP
-        let allCols = {}
-
-        if (TW.gmenuInfos[TW.File][0])
-          allCols.semantic = TW.gmenuInfos[TW.File][0].reldbqcols
-
-        if (TW.gmenuInfos[TW.File][1])
-          allCols.social = TW.gmenuInfos[TW.File][1].reldbqcols
-
-        let joinedAllCols = JSON.stringify(allCols)
-        urlParams += `&toindex=${joinedAllCols}`
-        // POSS use a direct access from php to db.json to avoid toindex
-      }
+      let urlParams = "type="+swType+"&query="+joinedQ+"&gexf="+TW.File+"&n="+TW.conf.relatedDocsMax ;
 
       $.ajax({
           type: 'GET',
           url: apiurl + '/info_div.php',
           data: urlParams,
+          contentType: "application/json",
           success : function(data){
-              console.log(`relatedDocs: ${apiurl}/info_div.php?${urlParams}`);
-              resHTML = data
-              cbNext(priorHtml + resHTML)
+            if (data.hits) {
+              accumulHits[nodetype] = accumulHits[nodetype].concat(data.hits)
+            }
+            cbNext(accumulHits)
           },
           error: function(){
             console.log(`Not found: relatedDocs for ${apiurl}`)
-            cbNext(priorHtml + stockErrMsg)
+            accumulHits[nodetype].push({
+              "error": stockErrMsg
+            })
+            cbNext(accumulHits)
           }
       });
     }
   }
 }
 
-function displayTopPapers(enrichedHtml) {
-  $("#topPapers").html(enrichedHtml);
+function makeRendererFromTemplate(tmplName) {
+  let tmplURL = TW.conf.paths.templates + '/' + tmplName + '.html'
+  let gotTemplate = AjaxSync({ url: tmplURL });
+
+  var tmplStr = ''
+  if (gotTemplate['OK']) {
+    tmplStr = gotTemplate.data
+  }
+
+  // we return a customized renderJsonToHtml function
+  return function(jsonHit) {
+    let htmlOut = tmplStr
+    for (key in jsonHit) {
+      // our tags look like this in the template ====> by $${author}, [$${date}]
+      let reKey = new RegExp('\\$\\$\\{'+key+'\\}', 'g')
+      // we replace them by value
+      htmlOut = htmlOut.replace(reKey, jsonHit[key])
+    }
+
+    // we also replace any not found keys by 'N/A'
+    let reKeyAll = new RegExp('\\$\\$\\{[^\\}]+\\}', 'g')
+    htmlOut = htmlOut.replace(reKeyAll, "N/A")
+
+    return htmlOut
+  }
+}
+
+function displayTopPapers(jsonHits) {
+
+  // console.log('jsonHits', jsonHits)
+
+  let resHTML = '<ul class="infoitems">'
+  let toHtmlFun = function(){}
+
+  for (var ndtypeId in TW.categories) {
+    if (TW.conf.relatedDocsType == 'twitter') {
+      toHtmlFun = renderTweet
+    }
+    else {
+      let thisRelDocsConf = TW.gmenuInfos[TW.File][ndtypeId]
+      if (thisRelDocsConf && thisRelDocsConf.reltemplate) {
+        // console.log("my rendering hits template", thisRelDocsConf.reltemplate)
+        
+        toHtmlFun = makeRendererFromTemplate(thisRelDocsConf.reltemplate)
+      }
+      else {
+        console.warn(`no rendering template found in ${TW.conf.paths.sourceMenu} for this source ${TW.File}...`)
+
+        // try the universal template
+        toHtmlFun = makeRendererFromTemplate("universal")
+      }
+    }
+
+    // console.log("my rendering fun", toHtmlFun)
+
+    for (var k in jsonHits[ndtypeId]) {
+      let hitJson = jsonHits[ndtypeId][k]
+      if (hitJson.error) {
+        resHTML += hitJson.error
+      }
+      else {
+        resHTML += toHtmlFun(hitJson)
+      }
+    }
+  }
+
+  resHTML += '</ul>'
+
+  // effect the changes in topPapers
+  $("#topPapers").html(resHTML);
 }
 
 function newPopup(url) {
@@ -687,8 +737,6 @@ function renderTweet( tweet) {
 }
 
 function getTips(){
-    param='';
-
     text =
         "<br>"+
         "Basic Interactions:"+
@@ -710,9 +758,6 @@ function getTips(){
         "<li>The 'change level' button allows to change between global view and node centered view,</li>"+
         "<li>To explore the neighborhood of a selection click on the 'change level' button.</li>"+
         "</ul>";
-
-    $("#tab-container").hide();
-    $("#tab-container-top").hide();
     return text;
 }
 

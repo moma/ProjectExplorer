@@ -1,4 +1,5 @@
 <?php
+include('tools.php');
 include('parameters_details.php');
 $db = $gexf_db[$gexf];
 
@@ -14,7 +15,7 @@ $query = str_replace( '__and__', '&', $_GET["query"] );
 $terms_of_query=json_decode($_GET["query"]);
 $elems = json_decode($query);
 
-// nombre d'item dans les tables 
+// nombre d'item dans les tables
 $sql='SELECT COUNT(*) FROM ISIABSTRACT';
 foreach ($base->query($sql) as $row) {
   $table_size=$row['COUNT(*)'];
@@ -23,7 +24,6 @@ foreach ($base->query($sql) as $row) {
 $table = "";
 $column = "";
 $id="";
-$twjs="pasteurapi/"; // submod path of TinaWebJS
 
 if($type=="social"){
   $table = "ISIAUTHOR";
@@ -64,9 +64,9 @@ $sum=0;
 //The final query!
 // array of all relevant documents with score
 
-foreach ($base->query($sql) as $row) {        
+foreach ($base->query($sql) as $row) {
         // on pondère le score par le nombre de termes mentionnés par l'article
-        
+
         //$num_rows = $result->numRows();
         $wos_ids[$row[$id]] = $row["count(*)"];
         $sum = $row["count(*)"] +$sum;
@@ -77,7 +77,7 @@ foreach ($base->query($sql) as $row) {
 
 $number_doc=ceil(count($wos_ids)/3);
 $count=0;
-foreach ($wos_ids as $id => $score) { 
+foreach ($wos_ids as $id => $score) {
   if ($count<1000){
     // retrieve publication year
     $sql = 'SELECT data FROM ISIpubdate WHERE id='.$id;
@@ -86,23 +86,22 @@ foreach ($wos_ids as $id => $score) {
     }
 
     // to filter under some conditions
-    $to_display=true; 
+    $to_display=true;
     if ($to_display){
       $count+=1;
       $output.="<li title='".$score."'>";
-      $output.=imagestar($score,$factor,$twjs).' '; 
+      $output.=imagestar($score,$factor,$our_libs_root).' ';
       $sql = 'SELECT data FROM ISITITLE WHERE id='.$id." group by data";
 
       foreach ($base->query($sql) as $row) {
-         $output.='<a href="default_doc_details2.php?gexf='.urlencode($gexf).'&type='.urlencode($_GET["type"]).'&query='.urlencode($query).'&id='.$id.'">'.$row['data']." </a> ";
+         $output.='<a href="'.$our_php_root.'/default_doc_details2.php?gexf='.urlencode($gexf).'&type='.urlencode($_GET["type"]).'&query='.urlencode($query).'&id='.$id.'">'.$row['data']." </a> ";
 
                         //this should be the command:
-      //$output.='<a href="JavaScript:newPopup(\''.$twjs.'php/default_doc_details.php?db='.urlencode($datadb).'&id='.$id.'  \')">'.$row['data']." </a> "; 
+      //$output.='<a href="JavaScript:newPopup(\''.$our_php_root.'/default_doc_details.php?db='.urlencode($datadb).'&id='.$id.'  \')">'.$row['data']." </a> ";
 
-                        //the old one:  
-      //$output.='<a href="JavaScript:newPopup(\''.$twjs.'php/default_doc_details.php?id='.$id.'  \')">'.$row['data']." </a> ";   
-        $external_link="<a href=http://scholar.google.com/scholar?q=".urlencode('"'.$row['data'].'"')." target=blank>".' <img width=20px src="twlibs/img/gs.png"></a>'; 
-        //$output.='<a href="JavaScript:newPopup(''php/doc_details.php?id='.$id.''')"> Link</a>'; 
+                        //the old one:
+      //$output.='<a href="JavaScript:newPopup(\''.$our_php_root.'/default_doc_details.php?id='.$id.'  \')">'.$row['data']." </a> ";
+        $external_link="<a href=http://scholar.google.com/scholar?q=".urlencode('"'.$row['data'].'"')." target=blank>".' <img width=20px src="'.$our_libs_root.'/img/gs.png"></a>';
       }
 
   // get the authors
@@ -113,7 +112,7 @@ foreach ($wos_ids as $id => $score) {
 
   //<a href="JavaScript:newPopup('http://www.quackit.com/html/html_help.cfm');">Open a popup window</a>'
 
-      $output.=$external_link."</li><br>";      
+      $output.=$external_link."</li><br>";
     }
 
   }else{
@@ -127,21 +126,4 @@ $output= '<h3>'.$count.' items related to: '.implode(' OR ', $elems).'</h3>'.$ou
 
 echo $output;
 
-
-function imagestar($score,$factor,$twjs) {
-// produit le html des images de score
-  $star_image = '';
-  if ($score > .5) {
-    $star_image = '';
-    for ($s = 0; $s < min(5,$score/$factor); $s++) {
-      $star_image.='<img src="twlibs/img/star.gif" border="0" >';
-    }
-  } else {
-    $star_image.='<img src="twlibs/img/stargrey.gif" border="0">';
-  }
-  return $star_image;
-}
-
 ?>
-
-

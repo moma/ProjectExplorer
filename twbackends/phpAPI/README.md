@@ -58,18 +58,47 @@ TWConf.relatedDocsType = "LocalDB"  (CSV or CortextDB)
 Finally, to match the correct DB with the correct graph file:
   - both should reside in `data/yoursubdir`
   - the appropriate source database information needs to appear in `db.json` in order to associate the graph source file (eg gexf) with this related docs API:
+
+
 ```json
 "data/yoursubdir": {
-      "dbname":"your.sqlite.db",
-      "title":"yourDocumentTitlesTable",
-      "date":"yourDocumentPubDatesTable",
-      "abstract":"yourDocumentContentsTable",
       "graphs": {
           "your.graph.gexf": {
-              "semantic": { "table":"yourTableWithTerms"},
-              "social": { "table":"yourTableWithSocialNodes"}
+              "node0": {
+                        "name": "terms",
+                        "reldbtype": "CortextDB",
+                        "reldbfile": "yourDB.db",
+                        "reldbqtable": "yourTableWithTerms"
+                      },
+              "node1": {
+                        "name": "people",
+                        "reldbtype": "CortextDB",
+                        "reldbfile": "yourDB.db",
+                        "reldbqtable": "yourTableWithSocialNodes"
+                      },
+          }
+      }
+},
+
+"data/anothersubdir": {
+      "graphs": {
+          "another.graph.gexf": {
+              "node0": {
+                        "name": "terms",
+                        "reldbtype": "csv",
+                        "reldbfile": "aCsvByDocs.csv",
+                        "reldbqcols": ["title", "text", "keywords"]
+                      },
+              "node1": {
+                        "name": "people",
+                        "reldbtype": "csv",
+                        "reldbfile": "aCsvByDocs.csv",
+                        "reldbqcols": ["authors", "editors"]
+                      },
           }
       }
 }
+
 ```
-£TODO update after new specifications implemented
+
+See more exemples and explanations in [servermenu_config.md](https://github.com/moma/ProjectExplorer/blob/master/00.DOCUMENTATION/A-Introduction/servermenu_config.md).

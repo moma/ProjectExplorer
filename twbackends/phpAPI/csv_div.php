@@ -7,47 +7,50 @@ error_reporting(-1);
 
 
 // DISPLAY THE RESULTS
-function displayDoc($docId, $score, $base) {
-
-  $output = "";
+function displayDoc($docId, $score, $base, $outmode) {
 
   // POSS score should have a data-score attribute
-  $output = "<li class='searchhit' title='".$score."'>";
 
   // shortcut to doc
   $doc = $base[$docId];
 
-  // £TODO new concept: use searchhit-templates
-  $has_template = False ;
-  if ($has_template) {
+  // fallback "universal" values
+  $title = try_attrs_until_you_find($doc, ['title', 'tit', 't']);
+  $source = try_attrs_until_you_find($doc, ['source', 'journal', 'j']);
+  $keywords = try_attrs_until_you_find($doc, ['keywords', 'keyword', 'kw']);
+  $author = try_attrs_until_you_find($doc, ['authors', 'author', 'auth', 'au']);
+  $doccontent = try_attrs_until_you_find($doc, ['text', 'txt', 'abstract', 'content']);
 
-  }
-  else {
-    // fallback "universal" values
-    $title = try_attrs_until_you_find($doc, ['title', 'tit', 't']);
-    $source = try_attrs_until_you_find($doc, ['source', 'journal', 'j']);
-    $keywords = try_attrs_until_you_find($doc, ['keywords', 'keyword', 'kw']);
-    $author = try_attrs_until_you_find($doc, ['authors', 'author', 'auth', 'au']);
-    $doccontent = try_attrs_until_you_find($doc, ['text', 'txt', 'abstract', 'content']);
+  $date = try_attrs_until_you_find($doc, ['pubdate', 'publication_year', 'date']);
 
-    $date = try_attrs_until_you_find($doc, ['pubdate', 'publication_year', 'date']);
+  // detailed dates, gargantext-compatible
+  $month = try_attrs_until_you_find($doc, ['publication_month']);
+  $day = try_attrs_until_you_find($doc, ['publication_day']);
+  if ($month) {       $date .= "/".$month;
+    if ($day) {         $date .= "/".$day;  } }
 
-    // detailed dates, gargantext-compatible
-    $month = try_attrs_until_you_find($doc, ['publication_month']);
-    $day = try_attrs_until_you_find($doc, ['publication_day']);
-    if ($month) {       $date .= "/".$month;
-      if ($day) {         $date .= "/".$day;  } }
-
-    // "universal" template
+  // "universal" template
+  if ($outmode == 'html') {
+    $output = "<li class='searchhit' title='".$score."'>";
     $output.="<p><b>$title</b> by <span class='author'>$author</span>, <i>$source</i> [$date]</p>";
     if (strlen($keywords)) {
       $output.="<p><b>keywords:</b> $keywords</p>";
     }
     $output.="<p><span class='hit-text'>$doccontent</span></p>";
+    $output.="</li>";
   }
-
-  $output.="</li>";
-
+  // json mode
+  else {
+    $output = array(
+      "tit" => $title,
+      "au" => $author,
+      "src" => $source,
+      "kws" => $keywords,
+      "txt" => $doccontent,
+      "date" => $date,
+      "score" => $score
+    );
+  }
   return $output;
 }
 
@@ -67,6 +70,7 @@ function try_attrs_until_you_find($doc_obj, $attr_names_array) {
 
 
 $htmlout = "<ul class=infoitems>\n";
+$jsonout = array();
 $nb_displayed = 0;
 foreach ($sims as $doc => $freq) {
   // doc limit
@@ -75,16 +79,30 @@ foreach ($sims as $doc => $freq) {
   }
 
   $rowid = ltrim($doc, 'd');
-  $thisdoc = displayDoc($rowid, $freq, $base);
+  $thisdoc = displayDoc($rowid, $freq, $base, $output_mode);
   // echodump("doc", $thisdoc);
-  $htmlout .= $thisdoc."\n";
 
+  if ($output_mode == "html") {
+    $htmlout .= $thisdoc."\n";
+  }
+  else {
+    array_push($jsonout, $thisdoc);
+  }
   // doc limit
   $nb_displayed++;
 }
 $htmlout .= "</ul>\n";
 
-echo '<br/><h4><font color="#0000FF"> Full text of top '.$max_item_displayed."/".count($sims).' related publications:</font></h4>'.$htmlout;
+if ($output_mode == "html") {
+  echo '<br/><h4><font color="#0000FF"> Full text of top '.$nb_displayed."/".count($sims).' related publications:</font></h4>';
+  echo $htmlout;
+}
+else {
+  echo json_encode(array(
+    'hits' => $jsonout,
+    'nhits' => $nb_displayed
+  ));
+}
 
 // to see the entire results array:
 // --------------------------------

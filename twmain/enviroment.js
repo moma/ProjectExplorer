@@ -24,6 +24,7 @@ TW.gui.foldedSide=false;
 TW.gui.manuallyChecked = false;
 TW.gui.handpickedcolor = false;     // <= changes edge rendering strategy
 TW.gui.lastFilters = {}
+TW.gui.reldocTabs = []
 
 TW.gui.sizeRatios = [1,1]           // sizeRatios per nodetype
 

@@ -7,24 +7,54 @@ ini_set('display_startup_errors',1);
 // exemple call:
 // http://blabla/LOCALDB/info_div.php?type=semantic&bi=0&query=[%22Monte%20Carlo%22]&gexf=%22line/AXA/RiskV2PageRank1000.gexf%22&index=ISItermsAxa_2015
 
+include('tools.php');
 include('parameters_details.php');
 
-if ($_GET['dbtype'] == "CortextDB") {
+if ($output_mode == "json") {
+  header('Content-Type: application/json');
+}
+
+$dbtype = null;
+if (array_key_exists('reldbtype', $my_conf[$ntid])) {
+  $dbtype = $my_conf[$ntid]['reldbtype'];
+}
+else {
+  $guess_src = '';
+  if (array_key_exists('dbtype', $_GET))  {
+    $dbtype = $_GET['dbtype'];
+    $guess_src = "via url parameters";
+  }
+  else {
+    $dbtype = 'csv'; // new default
+    $guess_src = "by default";
+
+  }
+  errmsg("not filled", "$gexf -> node$ntid -> 'reldbtype'", "...Assuming dbtype is $dbtype ($guess_src).");
+}
+
+
+if ($dbtype == "CortextDB") {
   $base = new PDO("sqlite:".$mainpath.$graphdb);
   include('default_div.php');
 }
 
 else {
-  // to index: the "searchable columns"
-  if (! array_key_exists('toindex', $_GET)) {
-    echo('<br> info_div.php (csv mode): please provide columns to index <br>');
+  // to index: the union of "searchable columns" qcols for all nodetypes
+  $idxcolsbytype = [];
+  for ($i = 0; $i < $ntypes ; $i++) {
+    if ($my_conf[$i]['active']) {
+      $idxcolsbytype[$i] = [];
+      $idxcolsbytype[$i] = $my_conf[$i]['reldbqcols'];
+    }
+    // else {
+    //   echo("no nodetype ".$i."<br>");
+    // }
+  }
+
+  if (! $idxcolsbytype) {
+    echo('<br> info_div.php (csv mode): please provide reldbqcols param in db.json <br>');
   }
   else {
-    $idxcolsbytype = json_decode($_GET['toindex']);
-
-    // echodump("columns to index",$idxcolsbytype);
-
-
     // DO THE INDEXATION (or RETRIEVE CACHED ONE)
     // we use cache if memcached is present (and if we indexed the csv already)
     include('csv_indexation.php');
@@ -68,7 +98,7 @@ else {
 
     // DO THE SEARCH
     // -------------
-    $searchcols = json_decode($_GET['searchin']);
+    $searchcols = $my_conf[$ntid]['reldbqcols'];
 
     // a - split the query
     $qtokens = preg_split('/\W/', $_GET["query"]);
@@ -93,7 +123,7 @@ else {
       for ($l=0 ; $l < count($searchcols) ; $l++) {
 
         // set of values we could find a match in
-        $searchable = $postings[$_GET['type']][$searchcols[$l]];
+        $searchable = $postings[$ntid][$searchcols[$l]];
 
         if (array_key_exists($tok, $searchable)) {
 

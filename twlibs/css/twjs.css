@@ -94,7 +94,7 @@ html.waiting {
 }
 
 #defaultop #searchnav {
-  padding-left: 40px;
+  padding-left: 30px;
 }
 #defaultop .my-nav-input-group {
   width: 2vw !important;
@@ -118,6 +118,8 @@ html.waiting {
 #defaultop .slider-legend {
     margin: 10px 0 0 0 ;
 }
+
+
 #defaultop .settingslider {
     max-width: 90px !important;
     display: inline-block ;
@@ -135,6 +137,10 @@ html.waiting {
   line-height: 12px;
 }
 
+#left {
+  max-width:
+}
+
 /* override navbar toggle on right side when collapsed */
 #toolbar-open {
   float:left !important;
@@ -143,8 +149,8 @@ html.waiting {
 
 
 /* right info panel */
-#accordion {
-  display:none
+#varinfos-accordion {
+  display:block;
 }
 
 /* VARIAE */
@@ -178,7 +184,9 @@ html.waiting {
 
 .searchhit {
   font-family: "Roboto", "Droid Sans", sans-serif;
-  border: 1px solid #222;
+  border: 1px solid #888;
+  border-radius: 7px;
+  background-color: #FFF;
   padding: 7px 0 7px 12px;
   margin: 10px 10px 0 0;
 }
@@ -188,22 +196,11 @@ html.waiting {
   font-family: "Crete Round", "garamond", serif ;
   padding: 5px;
 }
-
-#tab-container {
-  margin: 7px;
-}
-
-#topPapers{
-    display: none;
-    margin: 7px;
-    padding: 10px 0px 10px 10px;
-    border-style:solid;
-    background-color:white;
-    color:black;
-    border: 1px solid #666;
-    -moz-border-radius: 3px;
-    -webkit-border-radius: 3px;
-    -border-radius: 3px;
+.hit-keywords {
+  color: #000;
+  font-style: italic;
+  font-family: "Crete Round", "garamond", serif ;
+  padding: 5px;
 }
 
 /* small messages */
@@ -216,20 +213,9 @@ p.micromessage{
 	font-weight: bold;
 }
 
-/* Example Styles for Demo */
-.etabs { margin: 0; padding: 0; line-height: 15px;}
-.tab { display: inline-block; zoom:1; *display:inline; background: #eee; border: solid 1px #999; border-bottom: none; -moz-border-radius: 4px 4px 0 0; -webkit-border-radius: 4px 4px 0 0; }
-.tab a { font-size: 12px; line-height: 15px; display: block; padding: 0 5px 2px 5px; outline: none; }
-.tab a:hover { text-decoration: underline; }
-.tab.active { background: #fff; padding-top: 6px; position: relative; top: 1px; border-color: #666; }
-.tab a.active { font-weight: bold; }
-.tab-container .panel-container { background: #fff; border: solid #666 1px; padding: 10px; -moz-border-radius: 0 4px 4px 4px; -webkit-border-radius: 0 4px 4px 4px; }
-.panel-container { margin-bottom: 10px; }
-
-
-
 
 /* SIDEBAR CONTENT */
+
 
 #sidebar {
   padding: 5px 0 0 5px;
@@ -253,7 +239,7 @@ p.micromessage{
 
 #localInput {
     font-size: 80%;
-    padding: 10px;
+    height: 0;  /* before activation if explorerjs.html run locally */
 }
 
 #localgraphfile {
@@ -288,7 +274,70 @@ p.micromessage{
 
 ul.infoitems {
   list-style: none;
+  padding: 0 !important;
 }
+
+/* etabs => easytabs (for selection)
+ * nav-tabs => bootstrap[-native] tabs (for reldocs)
+ */
+
+
+#selection-tabs-contnr, #reldocs-tabs-wrapper {
+ margin: 7px;
+ display: none; /* shown when selection */
+}
+
+.etabs{ margin: 0; padding: 0; line-height: 15px;}
+.tab {
+  display: inline-block; zoom:1; *display:inline; background: #eee; border: solid 1px #999; border-bottom: none; -moz-border-radius: 4px 4px 0 0; -webkit-border-radius: 4px 4px 0 0; }
+.tab a { font-size: 12px; line-height: 15px; display: block; padding: 0 5px 2px 5px; outline: none; }
+.tab a:hover { text-decoration: underline; }
+.tab.active { background: #fff; padding-top: 6px; position: relative; top: 1px; border-color: #666; }
+.tab a.active { font-weight: bold; }
+.selection-tabs-contnr .panel-container { background: #fff; border: solid #666 1px; padding: 10px; -moz-border-radius: 0 4px 4px 4px; -webkit-border-radius: 0 4px 4px 4px; }
+.panel-container { margin-bottom: 10px; }
+
+
+.tab-content {
+    padding: 10px;
+    border: 1px solid #555;
+    border-radius: 0 4px 4px 4px;
+    background-color: #BBB;
+    display: block;
+}
+
+.nav-tabs > li > a,
+.nav-tabs > li:hover > a {
+    margin-bottom: -1px;
+    padding: 4px 7px;
+    border-top: 1px solid rgb(204, 204, 204);
+    border-left: 1px solid rgb(204, 204, 204);
+    border-right: 1px solid rgb(204, 204, 204);
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+    color: white !important;
+    background-color: #3E6280;
+    border-top: 1px solid #222;
+    border-left: 1px solid #222;
+    border-right: 1px solid #222;
+}
+
+#topPapers{
+    display: none;
+    color:black;
+}
+
+
+
+
+
+
+
+
+
 
 /* switch css -- generic (src: proto.io/freebies/onoff/)*/
 .onoffswitch {

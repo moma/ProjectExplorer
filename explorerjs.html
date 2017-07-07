@@ -58,7 +58,7 @@
   <!-- NB bootstrap 3 not used for main grid (graph + bars) but inside the bars -->
   <link rel="stylesheet" href="twlibs3/bootstrap-3/css/bootstrap.min.css" media="screen">
   <link rel="stylesheet" href="twlibs3/freshslider/freshslider.css" media="screen">
-  <link rel="stylesheet" href="twlibs3/tweets/tweet.light.ltr.css" />
+  <link rel="stylesheet" href="twlibs3/tweets/tweet.light.excerpt.css" />
   <link rel="stylesheet" href="twlibs3/tweets/custom.css"/>
 
   <link rel="stylesheet" href="twlibs/css/twjs.css">
@@ -73,7 +73,14 @@
 
 
 <body>
+  <a id='mainlogo' href="https://github.com/moma/ProjectExplorer"
+        class="navbar-higher"
+        title="Project Explorer">
+        <img src="twlibs/img/logo.png"
+             style="width:50px; position:absolute; top:-8px; left:-4px; z-index:5; overflow:visible;">
+  </a>
   <div id="topbar" class="navbar navbar-default">
+
     <div class="container">
 
       <div class="navbar-collapse collapse" id="navbar-main">
@@ -82,6 +89,7 @@
             <!-- name will be replaced by TW.conf.branding, link by TW.conf.brandingLink -->
             <a href="#" class="navbar-middle navbar-brand twbrand-link">
               <span id="twbrand">TinaWebJS</span>
+
             </a>
           </li>
 
@@ -130,7 +138,7 @@
 
   <!-- ex-defaultop -->
   <div id="toolbar" class="navbar navbar-default">
-    <div id="defaultop" class="container">
+    <div id="defaultop" class="container-fluid">
 
       <div class="navbar-header">
         <button id="toolbar-open" type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#left" aria-expanded="false" aria-controls="navbar">
@@ -143,7 +151,7 @@
 
         <div id="left" class="navbar-collapse collapse">
 
-          <ul class="nav navbar-nav">
+          <ul class="nav navbar-nav navbar">
 
             <!--
             <li>
@@ -155,13 +163,6 @@
                </a>
             </li>
             -->
-
-            <li><a href="https://communityexplorer.org"
-                  class="navbar-higher"
-                  title="Community Explorer">
-                  <img src="twlibs/img/logo.png"
-                       style="width:60px; position:absolute; top:-60px; left:-75px; z-index:5; overflow:visible;">
-            </a></li>
 
             <li>
                <a>
@@ -256,9 +257,7 @@
 
           </ul>
 
-
-
-          <ul id="searchnav" class='nav navbar-nav'>
+          <ul id="searchnav" class='nav navbar-nav navbar-left'>
             <li class="navbar-lower">
               <div id="search_input_group" class="input-group input-group-sm my-nav-input-group">
                 <span class="input-group-btn crowdsourcingModule">
@@ -441,7 +440,10 @@
     </div>
   </div>
   <div id="sidebar">
-    <div id="tab-container" class='tab-container'>
+    <!-- manual file chooser if run locally -->
+    <div id="localInput"></div>
+
+    <div id="selection-tabs-contnr" class='selection-tabs-contnr'>
 
        <ul class='etabs'>
          <!-- for related elements from the combined graph (eg soc => sem) -->
@@ -460,21 +462,25 @@
        </div>
     </div>
 
-    <div class="question reldocs">
-      <div class="input-group">
-        <label for="reldocs-type" class="smlabel input-group-addon">Related documents type</label>
-        <select id="reldocs-type" name="reldocs-type"
-                class="custom-select form-control"
-                 onchange="TW.conf.relatedDocsType=this.value; getTopPapers()">
-            <option value="twitter">Twitter API</option>
-            <option value="LocalDB">Local DB query</option>
-        </select>
-      </div>
-    </div>
-    <div id="topPapers">
-    </div>
+    <!-- topPapers tabs -->
+    <div id="reldocs-tabs-wrapper" class="reldocs">
 
-    <div id="localInput"></div>
+      <!-- NB:  data-reldocstype should match TW.conf.relatedDocsType
+                and will be filled from TW.conf.relatedDocsAPIS keys
+          -->
+      <ul id="reldocs-tabs" class="nav nav-tabs" role="tablist">
+
+      </ul>
+
+      <!-- One tab pane
+           (only one with topPapers, we change content ourselves)
+         -->
+      <div class="tab-content">
+        <div id="topPapers" role="tabpanel" class="tab-pane active">
+        </div>
+      </div>
+
+    </div>
 
     <div id="information"></div>
 
@@ -483,13 +489,14 @@
 
       open/close panel from: jsfiddle.net/KyleMit/kcpma
     -->
-    <div class="panel-group" id="accordion">
+    <div class="panel-group" id="varinfos-accordion">
 
 
       <div class="panel panel-default" id="video_explanation">
         <div class="panel-heading">
           <h4 class="panel-title">
-            <a data-toggle="collapse" data-target="#le_tutorial" href="#le_tutorial">
+            <a data-toggle="collapse" data-target="#le_tutorial" href="#le_tutorial"
+               data-parent="#varinfos-accordion">
               <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
               &nbsp;Tutorial video
             </a>
@@ -497,29 +504,35 @@
         </div>
 
         <!-- TODO: outcloud the video for better stream+player -->
-        <!-- <div class="panel-collapse collapse" id="le_tutorial">
+        <div class="panel-collapse collapse" id="le_tutorial">
+          <p>here video</p>
           <video width="100%"
-            src="video/AXA2015.mp4" controls=""  frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></video>
-        </div> -->
+            src="" controls=""  frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></video>
+        </div>
       </div>
 
       <div class="panel panel-default" id="tips_panel">
         <div class="panel-heading">
           <h4 class="panel-title">
-            <a data-toggle="collapse" data-target="#tips" href="#tips">
+            <a data-toggle="collapse" data-target="#tips" href="#tips"
+               data-parent="#varinfos-accordion">
               <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
               &nbsp;Tips
             </a>
           </h4>
         </div>
 
-        <div class="panel-collapse collapse in" id="tips"></div>
+        <div class="panel-collapse collapse in" id="tips">
+          <p>here tips inserted by twmain/Tinaweb.js</p>
+        </div>
       </div>
 
-      <div class="panel panel-default" id="credits_panel">
+
+      <div class="panel panel-default" id="video_explanationw">
         <div class="panel-heading">
           <h4 class="panel-title">
-            <a data-toggle="collapse" data-target="#credits" href="#credits">
+            <a data-toggle="collapse" data-target="#credits" href="#credits"
+               data-parent="#varinfos-accordion">
               <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
               &nbsp;Credits
             </a>
@@ -527,19 +540,21 @@
         </div>
 
         <div class="panel-collapse collapse" id="credits">
-          <a href="https://bigdata.iscpif.fr/" target="_blank">
-              <img src="https://bigdata.iscpif.fr/images/logos/BIGDATA-Logo-PoweredBy-light.jpg"
-              alt="Powered by Big Data at ISCPIF"
-              style="width:85%; ">
-          </a>
-          <a href="https://github.com/moma" target="_blank">
-              <img src="twlibs/img/moma.png"
-              alt="Sciencemapping"
-              style="width:85%; ">
-          </a>
+          <p>
+            <a href="https://bigdata.iscpif.fr/" target="_blank">
+                <img src="https://bigdata.iscpif.fr/images/logos/BIGDATA-Logo-PoweredBy-light.jpg"
+                alt="Powered by Big Data at ISCPIF"
+                style="width:85%; ">
+            </a>
+            <a href="https://github.com/moma" target="_blank">
+                <img src="twlibs/img/moma.png"
+                alt="Sciencemapping"
+                style="width:85%; ">
+            </a>
+          </p>
         </div>
-
       </div>
+
     </div>
 
     <br><br>
@@ -610,12 +625,12 @@
     </div>
 
 
-    <div id="modalloader" class="modal fade">
+    <!-- <div id="modalloader" class="modal fade">
         <div id="loader" class="loader">
             <img src="twlibs/img/loader.gif"></img>
         </div>
         <div id="closeloader" data-dismiss="modal"></div>
-    </div>
+    </div> -->
 
 
     <div id="facet-options" class="modal fade">
@@ -725,10 +740,9 @@
       </div>
     </div>
 
-
+<!--
     <div id="geomapmodal" class="modal fade">
 
-        <!-- <div class="modal-content"> -->
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             <h4 class="modal-title">Geomap</h4>
@@ -736,12 +750,10 @@
           <div class="modal-body">
             <div class="geomapCont"></div>
           </div>
-        <!-- </div> -->
-          <!-- <div class="geomapCont"></div> -->
           <div id="closegeomap" data-dismiss="modal"></div>
-    </div>
+    </div> -->
 
-    <div id="heatgraph"></div>
+    <!-- <div id="heatgraph"></div> -->
 
   </div>
 

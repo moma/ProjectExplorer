@@ -122,14 +122,17 @@ function cancelSelection (fromTagCloud, settings) {
 
     // hide all selection panels
     if(fromTagCloud==false){
+        // £TODO give them all a common class
         $("#names").html("");
-        $("#topPapers").html(""); $("#topPapers").hide();
-        $("#opossiteNodes").html(""); $("#tab-container").hide();
+        $("#topPapers").html("");
+        $("#topPapers").hide();
+        $("#oppositeNodes").html("");
+        $("#selection-tabs-contnr").hide();
+        $("#reldocs-tabs-wrapper").hide();
         $("#information").html("");
         $("#searchinput").val("");
         $("#unselectbutton").hide();
         $("#lefttopbox").hide();
-        $("#tips").html(getTips());
     }
 
     // send "eraseNodeSet" event
@@ -430,21 +433,22 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
 
     //using the readmore.js (NB readmore and easytabs are not easy to harmonize)
     $("#lefttopbox").show();
-    $("#tab-container").show();
+    $("#selection-tabs-contnr").show();
     $("#names").html(namesDIV).readmore({maxHeight:100});
     if(oppos.length>0) {
       $("#oppositeNodes").html(alterNodesDIV).readmore({maxHeight:200});
     }
     $("#sameNodes").html(sameNodesDIV).readmore({maxHeight:200});
     $("#information").html(informationDIV);
-    $("#tips").html("");
 
     if (TW.conf.getRelatedDocs) {
+      $("#reldocs-tabs-wrapper").show();
       $("#topPapers").show();
       getTopPapers()
     }
     else {
       $("#topPapers").hide()
+      $("#reldocs-tabs-wrapper").hide();
     }
 }
 
