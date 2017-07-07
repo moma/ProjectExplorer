@@ -74,7 +74,7 @@
             "reldbqtable": "ISItermsWhitelistV2Oct_5",
             "reldbfile" : "wos_climate-change_title_2014-2015.db",
             "reldbtype": "CortextDB",
-            "reltemplate": "universal"
+            "reltemplate": "cortext_with_link"
           }
       }
     }
