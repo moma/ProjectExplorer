@@ -41,7 +41,7 @@ TW.conf = (function(TW){
   }
 
   // fallback topPapers API if none found by type
-  TWConf.relatedDocsAPI = "http://127.0.0.1:5000/twitter_search"
+  TWConf.relatedDocsAPI = "twbackends/phpAPI"
 
   // =======================
   // DATA FACETS AND LEGENDS
@@ -108,7 +108,7 @@ TW.conf = (function(TW){
     'weight'          : {'col': "heatmap" , 'n': 5,  'binmode': 'samerange'  },
     'Weighted Degree' : {'col': "heatmap", 'n': 8,  'binmode': 'samerange'  },
     'out-degree'      : {'col': "heatmap" , 'n': 3,  'binmode': 'samepop'  },
-    'CC'              : {'col': "cluster" ,          'binmode': 'off'},
+    'country'         : {'col': "cluster" ,          'binmode': 'off'},
     'ACR'             : {'col': "cluster" ,          'binmode': 'off'},
 'cluster_universal_index': {'col': "cluster" ,         'binmode': 'off'      },
        'community_orphan' : {'col': "cluster" ,        'binmode': 'off'      }
