@@ -158,9 +158,9 @@ TW.conf = (function(TW){
   // Modules path
   // ------------
   TWConf.paths = {
-    'ourlibs': 'twlibs',
-    'templates': "twlibs/hit_templates",
-    'modules': 'twmodules',
+    'ourlibs':   'static/tinawebJS/twlibs',
+    'templates': 'static/tinawebJS/twlibs/hit_templates',
+    'modules':   'twmodules',
 
     'sourceFile': "",           // server-side .gexf|.json default source
     'sourceMenu': "db.json"     // ...or server-side gexf default source list

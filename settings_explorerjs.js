@@ -6,8 +6,8 @@ TW.conf = (function(TW){
 
   let TWConf = {}
 
-  TWConf.branding = 'ProjectExplorer'  // <--- name displayed in upper left
-  TWConf.brandingLink = 'https://github.com/moma/ProjectExplorer'   // <--- link to "home"
+  TWConf.branding = 'Community Explorer 2'  // <--- name displayed in upper left
+  TWConf.brandingLink = 'https://communityexplorer.org'   // <--- link to "home"
 
 
   // ==========================
@@ -17,7 +17,7 @@ TW.conf = (function(TW){
   // Graph data source
   // -----------------
   // the graph input depends on TWConf.sourcemode (or manual url arg 'sourcemode')
-  TWConf.sourcemode = "servermenu"   // accepted: "api" | "serverfile" | "servermenu" | "localfile"
+  TWConf.sourcemode = "api"   // accepted: "api" | "serverfile" | "servermenu" | "localfile"
 
   // ...or remote bridge to default source api ajax queries
   TWConf.sourceAPI={};
@@ -28,7 +28,7 @@ TW.conf = (function(TW){
   // Related documents (topPapers) data source
   // -----------------------------------------
 
-  TWConf.getRelatedDocs = true
+  TWConf.getRelatedDocs = false
   TWConf.relatedDocsMax = 10
 
   TWConf.relatedDocsType = "twitter"      // accepted: "twitter" | "LocalDB"
@@ -41,7 +41,7 @@ TW.conf = (function(TW){
   }
 
   // fallback topPapers API if none found by type
-  TWConf.relatedDocsAPI = "twbackends/phpAPI"
+  TWConf.relatedDocsAPI = "http://127.0.0.1:5000/twitter_search"
 
   // =======================
   // DATA FACETS AND LEGENDS
@@ -158,9 +158,9 @@ TW.conf = (function(TW){
   // Modules path
   // ------------
   TWConf.paths = {
-    'ourlibs': 'twlibs',
-    'templates': "twlibs/hit_templates",
-    'modules': 'twmodules',
+    'ourlibs':   'static/tinawebJS/twlibs',
+    'templates': 'static/tinawebJS/twlibs/hit_templates',
+    'modules':   'twmodules',
 
     'sourceFile': "",           // server-side .gexf|.json default source
     'sourceMenu': "db.json"     // ...or server-side gexf default source list
@@ -213,7 +213,7 @@ TW.conf = (function(TW){
   // if fa2Available, the auto-run config:
 
     TWConf.fa2Enabled= true;        // fa2 auto-run at start and after graph modified ?
-    TWConf.fa2Milliseconds=2000;    // duration of auto-run
+    TWConf.fa2Milliseconds=10000;    // duration of auto-run
     TWConf.minNodesForAutoFA2 = 5   // graph size threshold to auto-run
 
 
@@ -270,10 +270,10 @@ TW.conf = (function(TW){
       twSelectedColor: "default",     // "node" for a label bg like the node color,
                                    // "default" for note-like yellow
 
-      // not selected <=> grey
-      twNodesGreyOpacity: .35,                       // smaller value: more grey
+      // not selected <=> (1-greyness)
+      twNodesGreyOpacity: .5,                       // smaller value: more grey
       twBorderGreyColor: "rgba(100, 100, 100, 0.5)",
-      twEdgeGreyColor: "rgba(100, 100, 100, 0.2)",
+      twEdgeGreyColor: "rgba(100, 100, 100, 0.3)",
   };
   // NB: sigmaJsDrawingProperties are available as 'settings' in all renderers
   // cf. https://github.com/jacomyal/sigma.js/wiki/Settings#renderers-settings
@@ -283,7 +283,7 @@ TW.conf = (function(TW){
   // -----------------------------------
   // mouse captor zoom limits
   TWConf.zoomMin = .015625         // for zoom IN   (ex: 1/64 to allow zoom x64)
-  TWConf.zoomMax = 2               // for zoom OUT
+  TWConf.zoomMax = 8               // for zoom OUT
 
   // circle selection cursor
   TWConf.circleSizeMin = 0;
@@ -299,7 +299,7 @@ TW.conf = (function(TW){
 
   // relative sizes (iff ChangeType == both nodetypes)
   TWConf.sizeMult = [];
-  TWConf.sizeMult[0] = 1.0;      // ie for node type 0 (<=> sem)
+  TWConf.sizeMult[0] = 1.0;     // ie for node type 0 (<=> sem)
   TWConf.sizeMult[1] = 10.0;     // ie for node type 1 (<=> soc)
 
 
