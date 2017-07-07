@@ -10,6 +10,10 @@ ini_set('display_startup_errors',1);
 include('tools.php');
 include('parameters_details.php');
 
+if ($output_mode == "json") {
+  header('Content-Type: application/json');
+}
+
 $dbtype = null;
 if (array_key_exists('reldbtype', $my_conf[$ntid])) {
   $dbtype = $my_conf[$ntid]['reldbtype'];

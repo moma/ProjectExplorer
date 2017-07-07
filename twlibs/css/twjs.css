@@ -196,6 +196,13 @@ html.waiting {
   font-family: "Crete Round", "garamond", serif ;
   padding: 5px;
 }
+.hit-keywords {
+  color: #000;
+  font-style: italic;
+  font-family: "Crete Round", "garamond", serif ;
+  padding: 5px;
+}
+
 /* small messages */
 p.micromessage{
   font-size: 85%;

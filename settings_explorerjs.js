@@ -159,7 +159,9 @@ TW.conf = (function(TW){
   // ------------
   TWConf.paths = {
     'ourlibs': 'twlibs',
+    'templates': "twlibs/hit_templates",
     'modules': 'twmodules',
+
     'sourceFile': "",           // server-side .gexf|.json default source
     'sourceMenu': "db.json"     // ...or server-side gexf default source list
   }
