@@ -46,9 +46,12 @@ else {
       $idxcolsbytype[$i] = [];
       $idxcolsbytype[$i] = $my_conf[$i]['reldbqcols'];
     }
-    // else {
-    //   echo("no nodetype ".$i."<br>");
-    // }
+    else {
+      echo("<p>Your settings for relatedDocsType are set on a local database,
+          but your servermenu file does not provide any information about
+          the CSV or DB table to query for related documents
+          (on nodetypeId ".$i.")</p>");
+    }
   }
 
   if (! $idxcolsbytype) {

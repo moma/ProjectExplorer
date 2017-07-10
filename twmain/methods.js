@@ -87,6 +87,11 @@ TW.resetGraph = function() {
   TW.labels = []
   TW.Relations = {}
   TW.states = [TW.initialSystemState]
+  TW.lastRelDocQueries = {}
+
+  // reset related docs tabs
+  document.getElementById("reldocs-tabs").innerHTML=""
+  TW.gui.reldocTabs = [{},{}]
 
   // reset rendering gui flags
   TW.gui.selectionActive = false
@@ -444,7 +449,7 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
     if (TW.conf.getRelatedDocs) {
       $("#reldocs-tabs-wrapper").show();
       $("#topPapers").show();
-      getTopPapers()
+      // getTopPapers()
     }
     else {
       $("#topPapers").hide()

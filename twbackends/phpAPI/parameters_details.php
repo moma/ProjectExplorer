@@ -48,13 +48,13 @@ $conf = read_conf($mainpath.$project_menu_path, $ntypes, $supported_dbtypes);
 // =======================================
 
 $gexf= str_replace('"','',$_GET["gexf"]);
-$ndtype = $_GET["type"];
-$ntid = null;
+$ntid = $_GET["type"];
+$ndtype = null;
 $my_conf = null;
 
-// legacy types => generic types with 0 as default
-if ($ndtype == 'social')   {  $ntid = 1;  }
-else                       {  $ntid = 0;  }
+// new types => legacy types (with semantic as default)
+if ($ntid == 0)   {  $ndtype = 'social' ;   }
+else              {  $ndtype = 'semantic';  }
 
 // echodump("params: node type id", $ntid);
 

@@ -10,7 +10,8 @@
               "file": "shale_and_ice.csv",
               "qcols": ["title"],
               "template": "bib_details"
-            }
+            },
+            "twitter": {}
           }
         }
       },
@@ -22,7 +23,8 @@
               "file": "model_calibration.csv",
               "qcols": ["title"],
               "template": "bib_details"
-            }
+            },
+            "twitter": {}
           }
         }
       }
@@ -48,7 +50,8 @@
               "file": "mini_for_csv.csv",
               "qcols": ["title","keywords","text"],
               "template": "bib_details"
-            }
+            },
+            "twitter": {}
           }
         },
         "node1": {
@@ -71,10 +74,10 @@
     "first" : "ProgrammeDesCandidats.enrichi.gexf",
     "graphs": {
       "ProgrammeDesCandidats.enrichi.gexf": {
-        "node0": { "name": "terms" }
+        "node0": { "name": "terms", "reldbs": { "twitter": {} } }
       },
       "ProgrammeDesCandidats.gexf": {
-        "node0": { "name": "terms" }
+        "node0": { "name": "terms", "reldbs": { "twitter": {} } }
       }
     }
   },
@@ -88,7 +91,8 @@
               "file": "wos_climate-change_title_2014-2015.db",
               "qtable": "ISItermsWhitelistV2Oct_5",
               "reltemplate": "cortext_with_link"
-            }
+            },
+            "twitter": {}
           }
         }
       }

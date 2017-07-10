@@ -3,7 +3,12 @@
 // this class will be instanciated once (and exposed as TW.instance.selNgn)
 function SelectionEngine() {
 
+
     // creates the union of prevsels and currsels, if addvalue
+    // called for:
+    //    clickNode selections
+    //    circleArea selections
+    //    searchInput selections
     this.SelectorEngine = function( args ) {
 
         // console.log("addvalue, prevsels, currsels", args)
@@ -18,48 +23,25 @@ function SelectionEngine() {
         // currsels = bunch of nodes from a click in the map
         if(args.addvalue) {
             // FOR SIMPLE UNIQUE UNION
-            targeted = args.currsels.concat(args.prevsels.filter(function (item) {
-                return args.currsels.indexOf(item) < 0;
-            }));
-        } else targeted = args.currsels;
+            if ( TW.SystemState().level) {
+              targeted = args.currsels.concat(args.prevsels.filter(function (item) {
+                  return args.currsels.indexOf(item) < 0;
+                }));
+            }
+            // meso view: complementary select if disjoint, deselect if overlap
+            else {
+              targeted = args.currsels.filter(function (item) {
+                  return args.prevsels.indexOf(item) < 0;
+              }).concat(args.prevsels.filter(function (item) {
+                  return args.currsels.indexOf(item) < 0;
+                }));;
+            }
+        }
+        else {
+          targeted = args.currsels;
+        }
 
         if(targeted.length==0) return [];
-
-        // ------------ FOR SETWISE COMPLEMENT ---------------------->8---------
-        // if(args.prevsels.length>0) {
-        //     if(JSON.stringify(args.prevsels)==JSON.stringify(targeted)) {
-        //         // this is just effective for Add[ ] ...
-        //         // If previous selection is equal to the current one, you've nothing :D
-        //         cancelSelection(false);
-        //         return [];
-        //     }
-        //     var inter = this.intersect_safe(args.prevsels,targeted)
-        //     if(inter.length>0) {
-        //         var blacklist = {} , whitelist = {};
-        //         for(var k in inter) blacklist[inter[k]]=true;
-        //         for(var k in args.prevsels){
-        //             let nid = args.prevsels[k]
-        //             if(!blacklist[nid]) {
-        //                 whitelist[nid] = true;
-        //             }
-        //         }
-        //         for(var k in targeted){
-        //             let nid = targeted[k]
-        //             if(!blacklist[nid]) {
-        //                 whitelist[nid] = true;
-        //             }
-        //         }
-        //         targeted = Object.keys(whitelist);
-        //     } else {// inter = 0 ==> click in other portion of the graph (!= current selection)
-        //         // Union!
-        //         if(args.addvalue) {
-        //             targeted = currsels.concat(args.prevsels.filter(function (item) {
-        //                 return currsels.indexOf(item) < 0;
-        //             }));
-        //         }
-        //     }
-        // }
-        // ---------------------------------------------------------->8---------
 
         return targeted;
     };
@@ -386,53 +368,6 @@ var TinaWebJS = function ( sigmacanvas ) {
           updateHash:false,
           defaultTab: 'li#tabneigh'
         });
-
-        // initialize reldocs tabs
-        if (TW.conf.getRelatedDocs) {
-          // POSSible: create them on a settings list (currently in the HTML)
-
-          let ul = document.getElementById('reldocs-tabs')
-
-          let tabEls = []
-          for (var possibleAPI in TW.conf.relatedDocsAPIS) {
-            // create valid tabs
-            let newLi = document.createElement('li')
-            newLi.setAttribute("role", "presentation")
-            let newRDTab =  document.createElement('a')
-            newRDTab.text = possibleAPI
-            newRDTab.href = '#topPapers'
-            newRDTab.setAttribute("role", "tab")
-            newRDTab.dataset.toggle = 'tab'
-            newRDTab.dataset.reldocstype = possibleAPI
-
-            if (possibleAPI == TW.conf.relatedDocsType) {
-              newLi.setAttribute("class", "active")
-            }
-
-            // add to DOM
-            ul.append(newLi)
-            newLi.append(newRDTab)
-
-            // keep access
-            TW.gui.reldocTabs[possibleAPI] = newRDTab
-          }
-
-          // afterwards to get all types and the active type
-          for (let rdtype in TW.gui.reldocTabs) {
-            let tab = TW.gui.reldocTabs[rdtype]
-
-            // init toggle mecanisms (bootstrap.native/#componentTab)
-            // (just used for the tabs active/inactive handling,
-            //  content is *always* topPapers and we modify it ourselves)
-            new Tab(tab);
-
-            // add handler to switch relatedDocsType
-            tab.addEventListener('click', function(){
-              TW.conf.relatedDocsType = this.dataset.reldocstype
-              getTopPapers()
-            })
-          }
-        }
 
         // show any already existing panel
         document.getElementById("graph-panels").style.display = "block"
@@ -763,11 +698,6 @@ var TinaWebJS = function ( sigmacanvas ) {
           }
         })
 
-        // select currently preferred reldoc tab
-        if (TW.conf.getRelatedDocs && document.getElementById('reldocs-tabs')) {
-          TW.gui.reldocTabs[TW.conf.relatedDocsType].Tab.show()
-        }
-
         $("#tips").html(getTips());
 
         // we start with no selection
@@ -949,10 +879,6 @@ var TinaWebJS = function ( sigmacanvas ) {
       //              used for area (with global: TW.gui.circleSize)
       // 'clickNode'- simple click, second event if one node
 
-      // POSS easy in new sigma.js:
-      //       add doubleClick to select node + neighboors
-
-
       // when circle area select
       // ========================
       // 1st event, even before we know if there are nodes
@@ -1014,6 +940,15 @@ var TinaWebJS = function ( sigmacanvas ) {
         }
         // case with a selector circle cursor handled
         // just before, at click event
+      })
+
+
+      // doubleClick creates new meso view around clicked node
+      partialGraph.bind('doubleClickNode', function(e) {
+        var theNodeId = e.data.node.id
+        selInst.MultipleSelection2( {nodes:[theNodeId]} )
+        let newZoomState = Object.assign(TW.SystemState(), {level:false})
+        changeLevel(newZoomState)
       })
 
       // when click in the empty background
@@ -1118,10 +1053,72 @@ var TinaWebJS = function ( sigmacanvas ) {
         }
       });
 
-      if (TW.conf.filterSliders) {
+      // initialize reldocs tabs
+      if (TW.conf.getRelatedDocs) {
+        let ul = document.getElementById('reldocs-tabs')
 
-        // the indice of the first cat to be active (ex: '1')
-        let activeId = initialActivetypes.indexOf(true)
+        let tabEls = []
+
+        // for all existing nodetypes
+        for (let nodetypeId in initialActivetypes) {
+
+          for (var possibleAPI in TW.gmenuInfos[TW.File][nodetypeId]["reldbs"]){
+            // create valid tabs
+            let newLi = document.createElement('li')
+            newLi.setAttribute("role", "presentation")
+            let newRDTab =  document.createElement('a')
+            newRDTab.text = `${possibleAPI} (${nodetypeId==0?'sem':'soc'})`
+            newRDTab.href = '#topPapers'
+            newRDTab.setAttribute("role", "tab")
+            newRDTab.dataset.toggle = 'tab'
+            newRDTab.dataset.reldocstype = possibleAPI
+            newRDTab.dataset.nodetype = nodetypeId
+            newRDTab.setAttribute("class", `for-nodecategory-${nodetypeId}`)
+
+            if (possibleAPI == TW.conf.relatedDocsType) {
+              newLi.setAttribute("class", "active")
+            }
+
+            // add to DOM
+            ul.append(newLi)
+            newLi.append(newRDTab)
+
+            // keep access
+            TW.gui.reldocTabs[nodetypeId][possibleAPI] = newRDTab
+          }
+
+          // afterwards to already have all initialized rdtypes in DOM
+          for (let rdtype in TW.gui.reldocTabs[nodetypeId]) {
+
+            console.log("init for type", rdtype)
+            let tab = TW.gui.reldocTabs[nodetypeId][rdtype]
+
+            // init toggle mecanisms (bootstrap.native/#componentTab)
+            // (just used for the tabs active/inactive handling,
+            //  content is *always* topPapers and we modify it ourselves)
+            new Tab(tab);
+
+            // add handler to switch relatedDocsType
+            tab.addEventListener('click', function(e){
+              let reldType = e.target.dataset.reldocstype
+              let nodeType = e.target.dataset.nodetype
+              let qWords = queryForType(nodeType)
+              console.log("getTopPapers", qWords, nodeType, reldType)
+              getTopPapers(qWords, nodeType, reldType, 'topPapers')
+            })
+          }
+
+          // select currently preferred reldoc tabs
+          if (initialActivetypes[nodetypeId]) {
+            TW.gui.reldocTabs[nodetypeId][TW.conf.relatedDocsType].Tab.show()
+          }
+        }
+      }
+
+
+      // select currently active sliders
+      if (TW.conf.filterSliders) {
+        // also for all active cats
         for (let activeId in initialActivetypes) {
           if (initialActivetypes[activeId]) {
             // args: for display: target div ,

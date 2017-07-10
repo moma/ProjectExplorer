@@ -16,6 +16,7 @@ TW.labels=[];           // fulltext search list
 
 TW.categories = [];     // possible node types and their inverted map
 TW.catDict = {};
+TW.lastRelDocQueries = {}  // avoids resending ajax if same query twice in a row
 
 // used iff servermenu
 TW.gmenuPaths={};       // map [graphname => graphsource] for file selectors
@@ -293,7 +294,7 @@ function syncRemoteGraphData () {
                 else {
                   TW.gmenuInfos[path+"/"+aGraph] = null
                 }
-                // ^^^^^^ FIXME finish implementing new specifications
+
 
                 let cssFileSelected = (TW.File==(path+"/"+aGraph))?"selected":""
                 files_selector += '<option '+cssFileSelected+'>'+graphBasename+'</option>'
@@ -493,6 +494,9 @@ function mainStartGraph(inFormat, inData, twInstance) {
         initialActivetypes,      // to init node sliders and .class gui elements
         initialActivereltypes    // to init edge sliders
       )
+
+      // set the initial color
+      TW.gui.elContainer.style.backgroundColor =  TW.conf.normalBackground
 
       // [ / Poblating the Sigma-Graph ]
 
