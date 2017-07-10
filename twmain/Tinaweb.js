@@ -3,7 +3,12 @@
 // this class will be instanciated once (and exposed as TW.instance.selNgn)
 function SelectionEngine() {
 
+
     // creates the union of prevsels and currsels, if addvalue
+    // called for:
+    //    clickNode selections
+    //    circleArea selections
+    //    searchInput selections
     this.SelectorEngine = function( args ) {
 
         // console.log("addvalue, prevsels, currsels", args)
@@ -18,48 +23,25 @@ function SelectionEngine() {
         // currsels = bunch of nodes from a click in the map
         if(args.addvalue) {
             // FOR SIMPLE UNIQUE UNION
-            targeted = args.currsels.concat(args.prevsels.filter(function (item) {
-                return args.currsels.indexOf(item) < 0;
-            }));
-        } else targeted = args.currsels;
+            if ( TW.SystemState().level) {
+              targeted = args.currsels.concat(args.prevsels.filter(function (item) {
+                  return args.currsels.indexOf(item) < 0;
+                }));
+            }
+            // meso view: complementary select if disjoint, deselect if overlap
+            else {
+              targeted = args.currsels.filter(function (item) {
+                  return args.prevsels.indexOf(item) < 0;
+              }).concat(args.prevsels.filter(function (item) {
+                  return args.currsels.indexOf(item) < 0;
+                }));;
+            }
+        }
+        else {
+          targeted = args.currsels;
+        }
 
         if(targeted.length==0) return [];
-
-        // ------------ FOR SETWISE COMPLEMENT ---------------------->8---------
-        // if(args.prevsels.length>0) {
-        //     if(JSON.stringify(args.prevsels)==JSON.stringify(targeted)) {
-        //         // this is just effective for Add[ ] ...
-        //         // If previous selection is equal to the current one, you've nothing :D
-        //         cancelSelection(false);
-        //         return [];
-        //     }
-        //     var inter = this.intersect_safe(args.prevsels,targeted)
-        //     if(inter.length>0) {
-        //         var blacklist = {} , whitelist = {};
-        //         for(var k in inter) blacklist[inter[k]]=true;
-        //         for(var k in args.prevsels){
-        //             let nid = args.prevsels[k]
-        //             if(!blacklist[nid]) {
-        //                 whitelist[nid] = true;
-        //             }
-        //         }
-        //         for(var k in targeted){
-        //             let nid = targeted[k]
-        //             if(!blacklist[nid]) {
-        //                 whitelist[nid] = true;
-        //             }
-        //         }
-        //         targeted = Object.keys(whitelist);
-        //     } else {// inter = 0 ==> click in other portion of the graph (!= current selection)
-        //         // Union!
-        //         if(args.addvalue) {
-        //             targeted = currsels.concat(args.prevsels.filter(function (item) {
-        //                 return currsels.indexOf(item) < 0;
-        //             }));
-        //         }
-        //     }
-        // }
-        // ---------------------------------------------------------->8---------
 
         return targeted;
     };
@@ -949,10 +931,6 @@ var TinaWebJS = function ( sigmacanvas ) {
       //              used for area (with global: TW.gui.circleSize)
       // 'clickNode'- simple click, second event if one node
 
-      // POSS easy in new sigma.js:
-      //       add doubleClick to select node + neighboors
-
-
       // when circle area select
       // ========================
       // 1st event, even before we know if there are nodes
@@ -1014,6 +992,15 @@ var TinaWebJS = function ( sigmacanvas ) {
         }
         // case with a selector circle cursor handled
         // just before, at click event
+      })
+
+
+      // doubleClick creates new meso view around clicked node
+      partialGraph.bind('doubleClickNode', function(e) {
+        var theNodeId = e.data.node.id
+        selInst.MultipleSelection2( {nodes:[theNodeId]} )
+        let newZoomState = Object.assign(TW.SystemState(), {level:false})
+        changeLevel(newZoomState)
       })
 
       // when click in the empty background

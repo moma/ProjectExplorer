@@ -3,6 +3,7 @@
 // GUI commodity pointers
 TW.gui = {}
 TW.gui.elHtml = document.getElementsByTagName('html')[0]
+TW.gui.elContainer = document.getElementById('sigma-contnr')
 TW.gui.sheets = {}
 for (var i in document.styleSheets) {
   if (/twjs.css$/.test(document.styleSheets[i].href)) {
@@ -376,7 +377,9 @@ function changeType(optionaltypeFlag) {
       sourceNids = TW.partialGraph.graph.nodes().map(function(n){return n.id})
     }
     let targetNids = {}
-    if (!mixedState)       targetNids = getNeighbors(sourceNids, 'XR')
+    if (!mixedState && outgoing.level) {
+      targetNids = getNeighbors(sourceNids, 'XR')
+    }
     else {
       // in mixed state we need to separate those already tgt state from others
       let alreadyOk = TW.partialGraph.graph.getNodesByType(typeFlag)
@@ -385,7 +388,6 @@ function changeType(optionaltypeFlag) {
       let needTransition = []
       for (var i in sourceNids) {
         let nid = sourceNids[i]
-        console.log('nid', nid)
         if (alreadyOkLookup[nid])         targetNids[nid] = true
         else                              needTransition.push(nid)
       }
@@ -413,7 +415,17 @@ function changeType(optionaltypeFlag) {
 
     // 5 - define the new selection
     let newselsArr = []
-    if (outgoing.selectionNids.length)  newselsArr = Object.keys(targetNids)
+    if (outgoing.selectionNids.length) {
+      if (typeFlag != 'all') {
+        newselsArr = Object.keys(targetNids)
+      }
+      else {
+        // not extending selection to all transitive neighbors
+        // makes the operation stable (when clicked several times,
+        // we extend slower towards transitive closure)
+        newselsArr = outgoing.selectionNids
+      }
+    }
 
 
     // 6 - effect the changes on nodes
@@ -546,7 +558,7 @@ function getNeighbors(sourceNids, relKey) {
 //
 //  POSS: rewrite using .hidden instead of add/remove
 //
-function changeLevel() {
+function changeLevel(optionalTgtState) {
     // show waiting cursor
     TW.gui.elHtml.classList.add('waiting');
 
@@ -554,7 +566,8 @@ function changeLevel() {
     setTimeout(function() {
       var present = TW.SystemState(); // Last
 
-      var sels = present.selectionNids ;//[144, 384, 543]//TW.states[last].selectionNids;
+      // array of nids [144, 384, 543]
+      let sels = optionalTgtState ? optionalTgtState.selectionNids : present.selectionNids
 
       let selsChecker = {}
       for (let i in sels) {
@@ -602,9 +615,12 @@ function changeLevel() {
           }
       }
 
-      var futurelevel = null
+      var futurelevel = optionalTgtState ? optionalTgtState.level : !present.level
 
-      if(present.level) { // [Change to Local] when level=Global(1)
+      if(!futurelevel) { // [Change to Local] when level=Global(1)
+
+        TW.gui.elContainer.style.backgroundColor = TW.conf.mesoBackground
+
         for(var nid in nodesToAdd)
           add1Elem(nid)
         for(var eid in edgesToAdd)
@@ -621,10 +637,9 @@ function changeLevel() {
                   }
               }
           }
-
-          futurelevel = false;
-
       } else { // [Change to Global] when level=Local(0)
+
+          TW.gui.elContainer.style.backgroundColor =  TW.conf.normalBackground
 
           // var t0 = performance.now()
           for(var nid in TW.Nodes) {
@@ -639,17 +654,15 @@ function changeLevel() {
                   add1Elem(eid)
             }
           }
-
           // var t1 = performance.now()
-          futurelevel = true;
-
           // console.log("returning to global took:", t1-t0)
       }
 
       // sels and activereltypes unchanged, no need to call MultipleSelection2
 
       TW.pushGUIState({
-          level: futurelevel
+          level: futurelevel,
+          sels: sels
       })
 
       TW.partialGraph.camera.goTo({x:0, y:0, ratio:1.2, angle: 0})

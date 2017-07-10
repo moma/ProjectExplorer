@@ -281,9 +281,13 @@ TW.conf = (function(TW){
 
   // tina environment rendering settings
   // -----------------------------------
+  // normal and meso level background colors
+  TWConf.normalBackground = '#fff'             // <= should match css default
+  TWConf.mesoBackground = '#fcfcea'
+
   // mouse captor zoom limits
   TWConf.zoomMin = .015625         // for zoom IN   (ex: 1/64 to allow zoom x64)
-  TWConf.zoomMax = 8               // for zoom OUT
+  TWConf.zoomMax = 2               // for zoom OUT
 
   // circle selection cursor
   TWConf.circleSizeMin = 0;

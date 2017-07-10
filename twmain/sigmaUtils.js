@@ -98,6 +98,7 @@ var SigmaUtils = function () {
 
       // apply type-specific size slider ratios
       var typeId = TW.categories.indexOf(node.type) || 0
+      size *= TW.gui.sizeRatios[typeId]
       fontSize *= TW.gui.sizeRatios[typeId]
 
 
@@ -121,7 +122,7 @@ var SigmaUtils = function () {
         if (settings('twSelectedColor') == "node")
           context.fillStyle = TW.gui.handpickedcolor? node.customAttrs.alt_color : node.color; // node's
         else
-          context.fillStyle = "#F7E521"; // yellow
+          context.fillStyle = "#fff"; // default
 
         if (node.label && settings('labelHoverShadow')) {
           context.shadowOffsetX = 0;
@@ -137,7 +138,7 @@ var SigmaUtils = function () {
             context.measureText(node.label).width + fontSize / 2 + size + 12
           );
           h = Math.round(fontSize + 4);
-          e = Math.round(fontSize / 2 + 2);
+          e = Math.round(fontSize / 2 + 4);
 
           context.moveTo(x, y + e);
           context.arcTo(x, y, x + e, y, e);
@@ -170,7 +171,7 @@ var SigmaUtils = function () {
 
       context.fillText(
         node.label,
-        Math.round(X + size + 3),
+        Math.round(X + size + 5),
         Math.round(Y + fontSize / 3)
       );
     };
@@ -421,6 +422,7 @@ var SigmaUtils = function () {
 
         // apply type-specific size slider ratios
         var typeId = TW.categories.indexOf(node.type) || 0
+        size *= TW.gui.sizeRatios[typeId]
         fontSize *= TW.gui.sizeRatios[typeId]
 
         if (!node.customAttrs.active) {
@@ -452,7 +454,7 @@ var SigmaUtils = function () {
               context.measureText(node.label).width + fontSize / 2 + size + 7
             );
             h = Math.round(fontSize + 4);
-            e = Math.round(fontSize / 2 + 2);
+            e = Math.round(fontSize / 2 + 4);
 
             context.moveTo(x, y + e);
             context.arcTo(x, y, x + e, y, e);
@@ -503,7 +505,7 @@ var SigmaUtils = function () {
 
             context.fillText(
               node.label,
-              Math.round(node[prefix + 'x'] + size + 3),
+              Math.round(node[prefix + 'x'] + size + 5),
               Math.round(node[prefix + 'y'] + fontSize / 3)
             );
           }
