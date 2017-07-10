@@ -121,7 +121,7 @@ var SigmaUtils = function () {
         if (settings('twSelectedColor') == "node")
           context.fillStyle = TW.gui.handpickedcolor? node.customAttrs.alt_color : node.color; // node's
         else
-          context.fillStyle = "#F7E521"; // yellow
+          context.fillStyle = "#fff"; // default
 
         if (node.label && settings('labelHoverShadow')) {
           context.shadowOffsetX = 0;
