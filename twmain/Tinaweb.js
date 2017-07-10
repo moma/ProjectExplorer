@@ -931,10 +931,6 @@ var TinaWebJS = function ( sigmacanvas ) {
       //              used for area (with global: TW.gui.circleSize)
       // 'clickNode'- simple click, second event if one node
 
-      // POSS easy in new sigma.js:
-      //       add doubleClick to select node + neighboors
-
-
       // when circle area select
       // ========================
       // 1st event, even before we know if there are nodes
@@ -996,6 +992,15 @@ var TinaWebJS = function ( sigmacanvas ) {
         }
         // case with a selector circle cursor handled
         // just before, at click event
+      })
+
+
+      // doubleClick creates new meso view around clicked node
+      partialGraph.bind('doubleClickNode', function(e) {
+        var theNodeId = e.data.node.id
+        selInst.MultipleSelection2( {nodes:[theNodeId]} )
+        let newZoomState = Object.assign(TW.SystemState(), {level:false})
+        changeLevel(newZoomState)
       })
 
       // when click in the empty background

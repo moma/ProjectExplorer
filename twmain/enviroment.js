@@ -557,7 +557,7 @@ function getNeighbors(sourceNids, relKey) {
 //
 //  POSS: rewrite using .hidden instead of add/remove
 //
-function changeLevel() {
+function changeLevel(optionalTgtState) {
     // show waiting cursor
     TW.gui.elHtml.classList.add('waiting');
 
@@ -565,7 +565,8 @@ function changeLevel() {
     setTimeout(function() {
       var present = TW.SystemState(); // Last
 
-      var sels = present.selectionNids ;//[144, 384, 543]//TW.states[last].selectionNids;
+      // array of nids [144, 384, 543]
+      let sels = optionalTgtState ? optionalTgtState.selectionNids : present.selectionNids
 
       let selsChecker = {}
       for (let i in sels) {
@@ -613,9 +614,9 @@ function changeLevel() {
           }
       }
 
-      var futurelevel = null
+      var futurelevel = optionalTgtState ? optionalTgtState.level : !present.level
 
-      if(present.level) { // [Change to Local] when level=Global(1)
+      if(!futurelevel) { // [Change to Local] when level=Global(1)
         for(var nid in nodesToAdd)
           add1Elem(nid)
         for(var eid in edgesToAdd)
@@ -632,9 +633,6 @@ function changeLevel() {
                   }
               }
           }
-
-          futurelevel = false;
-
       } else { // [Change to Global] when level=Local(0)
 
           // var t0 = performance.now()
@@ -650,17 +648,15 @@ function changeLevel() {
                   add1Elem(eid)
             }
           }
-
           // var t1 = performance.now()
-          futurelevel = true;
-
           // console.log("returning to global took:", t1-t0)
       }
 
       // sels and activereltypes unchanged, no need to call MultipleSelection2
 
       TW.pushGUIState({
-          level: futurelevel
+          level: futurelevel,
+          sels: sels
       })
 
       TW.partialGraph.camera.goTo({x:0, y:0, ratio:1.2, angle: 0})
