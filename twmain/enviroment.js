@@ -3,6 +3,7 @@
 // GUI commodity pointers
 TW.gui = {}
 TW.gui.elHtml = document.getElementsByTagName('html')[0]
+TW.gui.elContainer = document.getElementById('sigma-contnr')
 TW.gui.sheets = {}
 for (var i in document.styleSheets) {
   if (/twjs.css$/.test(document.styleSheets[i].href)) {
@@ -617,6 +618,9 @@ function changeLevel(optionalTgtState) {
       var futurelevel = optionalTgtState ? optionalTgtState.level : !present.level
 
       if(!futurelevel) { // [Change to Local] when level=Global(1)
+
+        TW.gui.elContainer.style.backgroundColor = TW.conf.mesoBackground
+
         for(var nid in nodesToAdd)
           add1Elem(nid)
         for(var eid in edgesToAdd)
@@ -634,6 +638,8 @@ function changeLevel(optionalTgtState) {
               }
           }
       } else { // [Change to Global] when level=Local(0)
+
+          TW.gui.elContainer.style.backgroundColor =  TW.conf.normalBackground
 
           // var t0 = performance.now()
           for(var nid in TW.Nodes) {
