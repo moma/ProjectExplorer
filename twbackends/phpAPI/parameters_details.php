@@ -21,7 +21,10 @@ $mainpath=dirname(dirname(getcwd()))."/"; // default fs path to ProjectExplorer 
 $project_menu_path = "db.json";
 
 // 3 - others
-$ntypes = 2;         // max node types
+$ntypes = 2;  // max node types   (node0 & node1)
+
+// accepted entries in db.json -> source -> reldbs -> dbtype
+$supported_dbtypes = ['csv', 'CortextDB'];
 
 // number of docs to display setting
 $max_item_displayed = 7;
@@ -38,7 +41,7 @@ $memport = 11211;
 // CONFIGURATION PARAMS
 // --------------------
 // parse db.json project menu and create a conf by file
-$conf = read_conf($mainpath.$project_menu_path, $ntypes);
+$conf = read_conf($mainpath.$project_menu_path, $ntypes, $supported_dbtypes);
 
 // =======================================
 // echodump("== READ CONF ==<br>", $conf);

@@ -17,7 +17,7 @@ function errmsg($message, $context, $more = "") {
 
 // reading db.json associations
 //    source graph file <=> (db, dbtype, cols) as relatedDocs php API
-function read_conf($filepath, $ntypes) {
+function read_conf($filepath, $ntypes, $our_dbtypes) {
   $project_menu_fh = fopen($filepath, "r");
   $json_st = '';
   while (!feof($project_menu_fh)) {
@@ -37,7 +37,7 @@ function read_conf($filepath, $ntypes) {
       continue;
     }
     foreach ($dir_items->graphs as $graph_file => $graph_conf){
-      // echodump("== $graph_file ==", $graph_conf);
+      echodump("== $graph_file ==", $graph_conf);
 
       $gpath = $project_dir.'/'.$graph_file;
 
@@ -45,21 +45,44 @@ function read_conf($filepath, $ntypes) {
       // node0 <=> classic type 'semantic'
       // node1 <=> classic type 'social'
 
+      // NB2 now additionnally, each nodetype can have several dbs configured !
+
       $conf[$gpath] = array($ntypes);
 
       for ($i = 0 ; $i < $ntypes ; $i++) {
-        // check node0, node1, etc to see if they at least have a reldbfile
+        // check node0, node1, etc to see if they at least have a reldb conf
         if (! property_exists($graph_conf, 'node'.$i)
-            || ! property_exists($graph_conf->{'node'.$i}, 'reldbfile') ) {
-          $conf[$gpath][$i] = array('active' => false);
+            || ! property_exists($graph_conf->{'node'.$i}, 'reldbs') ) {
+
+          // all dbtypes inactive on this file and nodetype
+          foreach ($our_dbtypes as $dbtype) {
+            // $conf[$gpath][$i][$dbtype] = array('active' => false);
+            $conf[$gpath][$i] = array('active' => false);
+          }
           continue;
         }
         else {
-          // we have a file for this type: copy entire conf
-          $conf[$gpath][$i] = (array)$graph_conf->{'node'.$i};
+          // further check for each configured db that is listed under reldbs
+          $dbinfos = $graph_conf->{'node'.$i}->reldbs;
 
-          $conf[$gpath][$i]['active'] = true;
-          $conf[$gpath][$i]['dir'] = $project_dir;
+          foreach ($dbinfos as $dbtype => $dbconf) {
+            echodump("reldbtype", $dbtype);
+            echodump("reldbconf", $dbconf);
+
+            // valid conf cases
+            if (in_array($dbtype, $our_dbtypes) && $dbconf->file) {
+              // we have a file for this nodetype and dbtype: copy entire conf
+              $conf[$gpath][$i][$dbtype] = array();
+              $test = (array)$dbconf;
+              echodump("conf copy", $test);
+              // $conf[$gpath][$i][$dbtype] = (array)$dbconf;
+            }
+          }
+
+          echodump("got conf", $conf[$gpath][$i]);
+
+          // $conf[$gpath][$i]['active'] = true;
+          // $conf[$gpath][$i]['dir'] = $project_dir;
         }
         // POSS here info on higher level may be propagated for lower ones
         //     (ex: if dbtype is on the project level, its value should count

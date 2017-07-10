@@ -339,7 +339,7 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
 //      myFetcher('START', 'hello', function(aStr) {myFetcher(aStr, "world", displayFun)})
 //   }
 
-function getTopPapers(){
+function getTopPapers(choosenAPI){
   // waiting image
   let image='<img style="display:block; margin: 0px auto;" src="twlibs/img/loader.gif"></img>';
   $("#topPapers").html(image);
@@ -371,13 +371,15 @@ function getTopPapers(){
 
     // do the first then the nested call
     topPapersFetcher(
-      swNodetypes[0],
-      qWordsbySwType[swNodetypes[0]],
-      [[],[]],
-      function(priorJsonHits) {
+      swNodetypes[0],                          // <= the queried nodetype
+      qWordsbySwType[swNodetypes[0]],          // <= the query as array of words
+      choosenAPI,                              // <= the API backend from db.json
+      [[],[]],                                 // <= json hit arrays by nodetype
+      function(priorJsonHits) {                // <= the callback
         topPapersFetcher(
           swNodetypes[1],
           qWordsbySwType[swNodetypes[1]],
+          choosenAPI,
           priorJsonHits,
           displayTopPapers
         )
@@ -537,7 +539,7 @@ function displayTopPapers(jsonHits) {
       let thisRelDocsConf = TW.gmenuInfos[TW.File][ndtypeId]
       if (thisRelDocsConf && thisRelDocsConf.reltemplate) {
         // console.log("my rendering hits template", thisRelDocsConf.reltemplate)
-        
+
         toHtmlFun = makeRendererFromTemplate(thisRelDocsConf.reltemplate)
       }
       else {
