@@ -376,7 +376,9 @@ function changeType(optionaltypeFlag) {
       sourceNids = TW.partialGraph.graph.nodes().map(function(n){return n.id})
     }
     let targetNids = {}
-    if (!mixedState)       targetNids = getNeighbors(sourceNids, 'XR')
+    if (!mixedState && outgoing.level) {
+      targetNids = getNeighbors(sourceNids, 'XR')
+    }
     else {
       // in mixed state we need to separate those already tgt state from others
       let alreadyOk = TW.partialGraph.graph.getNodesByType(typeFlag)
@@ -385,7 +387,6 @@ function changeType(optionaltypeFlag) {
       let needTransition = []
       for (var i in sourceNids) {
         let nid = sourceNids[i]
-        console.log('nid', nid)
         if (alreadyOkLookup[nid])         targetNids[nid] = true
         else                              needTransition.push(nid)
       }
@@ -413,7 +414,17 @@ function changeType(optionaltypeFlag) {
 
     // 5 - define the new selection
     let newselsArr = []
-    if (outgoing.selectionNids.length)  newselsArr = Object.keys(targetNids)
+    if (outgoing.selectionNids.length) {
+      if (typeFlag != 'all') {
+        newselsArr = Object.keys(targetNids)
+      }
+      else {
+        // not extending selection to all transitive neighbors
+        // makes the operation stable (when clicked several times,
+        // we extend slower towards transitive closure)
+        newselsArr = outgoing.selectionNids
+      }
+    }
 
 
     // 6 - effect the changes on nodes
