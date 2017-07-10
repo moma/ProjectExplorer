@@ -494,6 +494,9 @@ function mainStartGraph(inFormat, inData, twInstance) {
         initialActivereltypes    // to init edge sliders
       )
 
+      // set the initial color
+      TW.gui.elContainer.style.backgroundColor =  TW.conf.normalBackground
+
       // [ / Poblating the Sigma-Graph ]
 
       if (!TW.conf.filterSliders) {
