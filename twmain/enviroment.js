@@ -248,7 +248,9 @@ function createFilechooserEl () {
           TW.resetGraph()
 
           // run
-          mainStartGraph(theFormat, rdr.result, TW.instance)
+          mainStartGraph(theFormat, rdr.result, null, TW.instance)
+
+          // NB 3rd arg null = we got no additional conf for this "unknown" file
 
           writeLabel(`Local file: ${clientLocalGraphFile.name}`)
         }
@@ -1141,20 +1143,8 @@ function jsActionOnGexfSelector(graphBasename){
     // remove any previous instance and flags
     TW.resetGraph()
 
-    // override default categories with the ones from db.json
-    if (TW.gmenuInfos[graphPath]) {
-      if (TW.gmenuInfos[graphPath][0] && TW.gmenuInfos[graphPath][0].name) {
-        TW.conf.catSem = TW.gmenuInfos[graphPath][0].name
-        console.log("new catSem:", TW.conf.catSem)
-      }
-      if (TW.gmenuInfos[graphPath][1] && TW.gmenuInfos[graphPath][1].name) {
-        TW.conf.catSoc = TW.gmenuInfos[graphPath][1].name
-        console.log("new catSoc:", TW.conf.catSoc)
-      }
-    }
-
-    mainStartGraph(newDataRes["format"], newDataRes["data"], TW.instance)
-    writeLabel(graphBasename)
     TW.File = graphPath
+    mainStartGraph(newDataRes["format"], newDataRes["data"], TW.File, TW.instance)
+    writeLabel(graphBasename)
 }
 //============================= </OTHER ACTIONS > =============================//

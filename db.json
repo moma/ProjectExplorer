@@ -90,11 +90,22 @@
             "CortextDB": {
               "file": "wos_climate-change_title_2014-2015.db",
               "qtable": "ISItermsWhitelistV2Oct_5",
-              "reltemplate": "cortext_with_link"
+              "template": "cortext_with_link"
             },
             "twitter": {}
           }
         }
+      }
+    }
+  },
+  "graphapi": {
+    "__comment__": "special subproject for api sourcemode",
+    "__comment__": "allows setting nodetypes and reldocs for api graph sources",
+    "__comment__": "POSS can be avoided if 2 files; filemenu.json, nodeconfs.json",
+    "graphs": {
+      "default": {
+        "node0": { "name": "NGram",   "reldbs": { "twitter": {} } },
+        "node1": { "name": "Document" }
       }
     }
   }

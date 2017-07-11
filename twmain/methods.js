@@ -97,6 +97,103 @@ TW.resetGraph = function() {
 }
 
 
+// read all sources' detailed confs
+//  -> list of source paths available
+//  -> declared nodetypes
+//  -> declared rDocs conf
+function readMenu(infofile) {
+
+  // exemple entry
+  // "data/gargistex": {
+  //   "first" : "shale_and_ice.gexf",
+  //   "graphs":{
+  //     "shale_and_ice.gexf": {
+  //       "node0": {
+  //         "name": "terms",
+  //         "reldbs": {
+  //           "csv": {
+  //             "file": "shale_and_ice.csv",
+  //             "qcols": ["title"],
+  //             "template": "bib_details"
+  //           },
+  //           "twitter": {}
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
+
+  let paths = {}
+  let details = {}
+
+  if (TW.conf.debug.logFetchers)  console.info(`attempting to load filemenu ${infofile}`)
+  var preRES = AjaxSync({ url: infofile, datatype:"json" });
+
+  if (preRES['OK'] && preRES.data) {
+    if (TW.conf.debug.logFetchers) console.log('initial AjaxSync result preRES', preRES)
+  }
+
+  var first_file = "" , first_path = ""
+  for( var path in preRES.data ) {
+
+      if (TW.conf.debug.logFetchers) console.log("db.json path", path)
+
+      first_file = preRES.data[path]["first"]
+      first_path = path
+      break;
+  }
+
+  // the first or a specified one (ie both mode and file params are present)
+  if( isUndef(getUrlParam.file) ) {
+      TW.File = first_path+"/"+first_file
+      mapLabel = first_file
+  } else {
+      // £POSS; match on the full paths from db.json
+      TW.File = first_path+"/"+getUrlParam.file
+      mapLabel = getUrlParam.file
+  }
+
+  for( var path in preRES.data ) {
+      var theGraphs = preRES.data[path]["graphs"]
+
+      for(var aGraph in theGraphs) {
+          var graphBasename = aGraph.replace(/\.gexf$/, "") // more human-readable in the menu
+          paths[graphBasename] = path+"/"+aGraph
+          // ex : "RiskV2PageRank1000.gexf":data/AXA/RiskV2PageRank1000.gexf
+          // (we assume there's no duplicate basenames)
+
+
+          if (TW.conf.debug.logSettings)
+            console.log("db conf entry: "+graphBasename)
+
+          // for associated LocalDB php queries: CSV (or CortextDBs sql)
+          if (theGraphs[aGraph]) {
+
+            let gSrcEntry = theGraphs[aGraph]
+
+            details[path+"/"+aGraph] = new Array(2)
+
+            if (gSrcEntry.node0) {
+              details[path+"/"+aGraph][0] = gSrcEntry.node0
+            }
+            if (gSrcEntry.node1) {
+              details[path+"/"+aGraph][1] = gSrcEntry.node1
+            }
+
+          }
+          else {
+            details[path+"/"+aGraph] = null
+          }
+
+
+      }
+      // console.log( files_selector )
+  }
+
+  return [paths, details]
+}
+
+
 // settings: {norender: Bool}
 function cancelSelection (fromTagCloud, settings) {
     if (TW.conf.debug.logSelections) { console.log("\t***in cancelSelection"); }
@@ -177,20 +274,6 @@ function getActiverelsKey(someState) {
 function getNActive(someState) {
   return TW.SystemState().activetypes.filter(function(bool){return bool}).length
 }
-
-// transitional function:
-// ----------------------
-// Goal: determine if a single nodetype or global activetype is semantic or social
-// Explanation: some older functions (eg topPapers) used this distinction
-//              (via semi-deprecated global swclickActual),
-//              but the specification changed twice since then:
-//                - 1st change: types described as type 0 and type 1 and possible default type
-//                - 2nd change default type of monopartite case changed from document to semantic
-function swActual(aNodetype) {
-  return (aNodetype == TW.categories[0]) ? 'semantic' : 'social'
-}
-
-
 
 // changes attributes of nodes and edges to remove active, highlight and activeEdge flags
 
@@ -302,6 +385,7 @@ function clearHover() {
 
 
 // nodes information div
+// POSS: merge with hit_templates from additional conf
 function htmlfied_nodesatts(elems){
 
     var socnodes=[]
@@ -316,7 +400,7 @@ function htmlfied_nodesatts(elems){
         var id=elems[i]
         var node = TW.Nodes[id]
 
-        if(swActual(node.type) == 'social'){
+        if(TW.catDict[node.type] == 1){
             information += '<li><b>' + node.label + '</b></li>';
             if(node.htmlCont==""){
                 if (!isUndef(node.level)) {
@@ -327,14 +411,13 @@ function htmlfied_nodesatts(elems){
             }
             socnodes.push(information)
         }
-
-        if(swActual(node.type) == 'semantic'){
-            information += '<li><b>' + node.label + '</b></li>';
-            let google='<a href=http://www.google.com/#hl=en&source=hp&q=%20'+node.label.replace(" ","+")+'%20><img src="'+TW.conf.paths.ourlibs+'/img/google.png"></img></a>';
-            let wiki = '<a href=http://en.wikipedia.org/wiki/'+node.label.replace(" ","_")+'><img src="'+TW.conf.paths.ourlibs+'/img/wikipedia.png"></img></a>';
-            let flickr= '<a href=http://www.flickr.com/search/?w=all&q='+node.label.replace(" ","+")+'><img src="'+TW.conf.paths.ourlibs+'/img/flickr.png"></img></a>';
-            information += '<li>'+google+"&nbsp;"+wiki+"&nbsp;"+flickr+'</li><br>';
-            semnodes.push(information)
+        else {
+          information += '<li><b>' + node.label + '</b></li>';
+          let google='<a href=http://www.google.com/#hl=en&source=hp&q=%20'+node.label.replace(" ","+")+'%20><img src="'+TW.conf.paths.ourlibs+'/img/google.png"></img></a>';
+          let wiki = '<a href=http://en.wikipedia.org/wiki/'+node.label.replace(" ","_")+'><img src="'+TW.conf.paths.ourlibs+'/img/wikipedia.png"></img></a>';
+          let flickr= '<a href=http://www.flickr.com/search/?w=all&q='+node.label.replace(" ","+")+'><img src="'+TW.conf.paths.ourlibs+'/img/flickr.png"></img></a>';
+          information += '<li>'+google+"&nbsp;"+wiki+"&nbsp;"+flickr+'</li><br>';
+          semnodes.push(information)
         }
 
     }
@@ -438,11 +521,21 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
 
     if (TW.conf.getRelatedDocs) {
       $("#reldocs-tabs-wrapper").show();
-      $("#topPapers").show();
-      // getTopPapers()
+
+      // update all related docs tabs
+      for (let ntId in TW.SystemState().activetypes) {
+        if (TW.SystemState().activetypes[ntId]) {
+          let qWords = queryForType(ntId)
+
+          console.log("available topPapers tabs:", TW.gui.reldocTabs[ntId])
+
+          for (let relDbType in TW.gui.reldocTabs[ntId]) {
+            getTopPapers(qWords, ntId, relDbType, `rd-${ntId}-${relDbType}`)
+          }
+        }
+      }
     }
     else {
-      $("#topPapers").hide()
       $("#reldocs-tabs-wrapper").hide();
     }
 }

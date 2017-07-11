@@ -329,7 +329,7 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
 
 
 // queryForType:
-//   prepare query words from selections of a given nodetype
+//   prepare query words from "selections of a given nodetype"
 function queryForType(ntypeId){
   let subSels = TW.SystemState().selectionNids.filter(function(nid) {
     return TW.catDict[TW.Nodes[nid].type] == ntypeId
@@ -370,6 +370,7 @@ function getTopPapers(qWords, nodetypeId, chosenAPI, tgtDivId) {
   }
 
   let cbDisplay = function(jsonData) {
+    // console.log("cbDisplay", jsonData)
     return displayTopPapers(jsonData, nodetypeId, chosenAPI, tgtDivId)
   }
 
@@ -412,9 +413,10 @@ function getTopPapers(qWords, nodetypeId, chosenAPI, tgtDivId) {
     // cf. the php code for these url args:
     //   - type: the node type id (0 or 1)
     //   - dbtype: 'CortextDB' or 'csv' decided by php read of the same conf file
+    //             (we send it as param because phpAPI supports different dbtypes)
 
     // POSS object + join.map(join)
-    let urlParams = "type="+nodetypeId+"&query="+joinedQ+"&gexf="+TW.File+"&n="+TW.conf.relatedDocsMax ;
+    let urlParams = "ndtype="+nodetypeId+"&dbtype="+chosenAPI+"&query="+joinedQ+"&gexf="+TW.File+"&n="+TW.conf.relatedDocsMax ;
 
     $.ajax({
         type: 'GET',
@@ -469,14 +471,9 @@ function displayTopPapers(jsonHits, ndtypeId, chosenAPI, targetDiv) {
   if (chosenAPI == 'twitter') {
     toHtmlFun = renderTweet
   }
-  else if (chosenAPI == "LocalDB") {
+  else if (chosenAPI == "CortextDB" || chosenAPI == "csv") {
     let thisRelDocsConf = TW.gmenuInfos[TW.File][ndtypeId]["reldbs"]
-    let localDBType = Object.keys(thisRelDocsConf)[0]
-    console.log("1", thisRelDocsConf)
-    console.log("2", thisRelDocsConf[chosenAPI])
-    console.log("3", thisRelDocsConf[chosenAPI].template)
     if (thisRelDocsConf && thisRelDocsConf[chosenAPI] && thisRelDocsConf[chosenAPI].template) {
-      console.log(">>>>>>>>>>> template >>>>>>", thisRelDocsConf[chosenAPI].template)
       toHtmlFun = makeRendererFromTemplate(thisRelDocsConf[chosenAPI].template)
     }
     else {
@@ -486,9 +483,6 @@ function displayTopPapers(jsonHits, ndtypeId, chosenAPI, targetDiv) {
       toHtmlFun = makeRendererFromTemplate("universal")
     }
   }
-
-  console.log("my rendering fun", toHtmlFun)
-  console.log("my jsonHits", jsonHits)
 
   for (var k in jsonHits) {
     let hitJson = jsonHits[k]

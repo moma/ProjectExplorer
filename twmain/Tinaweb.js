@@ -863,7 +863,7 @@ var TinaWebJS = function ( sigmacanvas ) {
 
     // to init local, instance-related listeners (need to run at new sigma instance)
     // args: @partialGraph = a sigma instance
-    this.initSigmaListeners = function(partialGraph, initialActivetypes, initialActivereltypes) {
+    this.initSigmaListeners = function(partialGraph, initialActivetypes, initialActivereltypes, optionalConfEntry) {
 
       // console.log("initSigmaListeners TW.categories / types array / reltypeskeys array: ", TW.categories, initialActivetypes, initialActivereltypes)
 
@@ -1053,70 +1053,99 @@ var TinaWebJS = function ( sigmacanvas ) {
         }
       });
 
-      // initialize reldocs tabs
+      // initialize reldocs tabs if declared in additionalConf
       if (TW.conf.getRelatedDocs) {
+
+        let moreConfKey = optionalConfEntry || TW.File
+
         let ul = document.getElementById('reldocs-tabs')
+        let divs = document.getElementById('reldocs-boxes')
 
         // remove any previous tabs
-        ul.innerHTML=""
+        ul.innerHTML = ""
+        divs.innerHTML = ""
         TW.gui.reldocTabs = [{},{}]
 
         // for all existing nodetypes
         for (let nodetypeId in initialActivetypes) {
+          let additionalConf = TW.gmenuInfos[moreConfKey][nodetypeId]
 
-          for (var possibleAPI in TW.gmenuInfos[TW.File][nodetypeId]["reldbs"]){
-            // create valid tabs
-            let newLi = document.createElement('li')
-            newLi.setAttribute("role", "presentation")
-            let newRDTab =  document.createElement('a')
-            newRDTab.text = `${possibleAPI} (${nodetypeId==0?'sem':'soc'})`
-            newRDTab.href = '#topPapers'
-            newRDTab.setAttribute("role", "tab")
-            newRDTab.dataset.toggle = 'tab'
-            newRDTab.dataset.reldocstype = possibleAPI
-            newRDTab.dataset.nodetype = nodetypeId
-            newRDTab.setAttribute("class", `for-nodecategory-${nodetypeId}`)
+          if (TW.conf.debug.logSettings)
+              console.log ("additionalConf for this source", additionalConf)
 
-            if (possibleAPI == TW.conf.relatedDocsType) {
-              newLi.setAttribute("class", "active")
+          let possibleAPIs = []
+          if (additionalConf.reldbs) {
+            possibleAPIs = additionalConf.reldbs
+            console.log("Tabs init from db.json")
+          }
+          else {
+            possibleAPIs = [TW.conf.relatedDocsType]
+            console.log("Tabs init from default")
+          }
+
+          if (additionalConf.reldbs) {
+            for (var possibleAPI in possibleAPIs){
+
+              // the tab's id
+              let tabref = `rd-${nodetypeId}-${possibleAPI}`
+
+              // create valid tabs
+              let newLi = document.createElement('li')
+              newLi.setAttribute("role", "presentation")
+              let newRDTab =  document.createElement('a')
+              newRDTab.text = `${possibleAPI} (${nodetypeId==0?'sem':'soc'})`
+              newRDTab.href = "#"+tabref
+              newRDTab.setAttribute("role", "tab")
+              newRDTab.dataset.toggle = 'tab'
+              newRDTab.dataset.reldocstype = possibleAPI
+              newRDTab.dataset.nodetype = nodetypeId
+              newRDTab.setAttribute("class", `for-nodecategory-${nodetypeId}`)
+
+              // keep access
+              TW.gui.reldocTabs[nodetypeId][possibleAPI] = newRDTab
+
+              // create corresponding content box
+              let newContentDiv = document.createElement('div')
+              newContentDiv.setAttribute("role", "tabpanel")
+              newContentDiv.setAttribute("class", "topPapers tab-pane")
+              newContentDiv.id = tabref
+
+              // add to DOM
+              ul.append(newLi)
+              newLi.append(newRDTab)
+
+              divs.append(newContentDiv)
+
+              // select currently preferred reldoc tabs
+              if (possibleAPI == TW.conf.relatedDocsType) {
+                newLi.classList.add("active")
+                newContentDiv.classList.add("active")
+              }
+
             }
 
-            // add to DOM
-            ul.append(newLi)
-            newLi.append(newRDTab)
+            // afterwards to already have all initialized rdtypes in DOM
+            for (let rdtype in TW.gui.reldocTabs[nodetypeId]) {
+              let tab = TW.gui.reldocTabs[nodetypeId][rdtype]
 
-            // keep access
-            TW.gui.reldocTabs[nodetypeId][possibleAPI] = newRDTab
+              // init toggle mecanisms (bootstrap.native/#componentTab)
+              // (just used for the tabs active/inactive handling,
+              //  content is *always* topPapers and we modify it ourselves)
+              new Tab(tab);
+
+              // add handler to switch relatedDocsType
+              tab.addEventListener('click', function(e){
+                let reldType = e.target.dataset.reldocstype
+                let nodeType = e.target.dataset.nodetype
+                let qWords = queryForType(nodeType)
+                console.log('tab click', `rd-${nodeType}-${reldType}`)
+                getTopPapers(qWords, nodeType, reldType, `rd-${nodeType}-${reldType}`)
+              })
+            }
           }
 
-          // afterwards to already have all initialized rdtypes in DOM
-          for (let rdtype in TW.gui.reldocTabs[nodetypeId]) {
-
-            console.log("init for type", rdtype)
-            let tab = TW.gui.reldocTabs[nodetypeId][rdtype]
-
-            // init toggle mecanisms (bootstrap.native/#componentTab)
-            // (just used for the tabs active/inactive handling,
-            //  content is *always* topPapers and we modify it ourselves)
-            new Tab(tab);
-
-            // add handler to switch relatedDocsType
-            tab.addEventListener('click', function(e){
-              let reldType = e.target.dataset.reldocstype
-              let nodeType = e.target.dataset.nodetype
-              let qWords = queryForType(nodeType)
-              console.log("getTopPapers", qWords, nodeType, reldType)
-              getTopPapers(qWords, nodeType, reldType, 'topPapers')
-            })
-          }
-
-          // select currently preferred reldoc tabs
-          if (initialActivetypes[nodetypeId]) {
-            TW.gui.reldocTabs[nodetypeId][TW.conf.relatedDocsType].Tab.show()
-          }
         }
       }
-
 
       // select currently active sliders
       if (TW.conf.filterSliders) {
