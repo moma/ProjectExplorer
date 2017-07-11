@@ -2,21 +2,8 @@
 
 //  ======= [ main TW properties initialization ] ======== //
 
-TW.Nodes = [];
-TW.Edges = [];
-TW.ByType = {}          // node ids sorted by nodetype id   (0, 1)
-TW.Relations = {}       // edges sorted by source/target type id ("00", "11")
-TW.Clusters = [];       // "by value" facet index built in parseCustom
 
 TW.File = ""            // remember the currently opened file
-
-TW.partialGraph = null  // will contain the sigma visible graph instance
-
-TW.labels=[];           // fulltext search list
-
-TW.categories = [];     // possible node types and their inverted map
-TW.catDict = {};
-TW.lastRelDocQueries = {}  // avoids resending ajax if same query twice in a row
 
 // used iff servermenu
 TW.gmenuPaths={};       // map [graphname => graphsource] for file selectors
@@ -345,6 +332,23 @@ function syncRemoteGraphData () {
 // 4 - finishes setting up the environment
 // (NB inspired by Samuel's legacy bringTheNoise() function)
 function mainStartGraph(inFormat, inData, twInstance) {
+
+  // Graph-related vars
+  // ------------------
+  // POSS: "new TWGraph()..."
+  TW.Nodes = [];
+  TW.Edges = [];
+  TW.ByType = {}          // node ids sorted by nodetype id   (0, 1)
+  TW.Relations = {}       // edges sorted by source/target type id ("00", "11")
+  TW.Clusters = [];       // "by value" facet index built in parseCustom
+
+  TW.partialGraph = null  // will contain the sigma visible graph instance
+
+  TW.labels=[];           // fulltext search list
+
+  TW.categories = [];     // possible node types and their inverted map
+  TW.catDict = {};
+  TW.lastRelDocQueries = {}  // avoids resending ajax if same query twice in a row
 
   if (! inFormat || ! inData) {
     alert("error on data load")

@@ -1057,7 +1057,9 @@ var TinaWebJS = function ( sigmacanvas ) {
       if (TW.conf.getRelatedDocs) {
         let ul = document.getElementById('reldocs-tabs')
 
-        let tabEls = []
+        // remove any previous tabs
+        ul.innerHTML=""
+        TW.gui.reldocTabs = [{},{}]
 
         // for all existing nodetypes
         for (let nodetypeId in initialActivetypes) {

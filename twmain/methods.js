@@ -81,18 +81,6 @@ TW.resetGraph = function() {
   // call the sigma graph clearing
   TW.instance.clearSigma()
 
-  // TW.categories, TW.Nodes and TW.Edges will be reset by mainStartGraph
-
-  // reset remaining global vars
-  TW.labels = []
-  TW.Relations = {}
-  TW.states = [TW.initialSystemState]
-  TW.lastRelDocQueries = {}
-
-  // reset related docs tabs
-  document.getElementById("reldocs-tabs").innerHTML=""
-  TW.gui.reldocTabs = [{},{}]
-
   // reset rendering gui flags
   TW.gui.selectionActive = false
   TW.gui.handpickedcolor = false
@@ -104,6 +92,8 @@ TW.resetGraph = function() {
   // reset other gui flags
   TW.gui.checkBox=false
   TW.gui.lastFilters = {}
+
+  // remaining global vars will be reset by new graph mainStartGraph
 }
 
 
