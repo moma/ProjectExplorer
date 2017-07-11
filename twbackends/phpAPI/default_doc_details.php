@@ -6,6 +6,9 @@ $base = new PDO("sqlite:" .$mainpath.$graphdb);
 $query = str_replace( '__and__', '&', $_GET["query"] );
 $terms_of_query = json_decode($query);
 
+// the table used as search perimeter is from db.json conf
+$table = $my_conf["node".$ntid][$dbtype]['qtable'] ;
+
 // echo "mainpath: ".$mainpath."<br>";
 // echo "thedb: ".$mainpath.$graphdb."<br>";
 // echo "thequery: ".var_dump($terms_of_query);
@@ -32,7 +35,7 @@ echo '
     <div id="tabs">
   <ul>
     <li><a href="#tabs-1">Selected Document</a></li>
-    <li><a href="full_doc_list.php?'.'gexf='.urlencode($gexf).'&query='.urlencode($_GET["query"]).'&index='.$_GET["index"].'&type='.urlencode($_GET["type"]).'">Full list</a></li>';
+    <li><a href="full_doc_list.php?'.'gexf='.urlencode($gexf).'&query='.urlencode($_GET["query"]).'&ndtype='.$ntid.'&dbtype='.$dbtype.'">Full list</a></li>';
   echo '</ul>';
 
 echo '<div id="tabs-1">';
@@ -81,7 +84,7 @@ $id=$_GET["id"];
 //   }
 
 //   // get the date
-  if(strpos($_GET["index"],'terms') ) $sql = 'SELECT data FROM '.$_GET["index"].' WHERE id='.$id;
+  if(strpos($table,'terms') ) $sql = "SELECT data FROM $table WHERE id=".$id;
   else $sql = 'SELECT data FROM ISItermsListV1 WHERE id='.$id;
   $output.='<br/><b>Keywords: </b>';
   $terms=array();

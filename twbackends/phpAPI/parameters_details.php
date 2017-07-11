@@ -48,7 +48,8 @@ $conf = read_conf($mainpath.$project_menu_path, $ntypes, $supported_dbtypes);
 // =======================================
 
 $gexf= str_replace('"','',$_GET["gexf"]);
-$ntid = $_GET["type"];
+$ntid = $_GET["ndtype"];
+$dbtype = $_GET["dbtype"];
 $ndtype = null;
 $my_conf = null;
 
@@ -58,13 +59,21 @@ else              {  $ndtype = 'semantic';  }
 
 // echodump("params: node type id", $ntid);
 
-if (! $conf[$gexf][$ntid]['active']) {
-  errmsg("not active", "your graph ($gexf)");
+if (! count($conf[$gexf]['node'.$ntid])) {
+  errmsg("has no php reldbs configured for nodetype $ntid", "your graph ($gexf)");
+  exit(1);
+}
+else if (! array_key_exists($dbtype, $conf[$gexf]['node'.$ntid])) {
+  errmsg("reldbs isn't configured for nodes of type $ntid and dbtype $dbtype", "your graph ($gexf)");
+  exit(1);
+}
+else if (! array_key_exists('file', $conf[$gexf]['node'.$ntid][$dbtype])) {
+  errmsg("reldb has no DB file for nodes of type $ntid and dbtype $dbtype", "your graph ($gexf)");
   exit(1);
 }
 else {
   $my_conf = $conf[$gexf];
-  $graphdb = $my_conf[$ntid]['dir'].'/'.$my_conf[$ntid]['reldbfile'];
+  $graphdb = $my_conf['node'.$ntid][$dbtype]['file'];
 }
 
 // echodump("params: reldb", $graphdb);
