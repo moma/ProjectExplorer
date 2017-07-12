@@ -1,4 +1,21 @@
 {
+  "data/ClimateChange": {
+    "graphs": {
+      "Maps_S_800.gexf": {
+        "node0": {
+          "name": "ISItermsWhitelistV2Oct_5 &amp; ISItermsWhitelistV2Oct_5",
+          "reldbs": {
+            "CortextDB": {
+              "file": "wos_climate-change_title_2014-2015.db",
+              "qtable": "ISItermsWhitelistV2Oct_5",
+              "template": "cortext_with_link"
+            },
+            "twitter": {}
+          }
+        }
+      }
+    }
+  },
   "data/gargistex": {
     "first" : "shale_and_ice.gexf",
     "graphs":{
@@ -78,23 +95,6 @@
       },
       "ProgrammeDesCandidats.gexf": {
         "node0": { "name": "terms", "reldbs": { "twitter": {} } }
-      }
-    }
-  },
-  "data/ClimateChange": {
-    "graphs": {
-      "Maps_S_800.gexf": {
-        "node0": {
-          "name": "ISItermsWhitelistV2Oct_5 &amp; ISItermsWhitelistV2Oct_5",
-          "reldbs": {
-            "CortextDB": {
-              "file": "wos_climate-change_title_2014-2015.db",
-              "qtable": "ISItermsWhitelistV2Oct_5",
-              "template": "cortext_with_link"
-            },
-            "twitter": {}
-          }
-        }
       }
     }
   },

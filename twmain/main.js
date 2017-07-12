@@ -78,8 +78,9 @@ if (window.location.protocol == 'file:' || sourcemode == 'localfile') {
 // traditional cases: remote read from API or prepared server-side file
 else {
   try {
-    // we'll first retrieve the menu of available sources in db.json, then get the real data in a second ajax via API or server file
-    [TW.gmenuPaths, TW.gmenuInfos] = readMenu(TW.conf.paths.sourceMenu)
+    // we'll first retrieve the menu of available sources in db.json,
+    // then get the real data in a second ajax via API or server file
+    [TW.gmenuPaths, TW.gmenuInfos, TW.File] = readMenu(TW.conf.paths.sourceMenu)
 
     //     NB: this menu used to be a file list for only one sourcemode
     //         but now also contains settings for nodetypes and for
@@ -238,11 +239,12 @@ function syncRemoteGraphData () {
         var files_selector = '<select onchange="jsActionOnGexfSelector(this.value);">'
         for (let shortname in TW.gmenuPaths) {
           let fullPath = TW.gmenuPaths[shortname]
-          let cssFileSelected = (TW.File==fullPath)?"selected":""
-          files_selector += '<option '+cssFileSelected+'>'+shortname+'</option>'
+          files_selector += '<option>'+shortname+'</option>'
         }
         files_selector += "</select>"
         $("#network").html(files_selector)
+
+        // in this case we keep the TW.File that was already set from readMenu
     }
 
     // direct urlparam file case
@@ -262,6 +264,7 @@ function syncRemoteGraphData () {
     inData = finalRes["data"]
     inFormat = finalRes["format"]
     inConfKey = TW.File
+    mapLabel = TW.File
 
     if (TW.conf.debug.logFetchers) {
       console.warn('@TW.File', finalRes["OK"], TW.File)

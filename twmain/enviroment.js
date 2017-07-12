@@ -1128,6 +1128,120 @@ function createWaitIcon(idname, width) {
   return icon
 }
 
+activateRDTab = function(elTgt) {
+  let relDbType = elTgt.dataset.reldocstype
+  let ndTypeId = elTgt.dataset.nodetype
+
+  let tabs = document.querySelectorAll('ul#reldocs-tabs > li')
+  for (var tabLi of tabs) {
+    if (tabLi != elTgt.parentNode)
+      tabLi.classList.remove("active")
+    else
+      tabLi.classList.add("active")
+  }
+
+  let divs = document.querySelectorAll("div#reldocs-boxes > div.tab-pane")
+
+  let theId = `rd-${ndTypeId}-${relDbType}`
+
+  // POSS: animate with transitions here
+  for (var tabDiv of divs) {
+    if (tabDiv.id != theId)
+      tabDiv.classList.remove("active", "in")
+    else
+      tabDiv.classList.add("active", "in")
+  }
+}
+
+
+// set up tabs for a given activetypes state and db.json entry
+function resetTabs(activetypes, dbconf) {
+  let ul = document.getElementById('reldocs-tabs')
+  let divs = document.getElementById('reldocs-boxes')
+
+  // remove any previous tabs
+  ul.innerHTML = ""
+  divs.innerHTML = ""
+  TW.gui.reldocTabs = [{},{}]
+
+  // used with no args for full reset
+  if (!activetypes || !dbconf) {
+    return
+  }
+
+  console.log("dbconf for this source", dbconf)
+
+  // for all active nodetypes
+  for (let nodetypeId in activetypes) {
+    if (activetypes[nodetypeId]) {
+      let additionalConf = dbconf[nodetypeId]
+
+      if (TW.conf.debug.logSettings)
+          console.log ("additionalConf for this source", additionalConf)
+
+      let possibleAPIs = []
+      if (additionalConf.reldbs) {
+        possibleAPIs = additionalConf.reldbs
+
+        // 3 vars to know which one to activate
+        let nAPIs = Object.keys(possibleAPIs).length
+        let iAPI = 0
+        let didActiveFlag = false
+
+        for (var possibleAPI in possibleAPIs){
+
+          // the tab's id
+          let tabref = `rd-${nodetypeId}-${possibleAPI}`
+
+          // create valid tabs
+          let newLi = document.createElement('li')
+          newLi.setAttribute("role", "presentation")
+          let newRDTab =  document.createElement('a')
+          newRDTab.text = `${possibleAPI} (${nodetypeId==0?'sem':'soc'})`
+          newRDTab.setAttribute("role", "tab")
+          newRDTab.dataset.reldocstype = possibleAPI
+          newRDTab.dataset.nodetype = nodetypeId
+          newRDTab.setAttribute("class", `for-nodecategory-${nodetypeId}`)
+          // newRDTab.dataset.toggle = 'tab'  // only needed if using bootstrap
+
+          // keep access
+          TW.gui.reldocTabs[nodetypeId][possibleAPI] = newRDTab
+
+          // create corresponding content box
+          let newContentDiv = document.createElement('div')
+          newContentDiv.setAttribute("role", "tabpanel")
+          newContentDiv.setAttribute("class", "topPapers tab-pane")
+          newContentDiv.id = tabref
+
+          // add to DOM
+          ul.append(newLi)
+          newLi.append(newRDTab)
+          divs.append(newContentDiv)
+
+          // select currently preferred reldoc tabs
+          // (we activate if favorite or if no matching favorite and last)
+          if (possibleAPI == TW.conf.relatedDocsType
+              || (!didActiveFlag && iAPI == nAPIs - 1)) {
+            newLi.classList.add("active")
+            newContentDiv.classList.add("active", "in")
+            didActiveFlag = true
+          }
+
+          // add handler to switch relatedDocsType
+          newRDTab.addEventListener('click', function(e){
+            // tab mecanism
+            activateRDTab(e.target)
+            // no need to run associated query:
+            // (updateRelatedNodesPanel did it at selection time)
+          })
+
+          iAPI++
+        }
+      }
+    }
+  }
+}
+
 
 function jsActionOnGexfSelector(graphBasename){
     let graphPath = TW.gmenuPaths[graphBasename] || graphBasename+".gexf"

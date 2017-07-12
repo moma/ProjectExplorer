@@ -325,12 +325,14 @@ ul.infoitems {
     border-right: 1px solid #222;
 }
 
-#topPapers{
+.topPapers{
     display: none;
     color:black;
 }
 
-
+.tab-pane {
+    transition: height 0.5s ease-out;
+}
 
 
 

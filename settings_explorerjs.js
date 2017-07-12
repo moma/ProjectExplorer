@@ -31,7 +31,7 @@ TW.conf = (function(TW){
   TWConf.getRelatedDocs = true
   TWConf.relatedDocsMax = 10
 
-  // fallback type (overriden by new replacement from db.json)
+  // fallback type (if no detailed source-by-source conf from db.json)
   TWConf.relatedDocsType = "csv"          // accepted: "twitter" | "csv" | "CortextDB"
                                           // POSSible: "elastic"
 

@@ -60,6 +60,16 @@ TW.pushGUIState = function( args ) {
       }
     }
 
+    // recreate tabs after type changes
+    // db.json conf entry (£TODO unify s/(?:TW.File|inConfKey)/TW.sourceId/g)
+    let inConfKey = (sourcemode != "api") ? TW.File : 'graphapi/default'
+    if (TW.conf.getRelatedDocs
+        && !isUndef(args.activetypes)
+        && TW.gmenuInfos[inConfKey]) {
+
+      resetTabs(newState.activetypes, TW.gmenuInfos[inConfKey])
+    }
+
     // 4) store it in TW.states
     TW.states.push(newState)
 
@@ -77,6 +87,9 @@ TW.pushGUIState = function( args ) {
 TW.resetGraph = function() {
   // remove the selection
   cancelSelection(false, {norender: true})
+
+  // and set tabs to none
+  resetTabs()
 
   // call the sigma graph clearing
   TW.instance.clearSigma()
@@ -104,6 +117,7 @@ TW.resetGraph = function() {
 function readMenu(infofile) {
 
   // exemple entry
+  // --------------
   // "data/gargistex": {
   //   "first" : "shale_and_ice.gexf",
   //   "graphs":{
@@ -123,8 +137,6 @@ function readMenu(infofile) {
   //   }
   // }
 
-  let paths = {}
-  let details = {}
 
   if (TW.conf.debug.logFetchers)  console.info(`attempting to load filemenu ${infofile}`)
   var preRES = AjaxSync({ url: infofile, datatype:"json" });
@@ -133,25 +145,19 @@ function readMenu(infofile) {
     if (TW.conf.debug.logFetchers) console.log('initial AjaxSync result preRES', preRES)
   }
 
-  var first_file = "" , first_path = ""
+  // 1 - store the first one (b/c we'll loose order)
+  var first_file = "", first_dir = "" , first_path = ""
   for( var path in preRES.data ) {
-
-      if (TW.conf.debug.logFetchers) console.log("db.json path", path)
-
-      first_file = preRES.data[path]["first"]
-      first_path = path
-      break;
+    if (TW.conf.debug.logFetchers) console.log("db.json path", path)
+    first_file = preRES.data[path]["first"] || Object.keys(preRES.data[path]["graphs"])[0]
+    first_dir = path
+    break;
   }
+  first_path = first_dir+"/"+first_file
 
-  // the first or a specified one (ie both mode and file params are present)
-  if( isUndef(getUrlParam.file) ) {
-      TW.File = first_path+"/"+first_file
-      mapLabel = first_file
-  } else {
-      // £POSS; match on the full paths from db.json
-      TW.File = first_path+"/"+getUrlParam.file
-      mapLabel = getUrlParam.file
-  }
+  // 2 - process all the paths and associated confs
+  let paths = {}
+  let details = {}
 
   for( var path in preRES.data ) {
       var theGraphs = preRES.data[path]["graphs"]
@@ -162,35 +168,27 @@ function readMenu(infofile) {
           // ex : "RiskV2PageRank1000.gexf":data/AXA/RiskV2PageRank1000.gexf
           // (we assume there's no duplicate basenames)
 
-
           if (TW.conf.debug.logSettings)
             console.log("db conf entry: "+graphBasename)
 
           // for associated LocalDB php queries: CSV (or CortextDBs sql)
           if (theGraphs[aGraph]) {
-
             let gSrcEntry = theGraphs[aGraph]
-
             details[path+"/"+aGraph] = new Array(2)
-
             if (gSrcEntry.node0) {
               details[path+"/"+aGraph][0] = gSrcEntry.node0
             }
             if (gSrcEntry.node1) {
               details[path+"/"+aGraph][1] = gSrcEntry.node1
             }
-
           }
           else {
             details[path+"/"+aGraph] = null
           }
-
-
       }
-      // console.log( files_selector )
   }
 
-  return [paths, details]
+  return [paths, details, first_path]
 }
 
 
@@ -520,20 +518,28 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
     $("#information").html(informationDIV);
 
     if (TW.conf.getRelatedDocs) {
-      $("#reldocs-tabs-wrapper").show();
-
+      let rdTabCount = 0
       // update all related docs tabs
       for (let ntId in TW.SystemState().activetypes) {
         if (TW.SystemState().activetypes[ntId]) {
           let qWords = queryForType(ntId)
-
-          console.log("available topPapers tabs:", TW.gui.reldocTabs[ntId])
-
+          // console.log("available topPapers tabs:", TW.gui.reldocTabs[ntId])
           for (let relDbType in TW.gui.reldocTabs[ntId]) {
-            getTopPapers(qWords, ntId, relDbType, `rd-${ntId}-${relDbType}`)
+            let tabId = `rd-${ntId}-${relDbType}`
+            rdTabCount ++
+
+            // if not already done
+            if (! TW.lastRelDocQueries[tabId]
+                || TW.lastRelDocQueries[tabId] != qWords) {
+              getTopPapers(qWords, ntId, relDbType, tabId)
+
+              // memoize
+              TW.lastRelDocQueries[tabId] = qWords
+            }
           }
         }
       }
+      if (rdTabCount > 0)    $("#reldocs-tabs-wrapper").show();
     }
     else {
       $("#reldocs-tabs-wrapper").hide();
