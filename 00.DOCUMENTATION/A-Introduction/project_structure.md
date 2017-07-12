@@ -13,9 +13,9 @@ Après commits de la semaine 26-30 juin 2017, une structure plus facile pour les
 │   └── (fusionné avec ./doc)
 ├── data
 │   └── (graphes par sous-projets)
-├── db.json
 ├── explorerjs.html         <= point d'entrée lancement
-├── settings_explorerjs.js  <= point d'entrée config
+├── settings_explorerjs.js  <= config générale
+├── db.json                 <= config additionnelle par sources gexf/json
 ├── favicon.ico
 ├── LICENSE
 ├── README.md
@@ -34,7 +34,6 @@ Après commits de la semaine 26-30 juin 2017, une structure plus facile pour les
 │   ├── jquery-3
 │   ├── readmore.js
 │   ├── sigma_v1.2
-│   ├── sigma_v1.5
 │   └── tweets
 |
 ├── twmain                  <=   ancien dossier tinawebJS

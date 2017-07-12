@@ -298,7 +298,6 @@ saferString = function(string) {
 }
 
 
-
  /**
   * function to test if file exists
   * via XHR, enhanced from http://stackoverflow.com/questions/5115141

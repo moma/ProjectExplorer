@@ -8,7 +8,7 @@ $base = new PDO("sqlite:" .$mainpath.$graphdb);
 $output = "<ul>"; // string sent to the javascript for display
 
 
-$type = $_GET["type"];
+$type = $_GET["ndtype"];
 $query = str_replace( '__and__', '&', $_GET["query"] );
 $terms_of_query=json_decode($_GET["query"]);
 $elems = json_decode($query);
@@ -19,25 +19,20 @@ foreach ($base->query($sql) as $row) {
   $table_size=$row['COUNT(*)'];
 }
 
-$table = "";
-$column = "";
-$id="";
+// the table used as search perimeter is from db.json conf
+$table = $my_conf["node".$ntid][$dbtype]['qtable'] ;
 
-if($type=="social"){
-  $table = "ISIAUTHOR";
-  $column = "data";
-  $id = "id";
-  $restriction='';
-  $factor=10;// factor for normalisation of stars
-}
+// values for CortextDB that seem to never change: /!\ hardcoded here /!\
+// the column accessors
+$column = "data";
+$id = "id";
 
-if($type=="semantic"){
-  $table = $_GET["index"];
-  $column = "data";
-  $id = "id";
-  $restriction='';
-  $factor=10;
-}
+// the output tables
+$author_table = "ISIAUTHOR";
+$titles_table = "ISITITLE";
+
+$factor=10;// factor for normalisation of stars
+$restriction='';
 
 
 $sql = 'SELECT count(*),'.$id.'
@@ -88,7 +83,7 @@ foreach ($wos_ids as $id => $score) {
       $count+=1;
       $output.="<li title='".$score."'>";
       $output.=imagestar($score,$factor,'./').' ';
-      $sql = 'SELECT data FROM ISITITLE WHERE id='.$id." group by data";
+      $sql = "SELECT data FROM $titles_table WHERE id=".$id." group by data";
 
       foreach ($base->query($sql) as $row) {
         $output.='<a href="default_doc_details.php?gexf='.urlencode($gexf).'&type='.urlencode($_GET["type"]).'&query='.urlencode($query).'&id='.$id.'">'.$row['data']." </a> ";
@@ -96,7 +91,7 @@ foreach ($wos_ids as $id => $score) {
       }
 
   // get the authors
-      $sql = 'SELECT data FROM ISIAUTHOR WHERE id='.$id;
+      $sql = "SELECT data FROM $author_table WHERE id=".$id;
       foreach ($base->query($sql) as $row) {
         $output.=strtoupper($row['data']).', ';
       }

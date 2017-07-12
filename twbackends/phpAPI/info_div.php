@@ -14,25 +14,6 @@ if ($output_mode == "json") {
   header('Content-Type: application/json');
 }
 
-$dbtype = null;
-if (array_key_exists('reldbtype', $my_conf[$ntid])) {
-  $dbtype = $my_conf[$ntid]['reldbtype'];
-}
-else {
-  $guess_src = '';
-  if (array_key_exists('dbtype', $_GET))  {
-    $dbtype = $_GET['dbtype'];
-    $guess_src = "via url parameters";
-  }
-  else {
-    $dbtype = 'csv'; // new default
-    $guess_src = "by default";
-
-  }
-  errmsg("not filled", "$gexf -> node$ntid -> 'reldbtype'", "...Assuming dbtype is $dbtype ($guess_src).");
-}
-
-
 if ($dbtype == "CortextDB") {
   $base = new PDO("sqlite:".$mainpath.$graphdb);
   include('default_div.php');
@@ -42,13 +23,20 @@ else {
   // to index: the union of "searchable columns" qcols for all nodetypes
   $idxcolsbytype = [];
   for ($i = 0; $i < $ntypes ; $i++) {
-    if ($my_conf[$i]['active']) {
-      $idxcolsbytype[$i] = [];
-      $idxcolsbytype[$i] = $my_conf[$i]['reldbqcols'];
+
+    // if nodetype is active
+    if (count($my_conf["node".$i])) {
+      // ... and well-formed
+      if (array_key_exists('qcols', $my_conf["node".$i][$dbtype])) {
+        $idxcolsbytype[$i] = $my_conf["node".$i][$dbtype]['qcols'];
+      }
+      else {
+        echo("<p>Your settings for relatedDocsType are set on a local database,
+            but your servermenu file does not provide any information about
+            the CSV or DB table to query for related documents
+            (on nodetypeId ".$i.")</p>");
+      }
     }
-    // else {
-    //   echo("no nodetype ".$i."<br>");
-    // }
   }
 
   if (! $idxcolsbytype) {
@@ -98,7 +86,7 @@ else {
 
     // DO THE SEARCH
     // -------------
-    $searchcols = $my_conf[$ntid]['reldbqcols'];
+    $searchcols = $my_conf["node".$ntid][$dbtype]['qcols'];
 
     // a - split the query
     $qtokens = preg_split('/\W/', $_GET["query"]);

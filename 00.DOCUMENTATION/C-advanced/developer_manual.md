@@ -1,5 +1,8 @@
 This is a stub for a future documentation for developers.
 
+#### About settings
+  - system-wide settings are in `settings_explorerjs.js`
+  - source-by-source settings (nodetypes, relatedDocs APIs) are in `db.json`
 
 ## Graph input choices
 
@@ -13,7 +16,7 @@ Tina allows 3 main ways of input :
 
 The `sourcemode` value is by default the one in settings_explorerjs.js (`TW.conf.sourcemode`), unless an url argument of the same name is present.
 
-The `serverfile` option has an extended version called `servermenu`. It opens a list of files called `db.json` on the server, providing a menu to choose from it.
+The `serverfile` option has an extended version called `servermenu`. It opens the list of files from `db.json` on the server, providing a menu to choose from it.
 
 The detailed implementation of these choices can be found in the function `syncRemoteGraphData()` in main.js.
 
@@ -32,7 +35,8 @@ This will still evolve but the main steps for any graph initialization messily u
  4. [`main.js`] mainStartGraph() function runs all the rest
     1. precomputes display properties (grey color, etc.)
     2. calls [`sigmaUtils`] where the function `FillGraph()` was a central point for filtering and preparing properties but now with 2 and 3 it just creates a filtered copy of the nodes and edges of the current active types to a new structure that groups them together (POSSIBLE remove this extra step)
-    3. back in [`main.js`], finally all sigma settings (user + defaults) are merged and we initialize the sigma instance (`new sigma` etc.)
+    3. back in [`main.js`], finally all sigma settings (user + defaults) are merged and we initialize the sigma instance (`new sigma` etc.)  
+       at this point, any additional conf located in db.json is used for nodeTypes and relatedDocsTypes
     4. finally a call to [`TinawebJS`] initializes the action listeners and this phase should crucially initialize items that need the sigma instance (because they may depend the displayed categories, the number of displayed nodes, etc)
 
 

@@ -6,7 +6,7 @@ $elems = json_decode($query);
 
 
 // the table used as search perimeter is from db.json conf
-$table = $my_conf[$ntid]['reldbqtable'] ;
+$table = $my_conf["node".$ntid][$dbtype]['qtable'] ;
 
 // values for CortextDB that seem to never change: /!\ hardcoded here /!\
 // the column accessors
@@ -100,7 +100,7 @@ foreach ($wos_ids as $id => $score) {
 				foreach ($base->query($sql) as $row) {
 					$external_link="<a href=http://google.com/webhp?#q=".urlencode('"'.$row['data'].'"')." target=blank>".' <img width=15px src="'.$our_libs_root.'/img/google.png"></a>';
 
-          $link = 'JavaScript:newPopup(\''.$our_php_root.'/default_doc_details.php?gexf='.urlencode($gexf).'&index='.$table.'&query='.urlencode($query).'&type='.urlencode($_GET['type']).'&id='.$id.'	\')';
+          $link = 'JavaScript:newPopup(\''.$our_php_root.'/default_doc_details.php?gexf='.urlencode($gexf).'&dbtype='.$dbtype.'&query='.urlencode($query).'&ndtype='.$ntid.'&id='.$id.'\')';
 
           if ($output_mode == "html") {
             $htmlout.="<li title='".$score."'>";

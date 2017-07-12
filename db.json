@@ -1,23 +1,48 @@
 {
+  "data/ClimateChange": {
+    "graphs": {
+      "Maps_S_800.gexf": {
+        "node0": {
+          "name": "ISItermsWhitelistV2Oct_5 &amp; ISItermsWhitelistV2Oct_5",
+          "reldbs": {
+            "CortextDB": {
+              "file": "wos_climate-change_title_2014-2015.db",
+              "qtable": "ISItermsWhitelistV2Oct_5",
+              "template": "cortext_with_link"
+            },
+            "twitter": {}
+          }
+        }
+      }
+    }
+  },
   "data/gargistex": {
     "first" : "shale_and_ice.gexf",
     "graphs":{
       "shale_and_ice.gexf": {
         "node0": {
           "name": "terms",
-          "reldbtype": "csv",
-          "reldbfile": "shale_and_ice.csv",
-          "reldbqcols": ["title"],
-          "reltemplate": "bib_details"
+          "reldbs": {
+            "csv": {
+              "file": "shale_and_ice.csv",
+              "qcols": ["title"],
+              "template": "bib_details"
+            },
+            "twitter": {}
+          }
         }
       },
       "model_calibration.gexf": {
         "node0": {
           "name": "terms",
-          "reldbtype": "csv",
-          "reldbfile": "model_calibration.csv",
-          "reldbqcols": ["title"],
-          "reltemplate": "bib_details"
+          "reldbs": {
+            "csv": {
+              "file": "model_calibration.csv",
+              "qcols": ["title"],
+              "template": "bib_details"
+            },
+            "twitter": {}
+          }
         }
       }
     }
@@ -37,17 +62,24 @@
       "mini_for_csv.gexf": {
         "node0": {
           "name": "term",
-          "reldbtype": "csv",
-          "reldbfile": "mini_for_csv.csv",
-          "reldbqcols": ["title","keywords","text"],
-          "reltemplate": "bib_details"
+          "reldbs": {
+            "csv": {
+              "file": "mini_for_csv.csv",
+              "qcols": ["title","keywords","text"],
+              "template": "bib_details"
+            },
+            "twitter": {}
+          }
         },
         "node1": {
           "name": "person",
-          "reldbtype": "csv",
-          "reldbfile": "mini_for_csv.csv",
-          "reldbqcols": ["author"],
-          "reltemplate": "bib_details"
+          "reldbs": {
+            "csv": {
+              "file": "mini_for_csv.csv",
+              "qcols": ["author"],
+              "template": "bib_details"
+            }
+          }
         }
       },
       "test_with_various_atts.gexf": {}
@@ -59,23 +91,21 @@
     "first" : "ProgrammeDesCandidats.enrichi.gexf",
     "graphs": {
       "ProgrammeDesCandidats.enrichi.gexf": {
-        "node0": { "name": "terms" }
+        "node0": { "name": "terms", "reldbs": { "twitter": {} } }
       },
       "ProgrammeDesCandidats.gexf": {
-        "node0": { "name": "terms" }
+        "node0": { "name": "terms", "reldbs": { "twitter": {} } }
       }
     }
   },
-  "data/ClimateChange": {
+  "graphapi": {
+    "__comment__": "special subproject for api sourcemode",
+    "__comment__": "allows setting nodetypes and reldocs for api graph sources",
+    "__comment__": "POSS can be avoided if 2 files; filemenu.json, nodeconfs.json",
     "graphs": {
-      "Maps_S_800.gexf": {
-          "node0": {
-            "name": "ISItermsWhitelistV2Oct_5 &amp; ISItermsWhitelistV2Oct_5",
-            "reldbqtable": "ISItermsWhitelistV2Oct_5",
-            "reldbfile" : "wos_climate-change_title_2014-2015.db",
-            "reldbtype": "CortextDB",
-            "reltemplate": "cortext_with_link"
-          }
+      "default": {
+        "node0": { "name": "NGram",   "reldbs": { "twitter": {} } },
+        "node1": { "name": "Document" }
       }
     }
   }

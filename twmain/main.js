@@ -2,20 +2,8 @@
 
 //  ======= [ main TW properties initialization ] ======== //
 
-TW.Nodes = [];
-TW.Edges = [];
-TW.ByType = {}          // node ids sorted by nodetype id   (0, 1)
-TW.Relations = {}       // edges sorted by source/target type id ("00", "11")
-TW.Clusters = [];       // "by value" facet index built in parseCustom
 
 TW.File = ""            // remember the currently opened file
-
-TW.partialGraph = null  // will contain the sigma visible graph instance
-
-TW.labels=[];           // fulltext search list
-
-TW.categories = [];     // possible node types and their inverted map
-TW.catDict = {};
 
 // used iff servermenu
 TW.gmenuPaths={};       // map [graphname => graphsource] for file selectors
@@ -89,9 +77,23 @@ if (window.location.protocol == 'file:' || sourcemode == 'localfile') {
 }
 // traditional cases: remote read from API or prepared server-side file
 else {
+  try {
+    // we'll first retrieve the menu of available sources in db.json,
+    // then get the real data in a second ajax via API or server file
+    [TW.gmenuPaths, TW.gmenuInfos, TW.File] = readMenu(TW.conf.paths.sourceMenu)
+
+    //     NB: this menu used to be a file list for only one sourcemode
+    //         but now also contains settings for nodetypes and for
+    //         companion APIs (reldocs searches)
+    //      => we read it for all cases now
+  }
+  catch(e) {
+    console.error(`Couldn't read ${TW.conf.paths.sourceMenu}, trying to start with settings_explorer defaults.`)
+  }
+
   // NB it will use global urlParams and TW.settings to choose the source
-  var [inFormat, inData, mapLabel] = syncRemoteGraphData()
-  mainStartGraph(inFormat, inData, TW.instance)
+  var [inFormat, inData, inConfKey, mapLabel] = syncRemoteGraphData()
+  mainStartGraph(inFormat, inData, inConfKey, TW.instance)
   writeLabel(mapLabel)
 }
 
@@ -101,10 +103,11 @@ else {
 
 
 function syncRemoteGraphData () {
-  var inFormat;            // = { db|api.json , somefile.json|gexf }
-  var inData;              // = {nodes: [....], edges: [....], cats:...}
+  var inFormat;      // = { db|api.json , somefile.json|gexf }
+  var inData;        // = {nodes: [....], edges: [....], cats:...}
+  var inConfKey;     // = source name for entry in db.json
 
-  var mapLabel;            // user displayed label for this input dataset
+  var mapLabel;      // user displayed label for this input dataset
 
   // case (1) read from remote DB via API bridge fetching
   // ex: /services/api/graph?q=filters...
@@ -113,6 +116,7 @@ function syncRemoteGraphData () {
 
     // the only API format, cf. inData
     inFormat = 'json'
+    inConfKey = 'graphapi/default'
 
     // TODO-rename: s/nodeidparam/srcparams
     var sourceinfo = getUrlParam.nodeidparam
@@ -214,8 +218,8 @@ function syncRemoteGraphData () {
   }
 
 
-  // cases            (2)       and     (3) : we'll read a file from server
-  // sourcemode == "serverfile" or "servermenu" (several files with <select>)
+  // sourcemode == "serverfile" or "servermenu"
+  // cases            (2)       and     (3) : read a file from server
   else {
     console.log("input case: server-side file, using TW.conf.paths.sourceMenu or getUrlParam.file or TW.conf.paths.sourceFile")
 
@@ -229,79 +233,18 @@ function syncRemoteGraphData () {
 
     // menufile case : a list of source files in ./db.json
     if (sourcemode == 'servermenu') {
-        console.log("reading from FILEMENU TW.conf.paths.sourceMenu")
-        // we'll first retrieve the menu of available files in db.json, then get the real data in a second ajax
-        var infofile = TW.conf.paths.sourceMenu
+        console.log("using entire FILEMENU TW.conf.paths.sourceMenu")
 
-        if (TW.conf.debug.logFetchers)  console.info(`attempting to load filemenu ${infofile}`)
-        var preRES = AjaxSync({ url: infofile, datatype:"json" });
-
-        if (preRES['OK'] && preRES.data) {
-          if (TW.conf.debug.logFetchers) console.log('initial AjaxSync result preRES', preRES)
-        }
-
-        var first_file = "" , first_path = ""
-        for( var path in preRES.data ) {
-
-            if (TW.conf.debug.logFetchers) console.log("db.json path", path)
-
-            first_file = preRES.data[path]["first"]
-            first_path = path
-            break;
-        }
-
-        // the first or a specified one (ie both mode and file params are present)
-        if( isUndef(getUrlParam.file) ) {
-            TW.File = first_path+"/"+first_file
-            mapLabel = first_file
-        } else {
-            // £POSS; match on the full paths from db.json
-            TW.File = first_path+"/"+getUrlParam.file
-            mapLabel = getUrlParam.file
-        }
-
+        // chooser menu
         var files_selector = '<select onchange="jsActionOnGexfSelector(this.value);">'
-
-        for( var path in preRES.data ) {
-            var theGraphs = preRES.data[path]["graphs"]
-
-            for(var aGraph in theGraphs) {
-                var graphBasename = aGraph.replace(/\.gexf$/, "") // more human-readable in the menu
-                TW.gmenuPaths[graphBasename] = path+"/"+aGraph
-                // ex : "RiskV2PageRank1000.gexf":data/AXA/RiskV2PageRank1000.gexf
-                // (we assume there's no duplicate basenames)
-
-
-                if (TW.conf.debug.logFetchers)
-                  console.log("\t\t\t"+graphBasename)
-
-                // for associated LocalDB php queries: CSV (or CortextDBs sql)
-                if (theGraphs[aGraph]) {
-
-                  let gSrcEntry = theGraphs[aGraph]
-
-                  TW.gmenuInfos[path+"/"+aGraph] = new Array(2)
-
-                  if (gSrcEntry.node0) {
-                    TW.gmenuInfos[path+"/"+aGraph][0] = gSrcEntry.node0
-                  }
-                  if (gSrcEntry.node1) {
-                    TW.gmenuInfos[path+"/"+aGraph][1] = gSrcEntry.node1
-                  }
-
-                }
-                else {
-                  TW.gmenuInfos[path+"/"+aGraph] = null
-                }
-                // ^^^^^^ FIXME finish implementing new specifications
-
-                let cssFileSelected = (TW.File==(path+"/"+aGraph))?"selected":""
-                files_selector += '<option '+cssFileSelected+'>'+graphBasename+'</option>'
-            }
-            // console.log( files_selector )
+        for (let shortname in TW.gmenuPaths) {
+          let fullPath = TW.gmenuPaths[shortname]
+          files_selector += '<option>'+shortname+'</option>'
         }
         files_selector += "</select>"
         $("#network").html(files_selector)
+
+        // in this case we keep the TW.File that was already set from readMenu
     }
 
     // direct urlparam file case
@@ -320,6 +263,8 @@ function syncRemoteGraphData () {
     var finalRes = AjaxSync({ url: TW.File });
     inData = finalRes["data"]
     inFormat = finalRes["format"]
+    inConfKey = TW.File
+    mapLabel = TW.File
 
     if (TW.conf.debug.logFetchers) {
       console.warn('@TW.File', finalRes["OK"], TW.File)
@@ -329,7 +274,7 @@ function syncRemoteGraphData () {
     }
   }
 
-  return [inFormat, inData, mapLabel]
+  return [inFormat, inData, inConfKey, mapLabel]
 
 }
 
@@ -338,21 +283,50 @@ function syncRemoteGraphData () {
 // ===============
 //  main function  (once we have some gexf or json data)
 // ===============
+// 0 - read optional additional conf
 // 1 - parses the graph data
 // 2 - starts the sigma instance in TW.partialGraph
 // 3 - starts the tinaweb instance
 // 4 - finishes setting up the environment
 // (NB inspired by Samuel's legacy bringTheNoise() function)
-function mainStartGraph(inFormat, inData, twInstance) {
+//
+//  args:
+//     inFormat: 'json' or 'gexf'
+//     inData: source data as str
+//     inConfKey: optional entry in db.json to declare nodetypes and reldbs
+//     twInstance: a tinaweb object (gui, methods) to bind the graph to
+function mainStartGraph(inFormat, inData, inConfKey, twInstance) {
+
+  // Graph-related vars
+  // ------------------
+  // POSS: "new TWGraph()..."
+  TW.Nodes = [];
+  TW.Edges = [];
+  TW.ByType = {}          // node ids sorted by nodetype id   (0, 1)
+  TW.Relations = {}       // edges sorted by source/target type id ("00", "11")
+  TW.Clusters = [];       // "by value" facet index built in parseCustom
+
+  TW.partialGraph = null  // will contain the sigma visible graph instance
+
+  TW.labels=[];           // fulltext search list
+
+  TW.categories = [];     // possible node types and their inverted map
+  TW.catDict = {};
+  TW.lastRelDocQueries = {}  // avoids resending ajax if same query twice in a row
 
   if (! inFormat || ! inData) {
     alert("error on data load")
   }
   else {
+      // override default categories with the ones from db.json if present
+      let additionalConf = []
+      if (TW.gmenuInfos[inConfKey]) {
+        additionalConf = TW.gmenuInfos[inConfKey]
+      }
 
+      // parse the data
       if (TW.conf.debug.logParsers)   console.log("parsing the data")
-
-      let start = new ParseCustom(  inFormat , inData );
+      let start = new ParseCustom(  inFormat , inData, additionalConf );
       let catsInfos = start.scanFile();
 
       TW.categories = catsInfos.categories
@@ -369,8 +343,8 @@ function mainStartGraph(inFormat, inData, twInstance) {
 
       // activetypes: the node categorie(s) that is (are) currently displayed
       // ex: [true,false] = [nodes of type 0 shown  ; nodes of type 1 not drawn]
-      var initialActivetypes = TW.instance.initialActivetypes( TW.categories )
-      var initialActivereltypes = TW.instance.inferActivereltypes( initialActivetypes )
+      var initialActivetypes = twInstance.initialActivetypes( TW.categories )
+      var initialActivereltypes = twInstance.inferActivereltypes( initialActivetypes )
 
       // XML parsing from ParseCustom into dicts of nodes by type or rels by etype
       var dicts = start.makeDicts(TW.categories); // > parse json or gexf, dictfy
@@ -488,10 +462,11 @@ function mainStartGraph(inFormat, inData, twInstance) {
       //      renderer position depend on viewpoint/zoom (like ~ html absolute positions of the node in the div)
 
       // now that we have a sigma instance, let's bind our click handlers to it
-      TW.instance.initSigmaListeners(
+      twInstance.initSigmaListeners(
         TW.partialGraph,
         initialActivetypes,      // to init node sliders and .class gui elements
-        initialActivereltypes    // to init edge sliders
+        initialActivereltypes,   // to init edge sliders
+        inConfKey                // to init relatedDocs
       )
 
       // set the initial color

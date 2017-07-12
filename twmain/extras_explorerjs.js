@@ -328,99 +328,60 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
 // = = = = = = = = = = = [ / Clusters Plugin ] = = = = = = = = = = = //
 
 
-// getTopPapersCurrentTypes:
-//    recursive caller of topPapers (makes it work for both types)
+// queryForType:
+//   prepare query words from "selections of a given nodetype"
+function queryForType(ntypeId){
+  let subSels = TW.SystemState().selectionNids.filter(function(nid) {
+    return TW.catDict[TW.Nodes[nid].type] == ntypeId
+  })
 
-// idea:
-//  function myCaller(n) {
-//    if (n == 1)
-//      myFetcher('START', 'hello', displayFun)
-//    else if (n == 2)
-//      myFetcher('START', 'hello', function(aStr) {myFetcher(aStr, "world", displayFun)})
-//   }
-
-function getTopPapers(){
-  // waiting image
-  let image='<img style="display:block; margin: 0px auto;" src="twlibs/img/loader.gif"></img>';
-  $("#topPapers").html(image);
-
-  // swNodetypes <=> active types expressed as "semantic" and "social"
-  // ------------------------------------------------------------------
-  // according to directives types should only be called type 0 or 1
-  // but in the case of topPapers this "legacy" form is good sense
-  // and it is used elsewhere (external APIs and DBs)
-  var swNodetypes = getActivetypesNames().map(function(t){return swActual(t)})
-
-  let sels = TW.SystemState().selectionNids
-
-  // traditional case run once and display
-  if (swNodetypes.length == 1) {
-    topPapersFetcher(swNodetypes[0], getNodeLabels(sels))
+  let qWordsForType = []
+  for (var j in subSels) {
+    let n = TW.Nodes[subSels[j]]
+    qWordsForType.push(n.label)
   }
-  // if both types we call 2 nested times
-  else {
-    // prepare: sort selections' labels as query words by swtype
-    var qWordsbySwType = {'semantic': [], 'social': []}
-    for (var swtype in swNodetypes) {
-      qWordsbySwType[swtype] = []
-    }
-    for (var j in sels) {
-      let n = TW.Nodes[sels[j]]
-      qWordsbySwType[swActual(n.type)].push(n.label)
-    }
 
-    // do the first then the nested call
-    topPapersFetcher(
-      swNodetypes[0],
-      qWordsbySwType[swNodetypes[0]],
-      [[],[]],
-      function(priorJsonHits) {
-        topPapersFetcher(
-          swNodetypes[1],
-          qWordsbySwType[swNodetypes[1]],
-          priorJsonHits,
-          displayTopPapers
-        )
-      }
-    )
-  }
+  return qWordsForType
 }
 
 
-// consult search API or DB data of TW.conf.relatedDocsType
-// for a given "legacy" type ("semantic" or "social")
+// consult search API or DB data
+//  - for a given nodetypeId: 0 (was:"semantic") or 1 (was:"social")
+//  - of the DB corresponding to chosenAPI (or default TW.conf.relatedDocsType)
 
 // args:
-//  - using qWords array as a search engine query
-//  - and enriching the corresponding matches' HTML
-//  - cbNext is a partial function to handle the follow-up
-//    (just pass it resHTML, to continue enriching or display)
-//
-function topPapersFetcher(swType, qWords, accumulHits, cbNext){
+//  - qWords:         the search query as array of strings
+//  - nodetypeId:     the queried nodetype
+//  - chosenAPI:      the API "switch" dbtype ('twitter'||'csv'||'CortextDB')
+//  - tgtDivId:       the div #id to update
+function getTopPapers(qWords, nodetypeId, chosenAPI, tgtDivId) {
 
-  // list of json object with hit metadata (title, author, etc.) by nodetype
-  if (isUndef(accumulHits))      accumulHits = [[],[]]
+  // waiting image
+  let image='<img style="display:block; margin: 0px auto;" src="twlibs/img/loader.gif"></img>';
+  document.getElementById(tgtDivId).innerHTML = image
 
-  // callback to continue accumulating json hits or display to html
-  if (isUndef(cbNext))           cbNext = displayTopPapers
+  // args and defaults
+  if (! chosenAPI)      chosenAPI = TW.conf.relatedDocsType
 
-  // introducing the modern node type thanks to updated db.json specs
-  let nodetype = (swType == 'semantic') ? 0 : 1
-
-  let apiurl = TW.conf.relatedDocsAPIS[TW.conf.relatedDocsType]
+  let apiurl = TW.conf.relatedDocsAPIS[chosenAPI]
 
   if (! apiurl) {
     apiurl = TW.conf.relatedDocsAPI
   }
 
+  let cbDisplay = function(jsonData) {
+    // console.log("cbDisplay", jsonData)
+    return displayTopPapers(jsonData, nodetypeId, chosenAPI, tgtDivId)
+  }
+
   let stockErrMsg = `
-  <p class="micromessage">The API ${TW.conf.relatedDocsType} couldn't be connected to.</p>
+  <p class="micromessage">The API ${chosenAPI} couldn't be connected to.</p>
   <p class="micromessage">The queried route found in TW.conf was: <span class=code>${apiurl}</span>
   <br>Check if it is running and accessible.</p>`
 
   let resHTML = ''
 
-  if (TW.conf.relatedDocsType == "twitter") {
+  if (chosenAPI == "twitter") {
     let joinedQ = qWords.map(function(w){return'('+w+')'}).join(' AND ')
     $.ajax({
         type: 'GET',
@@ -429,69 +390,47 @@ function topPapersFetcher(swType, qWords, accumulHits, cbNext){
         contentType: "application/json",
         success : function(data){
             if (data.length) {
-              accumulHits[nodetype] = accumulHits[nodetype].concat(data)
+              cbDisplay(data)
             }
             else {
-              accumulHits[nodetype].push({
+              cbDisplay([{
                 "error": `<p class="micromessage centered">The query
                            <span class=code>${joinedQ}</span> delivers
                            no results on Twitter.</p>`
-              })
+              }])
             }
-            cbNext(accumulHits)
         },
         error: function(){
           console.log(`Not found: relatedDocs for ${apiurl}`)
-          accumulHits[nodetype].push({
-            "error": stockErrMsg
-          })
-          cbNext(accumulHits)
+          cbDisplay([{ "error": stockErrMsg }])
         }
     });
   }
-  else if (TW.conf.relatedDocsType == "LocalDB") {
-    let thisRelDocsConf = TW.gmenuInfos[TW.File][nodetype]
-    if (!thisRelDocsConf) {
-      accumulHits[nodetype].push({
-        "error": `<p>Your settings for relatedDocsType are set on a local database,
-            but your servermenu file does not provide any information about
-            the CSV or DB table to query for related documents
-            (on nodetype ${nodetype}: ${swType})</p>`
-      })
-      cbNext(accumulHits)
-      return
-    }
-    else {
-      // /!\ documentation and specification needed for the php use cases /!\
-      let joinedQ = JSON.stringify(qWords).split('&').join('__and__');
-      // cf. the php code for these url args:
-      //   - type: the node type (social/semantic)
-      //   - dbtype: 'sql' (classic sqlite like wos)
-      //          or 'csv' (like gargantext exports)
+  else {
+    let thisRelDocsConf = TW.gmenuInfos[TW.File][nodetypeId]["reldbs"][chosenAPI]
+    // /!\ documentation and specification needed for the php use cases /!\
+    let joinedQ = JSON.stringify(qWords).split('&').join('__and__');
+    // cf. the php code for these url args:
+    //   - type: the node type id (0 or 1)
+    //   - dbtype: 'CortextDB' or 'csv' decided by php read of the same conf file
+    //             (we send it as param because phpAPI supports different dbtypes)
 
-      // POSS object + join.map(join)
-      let urlParams = "type="+swType+"&query="+joinedQ+"&gexf="+TW.File+"&n="+TW.conf.relatedDocsMax ;
+    // POSS object + join.map(join)
+    let urlParams = "ndtype="+nodetypeId+"&dbtype="+chosenAPI+"&query="+joinedQ+"&gexf="+TW.File+"&n="+TW.conf.relatedDocsMax ;
 
-      $.ajax({
-          type: 'GET',
-          url: apiurl + '/info_div.php',
-          data: urlParams,
-          contentType: "application/json",
-          success : function(data){
-            if (data.hits) {
-              accumulHits[nodetype] = accumulHits[nodetype].concat(data.hits)
-            }
-            cbNext(accumulHits)
-          },
-          error: function(){
-            console.log(`Not found: relatedDocs for ${apiurl}`)
-            accumulHits[nodetype].push({
-              "error": stockErrMsg
-            })
-            cbNext(accumulHits)
-          }
-      });
-    }
+    $.ajax({
+        type: 'GET',
+        url: apiurl + '/info_div.php',
+        data: urlParams,
+        contentType: "application/json",
+        success : function(data){
+          cbDisplay(data.hits)
+        },
+        error: function(){
+          console.log(`Not found: relatedDocs for ${apiurl}`)
+          cbDisplay([{ "error": stockErrMsg }])
+        }
+    });
   }
 }
 
@@ -522,49 +461,43 @@ function makeRendererFromTemplate(tmplName) {
   }
 }
 
-function displayTopPapers(jsonHits) {
+function displayTopPapers(jsonHits, ndtypeId, chosenAPI, targetDiv) {
 
   // console.log('jsonHits', jsonHits)
 
   let resHTML = '<ul class="infoitems">'
   let toHtmlFun = function(){}
 
-  for (var ndtypeId in TW.categories) {
-    if (TW.conf.relatedDocsType == 'twitter') {
-      toHtmlFun = renderTweet
+  if (chosenAPI == 'twitter') {
+    toHtmlFun = renderTweet
+  }
+  else if (chosenAPI == "CortextDB" || chosenAPI == "csv") {
+    let thisRelDocsConf = TW.gmenuInfos[TW.File][ndtypeId]["reldbs"]
+    if (thisRelDocsConf && thisRelDocsConf[chosenAPI] && thisRelDocsConf[chosenAPI].template) {
+      toHtmlFun = makeRendererFromTemplate(thisRelDocsConf[chosenAPI].template)
     }
     else {
-      let thisRelDocsConf = TW.gmenuInfos[TW.File][ndtypeId]
-      if (thisRelDocsConf && thisRelDocsConf.reltemplate) {
-        // console.log("my rendering hits template", thisRelDocsConf.reltemplate)
-        
-        toHtmlFun = makeRendererFromTemplate(thisRelDocsConf.reltemplate)
-      }
-      else {
-        console.warn(`no rendering template found in ${TW.conf.paths.sourceMenu} for this source ${TW.File}...`)
+      console.warn(`no rendering template found in ${TW.conf.paths.sourceMenu} for this source ${TW.File}...`)
 
-        // try the universal template
-        toHtmlFun = makeRendererFromTemplate("universal")
-      }
+      // try the universal template
+      toHtmlFun = makeRendererFromTemplate("universal")
     }
+  }
 
-    // console.log("my rendering fun", toHtmlFun)
-
-    for (var k in jsonHits[ndtypeId]) {
-      let hitJson = jsonHits[ndtypeId][k]
-      if (hitJson.error) {
-        resHTML += hitJson.error
-      }
-      else {
-        resHTML += toHtmlFun(hitJson)
-      }
+  for (var k in jsonHits) {
+    let hitJson = jsonHits[k]
+    if (hitJson.error) {
+      resHTML += hitJson.error
+    }
+    else {
+      resHTML += toHtmlFun(hitJson)
     }
   }
 
   resHTML += '</ul>'
 
   // effect the changes in topPapers
-  $("#topPapers").html(resHTML);
+  document.getElementById(targetDiv).innerHTML = resHTML
 }
 
 function newPopup(url) {
@@ -582,7 +515,7 @@ function clickInsideTweet(e, tweetSrcUrl) {
       while (tgt = tgt.parentElement) {
         if (tgt.tagName.toLowerCase() == "a"
             || tgt.classList.contains('Tweet')
-            || tgt.id == 'topPapers'
+            || tgt.id == 'sidebar'
             || max <= 0) {
           break
         }

@@ -369,53 +369,6 @@ var TinaWebJS = function ( sigmacanvas ) {
           defaultTab: 'li#tabneigh'
         });
 
-        // initialize reldocs tabs
-        if (TW.conf.getRelatedDocs) {
-          // POSSible: create them on a settings list (currently in the HTML)
-
-          let ul = document.getElementById('reldocs-tabs')
-
-          let tabEls = []
-          for (var possibleAPI in TW.conf.relatedDocsAPIS) {
-            // create valid tabs
-            let newLi = document.createElement('li')
-            newLi.setAttribute("role", "presentation")
-            let newRDTab =  document.createElement('a')
-            newRDTab.text = possibleAPI
-            newRDTab.href = '#topPapers'
-            newRDTab.setAttribute("role", "tab")
-            newRDTab.dataset.toggle = 'tab'
-            newRDTab.dataset.reldocstype = possibleAPI
-
-            if (possibleAPI == TW.conf.relatedDocsType) {
-              newLi.setAttribute("class", "active")
-            }
-
-            // add to DOM
-            ul.append(newLi)
-            newLi.append(newRDTab)
-
-            // keep access
-            TW.gui.reldocTabs[possibleAPI] = newRDTab
-          }
-
-          // afterwards to get all types and the active type
-          for (let rdtype in TW.gui.reldocTabs) {
-            let tab = TW.gui.reldocTabs[rdtype]
-
-            // init toggle mecanisms (bootstrap.native/#componentTab)
-            // (just used for the tabs active/inactive handling,
-            //  content is *always* topPapers and we modify it ourselves)
-            new Tab(tab);
-
-            // add handler to switch relatedDocsType
-            tab.addEventListener('click', function(){
-              TW.conf.relatedDocsType = this.dataset.reldocstype
-              getTopPapers()
-            })
-          }
-        }
-
         // show any already existing panel
         document.getElementById("graph-panels").style.display = "block"
 
@@ -745,11 +698,6 @@ var TinaWebJS = function ( sigmacanvas ) {
           }
         })
 
-        // select currently preferred reldoc tab
-        if (TW.conf.getRelatedDocs && document.getElementById('reldocs-tabs')) {
-          TW.gui.reldocTabs[TW.conf.relatedDocsType].Tab.show()
-        }
-
         $("#tips").html(getTips());
 
         // we start with no selection
@@ -915,7 +863,7 @@ var TinaWebJS = function ( sigmacanvas ) {
 
     // to init local, instance-related listeners (need to run at new sigma instance)
     // args: @partialGraph = a sigma instance
-    this.initSigmaListeners = function(partialGraph, initialActivetypes, initialActivereltypes) {
+    this.initSigmaListeners = function(partialGraph, initialActivetypes, initialActivereltypes, optionalConfEntry) {
 
       // console.log("initSigmaListeners TW.categories / types array / reltypeskeys array: ", TW.categories, initialActivetypes, initialActivereltypes)
 
@@ -1105,10 +1053,18 @@ var TinaWebJS = function ( sigmacanvas ) {
         }
       });
 
-      if (TW.conf.filterSliders) {
+      // initialize reldocs tabs if declared in additionalConf
+      if (TW.conf.getRelatedDocs) {
 
-        // the indice of the first cat to be active (ex: '1')
-        let activeId = initialActivetypes.indexOf(true)
+        let moreConfKey = optionalConfEntry || TW.File
+
+        resetTabs(initialActivetypes, TW.gmenuInfos[moreConfKey])
+
+      }
+
+      // select currently active sliders
+      if (TW.conf.filterSliders) {
+        // also for all active cats
         for (let activeId in initialActivetypes) {
           if (initialActivetypes[activeId]) {
             // args: for display: target div ,
