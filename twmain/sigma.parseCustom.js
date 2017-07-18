@@ -651,9 +651,15 @@ function dictfyGexf( gexf , categories ){
     // NB nodesByType lists arrays of ids per nodetype
     // (equivalent to TW.partialGraph.graph.getNodesByType but on full nodeset)
     for(var i in categories)  {
-      catDict[categories[i]] = i
       nodesByType[i] = []
+
+      let subCats = categories[i].split(/\//g)
+      for (var j in subCats) {
+        catDict[subCats[j]] = i
+      }
+
     }
+
 
     var elsNodes = gexf.getElementsByTagName('nodes') // The list of xml nodes 'nodes' (plural)
     TW.labels = [];
@@ -1057,8 +1063,13 @@ function dictfyJSON( data , categories ) {
     // NB nodesByType lists arrays of ids per nodetype
     // (equivalent to TW.partialGraph.graph.getNodesByType but on full nodeset)
     for(var i in categories)  {
-      catDict[categories[i]] = i
       nodesByType[i] = []
+
+      let subCats = categories[i].split(/\//g)
+      for (var j in subCats) {
+        catDict[subCats[j]] = i
+      }
+
     }
 
     // normalization, same as parseGexf
@@ -1111,6 +1122,7 @@ function dictfyJSON( data , categories ) {
 
         // record
         nodes[node.id] = node;
+
         if (!nodesByType[catDict[node.type]]) {
           console.warn("unrecognized type:", node.type)
         }

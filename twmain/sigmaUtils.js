@@ -97,10 +97,9 @@ var SigmaUtils = function () {
         settings('labelSizeRatio') * size;
 
       // apply type-specific size slider ratios
-      var typeId = TW.categories.indexOf(node.type) || 0
+      var typeId = TW.catDict[node.type] || 0
       size *= TW.gui.sizeRatios[typeId]
       fontSize *= TW.gui.sizeRatios[typeId]
-
 
       if (!activeFlag && fontSize < settings('labelThreshold') * settings('labelSizeRatio'))
         return;
@@ -292,7 +291,7 @@ var SigmaUtils = function () {
         // NB cost of this condition seems small:
         //    - without: [11 - 30] ms for 23 nodes
         //    - with   : [11 - 33] ms for 23 nodes
-        var typeId = TW.categories.indexOf(node.type) || 0
+        var typeId = TW.catDict[node.type] || 0
 
         // apply type-specific size slider ratios
         nodeSize *= TW.gui.sizeRatios[typeId]
@@ -421,7 +420,7 @@ var SigmaUtils = function () {
         // largerall: our customized size boosts
 
         // apply type-specific size slider ratios
-        var typeId = TW.categories.indexOf(node.type) || 0
+        var typeId = TW.catDict[node.type] || 0
         size *= TW.gui.sizeRatios[typeId]
         fontSize *= TW.gui.sizeRatios[typeId]
 
