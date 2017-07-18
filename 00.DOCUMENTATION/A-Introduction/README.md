@@ -9,7 +9,18 @@ This package is:
 The app can be tested by simply opening explorerjs.html and providing a graph in `json` or `gexf` format (see exemples in the `data/` dir.)
 
 
-#### Basic integration policy
+#### Input file setup and advanced usage
+ProjectExplorer allows 4 main ways of input :
+  - **localfile**: a local file from the client machine  
+  - **serverfile**: a static file from the remote server  
+  - **servermenu**: a list of static files from the remote server  
+  - **api**: a dataset from a remote server API  
+
+To set up the desired mode, you need to change the (`TW.conf.sourcemode`) value in settings_explorerjs.js or add `sourcemode=xxx` as a URL argument.
+
+See [the developer's manual](https://github.com/moma/ProjectExplorer/blob/master/00.DOCUMENTATION/C-advanced/developer_manual.md) for more information.
+
+#### Integration policy
 As a client-side lib, **tinawebJS can entirely reside in the `static` directory of your app**.
 
 For the rest of the exemples we assume you cloned the code in a directory called `path/to/yourapp/static/ProjectExplorer`
@@ -68,22 +79,3 @@ There are two exceptions are:
     - while part of the distribution, they are **standalone micro-servers**
     - they contain their own readme as to how to run them on a server
     - once they are configured or run, the communication between them and the main tinaweb client module happens via XHR requests: therefore they can actually reside in any convenient place for your deployment.
-
-
-
-#### Advanced usage
-
-cf. developer_manual.md
-
-
-#### old TODO update
-
-- "JS Mode": TinawebJS est utilisé juste a niveau Javascript (HTML+CSS+JS), sans aide des modules php/python. C'est la version standalone, ça veut dire "lecture d'un fichier GEXF ou JSON".
-	- Graph uni-partite.  http://localhost/TinawebJS_2015/explorerjs.html?file=data/0-terms-terms-MainNodes.gexf
-
-	- Graph bi-partite.   http://localhost/TinawebJS_2015/explorerjs.html?file=data/cnrsfolder/2015-11-06T15:15:02.121958_graph.json
-
-
-
-- "JS+PHP Mode": Quand il y a des GEXF|JSON et en plus une BD en sqlite en format CorText (manager.cortext.net). En ce mode on dois declarer une db.json avec l'info necessaire.
-	- Graph bi-partite.   http://localhost/TinawebJS_2015/explorerjs.html
