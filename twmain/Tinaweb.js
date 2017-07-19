@@ -264,6 +264,7 @@ function SelectionEngine() {
 
           for(var i in theSelection) {
                 let srcnid = theSelection[i]
+
                 var bipaNeighs = TW.Relations["XR"][srcnid];
 
                 activeRelations["XR"][srcnid] = {}
@@ -276,8 +277,16 @@ function SelectionEngine() {
                       oppoSideNeighbors[bipaNeighs[k]] = 0 ;
                     }
 
-                    // cumulated for all srcnids
-                    oppoSideNeighbors[bipaNeighs[k]]++
+                    // normalize sizes by special attribute "normfactor" if present
+                    let normfactor = 1
+                    if (TW.Nodes[bipaNeighs[k]]
+                        && TW.Nodes[bipaNeighs[k]].attributes
+                        && TW.Nodes[bipaNeighs[k]].attributes.normfactor) {
+                      normfactor = parseFloat(TW.Nodes[bipaNeighs[k]].attributes.normfactor)
+                    }
+
+                    // cumulated weight for all srcnids
+                    oppoSideNeighbors[bipaNeighs[k]] += 1 * normfactor
 
                     // and the details
                     activeRelations["XR"][srcnid][bipaNeighs[k]]++;
