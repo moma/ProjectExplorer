@@ -21,7 +21,10 @@ $mainpath=dirname(dirname(getcwd()))."/"; // default fs path to ProjectExplorer 
 $project_menu_path = "db.json";
 
 // 3 - others
-$ntypes = 2;         // max node types
+$ntypes = 2;  // max node types   (node0 & node1)
+
+// accepted entries in db.json -> source -> reldbs -> dbtype
+$supported_dbtypes = ['csv', 'CortextDB'];
 
 // number of docs to display setting
 $max_item_displayed = 7;
@@ -38,30 +41,39 @@ $memport = 11211;
 // CONFIGURATION PARAMS
 // --------------------
 // parse db.json project menu and create a conf by file
-$conf = read_conf($mainpath.$project_menu_path, $ntypes);
+$conf = read_conf($mainpath.$project_menu_path, $ntypes, $supported_dbtypes);
 
 // =======================================
 // echodump("== READ CONF ==<br>", $conf);
 // =======================================
 
 $gexf= str_replace('"','',$_GET["gexf"]);
-$ndtype = $_GET["type"];
-$ntid = null;
+$ntid = $_GET["ndtype"];
+$dbtype = $_GET["dbtype"];
+$ndtype = null;
 $my_conf = null;
 
-// legacy types => generic types with 0 as default
-if ($ndtype == 'social')   {  $ntid = 1;  }
-else                       {  $ntid = 0;  }
+// new types => legacy types (with semantic as default)
+if ($ntid == 0)   {  $ndtype = 'social' ;   }
+else              {  $ndtype = 'semantic';  }
 
 // echodump("params: node type id", $ntid);
 
-if (! $conf[$gexf][$ntid]['active']) {
-  errmsg("not active", "your graph ($gexf)");
+if (! count($conf[$gexf]['node'.$ntid])) {
+  errmsg("has no php reldbs configured for nodetype $ntid", "your graph ($gexf)");
+  exit(1);
+}
+else if (! array_key_exists($dbtype, $conf[$gexf]['node'.$ntid])) {
+  errmsg("reldbs isn't configured for nodes of type $ntid and dbtype $dbtype", "your graph ($gexf)");
+  exit(1);
+}
+else if (! array_key_exists('file', $conf[$gexf]['node'.$ntid][$dbtype])) {
+  errmsg("reldb has no DB file for nodes of type $ntid and dbtype $dbtype", "your graph ($gexf)");
   exit(1);
 }
 else {
   $my_conf = $conf[$gexf];
-  $graphdb = $my_conf[$ntid]['dir'].'/'.$my_conf[$ntid]['reldbfile'];
+  $graphdb = $my_conf['node'.$ntid][$dbtype]['file'];
 }
 
 // echodump("params: reldb", $graphdb);

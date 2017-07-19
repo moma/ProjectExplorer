@@ -3,7 +3,7 @@
 //   (for instance loop on full gexf in scanGexf then again in dictfyGexf)
 
 // Level-01
-var ParseCustom = function ( format , data ) {
+var ParseCustom = function ( format , data, optionalConf ) {
 
     if (format == 'gexf') {
       this.data = $.parseXML(data)
@@ -14,9 +14,13 @@ var ParseCustom = function ( format , data ) {
     this.format = format;
     this.nbCats = 0;
 
+    this.additionalConf = optionalConf
+
     // input = GEXFstring
     this.getGEXFCategories = function() {
-        return scanGexf( this.data );
+        let observedCategories = scanGexf(this.data)
+        let finalCategories = sortNodeTypes(observedCategories, this.additionalConf)
+        return finalCategories;
     }// output = {'cats':[ "cat1" , "cat2" , ...], 'rev': {cat1: 0, cat2: 1...}}
 
 
@@ -29,7 +33,9 @@ var ParseCustom = function ( format , data ) {
 
     // input = JSONstring
     this.getJSONCategories = function(json) {
-        return scanJSON( this.data );
+      let observedCategories = scanJSON(this.data)
+      let finalCategories = sortNodeTypes(observedCategories, this.additionalConf)
+      return finalCategories;
     }// output = {'cats':[ "cat1" , "cat2" , ...], 'rev': {cat1: 0, cat2: 1...}}
 
 
@@ -201,8 +207,7 @@ function scanGexf(gexfContent) {
         }
     }
 
-    // sorting observed json node types into Sem (=> 1)/Soc (=> 0)
-    return sortNodeTypes(categoriesDict)
+    return categoriesDict
 }
 
 // sorting observed node types into Sem/Soc
@@ -212,9 +217,24 @@ function scanGexf(gexfContent) {
 // expected content: usually a just a few cats over all nodes
 // ex: terms
 // ex: ISItermsriskV2_140 & ISItermsriskV2_140
-function sortNodeTypes(observedTypesDict) {
+function sortNodeTypes(observedTypesDict, optConf) {
   var observedTypes = Object.keys(observedTypesDict)
   observedTypes.sort(function(a,b) {return observedTypesDict[b] - observedTypesDict[a]})
+
+  let nbNodeTypes = 2
+  var declaredTypes = []
+  for (var i = 0 ; i < nbNodeTypes ; i++ ) {
+    if (optConf[i] && optConf[i].name) {
+      declaredTypes[i] = optConf[i].name
+      if (TW.conf.debug.logSettings)
+        console.log("expected cat (from db.json addtional conf)", i, declaredTypes[i])
+    }
+    else {
+      declaredTypes[i] = TW.conf[i == 0 ? 'catSem' : 'catSoc']
+      if (TW.conf.debug.logSettings)
+        console.log("expected cat (from settings_explorer defaults)", i, declaredTypes[i])
+    }
+  }
 
   var newcats = []
   var catDict = {}
@@ -236,13 +256,14 @@ function sortNodeTypes(observedTypesDict) {
       // allows multiple node types, with an "all the rest" node1
 
       // try stipulated cats, then fallbacks
-      if (observedTypesDict[TW.conf.catSem]) {
-        newcats[0] = TW.conf.catSem;
-        catDict[TW.conf.catSem] = 0;
+      // possible: loop
+      if (observedTypesDict[declaredTypes[0]]) {
+        newcats[0] = declaredTypes[0];
+        catDict[declaredTypes[0]] = 0;
       }
-      if (observedTypesDict[TW.conf.catSoc]) {
-        newcats[1] = TW.conf.catSoc;
-        catDict[TW.conf.catSoc] = 1;
+      if (observedTypesDict[declaredTypes[1]]) {
+        newcats[1] = declaredTypes[1];
+        catDict[declaredTypes[1]] = 1;
       }
 
       // NB: type for nodes0 will be the majoritary by default, unless taken
@@ -630,9 +651,15 @@ function dictfyGexf( gexf , categories ){
     // NB nodesByType lists arrays of ids per nodetype
     // (equivalent to TW.partialGraph.graph.getNodesByType but on full nodeset)
     for(var i in categories)  {
-      catDict[categories[i]] = i
       nodesByType[i] = []
+
+      let subCats = categories[i].split(/\//g)
+      for (var j in subCats) {
+        catDict[subCats[j]] = i
+      }
+
     }
+
 
     var elsNodes = gexf.getElementsByTagName('nodes') // The list of xml nodes 'nodes' (plural)
     TW.labels = [];
@@ -1018,8 +1045,7 @@ function scanJSON( data ) {
         }
     }
 
-    // sorting observed json node types into Sem (=> 1)/Soc (=> 0)
-    return sortNodeTypes(categoriesDict);
+    return categoriesDict
 }
 
 // Level-00
@@ -1037,8 +1063,13 @@ function dictfyJSON( data , categories ) {
     // NB nodesByType lists arrays of ids per nodetype
     // (equivalent to TW.partialGraph.graph.getNodesByType but on full nodeset)
     for(var i in categories)  {
-      catDict[categories[i]] = i
       nodesByType[i] = []
+
+      let subCats = categories[i].split(/\//g)
+      for (var j in subCats) {
+        catDict[subCats[j]] = i
+      }
+
     }
 
     // normalization, same as parseGexf
@@ -1091,6 +1122,7 @@ function dictfyJSON( data , categories ) {
 
         // record
         nodes[node.id] = node;
+
         if (!nodesByType[catDict[node.type]]) {
           console.warn("unrecognized type:", node.type)
         }

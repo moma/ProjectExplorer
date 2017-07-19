@@ -31,13 +31,15 @@ TW.conf = (function(TW){
   TWConf.getRelatedDocs = false
   TWConf.relatedDocsMax = 10
 
-  TWConf.relatedDocsType = "twitter"      // accepted: "twitter" | "LocalDB"
+  // fallback type (if no detailed source-by-source conf from db.json)
+  TWConf.relatedDocsType = "csv"          // accepted: "twitter" | "csv" | "CortextDB"
                                           // POSSible: "elastic"
 
+  // routes by corresponding type
   TWConf.relatedDocsAPIS = {
-    // routes by corresponding type
-    "LocalDB": "twbackends/phpAPI",
-    "twitter": "http://127.0.0.1:5000/twitter_search"
+    "twitter": "http://127.0.0.1:5000/twitter_search",
+    "CortextDB": "twbackends/phpAPI",
+    "csv": "twbackends/phpAPI"
   }
 
   // fallback topPapers API if none found by type
