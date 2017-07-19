@@ -507,15 +507,25 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
     informationDIV += htmlfied_nodesatts( sels ).join("<br>\n")
     informationDIV += '</ul><br>';
 
-    //using the readmore.js (NB readmore and easytabs are not easy to harmonize)
+    // selection panels and tabs
     $("#lefttopbox").show();
     $("#selection-tabs-contnr").show();
     $("#names").html(namesDIV).readmore({maxHeight:100});
+    $("#information").html(informationDIV);
+
+    // easytab + readmore needs "click" on active tab to update HTML correctly
+    let tabAnchors = document.querySelectorAll('.etabs > li > a')
+    for (var i = 0 ; i < tabAnchors.length ; i++) {
+      if (tabAnchors[i] && tabAnchors[i].classList.contains("active"))
+      $('#selection-tabs-contnr').easytabs(
+        'select', tabAnchors[i].getAttribute('href')
+      );
+    }
+
     if(oppos.length>0) {
       $("#oppositeNodes").html(alterNodesDIV).readmore({maxHeight:200});
     }
     $("#sameNodes").html(sameNodesDIV).readmore({maxHeight:200});
-    $("#information").html(informationDIV);
 
     if (TW.conf.getRelatedDocs) {
       let rdTabCount = 0
