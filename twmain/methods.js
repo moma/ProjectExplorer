@@ -459,11 +459,6 @@ function htmlProportionalLabels(elems , limit, selectableFlag) {
           fontSize = 1
         }
 
-        // normalize sizes by special attribute "normfactor" if present
-        if (TW.Nodes[id].attributes.normfactor) {
-          fontSize = fontSize * TW.Nodes[id].attributes.normfactor
-        }
-
         // debug
         // console.log('htmlfied_tagcloud (',id, TW.Nodes[id].label,') freq',frec,' fontSize', fontSize)
 
