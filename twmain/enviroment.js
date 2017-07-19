@@ -449,7 +449,7 @@ function changeType(optionaltypeFlag) {
 
     // 7 - add the relations
     let newEdges = {}
-    let allNodes = TW.partialGraph
+    let allNodes = {}
     if (typeFlag != "all")  allNodes = newNodes
     else                    allNodes = Object.assign(newNodes, preservedNodes)
     for (var srcnid in allNodes) {
@@ -500,6 +500,13 @@ function changeType(optionaltypeFlag) {
       if (TW.conf.debug.logSelections)
         console.log("selection transitive projection from",sourceNids, "to", newselsArr)
     }
+
+    // update search labels
+    TW.labels.splice(0, TW.labels.length)
+    for (var nid in allNodes) {
+      updateSearchLabels(nid,allNodes[nid].label,allNodes[nid].type);
+    }
+
 
     // update the gui (POSS could be handled by TW.pushGUIState)
     TW.gui.handpickedcolor = false
