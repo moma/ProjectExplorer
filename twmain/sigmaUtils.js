@@ -98,7 +98,6 @@ var SigmaUtils = function () {
 
       // apply type-specific size slider ratios
       var typeId = TW.catDict[node.type] || 0
-      size *= TW.gui.sizeRatios[typeId]
       fontSize *= TW.gui.sizeRatios[typeId]
 
       if (!activeFlag && fontSize < settings('labelThreshold') * settings('labelSizeRatio'))
@@ -288,14 +287,8 @@ var SigmaUtils = function () {
         // other POSS: we rename n.type at parsing
         // and each action (recoloring/selection)
         // to use sigma's "def vs someType" syntax
-        // NB cost of this condition seems small:
-        //    - without: [11 - 30] ms for 23 nodes
-        //    - with   : [11 - 33] ms for 23 nodes
         var typeId = TW.catDict[node.type] || 0
 
-        // apply type-specific size slider ratios
-        nodeSize *= TW.gui.sizeRatios[typeId]
-        borderSize *= TW.gui.sizeRatios[typeId]
 
         // mode variants 1: if a coloringFunction is active
         if (! TW.gui.handpickedcolor) {
@@ -421,7 +414,6 @@ var SigmaUtils = function () {
 
         // apply type-specific size slider ratios
         var typeId = TW.catDict[node.type] || 0
-        size *= TW.gui.sizeRatios[typeId]
         fontSize *= TW.gui.sizeRatios[typeId]
 
         if (!node.customAttrs.active) {
@@ -1039,7 +1031,7 @@ function getSizeFactor(val) {
   else {
     sliderFactor = Math.min.apply(null, TW.gui.sizeRatios)
   }
-  return adjustmentFactor * (sliderFactor * 1.15)
+  return adjustmentFactor * sliderFactor * 1.1
 }
 
 // mobile versions should get lighter settings
