@@ -55,7 +55,7 @@
   }
 
   /* in percentage of what htmlProportionalLabels() calculates*/
-  #sameNodes {
+  #read-sameside-neighs, #read-opposite-neighs {
     font-size: 75%;
   }
 

@@ -445,16 +445,26 @@
 
     <div id="selection-tabs-contnr" class='selection-tabs-contnr'>
 
-       <ul class='etabs'>
+       <!-- selection's neighbors display -->
+       <ul class='etabs nav nav-tabs'>
          <!-- for related elements from the combined graph (eg soc => sem) -->
-         <li id="taboppos" class='tab'><a href="#oppositeNodes">Opposite-Neighbors</a></li>
+         <li id="taboppos" class='tab'>
+           <a href="#tagcloud-XR">Opposite-Neighbors</a>
+         </li>
          <!-- for neighbors within this graph -->
-         <li id="tabneigh" class='tab'><a href="#sameNodes">Related</a></li>
+         <li id="tabsameside" class='tab'>
+           <a href="#tagcloud-00">Related</a>
+         </li>
        </ul>
 
        <div class='panel-container'>
-            <div id="oppositeNodes"></div>
-            <div id="sameNodes"></div>
+         <!-- 2 tabs with outer div for tabbing, inner div for readmore (readmore needs its container to be never hidden)-->
+         <div id="tagcloud-XR">
+            <div id="read-opposite-neighs"></div>
+         </div>
+         <div id="tagcloud-00">
+            <div id="read-sameside-neighs"></div>
+         </div>
        </div>
     </div>
 

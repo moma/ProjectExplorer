@@ -212,11 +212,12 @@ function cancelSelection (fromTagCloud, settings) {
 
     // hide all selection panels
     if(fromTagCloud==false){
-        // £TODO give them all a common class
+        // POSS give them all a common class
         $("#names").html("");
         $("#topPapers").html("");
         $("#topPapers").hide();
-        $("#oppositeNodes").html("");
+        $("#read-sameside-neighs").html("");
+        $("#read-opposite-neighs").html("");
         $("#selection-tabs-contnr").hide();
         $("#reldocs-tabs-wrapper").hide();
         $("#information").html("");
@@ -289,6 +290,8 @@ function deselectNodes(aSystemState){
 
     for(let i in sels) {
       let nid = sels[i]
+
+      if (!TW.partialGraph.graph.nodes(nid)) continue
 
       // mark as unselected!
       TW.partialGraph.graph.nodes(nid).customAttrs.active = 0
@@ -523,9 +526,13 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
     }
 
     if(oppos.length>0) {
-      $("#oppositeNodes").html(alterNodesDIV).readmore({maxHeight:200});
+      $("#read-opposite-neighs").readmore('destroy')
+      $("#read-opposite-neighs").html(alterNodesDIV)
+      $("#read-opposite-neighs").readmore({maxHeight:200});
     }
-    $("#sameNodes").html(sameNodesDIV).readmore({maxHeight:200});
+    $("#read-sameside-neighs").readmore('destroy')
+    $("#read-sameside-neighs").html(sameNodesDIV)
+    $("#read-sameside-neighs").readmore({maxHeight:200});
 
     if (TW.conf.getRelatedDocs) {
       let rdTabCount = 0
