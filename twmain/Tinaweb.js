@@ -270,26 +270,28 @@ function SelectionEngine() {
                 activeRelations["XR"][srcnid] = {}
 
                 for(var k in bipaNeighs) {
-                    if (typeof activeRelations["XR"][srcnid][bipaNeighs[k]] == "undefined") {
-                      activeRelations["XR"][srcnid][bipaNeighs[k]] = 0;
-                    }
-                    if (typeof oppoSideNeighbors[bipaNeighs[k]] == "undefined") {
-                      oppoSideNeighbors[bipaNeighs[k]] = 0 ;
-                    }
 
-                    // normalize sizes by special attribute "normfactor" if present
-                    let normfactor = 1
-                    if (TW.Nodes[bipaNeighs[k]]
-                        && TW.Nodes[bipaNeighs[k]].attributes
-                        && TW.Nodes[bipaNeighs[k]].attributes.normfactor) {
-                      normfactor = parseFloat(TW.Nodes[bipaNeighs[k]].attributes.normfactor)
-                    }
+                  let eid1 = srcnid+';'+bipaNeighs[k]
+                  let eid2 = bipaNeighs[k]+';'+srcnid
 
-                    // cumulated weight for all srcnids
-                    oppoSideNeighbors[bipaNeighs[k]] += 1 * normfactor
+                  var edgeWeight = 1
+                  if (TW.Edges[eid1])      edgeWeight = TW.Edges[eid1].weight
+                  else if (TW.Edges[eid2]) edgeWeight = TW.Edges[eid2].weight
 
-                    // and the details
-                    activeRelations["XR"][srcnid][bipaNeighs[k]]++;
+                  if (typeof activeRelations["XR"][srcnid][bipaNeighs[k]] == "undefined") {
+                    activeRelations["XR"][srcnid][bipaNeighs[k]] = 0;
+                  }
+                  if (typeof oppoSideNeighbors[bipaNeighs[k]] == "undefined") {
+                    oppoSideNeighbors[bipaNeighs[k]] = 0 ;
+                  }
+
+                  // cumulated weight for all srcnids
+                  oppoSideNeighbors[bipaNeighs[k]] += edgeWeight
+
+                  console.log('edgeWeight', edgeWeight)
+
+                  // and the details
+                  activeRelations["XR"][srcnid][bipaNeighs[k]] += edgeWeight
                 }
             }
         }
