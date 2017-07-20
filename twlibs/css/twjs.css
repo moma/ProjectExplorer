@@ -155,7 +155,7 @@ html.waiting {
 
 /* VARIAE */
 
-#oppositesBox{
+#relatedBox, #oppositesBox{
   margin: 0;
   padding: 0;
 }
@@ -277,8 +277,8 @@ ul.infoitems {
   padding: 0 !important;
 }
 
-/* etabs => easytabs (for selection)
- * nav-tabs => bootstrap[-native] tabs (for reldocs)
+/* etabs => activated via easytabs (for selection)
+ * nav-tabs => just the tabs' css (for selection and reldocs)
  */
 
 
@@ -288,13 +288,12 @@ ul.infoitems {
 }
 
 .etabs{ margin: 0; padding: 0; line-height: 15px;}
-.tab {
-  display: inline-block; zoom:1; *display:inline; background: #eee; border: solid 1px #999; border-bottom: none; -moz-border-radius: 4px 4px 0 0; -webkit-border-radius: 4px 4px 0 0; }
-.tab a { font-size: 12px; line-height: 15px; display: block; padding: 0 5px 2px 5px; outline: none; }
-.tab a:hover { text-decoration: underline; }
-.tab.active { background: #fff; padding-top: 6px; position: relative; top: 1px; border-color: #666; }
-.tab a.active { font-weight: bold; }
-.selection-tabs-contnr .panel-container { background: #fff; border: solid #666 1px; padding: 10px; -moz-border-radius: 0 4px 4px 4px; -webkit-border-radius: 0 4px 4px 4px; }
+
+.selection-tabs-contnr .panel-container { background: #fff;
+  border: solid #222 1px;
+  padding: 10px;
+  border-radius: 0 4px 4px 4px;
+}
 .panel-container { margin-bottom: 10px; }
 
 

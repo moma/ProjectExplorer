@@ -372,12 +372,6 @@ var TinaWebJS = function ( sigmacanvas ) {
           }
         }
 
-        // initialize selection tabs (POSS: swap from easytabs lib to bs-native)
-        $('#selection-tabs-contnr').easytabs({
-          updateHash:false,
-          defaultTab: 'li#tabneigh'
-        });
-
         // show any already existing panel
         document.getElementById("graph-panels").style.display = "block"
 
@@ -641,8 +635,8 @@ var TinaWebJS = function ( sigmacanvas ) {
         $('.etabs').click(function(){
             setTimeout(
               function() {
-                $("#oppositeNodes").readmore({maxHeight:200});
-                $("#sameNodes").readmore({maxHeight:200});
+                $("#read-opposite-neighs").readmore({maxHeight:200});
+                $("#read-sameside-neighs").readmore({maxHeight:200});
               },
               500
             )
@@ -654,9 +648,9 @@ var TinaWebJS = function ( sigmacanvas ) {
                 sigma_utils.ourStopFA2();
 
             changeType();
-
             setTimeout(function(){
-              $('.etabs a[href="#tabs1"]').trigger('click');
+              //  $('.etabs a[href="#tagCloudXR"]').trigger('click');
+              $('#selection-tabs-contnr').easytabs('select', '#tagcloud-XR')
             },500)
         });
 
@@ -878,6 +872,14 @@ var TinaWebJS = function ( sigmacanvas ) {
 
       var selInst = this.selNgn
 
+      // changetype button
+      if (TW.categories.length == 1) {
+        $("#changetype").hide();
+      }
+      else {
+        $("#changetype").show();
+      }
+
       // sigma events bindings
       // ---------------------
 
@@ -1061,6 +1063,25 @@ var TinaWebJS = function ( sigmacanvas ) {
           return false;
         }
       });
+
+      // initialize selection tabs (order: show => easytabs => hide => readmore)
+      if (TW.categories.length == 1) {
+        $('#selection-tabs-contnr').easytabs({
+          updateHash:false,
+          defaultTab: 'li#tabsameside'
+        });
+        $("#taboppos").hide();
+        $("#read-sameside-neighs").readmore({maxHeight:200});
+      }
+      else {
+        $("#taboppos").show();
+        $('#selection-tabs-contnr').easytabs({
+          updateHash:false,
+          defaultTab: 'li#taboppos'
+        });
+        $("#read-sameside-neighs").readmore({maxHeight:200});
+        $("#read-opposite-neighs").readmore({maxHeight:200});
+      }
 
       // initialize reldocs tabs if declared in additionalConf
       if (TW.conf.getRelatedDocs) {

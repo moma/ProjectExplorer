@@ -461,7 +461,7 @@ function mainStartGraph(inFormat, inData, inConfKey, twInstance) {
       // NB : camera positions are fix if the node is fixed => they only depend on layout
       //      renderer position depend on viewpoint/zoom (like ~ html absolute positions of the node in the div)
 
-      // now that we have a sigma instance, let's bind our click handlers to it
+      // now that we have a sigma instance let's adapt the environment and bind our click handlers to it
       twInstance.initSigmaListeners(
         TW.partialGraph,
         initialActivetypes,      // to init node sliders and .class gui elements
@@ -521,27 +521,6 @@ function mainStartGraph(inFormat, inData, inConfKey, twInstance) {
 
       // will run fa2 if enough nodes and TW.conf.fa2Enabled == true
       sigma_utils.smartForceAtlas()
-
-
-      // adapt the enviroment to monopartite vs. bipartite cases
-      if( TW.categories.length==1 ) {
-          $("#changetype").hide();
-          $("#taboppos").hide();
-
-          // if (TW.conf.catSem && TW.conf.catSoc) {
-            setTimeout(function () {
-                // tabneigh: show "Related" tab
-                document.querySelector('.etabs a[href="#tabs2"]').click()
-            }, 500);
-          // }
-      }
-      // for elements hidden by default (cf. css) but useful in bipartite case
-      else {
-        $("#changetype").show();
-        $("#taboppos").show();
-        $("#taboppos").css('display', 'inline-block');
-      }
-
 
       // should prepare the colors/clusters menu once and for all
       // (previously, needed to be called after changeType/changeLevel)
