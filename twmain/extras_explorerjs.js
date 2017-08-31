@@ -235,8 +235,14 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
       $("#legend-for-clusters").hide()
     }
     else {
+      let daclassLabel = daclass
+      if  (TW.conf.facetOptions
+        && TW.conf.facetOptions[daclass]
+        && TW.conf.facetOptions[daclass].menutransl) {
+          daclassLabel = TW.conf.facetOptions[daclass].menutransl
+      }
       var LegendDiv = ""
-      LegendDiv += `    <div class="legend-title">${daclass}</div>`
+      LegendDiv += `    <div class="legend-title">${daclassLabel}</div>`
       LegendDiv += '    <div class="legend-scale">'
       LegendDiv += '      <ul class="legend-labels">'
 
