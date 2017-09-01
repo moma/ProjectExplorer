@@ -1174,6 +1174,8 @@ var TinaWebJS = function ( sigmacanvas ) {
       // attributes' facet-options init & handler
       fillAttrsInForm('choose-attr')
       document.getElementById('choose-attr').onchange = showAttrConf
+
+      // add all numeric attributes to titlingMetric with option type fromFacets
       fillAttrsInForm('attr-titling-metric', 'num')
 
       // cancelSelection(false);

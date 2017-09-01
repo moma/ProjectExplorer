@@ -11,6 +11,14 @@ TW.gui.colorFuns = {
   'cluster': "clusterColoring"
 }
 
+// sigma has dynamic attributes.. the functions below return their resp. getters
+TW.sigmaAttributes = {
+  'degree' :    function(sigInst) { return function(nd) {return sigInst.graph.degree(nd.id)}},
+  'outDegree' : function(sigInst) { return function(nd) {return sigInst.graph.degree(nd.id, 'out')}},
+  'inDegree' :  function(sigInst) { return function(nd) {return sigInst.graph.degree(nd.id, 'in')}}
+}
+
+
 // Execution:    changeGraphAppearanceByFacets( true )
 // It reads scanned node-attributes and prepared legends in TW.Clusters
 //  to add the button in the html with the sigmaUtils.gradientColoring(x) listener.
@@ -277,13 +285,20 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
           let theRankingAttr = TW.conf.facetOptions[daclass].titlingMetric
           let maxLen = TW.conf.facetOptions[daclass].titlingNTerms || 2
 
-          // custom accessor (user settings or by default)
+          // custom accessor (sigma auto attr or user settings or by default)
           let getVal
           if(theRankingAttr) {
-            getVal = function(node) {return node.attributes[theRankingAttr]}
+            // one of the 3 sigma dynamic attributes 'degree', etc
+            if (theRankingAttr in TW.sigmaAttributes) {
+              getVal = TW.sigmaAttributes[theRankingAttr](TW.partialGraph)
+            }
+            // a user setting for a source data attribute
+            else {
+              getVal = function(node) {return node.attributes[theRankingAttr]}
+            }
           }
+          // default ranking: by size
           else {
-            // default ranking: by size
             getVal = function(node) {return node.size}
           }
 
@@ -872,7 +887,7 @@ function activateModules() {
 // =================
 
 
-// creates a list of <options> for all present attributes
+// creates a list of automatic <options> for all present attributes
 // (or a sublist on a meta.dataType condition
 //  NB condition on dataType could be on an extended meta "attrType"
 //     cf. doc/developer_manual.md autodiagnose remark)
@@ -883,9 +898,10 @@ function fillAttrsInForm(menuId, optionalAttTypeConstraint) {
 
     let elChooser = document.getElementById(menuId)
 
-    // remove the possible previous options from possible previous graphs
-    while (elChooser.lastChild) {
-      elChooser.removeChild(elChooser.lastChild)
+    // remove any previous fromFacets options from possible previous graphs
+    let autoOptions = document.getElementById(menuId).querySelectorAll('option[data-opttype=fromFacets]')
+    for (var i = 0 ; i <= autoOptions.length - 1 ; i++) {
+      elChooser.removeChild(autoOptions[i])
     }
 
     // each facet family or clustering type was already prepared
@@ -896,6 +912,7 @@ function fillAttrsInForm(menuId, optionalAttTypeConstraint) {
         let opt = document.createElement('option')
         opt.value = att
         opt.innerText = att
+        opt.dataset.opttype = "fromFacets"
         elChooser.appendChild(opt)
       }
     }
