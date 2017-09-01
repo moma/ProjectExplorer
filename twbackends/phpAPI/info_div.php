@@ -22,6 +22,7 @@ if ($dbtype == "CortextDB") {
 else {
   // to index: the union of "searchable columns" qcols for all nodetypes
   $idxcolsbytype = [];
+  $altcsvsep = $csvsep;
   for ($i = 0; $i < $ntypes ; $i++) {
 
     // if nodetype is active
@@ -35,6 +36,15 @@ else {
             but your servermenu file does not provide any information about
             the CSV or DB table to query for related documents
             (on nodetypeId ".$i.")</p>");
+      }
+
+      // optional conf items: separator
+        // FIXME: since conf is defined by node type,
+        //  only the last separator will be taken into account
+        //  but allowing two different separators contradicts
+        //  the 1-base-per-graph structure in csv_indexation
+      if (array_key_exists('delim', $my_conf["node".$i][$dbtype])) {
+        $altcsvsep = $my_conf["node".$i][$dbtype]['delim'];
       }
     }
   }
@@ -69,12 +79,12 @@ else {
       // echodump("filename CSV", $mainpath.$graphdb);
       $csv_search_base = parse_and_index_csv($mainpath.$graphdb,
                                              $idxcolsbytype,
-                                            $csvsep, $csvquote);
+                                            $altcsvsep, $csvquote);
       // -------------------------------------------------------------------------------
 
       if(class_exists('Memcached')){
-        // **store** in cache for 1/2h
-        $mcd->set(mem_entry_name($graphdb), json_encode($csv_search_base), 1800);
+        // **store** in cache for 2 min
+        $mcd->set(mem_entry_name($graphdb), json_encode($csv_search_base), 120);
       }
     }
 

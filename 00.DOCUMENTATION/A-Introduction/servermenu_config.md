@@ -87,10 +87,12 @@ Expected type is `"csv"` and you should fill the columns to search in and the te
   "csv" : {
     "file": "$$relpath/to/some.csv",
     "qcols": ["list", "of", "cols", "to", "search", "in", "for", "node0"],
+    "delim": ";"
     "template": "bib_details"
   }
 }
 ```
+NB: the delim parameter is optional (tab is used by default)
 
 ###### => for a cortext sql base
 Expected type is `"CortextDB"` and you should fill the tables to search in.

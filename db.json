@@ -82,7 +82,19 @@
           }
         }
       },
-      "test_with_various_atts.gexf": {}
+      "ProgrammeDesCandidats.gexf": {
+        "node0": {
+          "name": "term",
+          "reldbs": {
+            "csv": {
+              "file": "ProgrammesCandidats2017.csv",
+              "delim": ",",
+              "qcols": ["title","abstract","node0"],
+              "template": "bib_details"
+            }
+          }
+        }
+      }
     }
   },
   "data/politoscope": {
