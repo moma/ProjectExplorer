@@ -109,6 +109,14 @@ TW.resetGraph = function() {
   // remaining global vars will be reset by new graph mainStartGraph
 }
 
+// create more human-readable graph labels for the menu
+// data/project/coolgraph.gexf ==> "project: coolgraph"
+function graphPathToLabel(fullPath) {
+  return fullPath.replace(
+      /^(?:data\/)?([^/]+)\/(.*)(?:\.(?:gexf|json))?/,
+      "$1: $2"
+    )
+}
 
 // read all sources' detailed confs
 //  -> list of source paths available
@@ -156,39 +164,37 @@ function readMenu(infofile) {
   first_path = first_dir+"/"+first_file
 
   // 2 - process all the paths and associated confs
-  let paths = {}
   let details = {}
 
   for( var path in preRES.data ) {
       var theGraphs = preRES.data[path]["graphs"]
 
       for(var aGraph in theGraphs) {
-          var graphBasename = aGraph.replace(/\.gexf$/, "") // more human-readable in the menu
-          paths[graphBasename] = path+"/"+aGraph
+          let fullPath = path+"/"+aGraph
           // ex : "RiskV2PageRank1000.gexf":data/AXA/RiskV2PageRank1000.gexf
           // (we assume there's no duplicate basenames)
 
           if (TW.conf.debug.logSettings)
-            console.log("db conf entry: "+graphBasename)
+            console.log("db conf entry: " + fullPath)
 
           // for associated LocalDB php queries: CSV (or CortextDBs sql)
           if (theGraphs[aGraph]) {
             let gSrcEntry = theGraphs[aGraph]
-            details[path+"/"+aGraph] = new Array(2)
+            details[fullPath] = new Array(2)
             if (gSrcEntry.node0) {
-              details[path+"/"+aGraph][0] = gSrcEntry.node0
+              details[fullPath][0] = gSrcEntry.node0
             }
             if (gSrcEntry.node1) {
-              details[path+"/"+aGraph][1] = gSrcEntry.node1
+              details[fullPath][1] = gSrcEntry.node1
             }
           }
           else {
-            details[path+"/"+aGraph] = null
+            details[fullPath] = null
           }
       }
   }
 
-  return [paths, details, first_path]
+  return [details, first_path]
 }
 
 

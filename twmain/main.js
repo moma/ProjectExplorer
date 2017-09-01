@@ -80,7 +80,7 @@ else {
   try {
     // we'll first retrieve the menu of available sources in db.json,
     // then get the real data in a second ajax via API or server file
-    [TW.gmenuPaths, TW.gmenuInfos, TW.File] = readMenu(TW.conf.paths.sourceMenu)
+    [TW.gmenuInfos, TW.File] = readMenu(TW.conf.paths.sourceMenu)
 
     //     NB: this menu used to be a file list for only one sourcemode
     //         but now also contains settings for nodetypes and for
@@ -236,10 +236,10 @@ function syncRemoteGraphData () {
         console.log("using entire FILEMENU TW.conf.paths.sourceMenu")
 
         // chooser menu
-        var files_selector = '<select onchange="jsActionOnGexfSelector(this.value);">'
-        for (let shortname in TW.gmenuPaths) {
-          let fullPath = TW.gmenuPaths[shortname]
-          files_selector += '<option>'+shortname+'</option>'
+        var files_selector = '<select onchange="openGraph(this.options[this.selectedIndex].dataset.fullpath)">'
+        for (let fullPath in TW.gmenuInfos) {
+          let shortname = graphPathToLabel(fullPath)
+          files_selector += `<option data-fullpath="${fullPath}">`+shortname+'</option>'
         }
         files_selector += "</select>"
         $("#network").html(files_selector)
@@ -264,7 +264,7 @@ function syncRemoteGraphData () {
     inData = finalRes["data"]
     inFormat = finalRes["format"]
     inConfKey = TW.File
-    mapLabel = TW.File
+    mapLabel = graphPathToLabel(TW.File)
 
     if (TW.conf.debug.logFetchers) {
       console.warn('@TW.File', finalRes["OK"], TW.File)

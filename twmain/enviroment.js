@@ -1250,8 +1250,7 @@ function resetTabs(activetypes, dbconf) {
 }
 
 
-function jsActionOnGexfSelector(graphBasename){
-    let graphPath = TW.gmenuPaths[graphBasename] || graphBasename+".gexf"
+function openGraph(graphPath){
     let serverPrefix = ''
     var pathcomponents = window.location.pathname.split('/')
     for (var i in pathcomponents) {
@@ -1266,6 +1265,6 @@ function jsActionOnGexfSelector(graphBasename){
 
     TW.File = graphPath
     mainStartGraph(newDataRes["format"], newDataRes["data"], TW.File, TW.instance)
-    writeLabel(graphBasename)
+    writeLabel(graphPathToLabel(graphPath))
 }
 //============================= </OTHER ACTIONS > =============================//
