@@ -288,7 +288,7 @@ function SelectionEngine() {
                   // cumulated weight for all srcnids
                   oppoSideNeighbors[bipaNeighs[k]] += edgeWeight
 
-                  console.log('edgeWeight', edgeWeight)
+                  // console.log('edgeWeight', edgeWeight)
 
                   // and the details
                   activeRelations["XR"][srcnid][bipaNeighs[k]] += edgeWeight

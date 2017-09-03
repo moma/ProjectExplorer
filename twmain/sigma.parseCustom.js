@@ -679,6 +679,21 @@ function dictfyGexf( gexf , categories ){
                             //   if < maxDiscreteValues: keep all in legend
                             //   else:  show intervals in legend
 
+    // tmpVals structure
+    // -----------------
+    // {
+    //   nodecat0: {
+    //     betweeness: {
+    //       map: {
+    //         val0: [nodeid_a, nodeid_b...],
+    //         val1: [nodeid_c, nodeid_d...],...
+    //       }
+    //       vals: {vstr:[], vnum:[val0, val1,...]}
+    //     },
+    //     ...
+    //   }
+    // }
+
     // usually there is only 1 <nodes> element...
     for(i=0; i<elsNodes.length; i++) {
         var elNodes = elsNodes[i];  // Each xml element 'nodes' (plural)
