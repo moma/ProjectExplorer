@@ -221,16 +221,25 @@ function syncRemoteGraphData () {
   // sourcemode == "serverfile" or "servermenu"
   // cases            (2)       and     (3) : read a file from server
   else {
-    console.log("input case: server-side file, using TW.conf.paths.sourceMenu or getUrlParam.file or TW.conf.paths.sourceFile")
+    console.log("input case: server-side file, using TW.conf.paths.sourceMenu and/or TW.File")
 
-    // -> @mode is servermenu, files are listed in db.json file (preRes ajax)
+
+    // both modes (2) and (3) need a direct file
+
+    // a) file path is in the urlparam @file (overrides any defaults)
+    if( !isUndef(getUrlParam.file)  ) {
+      TW.File = getUrlParam.file
+    }
+    // b) default case: specified file path in settings_explorer
+    else if (TW.conf.paths.sourceFile) {
+      console.log("no @file arg: trying TW.conf.sourceFile from settings")
+      TW.File = TW.conf.paths.sourceFile;
+    }
+
+
+    // 2) @mode is servermenu, files are listed in db.json file (preRes ajax)
     //      --> if @file also in url, choose the db.json one matching
     //      --> otherwise, choose the "first_file" from db.json list
-
-    // -> @mode is serverfile
-    //      -> gexf file path is in the urlparam @file
-    //      -> gexf file path is already specified in TW.conf.paths.sourceFile
-
     // menufile case : a list of source files in ./db.json
     if (sourcemode == 'servermenu') {
         console.log("using entire FILEMENU TW.conf.paths.sourceMenu")
@@ -239,27 +248,26 @@ function syncRemoteGraphData () {
         var files_selector = '<select onchange="openGraph(this.options[this.selectedIndex].dataset.fullpath)">'
         for (let fullPath in TW.gmenuInfos) {
           let shortname = graphPathToLabel(fullPath)
-          files_selector += `<option data-fullpath="${fullPath}">`+shortname+'</option>'
+          let preSelected = (fullPath == TW.File)
+          files_selector += `<option ${preSelected ? "selected":""} data-fullpath="${fullPath}">`+shortname+'</option>'
         }
         files_selector += "</select>"
         $("#network").html(files_selector)
 
-        // in this case we keep the TW.File that was already set from readMenu
+        // NB if TW.File was not in the list we keep the first one from readMenu
     }
 
-    // direct urlparam file case
-    else if( !isUndef(getUrlParam.file)  ) {
-      TW.File = getUrlParam.file
-    }
-    // direct file fallback case: specified file in settings_explorer
-    else if (TW.conf.paths.sourceFile && linkCheck(TW.conf.paths.sourceFile)) {
-      console.log("no @file arg: trying TW.conf.sourceFile from settings")
-      TW.File = TW.conf.paths.sourceFile;
+    // 3) @mode is serverfile a or b (default)
+    else if (TW.File) {
+      if (! linkCheck(TW.File)) {
+        console.error(`Specified file ${TW.File} is absent.`)
+      }
     }
     else {
-      console.error(`No specified input and neither db.json nor TW.conf.paths.sourceFile ${TW.conf.paths.sourceFile} are present`)
+      console.error(`No specified input and no servermenu.`)
     }
 
+    // finally: read the chosen file
     var finalRes = AjaxSync({ url: TW.File });
     inData = finalRes["data"]
     inFormat = finalRes["format"]
@@ -275,7 +283,6 @@ function syncRemoteGraphData () {
   }
 
   return [inFormat, inData, inConfKey, mapLabel]
-
 }
 
 
