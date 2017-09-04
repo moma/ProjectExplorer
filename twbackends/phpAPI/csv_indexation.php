@@ -67,6 +67,8 @@ function parse_and_index_csv($filename, $typed_cols_to_index, $separator, $quote
 
                 foreach($tokens as $tok) {
 
+                  $tok = strtolower($tok);
+
                   if (strlen($tok)) {
 
                     // POSS : stopwords could be used here

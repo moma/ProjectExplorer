@@ -113,6 +113,8 @@ else {
         continue;
       }
 
+      $tok = strtolower($tok);
+
       // echodump("tok", $tok);
       // echodump("searchcols", $searchcols);
 
