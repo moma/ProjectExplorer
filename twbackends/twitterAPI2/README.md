@@ -40,6 +40,29 @@ python3 topPapers_flask_server.py --cors
 #### On a real server
 Use nohup or gunicorn to detach the process or make it into a full-fledged server.
 
+For instance for a ProjectExplorer server you can follow these 3 steps.
+
+1. run the backend with nohup
+```
+cd ${YOUR_PROJECT_EXPLORER_DIR}/twbackends/twitterAPI2
+nohup python3 topPapers_flask_server.py &
+```
+2. add a proxy location to the nginx server's conf:
+```
+location /twitter_search {
+     proxy_pass http://0.0.0.0:5000 ;
+     proxy_redirect off ;
+}
+```
+
+3. fill the corresponding info in ProjectExplorer's settings_explorerjs.js
+```
+TWConf.relatedDocsAPIS = {
+  "twitter": "http://${YOUR_SERVER_IP}/twitter_search",
+  (...)
+}
+```
+
 
 ## More info
 
