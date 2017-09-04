@@ -98,6 +98,10 @@ TW.conf = (function(TW){
                          'menutransl': 'Centralité par vecteurs propres'
                        },
 
+    'auto-degree'     : {'col': "gradient",  'n': 6,  'binmode': 'samerange'},
+    'auto-indegree'   : {'col': "gradient",  'n': 6,  'binmode': 'samerange'},
+    'auto-outdegree'  : {'col': "gradient",  'n': 6,  'binmode': 'samerange'},
+    'auto-size'       : {'col': "gradient",  'n': 6,  'binmode': 'samerange'},
     'numuniform'      : {'col': "heatmap",  'n': 7,  'binmode': 'samepop'  },
     'numpareto'       : {'col': "gradient", 'n': 5,  'binmode': 'samerange'},
     'intfewvalues'    : {'col': "cluster" , 'n': 4,  'binmode': 'samerange'},

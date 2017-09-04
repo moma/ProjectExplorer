@@ -657,10 +657,19 @@ function gradientColoring(daclass) {
 
     TW.gui.handpickedcolor = true
 
+    // value getter
+    let getVal
+    if (daclass in TW.sigmaAttributes) {
+      getVal = TW.sigmaAttributes[daclass](TW.partialGraph)
+    }
+    else {
+      getVal = function (nd) { return nd.attributes[daclass]}
+    }
+
     var min_pow = 0;
     for(var nid in TW.Nodes) {
         var the_node = TW.Nodes[ nid ]
-        var attval = the_node.attributes[daclass];
+        var attval = getVal(the_node);
         if( !isNaN(parseFloat(attval)) ) { //is float
             while(true) {
                 var themult = Math.pow(10,min_pow);
@@ -680,7 +689,8 @@ function gradientColoring(daclass) {
 
     for(var nid in TW.Nodes) {
         var the_node = TW.Nodes[ nid ]
-        var attval = the_node.attributes[daclass];
+        var attval = getVal(the_node)
+
         var attnumber = Number(attval);
         if (isNaN(attnumber)) {
           continue;

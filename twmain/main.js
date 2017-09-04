@@ -451,7 +451,7 @@ function mainStartGraph(inFormat, inData, inConfKey, twInstance) {
       });
       // ==================================================================
 
-      // a new state
+      // a new GUI state (updates sliders and menus)
       TW.pushGUIState({
         'activetypes': initialActivetypes,
         'activereltypes': initialActivereltypes
@@ -529,8 +529,8 @@ function mainStartGraph(inFormat, inData, inConfKey, twInstance) {
       // will run fa2 if enough nodes and TW.conf.fa2Enabled == true
       sigma_utils.smartForceAtlas()
 
-      // should prepare the colors/clusters menu once and for all
-      // (previously, needed to be called after changeType/changeLevel)
+      // prepare the colors/clusters menu until next changeType/changeLevel
+      updateDynamicFacets()
       changeGraphAppearanceByFacets()
 
       // set the default legend
