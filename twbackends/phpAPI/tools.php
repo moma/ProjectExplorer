@@ -1,12 +1,18 @@
 <?php
 
 
-function echodump($title, $anyObj) {
-  echo "<br>".$title.": ";
-  echo (preg_replace_callback("/\n(\s*)/", function($capt){
-    return('<br>'.str_repeat('&nbsp;', strlen($capt[0])));
-  }, json_encode($anyObj, JSON_PRETTY_PRINT)));
-  echo "<br>";
+function echodump($title, $anyObj, $output_mode = "json") {
+  if ($output_mode == "html") {
+    echo "<br>".$title.": ";
+    echo (preg_replace_callback("/\n(\s*)/", function($capt){
+      return('<br>'.str_repeat('&nbsp;', strlen($capt[0])));
+    }, json_encode($anyObj, JSON_PRETTY_PRINT)));
+    echo "<br>";
+  }
+  else {
+    echo "\n{debug: \"".$title."\",";
+    echo "dump: ".json_encode($anyObj, JSON_PRETTY_PRINT)."}\n\n";
+  }
 }
 
 
