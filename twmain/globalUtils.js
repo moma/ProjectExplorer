@@ -13,10 +13,24 @@ var AjaxSync = function(args) {
     if (isUndef(args.datatype))       args.datatype = 'text'
     else if (args.datatype=="jsonp")  args.datatype = "json"
 
+    // will contain success bool, format and data itself
     var Result = []
+
+    // format will influence downstream parser choice
+    var format = null ;
 
     if (TW.conf.debug.logFetchers)
       console.log("---AjaxSync---", args)
+
+    // use file extension to guess expected format (headers are more variable)
+    if (args.url && args.url.length) {
+      let extMatch = args.url.match(/\.(gexf|json)$/)
+      if (extMatch) {
+        format = extMatch.pop()
+        if (TW.conf.debug.logFetchers)
+          console.info(`before AjaxSync(${args.url}): format is ${format}, according to file extension`);
+      }
+    }
 
     $.ajax({
             type: args.type,
@@ -28,25 +42,27 @@ var AjaxSync = function(args) {
             data: args.data,
             contentType: 'application/json',
             success : function(data, textStatus, jqXHR) {
+              // header checked iff format not apparent from extension
+              if (format == null) {
                 var header = jqXHR.getResponseHeader("Content-Type")
-                var format ;
-                if (!header
-                     || header == "application/octet-stream"
-                     || header == "application/xml"
-                ) {
+                if (header &&
+                     (header == "application/json"
+                      || header == "text/json")
+                  ) {
+                    format = "json" ;
+                  }
+                else {
                   // default parser choice if xml or if undetailed header
                   format = "gexf" ;
-                }
-                else {
                   if (TW.conf.debug.logFetchers)
-                    console.debug("after AjaxSync("+args.url+") => response header="+header +"not xml => fallback on json");
-                  format = "json" ;
+                    console.debug("after AjaxSync("+args.url+") => response header="+header +"not json => fallback on xml gexf");
                 }
-                Result = { "OK":true , "format":format , "data":data };
+              }
+              Result = { "OK":true , "format":format , "data":data };
             },
             error: function(exception) {
-                console.warn('ajax error:', exception, exception.getAllResponseHeaders())
-                Result = { "OK":false , "format":false , "data":exception.status };
+              console.warn('ajax error:', exception, exception.getAllResponseHeaders())
+              Result = { "OK":false , "format":false , "data":exception.status };
             }
         });
     return Result;
