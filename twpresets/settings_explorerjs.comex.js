@@ -28,16 +28,18 @@ TW.conf = (function(TW){
   // Related documents (topPapers) data source
   // -----------------------------------------
 
-  TWConf.getRelatedDocs = false
+  TWConf.getRelatedDocs = false           // TURNED OFF FOR COMEX
   TWConf.relatedDocsMax = 10
 
-  TWConf.relatedDocsType = "twitter"      // accepted: "twitter" | "LocalDB"
+  // fallback type (if no detailed source-by-source conf from db.json)
+  TWConf.relatedDocsType = "twitter"      // accepted: "twitter" | "csv" | "CortextDB"
                                           // POSSible: "elastic"
 
+  // routes by corresponding type
   TWConf.relatedDocsAPIS = {
-    // routes by corresponding type
-    "LocalDB": "twbackends/phpAPI",
-    "twitter": "http://127.0.0.1:5000/twitter_search"
+    "twitter": "http://127.0.0.1:5000/twitter_search",
+    "CortextDB": "twbackends/phpAPI",
+    "csv": "twbackends/phpAPI"
   }
 
   // fallback topPapers API if none found by type
@@ -95,6 +97,34 @@ TW.conf = (function(TW){
                          'n': 9,
                          'menutransl': 'Centralité par vecteurs propres'
                        },
+   'normfactor':{
+                         'col':"gradient" ,
+                         'binmode': 'samepop',
+                         'n': 5,
+                         'menutransl': 'Focused keywords'
+                       },
+   'ACR':             {
+                         'col':"cluster" ,
+                         'binmode': 'off',
+                         'menutransl': 'Affiliation'
+                       },
+   'country':{
+                         'col':"cluster" ,
+                         'binmode': 'off',
+                         'menutransl': 'Country'
+                       },
+   'nbjobs':{
+                         'col':"heatmap" ,
+                         'binmode': 'samerange',
+                         'n': 5,
+                         'menutransl': 'Number of related job ads'
+                       },
+   'total_occurrences':{
+                         'col':"heatmap" ,
+                         'binmode': 'samepop',
+                         'n': 5,
+                         'menutransl': 'Total occurrences'
+                       },
 
     'numuniform'      : {'col': "heatmap",  'n': 7,  'binmode': 'samepop'  },
     'numpareto'       : {'col': "gradient", 'n': 5,  'binmode': 'samerange'},
@@ -108,8 +138,6 @@ TW.conf = (function(TW){
     'weight'          : {'col': "heatmap" , 'n': 5,  'binmode': 'samerange'  },
     'Weighted Degree' : {'col': "heatmap", 'n': 8,  'binmode': 'samerange'  },
     'out-degree'      : {'col': "heatmap" , 'n': 3,  'binmode': 'samepop'  },
-    'country'         : {'col': "cluster" ,          'binmode': 'off'},
-    'ACR'             : {'col': "cluster" ,          'binmode': 'off'},
 'cluster_universal_index': {'col': "cluster" ,         'binmode': 'off'      },
        'community_orphan' : {'col': "cluster" ,        'binmode': 'off'      }
 
@@ -281,9 +309,13 @@ TW.conf = (function(TW){
 
   // tina environment rendering settings
   // -----------------------------------
+  // normal and meso level background colors
+  TWConf.normalBackground = '#fff'             // <= should match css default
+  TWConf.mesoBackground = '#fcfcea'
+
   // mouse captor zoom limits
   TWConf.zoomMin = .015625         // for zoom IN   (ex: 1/64 to allow zoom x64)
-  TWConf.zoomMax = 8               // for zoom OUT
+  TWConf.zoomMax = 4               // for zoom OUT
 
   // circle selection cursor
   TWConf.circleSizeMin = 0;
@@ -299,8 +331,8 @@ TW.conf = (function(TW){
 
   // relative sizes (iff ChangeType == both nodetypes)
   TWConf.sizeMult = [];
-  TWConf.sizeMult[0] = 1.0;     // ie for node type 0 (<=> sem)
-  TWConf.sizeMult[1] = 10.0;     // ie for node type 1 (<=> soc)
+  TWConf.sizeMult[0] = 1.0;      // ie for node type 0 (<=> sem)
+  TWConf.sizeMult[1] = 8.0;     // ie for node type 1 (<=> soc)
 
 
   // ===========
@@ -310,7 +342,7 @@ TW.conf = (function(TW){
     initialShowAll: false,           // show all nodes on bipartite case init (docs + terms in one view)
 
     // show verbose console logs...
-    logFetchers: false,               // ...about ajax/fetching of graph data
+    logFetchers: false,              // ...about ajax/fetching of graph data
     logParsers: false,               // ...about parsing said data
     logFacets: false,                // ...about parsing node attribute:value facets
     logSettings: false,              // ...about settings at Tina and Sigma init time
