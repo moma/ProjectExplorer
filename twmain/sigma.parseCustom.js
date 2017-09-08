@@ -52,23 +52,18 @@ ParseCustom.prototype.scanFile = function() {
                     'lookup_dict': new Object()}
     switch (this.format) {
         case "api.json":
-            console.log("scanFile: "+this.format)
             break;
         case "db.json":
-            console.log("scanFile: "+this.format)
             break;
         case "json":
-            console.log("scanFile: "+this.format)
             catInfos = this.getJSONCategories( this.data );
             return catInfos;
             break;
         case "gexf":
-            console.log("scanFile: "+this.format)
             catInfos = this.getGEXFCategories( this.data );
             return catInfos;
             break;
         default:
-            console.log("scanFile   jsaispas: "+this.format)
             break;
     }
 };

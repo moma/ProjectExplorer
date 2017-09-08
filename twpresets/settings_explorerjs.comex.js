@@ -121,25 +121,27 @@ TW.conf = (function(TW){
                        },
    'total_occurrences':{
                          'col':"heatmap" ,
-                         'binmode': 'samepop',
-                         'n': 5,
+                         'binmode': 'samerange',
+                         'n': 3,
                          'menutransl': 'Total occurrences'
                        },
 
-    'numuniform'      : {'col': "heatmap",  'n': 7,  'binmode': 'samepop'  },
-    'numpareto'       : {'col': "gradient", 'n': 5,  'binmode': 'samerange'},
-    'intfewvalues'    : {'col': "cluster" , 'n': 4,  'binmode': 'samerange'},
-    'period'          : {'col': "cluster" ,          'binmode': 'off'},
-    'in-degree'       : {'col': "heatmap" , 'n': 3,  'binmode': 'samepop'  },
-    'cluster_index'   : {'col': "cluster" ,          'binmode': 'off'},
-    'cluster_label'   : {'col': "cluster" ,          'binmode': 'off'},
-    'betweeness'      : {'col': "gradient", 'n': 4,  'binmode': 'samepop'  },
-    'level'           : {'col': "heatmap" ,          'binmode': 'off'  },
+    'numuniform'      : {'col': "heatmap",  'n': 7,  'binmode': 'samepop'    },
+    'numpareto'       : {'col': "gradient", 'n': 5,  'binmode': 'samerange'  },
+    'intfewvalues'    : {'col': "cluster" , 'n': 4,  'binmode': 'samerange'  },
+    'period'          : {'col': "cluster" ,          'binmode': 'off'        },
+    'in-degree'       : {'col': "heatmap" , 'n': 3,  'binmode': 'samepop'    },
+    'cluster_index'   : {'col': "cluster" ,          'binmode': 'off'        },
+    'cluster_label'   : {'col': "cluster" ,          'binmode': 'off'        },
+    'betweeness'      : {'col': "gradient", 'n': 4,  'binmode': 'samepop'    },
+    'level'           : {'col': "heatmap" ,          'binmode': 'off'        },
     'weight'          : {'col': "heatmap" , 'n': 5,  'binmode': 'samerange'  },
-    'Weighted Degree' : {'col': "heatmap", 'n': 8,  'binmode': 'samerange'  },
-    'out-degree'      : {'col': "heatmap" , 'n': 3,  'binmode': 'samepop'  },
-'cluster_universal_index': {'col': "cluster" ,         'binmode': 'off'      },
-       'community_orphan' : {'col': "cluster" ,        'binmode': 'off'      }
+    'Weighted Degree' : {'col': "heatmap",  'n': 8,  'binmode': 'samerange'  },
+    'out-degree'      : {'col': "heatmap" , 'n': 3,  'binmode': 'samepop'    },
+    'clust_louvain'   : {'col': "cluster" ,          'binmode': 'off',
+                         'menutransl':'Louvain clustering'                   },
+     'cluster_universal_index': {'col': "cluster" ,        'binmode': 'off'  },
+      'community_orphan' :      {'col': "cluster" ,        'binmode': 'off'  }
 
   }
 
@@ -204,8 +206,7 @@ TW.conf = (function(TW){
   TWConf.ModulesFlags["histogramModule"] = false ;
   TWConf.ModulesFlags["histogramDailyVariantModule"] = false ;
   // TODO more generic module integrating the variants cf. experiments/histogramModule_STUB_GENERIQUE
-  TWConf.ModulesFlags["crowdsourcingModule"] = true ;
-
+  TWConf.ModulesFlags["crowdsourcingModule"] = false ;
 
   // Other GUI options
   // ------------------
@@ -241,7 +242,7 @@ TW.conf = (function(TW){
   // if fa2Available, the auto-run config:
 
     TWConf.fa2Enabled= true;        // fa2 auto-run at start and after graph modified ?
-    TWConf.fa2Milliseconds=10000;    // duration of auto-run
+    TWConf.fa2Milliseconds=8000;    // duration of auto-run
     TWConf.minNodesForAutoFA2 = 5   // graph size threshold to auto-run
 
 
@@ -331,8 +332,8 @@ TW.conf = (function(TW){
 
   // relative sizes (iff ChangeType == both nodetypes)
   TWConf.sizeMult = [];
-  TWConf.sizeMult[0] = 1.0;      // ie for node type 0 (<=> sem)
-  TWConf.sizeMult[1] = 8.0;     // ie for node type 1 (<=> soc)
+  TWConf.sizeMult[0] = 2.0;     // ie for node type 0 (<=> sem)
+  TWConf.sizeMult[1] = 1.0;     // ie for node type 1 (<=> soc)
 
 
   // ===========

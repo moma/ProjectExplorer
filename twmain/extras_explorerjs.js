@@ -32,12 +32,18 @@ function changeGraphAppearanceByFacets(actypes) {
     // create colormenu and 1st default entry
     var color_menu_info = '<li><a href="#" onclick="TW.gui.handpickedcolor = false ; graphResetLabelsAndSizes() ; TW.partialGraph.refresh()">By Default</a></li>';
 
+    let gotPreviousLouvain = false
     if( $( "#colorgraph-menu" ).length>0 ) {
       for (var tid in actypes) {
         let ty = actypes[tid]
 
+
         // each facet family or clustering type was already prepared
         for (var attTitle in TW.Clusters[ty]) {
+
+
+          // note any previous louvains
+          if (attTitle == 'clust_louvain')  gotPreviousLouvain = true
 
           // attribute counts: nb of classes
           // POSS here distinguish [ty][attTitle].classes.length and ranges.length
@@ -46,7 +52,7 @@ function changeGraphAppearanceByFacets(actypes) {
 
           if (attNbClasses) {
             let lastClass = TW.Clusters[ty][attTitle].invIdx[attNbClasses-1]
-            if (lastClass.labl && lastClass.labl == '_non_numeric_' && lastClass.nids) {
+            if (lastClass.labl && /^_non_numeric_/.test(lastClass.labl) && lastClass.nids) {
               if (lastClass.nids.length) {
                 attNbNodes -= lastClass.nids.length
               }
@@ -77,10 +83,7 @@ function changeGraphAppearanceByFacets(actypes) {
 
           // family label :)
           var attLabel ;
-          if (attTitle == 'clust_louvain') {
-            attLabel = 'Groupes de voisins, méthode de Louvain'
-          }
-          else if (TW.conf.facetOptions[attTitle] && TW.conf.facetOptions[attTitle]['menutransl']) {
+          if (TW.conf.facetOptions[attTitle] && TW.conf.facetOptions[attTitle]['menutransl']) {
             attLabel = TW.conf.facetOptions[attTitle]['menutransl']
           }
           else attLabel = attTitle
@@ -91,8 +94,10 @@ function changeGraphAppearanceByFacets(actypes) {
         // POSS add cumulated degree via TW.partialGraph.graph.degree(nid)
       }
 
-      // we also add clust_louvain in all cases
-      color_menu_info += `<li><a href="#" onclick='clusterColoring("clust_louvain")'>By Louvain clustering ( <span id="louvainN">?</span> | ${currentNbNodes})</a></li>`
+      // we also add clust_louvain if not already there
+      if (!gotPreviousLouvain) {
+        color_menu_info += `<li><a href="#" onclick='clusterColoring("clust_louvain")'>By Louvain clustering ( <span id="louvainN">?</span> | ${currentNbNodes})</a></li>`
+      }
 
       // for debug
       // console.warn('color_menu_info', color_menu_info)
@@ -103,6 +108,7 @@ function changeGraphAppearanceByFacets(actypes) {
     // Legend slots were prepared in TW.Clusters
 
 }
+
 
 function RunLouvain() {
 
@@ -148,7 +154,7 @@ function RunLouvain() {
         let len = reinvIdx[entry].length
         if (len) {
           TW.Clusters[typ]['clust_louvain'].invIdx.push({
-            'labl': `${entry} (${len})`,
+            'labl': `cluster n°${entry} (${len})`,
             'fullLabl': `${typ}||Louvain||${entry} (${len})`,
             'nids': reinvIdx[entry],
             'val': entry
@@ -196,9 +202,19 @@ function SomeEffect( ValueclassCode ) {
 
     // we have our precomputed idmaps for nodes_2_colour => full selection
     // /!\ nodeset can be quite big
-    TW.instance.selNgn.MultipleSelection2(
-      {nodes: TW.Clusters[nodeType][cluType].invIdx[iClu].nids}
+
+    // we still filter it due to Level or sliders filters
+    filteredNodes = TW.Clusters[nodeType][cluType].invIdx[iClu].nids.filter(
+      function(nid){
+        return Boolean(TW.partialGraph.graph.nodes(nid))
+      }
     )
+
+    if (filteredNodes.length) {
+      TW.instance.selNgn.MultipleSelection2(
+        {nodes: filteredNodes}
+      )
+    }
     TW.partialGraph.refresh()
 }
 
@@ -262,12 +278,14 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
         // get a sample node color for each bin/class
         var nMatchedNodes = legendInfo[l]['nids'].length
 
+        // console.log("legendInfo, nMatchedNodes", legendInfo, nMatchedNodes)
+
         let theColor = legendInfo[l].col || "#111"   // black if empty
 
         // create the legend item
         var preparedLabel = legendInfo[l]['labl']
 
-        if (preparedLabel == '_non_numeric_') {
+        if (/^_non_numeric_/.test(preparedLabel)) {
           if (!nMatchedNodes) {
             continue                // we skip "trash" category if empty
           }
@@ -322,8 +340,8 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
             titles = titles.slice(0,maxLen)
           }
 
-          // adding those k best titles to the legend
-          preparedLabel += " ["+titles.map(function(x){return x.key}).join('/')+"...]"
+          // replacing the cluster numbers by those k best titles in the legend
+          preparedLabel = "["+titles.map(function(x){return x.key}).join('/')+"...]" + ` (${nMatchedNodes})`
 
           // console.log("finding title perf", performance.now() - t0, titles)
         }

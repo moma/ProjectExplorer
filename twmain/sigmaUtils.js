@@ -743,10 +743,15 @@ function gradientColoring(daclass) {
         if (bins.invIdx[i].labl != '_non_numeric_') {
           let nidList = bins.invIdx[i]['nids']
           if (nidList.length) {
-            // we take an exemplar in the range, further than middle
-            // (result optically more representative than with 1/2 of len)
-            let aNid = nidList[Math.floor(3*nidList.length/4)]
-            bins.invIdx[i].col = TW.partialGraph.graph.nodes(aNid).color
+            // we take first non null exemplar from last in the range
+            // (possible skip due to changeLevel or filters)
+            for (var k = nidList.length-1 ; k-- ; k >= 0) {
+              let nd = TW.partialGraph.graph.nodes(nidList[k])
+              if (nd) {
+                bins.invIdx[i].col = nd.color
+                break
+              }
+            }
           }
           else {
             bins.invIdx[i].col = "#111" // empty bin

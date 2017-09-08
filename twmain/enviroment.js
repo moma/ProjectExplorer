@@ -515,6 +515,8 @@ function changeType(optionaltypeFlag) {
       graphResetLabelsAndSizes()
     }
     TW.partialGraph.settings('labelThreshold', getSizeFactor())
+    fillAttrsInForm('choose-attr')
+    fillAttrsInForm('attr-titling-metric', 'num')
 
     // recreates FA2 nodes array from new nodes
     reInitFa2({
@@ -1176,7 +1178,7 @@ function resetTabs(activetypes, dbconf) {
     return
   }
 
-  console.log("dbconf for this source", dbconf)
+  // console.log("dbconf for this source", dbconf)
 
   // for all active nodetypes
   for (let nodetypeId in activetypes) {

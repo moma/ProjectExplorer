@@ -1094,6 +1094,42 @@ var TinaWebJS = function ( sigmacanvas ) {
 
       }
 
+      // defaultColoring: an attribute name to immediately apply color with
+      let madeDefaultColor = false
+      if (TW.conf.defaultColoring) {
+        let colMethodName, colMethod
+        if (TW.conf.facetOptions[TW.conf.defaultColoring]) {
+          colMethodName = TW.gui.colorFuns[TW.conf.facetOptions[TW.conf.defaultColoring]['col']]
+        }
+        if (! colMethodName) {
+          if(TW.conf.defaultColoring.indexOf("clust")>-1||TW.conf.defaultColoring.indexOf("class")>-1) {
+            // for classes and clusters
+            colMethod = "clusterColoring"
+          }
+          else {
+            colMethod = "heatmapColoring"
+          }
+        }
+
+        // retrieve the actual function and if there, try and run it
+        colMethod = window[colMethodName]
+        if (colMethod && typeof colMethod == "function") {
+          try {
+            colMethod(TW.conf.defaultColoring)
+            madeDefaultColor = true
+          }
+          catch(err) {
+            console.warning(`Settings asked for defaultColoring by the
+                             attribute "${TW.conf.defaultColoring}" but
+                             it's not present in the dataset => skip action`)
+          }
+        }
+      }
+      // otherwise, set the default legend
+      if (! madeDefaultColor) {
+        set_ClustersLegend ( "clust_default" )
+      }
+
       // select currently active sliders
       if (TW.conf.filterSliders) {
         // also for all active cats

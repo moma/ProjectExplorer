@@ -532,9 +532,6 @@ function mainStartGraph(inFormat, inData, inConfKey, twInstance) {
       // should prepare the colors/clusters menu once and for all
       // (previously, needed to be called after changeType/changeLevel)
       changeGraphAppearanceByFacets()
-
-      // set the default legend
-      set_ClustersLegend ( "clust_default" )
   }
 
 }
