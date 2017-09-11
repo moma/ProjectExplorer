@@ -268,6 +268,19 @@ p.micromessage{
     border-radius: .3em;
 }
 
+#information .information-others {
+    padding: 0;
+    margin: 1em;
+    background-color:#eee;
+    border-radius: .3em;
+}
+
+#information .information-others li {
+  color: #444;
+  font-family: "Crete Round", "garamond", serif ;
+  padding: 5px;
+}
+
 #information .information-links {
     padding: 7px 0 0 20px;
 }
