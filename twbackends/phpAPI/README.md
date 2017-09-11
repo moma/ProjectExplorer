@@ -12,37 +12,32 @@ Main use case is support for one-doc-by-row CSV files.
 
 You need any kind of php server support with php > 5.0.
 
-For instance on an ubuntu 16 with an nginx server, I'd install php 7 fpm:
-```
-sudo apt install php7.0-fpm
-```
+For instance on an ubuntu 16 with an nginx server, I would:
+  - install php 7 fpm:
+    ```
+    sudo apt install php7.0-fpm
+    ```
 
-And then add this kind of configuration entry in `nginx.conf`:
-```
-location ~ \.php$ {
-  include snippets/fastcgi-php.conf;
-  fastcgi_pass unix:/run/php/php7.0-fpm.sock;
+  - follow **[nginx_suggestions.md](https://github.com/moma/ProjectExplorer/blob/master/00.DOCUMENTATION/C-advanced/nginx_suggestions.md)** to correctly configure the web server routes relative to my filesystem paths and `settings_explorerjs` configuration.
 
- fastcgi_param SCRIPT_FILENAME
-   /your/path/to/twbackends/phpAPI/$fastcgi_script_name;
- # --------------------------------
-}
-```
+###### CSV
 
-It's enough to run any kind of gargantext-style gexf + CSV sets.
+The prerequisites above are enough to run any kind of [gargantext](http://gargantext.org)-style {gexf + CSV} sets.
 
-Optionally, especially in production, you should add memcached support for faster CSV search (it allows caching the CSV postings base).
-
-```
-sudo apt install php-memcached
-sudo service php7.0-fpm restart
-```
+###### Cortext
 
 For legacy cortext-style databases, you'll also need sqlite:
 ```
 sudo apt install sqlite3 php7.0-sqlite3
 ```
 
+#### Optional cache-ing
+Optionally, especially in production, you should add memcached support for faster CSV search (it allows caching the CSV postings base).
+
+```
+sudo apt install php-memcached
+sudo service php7.0-fpm restart
+```
 
 #### Usage
 
@@ -51,9 +46,13 @@ sudo apt install sqlite3 php7.0-sqlite3
 To use the API for the "topPapers" embedded search in ProjectExplorer, the corresponding settings should be picked either:
   - via the interface (side panel menu)
   - or directly in settings_explorerjs.js:
-```
-TWConf.relatedDocsType = "LocalDB"  (CSV or CortextDB)
-```
+    ```
+    TWConf.relatedDocsType = "csv"
+
+    or
+
+    TWConf.relatedDocsType = "CortextDB"
+    ```
 
 Finally, to match the correct DB with the correct graph file:
   - both should reside in `data/yoursubdir`

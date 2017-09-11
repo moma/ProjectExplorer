@@ -7,7 +7,7 @@ TW.conf = (function(TW){
   let TWConf = {}
 
   TWConf.branding = 'ProjectExplorer'  // <--- name displayed in upper left
-  TWConf.brandingLink = 'https://github.com/moma/ProjectExplorer'   // <--- link to "home"
+  TWConf.brandingLink = 'http://iscpif.fr'   // <--- link to "home"
 
 
   // ==========================
@@ -209,7 +209,9 @@ TW.conf = (function(TW){
   TWConf.ModulesFlags["histogramModule"] = true ;
   TWConf.ModulesFlags["histogramDailyVariantModule"] = false ;
   // TODO more generic module integrating the variants cf. experiments/histogramModule_STUB_GENERIQUE
-  TWConf.ModulesFlags["crowdsourcingModule"] = false ;
+
+  // cf. twmodules/crowdsourcingModule/README.md to initialize the associated db
+  TWConf.ModulesFlags["crowdsourcingModule"] = true ;
 
   // Other GUI options
   // ------------------

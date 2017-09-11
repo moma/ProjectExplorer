@@ -71,15 +71,12 @@ function save_suggestions(term) {
     // console.log( "SAVE INFO:" + info )
     $.ajax({
         type: "POST",
-        url: "crowdsourcingModule/db/s.php",
-        // cache:false,
-        // contentType: "application/json",
+        url: "twmodules/crowdsourcingModule/db/s.php",
         data: info,
         dataType: "json",
         success : function(data, textStatus, jqXHR) {
             console.log( "SUCCESS" )
             console.log( data )
-            //$("#sendcrowds").html(D["#sendcrowds"]["thanks"][LA]) //showing message
             var p = $('<p>');
             var i = $('<i>');
             i.text('"'+term+'"');

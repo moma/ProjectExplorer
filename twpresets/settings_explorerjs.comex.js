@@ -206,6 +206,8 @@ TW.conf = (function(TW){
   TWConf.ModulesFlags["histogramModule"] = false ;
   TWConf.ModulesFlags["histogramDailyVariantModule"] = false ;
   // TODO more generic module integrating the variants cf. experiments/histogramModule_STUB_GENERIQUE
+
+  // cf. twmodules/crowdsourcingModule/README.md to initialize the associated db
   TWConf.ModulesFlags["crowdsourcingModule"] = false ;
 
   // Other GUI options
