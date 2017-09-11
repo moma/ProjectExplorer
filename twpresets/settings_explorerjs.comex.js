@@ -116,13 +116,13 @@ TW.conf = (function(TW){
    'nbjobs':{
                          'col':"heatmap" ,
                          'binmode': 'samerange',
-                         'n': 5,
+                         'n': 3,
                          'menutransl': 'Number of related job ads'
                        },
    'total_occurrences':{
                          'col':"heatmap" ,
                          'binmode': 'samerange',
-                         'n': 3,
+                         'n': 4,
                          'menutransl': 'Total occurrences'
                        },
 
@@ -242,7 +242,7 @@ TW.conf = (function(TW){
   // if fa2Available, the auto-run config:
 
     TWConf.fa2Enabled= true;        // fa2 auto-run at start and after graph modified ?
-    TWConf.fa2Milliseconds=8000;    // duration of auto-run
+    TWConf.fa2Milliseconds=4000;    // duration of auto-run
     TWConf.minNodesForAutoFA2 = 5   // graph size threshold to auto-run
 
 
@@ -333,7 +333,7 @@ TW.conf = (function(TW){
   // relative sizes (iff ChangeType == both nodetypes)
   TWConf.sizeMult = [];
   TWConf.sizeMult[0] = 2.0;     // ie for node type 0 (<=> sem)
-  TWConf.sizeMult[1] = 1.0;     // ie for node type 1 (<=> soc)
+  TWConf.sizeMult[1] = 3.0;     // ie for node type 1 (<=> soc)
 
 
   // ===========

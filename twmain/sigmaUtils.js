@@ -556,9 +556,14 @@ var SigmaUtils = function () {
           }
           // normal case
           else {
-              if ((TW.conf.fa2Enabled || args.manual)
-                  && TW.partialGraph.graph.nNodes() >= TW.conf.minNodesForAutoFA2) {
-                setTimeout(function(){sigma_utils.ourStopFA2()},args.duration)
+              if (TW.conf.fa2Enabled) {
+
+                if (! args.manual) {
+                  if (TW.partialGraph.graph.nNodes() < TW.conf.minNodesForAutoFA2)
+                    return
+                  else
+                    setTimeout(function(){sigma_utils.ourStopFA2()},args.duration)
+                }
 
                 // hide edges during work for smaller cpu load
                 if (TW.partialGraph.settings('drawEdges')) {
