@@ -7,7 +7,7 @@ TW.conf = (function(TW){
   let TWConf = {}
 
   TWConf.branding = 'ProjectExplorer'  // <--- name displayed in upper left
-  TWConf.brandingLink = 'https://iscpif.fr/'   // <--- link to "home"
+  TWConf.brandingLink = 'https://github.com/moma/ProjectExplorer'   // <--- link to "home"
 
 
   // ==========================
@@ -37,7 +37,7 @@ TW.conf = (function(TW){
 
   // routes by corresponding type
   TWConf.relatedDocsAPIS = {
-    "twitter": "http://134.158.74.111/twitter_search",
+    "twitter": "https://134.158.74.111/twitter_search",
     "CortextDB": "twbackends/phpAPI",
     "csv": "twbackends/phpAPI"
   }
