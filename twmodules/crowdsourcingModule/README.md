@@ -9,11 +9,13 @@ The user inputs (term/topic suggestions) are saved in an sqlite3 db in dir db/, 
   - For a new installation one should create the db with the following commands:
 
     ```
-    > cd db
-    > sqlite3 crowdsourcing.db
+    cd twmodules/crowdsourcingModule
+    sqlite3 db/crowdsourcing.db
     sqlite> CREATE TABLE terms (source CHAR(250),suggestion CHAR(250),time CHAR(30)) ;
     sqlite> .exit
-    > chmod -v 775 crowdsourcing.db
+    chmod -v 664 db/crowdsourcing.db
+    chown :www-data db
+    chown :www-data db/crowdsourcing.db
     ```
 
   - data saving is done by an XHR POST to a PHP script under `db/s.php` so you need a working php engine associated to your web server
