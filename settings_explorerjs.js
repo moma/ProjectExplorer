@@ -20,9 +20,10 @@ TW.conf = (function(TW){
   TWConf.sourcemode = "servermenu"   // accepted: "api" | "serverfile" | "servermenu" | "localfile"
 
   // ...or remote bridge to default source api ajax queries
-  TWConf.sourceAPI={};
-  TWConf.sourceAPI["forNormalQuery"] = "services/api/graph";
-  TWConf.sourceAPI["forFilteredQuery"] = "services/api/graph";
+  TWConf.sourceAPI={}
+  TWConf.sourceAPI["nodetypes"] = {"node0": "NGram", "node1": "Document" }
+  TWConf.sourceAPI["forNormalQuery"] = "services/api/graph"
+  TWConf.sourceAPI["forFilteredQuery"] = "services/api/graph"
 
 
   // Related documents (topPapers) data source
@@ -37,7 +38,7 @@ TW.conf = (function(TW){
 
   // routes by corresponding type
   TWConf.relatedDocsAPIS = {
-    "twitter": "https://134.158.74.111/twitter_search",
+    "twitter": "http://127.0.0.1:5000/twitter_search",
     "CortextDB": "twbackends/phpAPI",
     "csv": "twbackends/phpAPI"
   }
@@ -195,8 +196,8 @@ TW.conf = (function(TW){
     'templates': 'twlibs/hit_templates',
     'modules':   'twmodules',
 
-    'sourceFile': "",           // server-side .gexf|.json default source
-    'sourceMenu': "db.json"     // ...or server-side gexf default source list
+    'sourceFile': "",                 // server-side gexf|json default source
+    'sourceMenu': "server_menu.json"  // ...or server-side gexf|json source list
   }
   Object.freeze(TWConf.paths)  // /!\ to prevent path modification before load
 

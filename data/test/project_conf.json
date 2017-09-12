@@ -1,0 +1,25 @@
+{
+  "mini_for_csv.gexf": {
+    "node0": {
+      "name": "term",
+      "reldbs": {
+        "csv": {
+          "file": "mini_for_csv.csv",
+          "qcols": ["title","keywords","text"],
+          "template": "bib_details"
+        },
+        "twitter": {}
+      }
+    },
+    "node1": {
+      "name": "person",
+      "reldbs": {
+        "csv": {
+          "file": "mini_for_csv.csv",
+          "qcols": ["author"],
+          "template": "bib_details"
+        }
+      }
+    }
+  }
+}

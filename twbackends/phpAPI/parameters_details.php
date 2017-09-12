@@ -16,9 +16,9 @@ $our_libs_root="twbackends/phpAPI";       // for our few icons and jquery-ui
 
 // 2 - paths
 $mainpath=dirname(dirname(getcwd()))."/"; // default fs path to ProjectExplorer root
-                                          // (where data dir and db.json file reside)
+                                          // (where data dir resides with the projects)
 
-$project_menu_path = "db.json";
+$project_conf_fname='project_conf.json';  // default conf to look for in project dirs
 
 // 3 - others
 $ntypes = 2;  // max node types   (node0 & node1)
@@ -37,17 +37,25 @@ $csvquote = '"';
 $memserver = 'localhost';
 $memport = 11211;
 
+// the graph file
+$gexf= str_replace('"','',$_GET["gexf"]);
 
-// CONFIGURATION PARAMS
+// reconstruct the path $projectdir/project_conf.json
+$project_dir = dirname($gexf);
+
 // --------------------
 // parse db.json project menu and create a conf by file
-$conf = read_conf($mainpath.$project_menu_path, $ntypes, $supported_dbtypes);
+$conf = read_conf(
+  $mainpath.$project_dir.'/'.$project_conf_fname,
+  $ntypes,
+  $supported_dbtypes,
+  $project_dir
+);
 
 // =======================================
 // echodump("== READ CONF ==<br>", $conf);
 // =======================================
 
-$gexf= str_replace('"','',$_GET["gexf"]);
 $ntid = $_GET["ndtype"];
 $dbtype = $_GET["dbtype"];
 $ndtype = null;

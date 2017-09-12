@@ -446,7 +446,7 @@ function getTopPapers(qWords, nodetypeId, chosenAPI, tgtDivId) {
     });
   }
   else {
-    let thisRelDocsConf = TW.gmenuInfos[TW.File][nodetypeId]["reldbs"][chosenAPI]
+    let thisRelDocsConf = TW.currentRelDocsDBs[nodetypeId][chosenAPI]
     // /!\ documentation and specification needed for the php use cases /!\
     let joinedQ = JSON.stringify(qWords).split('&').join('__and__');
     // cf. the php code for these url args:
@@ -511,9 +511,9 @@ function displayTopPapers(jsonHits, ndtypeId, chosenAPI, targetDiv) {
     toHtmlFun = renderTweet
   }
   else if (chosenAPI == "CortextDB" || chosenAPI == "csv") {
-    let thisRelDocsConf = TW.gmenuInfos[TW.File][ndtypeId]["reldbs"]
-    if (thisRelDocsConf && thisRelDocsConf[chosenAPI] && thisRelDocsConf[chosenAPI].template) {
-      toHtmlFun = makeRendererFromTemplate(thisRelDocsConf[chosenAPI].template)
+    let thisRelDocsConf = TW.currentRelDocsDBs[ndtypeId][chosenAPI]
+    if (thisRelDocsConf && thisRelDocsConf.template) {
+      toHtmlFun = makeRendererFromTemplate(thisRelDocsConf.template)
     }
     else {
       console.warn(`no rendering template found in ${TW.conf.paths.sourceMenu} for this source ${TW.File}...`)

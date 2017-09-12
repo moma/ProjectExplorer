@@ -96,4 +96,4 @@ There are two exceptions are the html page and the companion backends:
         -----------------------------------------------
       ```
 
-    4) finally, to use these backends as related documents search engines for a given graph, you'll need to configure your `db.json` file [as explained here](https://github.com/moma/ProjectExplorer/blob/master/00.DOCUMENTATION/A-Introduction/servermenu_config.md#more-relateddocs-settings). You can also find real-life examples in this distribution's `db.json` file.
+    4) finally, to use these backends as related documents search engines for a given graph, you'll need to configure your `project_conf.json` file [as explained here](https://github.com/moma/ProjectExplorer/blob/master/00.DOCUMENTATION/A-Introduction/project_config.md#more-relateddocs-settings). You can also find real-life examples in this distribution's `data/test/project_conf.json` file.

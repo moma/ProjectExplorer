@@ -2,7 +2,7 @@ This is a stub for a future documentation for developers.
 
 #### About settings
   - system-wide settings are in `settings_explorerjs.js`
-  - source-by-source settings (nodetypes, relatedDocs APIs) are in `db.json`
+  - source-by-source settings (nodetypes, relatedDocs APIs) are in each project dir under `data/${projectname}/project_conf.json`
 
 ## Graph input choices
 
@@ -16,7 +16,7 @@ Tina allows 3 main ways of input :
 
 The `sourcemode` value is by default the one in settings_explorerjs.js (`TW.conf.sourcemode`), unless an url argument of the same name is present.
 
-The `serverfile` option has an extended version called `servermenu`. It opens the list of files from `db.json` on the server, providing a menu to choose from it.
+The `serverfile` option has an extended version called `servermenu`. It opens the list of files from `server_menu.json` on the server, providing a menu to choose from it.
 
 The detailed implementation of these choices can be found in the function `syncRemoteGraphData()` in main.js.
 

@@ -3,12 +3,7 @@
 //  ======= [ main TW properties initialization ] ======== //
 
 
-TW.File = ""            // remember the currently opened file
-
-// used iff servermenu
-TW.gmenuPaths={};       // map [graphname => graphsource] for file selectors
-TW.gmenuInfos={};       // map [graphsource => { node0/1 categories
-                        //                      + relatedDocs db fields names}]
+TW.File = ""              // remember the currently opened file
 
 // a system state is the summary of tina situation
 TW.initialSystemState = {
@@ -47,16 +42,18 @@ TW.instance.init()
 TW.instance.initGUIListeners();
 TW.instance.initSearchListeners();
 
+TW.currentRelDocsDBs = []  // to make available dbconf to topPapers
+
 // show the custom name + home link of the app
 writeBrand(TW.conf.branding, TW.conf.brandingLink)
 
 // choosing the input
 // -------------------
 // type of input
-var sourcemode = isUndef(getUrlParam.sourcemode) ? TW.conf.sourcemode : getUrlParam.sourcemode
+TW.sourcemode = isUndef(getUrlParam.sourcemode) ? TW.conf.sourcemode : getUrlParam.sourcemode
 
 // if page is being run locally ==> only possible source shall be via file input
-if (window.location.protocol == 'file:' || sourcemode == 'localfile') {
+if (window.location.protocol == 'file:' || TW.sourcemode == 'localfile') {
 
   let inputDiv = document.getElementById('localInput')
   inputDiv.style.display = 'block'
@@ -77,23 +74,11 @@ if (window.location.protocol == 'file:' || sourcemode == 'localfile') {
 }
 // traditional cases: remote read from API or prepared server-side file
 else {
-  try {
-    // we'll first retrieve the menu of available sources in db.json,
-    // then get the real data in a second ajax via API or server file
-    [TW.gmenuInfos, TW.File] = readMenu(TW.conf.paths.sourceMenu)
-
-    //     NB: this menu used to be a file list for only one sourcemode
-    //         but now also contains settings for nodetypes and for
-    //         companion APIs (reldocs searches)
-    //      => we read it for all cases now
-  }
-  catch(e) {
-    console.error(`Couldn't read ${TW.conf.paths.sourceMenu}, trying to start with settings_explorer defaults.`)
-  }
-
-  // NB it will use global urlParams and TW.settings to choose the source
-  var [inFormat, inData, inConfKey, mapLabel] = syncRemoteGraphData()
-  mainStartGraph(inFormat, inData, inConfKey, TW.instance)
+  // NB it will
+  //     - use global urlParams, TW.conf and possibly server_menu.json
+  //     - choose the source and format
+  var [inFormat, inData, mapLabel] = syncRemoteGraphData()
+  mainStartGraph(inFormat, inData, TW.instance)
   writeLabel(mapLabel)
 }
 
@@ -105,18 +90,16 @@ else {
 function syncRemoteGraphData () {
   var inFormat;      // = { db|api.json , somefile.json|gexf }
   var inData;        // = {nodes: [....], edges: [....], cats:...}
-  var inConfKey;     // = source name for entry in db.json
 
   var mapLabel;      // user displayed label for this input dataset
 
   // case (1) read from remote DB via API bridge fetching
   // ex: /services/api/graph?q=filters...
-  if (sourcemode == "api") {
+  if (TW.sourcemode == "api") {
     console.log("input case: api, using TW.conf.sourceAPI")
 
     // the only API format, cf. inData
     inFormat = 'json'
-    inConfKey = 'graphapi/default'
 
     // TODO-rename: s/nodeidparam/srcparams
     var sourceinfo = getUrlParam.nodeidparam
@@ -218,7 +201,7 @@ function syncRemoteGraphData () {
   }
 
 
-  // sourcemode == "serverfile" or "servermenu"
+  // TW.sourcemode == "serverfile" or "servermenu"
   // cases            (2)       and     (3) : read a file from server
   else {
     console.log("input case: server-side file, using TW.conf.paths.sourceMenu and/or TW.File")
@@ -241,20 +224,35 @@ function syncRemoteGraphData () {
     //      --> if @file also in url, choose the db.json one matching
     //      --> otherwise, choose the "first_file" from db.json list
     // menufile case : a list of source files in ./db.json
-    if (sourcemode == 'servermenu') {
-        console.log("using entire FILEMENU TW.conf.paths.sourceMenu")
-
-        // chooser menu
-        var files_selector = '<select onchange="openGraph(this.options[this.selectedIndex].dataset.fullpath)">'
-        for (let fullPath in TW.gmenuInfos) {
-          let shortname = graphPathToLabel(fullPath)
-          let preSelected = (fullPath == TW.File)
-          files_selector += `<option ${preSelected ? "selected":""} data-fullpath="${fullPath}">`+shortname+'</option>'
+    if (TW.sourcemode == 'servermenu') {
+        console.log("== servermenu mode ==")
+        if (! linkCheck(TW.conf.paths.sourceMenu)) {
+          console.error(`servermenu mode: Couldn't read ${TW.conf.paths.sourceMenu}, referenced by TWConf.paths under sourceMenu... file is not accessible, trying to start with settings_explorer defaults.`)
         }
-        files_selector += "</select>"
-        $("#network").html(files_selector)
+        else {
+          // we'll first retrieve the menu of available sources in server_menu.json,
+          // then get the real data in a second ajax via API or server file
+          let [gmenu, firstProject] = readMenu(TW.conf.paths.sourceMenu)
 
-        // NB if TW.File was not in the list we keep the first one from readMenu
+          // if TW.File was not set we keep the first one from readMenu
+          if (!TW.File) {
+            TW.File = firstProject + "/" + gmenu[firstProject][0]
+          }
+
+          // chooser menu
+          var files_selector = '<select onchange="openGraph(this.options[this.selectedIndex].dataset.fullpath)">'
+          for (var projectPath in gmenu) {
+            for (var i in gmenu[projectPath]) {
+              let filePath = gmenu[projectPath][i]
+              let fullPath = projectPath+'/'+filePath
+              let shortname = graphPathToLabel(fullPath)
+              let preSelected = (fullPath == TW.File)
+              files_selector += `<option ${preSelected ? "selected":""} data-fullpath="${fullPath}">`+shortname+'</option>'
+            }
+          }
+          files_selector += "</select>"
+          $("#network").html(files_selector)
+        }
     }
 
     // 3) @mode is serverfile a or b (default)
@@ -271,7 +269,6 @@ function syncRemoteGraphData () {
     var finalRes = AjaxSync({ url: TW.File });
     inData = finalRes["data"]
     inFormat = finalRes["format"]
-    inConfKey = TW.File
     mapLabel = graphPathToLabel(TW.File)
 
     if (TW.conf.debug.logFetchers) {
@@ -282,7 +279,7 @@ function syncRemoteGraphData () {
     }
   }
 
-  return [inFormat, inData, inConfKey, mapLabel]
+  return [inFormat, inData, mapLabel]
 }
 
 
@@ -300,9 +297,10 @@ function syncRemoteGraphData () {
 //  args:
 //     inFormat: 'json' or 'gexf'
 //     inData: source data as str
-//     inConfKey: optional entry in db.json to declare nodetypes and reldbs
 //     twInstance: a tinaweb object (gui, methods) to bind the graph to
-function mainStartGraph(inFormat, inData, inConfKey, twInstance) {
+//
+// NB: function also uses TW.File to get the associated project_conf.json entry
+function mainStartGraph(inFormat, inData, twInstance) {
 
   // Graph-related vars
   // ------------------
@@ -325,15 +323,30 @@ function mainStartGraph(inFormat, inData, inConfKey, twInstance) {
     alert("error on data load")
   }
   else {
-      // override default categories with the ones from db.json if present
-      let additionalConf = []
-      if (TW.gmenuInfos[inConfKey]) {
-        additionalConf = TW.gmenuInfos[inConfKey]
+      let optNodeTypes = null
+      let optRelDBs = null
+      if (TW.sourcemode == "api") {
+        optNodeTypes = TW.conf.sourceAPI.nodetypes
+      }
+      else {
+        // try and retrieve associated conf
+        [optNodeTypes, optRelDBs] = readProjectConf(TW.File)
+
+        // export to global for getTopPapers function :/
+        if (optRelDBs) {
+          TW.currentRelDocsDBs = optRelDBs
+        }
       }
 
+      if (TW.conf.debug.logSettings) {
+        console.log("READ project_conf.json nodetypes", optNodeTypes)
+        console.log("READ project_conf.json relatedDBs", optRelDBs)
+      }
+
+      // override default categories with project_conf.json if present
       // parse the data
       if (TW.conf.debug.logParsers)   console.log("parsing the data")
-      let start = new ParseCustom(  inFormat , inData, additionalConf );
+      let start = new ParseCustom(  inFormat , inData, optNodeTypes);
       let catsInfos = start.scanFile();
 
       TW.categories = catsInfos.categories
@@ -473,7 +486,7 @@ function mainStartGraph(inFormat, inData, inConfKey, twInstance) {
         TW.partialGraph,
         initialActivetypes,      // to init node sliders and .class gui elements
         initialActivereltypes,   // to init edge sliders
-        inConfKey                // to init relatedDocs
+        optRelDBs                // optional conf to init relatedDocs
       )
 
       // set the initial color

@@ -1,0 +1,20 @@
+{
+  "data/ClimateChange": [
+    "Maps_S_800.gexf"
+  ],
+  "data/gargistex": [
+    "shale_and_ice.gexf",
+    "model_calibration.gexf"
+  ],
+  "data/comexjsons": [
+    "graph_example.json",
+    "graph_example2.gexf"
+  ],
+  "data/test": [
+    "mini_for_csv.gexf"
+  ],
+  "data/politoscope": [
+    "ProgrammeDesCandidats.gexf"
+  ],
+  "first_project": "data/politoscope"
+}

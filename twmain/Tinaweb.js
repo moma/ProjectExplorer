@@ -868,7 +868,7 @@ var TinaWebJS = function ( sigmacanvas ) {
 
     // to init local, instance-related listeners (need to run at new sigma instance)
     // args: @partialGraph = a sigma instance
-    this.initSigmaListeners = function(partialGraph, initialActivetypes, initialActivereltypes, optionalConfEntry) {
+    this.initSigmaListeners = function(partialGraph, initialActivetypes, initialActivereltypes, optionalRelDocsConf) {
 
       // console.log("initSigmaListeners TW.categories / types array / reltypeskeys array: ", TW.categories, initialActivetypes, initialActivereltypes)
 
@@ -1085,13 +1085,10 @@ var TinaWebJS = function ( sigmacanvas ) {
         $("#read-opposite-neighs").readmore({maxHeight:200});
       }
 
-      // initialize reldocs tabs if declared in additionalConf
-      if (TW.conf.getRelatedDocs) {
-
-        let moreConfKey = optionalConfEntry || TW.File
-
-        resetTabs(initialActivetypes, TW.gmenuInfos[moreConfKey])
-
+      // initialize reldocs tabs if declared in optionalRelDocsConf
+      // (optionalRelDocsConf function-scope name of TW.currentRelDocsDBs)
+      if (TW.conf.getRelatedDocs && optionalRelDocsConf) {
+        resetTabs(initialActivetypes, optionalRelDocsConf)
       }
 
       // defaultColoring: an attribute name to immediately apply color with

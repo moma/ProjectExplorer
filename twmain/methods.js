@@ -61,13 +61,12 @@ TW.pushGUIState = function( args ) {
     }
 
     // recreate tabs after type changes
-    // db.json conf entry (£TODO unify s/(?:TW.File|inConfKey)/TW.sourceId/g)
-    let inConfKey = (sourcemode != "api") ? TW.File : 'graphapi/default'
+    // project_conf.json conf entry (POSS unify s/TW.File/TW.sourceId/g)
     if (TW.conf.getRelatedDocs
         && !isUndef(args.activetypes)
-        && TW.gmenuInfos[inConfKey]) {
+        && TW.currentRelDocsDBs) {
 
-      resetTabs(newState.activetypes, TW.gmenuInfos[inConfKey])
+      resetTabs(newState.activetypes, TW.currentRelDocsDBs)
     }
 
     // 4) store it in TW.states
@@ -118,85 +117,126 @@ function graphPathToLabel(fullPath) {
     )
 }
 
-// read all sources' detailed confs
-//  -> list of source paths available
-//  -> declared nodetypes
-//  -> declared rDocs conf
+
+// read the server files menu list
+// (list of source paths available)
 function readMenu(infofile) {
-
-  // exemple entry
-  // --------------
-  // "data/gargistex": {
-  //   "first" : "shale_and_ice.gexf",
-  //   "graphs":{
-  //     "shale_and_ice.gexf": {
-  //       "node0": {
-  //         "name": "terms",
-  //         "reldbs": {
-  //           "csv": {
-  //             "file": "shale_and_ice.csv",
-  //             "qcols": ["title"],
-  //             "template": "bib_details"
-  //           },
-  //           "twitter": {}
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
-
-
   if (TW.conf.debug.logFetchers)  console.info(`attempting to load filemenu ${infofile}`)
+
   var preRES = AjaxSync({ url: infofile, datatype:"json" });
 
   if (preRES['OK'] && preRES.data) {
     if (TW.conf.debug.logFetchers) console.log('initial AjaxSync result preRES', preRES)
   }
 
-  // 1 - store the first one (b/c we'll loose order)
-  var first_file = "", first_dir = "" , first_path = ""
-  for( var path in preRES.data ) {
-    if (TW.conf.debug.logFetchers) console.log("db.json path", path)
-    first_file = preRES.data[path]["first"] || Object.keys(preRES.data[path]["graphs"])[0]
-    first_dir = path
-    break;
-  }
-  first_path = first_dir+"/"+first_file
+  // we just make a clean copy, skipping invalid entries
+  let serverMenu = {}
+  let firstProject = null
 
-  // 2 - process all the paths and associated confs
-  let details = {}
-
-  for( var path in preRES.data ) {
-      var theGraphs = preRES.data[path]["graphs"]
-
-      for(var aGraph in theGraphs) {
-          let fullPath = path+"/"+aGraph
-          // ex : "RiskV2PageRank1000.gexf":data/AXA/RiskV2PageRank1000.gexf
-          // (we assume there's no duplicate basenames)
-
-          if (TW.conf.debug.logSettings)
-            console.log("db conf entry: " + fullPath)
-
-          // for associated LocalDB php queries: CSV (or CortextDBs sql)
-          if (theGraphs[aGraph]) {
-            let gSrcEntry = theGraphs[aGraph]
-            details[fullPath] = new Array(2)
-            if (gSrcEntry.node0) {
-              details[fullPath][0] = gSrcEntry.node0
-            }
-            if (gSrcEntry.node1) {
-              details[fullPath][1] = gSrcEntry.node1
-            }
-          }
-          else {
-            details[fullPath] = null
-          }
+  // check all the paths and associated sources
+  for( var projectPath in preRES.data ) {
+    if (! preRES.data[projectPath] || ! preRES.data[projectPath].length) {
+      console.warn("sourceMenu: Skipping invalid project entry:", projectPath)
+    }
+    else {
+      if (projectPath == "first_project") {
+        firstProject = preRES.data['first_project']
       }
+      else {
+        // test and copy if ok
+        serverMenu[projectPath] = []
+        for (var l in preRES.data[projectPath]) {
+          let sourceFile = preRES.data[projectPath][l]
+          let fileExists = linkCheck(projectPath+'/'+sourceFile)
+          if (fileExists) {
+            serverMenu[projectPath].push(sourceFile)
+          }
+        }
+        if (! serverMenu[projectPath].length) {
+          console.warn(`sourceMenu: Skipping project path ${projectPath} (none of the referenced source files are present.)`)
+          delete serverMenu[projectPath]
+        }
+      }
+    }
   }
-
-  return [details, first_path]
+  return [serverMenu, firstProject]
 }
 
+// read project_conf.json files
+function readProjectConf(aFilePath) {
+  let declaredNodetypes
+  let declaredDBConf
+
+  // we assume the filePath is of the form projectPath/sourceFile
+  let split = aFilePath.match("^(.*)/([^/]+)$")
+  if (! split) {
+    console.warn (`couldn't read associated conf for file, ${aFilePath}, will try using default nodetypes`)
+  }
+  else {
+    let projectPath = split[1]
+    let filePath = split[2]
+
+    let projectConfFile = projectPath + '/project_conf.json'
+
+    if (! linkCheck(projectConfFile)) {
+      console.warn (`no project_conf.json next to the file, ${aFilePath}, will try using default nodetypes`)
+    }
+    else {
+
+      if (TW.conf.debug.logFetchers)  console.info(`attempting to load project conf ${projectConfFile}`)
+      var pjconfRes = AjaxSync({ url: projectConfFile, datatype:"json" });
+
+      if (TW.conf.debug.logFetchers) console.log('project conf AjaxSync result pjconfRes', pjconfRes)
+
+      if (! pjconfRes['OK']
+         || ! pjconfRes.data
+         || ! pjconfRes.data[filePath] ) {
+         console.warn (`project_conf.json in ${projectPath} is not valid json or does not contain an entry for ${filePath}, will try using default nodetypes`)
+      }
+      else {
+        let confEntry = pjconfRes.data[filePath]
+        for (var ndtype in confEntry) {
+          if (! /node\d+/.test(ndtype)) {
+            console.warn (`project_conf.json in ${projectPath}, in the entry for ${filePath}, should only contain properties like 'node0', 'node1', etc.`)
+          }
+          else {
+            if (! confEntry[ndtype].name) {
+              console.warn (`project_conf.json in ${projectPath}, in the entry for ${filePath}.${ndtype}, should contain a 'name' property`)
+            }
+            // valid case !
+            else {
+              if (! declaredNodetypes)  declaredNodetypes = {}
+
+              // fill simple nodetypes
+              declaredNodetypes[ndtype] = confEntry[ndtype].name
+            }
+
+            // optional reldbs -----------------------
+            if (confEntry[ndtype].reldbs) {
+              if (! declaredDBConf)     declaredDBConf = {}
+
+              // it must match because we tested well-formedness above
+              let ndtypeId = ndtype.match(/^node(\d+)/)[1]
+
+              declaredDBConf[ndtypeId] = {}
+              for (var dbtype in confEntry[ndtype].reldbs) {
+                if (! TW.conf.relatedDocsAPIS[dbtype]) {
+                  console.info (`project_conf.json: ${projectPath}.${filePath}.${ndtype}: skipping unknown related docs db type **${dbtype}**. The only available db types are: ${Object.keys(TW.conf.relatedDocsAPIS)}.`)
+                }
+                else {
+                  declaredDBConf[ndtypeId][dbtype] = confEntry[ndtype].reldbs[dbtype]
+                }
+              }
+            }
+            // ----------------------------------------
+
+          }
+        }
+      }
+    }
+  }
+  return [declaredNodetypes, declaredDBConf]
+}
 
 // settings: {norender: Bool}
 function cancelSelection (fromTagCloud, settings) {

@@ -3,7 +3,7 @@
 //   (for instance loop on full gexf in scanGexf then again in dictfyGexf)
 
 // Level-01
-var ParseCustom = function ( format , data, optionalConf ) {
+var ParseCustom = function ( format , data, optionalNodeConf ) {
 
     if (format == 'gexf') {
       this.data = $.parseXML(data)
@@ -14,12 +14,10 @@ var ParseCustom = function ( format , data, optionalConf ) {
     this.format = format;
     this.nbCats = 0;
 
-    this.additionalConf = optionalConf
-
     // input = GEXFstring
     this.getGEXFCategories = function() {
         let observedCategories = scanGexf(this.data)
-        let finalCategories = sortNodeTypes(observedCategories, this.additionalConf)
+        let finalCategories = sortNodeTypes(observedCategories,optionalNodeConf)
         return finalCategories;
     }// output = {'cats':[ "cat1" , "cat2" , ...], 'rev': {cat1: 0, cat2: 1...}}
 
@@ -34,7 +32,7 @@ var ParseCustom = function ( format , data, optionalConf ) {
     // input = JSONstring
     this.getJSONCategories = function(json) {
       let observedCategories = scanJSON(this.data)
-      let finalCategories = sortNodeTypes(observedCategories, this.additionalConf)
+      let finalCategories = sortNodeTypes(observedCategories, optionalNodeConf)
       return finalCategories;
     }// output = {'cats':[ "cat1" , "cat2" , ...], 'rev': {cat1: 0, cat2: 1...}}
 
@@ -212,15 +210,20 @@ function scanGexf(gexfContent) {
 // expected content: usually a just a few cats over all nodes
 // ex: terms
 // ex: ISItermsriskV2_140 & ISItermsriskV2_140
-function sortNodeTypes(observedTypesDict, optConf) {
+// optional arg optionalNodeConf should contain keys of the form:
+//    "node0": "NGram",
+//    "node1": "Document"
+//     etc.
+// (it's read from project_conf.json)
+function sortNodeTypes(observedTypesDict, optionalNodeConf) {
   var observedTypes = Object.keys(observedTypesDict)
   observedTypes.sort(function(a,b) {return observedTypesDict[b] - observedTypesDict[a]})
 
   let nbNodeTypes = 2
   var declaredTypes = []
   for (var i = 0 ; i < nbNodeTypes ; i++ ) {
-    if (optConf[i] && optConf[i].name) {
-      declaredTypes[i] = optConf[i].name
+    if (optionalNodeConf["node"+i]) {
+      declaredTypes[i] = optionalNodeConf["node"+i]
       if (TW.conf.debug.logSettings)
         console.log("expected cat (from db.json addtional conf)", i, declaredTypes[i])
     }

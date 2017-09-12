@@ -21,80 +21,71 @@ function errmsg($message, $context, $more = "") {
   (please read A-Introduction/servermenu_config.md).<br>$more</p>";
 }
 
-// reading db.json associations
+// reading project_conf.json associations
 //    source graph file <=> (db, dbtype, cols) as relatedDocs php API
 //    1) we filter db.json entries by active/inactive nodetypes
 //    2) we filter db.json entries by supported dbtypes
-function read_conf($filepath, $ntypes, $our_dbtypes) {
-  $project_menu_fh = fopen($filepath, "r");
+function read_conf($filepath, $ntypes, $our_dbtypes, $project_dir) {
+  $project_conf_fh = fopen($filepath, "r");
   $json_st = '';
-  while (!feof($project_menu_fh)) {
-    $json_st .= fgets($project_menu_fh);
+  while (!feof($project_conf_fh)) {
+    $json_st .= fgets($project_conf_fh);
   }
-  fclose($project_menu_fh);
-  $project_menu = json_decode($json_st);
-
-  // echodump("== db.json menu ==", $project_menu);
-
+  fclose($project_conf_fh);
+  $dir_items = json_decode($json_st);
   $conf = array();
-  foreach ($project_menu as $project_dir => $dir_items){
-    // NB access by obj property (and not array key)
-    if (! property_exists($dir_items, 'graphs')) {
-      error_log("tw/phpAPI skip error: conf file ($project_menu_path)
-                 has no 'graphs' entry for project '$project_dir' !");
-      continue;
-    }
-    foreach ($dir_items->graphs as $graph_file => $graph_conf){
-      // echodump("== $graph_file ==", $graph_conf);
 
-      $gpath = $project_dir.'/'.$graph_file;
+  // echodump("== project_conf.json ==", $dir_items);
 
-      // NB a graph conf can now have different settings for each nodetype
-      // node0 <=> classic type 'semantic'
-      // node1 <=> classic type 'social'
+  foreach ($dir_items as $graph_file => $graph_conf){
+    // echodump("== $graph_file ==", $graph_conf);
 
-      // NB2 now additionnally, each nodetype can have several dbs configured !
+    $gpath = $project_dir.'/'.$graph_file;
 
-      // $conf[$gpath] = array($ntypes);
+    // NB a graph conf can now have different settings for each nodetype
+    // node0 <=> classic type 'semantic'
+    // node1 <=> classic type 'social'
 
-      for ($i = 0 ; $i < $ntypes ; $i++) {
-        $conf[$gpath]['node'.$i] = array();
+    // NB2 now additionnally, each nodetype can have several dbs configured !
 
-        // check node0, node1, etc to see if they at least have a reldb conf
-        if (property_exists($graph_conf, 'node'.$i)
-            && property_exists($graph_conf->{'node'.$i}, 'reldbs') ) {
+    // $conf[$gpath] = array($ntypes);
 
-          // check for each configured db that is listed under reldbs
-          $dbinfos = $graph_conf->{'node'.$i}->reldbs;
+    for ($i = 0 ; $i < $ntypes ; $i++) {
+      $conf[$gpath]['node'.$i] = array();
 
-          foreach ($dbinfos as $dbtype => $dbconf) {
-            // filter: supported and valid conf cases
-            if (in_array($dbtype, $our_dbtypes) && $dbconf->file) {
-              // we have a file for this nodetype and dbtype: copy entire conf
-              $conf[$gpath]['node'.$i][$dbtype] = (array)$dbconf ;
+      // check node0, node1, etc to see if they at least have a reldb conf
+      if (property_exists($graph_conf, 'node'.$i)
+          && property_exists($graph_conf->{'node'.$i}, 'reldbs') ) {
 
-              // update files path with dirpath
-              if (array_key_exists('file', $conf[$gpath]['node'.$i][$dbtype])) {
-                $relpath = $conf[$gpath]['node'.$i][$dbtype]['file'];
-                $conf[$gpath]['node'.$i][$dbtype]['file'] = $project_dir.'/'.$relpath;
-              }
+        // check for each configured db that is listed under reldbs
+        $dbinfos = $graph_conf->{'node'.$i}->reldbs;
+
+        foreach ($dbinfos as $dbtype => $dbconf) {
+          // filter: supported and valid conf cases
+          if (in_array($dbtype, $our_dbtypes) && $dbconf->file) {
+            // we have a file for this nodetype and dbtype: copy entire conf
+            $conf[$gpath]['node'.$i][$dbtype] = (array)$dbconf ;
+
+            // update files path with dirpath
+            if (array_key_exists('file', $conf[$gpath]['node'.$i][$dbtype])) {
+              $relpath = $conf[$gpath]['node'.$i][$dbtype]['file'];
+              $conf[$gpath]['node'.$i][$dbtype]['file'] = $project_dir.'/'.$relpath;
             }
           }
-
-          // echodump("got conf", $conf[$gpath]['node'.$i]);
         }
 
-        else {
-          // empty array <=> inactive nodetype or no supported dbs
-          $conf[$gpath]['node'.$i] = array ();
-        }
-        // POSS here info on higher level may be propagated for lower ones
-        //     (ex: if dbtype is on the project level, its value should count
-        //          for each source file in the project unless overridden)
+        // echodump("got conf", $conf[$gpath]['node'.$i]);
       }
+
+      else {
+        // empty array <=> inactive nodetype or no supported dbs
+        $conf[$gpath]['node'.$i] = array ();
+      }
+      // POSS here info on higher level may be propagated for lower ones
+      //     (ex: if dbtype is on the project level, its value should count
+      //          for each source file in the project unless overridden)
     }
   }
-
   // echodump("full conf", $conf);
   return $conf;
 }

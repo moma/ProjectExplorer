@@ -15,7 +15,7 @@ Après commits de la semaine 26-30 juin 2017, une structure plus facile pour les
 │   └── (graphes par sous-projets)
 ├── explorerjs.html         <= point d'entrée lancement
 ├── settings_explorerjs.js  <= config générale
-├── db.json                 <= config additionnelle par sources gexf/json
+├── server_menu.json        <= liste des sources gexf/json par projet
 ├── favicon.ico
 ├── LICENSE
 ├── README.md
