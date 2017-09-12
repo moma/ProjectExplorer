@@ -6,7 +6,7 @@
 //   - a DivsFlag for settings_explorerjs
 //   - our current dir for this module's files (and this init.js)
 //   - the class of module's html elements
-module_name="histogramDailyVariantModule"
+module_name="multivacV1HistogramModule"
 module_dir=TW.conf.paths.modules+'/'+module_name
 // ---- INIT main part -------- (listing all things to load)
 
@@ -14,10 +14,10 @@ module_dir=TW.conf.paths.modules+'/'+module_name
 loadCSS(module_dir+"/histogram.css") ;
 
 // our histogram controller
-loadJS(module_dir+"/dailyHistogram.js") ;
+loadJS(module_dir+"/wosHistogram.js") ;
 
 // dygraph library
-// loadCSS(module_name+"/dygraph/gallery.css") ;
+// loadCSS(module_dir+"/dygraph/gallery.css") ;
 loadCSS(module_dir+"/dygraph/textarea.css") ;
 loadJS(module_dir+"/dygraph/dygraph.combined.js") ;
 

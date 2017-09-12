@@ -206,9 +206,10 @@ TW.conf = (function(TW){
   // flag name is div class to be removed if false
   //        *and* subdirectory of modules path to import if true
   // see also activateModules()
-  TWConf.ModulesFlags["histogramModule"] = true ;
-  TWConf.ModulesFlags["histogramDailyVariantModule"] = false ;
-  // TODO more generic module integrating the variants cf. experiments/histogramModule_STUB_GENERIQUE
+  TWConf.ModulesFlags["multivacV1HistogramModule"] = true ;
+
+  // cf. twmodules/multivacV2HistogramModule/multivacV2Settings.js for settings
+  TWConf.ModulesFlags["multivacV2HistogramModule"] = false ;
 
   // cf. twmodules/crowdsourcingModule/README.md to initialize the associated db
   TWConf.ModulesFlags["crowdsourcingModule"] = true ;

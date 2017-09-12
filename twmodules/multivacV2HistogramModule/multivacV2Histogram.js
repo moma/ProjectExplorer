@@ -2,10 +2,13 @@
 /* ---------------------  search histogram  ----------------------- */
 /* ---------------------------------------------------------------- */
 
-// TODO be able to expose things from module like a histo.graph object
-var hg
+// init and settings exposed in mvacV2Hg var
+mvacV2Hg.init = (function(mvacV2Hg){
 
 var $search_histogram = $("#search_histogram2")
+
+var apiEndpoint = mvacV2Hg.settings.endpoint || '/pvt/politic/france/twitter/histogram'
+var apiInterval = mvacV2Hg.settings.interval || 'day'
 
 //method for calling the ISC-API and get pubs-distribution of the suggested term
 function search_proposed_terms_and_draw( the_queries ) {
@@ -25,10 +28,19 @@ function search_proposed_terms_and_draw( the_queries ) {
     var args = {
         // luc_q is a str
         "q": luc_q,
-        "interval": "day"
-
-        // no since and until: we want the entire period
+        "interval": apiInterval
     }
+
+    // no since and until unless specified in settings: we want the entire period
+    if (mvacV2Hg.settings.since)     args.since = mvacV2Hg.settings.since
+    if (mvacV2Hg.settings.until)     args.until = mvacV2Hg.settings.until
+
+    // time window depending on interval
+    var twindow = 7
+    if (mvacV2Hg.settings.avgWindowPerInterval && mvacV2Hg.settings.avgWindowPerInterval[apiInterval]) {
+      twindow = mvacV2Hg.settings.avgWindowPerInterval[apiInterval]
+    }
+
     var docs_days = [] ;
 
     $search_histogram
@@ -36,7 +48,7 @@ function search_proposed_terms_and_draw( the_queries ) {
 
     $.ajax({
         type: "GET",
-        url: 'https://api.iscpif.fr/v2/pub/politic/france/twitter/histogram',
+        url: 'https://api.iscpif.fr' + apiEndpoint,
         data: args,
         dataType: "json",
         success : function(data, textStatus, jqXHR) {
@@ -70,7 +82,7 @@ function search_proposed_terms_and_draw( the_queries ) {
                 // console.log("docs_days",docs_days)
 
                 // counts_by_year_array
-                draw_histogram(docs_days) ;
+                draw_histogram(docs_days, twindow) ;
                 return true ;
             }
         },
@@ -136,14 +148,14 @@ function newnodesHistogramBehavior(selectedNodeIds, unusedQuery) {
 
 
 // use dygraph lib to draw below the crowdsourcing div
-function draw_histogram(counts_by_days_array) {
+function draw_histogram(counts_by_days_array, cumulatedWindow) {
 
     // 1) layout for the div#search_histogram
     //    /!\ this div *needs* padding:0 /!\;
     $search_histogram.height("15em").show()
 
     // 2) data preparation
-    //    (cumulated sliding window over [J-7; J])
+    //    (cumulated sliding window over [T-cumulatedWindow; T])
     var cumulated_res = [] ;
     for (i in counts_by_days_array) {
 
@@ -155,7 +167,7 @@ function draw_histogram(counts_by_days_array) {
 
         var sum = 0
         var nvalues = 0
-        for (var j=i; j >= Math.max(i-6, 0); j--) {
+        for (var j=i; j >= Math.max(i-cumulatedWindow-1, 0); j--) {
           sum += counts_by_days_array[j][1]
           nvalues++
         }
@@ -210,3 +222,5 @@ function draw_histogram(counts_by_days_array) {
 function clean_histogram() {
     $("#search_histogram").html("") ;
 }
+
+})(mvacV2Hg)

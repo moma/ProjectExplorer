@@ -2,7 +2,6 @@
 /* ---------------------  search histogram  ----------------------- */
 /* ---------------------------------------------------------------- */
 
-// TODO be able to expose things from module like a histo.graph object
 var hg
 
 // constant values of total docs per year, for normalization
