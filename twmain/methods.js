@@ -464,9 +464,9 @@ function htmlfied_nodesatts(elems){
         }
         else {
           information += '<li><b>' + node.label + '</b></li>';
-          let google='<a href=http://www.google.com/#hl=en&source=hp&q=%20'+node.label.replace(" ","+")+'%20><img src="'+TW.conf.paths.ourlibs+'/img/google.png"></img></a>';
-          let wiki = '<a href=http://en.wikipedia.org/wiki/'+node.label.replace(" ","_")+'><img src="'+TW.conf.paths.ourlibs+'/img/wikipedia.png"></img></a>';
-          let flickr= '<a href=http://www.flickr.com/search/?w=all&q='+node.label.replace(" ","+")+'><img src="'+TW.conf.paths.ourlibs+'/img/flickr.png"></img></a>';
+          let google='<a target="_blank" href=http://www.google.com/#hl=en&source=hp&q=%20'+node.label.replace(" ","+")+'%20><img src="'+TW.conf.paths.ourlibs+'/img/google.png"></img></a>';
+          let wiki = '<a target="_blank" href=http://en.wikipedia.org/wiki/'+node.label.replace(" ","_")+'><img src="'+TW.conf.paths.ourlibs+'/img/wikipedia.png"></img></a>';
+          let flickr= '<a target="_blank" href=http://www.flickr.com/search/?w=all&q='+node.label.replace(" ","+")+'><img src="'+TW.conf.paths.ourlibs+'/img/flickr.png"></img></a>';
           information += '<li>'+google+"&nbsp;"+wiki+"&nbsp;"+flickr+'</li><br>';
           semnodes.push(information)
         }

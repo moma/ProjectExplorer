@@ -40,7 +40,7 @@ cd ProjectExplorer
 firefox explorerjs.html
 ```
 => An input in the upper right side allows you to open any gexf file.
-
+[]
 ###### Application and data structures
 An overview of the application structure can be found in the extended documentation under [00.DOCUMENTATION/A-Introduction/app_structure.md](https://github.com/moma/ProjectExplorer/blob/master/00.DOCUMENTATION/A-Introduction/app_structure.md) (comments are in french).
 
@@ -65,7 +65,8 @@ Once you have this webserver running and some source data files, you may also co
 To integrate ProjectExplorer in a larger web application, you may have several locations with subdirectories defined on your server. In this case, you'll need to use the provided path modification tool (see this [integration procedure example](https://github.com/moma/ProjectExplorer/tree/master/00.DOCUMENTATION/A-Introduction#integration-policy))
 
 ###### Advanced settings
-For more information about other ProjectExplorer's settings (settings file, input modes, attribute processing options), please refer to the [developer's manual](https://github.com/moma/ProjectExplorer/blob/master/00.DOCUMENTATION/C-advanced/developer_manual.md).
+For more information about ProjectExplorer's settings (settings file, input modes, attribute processing options), please refer to the [detailed introduction](https://github.com/moma/ProjectExplorer/blob/master/00.DOCUMENTATION/A-Introduction/README.md)
+ and the [developer's manual](https://github.com/moma/ProjectExplorer/blob/master/00.DOCUMENTATION/C-advanced/developer_manual.md).
 
 ### Copyright and license
 
