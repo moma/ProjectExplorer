@@ -41,6 +41,9 @@ firefox explorerjs.html
 ```
 => An input in the upper right side allows you to open any gexf file.
 
+###### Application and data structures
+An overview of the application structure can be found in the extended documentation under [00.DOCUMENTATION/A-Introduction/app_structure.md](https://github.com/moma/ProjectExplorer/blob/master/00.DOCUMENTATION/A-Introduction/app_structure.md) (comments are in french).
+
 ###### Usage on a web server
 To activate all features, you should:
   1. configure a web server like apache or nginx, for instance on your localhost
@@ -56,10 +59,11 @@ Once you have this webserver running and some source data files, you may also co
   - it will be shown as a **menu** to select graphs in the interface
   - it allows to define associated **node types** for each source
   - it allows to define associated **search backends** for each source
-  - to use this, follow the guidelines in the **[Servermenu HOWTO](https://github.com/moma/ProjectExplorer/blob/master/00.DOCUMENTATION/A-Introduction/servermenu_config.md)**
+  - to use this, follow the guidelines in the **[Project config HOWTO](https://github.com/moma/ProjectExplorer/blob/master/00.DOCUMENTATION/A-Introduction/project_config.md)**
 
 ###### Integration in a larger app
 To integrate ProjectExplorer in a larger web application, you may have several locations with subdirectories defined on your server. In this case, you'll need to use the provided path modification tool (see this [integration procedure example](https://github.com/moma/ProjectExplorer/tree/master/00.DOCUMENTATION/A-Introduction#integration-policy))
+
 ###### Advanced settings
 For more information about other ProjectExplorer's settings (settings file, input modes, attribute processing options), please refer to the [developer's manual](https://github.com/moma/ProjectExplorer/blob/master/00.DOCUMENTATION/C-advanced/developer_manual.md).
 

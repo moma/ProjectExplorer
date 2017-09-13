@@ -1,11 +1,13 @@
 
 ## Related Documents PHP backend
 
-##### Provides an API for "topPapers" search queries in tinawebJS
+##### Provides an API for "topPapers" search queries in ProjectExplorer
 
-These php files provide access to a CSV or sqlite database as an ajax endpoint for a "related documents" search in tinawebJS client.
+These php files provide access to a CSV or sqlite database as an ajax endpoint for a "related documents" search in ProjectExplorer client.
 
-Main use case is support for one-doc-by-row CSV files.
+It means that the selection of a node (or a set of nodes) in the ProjectExplorer interface can trigger a simple search-engine query for documents containing the names of these nodes in the said CSV or sqlite DBs.
+
+Main use case is support for one-doc-by-row CSV files showing, for instance, scientific articles, that will be displayed as "topPapers" for selected nodes in the interface.
 
 
 #### Prerequisites
@@ -55,49 +57,42 @@ To use the API for the "topPapers" embedded search in ProjectExplorer, the corre
     ```
 
 Finally, to match the correct DB with the correct graph file:
-  - both should reside in `data/yoursubdir`
-  - the appropriate source database information needs to appear in `db.json` in order to associate the graph source file (eg gexf) with this related docs API:
+  - both should reside in `data/yoursubdir` where "yoursubdir" is the name of your project
+  - the appropriate source database information needs to appear in a file named `project_conf.json` in the same directory `data/yoursubdir`, in order to associate the nodes from the graph source file (eg gexf) with this related docs API:
 
-
+For instance for a cortextDB associated with a graph with two types of nodes:
 ```json
-"data/yoursubdir": {
-      "graphs": {
-          "your.graph.gexf": {
-              "node0": {
-                        "name": "terms",
-                        "reldbtype": "CortextDB",
-                        "reldbfile": "yourDB.db",
-                        "reldbqtable": "yourTableWithTerms"
-                      },
-              "node1": {
-                        "name": "people",
-                        "reldbtype": "CortextDB",
-                        "reldbfile": "yourDB.db",
-                        "reldbqtable": "yourTableWithSocialNodes"
-                      },
-          }
-      }
-},
+{
+    "your.graph.gexf": {
+        "node0": {
+            "name": "terms",
+            "reldbtype": "CortextDB",
+            "reldbfile": "yourDB.db",
+            "reldbqtable": "yourTableWithTerms"
+        },
+        "node1": {
+            "name": "people",
+            "reldbtype": "CortextDB",
+            "reldbfile": "yourDB.db",
+            "reldbqtable": "yourTableWithSocialNodes"
+        }
+    }
+}
+```
 
-"data/anothersubdir": {
-      "graphs": {
-          "another.graph.gexf": {
-              "node0": {
-                        "name": "terms",
-                        "reldbtype": "csv",
-                        "reldbfile": "aCsvByDocs.csv",
-                        "reldbqcols": ["title", "text", "keywords"]
-                      },
-              "node1": {
-                        "name": "people",
-                        "reldbtype": "csv",
-                        "reldbfile": "aCsvByDocs.csv",
-                        "reldbqcols": ["authors", "editors"]
-                      },
-          }
+Or for a csv example and a graph with one type of nodes:
+```json
+{
+  "another.graph.gexf": {
+      "node0": {
+          "name": "terms",
+          "reldbtype": "csv",
+          "reldbfile": "yourCsvFile.csv",
+          "reldbqcols": ["title", "text", "keywords"]
       }
+  }
 }
 
 ```
 
-See more exemples and explanations in [servermenu_config.md](https://github.com/moma/ProjectExplorer/blob/master/00.DOCUMENTATION/A-Introduction/servermenu_config.md).
+See more exemples and explanations in [project_config.md](https://github.com/moma/ProjectExplorer/blob/master/00.DOCUMENTATION/A-Introduction/project_config.md).

@@ -162,75 +162,79 @@ function readMenu(infofile) {
   return [serverMenu, firstProject]
 }
 
-// read project_conf.json files
-function readProjectConf(aFilePath) {
+// read project_conf.json files in the project for this file
+function readProjectConf(projectPath, filePath) {
   let declaredNodetypes
   let declaredDBConf
 
-  // we assume the filePath is of the form projectPath/sourceFile
-  let split = aFilePath.match("^(.*)/([^/]+)$")
-  if (! split) {
-    console.warn (`couldn't read associated conf for file, ${aFilePath}, will try using default nodetypes`)
+  // ££TODO declaredFacetOptions
+
+  let projectConfFile = projectPath + '/project_conf.json'
+
+  if (! linkCheck(projectConfFile)) {
+    console.warn (`no project_conf.json next to the file, ${filePath},
+                   will try using default nodetypes`)
   }
   else {
-    let projectPath = split[1]
-    let filePath = split[2]
 
-    let projectConfFile = projectPath + '/project_conf.json'
+    if (TW.conf.debug.logFetchers)
+      console.info(`attempting to load project conf ${projectConfFile}`)
 
-    if (! linkCheck(projectConfFile)) {
-      console.warn (`no project_conf.json next to the file, ${aFilePath}, will try using default nodetypes`)
+    var pjconfRes = AjaxSync({ url: projectConfFile, datatype:"json" });
+
+    if (TW.conf.debug.logFetchers)
+      console.log('project conf AjaxSync result pjconfRes', pjconfRes)
+
+    if (! pjconfRes['OK']
+       || ! pjconfRes.data
+       || ! pjconfRes.data[filePath] ) {
+       console.warn (`project_conf.json in ${projectPath} is not valid json
+                      or does not contain an entry for ${filePath},
+                      will try using default nodetypes`)
     }
     else {
-
-      if (TW.conf.debug.logFetchers)  console.info(`attempting to load project conf ${projectConfFile}`)
-      var pjconfRes = AjaxSync({ url: projectConfFile, datatype:"json" });
-
-      if (TW.conf.debug.logFetchers) console.log('project conf AjaxSync result pjconfRes', pjconfRes)
-
-      if (! pjconfRes['OK']
-         || ! pjconfRes.data
-         || ! pjconfRes.data[filePath] ) {
-         console.warn (`project_conf.json in ${projectPath} is not valid json or does not contain an entry for ${filePath}, will try using default nodetypes`)
-      }
-      else {
-        let confEntry = pjconfRes.data[filePath]
-        for (var ndtype in confEntry) {
-          if (! /node\d+/.test(ndtype)) {
-            console.warn (`project_conf.json in ${projectPath}, in the entry for ${filePath}, should only contain properties like 'node0', 'node1', etc.`)
+      let confEntry = pjconfRes.data[filePath]
+      for (var ndtype in confEntry) {
+        if (! /node\d+/.test(ndtype)) {
+          console.warn (`project_conf.json in ${projectPath}, in the entry
+                         for ${filePath}, should only contain properties
+                         like 'node0', 'node1', etc.`)
+        }
+        else {
+          if (! confEntry[ndtype].name) {
+            console.warn (`project_conf.json in ${projectPath}, in the entry for
+                          ${filePath}.${ndtype}, should contain a 'name' slot`)
           }
+          // valid case !
           else {
-            if (! confEntry[ndtype].name) {
-              console.warn (`project_conf.json in ${projectPath}, in the entry for ${filePath}.${ndtype}, should contain a 'name' property`)
-            }
-            // valid case !
-            else {
-              if (! declaredNodetypes)  declaredNodetypes = {}
+            if (! declaredNodetypes)  declaredNodetypes = {}
 
-              // fill simple nodetypes
-              declaredNodetypes[ndtype] = confEntry[ndtype].name
-            }
+            // fill simple nodetypes
+            declaredNodetypes[ndtype] = confEntry[ndtype].name
+          }
 
-            // optional reldbs -----------------------
-            if (confEntry[ndtype].reldbs) {
-              if (! declaredDBConf)     declaredDBConf = {}
+          // optional reldbs -----------------------
+          if (confEntry[ndtype].reldbs) {
+            if (! declaredDBConf)     declaredDBConf = {}
 
-              // it must match because we tested well-formedness above
-              let ndtypeId = ndtype.match(/^node(\d+)/)[1]
+            // it must match because we tested well-formedness above
+            let ndtypeId = ndtype.match(/^node(\d+)/)[1]
 
-              declaredDBConf[ndtypeId] = {}
-              for (var dbtype in confEntry[ndtype].reldbs) {
-                if (! TW.conf.relatedDocsAPIS[dbtype]) {
-                  console.info (`project_conf.json: ${projectPath}.${filePath}.${ndtype}: skipping unknown related docs db type **${dbtype}**. The only available db types are: ${Object.keys(TW.conf.relatedDocsAPIS)}.`)
-                }
-                else {
-                  declaredDBConf[ndtypeId][dbtype] = confEntry[ndtype].reldbs[dbtype]
-                }
+            declaredDBConf[ndtypeId] = {}
+            for (var dbtype in confEntry[ndtype].reldbs) {
+              if (! TW.conf.relatedDocsAPIS[dbtype]) {
+                console.info (`project_conf.json: ${projectPath}.${filePath}.${ndtype}:
+                               skipping unknown related docs db type **${dbtype}**.
+                               The only available db types are:
+                               ${Object.keys(TW.conf.relatedDocsAPIS)}.`)
+              }
+              else {
+                declaredDBConf[ndtypeId][dbtype] = confEntry[ndtype].reldbs[dbtype]
               }
             }
-            // ----------------------------------------
-
           }
+          // ----------------------------------------
+
         }
       }
     }

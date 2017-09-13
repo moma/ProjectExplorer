@@ -18,7 +18,7 @@ function echodump($title, $anyObj, $output_mode = "json") {
 
 function errmsg($message, $context, $more = "") {
   echo "<p class='micromessage'>The relatedDocs DB conf for $context $message
-  (please read A-Introduction/servermenu_config.md).<br>$more</p>";
+  (please read A-Introduction/project_config.md).<br>$more</p>";
 }
 
 // reading project_conf.json associations

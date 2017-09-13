@@ -193,11 +193,11 @@ TW.conf = (function(TW){
   // ------------
   TWConf.paths = {
     'ourlibs':   'twlibs',
-    'templates': 'twlibs/hit_templates',
     'modules':   'twmodules',
+    'templates': 'twlibs/default_hit_templates',   // some default templates
 
-    'sourceFile': "",                 // server-side gexf|json default source
-    'sourceMenu': "server_menu.json"  // ...or server-side gexf|json source list
+    'sourceFile': null,              // server: 1 default gexf|json graph source
+    'sourceMenu': "server_menu.json" // ...or server: a gexf|json sources list
   }
   Object.freeze(TWConf.paths)  // /!\ to prevent path modification before load
 

@@ -25,10 +25,10 @@ One minimal entry contains for each graph file of the project dir : a list of ex
 The value **typename_of_nodes** should match the `type` or `category` attribute value of your nodes in the source gexf or json. It acts as a filter specifying the nodes that will be displayed in the ProjectExplorer GUI.
 
 ##### For a bipartite graph
-If the source file has 2 types of nodes, the config should look like this:
+If the source file has 2 types of nodes, a minimal config should look like this:
 ```json
 {
-  "$$source_file.ext":{
+  "$$graph_source.ext":{
     "node0": {"name": "$$typename_of_term_nodes"},
     "node1": {"name": "$$typename_of_context_nodes"}
   }
@@ -77,7 +77,7 @@ Expected type is `"csv"` and you should fill the columns to search in and the te
   "csv" : {
     "file": "$$relpath/to/some.csv",
     "qcols": ["list", "of", "cols", "to", "search", "in", "for", "node0"],
-    "delim": ";"
+    "delim": ";",
     "template": "bib_details"
   }
 }
@@ -124,6 +124,38 @@ Expected type is `"twitter"` and no additional conf is needed (POSS for the futu
 }
 ```
 
+In the exemple above, the results from the csv file `model_calibration.csv` will be styled in the interface **according to the `bib_details` template**.
+
+The corresponding template must be called `bib_details.html` and placed under `data/your_project_dir/hit_templates`.
+
+*Exemple template `bib_details.html`:*
+```html
+<li class="searchhit">
+  <p>
+    <b>$${tit}</b>
+    by
+   <span class="author">$${au}</span>
+   ,
+   <i>$${src}</i>
+   [$${date}]
+  </p>
+
+  <p>
+    <span class="hit-keywords">
+     $${kws}
+    </span>
+    <span class="hit-text">
+     $${txt}
+    </span>
+  </p>
+</li>
+```
+
+Such a template is a custom html file representing an element `<li class="searchhit">`, and can use the columns as template variables like so: `$${colname}`.
+
+An additional variable `${{score}}` is always available in the templating context.
+
+--------------------------------------------------------------------------------
 
 ```json
 {
@@ -153,6 +185,6 @@ Expected type is `"twitter"` and no additional conf is needed (POSS for the futu
 }
 ```
 
-In the last exemple, we have two nodetypes:
+In this last exemple, we have two nodetypes:
   - node0 allows both CSV and twitter relatedDocs tabs.
   - node1 allows only the CSV relatedDocs tab.

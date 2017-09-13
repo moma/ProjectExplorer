@@ -473,30 +473,60 @@ function getTopPapers(qWords, nodetypeId, chosenAPI, tgtDivId) {
   }
 }
 
+// function searches for template files in that order:
+//   1) project-local data/myproject/hit_templates directory
+//   2) app default twlibs/default_hit_templates directory
 function makeRendererFromTemplate(tmplName) {
-  let tmplURL = TW.conf.paths.templates + '/' + tmplName + '.html'
-  let gotTemplate = AjaxSync({ url: tmplURL });
+  let tmplStr = ''
+  let tmplURL
+  let gotTemplate
 
-  var tmplStr = ''
-  if (gotTemplate['OK']) {
-    tmplStr = gotTemplate.data
+  let defRenderer = function(jsonHit) {
+    return JSON.stringify(jsonHit, null, ' ').replace(/\n/g, '<br>') + '<br>'
   }
 
-  // we return a customized renderJsonToHtml function
-  return function(jsonHit) {
-    let htmlOut = tmplStr
-    for (key in jsonHit) {
-      // our tags look like this in the template ====> by $${author}, [$${date}]
-      let reKey = new RegExp('\\$\\$\\{'+key+'\\}', 'g')
-      // we replace them by value
-      htmlOut = htmlOut.replace(reKey, jsonHit[key])
+  if (! tmplName) {
+    return defRenderer
+  }
+
+  // (1)
+  if (TW.Project) {
+    tmplURL = TW.Project + '/hit_templates/' + tmplName + '.html' ;
+    if (linkCheck(tmplURL)) {
+      gotTemplate = AjaxSync({ url: tmplURL });
     }
+  }
+  // (2)
+  if (! gotTemplate || ! gotTemplate['OK']) {
+    tmplURL = TW.conf.paths.templates + '/' + tmplName + '.html'
+    if (linkCheck(tmplURL)) {
+      gotTemplate = AjaxSync({ url: tmplURL });
+    }
+  }
 
-    // we also replace any not found keys by 'N/A'
-    let reKeyAll = new RegExp('\\$\\$\\{[^\\}]+\\}', 'g')
-    htmlOut = htmlOut.replace(reKeyAll, "N/A")
+  if (gotTemplate && gotTemplate['OK']) {
+    tmplStr = gotTemplate.data
+    // we return a customized renderJsonToHtml function
+    return function(jsonHit) {
+      let htmlOut = tmplStr
+      for (key in jsonHit) {
+        // our tags look like this in the template ==> by $${author}, [$${date}]
+        let reKey = new RegExp('\\$\\$\\{'+key+'\\}', 'g')
+        // we replace them by value
+        htmlOut = htmlOut.replace(reKey, jsonHit[key])
+      }
 
-    return htmlOut
+      // we also replace any not found keys by 'N/A'
+      let reKeyAll = new RegExp('\\$\\$\\{[^\\}]+\\}', 'g')
+      htmlOut = htmlOut.replace(reKeyAll, "N/A")
+
+      return htmlOut
+    }
+  }
+  else {
+    console.error(`couldn't find template ${tmplName} at ${tmplURL},
+                   using raw hits display`)
+    return defRenderer
   }
 }
 

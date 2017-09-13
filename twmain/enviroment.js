@@ -204,6 +204,10 @@ function alertCheckBox(eventCheck){
     }
 }
 
+
+// fileChooser: added to the environment when user opens explorer as local file
+// -----------
+// TODO: because source files now get a project_conf.md, find a way to open it too if it exists
 function createFilechooserEl () {
 
   var inputComment = document.createElement("p")
@@ -218,6 +222,8 @@ function createFilechooserEl () {
   graphFileInput.classList.add('centered')
 
   // NB file input will trigger mainStartGraph() when the user chooses something
+
+
   graphFileInput.onchange = function() {
     if (this.files && this.files[0]) {
 

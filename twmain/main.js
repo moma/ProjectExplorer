@@ -4,6 +4,7 @@
 
 
 TW.File = ""              // remember the currently opened file
+TW.Project = ""           // remember the project of currently opened file
 
 // a system state is the summary of tina situation
 TW.initialSystemState = {
@@ -299,7 +300,8 @@ function syncRemoteGraphData () {
 //     inData: source data as str
 //     twInstance: a tinaweb object (gui, methods) to bind the graph to
 //
-// NB: function also uses TW.File to get the associated project_conf.json entry
+// NB: function also uses TW.File to get the associated project dir and conf
+//                    and TW.conf for all global settings
 function mainStartGraph(inFormat, inData, twInstance) {
 
   // Graph-related vars
@@ -325,16 +327,30 @@ function mainStartGraph(inFormat, inData, twInstance) {
   else {
       let optNodeTypes = null
       let optRelDBs = null
+
       if (TW.sourcemode == "api") {
         optNodeTypes = TW.conf.sourceAPI.nodetypes
       }
       else {
-        // try and retrieve associated conf
-        [optNodeTypes, optRelDBs] = readProjectConf(TW.File)
+        // we assume the filePath is of the form projectPath/sourceFile
+        // (NB these are server-side path so we got linux-style slashes)
+        let pathsplit = TW.File.match("^(.*)/([^/]+)$")
+        if (! pathsplit) {
+          console.warn (`couldn't make out project path from ${TW.File}:
+                         won't read project conf and will try using defaults`)
+        }
+        else {
+          let srcDirname = pathsplit[1] ;
+          let srcBasename = pathsplit[2] ;
 
-        // export to global for getTopPapers function :/
-        if (optRelDBs) {
-          TW.currentRelDocsDBs = optRelDBs
+          // try and retrieve associated conf
+          [optNodeTypes, optRelDBs] = readProjectConf(srcDirname, srcBasename)
+
+          // export to globals for getTopPapers and makeRendererFromTemplate
+          if (optRelDBs) {
+            TW.currentRelDocsDBs = optRelDBs
+            TW.Project = srcDirname
+          }
         }
       }
 

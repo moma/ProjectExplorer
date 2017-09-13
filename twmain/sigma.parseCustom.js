@@ -222,7 +222,7 @@ function sortNodeTypes(observedTypesDict, optionalNodeConf) {
   let nbNodeTypes = 2
   var declaredTypes = []
   for (var i = 0 ; i < nbNodeTypes ; i++ ) {
-    if (optionalNodeConf["node"+i]) {
+    if (optionalNodeConf && optionalNodeConf["node"+i]) {
       declaredTypes[i] = optionalNodeConf["node"+i]
       if (TW.conf.debug.logSettings)
         console.log("expected cat (from db.json addtional conf)", i, declaredTypes[i])
