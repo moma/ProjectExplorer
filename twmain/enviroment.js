@@ -1003,7 +1003,11 @@ function NodeWeightFilter( sliderDivID , tgtNodeKey) {
     // ids per weight level
     // we use live index from prepareSigmaCustomIndices
     let nodesByTypeNSize = TW.partialGraph.graph.getNodesBySize(tgtNodeKey)
-    var sortedSizes = Object.keys(nodesByTypeNSize).sort(function(a,b){return a-b})
+
+    var sortedSizes = []
+    if (nodesByTypeNSize)
+      sortedSizes = Object.keys(nodesByTypeNSize).sort(function(a,b){return a-b})
+
 
     var stepToIdsArr = []
 

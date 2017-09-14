@@ -1095,8 +1095,8 @@ var TinaWebJS = function ( sigmacanvas ) {
       let madeDefaultColor = false
       if (TW.conf.defaultColoring) {
         let colMethodName, colMethod
-        if (TW.conf.facetOptions[TW.conf.defaultColoring]) {
-          colMethodName = TW.gui.colorFuns[TW.conf.facetOptions[TW.conf.defaultColoring]['col']]
+        if (TW.facetOptions[TW.conf.defaultColoring]) {
+          colMethodName = TW.gui.colorFuns[TW.facetOptions[TW.conf.defaultColoring]['col']]
         }
         if (! colMethodName) {
           if(TW.conf.defaultColoring.indexOf("clust")>-1||TW.conf.defaultColoring.indexOf("class")>-1) {
@@ -1116,9 +1116,9 @@ var TinaWebJS = function ( sigmacanvas ) {
             madeDefaultColor = true
           }
           catch(err) {
-            console.warning(`Settings asked for defaultColoring by the
-                             attribute "${TW.conf.defaultColoring}" but
-                             it's not present in the dataset => skip action`)
+            console.warn(`Settings asked for defaultColoring by the
+                          attribute "${TW.conf.defaultColoring}" but
+                          it's not present in the dataset => skip action`)
           }
         }
       }

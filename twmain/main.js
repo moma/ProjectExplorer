@@ -23,6 +23,10 @@ TW.states = [TW.initialSystemState]
 // SystemState() returns the current situation
 TW.SystemState = function() { return TW.states.slice(-1)[0] }
 
+// options for facetting the data attributes
+// (project conf values will override these global conf defaults)
+TW.facetOptions = TW.conf.defaultFacetOptions
+
 // gracefully degrade our most costly settings if the user agent is mobile
 if (/mobile/i.test(navigator.userAgent))   mobileAdaptConf()
 
@@ -311,7 +315,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
   TW.Edges = [];
   TW.ByType = {}          // node ids sorted by nodetype id   (0, 1)
   TW.Relations = {}       // edges sorted by source/target type id ("00", "11")
-  TW.Clusters = [];       // "by value" facet index built in parseCustom
+  TW.Facets = [];       // "by value" facet index built in parseCustom
 
   TW.partialGraph = null  // will contain the sigma visible graph instance
 
@@ -327,6 +331,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
   else {
       let optNodeTypes = null
       let optRelDBs = null
+      let optProjectFacets = null
 
       if (TW.sourcemode == "api") {
         optNodeTypes = TW.conf.sourceAPI.nodetypes
@@ -344,12 +349,19 @@ function mainStartGraph(inFormat, inData, twInstance) {
           let srcBasename = pathsplit[2] ;
 
           // try and retrieve associated conf
-          [optNodeTypes, optRelDBs] = readProjectConf(srcDirname, srcBasename)
+          [optNodeTypes,
+            optRelDBs,
+            optProjectFacets] = readProjectConf(srcDirname, srcBasename)
 
           // export to globals for getTopPapers and makeRendererFromTemplate
           if (optRelDBs) {
             TW.currentRelDocsDBs = optRelDBs
             TW.Project = srcDirname
+          }
+
+          // same for facet options
+          if (optProjectFacets) {
+            TW.facetOptions = Object.assign(TW.facetOptions, optProjectFacets)
           }
         }
       }
@@ -396,7 +408,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
       prepareNodesRenderingProperties(TW.Nodes)
       prepareEdgesRenderingProperties(TW.Edges, TW.Nodes)
 
-      if (inData.clusters) TW.Clusters = inData.clusters
+      if (inData.clusters) TW.Facets = inData.clusters
 
       // main console info
       // ===================

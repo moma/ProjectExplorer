@@ -38,7 +38,7 @@ TW.conf = (function(TW){
 
   // routes by corresponding type
   TWConf.relatedDocsAPIS = {
-    "twitter": "http://127.0.0.1:5000/twitter_search",
+    "twitter": "https://134.158.74.111/twitter_search",
     "CortextDB": "twbackends/phpAPI",
     "csv": "twbackends/phpAPI"
   }
@@ -51,116 +51,44 @@ TW.conf = (function(TW){
   // =======================
   // to process node attributes values from data
   //    => colors   (continuous numeric attributes)
-  //    => clusters (discrete numeric or str attributes),
+  //    => clusters (discrete numeric or str attributes)
+
+  // cf. also "Configuring facets" in the doc under Introduction/project_config
 
   // create facets ?
-  TWConf.scanClusters = true
+  TWConf.scanAttributes = true
 
   // use a facet for default color
   TWConf.defaultColoring = "clust_louvain"
 
-  // facetOptions: choose here the visual result of your node attributes
-  // -------------------------------------------------------------------
-  // 3 possible coloring functions
-  //   - cluster   (contrasted colors for attributes describing *classes*)
-  //   - gradient  (uniform map from a numeric attribute to red/yellow gradient)
-  //   - heatmap   (from blue to red, centered on a white "neutral" color)
-  // 3 possible binning modes
-  //   - 'samerange':  constant intervals between each bin
-  //   - 'samepop':    constant cardinality inside each class (~ quantiles)
-  //   - 'off'  :       no binning (each distinct value will be a legend item)
-  TWConf.facetOptions = {
+  // facetOptions: choose here the default visual result of your node attributes
+  // ---------------------------------------------------------------------------
+  // (values overridden by data/myproject/project_conf.json "facets" if present)
+  TWConf.defaultFacetOptions = {
 
     // attr title
-    'age'             : {
-                         'col': "gradient",       // coloring function
-                         'binmode': 'samerange',  // binning mode
-                         'n': 4,                  // custom number of bins
-                         'menutransl': "Date initiale d'apparition du terme dans le corpus"
-                      },
-    'growth_rate'     : {
-                        'col': "heatmap",
-                        'binmode': 'samepop',
-                        'n': 5,
-                        'menutransl': 'Tendances et oubliés de la semaine'
-                      },
-    'PageRank'        : {
-                         'col': "gradient",
-                         'binmode': 'samerange',
-                         'n': 6,
-                         'menutransl': 'Importance dans le réseau, méthode Google',
-                       },
-   'Modularity Class' : { // <== exemple with no binning
-                         'col': "cluster",
-                         'binmode': 'off',
-                         'menutransl': 'Groupes de voisins, méthode des classes de modularité'
-                       },
-   'Eigenvector Centrality':{
-                         'col':"heatmap" ,
-                         'binmode': 'samepop',
-                         'n': 9,
-                         'menutransl': 'Centralité par vecteurs propres'
-                       },
-   'normfactor':{
-                         'col':"gradient" ,
-                         'binmode': 'samepop',
-                         'n': 5,
-                         'menutransl': 'Focused keywords'
-                       },
-   'ACR':             {
+    'cluster_index'   : {'col': "cluster" ,          'binmode': 'off'        },
+    'clust_louvain'   : {'col': "cluster" ,          'binmode': 'off',
+                         'legend':'Louvain clustering'                       },
+    'country':{
                          'col':"cluster" ,
                          'binmode': 'off',
-                         'menutransl': 'Affiliation'
+                         'legend': 'Country'
                        },
-   'country':{
-                         'col':"cluster" ,
-                         'binmode': 'off',
-                         'menutransl': 'Country'
-                       },
-   'nbjobs':{
-                         'col':"heatmap" ,
-                         'binmode': 'samerange',
-                         'n': 5,
-                         'menutransl': 'Number of related job ads'
-                       },
-   'total_occurrences':{
+    'total_occurrences':{
                          'col':"heatmap" ,
                          'binmode': 'samerange',
                          'n': 3,
-                         'menutransl': 'Total occurrences'
-                       },
-
-    'numuniform'      : {'col': "heatmap",  'n': 7,  'binmode': 'samepop'    },
-    'numpareto'       : {'col': "gradient", 'n': 5,  'binmode': 'samerange'  },
-    'intfewvalues'    : {'col': "cluster" , 'n': 4,  'binmode': 'samerange'  },
-    'period'          : {'col': "cluster" ,          'binmode': 'off'        },
-    'in-degree'       : {'col': "heatmap" , 'n': 3,  'binmode': 'samepop'    },
-    'cluster_index'   : {'col': "cluster" ,          'binmode': 'off'        },
-    'cluster_label'   : {'col': "cluster" ,          'binmode': 'off'        },
-    'betweeness'      : {'col': "gradient", 'n': 4,  'binmode': 'samepop'    },
-    'level'           : {'col': "heatmap" ,          'binmode': 'off'        },
-    'weight'          : {'col': "heatmap" , 'n': 5,  'binmode': 'samerange'  },
-    'Weighted Degree' : {'col': "heatmap",  'n': 8,  'binmode': 'samerange'  },
-    'out-degree'      : {'col': "heatmap" , 'n': 3,  'binmode': 'samepop'    },
-    'clust_louvain'   : {'col': "cluster" ,          'binmode': 'off',
-                         'menutransl':'Louvain clustering'                   },
-     'cluster_universal_index': {'col': "cluster" ,        'binmode': 'off'  },
-      'community_orphan' :      {'col': "cluster" ,        'binmode': 'off'  }
-
+                         'legend': 'Total occurrences'
+                       }
   }
-
-  // NB  other cases with no binning:
+  // NB  automatic cases with no binning:
   //     - if data type is not numeric
-  //     - if there is less than distinct values that facetOptions[attr][n]
-
+  //     - if there is less than distinct values that maxDiscreteValues
 
   // NB for heatmapColoring:
-  //     - you should prefer odd number of bins
-  //     - if the number of bins is even, the 2 classes in the middle get white
+  //     - if number of bins is even, the 2 classes in the middle get white
   //     - the maximum number of bins is 24
-
-  // other POSS option: display attribute value in label or not ?
-
 
   // when coloring method is "cluster", should the colors change each time ?
   TWConf.randomizeClusterColors = true
@@ -168,8 +96,7 @@ TW.conf = (function(TW){
   // default clustering attribute (<---> used for initial node colors)
   TWConf.nodeClusAtt = "modularity_class"
 
-
-  // for binning decision and nbins (fallbacks <=> if the attr is not in facetOptions)
+  // for binning decision and nbins (fallbacks if attr is not in facetOptions)
   TWConf.maxDiscreteValues = 15
   TWConf.legendsBins = 7
 
@@ -249,7 +176,7 @@ TW.conf = (function(TW){
   // if fa2Available, the auto-run config:
 
     TWConf.fa2Enabled= true;        // fa2 auto-run at start and after graph modified ?
-    TWConf.fa2Milliseconds=5000;    // duration of auto-run
+    TWConf.fa2Milliseconds=4000;    // duration of auto-run
     TWConf.minNodesForAutoFA2 = 5   // graph size threshold to auto-run
 
 
@@ -361,3 +288,5 @@ TW.conf = (function(TW){
 
   return TWConf
 })()
+
+console.log("TW.conf load OK")

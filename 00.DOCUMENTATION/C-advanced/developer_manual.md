@@ -31,7 +31,7 @@ This will still evolve but the main steps for any graph initialization messily u
      - *"scan"*: loop once to list present node categories
      - *"dictify"*: loop again to copy all nodes/edges information
      - prepares TW.Relations: edges sorted by type (term-term, term-doc...)
-     - prepares TW.Clusters: bins and facet index (node attr vals => nodes)
+     - prepares TW.Facets: bins and facet index (node attr vals => nodes)
  4. [`main.js`] mainStartGraph() function runs all the rest
     1. precomputes display properties (grey color, etc.)
     2. calls [`sigmaUtils`] where the function `FillGraph()` was a central point for filtering and preparing properties but now with 2 and 3 it just creates a filtered copy of the nodes and edges of the current active types to a new structure that groups them together (POSSIBLE remove this extra step)
@@ -46,7 +46,7 @@ This will still evolve but the main steps for any graph initialization messily u
    - if the category name is "document"  => catSoc (type 1)
 
  - `somenode.attributes`: the `attributes` property is always an object
-   - any attribute listed in the sourcenode.attributes will be indexed if the TW.scanClusters flag is true
+   - any attribute listed in the sourcenode.attributes will be indexed if the TW.scanAttributes flag is true
    - data type and style of processing (for heatmap, or for classes, etc.) should be stipulated in settings (cf. **data facets** below)
 
 
@@ -107,14 +107,19 @@ The values can be binned or not and can be linked to different color schemes:
    - 'samepop':    constant cardinality inside each class (~ quantiles)
    - 'off'  :       no binning (each distinct value will be a legend item)
 
-These choices can be specified in the conf `facetOptions` entry.
+These choices can be specified in each project_conf.json under the `facets` entry.
 
-If an attribute is **not** described in `facetOptions`, it will get `"gradient"` coloration and will be binned iff it has more disctinct values than `maxDiscreteValues`, into `legendBins` intervals.
+If an attribute is **not** described in `project_conf.json`, it will get `"gradient"` coloration and will be binned iff it has more disctinct values than `maxDiscreteValues`, into `legendBins` intervals.
 
-These indexes are stored in TW.Clusters and provide an access to sets of nodes that have a given value or range of values
-  - the mapping from attribute values to matching nodes is always in `TW.Clusters.aType.anAttr.invIdx.aClass.nids`
+The allowed coloring functions are declared in TW.gui.colorFuns in `environment.js`.
+
+#### Exposed facets indices
+A faceted index is an index "value of an attribute" => nodes having this value.
+
+These indexes are stored in the exposed `TW.Facets` variable by parseCustom time and provide an access to sets of nodes that have a given value or range of values
+  - the mapping from attribute values to matching nodes is always in `TW.Facets.aType.anAttr.invIdx.aClass.nids`
     (where aClass is the chosen interval or distinct value)
-  - the datatype of the observed values is in `TW.Clusters.aType.anAttr.meta`
+  - the datatype of the observed values is in `TW.Facets.aType.anAttr.meta`
     - the source datatype is always string in gexf, but real type ("vtype") can be numeric
     - (ie numeric cast doesn't give NaN or it do so very rarely over the values)
 

@@ -742,7 +742,7 @@ function gradientColoring(daclass) {
     repaintEdges()
 
     // remember in clusters
-    let bins = TW.Clusters[getActivetypesNames()[0]][daclass]
+    let bins = TW.Facets[getActivetypesNames()[0]][daclass]
     if (bins && bins.invIdx) {
       for (var i in bins.invIdx) {
         if (bins.invIdx[i].labl != '_non_numeric_') {
@@ -769,7 +769,7 @@ function gradientColoring(daclass) {
     }
 
     // NB legend will group different possible values using
-    //    precomputed ticks from TW.Clusters.terms[daclass]
+    //    precomputed ticks from TW.Facets.terms[daclass]
     set_ClustersLegend ( daclass)
 
     TW.partialGraph.render();
@@ -809,8 +809,8 @@ function repaintEdges() {
 
 // heatmap from cold to warm with middle white
 //         (good for values centered around a neutral zone)
-// NB - binning is done at parseCustom (cf. TW.Clusters)
-//    - number of bins can be specified by attribute name in TW.conf.facetOptions[daclass]["n"]
+// NB - binning is done at parseCustom (cf. TW.Facets)
+//    - number of bins can be specified by attribute name in TW.facetOptions[daclass]["n"]
 function heatmapColoring(daclass) {
   var binColors
   var doModifyLabel = false
@@ -820,9 +820,9 @@ function heatmapColoring(daclass) {
   let nColors = TW.conf.legendsBins || 5
 
   // possible user value
-  if (TW.conf.facetOptions[daclass]) {
-    if (TW.conf.facetOptions[daclass]["n"] != 0) {
-      nColors = TW.conf.facetOptions[daclass]["n"]
+  if (TW.facetOptions[daclass]) {
+    if (TW.facetOptions[daclass]["n"] != 0) {
+      nColors = TW.facetOptions[daclass]["n"]
     }
     else {
       console.warn(`Can't use user-specified number of bins value 0 for attribute ${at}, using TW.conf.legendsBins ${TW.conf.legendsBins} instead`)
@@ -837,11 +837,11 @@ function heatmapColoring(daclass) {
   var ty = actypes[0]
 
   // our binning
-  var tickThresholds = TW.Clusters[ty][daclass].invIdx
+  var tickThresholds = TW.Facets[ty][daclass].invIdx
 
   // verifications
   if (tickThresholds.length - 1 != nColors) {
-    console.warn (`heatmapColoring setup mismatch: TW.Clusters ticks ${tickThresholds.length} - 1 non_numeric from scanClusters should == nColors ${nColors}`)
+    console.warn (`heatmapColoring setup mismatch: TW.Facets ticks ${tickThresholds.length} - 1 non_numeric from scanAttributes should == nColors ${nColors}`)
     nColors = tickThresholds.length - 1
   }
 
@@ -946,7 +946,7 @@ function clusterColoring(daclass) {
       let nColors = TW.gui.colorList.length
 
 
-      let facets = TW.Clusters[getActivetypesNames()[0]][daclass]
+      let facets = TW.Facets[getActivetypesNames()[0]][daclass]
       if (facets && facets.invIdx) {
         for (var i in facets.invIdx) {
           let valGroup = facets.invIdx[i]
@@ -978,11 +978,11 @@ function clusterColoring(daclass) {
             }
           }
 
-          // remember in TW.Clusters
+          // remember in TW.Facets
           valGroup.col = theColor
         }
       }
-      // fallback on old, slower strategy if scanClusters inactive
+      // fallback on old, slower strategy if scanAttributes inactive
       else {
         for(var nid in TW.Nodes) {
             var the_node = TW.partialGraph.graph.nodes(nid)
@@ -1067,7 +1067,7 @@ function mobileAdaptConf() {
     TW.conf.sigmaJsDrawingProperties.mouseZoomDuration = 0
     // TW.conf.sigmaJsDrawingProperties.defaultEdgeType = 'line'
 
-    // TW.conf.scanClusters = false
+    // TW.conf.scanAttributes = false
     // TW.conf.twRendering = false
 
     // £TODO better CSS for histogram on mobile

@@ -1,5 +1,5 @@
 {
-  "mini_for_csv.gexf": {
+  "mini.gexf": {
     "node0": {
       "name": "term",
       "reldbs": {
@@ -9,6 +9,14 @@
           "template": "bib_details"
         },
         "twitter": {}
+      },
+      "facets": {
+        "someOccs": {
+          "col": "gradient",
+          "n": 3,
+          "binmode": "samepop",
+          "legend": "Test Occurrences"
+        }
       }
     },
     "node1": {
@@ -18,6 +26,15 @@
           "file": "mini_for_csv.csv",
           "qcols": ["author"],
           "template": "bib_details"
+        }
+      },
+      "facets": {
+        "country": {"col": "cluster" , "legend": "Country", "binmode": "off"  },
+        "myValue":  {
+          "col": "heatmap",
+          "n": 2,
+          "binmode": "samerange",
+          "legend": "Some Important Value"
         }
       }
     }

@@ -266,10 +266,14 @@ function sortNodeTypes(observedTypesDict, optionalNodeConf) {
 
       // NB: type for nodes0 will be the majoritary by default, unless taken
       if (!newcats[0]) {
-        if (observedTypes[0] != newcats[1])
-            newcats[0] = observedTypes[0]    // 0 is the most frequent here
-        else
-            newcats[0] = observedTypes[1]    // 1 is second most frequent
+        if (observedTypes[0] != newcats[1]) {
+          newcats[0] = observedTypes[0]    // 0 is the most frequent here
+          catDict[observedTypes[0]] = 0;
+        }
+        else {
+          newcats[0] = observedTypes[1]    // 1 is second most frequent
+          catDict[observedTypes[1]] = 0;
+        }
       }
 
       // all the rest
@@ -310,14 +314,9 @@ function facetsBinning (valuesIdx) {
   let facetIdx = {}
 
   if (TW.conf.debug.logFacets) {
-    console.log('facetsBinning: begin TW.Clusters')
+    console.log('facetsBinning: begin TW.Facets')
     var classvalues_deb = performance.now()
   }
-
-  // var gotClusters = false
-  // for (var nodecat in valuesIdx) {
-  //   gotClusters = gotClusters || (valuesIdx[nodecat]['cluster_index'] || valuesIdx[nodecat][TW.conf.nodeClusAtt])
-  // }
 
   // all scanned attributes get an inverted index
   for (var cat in valuesIdx) {
@@ -381,16 +380,16 @@ function facetsBinning (valuesIdx) {
 
       // read stipulated options in user settings
       // ----------------------------------------
-      if (TW.conf.facetOptions[at]) {
-        binningMode = TW.conf.facetOptions[at]["binmode"]
-        nBins = TW.conf.facetOptions[at]["n"]
+      if (TW.facetOptions[at]) {
+        binningMode = TW.facetOptions[at]["binmode"]
+        nBins = TW.facetOptions[at]["n"]
         maxDiscreteValues = nBins
 
         if (nBins == 0) {
           console.warn(`Can't use user-specified number of bins value 0 for attribute ${at}, using TW.conf.legendsBins ${TW.conf.legendsBins} instead`)
           nBins = TW.conf.legendsBins
         }
-        if (TW.conf.debug.logFacets) console.log("TW.conf.facetOptions[at]", TW.conf.facetOptions[at])
+        if (TW.conf.debug.logFacets) console.log("TW.facetOptions[at]", TW.facetOptions[at])
       }
       else {
         if (TW.conf.debug.logFacets) console.log("(no specified options in settings for this attribute)")
@@ -407,7 +406,7 @@ function facetsBinning (valuesIdx) {
 
       // if small number of distinct values doesn't need binify
       if (    dataType == 'str'
-         || (TW.conf.facetOptions[at]                               // case with custom facetOptions
+         || (TW.facetOptions[at]                               // case with custom facetOptions
               && (nDistinctVals <= nBins || binningMode == "off"))
          || (nDistinctVals <= maxDiscreteValues )           // case with unspecified options
        ) {
@@ -619,7 +618,7 @@ function facetsBinning (valuesIdx) {
 
   if (TW.conf.debug.logFacets) {
     var classvalues_fin = performance.now()
-    console.log('end TW.Clusters, own time:', classvalues_fin-classvalues_deb)
+    console.log('end TW.Facets, own time:', classvalues_fin-classvalues_deb)
   }
 
   return facetIdx
@@ -671,7 +670,7 @@ function dictfyGexf( gexf , categories ){
     // let sumSizes = 0
     // let sizeStats = {'mean':null, 'median':null, 'max':0, 'min':1000000000}
 
-    // if scanClusters, we'll also use:
+    // if scanAttributes, we'll also use:
     var tmpVals = {}        // to build inverted index attval => nodes
                             // (to inventory subclasses for a given attr)
                             //   if < maxDiscreteValues: keep all in legend
@@ -826,7 +825,7 @@ function dictfyGexf( gexf , categories ){
 
             // console.debug("node.attributes", node.attributes)
             // creating a faceted index from node.attributes
-            if (TW.conf.scanClusters) {
+            if (TW.conf.scanAttributes) {
 
               tmpVals = updateValueFacets(tmpVals, node)
             }
@@ -850,8 +849,8 @@ function dictfyGexf( gexf , categories ){
 
 
     // clusters and other facets => type => name => [{label,val/range,nodeids}]
-    if (TW.conf.scanClusters) {
-      TW.Clusters = facetsBinning(tmpVals)
+    if (TW.conf.scanAttributes) {
+      TW.Facets = facetsBinning(tmpVals)
     }
 
     // linear rescale node sizes
@@ -1089,7 +1088,7 @@ function dictfyJSON( data , categories ) {
     let minNodeSize = Infinity
     let maxNodeSize = 0
 
-    // if scanClusters, we'll also use:
+    // if scanAttributes, we'll also use:
     var tmpVals = {}
 
     for(var nid in data.nodes) {
@@ -1144,7 +1143,7 @@ function dictfyJSON( data , categories ) {
         }
 
         // creating a faceted index from node.attributes
-        if (TW.conf.scanClusters) {
+        if (TW.conf.scanAttributes) {
           tmpVals = updateValueFacets(tmpVals, node)
         }
     }
@@ -1152,8 +1151,8 @@ function dictfyJSON( data , categories ) {
     // test: json with string facet (eg lab affiliation in comex)
     // console.log(tmpVals['Document'])
 
-    if (TW.conf.scanClusters) {
-      TW.Clusters = facetsBinning (tmpVals)
+    if (TW.conf.scanAttributes) {
+      TW.Facets = facetsBinning (tmpVals)
     }
 
     // £TODO ask if wanted

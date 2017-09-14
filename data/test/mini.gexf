@@ -1,0 +1,109 @@
+<gexf xmlns="http://www.gexf.net/1.1draft" xmlns:viz="http://www.gephi.org/gexf/viz" version="1.1">
+  <graph defaultedgetype="undirected" type="static">
+    <attributes class="node" type="static">
+      <attribute id="0" title="category" type="string">   </attribute>
+      <attribute id="1" title="country" type="string">   </attribute>
+      <attribute id="2" title="myValue" type="string">   </attribute>
+      <attribute id="3" title="someOccs" type="string">   </attribute>
+    </attributes>
+    <nodes>
+      <node id="T::0" label="scalajs">
+        <viz:size value="1"/>
+        <attvalues>
+          <attvalue for="0" value="term"/>
+          <attvalue for="3" value="1798"/>
+        </attvalues>
+      </node>
+      <node id="T::1" label="scala">
+        <viz:size value="1"/>
+        <attvalues>
+          <attvalue for="0" value="term"/>
+          <attvalue for="3" value="1577"/>
+        </attvalues>
+      </node>
+      <node id="T::2" label="python">
+        <viz:size value="1"/>
+        <attvalues>
+          <attvalue for="0" value="term"/>
+          <attvalue for="3" value="19"/>
+        </attvalues>
+      </node>
+      <node id="T::3" label="javascript">
+        <viz:size value="1"/>
+        <attvalues>
+          <attvalue for="0" value="term"/>
+          <attvalue for="3" value="1032"/>
+        </attvalues>
+      </node>
+      <node id="T::4" label="php">
+        <viz:size value="1"/>
+        <attvalues>
+          <attvalue for="0" value="term"/>
+          <attvalue for="3" value="655"/>
+        </attvalues>
+      </node>
+      <node id="P::0" label="-bb-">
+        <viz:size value="1"/>
+        <attvalues>
+          <attvalue for="0" value="person"/>
+          <attvalue for="1" value="China"/>
+          <attvalue for="2" value="14.995"/>
+        </attvalues>
+      </node>
+      <node id="P::1" label="-aa-">
+        <viz:size value="1"/>
+        <attvalues>
+          <attvalue for="0" value="person"/>
+          <attvalue for="1" value="Bhutan"/>
+          <attvalue for="2" value="8.9572"/>
+        </attvalues>
+      </node>
+      <node id="P::2" label="-dd-">
+        <viz:size value="1"/>
+        <attvalues>
+          <attvalue for="0" value="person"/>
+          <attvalue for="1" value="Brazil"/>
+          <attvalue for="2" value="4.6753"/>
+        </attvalues>
+      </node>
+      <node id="P::3" label="-cc-">
+        <viz:size value="1"/>
+        <attvalues>
+          <attvalue for="0" value="person"/>
+          <attvalue for="1" value="France"/>
+          <attvalue for="2" value="0.8481"/>
+        </attvalues>
+      </node>
+      <node id="P::4" label="-cc-">
+        <viz:size value="1"/>
+        <attvalues>
+          <attvalue for="0" value="person"/>
+          <attvalue for="1" value="Poland"/>
+          <attvalue for="2" value="8.6959"/>
+        </attvalues>
+      </node>
+      </nodes>
+      <edges>
+      <!-- bipartite 1|1 -->
+      <edge id="1" source="T::1" target="P::1"/>
+      <edge id="2" source="T::1" target="P::2"/>
+      <edge id="3" source="T::2" target="P::3"/>
+      <edge id="4" source="T::3" target="P::2"/>
+      <edge id="5" source="T::3" target="P::3"/>
+      <edge id="6" source="T::4" target="P::0"/>
+      <edge id="7" source="T::4" target="P::3"/>
+      <edge id="8" source="T::1" target="P::4"/>
+      <edge id="9" source="T::4" target="P::4"/>
+      <!-- intra sem 1|0 -->
+      <edge id="10" source="T::2" target="T::3"/>
+      <edge id="11" source="T::3" target="T::4"/>
+      <edge id="12" source="T::0" target="T::1"/>
+      <edge id="13" source="T::0" target="T::3"/>
+      <!-- intra soc 0|1 -->
+      <edge id="14" source="P::0" target="P::1"/>
+      <edge id="15" source="P::1" target="P::2"/>
+      <edge id="16" source="P::2" target="P::3"/>
+      <edge id="17" source="P::1" target="P::4"/>
+     </edges>
+    </graph>
+   </gexf>

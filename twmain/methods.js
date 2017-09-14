@@ -166,6 +166,7 @@ function readMenu(infofile) {
 function readProjectConf(projectPath, filePath) {
   let declaredNodetypes
   let declaredDBConf
+  let declaredFacetsConf
 
   // ££TODO declaredFacetOptions
 
@@ -233,13 +234,23 @@ function readProjectConf(projectPath, filePath) {
               }
             }
           }
+
+          // optional facets -----------------------
+          if (confEntry[ndtype].facets) {
+            if (! declaredFacetsConf)     declaredFacetsConf = {}
+            // POSS store facets conf by type ?
+            declaredFacetsConf = Object.assign(
+              declaredFacetsConf,
+              confEntry[ndtype].facets
+            )
+          }
           // ----------------------------------------
 
         }
       }
     }
   }
-  return [declaredNodetypes, declaredDBConf]
+  return [declaredNodetypes, declaredDBConf, declaredFacetsConf]
 }
 
 // settings: {norender: Bool}
@@ -294,18 +305,19 @@ function cancelSelection (fromTagCloud, settings) {
 //   - that all typenames have a mapping to cat[0] (terms) or cat[1] (contexts)
 //   - that currentState.activetypes is an array of 2 bools for the currently displayed cat(s)
 function getActivetypesNames() {
-  let currentTypes = []
-  let currentTypeIdx
+  let currentTypeNames = []
 
-  for (var possType in TW.catDict) {
-    currentTypeIdx = TW.catDict[possType]
-    if (TW.SystemState().activetypes[currentTypeIdx]) {
-      currentTypes.push(possType)
+  // for instance [true, false] if type0 is active
+  let activeFlags = TW.SystemState().activetypes
+
+  for (var i = 0 ; i < TW.categories.length ; i++) {
+    if (activeFlags[i]) {
+      currentTypeNames.push(TW.categories[i])
     }
   }
 
   // ex: ['Document'] or ['Ngrams'] or ['Document','Ngrams']
-  return currentTypes
+  return currentTypeNames
 }
 
 function getActiverelsKey(someState) {
