@@ -20,31 +20,33 @@ TW.sigmaAttributes = {
 }
 
 
-
-// £TODO: allow updating only one of them for user-setup
 // update the Auto-Facets
 //     (bins over dynamic sigma attributes like degree,
 //      available since we initialized the sigma instance)
-function updateDynamicFacets() {
+function updateDynamicFacets(optionalFilter) {
     let autoVals = {}
     for (var icat in TW.categories) {
       let nodecat = TW.categories[icat]
       autoVals[nodecat] = {}
       for (var autoAttr in TW.sigmaAttributes) {
-        autoVals[nodecat][autoAttr] = {'map':{},'vals':{'vstr':[],'vnum':[]}}
-        let getVal = TW.sigmaAttributes[autoAttr](TW.partialGraph)
-        for (var nid of TW.ByType[icat]) {
-          let nd = TW.partialGraph.graph.nodes(nid)
-          if (nd) {
-            let val = getVal(TW.partialGraph.graph.nodes(nid))
-            if (! (val in autoVals[nodecat][autoAttr].map))
-              autoVals[nodecat][autoAttr].map[val] = []
-            autoVals[nodecat][autoAttr].map[val].push(nid)
-            autoVals[nodecat][autoAttr].vals.vnum.push(val)
+        if (!optionalFilter || autoAttr == optionalFilter) {
+          autoVals[nodecat][autoAttr] = {'map':{},'vals':{'vstr':[],'vnum':[]}}
+          let getVal = TW.sigmaAttributes[autoAttr](TW.partialGraph)
+          for (var nid of TW.ByType[icat]) {
+            let nd = TW.partialGraph.graph.nodes(nid)
+            if (nd) {
+              let val = getVal(TW.partialGraph.graph.nodes(nid))
+              if (! (val in autoVals[nodecat][autoAttr].map))
+                autoVals[nodecat][autoAttr].map[val] = []
+              autoVals[nodecat][autoAttr].map[val].push(nid)
+              autoVals[nodecat][autoAttr].vals.vnum.push(val)
+            }
           }
         }
       }
     }
+
+    // console.log("reparse dynamic attr, raw result", autoVals)
 
     let autoFacets = facetsBinning(autoVals)
     // merge them into clusters
@@ -52,7 +54,7 @@ function updateDynamicFacets() {
       let nodecat = TW.categories[icat]
       for (var autoAttr in TW.sigmaAttributes) {
         for (var facet in autoFacets[nodecat]) {
-          TW.Clusters[nodecat][facet] = autoFacets[nodecat][facet]
+          TW.Facets[nodecat][facet] = autoFacets[nodecat][facet]
         }
       }
     }
@@ -316,13 +318,10 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
 
       // valueclasses (values or intervals or classes) are already sorted in TW.Facets
       for (var l in legendInfo) {
-
-        // get a sample node color for each bin/class
         var nMatchedNodes = legendInfo[l]['nids'].length
 
-        // console.log("legendInfo, nMatchedNodes", legendInfo, nMatchedNodes)
-
-        let theColor = legendInfo[l].col || "#111"   // black if empty
+        // get a sample node color for each bin/class
+        let theColor = legendInfo[l].col || "#777"   // grey if empty
 
         // create the legend item
         var preparedLabel = legendInfo[l]['labl']
@@ -1104,32 +1103,41 @@ function newAttrConfAndColor() {
      'titlingNTerms': document.getElementById('attr-titling-n').value || 1
   }
 
-  // find the corresponding types
-  let relevantTypes = {}
-  for (let ty in TW.Facets) {
-    if (TW.Facets[ty][attrTitle]) {
-      relevantTypes[ty] = true
+  // dynamic attribute case
+  if (attrTitle in TW.sigmaAttributes) {
+    updateDynamicFacets(attrTitle)        // all-in-one function
+  }
+
+  // classic data-driven attribute case
+  else {
+
+    // 1 - find the corresponding types
+    let relevantTypes = {}
+    for (let ty in TW.Facets) {
+      if (TW.Facets[ty][attrTitle]) {
+        relevantTypes[ty] = true
+      }
     }
-  }
 
-  // reparse values (avoids keeping them in RAM since parseCustom)
-  tmpVals = {}
-  for (let nid in TW.Nodes) {
-    let n = TW.Nodes[nid]
-    if (relevantTypes[n.type]) {
-      tmpVals = updateValueFacets(tmpVals, n, attrTitle)
+    // 2 - reparse values (avoids keeping them in RAM since parseCustom)
+    tmpVals = {}
+    for (let nid in TW.Nodes) {
+      let n = TW.Nodes[nid]
+      if (relevantTypes[n.type]) {
+        tmpVals = updateValueFacets(tmpVals, n, attrTitle)
+      }
     }
+
+    let newClustering = facetsBinning (tmpVals)
+
+    // 3 - write result to global TW.Facets
+    for (let ty in newClustering) {
+      TW.Facets[ty][attrTitle] = newClustering[ty][attrTitle]
+    }
+
+    // console.log("reparse raw result", tmpVals)
+    // console.log("reparse binned result", newClustering)
   }
-
-  let newClustering = facetsBinning (tmpVals)
-
-  // write result to global TW.Facets
-  for (let ty in newClustering) {
-    TW.Facets[ty][attrTitle] = newClustering[ty][attrTitle]
-  }
-
-  // console.log("reparse raw result", tmpVals)
-  // console.log("reparse binned result", newClustering)
 
   // update the GUI menu
   changeGraphAppearanceByFacets()

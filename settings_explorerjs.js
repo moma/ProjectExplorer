@@ -66,11 +66,11 @@ TW.conf = (function(TW){
   // (values overridden by data/myproject/project_conf.json "facets" if present)
   TWConf.defaultFacetOptions = {
 
-    // attr title          coloring fun       nbins       binning strategy
-    'auto-size'       : {'col': "heatmap",  'n': 5,  'binmode': 'samerange'  },
-    'auto-degree'     : {'col': "gradient", 'n': 7,  'binmode': 'samepop'    },
-    'auto-indegree'   : {'col': "gradient", 'n': 7,  'binmode': 'samepop'    },
-    'auto-outdegree'  : {'col': "gradient", 'n': 7,  'binmode': 'samepop'    },
+    // attr title          coloring fun       nbins       binning strategy       label in menus
+    'auto-size'       : {'col': "gradient", 'n': 6,  'binmode': 'samerange'  },
+    'auto-degree'     : {'col': "heatmap",  'n': 7,  'binmode': 'samepop'    },
+    'auto-indegree'   : {'col': "heatmap",  'n': 7,  'binmode': 'samepop'    },
+    'auto-outdegree'  : {'col': "heatmap",  'n': 7,  'binmode': 'samepop'    },
     'cluster_index'   : {'col': "cluster" ,          'binmode': 'off'        },
     'clust_louvain'   : {'col': "cluster" ,          'binmode': 'off',
                          'legend':'Louvain clustering'                       },

@@ -760,7 +760,7 @@ function gradientColoring(daclass) {
           if (nidList.length) {
             // we take first non null exemplar from last in the range
             // (possible skip due to changeLevel or filters)
-            for (var k = nidList.length-1 ; k-- ; k >= 0) {
+            for (var k = nidList.length-1 ; k >= 0 ; k--) {
               let nd = TW.partialGraph.graph.nodes(nidList[k])
               if (nd) {
                 bins.invIdx[i].col = nd.color
@@ -769,7 +769,7 @@ function gradientColoring(daclass) {
             }
           }
           else {
-            bins.invIdx[i].col = "#111" // empty bin
+            bins.invIdx[i].col = "#777" // empty bin
           }
         }
         else {
