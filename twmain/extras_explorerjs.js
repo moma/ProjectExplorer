@@ -13,11 +13,51 @@ TW.gui.colorFuns = {
 
 // sigma has dynamic attributes.. the functions below return their resp. getters
 TW.sigmaAttributes = {
-  'degree' :    function(sigInst) { return function(nd) {return sigInst.graph.degree(nd.id)}},
-  'outDegree' : function(sigInst) { return function(nd) {return sigInst.graph.degree(nd.id, 'out')}},
-  'inDegree' :  function(sigInst) { return function(nd) {return sigInst.graph.degree(nd.id, 'in')}}
+  'auto-degree' :    function(sigInst) { return function(nd) {return sigInst.graph.degree(nd.id)}},
+  'auto-outdegree' : function(sigInst) { return function(nd) {return sigInst.graph.degree(nd.id, 'out')}},
+  'auto-indegree' :  function(sigInst) { return function(nd) {return sigInst.graph.degree(nd.id, 'in')}},
+  'auto-size' :    function() { return function(nd) {return nd.size}}
 }
 
+
+
+// £TODO: allow updating only one of them for user-setup
+// update the Auto-Facets
+//     (bins over dynamic sigma attributes like degree,
+//      available since we initialized the sigma instance)
+function updateDynamicFacets() {
+    let autoVals = {}
+    for (var icat in TW.categories) {
+      let nodecat = TW.categories[icat]
+      autoVals[nodecat] = {}
+      for (var autoAttr in TW.sigmaAttributes) {
+        autoVals[nodecat][autoAttr] = {'map':{},'vals':{'vstr':[],'vnum':[]}}
+        let getVal = TW.sigmaAttributes[autoAttr](TW.partialGraph)
+        for (var nid of TW.ByType[icat]) {
+          let nd = TW.partialGraph.graph.nodes(nid)
+          if (nd) {
+            let val = getVal(TW.partialGraph.graph.nodes(nid))
+            if (! (val in autoVals[nodecat][autoAttr].map))
+              autoVals[nodecat][autoAttr].map[val] = []
+            autoVals[nodecat][autoAttr].map[val].push(nid)
+            autoVals[nodecat][autoAttr].vals.vnum.push(val)
+          }
+        }
+      }
+    }
+
+    let autoFacets = facetsBinning(autoVals)
+    // merge them into clusters
+    for (var icat in TW.categories) {
+      let nodecat = TW.categories[icat]
+      for (var autoAttr in TW.sigmaAttributes) {
+        for (var facet in autoFacets[nodecat]) {
+          TW.Clusters[nodecat][facet] = autoFacets[nodecat][facet]
+        }
+      }
+    }
+
+}
 
 // Execution:    changeGraphAppearanceByFacets( true )
 // It reads scanned node-attributes and prepared legends in TW.Facets

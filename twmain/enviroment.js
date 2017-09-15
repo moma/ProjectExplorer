@@ -516,7 +516,9 @@ function changeType(optionaltypeFlag) {
 
     // update the gui (POSS could be handled by TW.pushGUIState)
     TW.gui.handpickedcolor = false
+    updateDynamicFacets()
     changeGraphAppearanceByFacets( getActivetypesNames() )
+
     if (typeFlag != 'all') {
       graphResetLabelsAndSizes()
     }
@@ -684,6 +686,9 @@ function changeLevel(optionalTgtState) {
 
       TW.partialGraph.camera.goTo({x:0, y:0, ratio:1.2, angle: 0})
       TW.partialGraph.refresh()
+
+      updateDynamicFacets()
+      changeGraphAppearanceByFacets( getActivetypesNames() )
 
       // recreate FA2 nodes array after you change the nodes
       reInitFa2({
