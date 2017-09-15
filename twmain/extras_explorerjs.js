@@ -695,8 +695,9 @@ function renderTweet( tweet) {
     var image_normal = author_url+"/profile_image?size=original";
     var image_bigger = "";
     if( tweet["user"]["profile_image_url"] ) {
-        image_normal = tweet["user"]["profile_image_url"]
-        image_bigger = tweet["user"]["profile_image_url"].replace("_normal","_bigger")
+        let saferUrl = tweet["user"]["profile_image_url"].replace(/^http:/, "https:")
+        image_normal = saferUrl
+        image_bigger = saferUrl.replace("_normal","_bigger")
     }
     var html = ""
     html += '\t\t'+ '<blockquote onclick="clickInsideTweet(event, \''+tweet_url+'\')" class="Tweet h-entry tweet subject expanded" cite="'+tweet_url+'" data-tweet-id="'+tweet["id_str"]+'" data-scribe="section:subject">' + '\n';
