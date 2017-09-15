@@ -63,19 +63,24 @@ if (window.location.protocol == 'file:' || TW.sourcemode == 'localfile') {
   let inputDiv = document.getElementById('localInput')
   inputDiv.style.display = 'block'
 
+  // user can open a gexf or json from his fs
+  var graphFileInput = createFilechooserEl()
+  inputDiv.appendChild(graphFileInput)
+
   if (window.location.protocol == 'file:') {
     var remark = document.createElement("p")
-    remark.innerHTML = `You're running project explorer as a local html file (no syncing).`
+    remark.innerHTML = `<h5>/!\\ Running project explorer as a local html file /!\\<br>(<a id="localfile-warning" data-toggle="popover" data-content="<p>In localfile mode, it is impossible to load some interface elements: <ul><li>modules (histograms, suggestions)</li><li>related docs search engine</li><li>any custom project conf</li></ul></p><p><b>You can still explore your graph and its data attributes with our default settings</b>.</p><p>For more information, check out the <a href=https://github.com/moma/ProjectExplorer/blob/master/README.md#usage-on-a-web-server target=_blank>documentation</a>.</p>">no syncing</a>)</h5>`
     remark.classList.add('comment')
     remark.classList.add('centered')
     inputDiv.appendChild(remark)
     inputDiv.style.height = "auto";
     inputDiv.style.padding = "10px";
-  }
 
-  // user can open a gexf or json from his fs
-  var graphFileInput = createFilechooserEl()
-  inputDiv.appendChild(graphFileInput)
+    new Popover(
+      document.getElementById('localfile-warning'),
+      {"placement": 'left', "delay": 1000}
+    )
+  }
 }
 // traditional cases: remote read from API or prepared server-side file
 else {

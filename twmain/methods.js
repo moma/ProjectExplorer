@@ -284,7 +284,8 @@ function cancelSelection (fromTagCloud, settings) {
         $("#information").html("");
         $("#searchinput").val("");
         $("#unselectbutton").hide();
-        $("#lefttopbox").hide();
+        $("#lefttopbox").hide();           // <= main selection list cf namesDIV
+        $("#names").html("");              // <= contained by #lefttopbox
     }
 
     // send "eraseNodeSet" event
@@ -336,7 +337,15 @@ function getNActive(someState) {
   return TW.SystemState().activetypes.filter(function(bool){return bool}).length
 }
 
-// changes attributes of nodes and edges to remove active, highlight and activeEdge flags
+
+
+// deselectNodes
+// -------------
+// works only on the sigma part:
+// changes attributes of nodes and edges to remove:
+//  - active flags
+//  - highlight flags
+//  - and activeEdge flags
 
 // NB: "low-level" <=> by design, does NOT change the state, gui nor global flag
 //                     but ought to be called by "scenario" functions that do

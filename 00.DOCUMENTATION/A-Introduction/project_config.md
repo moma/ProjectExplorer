@@ -1,11 +1,13 @@
 ## Project Configuration
 
-The directories under `data/` are called project directories and should contain:
+The directories under `data/` on the app's server are called *project directories* and should contain:
   - a graph file (ending in `.gexf` or `.json`)
   - a `project_conf.json` to declare nodetypes and optionally link DBs to each graph file.
   - optionally the said associated database of documents
 
 See for example `data/test/project_conf.json` in the project dir `test`.
+
+NB: Remember that localfile input mode can not open project directories nor project configuration.
 
 ------------------------------------------------------
 #### Minimal Config

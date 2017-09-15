@@ -184,7 +184,7 @@ function RunLouvain() {
 function SomeEffect( ValueclassCode ) {
     // console.debug("highlighting:", ValueclassCode )
 
-    deselectNodes(TW.SystemState())
+    cancelSelection(false, {"norender": true})
 
     TW.gui.selectionActive = true
 
@@ -903,8 +903,25 @@ function circleLocalSubset(camX0, camY0 , camRay) {
 //   - the dirname of the submodule's files (with a mandatory init.js)
 //   - the css class of all html elements added by the submodule
 function activateModules() {
-    for(var key in TW.conf.ModulesFlags) {
 
+    // special case: can't run if explorer opened locally (loadJS cors pb)
+    // ex: location == "file:///home/romain/tw/DEV_PJXP/explorerjs.html"
+    if (window.location.protocol == "file:") {
+      let localWarning = "localfile mode: Won't sync optional modules"
+
+      // log additional details if present
+      if (TW.conf.ModulesFlags && typeof TW.conf.ModulesFlags == "object") {
+        let requestedModules = Object.keys(
+          TW.conf.ModulesFlags
+        ).filter(function(moduleName){return TW.conf.ModulesFlags[moduleName]})
+        localWarning += " (" + requestedModules.join(",") + " => not loaded)"
+      }
+      console.warn(localWarning)
+    }
+    // normal case (all other modes)
+    // -----------
+    else {
+      for(var key in TW.conf.ModulesFlags) {
         if(TW.conf.ModulesFlags[key]===false) {
             $("."+key).remove() ; // hide elements of module's class
         }
@@ -930,6 +947,7 @@ function activateModules() {
             //                └── "crowdsourcingTerms"+"/suggest.js"
         }
     }
+  }
 }
 
 
