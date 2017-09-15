@@ -169,7 +169,7 @@ TW.conf = (function(TW){
   // TW.geomap = false;
   // TW.twittertimeline = false;
 
-  TWConf.maxPastStates = 5 ;      // number of TW.states to remember (~CTRL-Z)
+  TWConf.maxPastStates = 15 ;      // number of TW.states to remember (~CTRL-Z)
 
 
   // Layout options

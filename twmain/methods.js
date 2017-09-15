@@ -17,6 +17,8 @@ TW.pushGUIState = function( args ) {
     // counter à toutes fins utiles
     newState.id ++
 
+    // console.log("pushGUIState:", newState.id)
+
     // 2) we update it with provided args
     if (!isUndef(args.activetypes))    newState.activetypes = args.activetypes
     if (!isUndef(args.activereltypes)) newState.activereltypes = args.activereltypes

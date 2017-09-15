@@ -128,6 +128,7 @@ function SelectionEngine() {
      * Main function for any selecting action
      *
      * @nodes: eg targeted array (only ids)
+     * @noState: bool flag to avoid registering new state (useful for CTRL+Z)
      *
      *  external usage : clickHandler, search, changeType, filters, tag click...
      */
@@ -136,12 +137,14 @@ function SelectionEngine() {
 
         if (!args)                      args = {}
         if (isUndef(args.nodes))        args.nodes = []
+        if (isUndef(args.noState))      args.noState = false
 
         if (TW.conf.debug.logSelections) {
           var tMS2_deb = performance.now()
-
-          console.log("IN SelectionEngine.MultipleSelection2:")
-          console.log("nodes", args.nodes)
+          console.log(
+            "IN SelectionEngine.MultipleSelection2:", args.nodes,
+            "noState:", args.noState
+          )
         }
 
         // deselects only the active ones (based on SystemState())
@@ -318,8 +321,10 @@ function SelectionEngine() {
         }
 
         // it's a new SystemState
-        TW.pushGUIState( { 'sels': theSelection,
-                        'rels': activeRelations } )
+        if (! args.noState) {
+          TW.pushGUIState( { 'sels': theSelection,
+                             'rels': activeRelations } )
+        }
 
         // we send our "gotNodeSet" event
         // (signal for plugins that a search-selection was done or a new hand picked selection)
@@ -333,7 +338,6 @@ function SelectionEngine() {
         TW.gui.selectionActive = true
 
         TW.partialGraph.render();
-
 
         updateRelatedNodesPanel( theSelection , same, oppos )
 
@@ -839,27 +843,34 @@ var TinaWebJS = function ( sigmacanvas ) {
             }
 
             var timeoutIdCTRLZ = window.setTimeout(function() {
+              // console.log("pop state")
+              let previousState = TW.states.pop()
 
-              if (TW.gui.selectionActive) {
-                deselectNodes(TW.SystemState())
-                TW.gui.selectionActive = false
-              }
-
-              console.log("pop state")
-
-              TW.states.pop()
+              deselectNodes(previousState)
 
               let returningState = TW.SystemState()
-              if (returningState.selectionNids.length) {
-                TW.instance.selNgn.MultipleSelection2({nodes:returningState.selectionNids})
+
+              // restoring level (will also restore selections)
+              if (returningState.level != previousState.level) {
+                changeLevel(returningState)
               }
               else {
-                cancelSelection()
+                // restoring selection
+                if (returningState.selectionNids.length) {
+                  TW.gui.selectionActive = true
+                  // changes active/highlight and refresh
+                  // POSS turn the nostate version into a select fun like deselect (ie no state, no refresh)
+                  TW.instance.selNgn.MultipleSelection2({
+                    nodes: returningState.selectionNids,
+                    noState: true
+                  })
+                }
+                else {
+                  TW.gui.selectionActive = false
+                  TW.partialGraph.refresh()
+                }
               }
-              TW.partialGraph.refresh()
-
             }, 100)
-
           }
         } );
 
@@ -934,7 +945,7 @@ var TinaWebJS = function ( sigmacanvas ) {
       // when one node and normal click
       // ===============================
       partialGraph.bind('clickNode', function(e) {
-        // console.log("clickNode event e", e.data.node)
+        // console.log("clickNode event e", e)
 
         // new sigma.js gives easy access to clicked node!
         var theNodeId = e.data.node.id
@@ -948,7 +959,26 @@ var TinaWebJS = function ( sigmacanvas ) {
                           } )
           // 2)
           if(targeted.length>0) {
-            selInst.MultipleSelection2( {nodes:targeted} )
+
+            // we still check if the selection is unchanged before create state
+            let currentNids = TW.SystemState().selectionNids
+            let sameNids = true
+            if (currentNids.length != targeted.length) {
+              sameNids = false
+            }
+            else {
+              for (var j in currentNids) {
+                if (currentNids[j] != targeted[j]) {
+                  sameNids = false
+                  break
+                }
+              }
+            }
+
+            // iff new selection, create effects and state
+            if (!sameNids) {
+              selInst.MultipleSelection2( {nodes:targeted} )
+            }
           }
         }
         // case with a selector circle cursor handled
@@ -958,10 +988,24 @@ var TinaWebJS = function ( sigmacanvas ) {
 
       // doubleClick creates new meso view around clicked node
       partialGraph.bind('doubleClickNode', function(e) {
-        var theNodeId = e.data.node.id
-        selInst.MultipleSelection2( {nodes:[theNodeId]} )
-        let newZoomState = Object.assign(TW.SystemState(), {level:false})
-        changeLevel(newZoomState)
+        // /!\   doubleClick will also fire 2 singleClick events  /!\
+        //
+        //      https://github.com/jacomyal/sigma.js/issues/208
+        //      https://github.com/jacomyal/sigma.js/issues/506
+        //
+        //      (order: clickNode, doubleClickNode, clickNode)
+        //                 1st        2nd (NOW)        3rd
+
+        // so if this was also a new selection, the 1st clickNode did handle it
+        // => we just create the new zoom level
+
+        // NB2: we never switch back to macro level from doubleClick
+
+        // A - create new zoom level state
+        TW.pushGUIState({ level: false })
+
+        // B - apply it without changing state
+        changeLevel(TW.SystemState())
       })
 
       // when click in the empty background
