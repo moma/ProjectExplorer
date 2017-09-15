@@ -11,7 +11,7 @@ See for example `data/test/project_conf.json` in the project dir `test`.
 
 Remarks:
   - The `localfile` input mode can **not** open project directories nor project-specific configurations (but the user can open a graph file and visualize it with default configuration)
-  - ProjectExplorer also allows another conf file in the project directory for data attributes preprocessing settings. The file is called `legends.json` and has a  separate documentation under [data facets and legends](https://github.com/moma/ProjectExplorer/blob/master/00.DOCUMENTATION/C-advanced/data_facets_and_legends.json)).
+  - ProjectExplorer also allows another conf file in the project directory for data attributes preprocessing settings. The file is called `legends.json` and has a  separate documentation under [data facets and legends](https://github.com/moma/ProjectExplorer/blob/master/00.DOCUMENTATION/C-advanced/data_facets_and_legends.md)).
 
 
 ------------------------------------------------------
