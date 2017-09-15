@@ -60,9 +60,11 @@ Binning can build the intervals with 3 strategies (`binmode` key):
 Remarks:
   - `legend` and `n` are optional
   - `n` is not needed if `binmode` is off
-  - if `binmode` is not off, the default value for `n` is 7
+  -  if `binmode` is not off, the default value for `n` is 7
   - `cluster` coloring works best with no binning: each distinct value corresponds to a class and becomes a different color.
   - `heatmap` coloring maximum amount of bins is 24.
+  - `gradient` coloring supports an additional attribute `setsize` (boolean) to decide if the attribute value should modify the node size (it is considered false if absent)
+  - to return to normal colors and size, choose "By Default" in the interface's "Set Color" menu)
 
 
 -----------------------------------------------------
@@ -74,7 +76,8 @@ Remarks:
     "legend": "Date d'entrée dans le corpus",
     "col": "gradient",
     "binmode": "samerange",
-    "n": 4
+    "n": 4,
+    "setsize": true
   },
   "growth_rate" : {
     "legend": "Tendances et oubliés de la semaine",

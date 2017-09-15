@@ -730,15 +730,16 @@ function gradientColoring(daclass) {
 
         let n = TW.partialGraph.graph.nodes(nid)
         if (n && !n.hidden) {
-          n.color = hex_color
           n.customAttrs.alt_color = hex_color
 
           // also recalculating the "unselected" color for next renders
           n.customAttrs.altgrey_color = "rgba("+(hex2rgba(hex_color).slice(0,3).join(','))+",0.4)"
 
-          // £TODO SETTING SIZE HERE SHOULD BE OPTIONAL
-          var newval_size = Math.round( ( Min_size+(NodeID_Val[nid]["round"]-real_min)*((Max_size-Min_size)/(real_max-real_min)) ) );
-          n.size = newval_size;
+          // optionally changing size
+          if (TW.facetOptions[daclass] && TW.facetOptions[daclass].setsize) {
+            var newval_size = Math.round( ( Min_size+(NodeID_Val[nid]["round"]-real_min)*((Max_size-Min_size)/(real_max-real_min)) ) );
+            n.size = newval_size;
+          }
 
           n.label = "("+NodeID_Val[nid]["real"].toFixed(min_pow)+") "+TW.Nodes[nid].label
         }
@@ -763,7 +764,7 @@ function gradientColoring(daclass) {
             for (var k = nidList.length-1 ; k >= 0 ; k--) {
               let nd = TW.partialGraph.graph.nodes(nidList[k])
               if (nd) {
-                bins.invIdx[i].col = nd.color
+                bins.invIdx[i].col = nd.customAttrs.alt_color
                 break
               }
             }
@@ -805,8 +806,16 @@ function repaintEdges() {
 
 
           if (src && tgt) {
-            let src_color = src.customAttrs.alt_color || src.color || '#555'
-            let tgt_color = tgt.customAttrs.alt_color || tgt.color || '#555'
+            let src_color
+            let tgt_color
+            if (TW.gui.handpickedcolor) {
+              src_color = src.customAttrs.alt_color || '#555'
+              tgt_color = tgt.customAttrs.alt_color || '#555'
+            }
+            else {
+              src_color = src.color || '#555'
+              tgt_color = tgt.color || '#555'
+            }
             e.customAttrs.alt_rgb = sigmaTools.edgeRGB(src_color,tgt_color)
             // we don't set e.color because opacity may vary if selected or not
           }
