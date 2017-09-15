@@ -107,6 +107,9 @@ TW.resetGraph = function() {
   TW.gui.checkBox=false
   TW.gui.lastFilters = {}
 
+  // forget the states
+  TW.states = [TW.initialSystemState]
+
   // remaining global vars will be reset by new graph mainStartGraph
 }
 

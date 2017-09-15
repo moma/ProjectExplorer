@@ -581,8 +581,6 @@ function getNeighbors(sourceNids, relKey) {
 //    POSS: rewrite using .hidden instead of add/remove
 function changeLevel(optionalTgtState) {
 
-    console.log('got optionalTgtState', optionalTgtState)
-
     // show waiting cursor
     TW.gui.elHtml.classList.add('waiting');
 
