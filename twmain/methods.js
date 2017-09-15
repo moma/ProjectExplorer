@@ -162,13 +162,10 @@ function readMenu(infofile) {
   return [serverMenu, firstProject]
 }
 
-// read project_conf.json files in the project for this file
+// read project_conf.json files in the project dir for this file
 function readProjectConf(projectPath, filePath) {
   let declaredNodetypes
   let declaredDBConf
-  let declaredFacetsConf
-
-  // ££TODO declaredFacetOptions
 
   let projectConfFile = projectPath + '/project_conf.json'
 
@@ -234,24 +231,50 @@ function readProjectConf(projectPath, filePath) {
               }
             }
           }
-
-          // optional facets -----------------------
-          if (confEntry[ndtype].facets) {
-            if (! declaredFacetsConf)     declaredFacetsConf = {}
-            // POSS store facets conf by type ?
-            declaredFacetsConf = Object.assign(
-              declaredFacetsConf,
-              confEntry[ndtype].facets
-            )
-          }
           // ----------------------------------------
 
         }
       }
     }
   }
-  return [declaredNodetypes, declaredDBConf, declaredFacetsConf]
+  return [declaredNodetypes, declaredDBConf]
 }
+
+
+
+// read optional legends.json file in the project dir for this file
+function readProjectFacetsConf(projectPath, filePath) {
+  let declaredFacetsConf
+
+  let legendConfFile = projectPath + '/legends.json'
+
+  if (! linkCheck(legendConfFile)) {
+    console.log (`no legend.json next to the file, ${filePath},
+                   will try using default facet options`)
+  }
+  else {
+    if (TW.conf.debug.logFetchers)
+      console.info(`attempting to load legends conf ${legendConfFile}`)
+
+    var legconfRes = AjaxSync({ url: legendConfFile, datatype:"json" });
+
+    if (TW.conf.debug.logFetchers)
+      console.log('legends conf AjaxSync result legconfRes', legconfRes)
+
+    if (! legconfRes['OK']
+       || ! legconfRes.data) {
+       console.warn (`legends.json in ${projectPath} is not valid json: skipped`)
+    }
+    else {
+      // load attributes params as they are
+      declaredFacetsConf = legconfRes.data
+      // (each coloring function has own fallbacks and checks on these params)
+    }
+  }
+  return declaredFacetsConf
+}
+
+
 
 // settings: {norender: Bool}
 function cancelSelection (fromTagCloud, settings) {

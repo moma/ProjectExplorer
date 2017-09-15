@@ -39,13 +39,16 @@ Après commits de la semaine 26-30 juin 2017, une structure plus facile pour les
 │        │                          (exemples sous twlibs/default_hit_templates)
 │        ├─ (etc.)
 │        │
-│        └─ project_conf.json  <= pour déclarer:
-│                                 - types de nodes
-│                                 - colorations/légendes des attributs des nodes
-|                                 - les bases associées pour les requêtes
-|                                   (et les templates de résultats ad hoc)
+│        ├─ project_conf.json  <= pour déclarer:
+│        |                        - les types de nodes
+|        |                        - les bases associées pour les requêtes
+|        |                          (et les templates de résultats ad hoc)
+|        |
+│        └─ legends.json       <= pour déclarer les colorations/légendes
+|                                 (pre-traitements des attributs des nodes)
 |
-├── server_menu.json        <= liste des sources gexf/json par projet (optionnelle: sert à afficher un menu)
+├── server_menu.json        <= liste des sources gexf/json par projet
+|                               (optionnelle: pour afficher un menu des graphes)
 ├── favicon.ico
 ├── LICENSE
 ├── README.md

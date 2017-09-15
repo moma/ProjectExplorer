@@ -1,0 +1,15 @@
+{
+  "someOccs": {
+    "col": "gradient",
+    "n": 3,
+    "binmode": "samepop",
+    "legend": "Test Occurrences"
+  },
+  "country": {"col": "cluster" , "legend": "Country", "binmode": "off"  },
+  "myValue":  {
+    "col": "heatmap",
+    "n": 2,
+    "binmode": "samerange",
+    "legend": "Some Important Value"
+  }
+}

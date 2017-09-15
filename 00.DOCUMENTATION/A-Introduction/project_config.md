@@ -2,17 +2,22 @@
 
 The directories under `data/` on the app's server are called *project directories* and should contain:
   - a graph file (ending in `.gexf` or `.json`)
-  - a `project_conf.json` to declare nodetypes and optionally link DBs to each graph file.
-  - optionally the said associated database of documents
+  - a `project_conf.json` to declare
+    - types of nodes in the input graph
+    - optionally linked DBs of documents for each graph file
+  - optionally the associated DBs of documents themselves
 
 See for example `data/test/project_conf.json` in the project dir `test`.
 
-NB: Remember that localfile input mode can not open project directories nor project configuration.
+Remarks:
+  - The `localfile` input mode can **not** open project directories nor project-specific configurations (but the user can open a graph file and visualize it with default configuration)
+  - ProjectExplorer also allows another conf file in the project directory for data attributes preprocessing settings. The file is called `legends.json` and has a  separate documentation under [data facets and legends](https://github.com/moma/ProjectExplorer/blob/master/00.DOCUMENTATION/C-advanced/data_facets_and_legends.json)).
+
 
 ------------------------------------------------------
 #### Minimal Config
 
-One minimal entry contains for each graph file of the project dir : a list of expected node types starting by 'node0' (**the nodetypes**)
+One minimal exemple of `project_conf.json` contains for each graph file of the project dir : a list of expected node types starting by 'node0' (**the nodetypes**)
 
 ```json
 {
@@ -190,135 +195,3 @@ An additional variable `${{score}}` is always available in the templating contex
 In this last exemple, we have two nodetypes:
   - node0 allows both CSV and twitter relatedDocs tabs.
   - node1 allows only the CSV relatedDocs tab.
-
-
-
-------------------------------------------------------
-#### Configuring facets (node attributes) rendering
-
-Your graph nodes may contain attributes (aka **data facets**) and project_conf can allow you to specify how to use them.
-
-For instance let's assume a node in your gexf input file may contain something like this:
-```xml
-<node id="99262" label="entreprises">
-  <attvalues>
-    <attvalue for="modularity_class" value="3"/>
-    <attvalue for="age" value="2012"/>
-  </attvalues>
-  <viz:size value="100.0"/>
-  <viz:color r="0" g="173" b="38"/>
-</node>
-```
-The input data here has two attributes: "age" and "modularity_class"
-
-These attributes (attvalues) can be processed at input time to:
-  - color the nodes in the interface
-  - create a legend with close values grouped into [statistical bins](https://en.wikipedia.org/wiki/Data_binning) by defining intervals
-  - replace the attribute name by a human-readable label in the legend and menus
-  - find a title for each subgroups or class
-
-This processing is default and will take place any way if the value `scanAttributes` is true in the global conf (`settings_explorerjs.js`).
-
-But the project conf `project_conf.json` allows us to fine-tune this, by specifying `facets` properties in the node entry for a source in your project :
-
-###### Exemple 1: gradient coloring and 4 bins
-```
-"facets": {
-  "age" : {
-    "legend": "Date d'entrée dans le corpus"  <== label used for legends
-    "col": "gradient",                        <== coloring function
-    "binmode": "samerange",                   <== binning mode
-    "n": 4,                                   <== optional: number of bins
-  }
-}
-```
-
-Here, `age` is the name of the attribute in the original data.
-
-For the `col` key, the available coloring functions are:
-  - `cluster`: for attributes describing *classes* (class names or class numbers, contrasted colors)
-  - `gradient`: for continuous variables (uniform map from light yellow to dark red)
-  - `heatmap`: for continuous variables (from blue-green to red-brown, centered on a white "neutral" color)
-
-Binning can build the intervals with 3 strategies (`binmode` key):
-  - `samerange`: constant intervals between each bin (dividing the range into `n` equal intervals)
-  - `samepop`: constant cardinality inside each class (~ quantiles: dividing the range into `n` intervals with equal population)
-  - `off`: no binning (each value gets a different color)
-
-###### Exemple 2: `cluster` coloring
-```
-"facets": {
-  "Modularity Class" : {
-    "legend": "Modules dans le graphe",
-    "col": "cluster",
-    "binmode": "off"                  <== no binning: values are kept intact
-  }
-}
-```
-Remarks:
-  - Heatmap coloring maximum amount of bins is 24.
-  - `legend` is optional
-  - `n` is not needed if `binmode` is off.
-  - Cluster coloring works best with no binning: each distinct value corresponds to a class and becomes a different color.
-
-###### Real life example 1
-```json
-{
-  "ProgrammeDesCandidats.gexf": {
-    "node0": {
-      "name": "term",
-      "reldbs": {...},
-      "facets": {
-        "age" : {
-          "legend": "Date d'entrée dans le corpus",
-          "col": "gradient",
-          "binmode": "samerange",
-          "n": 4
-        },
-        "growth_rate" : {
-          "legend": "Tendances et oubliés de la semaine",
-          "col": "heatmap",
-          "binmode": "samepop",
-          "n": 11
-        },
-        "modularity_class" : {
-          "legend": "Modules dans le graphe",
-          "col": "cluster",
-          "binmode": "off"
-        }
-      }
-    }
-  }
-}
-```
-
-###### Real life example 2
-```json
-{
-  "Maps_S_800.gexf": {
-    "node0": {
-      "name": "termsWhitelist",
-      "reldbs": {...},
-      "facets":{
-        "level": {"col": "heatmap" ,                  "binmode": "off"        },
-        "weight": {"col": "heatmap" ,        "n": 5,  "binmode": "samerange"  },
-        "period": {"col": "cluster" ,                 "binmode": "off"        },
-        "in-degree":  {"col": "heatmap" ,    "n": 3,  "binmode": "samepop"    },
-        "out-degree": {"col": "heatmap" ,    "n": 3,  "binmode": "samepop"    },
-        "betweeness": {"col": "gradient",    "n": 4,  "binmode": "samepop"    },
-        "cluster_label": {"col": "cluster" ,          "binmode": "off"        },
-        "community_orphan":{"col": "cluster" ,        "binmode": "off"  },
-        "cluster_universal_index": {"col": "cluster" ,"binmode": "off"  },
-      }
-    }
-  }
-}
-```
-
-NB: If an attribute is **not** described in `facets` and `TW.conf.scanAttributes` is true, the attribute will get `"gradient"` coloration by default and the distinct attributes values will be counted:
-  - if there is few of them (less than 15), they won't be binned
-  - if there is many distinct values, they will be binned into 7 intervals
-
-The corresponding global conf keys to this default behavior are `TWConf.legendBins` and `TWConf.maxDiscreteValues` in `settings_explorerjs.js`
-
-For more information, see the [developer's manual](https://github.com/moma/ProjectExplorer/blob/master/00.DOCUMENTATION/C-advanced/developer_manual.md#exposed-facets-indices)

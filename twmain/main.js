@@ -353,10 +353,8 @@ function mainStartGraph(inFormat, inData, twInstance) {
           let srcDirname = pathsplit[1] ;
           let srcBasename = pathsplit[2] ;
 
-          // try and retrieve associated conf
-          [optNodeTypes,
-            optRelDBs,
-            optProjectFacets] = readProjectConf(srcDirname, srcBasename)
+          // try and retrieve associated project_conf.json
+          [optNodeTypes, optRelDBs] = readProjectConf(srcDirname, srcBasename)
 
           // export to globals for getTopPapers and makeRendererFromTemplate
           if (optRelDBs) {
@@ -364,7 +362,10 @@ function mainStartGraph(inFormat, inData, twInstance) {
             TW.Project = srcDirname
           }
 
-          // same for facet options
+          // try and retrieve associated legends.json
+          optProjectFacets = readProjectFacetsConf(srcDirname, srcBasename)
+
+          // export to globals for facet options (merge with previous defaults)
           if (optProjectFacets) {
             TW.facetOptions = Object.assign(TW.facetOptions, optProjectFacets)
           }
