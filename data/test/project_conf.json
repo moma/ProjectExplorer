@@ -4,7 +4,7 @@
       "name": "term",
       "reldbs": {
         "csv": {
-          "file": "mini_for_csv.csv",
+          "file": "mini.csv",
           "qcols": ["title","keywords","text"],
           "template": "bib_details"
         },
@@ -15,7 +15,7 @@
       "name": "person",
       "reldbs": {
         "csv": {
-          "file": "mini_for_csv.csv",
+          "file": "mini.csv",
           "qcols": ["author"],
           "template": "bib_details"
         }
