@@ -4,6 +4,65 @@
 // --------------------------------------------------------------
 // returns the full csv array (the documents base)
 //     AND a list of postings (the search index)
+//
+//  The documents-base gets a [{1 obj per row: 1 property per column}] structure
+//
+//  exemple of the documents base structure:
+//  -------
+//  {
+//     "title": "A three-dimensional photoelastic method for analysis of differential-contraction stresses",
+//     "source": "Experimental Mechanics",
+//     "publication_year": "1963",
+//     "publication_month": "01",
+//     "publication_day": "01",
+//     "abstract": "Abstract: The property of homogeneous and isotropic
+//                  contraction accompanying the slow polymerization
+//                  of a photoelastic epoxy resin is utilized to produce
+//                  a photoelastic model of the same size and shape,
+//                  at the elevated cure temperature, as the container
+//                  in which it was cast. (...).",
+//     "authors": "Robert C. Sampson"
+// },
+// {
+//     "title": "Use of subjective information in estimation of aquifer parameters",
+//     "source": "Water Resources Research",
+//     "publication_year": "1972",
+//     "publication_month": "01",
+//     "publication_day": "01",
+//     "abstract": "In the calibration of aquifer models, the desire for
+//                  an automated adjustment process is sometimes
+//                  in conflict with the need for subjective intervention
+//                  during the calibration process. (...)",
+//     "authors": "R. E. Lovell, L. Duckstein, C. C. Kisiel"
+// },
+// {
+//     "title": "Man-machine interactive transit system planning",
+//     "source": "Socio-Economic Planning Sciences",
+//     "publication_year": "1972",
+//     "publication_month": "01",
+//     "publication_day": "01",
+//     "abstract": "The problem of finding the best fixed routes for node
+//                  oriented transit systems is used for an initial
+//                  implementation and evaluation of a man-machine
+//                  interactive problem solving system. (...)",
+//     "authors": "Matthias H. Rapp"
+// },
+//
+//
+//  The postings have the form: {
+//                                col_i => {
+//                                           "tokenA" => {
+//                                                          docid0: occs i.A.0,
+//                                                          docid1: occs i.A.1,
+//                                                           ...
+//                                                        },
+//                                             ...
+//                                         },
+//                                 ...
+//                               }
+//
+//
+//
 function parse_and_index_csv($filename, $typed_cols_to_index, $separator, $quotechar) {
 
   // list of csv rows
@@ -58,8 +117,10 @@ function parse_and_index_csv($filename, $typed_cols_to_index, $separator, $quote
           for ($ndtypeid = 0 ; $ndtypeid < $GLOBALS["ntypes"] ; $ndtypeid++) {
             if (array_key_exists($ndtypeid, $postings)) {
               if (array_key_exists($colname, $postings[$ndtypeid])) {
-                // basic tokenisation (TODO specify tokenisation delimiters etc.)
-                $tokens = preg_split("/\W/", $line_fields[$c]);
+
+                // basic tokenisation on unicode punctuation and separators
+                // cf http://unicode.org/reports/tr18/#General_Category_Property
+                $tokens = preg_split("/[\p{Z}\p{P}\p{C}]+/u", $line_fields[$c]);
 
                 // for debug
                 // echo("indexing column:".$colname." under type:".$ndtypeid.'<br>');

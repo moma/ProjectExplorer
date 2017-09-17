@@ -99,7 +99,7 @@ else {
     $searchcols = $my_conf["node".$ntid][$dbtype]['qcols'];
 
     // a - split the query
-    $qtokens = preg_split('/\W/', $_GET["query"]);
+    $qtokens = preg_split('/[\p{Z}\p{P}\p{C}]+/u', $_GET["query"]);
 
     // b - compute freq similarity per doc
     $sims = array();
