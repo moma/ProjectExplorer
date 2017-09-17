@@ -49,17 +49,7 @@
 // },
 //
 //
-//  The postings have the form: {
-//                                col_i => {
-//                                           "tokenA" => {
-//                                                          docid0: occs i.A.0,
-//                                                          docid1: occs i.A.1,
-//                                                           ...
-//                                                        },
-//                                             ...
-//                                         },
-//                                 ...
-//                               }
+//  The postings have the form: $nodetype => $col => $tok => $docid => $occs
 //
 //
 //
@@ -154,8 +144,30 @@ function parse_and_index_csv($filename, $typed_cols_to_index, $separator, $quote
     }
     fclose($fh);
   }
+  // post-treatment: cumulative number of docs by token
+  $df = array() ;
+  for ($ndtypeid = 0 ; $ndtypeid < $GLOBALS["ntypes"] ; $ndtypeid++) {
+    if (array_key_exists($ndtypeid, $postings)) {
+      foreach ($postings[$ndtypeid] as $col => $occs_matrix) {
+        foreach ($occs_matrix as $tok => $doc_occs) {
+          if (array_key_exists($tok, $df)) {
+            $df[$tok] += count($doc_occs);
+          }
+          else {
+            $df[$tok]  = count($doc_occs);
+          }
+        }
+      }
+    }
+  }
 
-  return array($base, $postings);
+  $logtotaldocs = log($rowid + 1);
+  $idfvals = array();
+  foreach ($df as $tok => $df_tok) {
+    $idfvals[$tok] = $logtotaldocs - log($df_tok);
+  }
+
+  return array($base, $postings, $idfvals);
 }
 
 

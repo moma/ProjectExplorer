@@ -48,7 +48,7 @@ function displayDoc($docId, $score, $base, $outmode) {
       "kws" => $keywords,
       "txt" => $doccontent,
       "date" => $date,
-      "score" => $score
+      "score" => round($score, 5)
     );
   }
   return $output;
@@ -72,14 +72,14 @@ function try_attrs_until_you_find($doc_obj, $attr_names_array) {
 $htmlout = "<ul class=infoitems>\n";
 $jsonout = array();
 $nb_displayed = 0;
-foreach ($sims as $doc => $freq) {
+foreach ($sims as $doc => $score) {
   // doc limit
   if ($nb_displayed > $max_item_displayed - 1) {
     break;
   }
 
   $rowid = ltrim($doc, 'd');
-  $thisdoc = displayDoc($rowid, $freq, $base, $output_mode);
+  $thisdoc = displayDoc($rowid, $score, $base, $output_mode);
   // echodump("doc", $thisdoc);
 
   if ($output_mode == "html") {
