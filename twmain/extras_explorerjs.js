@@ -50,8 +50,7 @@ function updateDynamicFacets(optionalFilter) {
 
     let autoFacets = facetsBinning(autoVals)
     // merge them into clusters
-    for (var icat in TW.categories) {
-      let nodecat = TW.categories[icat]
+    for (var nodecat in TW.catDict) {
       for (var autoAttr in TW.sigmaAttributes) {
         for (var facet in autoFacets[nodecat]) {
           TW.Facets[nodecat][facet] = autoFacets[nodecat][facet]
@@ -382,7 +381,7 @@ function set_ClustersLegend ( daclass, groupedByTicks ) {
           }
 
           // replacing the cluster numbers by those k best titles in the legend
-          preparedLabel = "["+titles.map(function(x){return x.key}).join('/')+"...]" + ` (${nMatchedNodes})`
+          preparedLabel = "["+titles.map(function(x){return x.key}).join(' / ')+"...]" + ` (${nMatchedNodes})`
 
           // console.log("finding title perf", performance.now() - t0, titles)
         }
@@ -1001,29 +1000,42 @@ function activateModules() {
 //     cf. doc/developer_manual.md autodiagnose remark)
 function fillAttrsInForm(menuId, optionalAttTypeConstraint) {
   var actypes = getActivetypesNames()
+
+  // 1- remove any previous fromFacets options from possible previous graphs
+  let autoOptions = document.getElementById(menuId).querySelectorAll('option[data-opttype=fromFacets]')
+  for (var i = 0 ; i <= autoOptions.length - 1 ; i++) {
+    elChooser.removeChild(autoOptions[i])
+  }
+
+  // 2- ls | uniq all options (no matter what active type they belong too)
+  let uniqOptions = {}
   for (let tid in actypes) {
     let ty = actypes[tid]
-
-    let elChooser = document.getElementById(menuId)
-
-    // remove any previous fromFacets options from possible previous graphs
-    let autoOptions = document.getElementById(menuId).querySelectorAll('option[data-opttype=fromFacets]')
-    for (var i = 0 ; i <= autoOptions.length - 1 ; i++) {
-      elChooser.removeChild(autoOptions[i])
-    }
-
-    // each facet family or clustering type was already prepared
-    for (let att in TW.Facets[ty]) {
+    for (var att in TW.Facets[ty]) {
       if (!optionalAttTypeConstraint
            || (   TW.Facets[ty][att].meta.dataType
                && TW.Facets[ty][att].meta.dataType == optionalAttTypeConstraint)) {
-        let opt = document.createElement('option')
-        opt.value = att
-        opt.innerText = att
-        opt.dataset.opttype = "fromFacets"
-        elChooser.appendChild(opt)
-      }
+         uniqOptions[att] = true
+       }
+     }
+   }
+
+  // 3- write to DOM
+  let elChooser = document.getElementById(menuId)
+  for (var att in uniqOptions) {
+    // <option> creation
+    // -------------------
+    // each facet family or clustering type was already prepared
+    let opt = document.createElement('option')
+    opt.value = att
+    opt.innerText = att
+    if (att in TW.sigmaAttributes) {
+      opt.dataset.opttype = "auto"
     }
+    else {
+      opt.dataset.opttype = "fromFacets"
+    }
+    elChooser.appendChild(opt)
   }
 }
 
@@ -1046,44 +1058,42 @@ function conditiOpen(subQId, mainQId, mainQOkValues) {
 
 // attr-col change has complex consequences
 function colChangedHandler() {
-  // for titling subquestion open
-  conditiOpen('choose-titling-div', 'attr-col',['cluster'])
-
-  // for the implication [cluster => binmode off]
+  // for the implication [cluster => grey freeze binmode off but keep it shown,
+  //                        other => reactivate ]
+  // (no sense to ordinally bin clusters)
   let elColQ = document.getElementById('attr-col')
   let elBinmodeQ = document.getElementById('attr-binmode')
   if (elColQ.value == 'cluster') {
     elBinmodeQ.value = "off"
     elBinmodeQ.disabled = true
-    document.getElementById("attr-nbins-div").style.display = 'none'
+    elBinmodeQ.style.backgroundColor = "#777"
   }
   else {
     elBinmodeQ.disabled = false
+    elBinmodeQ.style.backgroundColor = ""
   }
+
+  // for titling subquestion show
+  conditiOpen('choose-titling-div', 'attr-col',['cluster'])
+
+  // for nbins subquestion show
+  conditiOpen('attr-nbins-div', 'attr-binmode',['samepop', 'samerange'])
+
 }
 
 
 function showAttrConf() {
   let attrTitle = this.value
-  let settings = TW.facetOptions[attrTitle]
-  if (settings) {
-    document.getElementById('attr-col').value = settings.col || 'gradient'
-    document.getElementById('attr-binmode').value = settings.binmode || 'off'
-    document.getElementById('attr-translation').value = settings.legend || attrTitle
-    if(settings.n) {
-      document.getElementById('attr-nbins-div').style.display = 'block'
-      document.getElementById('attr-nbins').value = settings.n || 5
-    }
-    if(settings.col == 'cluster') {
-      document.getElementById('choose-titling-div').style.display = 'block'
-      document.getElementById('attr-titling-metric').value = settings.titlingMetric || ''
-      document.getElementById('attr-titling-n').value = settings.titlingNTerms || 1
+  let settings = TW.facetOptions[attrTitle] || {}
+  document.getElementById('attr-translation').value = settings.legend || attrTitle
+  document.getElementById('attr-col').value = settings.col || 'gradient'
+  document.getElementById('attr-binmode').value = settings.binmode || 'off'
+  document.getElementById('attr-nbins').value = settings.n || TW.conf.legendsBins || 5
+  document.getElementById('attr-titling-metric').value = settings.titlingMetric || 'auto-size'
+  document.getElementById('attr-titling-n').value = settings.titlingNTerms || 2
 
-      // no sense to ordinally bin clusters
-      document.getElementById('attr-binmode').value = "off"
-      document.getElementById('attr-binmode').disabled = true
-    }
-  }
+  // make the binmode and titling details adapt to choosen settings.col
+  colChangedHandler()
 }
 
 

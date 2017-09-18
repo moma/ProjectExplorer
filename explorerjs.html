@@ -661,14 +661,21 @@
                        <select id="choose-attr" name="choose-attr"
                                class="custom-select form-control">
                                <option selected value="0"></option>
-                               <option value="auto-size" data-opttype="auto">Auto size</option>
-                               <option value="auto-degree" data-opttype="auto">Auto degree</option>
-                               <option value="auto-indegree" data-opttype="auto">Auto in degree</option>
-                               <option value="auto-outdegree" data-opttype="auto">Auto out degree</option>
                                <!-- filled by fillAttrsInForm(.) -->
                        </select>
                      </div>
                    </div>
+
+                   <div class="question">
+                     <div class="input-group">
+                       <label for="attr-translation" class="smlabel input-group-addon">Legend</label>
+                       <input id="attr-translation" name="attr-translation" maxlength="70"
+                              type="text" class="form-control autocomp" placeholder="A label for this attribute"
+                              >
+                      </div>
+                      <p class="legend">Will be displayed in the color menu and legends box.</p>
+                   </div>
+
 
                    <div class="question">
                      <div class="input-group">
@@ -682,31 +689,6 @@
                            <option value="heatmap">heatmap</option>
                        </select>
                      </div>
-                   </div>
-
-
-                   <!-- this titling functionality is like a head -n inside each class -->
-                   <div class="question conditional-q"  id="choose-titling-div">
-                     <p class="legend">Please choose a size/weight metric used to rank the "title-candidates" inside each cluster.</p>
-
-                     <div class="input-group">
-                       <label for="attr-titling-metric" class="smlabel input-group-addon">Titling metric</label>
-                       <select id="attr-titling-metric" name="attr-titling-metric"
-                               class="custom-select form-control">
-                               <option value="auto-size" data-opttype="auto">Auto size</option>
-                               <option value="auto-degree" data-opttype="auto">Auto degree</option>
-                               <option value="auto-indegree" data-opttype="auto">Auto in degree</option>
-                               <option value="auto-outdegree" data-opttype="auto">Auto out degree</option>
-                               <!-- other attrs filled by fillAttrsInForm(., 'num') -->
-                       </select>
-                     </div>
-                     <div class="input-group" style="margin-top:.5em;">
-                       <label for="attr-titling-n" class="smlabel input-group-addon">Number of terms</label>
-                       <input id="attr-titling-n" name="attr-titling-n" maxlength="2"
-                              type="text" class="form-control autocomp" placeholder="number of node labels to pick as title (1-10)"
-                              onchange="let castint = parseInt(this.value) ; if (castint != this.value || castint < 1) {this.value = 1} else if(castint > 10) {this.value = 10}"
-                              >
-                      </div>
                    </div>
 
                    <div class="question">
@@ -733,12 +715,25 @@
                       <p class="legend">Please input an integer value between 2 and 24.</p>
                    </div>
 
-                   <div class="question input-group">
-                     <label for="attr-translation" class="smlabel input-group-addon"> Title </label>
-                     <input id="attr-translation" name="attr-translation" maxlength="70"
-                            type="text" class="form-control autocomp" placeholder="a text for the color menu"
-                            >
-                   </div>
+                    <!-- this titling functionality is like a head -n inside each class -->
+                    <div class="question conditional-q"  id="choose-titling-div">
+                      <p class="legend">Please choose a size/weight metric used to rank the "title-candidates" inside each cluster.</p>
+
+                      <div class="input-group">
+                        <label for="attr-titling-metric" class="smlabel input-group-addon">Titling metric</label>
+                        <select id="attr-titling-metric" name="attr-titling-metric"
+                                class="custom-select form-control">
+                                <!-- other attrs filled by fillAttrsInForm(., 'num') -->
+                        </select>
+                      </div>
+                      <div class="input-group" style="margin-top:.5em;">
+                        <label for="attr-titling-n" class="smlabel input-group-addon">Number of terms</label>
+                        <input id="attr-titling-n" name="attr-titling-n" maxlength="2"
+                               type="text" class="form-control autocomp" placeholder="number of node labels to pick as title (1-10)"
+                               onchange="let castint = parseInt(this.value) ; if (castint != this.value || castint < 1) {this.value = 1} else if(castint > 10) {this.value = 10}"
+                               >
+                       </div>
+                    </div>
 
               </form>
 

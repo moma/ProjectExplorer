@@ -67,10 +67,10 @@ TW.conf = (function(TW){
   TWConf.defaultFacetOptions = {
 
     // attr title          coloring fun       nbins       binning strategy       label in menus
-    'auto-size'       : {'col': "gradient", 'n': 6,  'binmode': 'samerange'  },
-    'auto-degree'     : {'col': "heatmap",  'n': 7,  'binmode': 'samepop'    },
-    'auto-indegree'   : {'col': "heatmap",  'n': 7,  'binmode': 'samepop'    },
-    'auto-outdegree'  : {'col': "heatmap",  'n': 7,  'binmode': 'samepop'    },
+    'auto-size'       : {'col': "gradient", 'n': 6,  'binmode': 'samerange', 'legend': 'Auto Size'  },
+    'auto-degree'     : {'col': "heatmap",  'n': 7,  'binmode': 'samepop',   'legend': 'Auto Degree'},
+    'auto-indegree'   : {'col': "heatmap",  'n': 7,  'binmode': 'samepop', 'legend': 'Auto InDegree'},
+    'auto-outdegree'  : {'col': "heatmap",  'n': 7,  'binmode': 'samepop', 'legend': 'Auto OutDegree'},
     'cluster_index'   : {'col': "cluster" ,          'binmode': 'off'        },
     'clust_louvain'   : {'col': "cluster" ,          'binmode': 'off',
                          'legend':'Louvain clustering'                       },

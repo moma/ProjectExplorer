@@ -518,7 +518,13 @@ function mainStartGraph(inFormat, inData, twInstance) {
       // NB : camera positions are fix if the node is fixed => they only depend on layout
       //      renderer position depend on viewpoint/zoom (like ~ html absolute positions of the node in the div)
 
-      // now that we have a sigma instance let's adapt the environment and bind our click handlers to it
+      // prepare the colors/clusters menu until next changeType/changeLevel
+      // (and update TW.Facets)
+      updateDynamicFacets()
+      changeGraphAppearanceByFacets()
+
+      // now that we have a sigma instance and TW.Facets
+      // let's adapt the environment and bind our click handlers to it
       twInstance.initSigmaListeners(
         TW.partialGraph,
         initialActivetypes,      // to init node sliders and .class gui elements
@@ -578,10 +584,6 @@ function mainStartGraph(inFormat, inData, twInstance) {
 
       // will run fa2 if enough nodes and TW.conf.fa2Enabled == true
       sigma_utils.smartForceAtlas()
-
-      // prepare the colors/clusters menu until next changeType/changeLevel
-      updateDynamicFacets()
-      changeGraphAppearanceByFacets()
   }
 
 }

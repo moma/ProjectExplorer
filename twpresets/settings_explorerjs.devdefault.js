@@ -66,7 +66,11 @@ TW.conf = (function(TW){
   // (values overridden by data/myproject/project_conf.json "facets" if present)
   TWConf.defaultFacetOptions = {
 
-    // attr title
+    // attr title          coloring fun       nbins       binning strategy       label in menus
+    'auto-size'       : {'col': "gradient", 'n': 6,  'binmode': 'samerange', 'legend': 'Auto Size'  },
+    'auto-degree'     : {'col': "heatmap",  'n': 7,  'binmode': 'samepop',   'legend': 'Auto Degree'},
+    'auto-indegree'   : {'col': "heatmap",  'n': 7,  'binmode': 'samepop', 'legend': 'Auto InDegree'},
+    'auto-outdegree'  : {'col': "heatmap",  'n': 7,  'binmode': 'samepop', 'legend': 'Auto OutDegree'},
     'cluster_index'   : {'col': "cluster" ,          'binmode': 'off'        },
     'clust_louvain'   : {'col': "cluster" ,          'binmode': 'off',
                          'legend':'Louvain clustering'                       },
@@ -165,7 +169,7 @@ TW.conf = (function(TW){
   // TW.geomap = false;
   // TW.twittertimeline = false;
 
-  TWConf.maxPastStates = 5 ;      // number of TW.states to remember (~CTRL-Z)
+  TWConf.maxPastStates = 15 ;      // number of TW.states to remember (~CTRL-Z)
 
 
   // Layout options

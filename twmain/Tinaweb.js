@@ -879,6 +879,7 @@ var TinaWebJS = function ( sigmacanvas ) {
 
     // to init local, instance-related listeners (need to run at new sigma instance)
     // args: @partialGraph = a sigma instance
+    // accessed globals: TW.Facets
     this.initSigmaListeners = function(partialGraph, initialActivetypes, initialActivereltypes, optionalRelDocsConf) {
 
       // console.log("initSigmaListeners TW.categories / types array / reltypeskeys array: ", TW.categories, initialActivetypes, initialActivereltypes)
