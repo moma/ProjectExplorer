@@ -222,38 +222,38 @@ TW.conf = (function(TW){
   TWConf.sigmaJsDrawingProperties = {
       // nodes
       defaultNodeColor: "#ddd",
-      twNodeRendBorderSize: 1,           // node borders (only iff ourRendering)
+      twNodeRendBorderSize: 0.5,          // node borders (only iff ourRendering)
       twNodeRendBorderColor: "#222",
 
       // edges
       minEdgeSize: 1,                    // in fact used in tina as edge size
       defaultEdgeType: 'curve',          // 'curve' or 'line' (curve only iff ourRendering)
-      twEdgeDefaultOpacity: 0.4,         // initial opacity added to src/tgt colors
+      twEdgeDefaultOpacity: .4,         // initial opacity added to src/tgt colors
 
       // labels
       font: "Droid Sans",                // font params
       fontStyle: "bold",
       defaultLabelColor: '#000',         // labels text color
       labelSizeRatio: 1,                 // label size in ratio of node size
-      labelThreshold: 4,                 // min node cam size to start showing label
+      labelThreshold: 3.5,               // min node cam size to start showing label
                                          // (old tina: showLabelsIfZoom)
 
       // hovered nodes
       defaultHoverLabelBGColor: '#fff',
       defaultHoverLabelColor: '#000',
-      borderSize: 2.5,                   // for ex, bigger border when hover
+      borderSize: 1,                     // for ex, bigger border when hover
       nodeBorderColor: "node",           // choices: 'default' color vs. node color
       defaultNodeBorderColor: "black",   // <- if nodeBorderColor = 'default'
 
 
       // selected nodes <=> special label
       twSelectedColor: "default",     // "node" for a label bg like the node color,
-                                   // "default" for note-like yellow
+                                      // "default" for white background
 
       // not selected <=> (1-greyness)
-      twNodesGreyOpacity: .5,                       // smaller value: more grey
+      twNodesGreyOpacity: .4,                       // smaller value: more grey
       twBorderGreyColor: "rgba(100, 100, 100, 0.5)",
-      twEdgeGreyColor: "rgba(100, 100, 100, 0.3)",
+      twEdgeGreyColor: "rgba(100, 100, 100, 0.05)",
   };
   // NB: sigmaJsDrawingProperties are available as 'settings' in all renderers
   // cf. https://github.com/jacomyal/sigma.js/wiki/Settings#renderers-settings
