@@ -22,20 +22,12 @@ function SelectionEngine() {
 
         // currsels = bunch of nodes from a click in the map
         if(args.addvalue) {
-            // FOR SIMPLE UNIQUE UNION
-            if ( TW.SystemState().level) {
-              targeted = args.currsels.concat(args.prevsels.filter(function (item) {
-                  return args.currsels.indexOf(item) < 0;
-                }));
-            }
-            // meso view: complementary select if disjoint, deselect if overlap
-            else {
-              targeted = args.currsels.filter(function (item) {
-                  return args.prevsels.indexOf(item) < 0;
-              }).concat(args.prevsels.filter(function (item) {
-                  return args.currsels.indexOf(item) < 0;
-                }));;
-            }
+            // complementary select if disjoint, deselect if overlap
+            targeted = args.currsels.filter(function (item) {
+                return args.prevsels.indexOf(item) < 0;
+            }).concat(args.prevsels.filter(function (item) {
+                return args.currsels.indexOf(item) < 0;
+              }));;
         }
         else {
           targeted = args.currsels;
