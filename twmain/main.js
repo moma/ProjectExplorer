@@ -320,7 +320,10 @@ function mainStartGraph(inFormat, inData, twInstance) {
   TW.Edges = [];
   TW.ByType = {}          // node ids sorted by nodetype id   (0, 1)
   TW.Relations = {}       // edges sorted by source/target type id ("00", "11")
-  TW.Facets = [];       // "by value" facet index built in parseCustom
+  TW.Facets = [];         // "by value" facet index built in parseCustom
+
+  TW.Project = null
+  TW.currentRelDocsDBs = {}
 
   TW.partialGraph = null  // will contain the sigma visible graph instance
 
