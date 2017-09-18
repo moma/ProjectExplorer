@@ -94,7 +94,7 @@ TW.conf = (function(TW){
     'nbjobs':{
                          'col':"heatmap" ,
                          'binmode': 'samerange',
-                         'n': 5,
+                         'n': 2,
                          'legend': 'Number of related job ads'
                        },
     'total_occurrences':{

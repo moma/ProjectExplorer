@@ -1000,9 +1000,10 @@ function activateModules() {
 //     cf. doc/developer_manual.md autodiagnose remark)
 function fillAttrsInForm(menuId, optionalAttTypeConstraint) {
   var actypes = getActivetypesNames()
+  let elChooser = document.getElementById(menuId)
 
-  // 1- remove any previous fromFacets options from possible previous graphs
-  let autoOptions = document.getElementById(menuId).querySelectorAll('option[data-opttype=fromFacets]')
+  // 1- remove any previous options from possible previous graphs
+  let autoOptions = document.getElementById(menuId).querySelectorAll('option')
   for (var i = 0 ; i <= autoOptions.length - 1 ; i++) {
     elChooser.removeChild(autoOptions[i])
   }
@@ -1021,7 +1022,6 @@ function fillAttrsInForm(menuId, optionalAttTypeConstraint) {
    }
 
   // 3- write to DOM
-  let elChooser = document.getElementById(menuId)
   for (var att in uniqOptions) {
     // <option> creation
     // -------------------
@@ -1029,6 +1029,12 @@ function fillAttrsInForm(menuId, optionalAttTypeConstraint) {
     let opt = document.createElement('option')
     opt.value = att
     opt.innerText = att
+    if (att in TW.facetOptions && TW.facetOptions[att].legend) {
+      opt.innerText = TW.facetOptions[att].legend + " (" + att + ")"
+    }
+    else {
+      opt.innerText = "(" + att + ")"
+    }
     if (att in TW.sigmaAttributes) {
       opt.dataset.opttype = "auto"
     }
@@ -1102,6 +1108,12 @@ function showAttrConf() {
 function newAttrConfAndColor() {
   let attrTitle = document.getElementById('choose-attr').value
 
+  let legendChanged = (
+    (! "legend" in TW.facetOptions[attrTitle] && document.getElementById('attr-translation').value)
+       ||
+    (TW.facetOptions[attrTitle].legend != document.getElementById('attr-translation').value)
+  )
+
   // read values from GUI
   TW.facetOptions[attrTitle] = {
      'col': document.getElementById('attr-col').value,
@@ -1111,7 +1123,13 @@ function newAttrConfAndColor() {
 
      // only for clusterings (ie currently <=> (col == "cluster"))
      'titlingMetric': document.getElementById('attr-titling-metric').value,
-     'titlingNTerms': document.getElementById('attr-titling-n').value || 1
+     'titlingNTerms': document.getElementById('attr-titling-n').value || 2
+  }
+
+  // case where we need to update dialog displays because of new legend
+  if (legendChanged) {
+    fillAttrsInForm('choose-attr')
+    fillAttrsInForm('attr-titling-metric', 'num')
   }
 
   // dynamic attribute case
