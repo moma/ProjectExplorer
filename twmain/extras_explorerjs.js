@@ -1009,7 +1009,7 @@ function fillAttrsInForm(menuId, optionalAttTypeConstraint) {
   }
 
   // 2- ls | uniq all options (no matter what active type they belong too)
-  let uniqOptions = {}
+  let uniqOptions = {'clust_louvain': true}
   for (let tid in actypes) {
     let ty = actypes[tid]
     for (var att in TW.Facets[ty]) {
@@ -1035,6 +1035,9 @@ function fillAttrsInForm(menuId, optionalAttTypeConstraint) {
     else {
       opt.innerText = "(" + att + ")"
     }
+    if (att == 'clust_louvain') {
+      opt.selected = true
+    }
     if (att in TW.sigmaAttributes) {
       opt.dataset.opttype = "auto"
     }
@@ -1043,6 +1046,8 @@ function fillAttrsInForm(menuId, optionalAttTypeConstraint) {
     }
     elChooser.appendChild(opt)
   }
+
+  showAttrConf(null, 'clust_louvain')
 }
 
 // for optional questions:
@@ -1088,8 +1093,8 @@ function colChangedHandler() {
 }
 
 
-function showAttrConf() {
-  let attrTitle = this.value
+function showAttrConf(event, optionalAttrname) {
+  let attrTitle = optionalAttrname || this.value
   let settings = TW.facetOptions[attrTitle] || {}
   document.getElementById('attr-translation').value = settings.legend || attrTitle
   document.getElementById('attr-col').value = settings.col || 'gradient'
