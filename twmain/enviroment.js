@@ -158,7 +158,11 @@ function getHeatmapColors(nClasses) {
 
 
 function writeBrand (brandString, brandLink) {
-  document.getElementById('twbrand').innerHTML = brandString
+  let elTitle = document.getElementById('twbrand')
+  if (elTitle) {
+    elTitle.innerHTML = brandString
+  }
+
   let anchors = document.getElementsByClassName('twbrand-link')
   for (var k in anchors) {
     if (anchors[k] && anchors[k].href) {
