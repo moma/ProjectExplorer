@@ -59,7 +59,7 @@ TW.conf = (function(TW){
   TWConf.scanAttributes = true
 
   // use a facet for default color
-  TWConf.defaultColoring = "clust_louvain"
+  TWConf.defaultColoring = "country"
 
   // facetOptions: choose here the default visual result of your node attributes
   // ---------------------------------------------------------------------------
