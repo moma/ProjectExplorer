@@ -23,8 +23,8 @@ TW.gui.checkBox=false;
 TW.gui.shiftKey=false;
 TW.gui.foldedSide=false;
 TW.gui.manuallyChecked = false;
-TW.gui.handpickedcolor = false;     // <= changes edge rendering strategy
-TW.gui.lastFilters = {}
+TW.gui.handpickedcolor = {};        // <= changes rendering, by nodetype
+TW.gui.lastFilters = {}             // <= last values, by slider id
 TW.gui.reldocTabs = [{}, {}]        // <= by nodetype and then dbtype
 
 TW.gui.sizeRatios = [1,1]           // sizeRatios per nodetype
@@ -519,7 +519,7 @@ function changeType(optionaltypeFlag) {
 
 
     // update the gui (POSS could be handled by TW.pushGUIState)
-    TW.gui.handpickedcolor = false
+    TW.gui.handpickedcolor = {}  // <=> none
     updateDynamicFacets()
     changeGraphAppearanceByFacets( getActivetypesNames() )
 

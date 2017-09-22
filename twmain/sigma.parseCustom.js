@@ -211,8 +211,8 @@ function scanGexf(gexfContent) {
 // ex: terms
 // ex: ISItermsriskV2_140 & ISItermsriskV2_140
 // optional arg optionalNodeConf should contain keys of the form:
-//    "node0": "NGram",
-//    "node1": "Document"
+//    "node0": "Keywords",
+//    "node1": "Scholars"
 //     etc.
 // (it's read from project_conf.json)
 function sortNodeTypes(observedTypesDict, optionalNodeConf) {

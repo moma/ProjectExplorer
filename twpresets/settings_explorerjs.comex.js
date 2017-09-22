@@ -21,7 +21,7 @@ TW.conf = (function(TW){
 
   // ...or remote bridge to default source api ajax queries
   TWConf.sourceAPI={}
-  TWConf.sourceAPI["nodetypes"] = {"node0": "NGram", "node1": "Document" }
+  TWConf.sourceAPI["nodetypes"] = {"node0": "Keywords", "node1": "Scholars" }
   TWConf.sourceAPI["forNormalQuery"] = "services/api/graph"
   TWConf.sourceAPI["forFilteredQuery"] = "services/api/graph"
 
@@ -59,7 +59,7 @@ TW.conf = (function(TW){
   TWConf.scanAttributes = true
 
   // use a facet for default color
-  TWConf.defaultColoring = "clust_louvain"
+  TWConf.defaultColoring = null
 
   // facetOptions: choose here the default visual result of your node attributes
   // ---------------------------------------------------------------------------
