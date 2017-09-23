@@ -106,6 +106,9 @@ TW.resetGraph = function() {
   TW.gui.checkBox=false
   TW.gui.lastFilters = {}
 
+  // reset colors legends
+  updateColorsLegend()
+
   // forget the states
   TW.states = [TW.initialSystemState]
 
