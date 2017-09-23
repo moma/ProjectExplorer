@@ -118,7 +118,7 @@ var SigmaUtils = function () {
         context.beginPath();
 
         if (settings('twSelectedColor') == "node")
-          context.fillStyle = TW.gui.handpickedcolor[node.type] ? node.customAttrs.alt_color : node.color; // node's
+          context.fillStyle = TW.gui.handpickedcolors[node.type].alton ? node.customAttrs.alt_color : node.color; // node's
         else
           context.fillStyle = "#fff"; // default
 
@@ -290,7 +290,7 @@ var SigmaUtils = function () {
 
 
         // mode variants 1: if a coloringFunction is active
-        if (! TW.gui.handpickedcolor[node.type]) {
+        if (! TW.gui.handpickedcolors[node.type].alton) {
           nodeColor = node.color
         }
         else {
@@ -315,7 +315,7 @@ var SigmaUtils = function () {
           // passive nodes should blend in the grey of twEdgeGreyColor
           // cf settings_explorerjs, defgrey_color and deselectNodes()
           else {
-            if (! TW.gui.handpickedcolor[node.type]) {
+            if (! TW.gui.handpickedcolors[node.type].alton) {
               nodeColor = node.customAttrs.defgrey_color
             }
             else {
@@ -440,7 +440,7 @@ var SigmaUtils = function () {
             x = Math.round(node[prefix + 'x'] - fontSize / 2 - 2);
             y = Math.round(node[prefix + 'y'] - fontSize / 2 - 2);
             w = Math.round(
-              context.measureText(node.label).width + fontSize / 2 + size + 7
+              context.measureText(node.label).width + fontSize / 2 + size + 12
             );
             h = Math.round(fontSize + 4);
             e = Math.round(fontSize / 2 + 4);
@@ -675,9 +675,7 @@ function gradientColoring(daclass) {
 
     var min_pow = 0;
     for (var k in forTypes) {
-      let nids = TW.partialGraph.graph.getNodesByType(
-        TW.catDict[forTypes[k]]
-      )
+      let nids = TW.ByType[TW.catDict[forTypes[k]]]
       for (var j in nids) {
         let attval = getVal(TW.Nodes[ nids[j] ]);
         if( !isNaN(parseFloat(attval)) ) { //is float
@@ -773,7 +771,10 @@ function gradientColoring(daclass) {
     // remember in clusters of each requested type
     for (var k in forTypes) {
       let ty = forTypes[k]
-      TW.gui.handpickedcolor[ty] = true
+      TW.gui.handpickedcolors[ty] = {
+        'alton': true,
+        'altattr': daclass,
+      }
       let bins = TW.Facets[ty][daclass]
       if (bins && bins.invIdx) {
         for (var i in bins.invIdx) {
@@ -803,7 +804,7 @@ function gradientColoring(daclass) {
 
     // NB legend will group different possible values using
     //    precomputed ticks from TW.Facets[type][daclass]
-    set_ClustersLegend (daclass, forTypes)
+    updateColorsLegend (daclass, forTypes)
 
     TW.partialGraph.render();
 }
@@ -831,18 +832,18 @@ function repaintEdges() {
             let src_color
             let tgt_color
 
-            // handpickedcolor on multiple types may or may not affect
+            // handpickedcolors on multiple types may or may not affect
             // a given edge so we need the useAltColor individual flag
             let useAlt = false
 
-            if (TW.gui.handpickedcolor[src.type]) {
+            if (TW.gui.handpickedcolors[src.type].alton) {
               src_color = src.customAttrs.alt_color || '#555'
               useAlt = true
             }
             else
               src_color = src.color || '#555'
 
-            if (TW.gui.handpickedcolor[tgt.type]) {
+            if (TW.gui.handpickedcolors[tgt.type].alton) {
               tgt_color = tgt.customAttrs.alt_color || '#555'
               useAlt = true
             }
@@ -893,7 +894,10 @@ function heatmapColoring(daclass) {
     var ty = forTypes[k]
 
     // global flag
-    TW.gui.handpickedcolor[ty] = true
+    TW.gui.handpickedcolors[ty] = {
+      'alton': true,
+      'altattr': daclass,
+    }
 
     // our binning
     var tickThresholds = TW.Facets[ty][daclass].invIdx
@@ -949,7 +953,7 @@ function heatmapColoring(daclass) {
   // Edge precompute alt_rgb by new source-target nodes-colours combination
   repaintEdges()
 
-  set_ClustersLegend ( daclass, forTypes )
+  updateColorsLegend ( daclass, forTypes )
 
   TW.partialGraph.render();
 }
@@ -991,7 +995,8 @@ function clusterColoring(daclass) {
         }
 
         // reset the global state
-        TW.gui.handpickedcolor = {}
+        TW.gui.handpickedcolorsReset()
+
     }
     else {
       let colList = []
@@ -1035,7 +1040,7 @@ function clusterColoring(daclass) {
                 let theNode = TW.partialGraph.graph.nodes(valGroup.nids[j])
                 if (theNode) {
                   theNode.customAttrs.alt_color = theColor
-                  theNode.customAttrs.altgrey_color = "rgba("+rgbColStr+",0.4)"
+                  theNode.customAttrs.altgrey_color = "rgba("+rgbColStr+","+TW.conf.sigmaJsDrawingProperties.twNodesGreyOpacity+")"
                 }
               }
             }
@@ -1046,7 +1051,7 @@ function clusterColoring(daclass) {
         }
         // fallback on old, slower strategy if scanAttributes inactive
         else {
-          let nids = TW.partialGraph.graph.getNodesByType(TW.catDict[typeName])
+          let nids = TW.ByType[TW.catDict[typeName]]
           for (var j in nids) {
             let nid = nids[j]
             let the_node = TW.partialGraph.graph.nodes(nid)
@@ -1054,7 +1059,7 @@ function clusterColoring(daclass) {
             if (the_node) {
 
               // POSS: use "hidden" in filters instead of remove/readd
-              //       then this condition would be more useful here
+              //  typeName     then this condition would be more useful here
               if (! the_node.hidden) {
                 var attval = ( !isUndef(the_node.attributes) && !isUndef(the_node.attributes[daclass]) )? the_node.attributes[daclass] : TW.partialGraph.graph.nodes(nid)[daclass];
 
@@ -1079,14 +1084,17 @@ function clusterColoring(daclass) {
           }
         }
         // set the global state
-        TW.gui.handpickedcolor[typeName] = true
+        TW.gui.handpickedcolors[typeName] = {
+          'alton': true,
+          'altattr': daclass,
+        }
       }
     }
 
     // Edge precompute alt_rgb by new source-target nodes-colours combination
     repaintEdges()
 
-    set_ClustersLegend ( daclass, forTypes )
+    updateColorsLegend ( daclass, forTypes )
     TW.partialGraph.render();
 }
 

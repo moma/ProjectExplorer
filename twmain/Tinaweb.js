@@ -1161,7 +1161,7 @@ var TinaWebJS = function ( sigmacanvas ) {
       }
       // otherwise, set the default legend
       if (! madeDefaultColor) {
-        set_ClustersLegend ( "clust_default" )
+        updateColorsLegend ( "clust_default" )
       }
 
       // select currently active sliders

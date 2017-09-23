@@ -68,16 +68,16 @@ function changeGraphAppearanceByFacets(actypes) {
 
     if (!actypes)            actypes = getActivetypesNames()
 
-    let currentNbNodes = TW.partialGraph.graph.nNodes()
+    let allNbNodes = TW.partialGraph.graph.nNodes()
 
     // create colormenu and 1st default entry
-    var color_menu_info = '<li><a href="#" onclick="TW.gui.handpickedcolor = {} ; graphResetLabelsAndSizes() ; TW.partialGraph.refresh()">By Default</a></li>';
+    var color_menu_info = '<li><a href="#" onclick="graphResetAllColors() ; TW.partialGraph.refresh()">By Default</a></li>';
 
     let gotPreviousLouvain = false
     if( $( "#colorgraph-menu" ).length>0 ) {
-      for (var tid in actypes) {
-        let ty = actypes[tid]
-
+      for (var k in actypes) {
+        let ty = actypes[k]
+        let currentNbNodes = TW.ByType[TW.catDict[ty]].length
 
         // each facet family or clustering type was already prepared
         for (var attTitle in TW.Facets[ty]) {
@@ -89,8 +89,8 @@ function changeGraphAppearanceByFacets(actypes) {
 
           // attribute counts: nb of classes
           // POSS here distinguish [ty][attTitle].classes.length and ranges.length
-          var attNbClasses = TW.Facets[ty][attTitle].invIdx.length
-          var attNbNodes = currentNbNodes
+          let attNbClasses = TW.Facets[ty][attTitle].invIdx.length
+          let attNbNodes = currentNbNodes
 
           if (attNbClasses) {
             let lastClass = TW.Facets[ty][attTitle].invIdx[attNbClasses-1]
@@ -104,24 +104,8 @@ function changeGraphAppearanceByFacets(actypes) {
             }
           }
 
-          // coloringFunction
-          var colMethod
-
-          // read from user settings
-          if (TW.facetOptions[attTitle] && TW.facetOptions[attTitle]['col']) {
-            colMethod = TW.gui.colorFuns[TW.facetOptions[attTitle]['col']]
-          }
-
-          // fallback guess-values
-          if (! colMethod) {
-            if(attTitle.indexOf("clust")>-1||attTitle.indexOf("class")>-1) {
-              // for classes and clusters
-              colMethod = "clusterColoring"
-            }
-            else {
-              colMethod = "gradientColoring"
-            }
-          }
+          // coloring function
+          let colMethod = getColorFunction(attTitle)
 
           // family label :)
           var attLabel ;
@@ -138,7 +122,7 @@ function changeGraphAppearanceByFacets(actypes) {
 
       // we also add clust_louvain if not already there
       if (!gotPreviousLouvain) {
-        color_menu_info += `<li><a href="#" onclick='clusterColoring("clust_louvain")'>By Louvain clustering ( <span id="louvainN">?</span> | ${currentNbNodes})</a></li>`
+        color_menu_info += `<li><a href="#" onclick='clusterColoring("clust_louvain")'>By Louvain clustering ( <span id="louvainN">?</span> | ${allNbNodes})</a></li>`
       }
 
       // for debug
@@ -149,6 +133,29 @@ function changeGraphAppearanceByFacets(actypes) {
 
     // Legend slots were prepared in TW.Facets
 
+}
+
+function getColorFunction(attTitle) {
+  // coloringFunction name as str
+  var colMethod
+
+  // read from user settings
+  if (TW.facetOptions[attTitle] && TW.facetOptions[attTitle]['col']) {
+    colMethod = TW.gui.colorFuns[TW.facetOptions[attTitle]['col']]
+  }
+
+  // fallback guess-values
+  if (! colMethod) {
+    if(attTitle.indexOf("clust")>-1||attTitle.indexOf("class")>-1) {
+      // for classes and clusters
+      colMethod = "clusterColoring"
+    }
+    else {
+      colMethod = "gradientColoring"
+    }
+  }
+
+  return colMethod
 }
 
 // @cb: optional callback
@@ -276,14 +283,31 @@ function graphResetLabelsAndSizes(){
   }
 }
 
+function graphResetAllColors() {
+  graphResetLabelsAndSizes()
+  TW.gui.handpickedcolorsReset()
+  updateColorsLegend()
+}
+
+// removes selectively for an array of nodetypes
+function clearColorLegend (forTypes) {
+  console.log('clearColorLegend', forTypes)
+  for (var ty of forTypes) {
+    let legTy = document.getElementById("legend-for-"+ty)
+    if (legTy)
+      legTy.remove()
+  }
+}
+
 
 // @daclass: the name of a numeric/categorical attribute from node.attributes
-// @forTypes: optional array of which typenames are concerned
+// @forTypes: array of which typenames are concerned
 // @groupingTicks: an optional threshold's array expressing ranges with their low/up bounds label and ref to matchin nodeIds
-function set_ClustersLegend ( daclass, forTypes, groupedByTicks ) {
+function updateColorsLegend ( daclass, forTypes, groupedByTicks ) {
 
     // shortcut to erase legends for all types
     if(daclass == null) {
+      clearColorLegend(TW.categories)
       $("#legend-for-facets").html("")
     };
 
@@ -293,6 +317,7 @@ function set_ClustersLegend ( daclass, forTypes, groupedByTicks ) {
         return daclass in TW.Facets[ty]
       })
     }
+    // (we ignore other types: their color legends remain the same by default)
 
     for (var k in forTypes) {
       let curType = forTypes[k]
@@ -316,7 +341,7 @@ function set_ClustersLegend ( daclass, forTypes, groupedByTicks ) {
             daclassLabel = TW.facetOptions[daclass].legend
         }
 
-        LegendDiv += `    <div class="legend-title">${curType}:${daclassLabel}</div>`
+        LegendDiv += `    <div class="legend-title"><small>${curType}:</small> ${daclassLabel}</div>`
         LegendDiv += '    <div class="legend-scale">'
         LegendDiv += '      <ul class="legend-labels">'
 
@@ -412,7 +437,7 @@ function set_ClustersLegend ( daclass, forTypes, groupedByTicks ) {
         }
         else {
           let newLegend = document.createElement('div')
-          document.getElementById("legend-for-facets").appendChild(newLegend)
+          $("#legend-for-facets").prepend(newLegend)
           newLegend.outerHTML = LegendDiv
         }
       }

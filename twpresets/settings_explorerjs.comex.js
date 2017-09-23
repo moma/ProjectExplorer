@@ -251,7 +251,7 @@ TW.conf = (function(TW){
                                       // "default" for white background
 
       // not selected <=> (1-greyness)
-      twNodesGreyOpacity: .4,                       // smaller value: more grey
+      twNodesGreyOpacity: .5,                       // smaller value: more grey
       twBorderGreyColor: "rgba(100, 100, 100, 0.5)",
       twEdgeGreyColor: "rgba(100, 100, 100, 0.25)",
   };

@@ -97,7 +97,6 @@ TW.resetGraph = function() {
 
   // reset rendering gui flags
   TW.gui.selectionActive = false
-  TW.gui.handpickedcolor = {}
 
   // reset circle size and cursor
   TW.gui.circleSize = 0
@@ -734,7 +733,7 @@ function prepareNodesRenderingProperties(nodesDict) {
       // default unselected color
       defgrey_color : "rgba("+rgbStr+","+TW.conf.sigmaJsDrawingProperties.twNodesGreyOpacity+")",
 
-      // will be used for repainting (read when TW.gui.handpickedcolor flags)
+      // will be used for repainting (read when TW.gui.handpickedcolors flags)
       alt_color: null,
       altgrey_color: null,
     }

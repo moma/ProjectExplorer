@@ -413,6 +413,9 @@ function mainStartGraph(inFormat, inData, twInstance) {
 
       TW.ByType = dicts.byType  // useful for loops
 
+      // init the rendering flags (after we got types, before we first render)
+      TW.gui.handpickedcolorsReset(TW.categories)
+
       // in-place: pre-compute all color/unselected color/size properties
       prepareNodesRenderingProperties(TW.Nodes)
       prepareEdgesRenderingProperties(TW.Edges, TW.Nodes)
