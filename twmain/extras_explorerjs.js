@@ -430,7 +430,10 @@ function updateColorsLegend ( daclass, forTypes, groupedByTicks ) {
           }
 
           // we add a title to cluster classes by ranking their nodes and taking k best labels, except if type is "social"
-          if (TW.facetOptions[daclass] && TW.facetOptions[daclass].col == 'cluster' && curType != TW.categories[1]) {
+          if (TW.facetOptions[daclass]
+           && TW.facetOptions[daclass].titlingMetric
+           && TW.facetOptions[daclass].titlingMetric != 'off'
+           && TW.facetOptions[daclass].col == 'cluster') {
 
             // let t0 = performance.now()
 
@@ -455,10 +458,42 @@ function updateColorsLegend ( daclass, forTypes, groupedByTicks ) {
               getVal = function(node) {return node.size}
             }
 
-            for (let j in legendInfo[l]['nids']) {
-              let n = TW.partialGraph.graph.nodes(legendInfo[l]['nids'][j])
+            // our source of words (labels)
+            let ndsToRetrieveNameFrom = {}
 
-              let theRankingVal = getVal(n)
+            // if node0 contains meaningful labels for titling
+            // we can title node1 clusters using node0 neighborhood
+            // => we'll use metric on bipartite neighborhood labels
+            // POSS it could be a conf option to use another type or not
+            if (curType == TW.categories[1] && TW.Relations["XR"]) {
+              // transitive step from nodetype to their surrogate nodetype
+              for (var i in legendInfo[l]['nids']) {
+                let start_nid = legendInfo[l]['nids'][i]
+                let transitiveNids = TW.Relations["XR"][start_nid]
+                for (var j in transitiveNids) {
+                  let nei_nid = transitiveNids[j]
+                  if (!ndsToRetrieveNameFrom[nei_nid]) {
+                    ndsToRetrieveNameFrom[nei_nid] = 1
+                  }
+                  else {
+                    ndsToRetrieveNameFrom[nei_nid] += 1   // <== coef
+                  }
+                }
+              }
+            }
+            // normal case => directly use metric on these nodes' labels
+            else {
+              for (var i in legendInfo[l]['nids']) {
+                let nid = legendInfo[l]['nids'][i]
+                ndsToRetrieveNameFrom[nid] = 1
+              }
+            }
+
+            for (var nid in ndsToRetrieveNameFrom) {
+              let n = TW.Nodes[nid]
+              let coef = ndsToRetrieveNameFrom[nid]
+
+              let theRankingVal = getVal(n) * Math.sqrt(coef)
 
               if (titles.length < maxLen) {
                 titles.push({'key':n.label, 'val':theRankingVal})
@@ -1107,9 +1142,9 @@ function fillAttrsInForm(menuId, optionalAttTypeConstraint) {
   let elChooser = document.getElementById(menuId)
 
   // 1- remove any previous options from possible previous graphs
-  let autoOptions = document.getElementById(menuId).querySelectorAll('option')
-  for (var i = 0 ; i <= autoOptions.length - 1 ; i++) {
-    elChooser.removeChild(autoOptions[i])
+  let filledOptions = document.getElementById(menuId).querySelectorAll('option[data-opttype=filled]')
+  for (var i = 0 ; i <= filledOptions.length - 1 ; i++) {
+    elChooser.removeChild(filledOptions[i])
   }
 
   // 2- ls | uniq all options (no matter what active type they belong too)
@@ -1146,7 +1181,7 @@ function fillAttrsInForm(menuId, optionalAttTypeConstraint) {
       opt.dataset.opttype = "auto"
     }
     else {
-      opt.dataset.opttype = "fromFacets"
+      opt.dataset.opttype = "filled"
     }
     elChooser.appendChild(opt)
   }

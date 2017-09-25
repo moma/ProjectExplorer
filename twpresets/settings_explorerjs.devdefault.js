@@ -73,12 +73,13 @@ TW.conf = (function(TW){
     'auto-outdegree'  : {'col': "heatmap",  'n': 7,  'binmode': 'samepop', 'legend': 'Auto OutDegree'},
     'cluster_index'   : {'col': "cluster" ,          'binmode': 'off'        },
     'clust_louvain'   : {'col': "cluster" ,          'binmode': 'off',
-                         'legend':'Louvain clustering'                       },
+                         'legend':'Louvain clustering', 'titlingMetric': 'auto-outdegree'},
     'country':{
                          'col':"cluster" ,
                          'binmode': 'off',
                          'legend': 'Country'
-                       },
+                         'titlingMetric': 'off';
+              },
     'total_occurrences':{
                          'col':"heatmap" ,
                          'binmode': 'samerange',
