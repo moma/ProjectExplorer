@@ -68,56 +68,120 @@ function changeGraphAppearanceByFacets(actypes) {
 
     if (!actypes)            actypes = getActivetypesNames()
 
+    let colorsMeta = {}
     let allNbNodes = TW.partialGraph.graph.nNodes()
-
-    // create colormenu and 1st default entry
-    var color_menu_info = '<li><a href="#" onclick="graphResetAllColors() ; TW.partialGraph.refresh()">By Default</a></li>';
-
     let gotPreviousLouvain = false
-    if( $( "#colorgraph-menu" ).length>0 ) {
-      for (var k in actypes) {
-        let ty = actypes[k]
-        let currentNbNodes = TW.ByType[TW.catDict[ty]].length
 
-        // each facet family or clustering type was already prepared
-        for (var attTitle in TW.Facets[ty]) {
+    let currentNbNodes = {}
+    for (var k in actypes) {
+      currentNbNodes[actypes[k]] = TW.partialGraph.graph.getNodesByType(TW.catDict[actypes[k]]).length
+    }
 
-          // console.warn('changeGraphAppearanceByFacets:', ty, attTitle)
+    // 1st loop: census on [colors <=> types] and involved nb Nodes
+    for (var k in actypes) {
+      let ty = actypes[k]
+      let attNbNodes = currentNbNodes[ty]
 
-          // note any previous louvains
-          if (attTitle == 'clust_louvain')  gotPreviousLouvain = true
-
-          // attribute counts: nb of classes
-          // POSS here distinguish [ty][attTitle].classes.length and ranges.length
-          let attNbClasses = TW.Facets[ty][attTitle].invIdx.length
-          let attNbNodes = currentNbNodes
-
-          if (attNbClasses) {
-            let lastClass = TW.Facets[ty][attTitle].invIdx[attNbClasses-1]
-            if (lastClass.labl && /^_non_numeric_/.test(lastClass.labl) && lastClass.nids) {
-              if (lastClass.nids.length) {
-                attNbNodes -= lastClass.nids.length
-              }
-              else {
-                attNbClasses -= 1
-              }
-            }
-          }
-
-          // coloring function
-          let colMethod = getColorFunction(attTitle)
-
-          // family label :)
-          var attLabel ;
-          if (TW.facetOptions[attTitle] && TW.facetOptions[attTitle]['legend']) {
-            attLabel = TW.facetOptions[attTitle]['legend']
-          }
-          else attLabel = attTitle
-
-          color_menu_info += `<li><a href="#" onclick='${colMethod}("${attTitle}","${ty}")'>By ${attLabel} (${attNbClasses} | ${attNbNodes})</a></li>`
+      // each facet family or clustering type was already prepared
+      for (var attTitle in TW.Facets[ty]) {
+        if (! colorsMeta[attTitle]) {
+          colorsMeta[attTitle] = []
         }
 
-        // POSS add cumulated degree via TW.partialGraph.graph.degree(nid)
+        // attribute counts: nb of classes
+        // POSS here distinguish [ty][attTitle].classes.length and ranges.length
+        let attNbClasses = TW.Facets[ty][attTitle].invIdx.length
+
+        if (attNbClasses) {
+          let lastClass = TW.Facets[ty][attTitle].invIdx[attNbClasses-1]
+          if (lastClass.labl && /^_non_numeric_/.test(lastClass.labl) && lastClass.nids) {
+            if (lastClass.nids.length) {
+              attNbNodes -= lastClass.nids.length
+            }
+            else {
+              attNbClasses -= 1
+            }
+          }
+        }
+
+        // note any previous louvains
+        if (attTitle == 'clust_louvain')  gotPreviousLouvain = true
+
+        // save relevant info
+        colorsMeta[attTitle].push({
+          'type': ty,
+          'nbDomain': attNbNodes,
+          'nbOutput': attNbClasses
+        })
+      }
+    }
+    console.log(colorsMeta)
+
+    // sorted by type and how many types (one type x by alpha, one type y by alpha, two types xy by alpha)
+    let colorsList = Object.keys(colorsMeta)
+    colorsList.sort(function (a, b) {
+      let cmp = colorsMeta[a].length - colorsMeta[b].length
+      if (cmp == 0) {
+        cmp = (a in TW.sigmaAttributes) - (b in TW.sigmaAttributes)
+        if (cmp == 0) {
+          if (colorsMeta[a][0].type < colorsMeta[b][0].type) cmp = -1
+          else if (colorsMeta[a][0].type > colorsMeta[b][0].type) cmp = 1
+          else {
+            if (a < b) cmp = -1
+            else if (a > b) cmp = 1
+          }
+        }
+      }
+      return cmp
+    })
+
+    // 2nd loop: create colormenu and 1st default entry
+    var color_menu_info = '<li><a href="#" onclick="graphResetAllColors() ; TW.partialGraph.refresh()">By Default</a></li>';
+
+    let lastGroup = null
+    if( $( "#colorgraph-menu" ).length>0 ) {
+
+      for (var l in colorsList) {
+        var attTitle = colorsList[l]
+
+        // which concerned types and how many concerned nodes and output classes
+        let attNbNodes = 0
+        let forTypes = []
+        for (var i in colorsMeta[attTitle]) {
+          forTypes.push(colorsMeta[attTitle][i].type)
+          attNbNodes += colorsMeta[attTitle][i].nbDomain
+        }
+        let attNbClasses = colorsMeta[attTitle][0].nbOutput
+
+        // coloring function
+        let colMethod = getColorFunction(attTitle)
+
+        // family label :)
+        var attLabel ;
+        if (TW.facetOptions[attTitle] && TW.facetOptions[attTitle]['legend']) {
+          attLabel = TW.facetOptions[attTitle]['legend']
+        }
+        else attLabel = attTitle
+
+        if (actypes.length == 1) {
+          color_menu_info += `
+            <li><a href="#" onclick='${colMethod}("${attTitle}")'>
+                By ${attLabel} (${attNbClasses} | ${attNbNodes})
+            </a></li>
+            `
+        }
+        else {
+          groupName = `${forTypes}`
+          if (groupName != lastGroup) {
+            color_menu_info += `<li class="pseudo-optgroup">${groupName}</li>`
+          }
+          color_menu_info += `
+            <li><a href="#" onclick='${colMethod}("${attTitle}",${JSON.stringify(forTypes)})'>
+                By ${attLabel} (${attNbClasses} | ${attNbNodes})
+            </a></li>
+            `
+          lastGroup = groupName
+        }
       }
 
       // we also add clust_louvain if not already there
@@ -132,7 +196,6 @@ function changeGraphAppearanceByFacets(actypes) {
     }
 
     // Legend slots were prepared in TW.Facets
-
 }
 
 function getColorFunction(attTitle) {
@@ -291,7 +354,7 @@ function graphResetAllColors() {
 
 // removes selectively for an array of nodetypes
 function clearColorLegend (forTypes) {
-  console.log('clearColorLegend', forTypes)
+  // console.log('clearColorLegend', forTypes)
   for (var ty of forTypes) {
     let legTy = document.getElementById("legend-for-"+ty)
     if (legTy)

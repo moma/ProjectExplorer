@@ -655,14 +655,16 @@ function edgeInfos(anEdge) {
 
 
 // FIXME this function could be optimized
-function gradientColoring(daclass) {
+function gradientColoring(daclass, forTypes) {
 
     graphResetLabelsAndSizes()    // full loop
 
-    // strategy on multiple types: color all types that have the attr
-    let forTypes = getActivetypesNames().filter(function (ty){
-      return daclass in TW.Facets[ty]
-    })
+    if (typeof forTypes != 'array' || ! forTypes.length) {
+      // default strategy on multiple types: color all types that have the attr
+      forTypes = getActivetypesNames().filter(function(ty){
+        return daclass in TW.Facets[ty]
+      })
+    }
 
     // value getter
     let getVal
@@ -865,7 +867,7 @@ function repaintEdges() {
 //         (good for values centered around a neutral zone)
 // NB - binning is done at parseCustom (cf. TW.Facets)
 //    - number of bins can be specified by attribute name in TW.facetOptions[daclass]["n"]
-function heatmapColoring(daclass) {
+function heatmapColoring(daclass, forTypes) {
   var binColors
   var doModifyLabel = false
 
@@ -885,12 +887,15 @@ function heatmapColoring(daclass) {
     }
   }
 
-  // strategy on multiple types: color all types that have the attr
-  let forTypes = getActivetypesNames().filter(function (ty){
-    return daclass in TW.Facets[ty]
-  })
+  if (typeof forTypes != 'array' || ! forTypes.length) {
+    // default strategy on multiple types: color all types that have the attr
+    forTypes = getActivetypesNames().filter(function(ty){
+      return daclass in TW.Facets[ty]
+    })
+  }
 
   for (var k in forTypes) {
+
     var ty = forTypes[k]
 
     // global flag
@@ -904,7 +909,7 @@ function heatmapColoring(daclass) {
 
     // verifications
     if (tickThresholds.length - 1 != nColors) {
-      console.warn (`heatmapColoring setup mismatch: TW.Facets ticks ${tickThresholds.length} - 1 non_numeric from scanAttributes should == nColors ${nColors}`)
+      console.log (`heatmapColoring setup mismatch: TW.Facets ticks ${tickThresholds.length} - 1 non_numeric from scanAttributes should == nColors ${nColors}`)
       nColors = tickThresholds.length - 1
     }
 
@@ -959,13 +964,16 @@ function heatmapColoring(daclass) {
 }
 
 
-function clusterColoring(daclass) {
+function clusterColoring(daclass, forTypes) {
 
-    graphResetLabelsAndSizes()    // full loop
+    graphResetLabelsAndSizes()    // full loop (could be avoided most times if flag in sstate)
 
-    let forTypes = getActivetypesNames().filter(function (ty){
-      return daclass in TW.Facets[ty]
-    })
+    if (typeof forTypes != 'array' || ! forTypes.length) {
+      // default strategy on multiple types: color all types that have the attr
+      forTypes = getActivetypesNames().filter(function(ty){
+        return daclass in TW.Facets[ty]
+      })
+    }
 
     // louvain needs preparation
     if(daclass=="clust_louvain") {
