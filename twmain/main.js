@@ -446,8 +446,12 @@ function mainStartGraph(inFormat, inData, twInstance) {
       TW.graphData = {nodes: [], edges: []}
       TW.graphData = sigma_utils.FillGraph( initialActivetypes , initialActivereltypes, TW.catDict  , TW.Nodes , TW.Edges , TW.graphData );
 
-      if (TW.graphData.nodes.length == 0) console.error("empty graph")
-      if (TW.graphData.edges.length == 0) console.error("no edges in graph")
+      if (TW.graphData.edges.length == 0) console.warning("no edges in graph")
+      if (TW.graphData.nodes.length == 0) {
+        console.error("empty graph")
+        alert("This query returned no nodes. The graph is empty")
+        return false
+      }
 
       // our final sigma params (cf github.com/jacomyal/sigma.js/wiki/Settings)
       TW.customSettings = Object.assign(
