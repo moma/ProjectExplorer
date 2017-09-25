@@ -21,7 +21,7 @@ TW.conf = (function(TW){
 
   // ...or remote bridge to default source api ajax queries
   TWConf.sourceAPI={}
-  TWConf.sourceAPI["nodetypes"] = {"node0": "NGram", "node1": "Document" }
+  TWConf.sourceAPI["nodetypes"] = {"node0": "Keywords", "node1": "Scholars" }
   TWConf.sourceAPI["forNormalQuery"] = "services/api/graph"
   TWConf.sourceAPI["forFilteredQuery"] = "services/api/graph"
 
@@ -251,7 +251,7 @@ TW.conf = (function(TW){
                                       // "default" for white background
 
       // not selected <=> (1-greyness)
-      twNodesGreyOpacity: .4,                       // smaller value: more grey
+      twNodesGreyOpacity: .5,                       // smaller value: more grey
       twBorderGreyColor: "rgba(100, 100, 100, 0.5)",
       twEdgeGreyColor: "rgba(100, 100, 100, 0.25)",
   };

@@ -68,77 +68,125 @@ function changeGraphAppearanceByFacets(actypes) {
 
     if (!actypes)            actypes = getActivetypesNames()
 
-    let currentNbNodes = TW.partialGraph.graph.nNodes()
-
-    // create colormenu and 1st default entry
-    var color_menu_info = '<li><a href="#" onclick="TW.gui.handpickedcolor = false ; graphResetLabelsAndSizes() ; TW.partialGraph.refresh()">By Default</a></li>';
-
+    let colorsMeta = {}
+    let allNbNodes = TW.partialGraph.graph.nNodes()
     let gotPreviousLouvain = false
-    if( $( "#colorgraph-menu" ).length>0 ) {
-      for (var tid in actypes) {
-        let ty = actypes[tid]
 
+    let currentNbNodes = {}
+    for (var k in actypes) {
+      currentNbNodes[actypes[k]] = TW.partialGraph.graph.getNodesByType(TW.catDict[actypes[k]]).length
+    }
 
-        // each facet family or clustering type was already prepared
-        for (var attTitle in TW.Facets[ty]) {
+    // 1st loop: census on [colors <=> types] and involved nb Nodes
+    for (var k in actypes) {
+      let ty = actypes[k]
+      let attNbNodes = currentNbNodes[ty]
 
-          // console.warn('changeGraphAppearanceByFacets:', ty, attTitle)
-
-          // note any previous louvains
-          if (attTitle == 'clust_louvain')  gotPreviousLouvain = true
-
-          // attribute counts: nb of classes
-          // POSS here distinguish [ty][attTitle].classes.length and ranges.length
-          var attNbClasses = TW.Facets[ty][attTitle].invIdx.length
-          var attNbNodes = currentNbNodes
-
-          if (attNbClasses) {
-            let lastClass = TW.Facets[ty][attTitle].invIdx[attNbClasses-1]
-            if (lastClass.labl && /^_non_numeric_/.test(lastClass.labl) && lastClass.nids) {
-              if (lastClass.nids.length) {
-                attNbNodes -= lastClass.nids.length
-              }
-              else {
-                attNbClasses -= 1
-              }
-            }
-          }
-
-          // coloringFunction
-          var colMethod
-
-          // read from user settings
-          if (TW.facetOptions[attTitle] && TW.facetOptions[attTitle]['col']) {
-            colMethod = TW.gui.colorFuns[TW.facetOptions[attTitle]['col']]
-          }
-
-          // fallback guess-values
-          if (! colMethod) {
-            if(attTitle.indexOf("clust")>-1||attTitle.indexOf("class")>-1) {
-              // for classes and clusters
-              colMethod = "clusterColoring"
-            }
-            else {
-              colMethod = "gradientColoring"
-            }
-          }
-
-          // family label :)
-          var attLabel ;
-          if (TW.facetOptions[attTitle] && TW.facetOptions[attTitle]['legend']) {
-            attLabel = TW.facetOptions[attTitle]['legend']
-          }
-          else attLabel = attTitle
-
-          color_menu_info += `<li><a href="#" onclick='${colMethod}("${attTitle}")'>By ${attLabel} (${attNbClasses} | ${attNbNodes})</a></li>`
+      // each facet family or clustering type was already prepared
+      for (var attTitle in TW.Facets[ty]) {
+        if (! colorsMeta[attTitle]) {
+          colorsMeta[attTitle] = []
         }
 
-        // POSS add cumulated degree via TW.partialGraph.graph.degree(nid)
+        // attribute counts: nb of classes
+        // POSS here distinguish [ty][attTitle].classes.length and ranges.length
+        let attNbClasses = TW.Facets[ty][attTitle].invIdx.length
+
+        if (attNbClasses) {
+          let lastClass = TW.Facets[ty][attTitle].invIdx[attNbClasses-1]
+          if (lastClass.labl && /^_non_numeric_/.test(lastClass.labl) && lastClass.nids) {
+            if (lastClass.nids.length) {
+              attNbNodes -= lastClass.nids.length
+            }
+            else {
+              attNbClasses -= 1
+            }
+          }
+        }
+
+        // note any previous louvains
+        if (attTitle == 'clust_louvain')  gotPreviousLouvain = true
+
+        // save relevant info
+        colorsMeta[attTitle].push({
+          'type': ty,
+          'nbDomain': attNbNodes,
+          'nbOutput': attNbClasses
+        })
+      }
+    }
+    console.log(colorsMeta)
+
+    // sorted by type and how many types (one type x by alpha, one type y by alpha, two types xy by alpha)
+    let colorsList = Object.keys(colorsMeta)
+    colorsList.sort(function (a, b) {
+      let cmp = colorsMeta[a].length - colorsMeta[b].length
+      if (cmp == 0) {
+        cmp = (a in TW.sigmaAttributes) - (b in TW.sigmaAttributes)
+        if (cmp == 0) {
+          if (colorsMeta[a][0].type < colorsMeta[b][0].type) cmp = -1
+          else if (colorsMeta[a][0].type > colorsMeta[b][0].type) cmp = 1
+          else {
+            if (a < b) cmp = -1
+            else if (a > b) cmp = 1
+          }
+        }
+      }
+      return cmp
+    })
+
+    // 2nd loop: create colormenu and 1st default entry
+    var color_menu_info = '<li><a href="#" onclick="graphResetAllColors() ; TW.partialGraph.refresh()">By Default</a></li>';
+
+    let lastGroup = null
+    if( $( "#colorgraph-menu" ).length>0 ) {
+
+      for (var l in colorsList) {
+        var attTitle = colorsList[l]
+
+        // which concerned types and how many concerned nodes and output classes
+        let attNbNodes = 0
+        let forTypes = []
+        for (var i in colorsMeta[attTitle]) {
+          forTypes.push(colorsMeta[attTitle][i].type)
+          attNbNodes += colorsMeta[attTitle][i].nbDomain
+        }
+        let attNbClasses = colorsMeta[attTitle][0].nbOutput
+
+        // coloring function
+        let colMethod = getColorFunction(attTitle)
+
+        // family label :)
+        var attLabel ;
+        if (TW.facetOptions[attTitle] && TW.facetOptions[attTitle]['legend']) {
+          attLabel = TW.facetOptions[attTitle]['legend']
+        }
+        else attLabel = attTitle
+
+        if (actypes.length == 1) {
+          color_menu_info += `
+            <li><a href="#" onclick='${colMethod}("${attTitle}")'>
+                By ${attLabel} (${attNbClasses} | ${attNbNodes})
+            </a></li>
+            `
+        }
+        else {
+          groupName = `${forTypes}`
+          if (groupName != lastGroup) {
+            color_menu_info += `<li class="pseudo-optgroup">${groupName}</li>`
+          }
+          color_menu_info += `
+            <li><a href="#" onclick='${colMethod}("${attTitle}",${JSON.stringify(forTypes)})'>
+                By ${attLabel} (${attNbClasses} | ${attNbNodes})
+            </a></li>
+            `
+          lastGroup = groupName
+        }
       }
 
       // we also add clust_louvain if not already there
       if (!gotPreviousLouvain) {
-        color_menu_info += `<li><a href="#" onclick='clusterColoring("clust_louvain")'>By Louvain clustering ( <span id="louvainN">?</span> | ${currentNbNodes})</a></li>`
+        color_menu_info += `<li><a href="#" onclick='clusterColoring("clust_louvain")'>By Louvain clustering ( <span id="louvainN">?</span> | ${allNbNodes})</a></li>`
       }
 
       // for debug
@@ -148,11 +196,33 @@ function changeGraphAppearanceByFacets(actypes) {
     }
 
     // Legend slots were prepared in TW.Facets
-
 }
 
+function getColorFunction(attTitle) {
+  // coloringFunction name as str
+  var colMethod
 
-function RunLouvain() {
+  // read from user settings
+  if (TW.facetOptions[attTitle] && TW.facetOptions[attTitle]['col']) {
+    colMethod = TW.gui.colorFuns[TW.facetOptions[attTitle]['col']]
+  }
+
+  // fallback guess-values
+  if (! colMethod) {
+    if(attTitle.indexOf("clust")>-1||attTitle.indexOf("class")>-1) {
+      // for classes and clusters
+      colMethod = "clusterColoring"
+    }
+    else {
+      colMethod = "gradientColoring"
+    }
+  }
+
+  return colMethod
+}
+
+// @cb: optional callback
+function RunLouvain(cb) {
 
   var node_realdata = []
   var nodesV = getVisibleNodes()
@@ -216,6 +286,11 @@ function RunLouvain() {
       TW.facetOptions['clust_louvain'] = {'col': 'cluster'}
     }
     // NB the LouvainFait flag is updated by caller fun
+
+    // callback
+    if (cb && typeof cb == 'function') {
+      cb()
+    }
 }
 
 
@@ -269,139 +344,168 @@ function graphResetLabelsAndSizes(){
       n.size = TW.Nodes[n.id].size
     }
   }
-  set_ClustersLegend()
 }
 
+function graphResetAllColors() {
+  graphResetLabelsAndSizes()
+  TW.gui.handpickedcolorsReset()
+  updateColorsLegend()
+}
+
+// removes selectively for an array of nodetypes
+function clearColorLegend (forTypes) {
+  // console.log('clearColorLegend', forTypes)
+  for (var ty of forTypes) {
+    let legTy = document.getElementById("legend-for-"+ty)
+    if (legTy)
+      legTy.remove()
+  }
+}
+
+
 // @daclass: the name of a numeric/categorical attribute from node.attributes
+// @forTypes: array of which typenames are concerned
 // @groupingTicks: an optional threshold's array expressing ranges with their low/up bounds label and ref to matchin nodeIds
-function set_ClustersLegend ( daclass, groupedByTicks ) {
-    $("#legend-for-clusters").removeClass( "my-legend" )
-    $("#legend-for-clusters").html("")
-    if(daclass==null) return;
+function updateColorsLegend ( daclass, forTypes, groupedByTicks ) {
 
-    var actypes = getActivetypesNames()
+    // shortcut to erase legends for all types
+    if(daclass == null) {
+      clearColorLegend(TW.categories)
+      $("#legend-for-facets").html("")
+    };
 
-    // TODO test more for multiple types
-    // we have no specifications yet for colors (and legends) on multiple types
-    if (actypes.length > 1) {
-      console.warn("colors by bins will only color nodes of type 0")
+    // current display among TW.categories (ex: ['terms'])
+    if (typeof forTypes != 'array' || ! forTypes.length) {
+      forTypes = getActivetypesNames().filter(function(ty){
+        return daclass in TW.Facets[ty]
+      })
     }
-    // current display among TW.categories (ex: 'terms')
-    var curType = actypes[0]
+    // (we ignore other types: their color legends remain the same by default)
 
-    // all infos in a bin array
-    var legendInfo = []
+    for (var k in forTypes) {
+      let curType = forTypes[k]
+      var LegendDiv = "<div id=legend-for-"+curType+" class=\"over-panels my-legend\">"
 
-    // sample node color
-    var ClustNB_CurrentColor = {}
+      // all infos in a bin array
+      var legendInfo = []
 
-    // passed as arg   or  prepared in parseCustom
-    if (!groupedByTicks && (!TW.Facets[curType] || !TW.Facets[curType][daclass])) {
-      console.warn(`no class bins for ${daclass}, displaying no legend`)
+      // sample node color
+      var ClustNB_CurrentColor = {}
 
-      $("#legend-for-clusters").hide()
-    }
-    else {
-      let daclassLabel = daclass
-      if  (TW.facetOptions
-        && TW.facetOptions[daclass]
-        && TW.facetOptions[daclass].legend) {
-          daclassLabel = TW.facetOptions[daclass].legend
+      // passed as arg   or  prepared in parseCustom
+      if (!groupedByTicks && (!TW.Facets[curType] || !TW.Facets[curType][daclass])) {
+        console.warn(`no class bins for ${curType} ${daclass}`)
       }
-      var LegendDiv = ""
-      LegendDiv += `    <div class="legend-title">${daclassLabel}</div>`
-      LegendDiv += '    <div class="legend-scale">'
-      LegendDiv += '      <ul class="legend-labels">'
-
-      var legendInfo = groupedByTicks || TW.Facets[curType][daclass].invIdx
-
-      // valueclasses (values or intervals or classes) are already sorted in TW.Facets
-      for (var l in legendInfo) {
-        var nMatchedNodes = legendInfo[l]['nids'].length
-
-        // get a sample node color for each bin/class
-        let theColor = legendInfo[l].col || "#777"   // grey if empty
-
-        // create the legend item
-        var preparedLabel = legendInfo[l]['labl']
-
-        if (/^_non_numeric_/.test(preparedLabel)) {
-          if (!nMatchedNodes) {
-            continue                // we skip "trash" category if empty
-          }
-          else {
-            preparedLabel = "not numeric"
-          }
+      else {
+        let daclassLabel = daclass
+        if  (TW.facetOptions
+          && TW.facetOptions[daclass]
+          && TW.facetOptions[daclass].legend) {
+            daclassLabel = TW.facetOptions[daclass].legend
         }
 
-        // we add a title to cluster classes by ranking their nodes and taking k best labels, except if type is "social"
-        if (TW.facetOptions[daclass] && TW.facetOptions[daclass].col == 'cluster' && curType != TW.categories[1]) {
+        LegendDiv += `    <div class="legend-title"><small>${curType}:</small> ${daclassLabel}</div>`
+        LegendDiv += '    <div class="legend-scale">'
+        LegendDiv += '      <ul class="legend-labels">'
 
-          // let t0 = performance.now()
+        var legendInfo = groupedByTicks || TW.Facets[curType][daclass].invIdx
 
-          let titles = []
-          let theRankingAttr = TW.facetOptions[daclass].titlingMetric
-          let maxLen = TW.facetOptions[daclass].titlingNTerms || 2
+        // valueclasses (values or intervals or classes) are already sorted in TW.Facets
+        for (var l in legendInfo) {
+          var nMatchedNodes = legendInfo[l]['nids'].length
 
-          // custom accessor (sigma auto attr or user settings or by default)
-          let getVal
-          if(theRankingAttr) {
-            // one of the 3 sigma dynamic attributes 'degree', etc
-            if (theRankingAttr in TW.sigmaAttributes) {
-              getVal = TW.sigmaAttributes[theRankingAttr](TW.partialGraph)
-            }
-            // a user setting for a source data attribute
-            else {
-              getVal = function(node) {return node.attributes[theRankingAttr]}
-            }
-          }
-          // default ranking: by size
-          else {
-            getVal = function(node) {return node.size}
-          }
+          // get a sample node color for each bin/class
+          let theColor = legendInfo[l].col || "#777"   // grey if empty
 
-          for (let j in legendInfo[l]['nids']) {
-            let n = TW.partialGraph.graph.nodes(legendInfo[l]['nids'][j])
+          // create the legend item
+          var preparedLabel = legendInfo[l]['labl']
 
-            let theRankingVal = getVal(n)
-
-            if (titles.length < maxLen) {
-              titles.push({'key':n.label, 'val':theRankingVal})
+          if (/^_non_numeric_/.test(preparedLabel)) {
+            if (!nMatchedNodes) {
+              continue                // we skip "trash" category if empty
             }
             else {
-              // we keep titles sorted for this
-              let lastMax = titles.slice(-1)[0].val
-              if (theRankingVal > lastMax) {
-                titles.push({'key':n.label, 'val':theRankingVal})
+              preparedLabel = "not numeric"
+            }
+          }
+
+          // we add a title to cluster classes by ranking their nodes and taking k best labels, except if type is "social"
+          if (TW.facetOptions[daclass] && TW.facetOptions[daclass].col == 'cluster' && curType != TW.categories[1]) {
+
+            // let t0 = performance.now()
+
+            let titles = []
+            let theRankingAttr = TW.facetOptions[daclass].titlingMetric
+            let maxLen = TW.facetOptions[daclass].titlingNTerms || 2
+
+            // custom accessor (sigma auto attr or user settings or by default)
+            let getVal
+            if(theRankingAttr) {
+              // one of the 3 sigma dynamic attributes 'degree', etc
+              if (theRankingAttr in TW.sigmaAttributes) {
+                getVal = TW.sigmaAttributes[theRankingAttr](TW.partialGraph)
+              }
+              // a user setting for a source data attribute
+              else {
+                getVal = function(node) {return node.attributes[theRankingAttr]}
               }
             }
+            // default ranking: by size
+            else {
+              getVal = function(node) {return node.size}
+            }
 
-            titles.sort(function(a,b) {return b.val - a.val})
-            titles = titles.slice(0,maxLen)
+            for (let j in legendInfo[l]['nids']) {
+              let n = TW.partialGraph.graph.nodes(legendInfo[l]['nids'][j])
+
+              let theRankingVal = getVal(n)
+
+              if (titles.length < maxLen) {
+                titles.push({'key':n.label, 'val':theRankingVal})
+              }
+              else {
+                // we keep titles sorted for this
+                let lastMax = titles.slice(-1)[0].val
+                if (theRankingVal > lastMax) {
+                  titles.push({'key':n.label, 'val':theRankingVal})
+                }
+              }
+
+              titles.sort(function(a,b) {return b.val - a.val})
+              titles = titles.slice(0,maxLen)
+            }
+
+            // replacing the cluster numbers by those k best titles in the legend
+            preparedLabel = "["+titles.map(function(x){return x.key}).join(' / ')+"...]" + ` (${nMatchedNodes})`
+
+            // console.log("finding title perf", performance.now() - t0, titles)
           }
 
-          // replacing the cluster numbers by those k best titles in the legend
-          preparedLabel = "["+titles.map(function(x){return x.key}).join(' / ')+"...]" + ` (${nMatchedNodes})`
+          // all-in-one argument for SomeEffect
+          var valueclassId = `${curType}::${daclass}::${l}`
 
-          // console.log("finding title perf", performance.now() - t0, titles)
+          var colorBg = `<span class="lgdcol" style="background:${theColor};"></span>`
+
+          LegendDiv += `<li onclick='SomeEffect("${valueclassId}")'>`
+          LegendDiv += colorBg + preparedLabel
+          LegendDiv += "</li>\n"
         }
+        LegendDiv += '      </ul>'
+        LegendDiv += '    </div>'
+        LegendDiv += '  </div>'
 
-        // all-in-one argument for SomeEffect
-        var valueclassId = `${curType}::${daclass}::${l}`
-
-        var colorBg = `<span class="lgdcol" style="background:${theColor};"></span>`
-
-        LegendDiv += `<li onclick='SomeEffect("${valueclassId}")'>`
-        LegendDiv += colorBg + preparedLabel
-        LegendDiv += "</li>\n"
+        let perhapsPreviousLegend = document.getElementById("legend-for-"+curType)
+        if (perhapsPreviousLegend) {
+          perhapsPreviousLegend.outerHTML = LegendDiv
+        }
+        else {
+          let newLegend = document.createElement('div')
+          $("#legend-for-facets").prepend(newLegend)
+          newLegend.outerHTML = LegendDiv
+        }
       }
-      LegendDiv += '      </ul>'
-      LegendDiv += '    </div>'
-
-      $("#legend-for-clusters").addClass( "my-legend" );
-      $("#legend-for-clusters").html( LegendDiv )
-      $("#legend-for-clusters").show()
     }
+    $("#legend-for-facets").show()
 }
 
 // = = = = = = = = = = = [ / Clusters Plugin ] = = = = = = = = = = = //

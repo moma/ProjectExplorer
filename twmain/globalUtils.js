@@ -96,8 +96,10 @@ function isUndef(variable){
 
 function stringToSomeInt (anyString) {
   let charCodeSum = 0
-  for (let i = 0 ; i < anyString.length ; i++) {
-    charCodeSum += anyString.charCodeAt(i)
+  if (anyString && anyString.length) {
+    for (let i = 0 ; i < anyString.length ; i++) {
+      charCodeSum += anyString.charCodeAt(i)
+    }
   }
   return charCodeSum
 }

@@ -49,8 +49,8 @@
   }
 
   /* legend re-positioned */
-  .my-legend {
-    bottom: calc(40% - 105px);
+  #legend-for-facets {
+    bottom: calc(40% - 100px);
     /* bot just above #sidebar which has top at calc(105px + 60%); */
   }
 
@@ -97,17 +97,20 @@
   }
 
   /* legend reduction */
+  #legend-for-facets {
+    max-width: 25%;
+  }
+
   .my-legend {
-    max-width: 27%;
     max-height: 25%;
-    padding: 0 2px;
     font-size: 85%;
-    margin: 0 0 5px 0;
+    margin: 0;
+    padding: 0 1px 3px 1px;
   }
 
   .my-legend .legend-title {
       margin-bottom: 0;
-      font-size: 90%;
+      font-size: 85%;
    }
   .my-legend .legend-scale ul {
     margin-bottom: 0;

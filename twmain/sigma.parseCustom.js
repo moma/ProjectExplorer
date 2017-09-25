@@ -211,8 +211,8 @@ function scanGexf(gexfContent) {
 // ex: terms
 // ex: ISItermsriskV2_140 & ISItermsriskV2_140
 // optional arg optionalNodeConf should contain keys of the form:
-//    "node0": "NGram",
-//    "node1": "Document"
+//    "node0": "Keywords",
+//    "node1": "Scholars"
 //     etc.
 // (it's read from project_conf.json)
 function sortNodeTypes(observedTypesDict, optionalNodeConf) {
@@ -220,6 +220,14 @@ function sortNodeTypes(observedTypesDict, optionalNodeConf) {
   observedTypes.sort(function(a,b) {return observedTypesDict[b] - observedTypesDict[a]})
 
   let nbNodeTypes = 2
+
+  if (observedTypes.length > nbNodeTypes) {
+    console.warn(`The graph source data has more different node types than
+                  supported. Less frequent node types will be ignored.
+                  Max allowed types: ${nbNodeTypes},
+                  Found: ${observedTypes.length} (namely: ${observedTypes})`)
+  }
+
   var declaredTypes = []
   for (var i = 0 ; i < nbNodeTypes ; i++ ) {
     if (optionalNodeConf && optionalNodeConf["node"+i]) {
@@ -234,10 +242,14 @@ function sortNodeTypes(observedTypesDict, optionalNodeConf) {
     }
   }
 
-  var newcats = []
-  var catDict = {}
+  // console.log("observedTypes", observedTypes)
+  // console.log("declaredTypes", declaredTypes)
+
+  var newcats = []   // will become TW.categories
+  var catDict = {}   // will become TW.catDict
 
   var nTypes = observedTypes.length
+
   if(nTypes==0) {
       newcats[0]="Terms";
       catDict["Terms"] = 0;
@@ -251,43 +263,72 @@ function sortNodeTypes(observedTypesDict, optionalNodeConf) {
         console.log(`cat unique (${observedTypes[0]}) =>0`)
   }
   if(nTypes>1) {
-      // allows multiple node types, with an "all the rest" node1
+      // allows multiple node types even if not well declared
+      // ----------------------------------------------------
+      // POSSIBLE: an "all the rest" last nodeType ?
 
-      // try stipulated cats, then fallbacks
-      // possible: loop
-      if (observedTypesDict[declaredTypes[0]]) {
-        newcats[0] = declaredTypes[0];
-        catDict[declaredTypes[0]] = 0;
-      }
-      if (observedTypesDict[declaredTypes[1]]) {
-        newcats[1] = declaredTypes[1];
-        catDict[declaredTypes[1]] = 1;
-      }
+      let alreadyUsed = {}
 
-      // NB: type for nodes0 will be the majoritary by default, unless taken
-      if (!newcats[0]) {
-        if (observedTypes[0] != newcats[1]) {
-          newcats[0] = observedTypes[0]    // 0 is the most frequent here
-          catDict[observedTypes[0]] = 0;
-        }
-        else {
-          newcats[0] = observedTypes[1]    // 1 is second most frequent
-          catDict[observedTypes[1]] = 0;
+      // try declared cats in declared position, independantly from each other
+      for (var i = 0 ; i < nbNodeTypes; i++) {
+        if (observedTypesDict[declaredTypes[i]]) {
+          let validatedType = declaredTypes[i]
+          newcats[i] = validatedType;
+          alreadyUsed[validatedType] = true
         }
       }
 
-      // all the rest
-      for(var i in observedTypes) {
-        let c = observedTypes[i]
-        // or c is in "all the rest" group
-        // (POSS extend to multitypes)
-        if (c != newcats[0] && c != newcats[1]) {
-            if (!newcats[1])    newcats[1] = c;
-            else newcats[1] += '/'+c
-            catDict[c] = 1;
+      // console.log("found stipulated cats", newcats, catDict)
+
+      // fallbacks: if some or all stipulated cats are not found
+      // ---------
+
+      // heuristic A: fill missing ones, by frequence
+      // (eg if nodes0 was not found, then type for nodes0 will be the
+      //     majoritary observed one, unless taken where we move one up)
+      for (var i = 0 ; i < nbNodeTypes; i++) {
+        if (typeof newcats[i] == "undefined") {
+          for (var j = 0 ; j < nTypes ; j++) {
+            if (!alreadyUsed[observedTypes[j]]) {
+              newcats[i] = observedTypes[j]
+              alreadyUsed[observedTypes[j]] = true
+              break
+            }
+          }
+        }
+      }
+      // console.log("after filling majority cats", newcats, catDict)
+
+      // all the rest (heuristic B)
+      if (!newcats[nbNodeTypes-1]) {
+        for(var i in observedTypes) {
+          // without a group others: if there is more than two cats altogether,
+          //                         only the last cat counts as node1 cat
+          let c = observedTypes[i]
+
+
+          // -------------------------------------------- for a group "others"
+          // with a group "others": if there is more than two cats altogether,
+          //                         all the non majoritary or non-stipulated
+          //                         are grouped here as node1 cat
+          // but problem: it break the symetry b/w TW.categories and TW.catDict
+          //
+          // // c is in "all the rest" group (POSS extend to multitypes)
+          // if (c != newcats[0] && c != newcats[1]) {
+          //     if (!newcats[1])    newcats[1] = c;
+          //     else newcats[1] += '/'+c
+          //     catDict[c] = 1;
+          // }
+          // -------------------------------------------/ for a group "others"
         }
       }
   }
+
+  // reverse lookup
+  for (var i in newcats) {
+    catDict[newcats[i]] = i
+  }
+
   return {'categories': newcats, 'lookup_dict': catDict}
 }
 
@@ -650,10 +691,18 @@ function dictfyGexf( gexf , categories ){
     for(var i in categories)  {
       nodesByType[i] = []
 
-      let subCats = categories[i].split(/\//g)
-      for (var j in subCats) {
-        catDict[subCats[j]] = i
-      }
+
+      // without  a group "others" -------------------
+      catDict[categories[i]] = i
+
+      // POSS subCats for cat "others" if open types mapped to n types
+      //
+      // ----------------------- with a group "others"
+      // let subCats = categories[i].split(/\//g)
+      // for (var j in subCats) {
+      //   catDict[subCats[j]] = i
+      // }
+      // ---------------------- /with a group "others"
 
     }
 
@@ -1077,11 +1126,17 @@ function dictfyJSON( data , categories ) {
     for(var i in categories)  {
       nodesByType[i] = []
 
-      let subCats = categories[i].split(/\//g)
-      for (var j in subCats) {
-        catDict[subCats[j]] = i
-      }
+      // without  a group "others" -------------------
+      catDict[categories[i]] = i
 
+      // POSS subCats for cat "others" if open types mapped to n types
+      //
+      // ----------------------- with a group "others"
+      // let subCats = categories[i].split(/\//g)
+      // for (var j in subCats) {
+      //   catDict[subCats[j]] = i
+      // }
+      // ---------------------- /with a group "others"
     }
 
     // normalization, same as parseGexf

@@ -165,6 +165,13 @@ html.waiting {
   display: none;      /* initial display off but turned on if bipartite */
 }
 
+.pseudo-optgroup {
+  color: #555;
+  text-align: center;
+  font-size: 90%;
+  padding: 1.5em 0 .5em 0;
+}
+
 .tagcloud-item{
     display:inline-block;
     border:solid 1px;
