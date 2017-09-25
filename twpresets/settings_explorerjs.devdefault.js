@@ -77,8 +77,8 @@ TW.conf = (function(TW){
     'country':{
                          'col':"cluster" ,
                          'binmode': 'off',
-                         'legend': 'Country'
-                         'titlingMetric': 'off';
+                         'legend': 'Country',
+                         'titlingMetric': 'off'
               },
     'total_occurrences':{
                          'col':"heatmap" ,
