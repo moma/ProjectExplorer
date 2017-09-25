@@ -741,7 +741,8 @@ function changeLevel(optionalTgtState) {
 
       // Selection is unchanged, but all the nodes are new
       // so we call MultipleSelection2 to set up node attributes
-      TW.instance.selNgn.MultipleSelection2({nodes:sels, noState:true});
+      if (sels.length)
+        TW.instance.selNgn.MultipleSelection2({nodes:sels, noState:true});
 
       // if caller already had the state, he may or may not want to push it
       if (! optionalTgtState) {
