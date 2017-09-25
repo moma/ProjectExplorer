@@ -91,7 +91,7 @@ TW.conf = (function(TW){
                          'col':"cluster" ,
                          'binmode': 'off',
                          'legend': 'Affiliation',
-                         'titlingMetric': 'off';
+                         'titlingMetric': 'off'
                        },
     'nbjobs':{
                          'col':"heatmap" ,
