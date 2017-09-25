@@ -134,11 +134,11 @@ TW.conf = (function(TW){
   // =============
 
   // Node typology: categories (resp. 0 and 1) will get these default labels
-  TWConf.catSem = "NGram";
-  TWConf.catSoc = "Document";
+  TWConf.catSem = "Keywords";
+  TWConf.catSoc = "Scholars";
   // NB: these labels may be superseded by:
   //   - the input data's node types values cf. sortNodeTypes()
-  //   - in servermenu mode, by the node0 & node1 properties
+  //   - in project_conf.md the node0 & node1 properties
 
   // Modules path
   // ------------
