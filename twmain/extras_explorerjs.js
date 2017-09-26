@@ -410,6 +410,12 @@ function updateColorsLegend ( daclass, forTypes, groupedByTicks ) {
 
         var legendInfo = groupedByTicks || TW.Facets[curType][daclass].invIdx
 
+        if (getColorFunction(daclass) == "clusterColoring") {
+          legendInfo.sort(function(a,b) {
+            return b.nids.length - a.nids.length
+          })
+        }
+
         // valueclasses (values or intervals or classes) are already sorted in TW.Facets
         for (var l in legendInfo) {
           var nMatchedNodes = legendInfo[l]['nids'].length
