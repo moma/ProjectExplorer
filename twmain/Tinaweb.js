@@ -208,7 +208,10 @@ function SelectionEngine() {
 
                                   // since we're there we'll also keep the neighbors info
                                   if (typeof sameSideNeighbors[tgtnid] == 'undefined') {
-                                    sameSideNeighbors[tgtnid]=0
+
+                                    // except when XR because it'll already be in oppoSideNeighbors
+                                    if (activereltype != 'XR')
+                                      sameSideNeighbors[tgtnid]=0
                                   }
 
                                   // and the detailed info
@@ -219,13 +222,19 @@ function SelectionEngine() {
                                   // **make the edge active**
                                   if (e1 && !e1.hidden) {
                                     e1.customAttrs.activeEdge = 1;
-                                    sameSideNeighbors[tgtnid] += e1.weight || 1
                                     activeRelations[activereltype][srcnid][tgtnid] += e1.weight || 1
+
+                                    // + enrich neighbor's info except if duplicate with oppoSideNeighbors
+                                    if (activereltype != 'XR')
+                                      sameSideNeighbors[tgtnid] += e1.weight || 1
                                   }
                                   if (e2 && !e2.hidden) {
                                      e2.customAttrs.activeEdge = 1;
-                                     sameSideNeighbors[tgtnid] += e2.weight || 1
                                      activeRelations[activereltype][srcnid][tgtnid] += e2.weight || 1
+
+                                     // + enrich neighbor's info except if duplicate with oppoSideNeighbors
+                                     if (activereltype != 'XR')
+                                      sameSideNeighbors[tgtnid] += e2.weight || 1
                                   }
 
                                   // we add as neighbor to color it (except if already in targeted)

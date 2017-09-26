@@ -115,7 +115,7 @@ function changeGraphAppearanceByFacets(actypes) {
         })
       }
     }
-    console.log(colorsMeta)
+    // console.log(colorsMeta)
 
     // sorted by type and how many types (one type x by alpha, one type y by alpha, two types xy by alpha)
     let colorsList = Object.keys(colorsMeta)
