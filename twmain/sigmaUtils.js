@@ -1007,20 +1007,20 @@ function clusterColoring(daclass, forTypes) {
 
     }
     else {
-      let colList = []
-      if (TW.conf.randomizeClusterColors) {
-        // shuffle on entire array is better than random sorting function on each element
-        colList = shuffle(TW.gui.colorList)
-      }
-      else {
-        colList = TW.gui.colorList
-      }
-
       let nColors = TW.gui.colorList.length
 
       for (var k in forTypes) {
         let typeName = forTypes[k]
         let facets = TW.Facets[typeName][daclass]
+
+        let colList = []
+        if (TW.conf.randomizeClusterColors) {
+          // shuffle on entire array is better than random sorting function on each element
+          colList = shuffle(TW.gui.colorList)
+        }
+        else {
+          colList = TW.gui.colorList
+        }
 
         if (facets && facets.invIdx) {
           for (var i in facets.invIdx) {
@@ -1121,7 +1121,7 @@ function getSizeFactor(val) {
   else {
     sliderFactor = Math.min.apply(null, TW.gui.sizeRatios)
   }
-  return adjustmentFactor * sliderFactor * 1.1
+  return adjustmentFactor * sliderFactor * .9
 }
 
 // mobile versions should get lighter settings
