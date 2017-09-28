@@ -305,7 +305,7 @@ function cancelSelection (fromTagCloud, settings) {
     TW.gui.selectionActive = false
 
     // hide all selection panels
-    if(fromTagCloud==false){
+    if(!fromTagCloud){
         // POSS give them all a common class
         $("#names").html("");
         $("#topPapers").html("");

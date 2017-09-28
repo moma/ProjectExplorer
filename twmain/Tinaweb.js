@@ -989,6 +989,10 @@ var TinaWebJS = function ( sigmacanvas ) {
               selInst.MultipleSelection2( {nodes:targeted} )
             }
           }
+          // or clear previous selection
+          else {
+            cancelSelection(false)
+          }
         }
         // case with a selector circle cursor handled
         // just before, at click event
