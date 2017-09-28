@@ -27,8 +27,15 @@ function SelectionEngine() {
                 return args.prevsels.indexOf(item) < 0;
             }).concat(args.prevsels.filter(function (item) {
                 return args.currsels.indexOf(item) < 0;
-              }));;
+              }));
         }
+        // meso view default: deselect if overlap
+        else if (! TW.SystemState().level) {
+          targeted = args.currsels.filter(function (item) {
+              return args.prevsels.indexOf(item) < 0;
+          });
+        }
+        // macro view default: only new targets
         else {
           targeted = args.currsels;
         }
@@ -1292,7 +1299,6 @@ var TinaWebJS = function ( sigmacanvas ) {
         let activereltypes = []
         // multiple nodetypes all true => all reltypes
         if (nodeActivetypes.indexOf(false) == -1) {
-          let combinations = {}
           if (TW.categories.length == 1) {
             activereltypes = ['00']
           }
@@ -1308,4 +1314,10 @@ var TinaWebJS = function ( sigmacanvas ) {
 
         return activereltypes;
     }
+
+    // POSS for one type => many (jutsu case) results are also interesting when
+    //      "disconnecting" previous direct neighbors (making them indirect via XR)
+    //      ie:
+    //         00 => [11, XR]
+    //         11 => [00, XR]
 };
