@@ -251,7 +251,7 @@ TW.conf = (function(TW){
   // -----------------------------------
   // normal and meso level background colors
   TWConf.normalBackground = '#fff'             // <= should match css default
-  TWConf.mesoBackground = '#fcfcea'
+  TWConf.mesoBackground = '#fcfcd5'
 
   // mouse captor zoom limits
   TWConf.zoomMin = .015625         // for zoom IN   (ex: 1/64 to allow zoom x64)

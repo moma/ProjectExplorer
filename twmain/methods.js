@@ -25,6 +25,9 @@ TW.pushGUIState = function( args ) {
     if (!isUndef(args.level))          newState.level = args.level;
     if (!isUndef(args.sels))           newState.selectionNids = args.sels;
 
+    // this one just needed for changeType "comeback" case
+    if (!isUndef(args.comingFromType)) newState.comingFromType = args.comingFromType
+
     // neighbors (of any type) and their edges in an .selectionRels[type] slot
     if(!isUndef(args.rels))          newState.selectionRels = args.rels;
 

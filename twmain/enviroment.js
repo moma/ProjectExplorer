@@ -351,15 +351,39 @@ function changeType(optionaltypeFlag) {
     let mixedState = (outgoing.activereltypes.length > 1)
     let preservedNodes = {}
 
+    // needed selection content diagnostic for mixed meso target choice
+    let selectionTypeId = false
+    if (outgoing.selectionNids.length) {
+      if (!mixedState) {
+        selectionTypeId = oldTypeId
+      }
+      else if (!outgoing.level) {
+        let selMajorityType = TW.categories[oldTypeId]
+        let counts = {}
+        for (var j in outgoing.selectionNids) {
+          let ty = TW.Nodes[outgoing.selectionNids[j]].type
+          if (! counts[ty])   counts[ty]  = 1
+          else                counts[ty] += 1
+        }
+        for (var ty in counts) {
+          if (counts[ty] > counts[selMajorityType]) {
+            selMajorityType = ty
+          }
+        }
+        selectionTypeId = TW.catDict[ty]
+      }
+    }
+
     // 1 - make the targetTypes choices
     if (!isUndef(optionaltypeFlag)) {
       typeFlag = optionaltypeFlag
     }
     else {
-      // "comeback" case: going back from mixed view to nodes0 view
+      // "comeback" case: going back from mixed view to selections majority view
+      //                  (or last non-mixed view if no selection)
       // ----------
       if (mixedState) {
-        typeFlag = 0
+        typeFlag = selectionTypeId || outgoing.comingFromType || 0
       }
       // "jutsu" case: macrolevel opens mixed view
       // -------
@@ -390,29 +414,39 @@ function changeType(optionaltypeFlag) {
     let newReltypes = TW.instance.inferActivereltypes(newActivetypes)
     // console.log('newReltypes', newReltypes)
 
+    // nodes already in target type
+    let alreadyOk = {}
+    if (mixedState) {
+      let arr = TW.partialGraph.graph.getNodesByType(typeFlag)
+      for (var i in arr) {alreadyOk[arr[i]] = true}
+    }
 
     // 3 - define the projected selection (sourceNids => corresponding opposites)
     let sourceNids = outgoing.selectionNids
-    if (!outgoing.level && !sourceNids.length) {
-      // when local and no selection => all local graph is selection
-      sourceNids = TW.partialGraph.graph.nodes().map(function(n){return n.id})
-    }
+    // // when jutsu and no selection => by def nothing happens
+    // // otherwise POSS: all local graph is selection
+    // if (typeFlag == 'all' && !sourceNids.length) {
+    //   sourceNids = TW.partialGraph.graph.nodes().map(function(n){return n.id})
+    // }
     let targetNids = {}
-    if (!mixedState && outgoing.level) {
+    if (!mixedState) {
       targetNids = getNeighbors(sourceNids, 'XR')
     }
     else {
-      // in mixed state we need to separate those already tgt state from others
-      let alreadyOk = TW.partialGraph.graph.getNodesByType(typeFlag)
-      let alreadyOkLookup = {}
-      for (var i in alreadyOk) {alreadyOkLookup[alreadyOk[i]] = true}
-      let needTransition = []
+      // in mixed local state we need to separate those already tgt state from others
+      let needXRTransition = []
       for (var i in sourceNids) {
         let nid = sourceNids[i]
-        if (alreadyOkLookup[nid])         targetNids[nid] = true
-        else                              needTransition.push(nid)
+        if (alreadyOk[nid])         targetNids[nid] = true
+        else                        needXRTransition.push(nid)
       }
-      targetNids = Object.assign(targetNids, getNeighbors(needTransition, 'XR'))
+      //   if none of the selection in new type  => selection's projection
+      //   if some of the selection in new type  => this majority subset of selection
+      //                                            without the projection of others
+      if (! Object.keys(targetNids).length) {
+        targetNids = getNeighbors(needXRTransition, "XR")
+      }
+      // console.log("mixedState start, selections targetNids:", targetNids)
     }
 
     // 4 - define the nodes to be added
@@ -426,10 +460,25 @@ function changeType(optionaltypeFlag) {
         }
       }
     }
-    // when scope is "local subset" => selection's projection
     else {
-      for (var nid in targetNids) {
-        newNodes[nid] = TW.Nodes[nid]
+      if (Object.keys(targetNids).length) {
+        for (var nid in targetNids) {
+          newNodes[nid] = TW.Nodes[nid]
+        }
+
+        // also more added because they are the "meso" sameside neighbors of the selection
+        let rel = typeFlag.toString().repeat(2)
+        let additionalNewTypeNids = getNeighbors(Object.keys(targetNids), rel)
+        for (var nid in additionalNewTypeNids) {
+          newNodes[nid] = TW.Nodes[nid]
+        }
+      }
+      // if no selection, meso shouldn't be possible, but we can still
+      // show something: those that were already of the correct type
+      else if (mixedState) {
+        for (var nid in alreadyOk) {
+          newNodes[nid] = TW.Nodes[nid]
+        }
       }
     }
     // console.log('newNodes', newNodes)
@@ -439,11 +488,12 @@ function changeType(optionaltypeFlag) {
     if (outgoing.selectionNids.length) {
       if (typeFlag != 'all') {
         newselsArr = Object.keys(targetNids)
+        // NB: if mixedState we already filtered them at step 3
       }
       else {
         // not extending selection to all transitive neighbors
         // makes the operation stable (when clicked several times,
-        // we extend slower towards transitive closure)
+        // without changing selection, we go back to original state)
         newselsArr = outgoing.selectionNids
       }
     }
@@ -504,13 +554,24 @@ function changeType(optionaltypeFlag) {
     // 9 - refresh view and record the state
     TW.partialGraph.camera.goTo({x:0, y:0, ratio:1, angle: 0})
     TW.partialGraph.refresh()
-    TW.pushGUIState({
-        activetypes: newActivetypes,
-        activereltypes: newReltypes,
-        sels: newselsArr
-        // rels: added by MS2 (highlighted opposite- and same-side neighbours)
-        // possible: add it in an early way here and request that MS2 doesn't change state
-    })
+
+    if (typeFlag != "all") {
+      TW.pushGUIState({
+          activetypes: newActivetypes,
+          activereltypes: newReltypes,
+          sels: newselsArr
+          // rels: added by MS2 (highlighted opposite- and same-side neighbours)
+          // possible: add it in an early way here and request that MS2 doesn't change state
+      })
+    }
+    else {
+      TW.pushGUIState({
+          activetypes: newActivetypes,
+          comingFromType: oldTypeId,
+          activereltypes: newReltypes,
+          sels: newselsArr
+      })
+    }
 
     // to recreate the new selection in the new type graph, if we had one before
     // NB relies on new actypes so should be after pushState
