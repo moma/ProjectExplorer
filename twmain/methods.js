@@ -31,6 +31,8 @@ TW.pushGUIState = function( args ) {
     // neighbors (of any type) and their edges in an .selectionRels[type] slot
     if(!isUndef(args.rels))          newState.selectionRels = args.rels;
 
+    // POSS1: add common changeGraphAppearanceByFacets effects inside this function
+
     // POSS2: add filterSliders params to be able to recreate subsets at a given time
     //      cf. usage of TW.partialGraph.graph.nodes() as current scope in changeType
     //            and n.hidden usage in sliders
@@ -393,15 +395,15 @@ function deselectNodes(aSystemState){
       console.log("deselecting using SystemState's lists")
 
     for(let i in sels) {
-      let nid = sels[i]
+      let n = TW.partialGraph.graph.nodes(sels[i])
 
-      if (!TW.partialGraph.graph.nodes(nid)) continue
+      if (!n || n.hidden) continue
 
       // mark as unselected!
-      TW.partialGraph.graph.nodes(nid).customAttrs.active = 0
+      n.customAttrs.active = 0
 
       // for only case legend highlight...
-      TW.partialGraph.graph.nodes(nid).customAttrs.highlight = 0
+      n.customAttrs.highlight = 0
     }
 
     // active relations
@@ -412,17 +414,17 @@ function deselectNodes(aSystemState){
       for (var srcnid in rels[reltyp]) {
         for (var tgtnid in rels[reltyp][srcnid]) {
           let tgt = TW.partialGraph.graph.nodes(tgtnid)
-          if (tgt) {
+          if (tgt && !tgt.hidden) {
             tgt.customAttrs.highlight = 0
             let eid1 = `${srcnid};${tgtnid}`
             let eid2 = `${tgtnid};${srcnid}`
 
             let e1 = TW.partialGraph.graph.edges(`${srcnid};${tgtnid}`)
-            if(e1) {
+            if(e1 && !e1.hidden) {
               e1.customAttrs.activeEdge = 0
             }
             let e2 = TW.partialGraph.graph.edges(`${tgtnid};${srcnid}`)
-            if(e2) {
+            if(e2 && !e2.hidden) {
               e2.customAttrs.activeEdge = 0
             }
           }
@@ -431,7 +433,7 @@ function deselectNodes(aSystemState){
     }
 }
 
-
+// called by tagcloud neighbors
 function manualForceLabel(nodeid, flagToSet, justHover) {
   let nd = TW.partialGraph.graph.nodes(nodeid)
 
@@ -839,7 +841,7 @@ function saveGraph() {
     }
 
     if(getByID("visgraph").checked) {
-        saveGEXF ( TW.partialGraph.graph.nodes() , TW.partialGraph.graph.edges(), atts )
+        saveGEXF ( getVisibleNodes() , getVisibleEdges(), atts )
     }
 
     $("#closesavemodal").click();

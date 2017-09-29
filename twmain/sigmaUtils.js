@@ -41,9 +41,14 @@ var SigmaUtils = function () {
 
                 i++
             }
+            else {
+              n.hidden = true
+              graph.nodes.push(n)
+            }
         }
 
         // the typestrings in activereltypes are the key to stored Relations (<=> edges)
+        let checker = {}
         for (var k in initialActivereltypes) {
           let reltype = initialActivereltypes[k]
           for(let srcnid in TW.Relations[reltype]) {
@@ -53,9 +58,17 @@ var SigmaUtils = function () {
                   if(e) {
                       if(e.source != e.target) {
                           graph.edges.push( e);
+                          checker[e.id] = true
                       }
                   }
               }
+          }
+        }
+        for (var eid in TW.Edges) {
+          if (! checker[eid]) {
+            let e = TW.Edges[eid]
+            e.hidden = true
+            graph.edges.push(e)
           }
         }
         return graph;
@@ -787,7 +800,7 @@ function gradientColoring(daclass, forTypes) {
               // (possible skip due to changeLevel or filters)
               for (var k = nidList.length-1 ; k >= 0 ; k--) {
                 let nd = TW.partialGraph.graph.nodes(nidList[k])
-                if (nd) {
+                if (nd && !nd.hidden) {
                   bins.invIdx[i].col = nd.customAttrs.alt_color
                   break
                 }
@@ -825,7 +838,7 @@ function repaintEdges() {
       else {
         let e = TW.partialGraph.graph.edges(eid)
 
-        if (e) {
+        if (e && !e.hidden) {
           let src = TW.partialGraph.graph.nodes(idPair[0])
           let tgt = TW.partialGraph.graph.nodes(idPair[1])
 
@@ -937,7 +950,7 @@ function heatmapColoring(daclass, forTypes) {
         // color the referred nodes
         for (var j in tickThresholds[k].nids) {
           let n = TW.partialGraph.graph.nodes(tickThresholds[k].nids[j])
-          if (n) {
+          if (n && !n.hidden) {
             n.customAttrs.alt_color = binColors[k]
             n.customAttrs.altgrey_color = "rgba("+rgbColStr+",0.4)"
 
@@ -1046,7 +1059,7 @@ function clusterColoring(daclass, forTypes) {
               let rgbColStr = hex2rgba(theColor).slice(0,3).join(',')
               for (let j in valGroup.nids) {
                 let theNode = TW.partialGraph.graph.nodes(valGroup.nids[j])
-                if (theNode) {
+                if (theNode && !theNode.hidden) {
                   theNode.customAttrs.alt_color = theColor
                   theNode.customAttrs.altgrey_color = "rgba("+rgbColStr+","+TW.conf.sigmaJsDrawingProperties.twNodesGreyOpacity+")"
                 }
@@ -1064,7 +1077,7 @@ function clusterColoring(daclass, forTypes) {
             let nid = nids[j]
             let the_node = TW.partialGraph.graph.nodes(nid)
 
-            if (the_node) {
+            if (the_node && !the_node.hidden) {
 
               // POSS: use "hidden" in filters instead of remove/readd
               //  typeName     then this condition would be more useful here
@@ -1084,7 +1097,6 @@ function clusterColoring(daclass, forTypes) {
                   theColor = colList[ someRepresentativeInt ]
                 }
 
-                // TW.partialGraph.graph.nodes(nid).color = theColor
                 the_node.customAttrs.alt_color = theColor
                 the_node.customAttrs.altgrey_color = "rgba("+(hex2rgba(theColor).slice(0,3).join(','))+",0.4)"
               }

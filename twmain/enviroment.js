@@ -288,6 +288,7 @@ function createFilechooserEl () {
 //============================ < NEW BUTTONS > =============================//
 
 function changeType(optionaltypeFlag) {
+    // var ctstart = performance.now()
 
     // RELATION TYPES
     //
@@ -422,11 +423,16 @@ function changeType(optionaltypeFlag) {
 
     // 3 - define the projected selection (sourceNids => corresponding opposites)
     let sourceNids = outgoing.selectionNids
-    // // when jutsu and no selection => by def nothing happens
-    // // otherwise POSS: all local graph is selection
-    // if (typeFlag == 'all' && !sourceNids.length) {
-    //   sourceNids = TW.partialGraph.graph.nodes().map(function(n){return n.id})
-    // }
+    // when jutsu and no selection => we pick one selection at random (in meso mode we can't go to another meso with no selection, because nothing would appear)
+    if (typeFlag == 'all' && !sourceNids.length) {
+      sourceNids = []
+      for (var nid in TW.Nodes) {
+        if (! TW.Nodes[nid].hidden) {
+          sourceNids.push(nid)
+          break
+        }
+      }
+    }
     let targetNids = {}
     if (!mixedState) {
       targetNids = getNeighbors(sourceNids, 'XR')
@@ -453,9 +459,9 @@ function changeType(optionaltypeFlag) {
 
     // in mode all the current selection (and only it) is preserved
     if (typeFlag == 'all') {
-      for (var i in outgoing.selectionNids) {
-        let nid = outgoing.selectionNids[i]
-        newNodes[nid] = TW.Nodes[nid]
+      for (var i in sourceNids) {
+        let nid = sourceNids[i]
+        newNodes[nid] = true
       }
     }
 
@@ -470,21 +476,21 @@ function changeType(optionaltypeFlag) {
     else {
       if (Object.keys(targetNids).length) {
         for (var nid in targetNids) {
-          newNodes[nid] = TW.Nodes[nid]
+          newNodes[nid] = true
         }
 
         // also more added because they are the "meso" sameside neighbors of the selection
         let rel = typeFlag.toString().repeat(2)
         let additionalNewTypeNids = getNeighbors(Object.keys(targetNids), rel)
         for (var nid in additionalNewTypeNids) {
-          newNodes[nid] = TW.Nodes[nid]
+          newNodes[nid] = true
         }
       }
       // if no selection, meso shouldn't be possible, but we can still
       // show something: those that were already of the correct type
       else if (mixedState) {
         for (var nid in alreadyOk) {
-          newNodes[nid] = TW.Nodes[nid]
+          newNodes[nid] = true
         }
       }
     }
@@ -492,7 +498,7 @@ function changeType(optionaltypeFlag) {
 
     // 5 - define the new selection
     let newselsArr = []
-    if (outgoing.selectionNids.length) {
+    if (sourceNids.length) {
       if (typeFlag != 'all') {
         newselsArr = Object.keys(targetNids)
         // NB: if mixedState we already filtered them at step 3
@@ -501,19 +507,21 @@ function changeType(optionaltypeFlag) {
         // not extending selection to all transitive neighbors
         // makes the operation stable (when clicked several times,
         // without changing selection, we go back to original state)
-        newselsArr = outgoing.selectionNids
+        newselsArr = sourceNids
       }
     }
 
 
     // 6 - effect the changes on nodes
     deselectNodes()
-    TW.partialGraph.graph.clear()   // a new start
 
-    for (var nid in newNodes) {
-      try {
-        TW.partialGraph.graph.addNode(newNodes[nid])
-      } catch(e) {continue}
+    for (var nid in TW.Nodes) {
+      if (newNodes[nid]) {
+        TW.partialGraph.graph.nodes(nid).hidden = false
+      }
+      else {
+        TW.partialGraph.graph.nodes(nid).hidden = true
+      }
     }
 
     // 7 - add the relations
@@ -530,9 +538,9 @@ function changeType(optionaltypeFlag) {
               let eids = [`${srcnid};${tgtnid}`, `${tgtnid};${srcnid}`]
               for (var l in eids) {
                 let eid = eids[l]
-                if (eid && TW.Edges[eid] && !TW.partialGraph.graph.edges(eid)){
-                  newEdges[eid] = TW.Edges[eid]
-                  break
+                if (eid && TW.Edges[eid]){
+                  newEdges[eid] = true
+                  // POSS: do something about all those double-direction edges
                 }
               }
             }
@@ -542,10 +550,13 @@ function changeType(optionaltypeFlag) {
     }
 
     // 8 - effect the changes on edges
-    for (var eid in newEdges) {
-      try {
-        TW.partialGraph.graph.addEdge(newEdges[eid])
-      } catch(e) {continue}
+    for (var eid in TW.Edges) {
+      if (newEdges[eid]) {
+        TW.partialGraph.graph.edges(eid).hidden = false
+      }
+      else {
+        TW.partialGraph.graph.edges(eid).hidden = true
+      }
     }
 
     // 9 - refresh view and record the state
@@ -620,12 +631,14 @@ function changeType(optionaltypeFlag) {
     fillAttrsInForm('attr-titling-metric', 'num')
 
     // recreates FA2 nodes array from new nodes
-    reInitFa2({
-      useSoftMethod: false,
-      callback: function() {
-        sigma_utils.smartForceAtlas()
-      }
-    })
+    // reInitFa2({
+    //   useSoftMethod: false,
+    //   callback: function() {
+    //     sigma_utils.smartForceAtlas()
+    //   }
+    // })
+
+    // console.log("changeType time:", performance.now()-ctstart)
 
     // end update the gui ======================================================
 }
@@ -676,6 +689,8 @@ function getNeighbors(sourceNids, relKey) {
 //    POSS: rewrite using .hidden instead of add/remove
 function changeLevel(optionalTgtState) {
 
+    // var clstart = performance.now()
+
     // show waiting cursor
     TW.gui.elHtml.classList.add('waiting');
 
@@ -721,48 +736,53 @@ function changeLevel(optionalTgtState) {
         }
       }
 
-      TW.partialGraph.graph.clear();
-
-      var voisinage = {}
-      // Dictionaries of: selection+neighbors
-      var nodesToAdd = {}
-      var edgesToAdd = {}
-
-      for(var i in sels) {
-          s = sels[i];
-          nodesToAdd[s]=true;
-          for (var k in activereltypes) {
-            let activereltype = activereltypes[k]
-            if (TW.Relations[activereltype]) {
-              neigh = TW.Relations[activereltype][s]
-              if(neigh) {
-                  for(var j in neigh) {
-                      t = neigh[j]
-                      nodesToAdd[t]=true;
-                      edgesToAdd[s+";"+t]=true;
-                      edgesToAdd[t+";"+s]=true;
-                      if( !selsChecker[t]  )
-                          voisinage[ t ] = true;
-                  }
-              }
-            }
-            else {
-              // case where no edges at all (ex: scholars have no common keywords)
-              console.log("no edges between these nodes")
-            }
-          }
-      }
-
       var futurelevel = optionalTgtState ? optionalTgtState.level : !present.level
 
       if(!futurelevel) { // [Change to Local] when level=Global(1)
 
         TW.gui.elContainer.style.backgroundColor = TW.conf.mesoBackground
 
-        for(var nid in nodesToAdd)
-          add1Elem(nid)
-        for(var eid in edgesToAdd)
-          add1Elem(eid)
+        var voisinage = {}
+        // Dictionaries of: selection+neighbors
+        var nodesToKeep = {}
+        var edgesToKeep = {}
+
+        for(var i in sels) {
+            s = sels[i];
+            nodesToKeep[s]=true;
+            for (var k in activereltypes) {
+              let activereltype = activereltypes[k]
+              if (TW.Relations[activereltype]) {
+                neigh = TW.Relations[activereltype][s]
+                console.log("neigh", neigh)
+                if(neigh) {
+                    for(var j in neigh) {
+                        t = neigh[j]
+                        nodesToKeep[t]=true;
+                        edgesToKeep[s+";"+t]=true;
+                        edgesToKeep[t+";"+s]=true;
+                        if( !selsChecker[t]  )
+                            voisinage[ t ] = true;
+                    }
+                }
+              }
+              else {
+                // case where no edges at all (ex: scholars have no common keywords)
+                console.log("no edges between these nodes")
+              }
+            }
+        }
+
+        for (var nid in TW.Nodes) {
+          if (!nodesToKeep[nid]) {
+            TW.partialGraph.graph.nodes(nid).hidden = true
+          }
+        }
+        for (var eid in TW.Edges) {
+          if (! edgesToKeep[eid]) {
+            TW.partialGraph.graph.nodes(nid).hidden = true
+          }
+        }
 
           // Adding intra-neighbors edges O(voisinage²)
           voisinage = Object.keys(voisinage)
@@ -770,8 +790,12 @@ function changeLevel(optionalTgtState) {
               for(var j=1;j<voisinage.length;j++) {
                   if( voisinage[i]!=voisinage[j] ) {
                       // console.log( "\t" + voisinage[i] + " vs " + voisinage[j] )
-                      add1Elem( voisinage[i]+";"+voisinage[j] )
-                      add1Elem( voisinage[j]+";"+voisinage[i] )
+                      let e1 = TW.partialGraph.graph.edges(voisinage[i]+";"+voisinage[j])
+                      let e2 = TW.partialGraph.graph.edges(voisinage[j]+";"+voisinage[i])
+                      if (e1 && e1.hidden)
+                        e1.hidden = false
+                      if (e2 && e2.hidden)
+                        e2.hidden = false
                   }
               }
           }
@@ -781,16 +805,23 @@ function changeLevel(optionalTgtState) {
 
           // var t0 = performance.now()
           for(var nid in TW.Nodes) {
+            // we unhide 1 by 1
             if (activetypesDict[TW.Nodes[nid].type]) {
-              // we add 1 by 1 (POSS: use hidden instead)
-              add1Elem(nid)
+              TW.partialGraph.graph.nodes(nid).hidden = false
+            }
+            else {
+              TW.partialGraph.graph.nodes(nid).hidden = true
             }
           }
           for(var eid in TW.Edges) {
             for (var k in activereltypes) {
               let activereltype = activereltypes[k]
-              if(TW.Edges[eid].categ == activereltype)
-                  add1Elem(eid)
+              if(TW.Edges[eid].categ == activereltype) {
+                TW.partialGraph.graph.edges(eid).hidden = false
+              }
+              else {
+                TW.partialGraph.graph.edges(eid).hidden = true
+              }
             }
           }
           // var t1 = performance.now()
@@ -836,15 +867,17 @@ function changeLevel(optionalTgtState) {
       }
 
       // recreate FA2 nodes array after you change the nodes
-      reInitFa2({
-        useSoftMethod: false,
-        callback: function() {
-          TW.gui.elHtml.classList.remove('waiting');
+      // reInitFa2({
+      //   useSoftMethod: false,
+      //   callback: function() {
+      //     TW.gui.elHtml.classList.remove('waiting');
+      //
+      //     // rearrange nodes in all cases (&& if fa2Enabled)
+      //     sigma_utils.smartForceAtlas()
+      //   }
+      // })
 
-          // rearrange nodes in all cases (&& if fa2Enabled)
-          sigma_utils.smartForceAtlas()
-        }
-      })
+      // console.log("changeLevel time:", performance.now() - clstart)
     },500 // cursor waiting
   )
 }
@@ -1056,16 +1089,14 @@ function EdgeWeightFilter(sliderDivID , reltypestr ,  criteria) {
                                       let sid = nidkeys[0]
                                       let tid = nidkeys[1]
 
+                                      let presentSid = TW.partialGraph.graph.nodes(sid)
+                                      let presentTid = TW.partialGraph.graph.nodes(tid)
+
                                       // if nodes not removed by local view
-                                      if (   TW.partialGraph.graph.nodes(sid)
-                                          && TW.partialGraph.graph.nodes(tid)) {
-                                            if(TW.partialGraph.graph.nodes(sid).hidden) unHide(sid)
-                                            if(TW.partialGraph.graph.nodes(tid).hidden) unHide(tid)
-                                            if (! TW.partialGraph.graph.edges(eid)) {
-                                              add1Elem(eid)
-                                            }
-                                            TW.partialGraph.graph.edges(eid).hidden = false
-                                            TW.Edges[eid].lock = false;
+                                      if (   presentSid
+                                          && presentTid) {
+                                            presentSid.hidden = false
+                                            presentTid.hidden = false
                                       }
                                     }
                                   }
@@ -1076,44 +1107,22 @@ function EdgeWeightFilter(sliderDivID , reltypestr ,  criteria) {
                                     add1Elem(eid)
                                   }
                                   TW.partialGraph.graph.edges(eid).hidden = false
-                                  TW.Edges[eid].lock = false;
                               }
                           }
                       } else {
                           if(delflag) {
                               for(var i in eids) {
                                   let eid = eids[i]
-                                  if(!isUndef(TW.partialGraph.graph.edges(eid))) {
-                                      var t0 = performance.now()
-                                      if (TW.partialGraph.graph.edges(eid)) {
-                                        TW.partialGraph.graph.edges(eid).hidden = true
-                                        TW.Edges[eid].lock = true;
-                                      }
-                                      var t1 = performance.now()
-
-                                      totalDeletingTime += (t1-t0)
-
-                                      // console.log("\thiding "+eid)
-
-                                      // n = ID.split(";")
-                                      // if(n.length>1)
-                                      //     console.log("\t\tsource:("+TW.Nodes[n[0]].x+","+TW.Nodes[n[0]].y+") ||| target:("+TW.Nodes[n[1]].x+","+TW.Nodes[n[1]].y+")")
+                                  let e = TW.partialGraph.graph.edges(eid)
+                                  if(!isUndef(e)) {
+                                      e.hidden = true
                                   }
                               }
                           }
                       }
                   }
 
-                  if(delflag) {
-                    console.info('totalDeletingTime', totalDeletingTime)
-                    // NB: performance with hiding: more or less 8x faster than with dropEdge on large graphs
-                  }
-
-                  // [ Starting FA2 ]
-                  setTimeout(function() {
-                    sigma_utils.smartForceAtlas({'duration': 2000}) // shorter FA2 sufficient
-                  }, 10)
-                // [ / Starting FA2 ]
+                  // fixed positions: no more auto-fa2
 
                   // memoize as last value
                   TW.gui.lastFilters[`${sliderDivID}/${reltypestr}`] = filtervalue
