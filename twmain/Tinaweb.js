@@ -68,13 +68,13 @@ function SelectionEngine() {
                 return args.currsels.indexOf(item) < 0;
               }));
         }
-        // meso view default: deselect if overlap
-        else if (! TW.SystemState().level) {
+        // circle select default: deselect if overlap
+        else if (TW.gui.circleSize) {
           targeted = args.currsels.filter(function (item) {
               return args.prevsels.indexOf(item) < 0;
           });
         }
-        // macro view default: only new targets
+        // other view default: only new targets
         else {
           targeted = args.currsels;
         }
