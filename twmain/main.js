@@ -111,8 +111,7 @@ function syncRemoteGraphData () {
     // the only API format, cf. inData
     inFormat = 'json'
 
-    // TODO-rename: s/nodeidparam/srcparams
-    var sourceinfo = getUrlParam.nodeidparam
+    var sourceinfo = getUrlParam.srcparams
     var qtype = getUrlParam.type
     if(isUndef(sourceinfo) || isUndef(qtype)) {
         console.warn("missing nodes filter/id param to transmit to source api");
@@ -142,10 +141,11 @@ function syncRemoteGraphData () {
               // json is twice URI encoded by whoswho to avoid both '"' and '%22'
               var json_constraints = decodeURIComponent(sourceinfo)
 
-              // console.log("multipleQuery RECEIVED", json_constraints)
 
               // safe parsing of the URL's untrusted JSON
-              var filteringKeyArrayPairs = JSON.parse( json_constraints)
+              var multiQuery = JSON.parse( json_constraints)
+
+              console.warn("multipleQuery RECEIVED", multiQuery)
 
               // INPUT json: <= { keywords: ['complex systems', 'something'],
               //                  countries: ['France', 'USA'], laboratories: []}
@@ -158,20 +158,30 @@ function syncRemoteGraphData () {
               // => mapLabel (for user display):
               //   ("complex systems" or "something") and ("France" or "USA")
 
-              // console.log("decoded filtering query", filteringKeyArrayPairs)
+              // console.log("decoded filtering query", multiQuery)
 
               var restParams = []
               var nameElts = []
               // build REST parameters from filtering arrays
               // and name from each filter value
-              for (var fieldName in filteringKeyArrayPairs) {
-                  var nameSubElts = []
-                  for (var value of filteringKeyArrayPairs[fieldName]) {
-                      // exemple: "countries[]=France"
-                      restParams.push(fieldName+'[]='+encodeURIComponent(value))
-                      nameSubElts.push ('"'+value+'"')
+              for (var fieldName in multiQuery) {
+                  // a nodetype
+                  if (/^_node[0-1]$/.test(fieldName)) {
+                    let itype = fieldName.charAt(fieldName.length-1)
+                    let typeName = multiQuery[fieldName]
+                    restParams.push("type"+itype+"="+typeName)
                   }
-                  nameElts.push("("+nameSubElts.join(" or ")+")")
+                  // an array of filters
+                  else {
+                    var nameSubElts = []
+                    for (var value of multiQuery[fieldName]) {
+                        // exemple: "countries[]=France"
+                        restParams.push(fieldName+'[]='+encodeURIComponent(value))
+                        nameSubElts.push ('"'+value+'"')
+                    }
+                    nameElts.push("("+nameSubElts.join(" or ")+")")
+                  }
+
               }
 
               if (restParams.length) {
