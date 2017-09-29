@@ -481,6 +481,8 @@ function mainStartGraph(inFormat, inData, twInstance) {
               animationsTime:150,
               mouseZoomDuration:250,
 
+              doubleClickTimeout: 50,
+
               zoomMin: TW.conf.zoomMin,
               zoomMax: TW.conf.zoomMax
           },

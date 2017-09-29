@@ -21,6 +21,7 @@ TW.gui.circleSize = 0;
 TW.gui.circleSlider = null
 TW.gui.checkBox=false;
 TW.gui.shiftKey=false;
+TW.gui.doubleClick=0;          // prevents 2 singleClick events when doubleClick
 TW.gui.foldedSide=false;
 TW.gui.manuallyChecked = false;
 TW.gui.lastFilters = {}             // <= last values, by slider id

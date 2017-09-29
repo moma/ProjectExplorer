@@ -60,7 +60,10 @@ function SelectionEngine() {
         var targeted = []
 
         // currsels = bunch of nodes from a click in the map
-        if(args.addvalue) {
+        if (TW.gui.doubleClick) {
+          targeted = args.currsels
+        }
+        else if(args.addvalue) {
             // complementary select if disjoint, deselect if overlap
             targeted = args.currsels.filter(function (item) {
                 return args.prevsels.indexOf(item) < 0;
@@ -68,16 +71,16 @@ function SelectionEngine() {
                 return args.currsels.indexOf(item) < 0;
               }));
         }
-        // meso view default: deselect if overlap
-        else if (! TW.SystemState().level) {
+        // otherwise default: deselect if overlap
+        else {
           targeted = args.currsels.filter(function (item) {
               return args.prevsels.indexOf(item) < 0;
           });
         }
-        // macro view default: only new targets
-        else {
-          targeted = args.currsels;
-        }
+        // old default: only new targets
+        // else {
+        //   targeted = args.currsels;
+        // }
 
         if(targeted.length==0) return [];
 
@@ -957,6 +960,8 @@ var TinaWebJS = function ( sigmacanvas ) {
       partialGraph.bind('click', function(e) {
         // console.log("sigma click event e", e)
 
+        if (TW.gui.doubleClick) { TW.gui.doubleClick = 0 }
+
         // case with a selector circle cursor handled here
         if (TW.gui.circleSize > 0) {
           // actual click position, but in graph coords
@@ -981,14 +986,25 @@ var TinaWebJS = function ( sigmacanvas ) {
       partialGraph.bind('clickNode', function(e) {
         // console.log("clickNode event e", e)
 
-        // new sigma.js gives easy access to clicked node!
-        var theNodeId = e.data.node.id
+        // timeout to abort in case of doubleClick
+        window.setTimeout(function(){
+            if (TW.gui.doubleClick) {
+              TW.gui.doubleClick --
+              return;
+            }
+            else {
+              // new sigma.js gives easy access to clicked node!
+              var theNodeId = e.data.node.id
 
-        if (TW.gui.circleSize == 0) {
+              if (TW.gui.circleSize == 0) {
                 selectionEngine.runAndEffects([theNodeId])
-        }
-        // case with a selector circle cursor handled
-        // just before, at click event
+              }
+              // case with a selector circle cursor handled
+              // just before, at click event
+            }
+          },
+        TW.customSettings.doubleClickTimeout + 300
+        )
       })
 
 
@@ -1002,9 +1018,12 @@ var TinaWebJS = function ( sigmacanvas ) {
         //      (order: clickNode, doubleClickNode, clickNode)
         //                 1st        2nd (NOW)        3rd
 
-        // so if this was also a new selection, the 1st clickNode did handle it
-        // => we just create the new zoom level
+        // this var will abort 1st and 3rd events
+        TW.gui.doubleClick = 2
 
+        // doubleClick may also be a new selection
+        var theNodeId = e.data.node.id
+        selectionEngine.runAndEffects([theNodeId])
 
         // A - create new zoom level state
         TW.pushGUIState({ level: false })
