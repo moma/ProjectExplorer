@@ -349,7 +349,6 @@ function changeType(optionaltypeFlag) {
     let outgoing = TW.SystemState()
     let oldTypeId = outgoing.activetypes.indexOf(true)
     let mixedState = (outgoing.activereltypes.length > 1)
-    let preservedNodes = {}
 
     // needed selection content diagnostic for mixed meso target choice
     let selectionTypeId = false
@@ -452,6 +451,14 @@ function changeType(optionaltypeFlag) {
     // 4 - define the nodes to be added
     let newNodes = {}
 
+    // in mode all the current selection (and only it) is preserved
+    if (typeFlag == 'all') {
+      for (var i in outgoing.selectionNids) {
+        let nid = outgoing.selectionNids[i]
+        newNodes[nid] = TW.Nodes[nid]
+      }
+    }
+
     // when scope is "entire graph" => entire sets by type
     if (outgoing.level) {
       for (let typeId in newActivetypes) {
@@ -501,14 +508,7 @@ function changeType(optionaltypeFlag) {
 
     // 6 - effect the changes on nodes
     deselectNodes()
-    if (typeFlag != "all") {
-      TW.partialGraph.graph.clear()   // a new start is faster except in "jutsu"
-    }
-    else {
-      TW.partialGraph.graph.getNodesByType(oldTypeId).map(
-        function(nid){ preservedNodes[nid]=true }
-      )
-    }
+    TW.partialGraph.graph.clear()   // a new start
 
     for (var nid in newNodes) {
       try {
@@ -518,10 +518,7 @@ function changeType(optionaltypeFlag) {
 
     // 7 - add the relations
     let newEdges = {}
-    let allNodes = {}
-    if (typeFlag != "all")  allNodes = newNodes
-    else                    allNodes = Object.assign(newNodes, preservedNodes)
-    for (var srcnid in allNodes) {
+    for (var srcnid in newNodes) {
       for (var k in newReltypes) {
         let relKey = newReltypes[k]
         if (TW.Relations[relKey]
@@ -529,7 +526,7 @@ function changeType(optionaltypeFlag) {
             && TW.Relations[relKey][srcnid].length) {
           for (var j in TW.Relations[relKey][srcnid]) {
             let tgtnid = TW.Relations[relKey][srcnid][j]
-            if (allNodes[tgtnid]) {
+            if (newNodes[tgtnid]) {
               let eids = [`${srcnid};${tgtnid}`, `${tgtnid};${srcnid}`]
               for (var l in eids) {
                 let eid = eids[l]
@@ -583,8 +580,8 @@ function changeType(optionaltypeFlag) {
 
     // update search labels
     TW.labels.splice(0, TW.labels.length)
-    for (var nid in allNodes) {
-      updateSearchLabels(nid,allNodes[nid].label,allNodes[nid].type);
+    for (var nid in newNodes) {
+      updateSearchLabels(nid,newNodes[nid].label,newNodes[nid].type);
     }
 
     // update the gui (TODO handle by TW.pushGUIState) =========================
