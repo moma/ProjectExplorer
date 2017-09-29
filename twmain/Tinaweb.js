@@ -3,6 +3,45 @@
 // this class will be instanciated once (and exposed as TW.instance.selNgn)
 function SelectionEngine() {
 
+    // "main" selection function for a typical event
+    //  - checks the cases
+    //  - calls the other SelectionEngine routines
+    //  - triggers GUI effects and state
+    this.runAndEffects = function (eventTargets) {
+      // 1)
+      var targeted = this.SelectorEngine( {
+                          addvalue:TW.gui.checkBox,
+                          currsels: eventTargets,
+                          prevsels: TW.SystemState().selectionNids
+                      } )
+      // 2)
+      if(targeted.length>0) {
+
+        // we still check if the selection is unchanged before create state
+        let currentNids = TW.SystemState().selectionNids
+        let sameNids = true
+        if (currentNids.length != targeted.length) {
+          sameNids = false
+        }
+        else {
+          for (var j in currentNids) {
+            if (currentNids[j] != targeted[j]) {
+              sameNids = false
+              break
+            }
+          }
+        }
+
+        // iff new selection, create effects and state
+        if (!sameNids) {
+          this.MultipleSelection2( {nodes:targeted} )
+        }
+      }
+      // or clear previous selection, also with effects and state
+      else {
+        cancelSelection(false)
+      }
+    }
 
     // creates the union of prevsels and currsels, if addvalue
     // called for:
@@ -531,7 +570,7 @@ var TinaWebJS = function ( sigmacanvas ) {
 
     this.initSearchListeners = function () {
 
-        var selInst = this.selNgn
+        var selectionEngine = this.selNgn
 
         $('input#searchinput').autocomplete({
             source: function(request, response) {
@@ -593,7 +632,7 @@ var TinaWebJS = function ( sigmacanvas ) {
             //           over sigmaUtils.getnodesIndex()
             //   -> then call this.SelectorEngine
             //            and this.MultipleSelection2
-            selInst.search_n_select(query)
+            selectionEngine.search_n_select(query)
             // ------------------------------------------------
         });
 
@@ -601,7 +640,7 @@ var TinaWebJS = function ( sigmacanvas ) {
         $("#searchinput").keydown(function (e) {
             if (e.keyCode == 13) {
                 var query = normalizeString($("#searchinput").val())
-                selInst.search_n_select(query)
+                selectionEngine.search_n_select(query)
             }
         });
     }
@@ -892,7 +931,7 @@ var TinaWebJS = function ( sigmacanvas ) {
 
       // console.log("initSigmaListeners TW.categories / types array / reltypeskeys array: ", TW.categories, initialActivetypes, initialActivereltypes)
 
-      var selInst = this.selNgn
+      var selectionEngine = this.selNgn
 
       // changetype button
       if (TW.categories.length == 1) {
@@ -933,21 +972,7 @@ var TinaWebJS = function ( sigmacanvas ) {
             camCoords.y
           )
 
-          // 1) determine new selection
-          var targeted = selInst.SelectorEngine( {
-                              addvalue:TW.gui.checkBox,
-                              currsels:circleNodes,
-                              prevsels:TW.SystemState().selectionNids
-                          } )
-
-          // 2) show new selection + do all related effects
-          if(targeted.length>0) {
-            selInst.MultipleSelection2( {nodes:targeted} )
-          }
-          // or clear previous selection
-          else {
-            cancelSelection(false)
-          }
+          selectionEngine.runAndEffects(circleNodes)
         }
       })
 
@@ -960,39 +985,7 @@ var TinaWebJS = function ( sigmacanvas ) {
         var theNodeId = e.data.node.id
 
         if (TW.gui.circleSize == 0) {
-          // 1)
-          var targeted = selInst.SelectorEngine( {
-                              addvalue:TW.gui.checkBox,
-                              currsels:[theNodeId],
-                              prevsels: TW.SystemState().selectionNids
-                          } )
-          // 2)
-          if(targeted.length>0) {
-
-            // we still check if the selection is unchanged before create state
-            let currentNids = TW.SystemState().selectionNids
-            let sameNids = true
-            if (currentNids.length != targeted.length) {
-              sameNids = false
-            }
-            else {
-              for (var j in currentNids) {
-                if (currentNids[j] != targeted[j]) {
-                  sameNids = false
-                  break
-                }
-              }
-            }
-
-            // iff new selection, create effects and state
-            if (!sameNids) {
-              selInst.MultipleSelection2( {nodes:targeted} )
-            }
-          }
-          // or clear previous selection
-          else {
-            cancelSelection(false)
-          }
+                selectionEngine.runAndEffects([theNodeId])
         }
         // case with a selector circle cursor handled
         // just before, at click event
@@ -1012,10 +1005,10 @@ var TinaWebJS = function ( sigmacanvas ) {
         // so if this was also a new selection, the 1st clickNode did handle it
         // => we just create the new zoom level
 
-        // NB2: we never switch back to macro level from doubleClick
 
         // A - create new zoom level state
         TW.pushGUIState({ level: false })
+        // NB2: we never switch back to macro level from doubleClick
 
         // B - apply it without changing state
         changeLevel(TW.SystemState())
