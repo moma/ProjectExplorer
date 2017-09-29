@@ -146,7 +146,7 @@ TW.conf = (function(TW){
   // ------------
   TWConf.paths = {
     'ourlibs':   'static/tinawebJS/twlibs',
-    'modules':   'static/tinawebJS/twmodules',
+    'modules':   'static/tinawebModuleComexLayout',
     'templates': 'static/tinawebJS/twlibs/default_hit_templates',
 
     'sourceFile': null,              // server: 1 default gexf|json graph source
@@ -160,13 +160,7 @@ TW.conf = (function(TW){
   // flag name is div class to be removed if false
   //        *and* subdirectory of modules path to import if true
   // see also activateModules()
-  TWConf.ModulesFlags["multivacV1HistogramModule"] = false ;
-
-  // cf. twmodules/multivacV2HistogramModule/multivacV2Settings.js for settings
-  TWConf.ModulesFlags["multivacV2HistogramModule"] = false ;
-
-  // cf. twmodules/crowdsourcingModule/README.md to initialize the associated db
-  TWConf.ModulesFlags["crowdsourcingModule"] = false ;
+  TWConf.ModulesFlags["comexTopBarLoader"] = true ;
 
   // Other GUI options
   // ------------------
