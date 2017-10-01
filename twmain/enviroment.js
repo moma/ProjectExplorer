@@ -630,13 +630,21 @@ function changeType(optionaltypeFlag) {
     fillAttrsInForm('choose-attr')
     fillAttrsInForm('attr-titling-metric', 'num')
 
-    // recreates FA2 nodes array from new nodes
-    // reInitFa2({
-    //   useSoftMethod: false,
-    //   callback: function() {
-    //     sigma_utils.smartForceAtlas()
-    //   }
-    // })
+    if (! TW.conf.stablePositions) {
+      // for (var nid in newNodes) {
+      //   TW.partialGraph.graph.nodes(nid).x = 0
+      //   TW.partialGraph.graph.nodes(nid).y = 0
+      // }
+      reInitFa2({
+        useSoftMethod: false,
+        // recreates FA2 nodes array from new nodes
+        skipHidden: true,
+        callback: function() {
+          // runs FA2
+          sigma_utils.smartForceAtlas()
+        }
+      })
+    }
 
     // console.log("changeType time:", performance.now()-ctstart)
 
@@ -754,7 +762,6 @@ function changeLevel(optionalTgtState) {
               let activereltype = activereltypes[k]
               if (TW.Relations[activereltype]) {
                 neigh = TW.Relations[activereltype][s]
-                console.log("neigh", neigh)
                 if(neigh) {
                     for(var j in neigh) {
                         t = neigh[j]
@@ -866,16 +873,18 @@ function changeLevel(optionalTgtState) {
         }
       }
 
-      // recreate FA2 nodes array after you change the nodes
-      // reInitFa2({
-      //   useSoftMethod: false,
-      //   callback: function() {
-      //     TW.gui.elHtml.classList.remove('waiting');
-      //
-      //     // rearrange nodes in all cases (&& if fa2Enabled)
-      //     sigma_utils.smartForceAtlas()
-      //   }
-      // })
+      if (! TW.conf.stablePositions) {
+        reInitFa2({
+          useSoftMethod: !futurelevel,
+          // recreates FA2 nodes array after changing the nodes
+          skipHidden: true,
+          callback: function() {
+            // runs FA2
+            sigma_utils.smartForceAtlas()
+          }
+        })
+      }
+
 
       // console.log("changeLevel time:", performance.now() - clstart)
     },500 // cursor waiting
@@ -937,7 +946,7 @@ function edgeSizesSteps(eTypeStr, esizesCensus) {
 function EdgeWeightFilter(sliderDivID , reltypestr ,  criteria) {
 
     if(TW.partialGraph.graph.nEdges()<2) {
-        console.log('not enough edges for subsets: skipping GUI slider init')
+        console.debug('not enough edges for subsets: skipping GUI slider init')
         showDisabledSlider(sliderDivID)
         return;
     }
@@ -950,15 +959,17 @@ function EdgeWeightFilter(sliderDivID , reltypestr ,  criteria) {
     var steps = stepToIdsArr.length
 
     if(steps<2) {
-        console.log('no size steps for edges: skipping GUI slider init')
+        console.debug('no size steps for edges: skipping GUI slider init')
         showDisabledSlider(sliderDivID)
         return;
     }
 
+    var sliderId = `${sliderDivID}/${reltypestr}`
+    var firstTimeFlag = isUndef(TW.gui.lastFilters[sliderId])
 
     // cache initial value
     var initialValue=("0-"+(steps-1));
-    TW.gui.lastFilters[`${sliderDivID}/${reltypestr}`] = initialValue
+    TW.gui.lastFilters[sliderId] = initialValue
 
     var present = TW.states.slice(-1)[0];
 
@@ -988,7 +999,7 @@ function EdgeWeightFilter(sliderDivID , reltypestr ,  criteria) {
         break;
     }
 
-    // legacy technique (should use .hidden more and possibly edg indx by sizes)
+    // legacy technique (should possibly use edg indx by sizes)
     $(sliderDivID).freshslider({
         range: true,
         step: 1,
@@ -1014,7 +1025,7 @@ function EdgeWeightFilter(sliderDivID , reltypestr ,  criteria) {
             edgeSlideTimeout = setTimeout ( function () {
 
                 var filtervalue = low+"-"+high
-                var lastvalue = TW.gui.lastFilters[`${sliderDivID}/${reltypestr}`]
+                var lastvalue = TW.gui.lastFilters[sliderId]
 
                 if(filtervalue!=lastvalue) {
 
@@ -1122,10 +1133,22 @@ function EdgeWeightFilter(sliderDivID , reltypestr ,  criteria) {
                       }
                   }
 
-                  // fixed positions: no more auto-fa2
+                  if (!firstTimeFlag && !TW.conf.stablePositions) {
+                    setTimeout(function() {
+                        reInitFa2({
+                          useSoftMethod: false,
+                          // recreates FA2 edges array after changing the edges
+                          skipHidden: true,
+                          callback: function() {
+                            // runs FA2
+                            sigma_utils.smartForceAtlas()
+                          }
+                        })
+                    }, 10)
+                  }
 
                   // memoize as last value
-                  TW.gui.lastFilters[`${sliderDivID}/${reltypestr}`] = filtervalue
+                  TW.gui.lastFilters[sliderId] = filtervalue
                 }
 
                 // in any case
@@ -1154,7 +1177,7 @@ function NodeWeightFilter( sliderDivID , tgtNodeKey) {
     }
 
     if(TW.partialGraph.graph.nNodes() < 2) {
-      console.warn('not enough nodes for subsets: skipping GUI slider init')
+      console.debug('not enough nodes for subsets: skipping GUI slider init')
       showDisabledSlider(sliderDivID)
       return;
     }
@@ -1184,7 +1207,7 @@ function NodeWeightFilter( sliderDivID , tgtNodeKey) {
     // console.warn('NodeWeightFilter: steps', steps)
 
     if(steps<2) {
-      console.warn('no size steps for nodes: skipping GUI slider init')
+      console.debug('no size steps for nodes: skipping GUI slider init')
       showDisabledSlider(sliderDivID)
       return;
     }
@@ -1247,14 +1270,26 @@ function NodeWeightFilter( sliderDivID , tgtNodeKey) {
                           }
                       }
                   }
+                  console.log("TW.gui.lastFilters", TW.gui.lastFilters)
                   TW.gui.lastFilters[sliderDivID] = filtervalue
+
 
                   TW.partialGraph.render()
 
-                  // [ Starting FA2 ]
-                  setTimeout(function() {
-                    sigma_utils.smartForceAtlas({'duration': 2000}) // shorter FA2 sufficient
-                  }, 10)
+                  // [ Starting FA2 ]*
+                  if (! TW.conf.stablePositions) {
+                    setTimeout(function() {
+                        reInitFa2({
+                          useSoftMethod: false,
+                          // recreates FA2 nodes array after changing the nodes
+                          skipHidden: true,
+                          callback: function() {
+                            // runs FA2
+                            sigma_utils.smartForceAtlas()
+                          }
+                        })
+                    }, 10)
+                  }
                   // [ / Starting FA2 ]
                 }
             }, 1000)

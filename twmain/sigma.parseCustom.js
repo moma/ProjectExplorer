@@ -884,7 +884,7 @@ function dictfyGexf( gexf , categories ){
 
     // console.warn ('parseCustom output nodes', nodes)
 
-    console.warn ('parseCustom inverted index: vals to srcType', tmpVals)
+    // console.warn ('parseCustom inverted index: vals to srcType', tmpVals)
 
 
     // -------------- debug: for local stats ----------------
@@ -916,7 +916,9 @@ function dictfyGexf( gexf , categories ){
       // normal case => rescaling
       else {
         for(var nid in nodes){
-            nodes[nid].size = parseInt(1000 * ((parseFloat(nodes[nid].size) - minNodeSize) / realSizeRange * desiSizeRange + TW.conf.desirableNodeSizeMin)) / 1000
+            nodes[nid].size = parseInt(1000 * desiSizeRange * (parseFloat(nodes[nid].size) - minNodeSize) / realSizeRange + TW.conf.desirableNodeSizeMin) / 1000
+
+          // console.log("new size", nid, nodes[nid].size)
         }
       }
     }
@@ -1175,7 +1177,7 @@ function dictfyJSON( data , categories ) {
 
         // £TODO generalize some alternate names in here and maybe gexf
         if (n.term_occ) {
-          node.size = Math.sqrt(Number(n.term_occ))
+          node.size = Math.log(1+Number(n.term_occ))
         }
 
         if(parseFloat(node.size) < minNodeSize)
@@ -1210,17 +1212,25 @@ function dictfyJSON( data , categories ) {
       TW.Facets = facetsBinning (tmpVals)
     }
 
-    // £TODO ask if wanted
-    // if we wanted linear rescale node sizes like dictfyGexf:
+    // linear rescale node sizes like dictfyGexf
+    if (!isUndef(TW.conf.desirableNodeSizeMin) && !isUndef(TW.conf.desirableNodeSizeMax)) {
+      let desiSizeRange = TW.conf.desirableNodeSizeMax-TW.conf.desirableNodeSizeMin
+      let realSizeRange = maxNodeSize - minNodeSize
 
-    // if (!isUndef(TW.conf.desirableNodeSizeMin) && !isUndef(TW.conf.desirableNodeSizeMax)) {
-    //   let desiSizeRange = TW.conf.desirableNodeSizeMax-TW.conf.desirableNodeSizeMin
-    //   let realSizeRange = maxNodeSize - minNodeSize
-    //   for(var nid in nodes){
-    //       nodes[nid].size = parseInt(1000 * ((parseFloat(nodes[nid].size) - minNodeSize) / realSizeRange * desiSizeRange + TW.conf.desirableNodeSizeMin)) / 1000
-    //   }
-    // }
+      if (realSizeRange == 0) {
+        for(var nid in nodes){
+          nodes[nid].size  = TW.conf.desirableNodeSizeMin
+        }
+      }
+      // normal case => rescaling
+      else {
+        for(var nid in nodes){
+            nodes[nid].size = parseInt(1000 * desiSizeRange * (nodes[nid].size - minNodeSize) / realSizeRange + TW.conf.desirableNodeSizeMin) / 1000
 
+          // console.log("new size", nid, nodes[nid].size)
+        }
+      }
+    }
 
     // £TODO this could be a call to clusterColoring()
     TW.gui.colorList.sort(function(){ return Math.random()-0.5; });

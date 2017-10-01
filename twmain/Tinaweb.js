@@ -799,6 +799,12 @@ var TinaWebJS = function ( sigmacanvas ) {
                 listener.bind('stop', function(event) {
                   var stillRunning = document.getElementById('noverlapwait')
                   if (stillRunning) {
+                    // update fa2 positions in any case, but don't skipHidden unless unstable positions
+                    reInitFa2({
+                      useSoftMethod: true,
+                      skipHidden: (TW.conf.stablePositions === false),
+                      callback: function() {console.debug("noverlap: updated fa2 positions")}
+                    })
                     TW.gui.elHtml.classList.remove('waiting');
                     noverButton.style.cursor = 'auto'
                     stillRunning.remove()

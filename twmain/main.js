@@ -574,16 +574,16 @@ function mainStartGraph(inFormat, inData, twInstance) {
 
         // global behavior -----------
         linLogMode: true,
-        edgeWeightInfluence: .3,
-        gravity: .8,
+        edgeWeightInfluence: .4,
+        gravity: .3,
         strongGravityMode: false,
         scalingRatio: 1,
+        skipHidden: false,      // if true fa2 initial filter nodes
 
         adjustSizes: false,     // ~ messy but sort of in favor of overlap prevention
 
         // favors global centrality
-        // (but rather not needed when data already shows topic-centered
-        //  node groups and/nor when preferential attachment type of data)
+        // (rather not needed for large preferential attachment type of data ?)
         outboundAttractionDistribution: false
       }
 

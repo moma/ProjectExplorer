@@ -913,33 +913,37 @@ function saveGraphIMG(){
 // first call (startForceAtlas2 or configForceAtlas2)
 // but it keeps its own node index (as byteArray) and
 // so needs to be recreated when nodes change
-function reInitFa2 (params) {
-  if (!params)  params = {}
+function reInitFa2 (params = {}) {
 
   sigma_utils.ourStopFA2()
 
-  if (params.useSoftMethod) {
+  // if (params.useSoftMethod) {
     // soft method: we just update FA2 internal index
     // (is good enough if new nodes are subset of previous nodes)
-    TW.partialGraph.supervisor.graphToByteArrays()
+    TW.partialGraph.supervisor.graphToByteArrays(
+      {'skipHidden': params.skipHidden || !TW.conf.stablePositions}
+    )
 
     // now cb
     if (params.callback) {
       params.callback()
     }
-  }
-  else {
-    TW.partialGraph.killForceAtlas2()
-
-    // after 1s to let killForceAtlas2 finish
-    setTimeout ( function() {
-      // init FA2
-      TW.partialGraph.configForceAtlas2(TW.FA2Params)
-
-      // now cb
-      if (params.callback) {
-        params.callback()
-      }
-    }, 1000)
-  }
+  // }
+  // else {
+  //   TW.partialGraph.killForceAtlas2()
+  //
+  //   // after 1s to let killForceAtlas2 finish
+  //   setTimeout ( function() {
+  //     // init FA2
+  //     if (params.skipHidden || !TW.conf.stablePositions) {
+  //       TW.FA2Params.skipHidden = true
+  //     }
+  //     TW.partialGraph.configForceAtlas2(TW.FA2Params)
+  //
+  //     // now cb
+  //     if (params.callback) {
+  //       params.callback()
+  //     }
+  //   }, 1000)
+  // }
 }

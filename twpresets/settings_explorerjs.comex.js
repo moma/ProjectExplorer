@@ -128,7 +128,7 @@ TW.conf = (function(TW){
 
   // to normalize node sizes (larger range does increase visual size difference)
   TWConf.desirableNodeSizeMin=1;
-  TWConf.desirableNodeSizeMax=10;
+  TWConf.desirableNodeSizeMax=2;
 
 
   // =============
@@ -213,6 +213,11 @@ TW.conf = (function(TW){
   TWConf.overSampling = true      // hi-def rendering (true => pixelRatio x 2)
                                   // (/!\ costly)
 
+  TWConf.stablePositions = true    // remember overall positions for all types
+                                   //    (and when layouts are called,
+                                   //     all types are moving together
+                                   //      even when some are hidden)
+
   // sigma rendering settings
   // ------------------------
   TWConf.sigmaJsDrawingProperties = {
@@ -279,8 +284,8 @@ TW.conf = (function(TW){
 
   // relative sizes (iff ChangeType == both nodetypes)
   TWConf.sizeMult = [];
-  TWConf.sizeMult[0] = 2.0;     // ie for node type 0 (<=> sem)
-  TWConf.sizeMult[1] = 3.0;     // ie for node type 1 (<=> soc)
+  TWConf.sizeMult[0] = 1.0;     // ie for node type 0 (<=> sem)
+  TWConf.sizeMult[1] = 2.0;     // ie for node type 1 (<=> soc)
 
 
   // ===========
