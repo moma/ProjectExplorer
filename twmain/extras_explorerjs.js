@@ -1174,6 +1174,7 @@ function fillAttrsInForm(menuId, optionalAttTypeConstraint) {
     let opt = document.createElement('option')
     opt.value = att
     opt.innerText = att
+    opt.dataset.opttype = "filled"
     if (att in TW.facetOptions && TW.facetOptions[att].legend) {
       opt.innerText = TW.facetOptions[att].legend + " (" + att + ")"
     }
@@ -1182,12 +1183,6 @@ function fillAttrsInForm(menuId, optionalAttTypeConstraint) {
     }
     if (att == 'clust_louvain') {
       opt.selected = true
-    }
-    if (att in TW.sigmaAttributes) {
-      opt.dataset.opttype = "auto"
-    }
-    else {
-      opt.dataset.opttype = "filled"
     }
     elChooser.appendChild(opt)
   }
