@@ -516,11 +516,14 @@ function changeType(optionaltypeFlag) {
     deselectNodes()
 
     for (var nid in TW.Nodes) {
+      let n = TW.partialGraph.graph.nodes(nid)
       if (newNodes[nid]) {
-        TW.partialGraph.graph.nodes(nid).hidden = false
+        n.hidden = false
+        n.sliderlock = false
       }
       else {
-        TW.partialGraph.graph.nodes(nid).hidden = true
+        n.hidden = true
+        n.sliderlock = true
       }
     }
 
@@ -551,11 +554,14 @@ function changeType(optionaltypeFlag) {
 
     // 8 - effect the changes on edges
     for (var eid in TW.Edges) {
+      let e = TW.partialGraph.graph.edges(eid)
       if (newEdges[eid]) {
-        TW.partialGraph.graph.edges(eid).hidden = false
+        e.hidden = false
+        e.sliderlock = false
       }
       else {
-        TW.partialGraph.graph.edges(eid).hidden = true
+        e.hidden = true
+        e.sliderlock = true
       }
     }
 
@@ -779,13 +785,25 @@ function changeLevel(optionalTgtState) {
         }
 
         for (var nid in TW.Nodes) {
+          let n = TW.partialGraph.graph.nodes(nid)
           if (!nodesToKeep[nid]) {
-            TW.partialGraph.graph.nodes(nid).hidden = true
+            n.hidden = true
+            n.sliderlock = true
+          }
+          else {
+            n.hidden = false
+            n.sliderlock = false
           }
         }
         for (var eid in TW.Edges) {
+          let e = TW.partialGraph.graph.edges(eid)
           if (! edgesToKeep[eid]) {
-            TW.partialGraph.graph.nodes(nid).hidden = true
+            e.hidden = true
+            e.sliderlock = true
+          }
+          else {
+            e.hidden = false
+            e.sliderlock = false
           }
         }
 
@@ -797,10 +815,14 @@ function changeLevel(optionalTgtState) {
                       // console.log( "\t" + voisinage[i] + " vs " + voisinage[j] )
                       let e1 = TW.partialGraph.graph.edges(voisinage[i]+";"+voisinage[j])
                       let e2 = TW.partialGraph.graph.edges(voisinage[j]+";"+voisinage[i])
-                      if (e1 && e1.hidden)
+                      if (e1 && e1.hidden) {
                         e1.hidden = false
-                      if (e2 && e2.hidden)
+                        e1.sliderlock = false
+                      }
+                      if (e2 && e2.hidden) {
                         e2.hidden = false
+                        e2.sliderlock = false
+                      }
                   }
               }
           }
@@ -811,21 +833,27 @@ function changeLevel(optionalTgtState) {
           // var t0 = performance.now()
           for(var nid in TW.Nodes) {
             // we unhide 1 by 1
+            let n = TW.partialGraph.graph.nodes(nid)
             if (activetypesDict[TW.Nodes[nid].type]) {
-              TW.partialGraph.graph.nodes(nid).hidden = false
+              n.hidden = false
+              n.sliderlock = false
             }
             else {
-              TW.partialGraph.graph.nodes(nid).hidden = true
+              n.hidden = true
+              n.sliderlock = true
             }
           }
           for(var eid in TW.Edges) {
             for (var k in activereltypes) {
               let activereltype = activereltypes[k]
+              let e = TW.partialGraph.graph.edges(eid)
               if(TW.Edges[eid].categ == activereltype) {
-                TW.partialGraph.graph.edges(eid).hidden = false
+                e.hidden = false
+                e.sliderlock = false
               }
               else {
-                TW.partialGraph.graph.edges(eid).hidden = true
+                e.hidden = true
+                e.sliderlock = true
               }
             }
           }
@@ -1076,50 +1104,44 @@ function EdgeWeightFilter(sliderDivID , reltypestr ,  criteria) {
 
                       if(i>=low && i<=high) {
                           if(addflag) {
-                              // console.log("adding "+ids.join())
-                              for(var i in eids) {
-                                  let eid = eids[i]
+                            // console.log("adding "+ids.join())
+                            for(var i in eids) {
+                              let eid = eids[i]
 
-                                  if (TW.Edges[eid])
-                                    TW.Edges[eid].lock = false;
-                                  else
-                                    console.warn("skipped missing eid", eid)
+                              // consequences of local level or change type:
+                              // stepToIdsArr is full of edges that don't really exist at this point
+                              // we need to distinguish between
+                              //    - absent edges (sliderlock true)
+                              //       => keep them absent because of local
+                              //    - edges with hidden nodes (sliderlock false)
+                              //       => effect of a node slider => make them appear
 
-                                  // local level case
-                                  // stepToIdsArr is full of edges that don't really exist at this point
-                                  // we need to distinguish between absent edges => keep them absent because of local
-                                  //         and edges with hidden nodes => effect of a node slider => make them appear
-                                  if (! present.level) {
+                              // NB we assume the sigma convention eid = "nid1;nid2"
+                              let e = TW.partialGraph.graph.edges(eid)
+                              if (!e.sliderlock) {
+                                let nidkeys = eid.split(';')
 
-                                    // NB we assume the sigma convention eid = "nid1;nid2"
-                                    let nidkeys = eid.split(';')
+                                if (nidkeys.length != 2) {
+                                  console.error("invalid edge id:" + eid)
+                                }
+                                else {
+                                  let sid = nidkeys[0]
+                                  let tid = nidkeys[1]
 
-                                    if (nidkeys.length != 2) {
-                                      console.error("invalid edge id:" + eid)
-                                    }
-                                    else {
-                                      let sid = nidkeys[0]
-                                      let tid = nidkeys[1]
+                                  let src = TW.partialGraph.graph.nodes(sid)
+                                  let tgt = TW.partialGraph.graph.nodes(tid)
 
-                                      let presentSid = TW.partialGraph.graph.nodes(sid)
-                                      let presentTid = TW.partialGraph.graph.nodes(tid)
-
-                                      // if nodes not removed by local view
-                                      if (   presentSid
-                                          && presentTid) {
-                                            presentSid.hidden = false
-                                            presentTid.hidden = false
-                                      }
-                                    }
+                                  // if nothing is locked (nodes not
+                                  // removed by changetype or local view)
+                                  if (   (src && !src.sliderlock)
+                                      && (tgt && !tgt.sliderlock)) {
+                                        src.hidden = false
+                                        tgt.hidden = false
+                                        e.hidden = false
                                   }
-                                  // in any case we show the edge
-                                  // global level case
-                                  if (! TW.partialGraph.graph.edges(eid)) {
-                                    // legacy fallback shouldn't be necessary
-                                    add1Elem(eid)
-                                  }
-                                  TW.partialGraph.graph.edges(eid).hidden = false
+                                }
                               }
+                            }
                           }
                       } else {
                           if(delflag) {
@@ -1250,27 +1272,21 @@ function NodeWeightFilter( sliderDivID , tgtNodeKey) {
                       if(i>=low && i<=high){
                           for(var id in ids) {
                               ID = ids[id]
-                              if (! TW.Nodes[ID]) {
-                                console.warn ('nodeslider asks for nonexistatn ID', ID)
-                                continue;
-                              }
-
-                              TW.Nodes[ID].lock = false;
-                              if(TW.partialGraph.graph.nodes(ID))
-                                  TW.partialGraph.graph.nodes(ID).hidden = false;
+                              let n = TW.partialGraph.graph.nodes(ID)
+                              if(n && !n.sliderlock)
+                                  n.hidden = false;
                           }
                       } else {
                           for(var id in ids) {
                               ID = ids[id]
-                              TW.Nodes[ID].lock = true;
-                              if(TW.partialGraph.graph.nodes(ID))
-                                  TW.partialGraph.graph.nodes(ID).hidden = true;
+                              let n = TW.partialGraph.graph.nodes(ID)
+                              if(n && !n.sliderlock)
+                                  n.hidden = true;
                           }
                       }
                   }
                   console.log("TW.gui.lastFilters", TW.gui.lastFilters)
                   TW.gui.lastFilters[sliderDivID] = filtervalue
-
 
                   TW.partialGraph.render()
 
