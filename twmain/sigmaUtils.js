@@ -203,7 +203,7 @@ var SigmaUtils = function () {
       var baseRGB = edge.customAttrs.useAltColor ? edge.customAttrs.alt_rgb : edge.customAttrs.rgb
 
       if (edge.customAttrs.activeEdge) {
-        size = (defSize * 2) + 1
+        size = defSize * 1.5 + .5
 
         // active edges look well with no opacity
         color = `rgb(${baseRGB})`
@@ -212,6 +212,7 @@ var SigmaUtils = function () {
       }
       else {
         color = settings('twEdgeGreyColor')
+        // console.log("defSize", defSize)
         size = defSize
       }
 
@@ -539,33 +540,34 @@ var SigmaUtils = function () {
         }
         catch(e) {console.log(e)}
 
+        // remove wait icon overlay on button
         if(document.getElementById('layoutwait')) {
           document.getElementById('layoutwait').remove()
         }
 
         // restore edges if needed
         if (document.getElementById('edges-switch').checked) {
-          this.toggleEdges(true)
+          sigma_utils.toggleEdges(true)
         }
       }
 
       // factorized: forceAtlas2 supervisor call with:
       //  - togglability (ie. turns FA2 off if called again)
       //  - custom expiration duration
-      //  - conditions on graph size (args.adapt uses these to slow down small graphs)
       //  - edges management (turns them off and restores them after finished)
+      //
+      // NB we don't change config here to be able to inherit last one
+      //    => conditions on graph size or meso context handled by reInitFa2
 
       // POSS: use n.fixed flag https://github.com/jacomyal/sigma.js/issues/884
-      this.smartForceAtlas = function (args) {
+      this.smartForceAtlas = function (args = {}) {
         if (TW.conf.fa2Available) {
-          if (!args)             args = {}
-          if (!args.adapt)       args.adapt = true     // adapt speed to gr size
           if (!args.manual)      args.manual = false
           if (!args.duration)    args.duration = parseInt(TW.conf.fa2Milliseconds) || 4000
 
           // togglability case
           if(TW.partialGraph.isForceAtlas2Running()) {
-              this.ourStopFA2()
+              sigma_utils.ourStopFA2()
               return;
           }
           // normal case
@@ -580,35 +582,10 @@ var SigmaUtils = function () {
                     setTimeout(function(){sigma_utils.ourStopFA2()},args.duration)
                 }
 
-                // size adjust
-                if (args.adapt) {
-                  // POSS make always true & do this only once at FillGraph time
-                  let nNdsVizbl = getVisibleNodes().length
-                  // let nNdsVizbl = TW.partialGraph.graph.nNodes()
-                  // slowDown default is 1.5 but optimal effect is when adapting
-                  TW.FA2Params.slowDown = Math.max(.1,parseInt(30000/nNdsVizbl)/100)
-                  // slowDown of 300/n:                         ^^^^^^^^^
-                  //                                       100    for    3 nodes
-                  //                                        20    for   15 nodes
-                  //                                        12.5  for   24 nodes
-                  //                                          .6  for  500 nodes
-                  //                                          .15 for 2000 nodes
-
-                  // when very large graphs, wait more iterations b/w each render
-                  if (nNdsVizbl > 3000) {
-                    TW.FA2Params.iterationsPerRender = 2*parseInt(Math.sqrt(nNdsVizbl)/6 - 2)
-                  }
-                  TW.partialGraph.configForceAtlas2(TW.FA2Params)
-
-                  // console.log("nVNodes, slowDown", nNdsVizbl, TW.FA2Params.slowDown)
-                  // console.log("iterationsPerRender", parseInt(TW.FA2Params.iterationsPerRender))
-                }
-
                 // hide edges during work for smaller cpu load
                 if (TW.partialGraph.settings('drawEdges')) {
-                  this.toggleEdges(false)
+                  sigma_utils.toggleEdges(false)
                 }
-
 
                 // console.error("running")
                 try {

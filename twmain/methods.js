@@ -914,36 +914,63 @@ function saveGraphIMG(){
 // but it keeps its own node index (as byteArray) and
 // so needs to be recreated when nodes change
 function reInitFa2 (params = {}) {
-
   sigma_utils.ourStopFA2()
+  TW.partialGraph.killForceAtlas2()
 
-  // if (params.useSoftMethod) {
-    // soft method: we just update FA2 internal index
-    // (is good enough if new nodes are subset of previous nodes)
-    TW.partialGraph.supervisor.graphToByteArrays(
-      {'skipHidden': params.skipHidden || !TW.conf.stablePositions}
-    )
+  // after 150ms to let killForceAtlas2 finish
+  setTimeout ( function() {
+    // start from a copy of the standard params
+    let theseFA2Params = Object.assign({}, TW.FA2Params)
+
+    // tweak FA2 config
+    // ----------------
+
+    // meso: skipHidden, no gravity, no barnesHut, slightly larger scalingRatio.
+    if (params.localZoneSettings) {
+      theseFA2Params.skipHidden = true
+      // gravity not needed in meso: no drift b/c always 1 connected component
+      theseFA2Params.gravity = 0
+      theseFA2Params.barnesHutOptimize = false
+      theseFA2Params.scalingRatio = TW.FA2Params.scalingRatio * 3
+      theseFA2Params.edgeWeightInfluence = .75
+
+      // testing: adjust slowDown in local zone
+      params.sizeadapt = true
+    }
+
+    // when skipHidden though not in meso (eg when sliders and !stablePositions)
+    if (params.skipHidden || !TW.conf.stablePositions) {
+      theseFA2Params.skipHidden = true
+    }
+
+    // POSS: speed adjust for small graphs
+    if (params.sizeadapt) {
+      let nNds
+      if (theseFA2Params.skipHidden) {
+        nNds = getVisibleNodes().length
+      }
+      else {
+        nNds = TW.partialGraph.graph.nNodes()
+      }
+      // let nNdsVizbl =
+      // slowDown default is 1.5 but optimal effect is when adapting
+      theseFA2Params.slowDown = Math.max(.1,parseInt(30000/nNds)/100)
+      // slowDown of 300/n:                          ^^^^^^^^^
+      //                                       100    for    3 nodes
+      //                                        20    for   15 nodes
+      //                                        12.5  for   24 nodes
+      //                                          .6  for  500 nodes
+      //                                          .15 for 2000 nodes
+
+      console.log("nNodes, slowDown", nNds, TW.FA2Params.slowDown)
+    }
+
+    // apply persistent conf
+    TW.partialGraph.configForceAtlas2(theseFA2Params)
 
     // now cb
     if (params.callback) {
       params.callback()
     }
-  // }
-  // else {
-  //   TW.partialGraph.killForceAtlas2()
-  //
-  //   // after 1s to let killForceAtlas2 finish
-  //   setTimeout ( function() {
-  //     // init FA2
-  //     if (params.skipHidden || !TW.conf.stablePositions) {
-  //       TW.FA2Params.skipHidden = true
-  //     }
-  //     TW.partialGraph.configForceAtlas2(TW.FA2Params)
-  //
-  //     // now cb
-  //     if (params.callback) {
-  //       params.callback()
-  //     }
-  //   }, 1000)
-  // }
+  }, 150)
 }

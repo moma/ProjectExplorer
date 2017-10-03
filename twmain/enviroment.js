@@ -630,18 +630,16 @@ function changeType(optionaltypeFlag) {
     fillAttrsInForm('choose-attr')
     fillAttrsInForm('attr-titling-metric', 'num')
 
-    if (! TW.conf.stablePositions) {
-      // for (var nid in newNodes) {
-      //   TW.partialGraph.graph.nodes(nid).x = 0
-      //   TW.partialGraph.graph.nodes(nid).y = 0
-      // }
+    // in meso the changed nodes always need their FA2 config
+    if (!outgoing.level || !TW.conf.stablePositions) {
       reInitFa2({
-        useSoftMethod: false,
-        // recreates FA2 nodes array from new nodes
+        localZoneSettings: !outgoing.level,
         skipHidden: true,
         callback: function() {
           // runs FA2
-          sigma_utils.smartForceAtlas()
+          if (!TW.conf.stablePositions) {
+            sigma_utils.smartForceAtlas()
+          }
         }
       })
     }
@@ -873,17 +871,20 @@ function changeLevel(optionalTgtState) {
         }
       }
 
-      if (! TW.conf.stablePositions) {
-        reInitFa2({
-          useSoftMethod: !futurelevel,
-          // recreates FA2 nodes array after changing the nodes
-          skipHidden: true,
-          callback: function() {
-            // runs FA2
+      // recreates FA2 nodes array after changing the nodes
+      reInitFa2({
+        skipHidden: !futurelevel,          // <= in meso, nodes move freely
+        localZoneSettings: !futurelevel,   // <= and they have lighter settings
+        callback: function() {
+          // runs FA2
+          if (! TW.conf.stablePositions) {
             sigma_utils.smartForceAtlas()
           }
-        })
-      }
+
+          // remove changeLevel waiting cursor
+          TW.gui.elHtml.classList.remove('waiting');
+        }
+      })
 
 
       // console.log("changeLevel time:", performance.now() - clstart)
@@ -1136,13 +1137,10 @@ function EdgeWeightFilter(sliderDivID , reltypestr ,  criteria) {
                   if (!firstTimeFlag && !TW.conf.stablePositions) {
                     setTimeout(function() {
                         reInitFa2({
-                          useSoftMethod: false,
                           // recreates FA2 edges array after changing the edges
                           skipHidden: true,
-                          callback: function() {
-                            // runs FA2
-                            sigma_utils.smartForceAtlas()
-                          }
+                          // runs FA2 with args from reInitFa2
+                          callback: sigma_utils.smartForceAtlas
                         })
                     }, 10)
                   }
@@ -1280,13 +1278,10 @@ function NodeWeightFilter( sliderDivID , tgtNodeKey) {
                   if (! TW.conf.stablePositions) {
                     setTimeout(function() {
                         reInitFa2({
-                          useSoftMethod: false,
                           // recreates FA2 nodes array after changing the nodes
                           skipHidden: true,
-                          callback: function() {
-                            // runs FA2
-                            sigma_utils.smartForceAtlas()
-                          }
+                          // runs FA2 with args from reInitFa2
+                          callback: sigma_utils.smartForceAtlas
                         })
                     }, 10)
                   }
