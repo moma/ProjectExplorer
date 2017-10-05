@@ -346,6 +346,8 @@ function changeType(optionaltypeFlag) {
     //                      |
     //                      updates the sliders and selection panels
 
+    sigma_utils.ourStopFA2();
+
     let typeFlag
     let outgoing = TW.SystemState()
     let oldTypeId = outgoing.activetypes.indexOf(true)
@@ -637,13 +639,13 @@ function changeType(optionaltypeFlag) {
     fillAttrsInForm('attr-titling-metric', 'num')
 
     // in meso the changed nodes always need their FA2 config
-    if (!outgoing.level || !TW.conf.stablePositions) {
+    if (!outgoing.level || TW.conf.independantTypes || !TW.conf.stablePositions) {
       reInitFa2({
         localZoneSettings: !outgoing.level,
         skipHidden: true,
         callback: function() {
           // runs FA2
-          if (!TW.conf.stablePositions) {
+          if (TW.conf.independantTypes || !TW.conf.stablePositions) {
             sigma_utils.smartForceAtlas()
           }
         }

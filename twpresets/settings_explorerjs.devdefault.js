@@ -212,6 +212,8 @@ TW.conf = (function(TW){
                                    //     all types are moving together
                                    //      even when some are hidden)
 
+  TWConf.independantTypes = false  // if stablePositions, types are not moving together
+
   // sigma rendering settings
   // ------------------------
   TWConf.sigmaJsDrawingProperties = {

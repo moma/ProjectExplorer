@@ -589,8 +589,16 @@ function mainStartGraph(inFormat, inData, twInstance) {
 
       if (TW.conf.debug.logSettings) console.info("FA2 settings", TW.FA2Params)
 
-      // init FA2 for any future forceAtlas2 calls
-      TW.partialGraph.configForceAtlas2(TW.FA2Params)
+      // adapt init parameters to conf and run initial fa2
+      if (TW.conf.fa2Enabled) {
+        reInitFa2({
+          skipHidden: TW.conf.independantTypes,
+          callback: function() {
+            // initial FA2
+            sigma_utils.smartForceAtlas()
+          }
+        })
+      }
 
       // NB: noverlap conf depends on sizeRatios so updated before each run
 
@@ -599,11 +607,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
 
       // mostly json data are extracts provided by DB apis => no positions
       // if (inFormat == "json")  TW.conf.fa2Enabled = true
-
-      // will run fa2 if enough nodes and TW.conf.fa2Enabled == true
-      sigma_utils.smartForceAtlas()
   }
-
 }
 
 setTimeout( function() {

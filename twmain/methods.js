@@ -938,7 +938,7 @@ function reInitFa2 (params = {}) {
       params.sizeadapt = TW.conf.fa2SlowerMeso
     }
 
-    // when skipHidden though not in meso (eg when sliders and !stablePositions)
+    // when skipHidden though not in meso (eg when independantTypes or sliders and !stablePositions)
     if (params.skipHidden || !TW.conf.stablePositions) {
       theseFA2Params.skipHidden = true
     }
