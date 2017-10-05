@@ -566,7 +566,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
 
       TW.FA2Params = {
         // adapting speed -------------
-        slowDown: 1.5,
+        slowDown: .8,                      // above 1:slower, in [.2;1]:faster, under .2:unstable
         startingIterations: 2,             // keep it an even number to reduce visible oscillations at rendering
         iterationsPerRender: 4,            // idem
         barnesHutOptimize: false,
@@ -574,8 +574,8 @@ function mainStartGraph(inFormat, inData, twInstance) {
 
         // global behavior -----------
         linLogMode: true,
-        edgeWeightInfluence: .4,
-        gravity: .3,
+        edgeWeightInfluence: .5,           // <= slowish when above .5, unstable at 1
+        gravity: .4,
         strongGravityMode: false,
         scalingRatio: 1,
         skipHidden: false,      // if true fa2 initial filter nodes

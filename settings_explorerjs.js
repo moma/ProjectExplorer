@@ -183,6 +183,7 @@ TW.conf = (function(TW){
     TWConf.fa2Enabled= true;        // fa2 auto-run at start and after graph modified ?
     TWConf.fa2Milliseconds=4000;    // duration of auto-run
     TWConf.minNodesForAutoFA2 = 5   // graph size threshold to auto-run
+    TWConf.fa2SlowerMeso = false    // slow down meso if few nodes
 
 
   // Full-text search

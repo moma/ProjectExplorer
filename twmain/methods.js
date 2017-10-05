@@ -754,7 +754,7 @@ function prepareEdgesRenderingProperties(edgesDict, nodesDict) {
   for (var eid in edgesDict) {
     var e = edgesDict[eid]
 
-    e.weight = Math.round(e.weight*1000)/1000
+    e.weight = Math.round(e.weight*100000)/100000
     // e.size = e.weight // REFA s/weight/size/ ?
 
     var rgbStr = sigmaTools.edgeRGB(nodesDict[e.source].color, nodesDict[e.target].color)
@@ -931,11 +931,11 @@ function reInitFa2 (params = {}) {
       // gravity not needed in meso: no drift b/c always 1 connected component
       theseFA2Params.gravity = 0
       theseFA2Params.barnesHutOptimize = false
-      theseFA2Params.scalingRatio = TW.FA2Params.scalingRatio * 3
-      theseFA2Params.edgeWeightInfluence = .75
+      theseFA2Params.scalingRatio = TW.FA2Params.scalingRatio * 2
+      theseFA2Params.edgeWeightInfluence = .85
 
-      // testing: adjust slowDown in local zone
-      params.sizeadapt = true
+      // adjust slowDown in local zone (off by default)
+      params.sizeadapt = TW.conf.fa2SlowerMeso
     }
 
     // when skipHidden though not in meso (eg when sliders and !stablePositions)
@@ -952,17 +952,15 @@ function reInitFa2 (params = {}) {
       else {
         nNds = TW.partialGraph.graph.nNodes()
       }
-      // let nNdsVizbl =
       // slowDown default is 1.5 but optimal effect is when adapting
-      theseFA2Params.slowDown = Math.max(.1,parseInt(30000/nNds)/100)
-      // slowDown of 300/n:                          ^^^^^^^^^
-      //                                       100    for    3 nodes
-      //                                        20    for   15 nodes
-      //                                        12.5  for   24 nodes
-      //                                          .6  for  500 nodes
-      //                                          .15 for 2000 nodes
-
-      console.log("nNodes, slowDown", nNds, TW.FA2Params.slowDown)
+      theseFA2Params.slowDown = Math.max(.2,parseInt(9000/nNds)/100)
+      // slowDown of 90/n:                          ^^^^^^^^^
+      //                                        30    for    3 nodes
+      //                                         6    for   15 nodes
+      //                                         3.75 for   24 nodes
+      //                                          .3  for  300 nodes
+      //                                          .2  for  450 nodes and more
+      console.debug("nNodes, slowDown", nNds, theseFA2Params.slowDown)
     }
 
     // apply persistent conf
