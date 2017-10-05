@@ -1253,6 +1253,38 @@ function showAttrConf(event, optionalAttrname) {
 }
 
 
+function newSettingsAndRun() {
+
+  let scenario = document.getElementById('layout-scenario').value
+
+  if (scenario == "allstable") {
+    TW.conf.stablePositions = true
+    TW.conf.independantTypes = false
+    TW.FA2Params.iterationsPerRender = 6
+  }
+  else if (scenario == "indeptypes") {
+    TW.conf.stablePositions = true
+    TW.conf.independantTypes = true
+    TW.FA2Params.iterationsPerRender = 4
+  }
+  else if (scenario == "notstable") {
+    TW.conf.stablePositions = false
+    TW.conf.independantTypes = true
+    TW.FA2Params.iterationsPerRender = 4
+  }
+
+  console.warn("TW.conf.stablePositions <= ", TW.conf.stablePositions)
+  console.warn("TW.conf.independantTypes <= ", TW.conf.independantTypes)
+  console.warn("TW.FA2Params.iterationsPerRender <= ", TW.FA2Params.iterationsPerRender)
+
+  // in all cases we reload
+  TW.resetGraph()
+  var [inFormat, inData, mapLabel] = syncRemoteGraphData()
+  mainStartGraph(inFormat, inData, TW.instance)
+  writeLabel(mapLabel)
+}
+
+
 // writes new attribute configuration from user form, recreates facet bins AND runs the new color
 // processing time: ~~ 1.5 ms for 100 nodes
 function newAttrConfAndColor() {

@@ -218,6 +218,14 @@
                 </ul>
              </a></li>
 
+             <li>
+                 <a href="#dev-testing" id="facets" class="button"
+                    title="Open dev mode settings"
+                    data-toggle="modal" data-target="#dev-testing">
+                   <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+                 </a>
+             </li>
+
             <li class="tworow-selectors for-nodecategory-0">
               <!-- Create a subgraph over nodes from TW.categories[0] (terms or def nodes)-->
               <table>
@@ -503,6 +511,27 @@
     -->
     <div class="panel-group" id="varinfos-accordion">
 
+      <!-- <div class="panel panel-default" id="dev-testing">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-target="#test-settings" href="#test-settings"
+               data-parent="#varinfos-accordion">
+              <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+              &nbsp;Test settings
+            </a>
+          </h4>
+        </div>
+
+        <div class="panel-collapse collapse" id="test-settings">
+          <p>
+            <input id="stable-switch"
+                  title="Toggle 'stable positions' setting"
+                  class="nav btn btn-info"
+                  type="checkbox">
+            <span style="position: relative; top: 4px;">Stable positions</span>
+          </p>
+        </div>
+      </div> -->
 
       <div class="panel panel-default" id="video_explanation">
         <div class="panel-heading">
@@ -643,6 +672,49 @@
         </div>
         <div id="closeloader" data-dismiss="modal"></div>
     </div> -->
+
+
+    <div id="dev-testing" class="modal fade">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h4 class="modal-title">Test settings</h4>
+          </div>
+          <div class="modal-body">
+            <div class="uform-white">
+              <form id="dev_testing-form">
+                 <h3 class="formcat">Réglages de spatialisation</h3><br/>
+
+                   <div class="question">
+                     <div class="input-group">
+                       <label for="layout-scenario" class="smlabel input-group-addon">Scenarios</label>
+                       <select id="layout-scenario" name="layout-scenario" class="custom-select form-control">
+                           <option value="allstable">Spatialisation conjointe stable</option>
+                           <option selected value="indeptypes">Spatialisation distincte par types stable par filtres</option>
+                           <option value="notstable">Re-spatialisation à chaque vue ou filtre</option>
+                       </select>
+                     </div>
+                   </div>
+
+                 <!-- <h3 class="formcat">Fonction de match</h3><br/> -->
+
+              </form>
+
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-default" data-dismiss="modal">
+              Cancel
+            </button>
+            <button class="btn btn-primary"
+              type=button onclick="newSettingsAndRun()" data-dismiss="modal">
+              Run
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
 
     <div id="facet-options" class="modal fade">

@@ -412,3 +412,13 @@ ul.infoitems {
     background-color: #EEEEEE; color: #999999;
     text-align: right;
 }
+
+
+/* dev-testing panel */
+#dev-testing {
+}
+
+#test-settings {
+  padding: 20px;
+  border-radius: 2em;
+}
