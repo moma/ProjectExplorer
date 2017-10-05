@@ -564,6 +564,7 @@ var SigmaUtils = function () {
         if (TW.conf.fa2Available) {
           if (!args.manual)      args.manual = false
           if (!args.duration)    args.duration = parseInt(TW.conf.fa2Milliseconds) || 4000
+          if (!args.propDuration) args.propDuration = TW.conf.fa2AdaptDuration
 
           // togglability case
           if(TW.partialGraph.isForceAtlas2Running()) {
@@ -578,8 +579,17 @@ var SigmaUtils = function () {
                 if (! args.manual) {
                   if (TW.partialGraph.graph.nNodes() < TW.conf.minNodesForAutoFA2)
                     return
-                  else
-                    setTimeout(function(){sigma_utils.ourStopFA2()},args.duration)
+                  else {
+                    if (!args.propDuration) {
+                      setTimeout(function(){sigma_utils.ourStopFA2()},args.duration)
+                    }
+                    else {
+                      let nEds = getVisibleEdges().length
+                      let newDur = parseInt(args.duration * Math.log(nEds) / 3)
+                      setTimeout(function(){sigma_utils.ourStopFA2()},newDur)
+                      console.debug("fa2 adapted duration", newDur)
+                    }
+                  }
                 }
 
                 // hide edges during work for smaller cpu load
