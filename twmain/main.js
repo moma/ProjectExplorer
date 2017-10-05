@@ -566,18 +566,18 @@ function mainStartGraph(inFormat, inData, twInstance) {
 
       TW.FA2Params = {
         // adapting speed -------------
-        slowDown: .8,                      // above 1:slower, in [.2;1]:faster, under .2:unstable
-        startingIterations: 2,             // keep it an even number to reduce visible oscillations at rendering
-        iterationsPerRender: 4,            // idem
+        slowDown: .4,                      // above 1:slower, in [.2;1]:faster, under .2:unstable
+        startingIterations: 4,             // keep it an even number to reduce visible oscillations at rendering
+        iterationsPerRender: 6,            // idem
         barnesHutOptimize: false,
         // barnesHutTheta: .5,
 
         // global behavior -----------
         linLogMode: true,
-        edgeWeightInfluence: .5,           // <= slowish when above .5, unstable at 1
-        gravity: .4,
+        edgeWeightInfluence: .7,           // <= slowish when above .5, unstable at 1
+        gravity: 1,
         strongGravityMode: false,
-        scalingRatio: 1,
+        scalingRatio: .5,
         skipHidden: false,      // if true fa2 initial filter nodes
 
         adjustSizes: false,     // ~ messy but sort of in favor of overlap prevention
@@ -603,7 +603,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
       // NB: noverlap conf depends on sizeRatios so updated before each run
 
       // REFA new sigma.js
-      TW.partialGraph.camera.goTo({x:0, y:0, ratio:0.9, angle: 0})
+      TW.partialGraph.camera.goTo({x:0, y:0, ratio:1, angle: 0})
 
       // mostly json data are extracts provided by DB apis => no positions
       // if (inFormat == "json")  TW.conf.fa2Enabled = true

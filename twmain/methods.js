@@ -931,7 +931,7 @@ function reInitFa2 (params = {}) {
       // gravity not needed in meso: no drift b/c always 1 connected component
       theseFA2Params.gravity = 0
       theseFA2Params.barnesHutOptimize = false
-      theseFA2Params.scalingRatio = TW.FA2Params.scalingRatio * 2
+      theseFA2Params.scalingRatio = TW.FA2Params.scalingRatio * 1.5
       theseFA2Params.edgeWeightInfluence = .85
 
       // adjust slowDown in local zone (off by default)

@@ -988,8 +988,8 @@ function dictfyGexf( gexf , categories ){
                                               source, target )
 
 
-              // boost crossrels edges
-              if (edge.categ == "XR")   edge.weight *= 1.5
+              // boost crossrels edges: off (we do it in source app)
+              // if (edge.categ == "XR")   edge.weight *= 10
 
               // save
               if(!edges[target+";"+source])
@@ -1270,8 +1270,8 @@ function dictfyJSON( data , categories ) {
                                           typestring,
                                           source, target )
 
-          // boost crossrels edges
-          if (edge.categ == "XR")   edge.weight *= 1.5
+          // boost crossrels edges: off (we do it in source app)
+          // if (edge.categ == "XR")   edge.weight *= 10
 
           // save
           if(!edges[target+";"+source])
