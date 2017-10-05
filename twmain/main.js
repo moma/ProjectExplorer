@@ -566,6 +566,9 @@ function mainStartGraph(inFormat, inData, twInstance) {
 
       if (TW.conf.debug.logSettings) console.info("FA2 settings", TW.FA2Params)
 
+      // track which type has already been spatialised once
+      TW.didFA2OnTypes = TW.categories.map(function(){return false})
+
       // adapt init parameters to conf and run initial fa2
       if (TW.conf.fa2Enabled) {
         reInitFa2({
@@ -573,6 +576,15 @@ function mainStartGraph(inFormat, inData, twInstance) {
           callback: function() {
             // initial FA2
             sigma_utils.smartForceAtlas()
+
+            if (TW.conf.stablePositions) {
+              if (TW.conf.independantTypes) {
+                TW.didFA2OnTypes = initialActivetypes
+              }
+              else {
+                TW.didFA2OnTypes = TW.categories.map(function(){return true})
+              }
+            }
           }
         })
       }
