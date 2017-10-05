@@ -589,10 +589,12 @@ function mainStartGraph(inFormat, inData, twInstance) {
         })
       }
 
-      // NB: noverlap conf depends on sizeRatios so updated before each run
 
       // REFA new sigma.js
-      TW.partialGraph.camera.goTo({x:0, y:0, ratio:1, angle: 0})
+      TW.partialGraph.camera.goTo({x:0, y:0, ratio:1.2, angle: 0})
+
+      // NB: noverlap conf depends on sizeRatios so updated before each run
+
 
       // mostly json data are extracts provided by DB apis => no positions
       // if (inFormat == "json")  TW.conf.fa2Enabled = true

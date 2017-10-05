@@ -60,10 +60,10 @@ TW.FA2Params = {
 
   // global behavior -----------
   linLogMode: true,
-  edgeWeightInfluence: .7,           // <= slowish when above .5, unstable at 1
-  gravity: 1,
+  edgeWeightInfluence: .7,          // <= slowish when above .5, unstable at 1
+  gravity: 1.1,
   strongGravityMode: false,
-  scalingRatio: .5,
+  scalingRatio: .7,
   skipHidden: false,      // if true fa2 initial filter nodes
 
   adjustSizes: false,     // ~ messy but sort of in favor of overlap prevention
