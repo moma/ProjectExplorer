@@ -175,13 +175,14 @@ TW.conf = (function(TW){
 
   // Layout options
   // --------------
-  TWConf.fa2Available=true;        // show/hide fa2Button
   TWConf.disperseAvailable=true;   // show/hide disperseButton
+  TWConf.fa2Available=true;        // show/hide fa2Button
 
   // if fa2Available, the auto-run config:
 
     TWConf.fa2Enabled= true;        // fa2 auto-run at start and after graph modified ?
     TWConf.fa2Milliseconds=4000;    // duration of auto-run
+    TWConf.fa2AdaptDuration=true;   // duration of auto-run proportional log(nEdges)
     TWConf.minNodesForAutoFA2 = 5   // graph size threshold to auto-run
 
 
