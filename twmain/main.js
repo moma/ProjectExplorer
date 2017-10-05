@@ -564,29 +564,6 @@ function mainStartGraph(inFormat, inData, twInstance) {
         }
       }
 
-      TW.FA2Params = {
-        // adapting speed -------------
-        slowDown: .4,                      // above 1:slower, in [.2;1]:faster, under .2:unstable
-        startingIterations: 4,             // keep it an even number to reduce visible oscillations at rendering
-        iterationsPerRender: 6,            // idem
-        barnesHutOptimize: false,
-        // barnesHutTheta: .5,
-
-        // global behavior -----------
-        linLogMode: true,
-        edgeWeightInfluence: .7,           // <= slowish when above .5, unstable at 1
-        gravity: 1,
-        strongGravityMode: false,
-        scalingRatio: .5,
-        skipHidden: false,      // if true fa2 initial filter nodes
-
-        adjustSizes: false,     // ~ messy but sort of in favor of overlap prevention
-
-        // favors global centrality
-        // (rather not needed for large preferential attachment type of data ?)
-        outboundAttractionDistribution: false
-      }
-
       if (TW.conf.debug.logSettings) console.info("FA2 settings", TW.FA2Params)
 
       // adapt init parameters to conf and run initial fa2
