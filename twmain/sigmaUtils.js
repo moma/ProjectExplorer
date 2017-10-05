@@ -190,7 +190,7 @@ var SigmaUtils = function () {
       var baseRGB = edge.customAttrs.useAltColor ? edge.customAttrs.alt_rgb : edge.customAttrs.rgb
 
       if (edge.customAttrs.activeEdge) {
-        size = (defSize * 2) + 1
+        size = (defSize * 1.5) + .5
 
         // active edges look well with no opacity
         color = `rgb(${baseRGB})`
@@ -526,6 +526,7 @@ var SigmaUtils = function () {
         }
         catch(e) {console.log(e)}
 
+        // remove wait icon overlay on button
         if(document.getElementById('layoutwait')) {
           document.getElementById('layoutwait').remove()
         }
@@ -539,7 +540,6 @@ var SigmaUtils = function () {
       // factorized: forceAtlas2 supervisor call with:
       //  - togglability (ie. turns FA2 off if called again)
       //  - custom expiration duration
-      //  - conditions on graph size (£TODO use these to slowDown small graphs)
       //  - edges management (turns them off and restores them after finished)
       this.smartForceAtlas = function (args) {
         if (TW.conf.fa2Available) {

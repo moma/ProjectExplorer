@@ -564,29 +564,6 @@ function mainStartGraph(inFormat, inData, twInstance) {
         }
       }
 
-      TW.FA2Params = {
-        // adapting speed -------------
-        slowDown: 1.5,
-        startingIterations: 2,             // keep it an even number to reduce visible oscillations at rendering
-        iterationsPerRender: 4,            // idem
-        barnesHutOptimize: false,
-        // barnesHutTheta: .5,
-
-        // global behavior -----------
-        linLogMode: true,
-        edgeWeightInfluence: .3,
-        gravity: .8,
-        strongGravityMode: false,
-        scalingRatio: 1,
-
-        adjustSizes: false,     // ~ messy but sort of in favor of overlap prevention
-
-        // favors global centrality
-        // (but rather not needed when data already shows topic-centered
-        //  node groups and/nor when preferential attachment type of data)
-        outboundAttractionDistribution: false
-      }
-
       if (TW.conf.debug.logSettings) console.info("FA2 settings", TW.FA2Params)
 
       // init FA2 for any future forceAtlas2 calls

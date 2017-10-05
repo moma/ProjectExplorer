@@ -752,7 +752,7 @@ function prepareEdgesRenderingProperties(edgesDict, nodesDict) {
   for (var eid in edgesDict) {
     var e = edgesDict[eid]
 
-    e.weight = Math.round(e.weight*1000)/1000
+    e.weight = Math.round(e.weight*100000)/100000
     // e.size = e.weight // REFA s/weight/size/ ?
 
     var rgbStr = sigmaTools.edgeRGB(nodesDict[e.source].color, nodesDict[e.target].color)

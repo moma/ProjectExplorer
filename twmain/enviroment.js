@@ -49,6 +49,28 @@ TW.gui.noverlapConf = {
                    // NB animation happens *after* processing
 }
 
+TW.FA2Params = {
+  // adapting speed -------------
+  slowDown: 1.5,
+  startingIterations: 2,             // keep it an even number to reduce visible oscillations at rendering
+  iterationsPerRender: 4,            // idem
+  barnesHutOptimize: false,
+  // barnesHutTheta: .5,
+
+  // global behavior -----------
+  linLogMode: true,
+  edgeWeightInfluence: .3,
+  gravity: .8,
+  strongGravityMode: false,
+  scalingRatio: 1,
+
+  adjustSizes: false,     // ~ messy but sort of in favor of overlap prevention
+
+  // favors global centrality
+  // (but rather not needed when data already shows topic-centered
+  //  node groups and/nor when preferential attachment type of data)
+  outboundAttractionDistribution: false
+}
 
 // POSS: themed variants (ex: for dark bg vs light bg)
 // contrasted color list for clusterColoring()
@@ -422,11 +444,17 @@ function changeType(optionaltypeFlag) {
 
     // 3 - define the projected selection (sourceNids => corresponding opposites)
     let sourceNids = outgoing.selectionNids
-    // // when jutsu and no selection => by def nothing happens
-    // // otherwise POSS: all local graph is selection
-    // if (typeFlag == 'all' && !sourceNids.length) {
-    //   sourceNids = TW.partialGraph.graph.nodes().map(function(n){return n.id})
-    // }
+    // when jutsu and no selection => we pick one selection at random (in meso mode we can't go to another meso with no selection, because nothing would appear)
+    if (typeFlag == 'all' && !sourceNids.length) {
+      sourceNids = []
+      for (var nid in TW.Nodes) {
+        if (! TW.Nodes[nid].hidden) {
+          sourceNids.push(nid)
+          break
+        }
+      }
+    }
+
     let targetNids = {}
     if (!mixedState) {
       targetNids = getNeighbors(sourceNids, 'XR')
@@ -1145,7 +1173,7 @@ function NodeWeightFilter( sliderDivID , tgtNodeKey) {
     }
 
     if(TW.partialGraph.graph.nNodes() < 2) {
-      console.warn('not enough nodes for subsets: skipping GUI slider init')
+      console.debug('not enough nodes for subsets: skipping GUI slider init')
       showDisabledSlider(sliderDivID)
       return;
     }
@@ -1175,7 +1203,7 @@ function NodeWeightFilter( sliderDivID , tgtNodeKey) {
     // console.warn('NodeWeightFilter: steps', steps)
 
     if(steps<2) {
-      console.warn('no size steps for nodes: skipping GUI slider init')
+      console.debug('no size steps for nodes: skipping GUI slider init')
       showDisabledSlider(sliderDivID)
       return;
     }
