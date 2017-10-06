@@ -1040,7 +1040,7 @@ var TinaWebJS = function ( sigmacanvas ) {
       //     ===============
       var zoomTimeoutId = null
       TW.cam.bind('coordinatesUpdated', function(e) {
-        $("#zoomSlider").slider("value",1/TW.cam.ratio)
+        $("#zoomSlider").slider("value",Math.log(1/(TW.cam.ratio+zoomSliRangeRatio)))
       })
 
 
@@ -1086,20 +1086,31 @@ var TinaWebJS = function ( sigmacanvas ) {
 
       // sliders events
       // ==============
+
+      var zoomSliRangeRatio = TW.conf.zoomMin/TW.conf.zoomMax
+      var zoomSliBoundaryTop = Math.log(1/(TW.conf.zoomMin+zoomSliRangeRatio))
+      var zoomSliBoundaryBot = Math.log(1/(TW.conf.zoomMax+zoomSliRangeRatio))
+      var zoomSliOrigin =      Math.log(1/(TW.cam.ratio+zoomSliRangeRatio))
+      var zoomSliStep = (zoomSliBoundaryTop - zoomSliBoundaryBot)/50
+
+      console.log("zoomSliOrigin",zoomSliOrigin)
+
       $("#zoomSlider").slider({
           orientation: "vertical",
 
           // new sigma.js current zoom ratio
           value: partialGraph.camera.ratio,
-          min: 1 / TW.conf.zoomMax,   // ex x.5
-          max: 1 / TW.conf.zoomMin,   // ex x32
+          min: zoomSliBoundaryBot,   // ex  log(1/(ZOOM-OUT_RATIO+k))
+          max: zoomSliBoundaryTop,   // ex  log(1/(ZOOM-IN_RATIO+k))
+          // where k is the ratio of the full range
+
           // range: true,
-          step: .2,
-          value: 1,
+          step: zoomSliStep,
+          value: zoomSliOrigin,
           slide: function( event, ui ) {
               TW.partialGraph.camera.goTo({
-                  // POSS: make a transform to increase detail around x = 1
-                  ratio: 1 / ui.value
+                  // we use 1/e^x -k transform for result like logscale on 1/x
+                  ratio: 1/Math.exp(ui.value) - zoomSliRangeRatio
               });
           }
       });

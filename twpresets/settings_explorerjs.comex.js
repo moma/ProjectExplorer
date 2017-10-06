@@ -263,8 +263,11 @@ TW.conf = (function(TW){
   TWConf.mesoBackground = '#fcfcd5'
 
   // mouse captor zoom limits
-  TWConf.zoomMin = .015625         // for zoom IN   (ex: 1/64 to allow zoom x64)
+  TWConf.zoomMin = 1/64            // for zoom IN   (ex: 1/64 to allow zoom x64)
   TWConf.zoomMax = 8               // for zoom OUT
+
+  // NB these "inverted" semantics are based on sigma's own zoomMin and zoomMax
+  //    cf. https://github.com/jacomyal/sigma.js/wiki/Settings#captors-settings
 
   // circle selection cursor
   TWConf.circleSizeMin = 0;

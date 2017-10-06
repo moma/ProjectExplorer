@@ -255,7 +255,7 @@ TW.conf = (function(TW){
   TWConf.mesoBackground = '#fcfcd5'
 
   // mouse captor zoom limits
-  TWConf.zoomMin = .015625         // for zoom IN   (ex: 1/64 to allow zoom x64)
+  TWConf.zoomMin = 1/64            // for zoom IN   (ex: 1/64 to allow zoom x64)
   TWConf.zoomMax = 8               // for zoom OUT
 
   // circle selection cursor
