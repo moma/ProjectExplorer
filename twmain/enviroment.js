@@ -719,8 +719,8 @@ function changeLevel(optionalTgtState) {
       else {
         var present = TW.SystemState(); // Last
         sels = present.selectionNids
-        deselectNodes()
       }
+      deselectNodes()
 
       let selsChecker = {}
       for (let i in sels) {
