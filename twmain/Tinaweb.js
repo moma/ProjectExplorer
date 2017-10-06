@@ -1048,6 +1048,16 @@ var TinaWebJS = function ( sigmacanvas ) {
       if (TW.conf.dragNodesAvailable) {
         var dragListener = sigma.plugins.dragNodes(partialGraph, partialGraph.renderers[0]);
 
+        dragListener.bind("dragend", function(dragEndEvent){
+          let mouseEvent = dragEndEvent.data.captor
+          if (mouseEvent.ctrlKey) {
+            // update FA2 positions array
+            reInitFa2({
+              callback: function() {console.debug("dragNodes: updated fa2 positions")}
+            })
+          }
+        })
+
         // intercept dragNodes events if not CTRL+click
         document.getElementById('sigma-contnr').addEventListener(
           'mousemove',
