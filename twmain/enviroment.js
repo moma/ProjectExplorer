@@ -1059,54 +1059,41 @@ function EdgeWeightFilter(sliderDivID , reltypestr ,  criteria) {
 
                       if(i>=low && i<=high) {
                           if(addflag) {
-                              // console.log("adding "+ids.join())
-                              for(var i in eids) {
-                                  let eid = eids[i]
+                            // console.log("adding "+ids.join())
+                            for(var i in eids) {
+                                let eid = eids[i]
 
-                                  if (TW.Edges[eid])
-                                    TW.Edges[eid].lock = false;
-                                  else
-                                    console.warn("skipped missing eid", eid)
+                                // we need to distinguish between
+                                //    - absent edges
+                                //       => keep them absent because of local
+                                //    - edges with absent nodes
+                                //       => effect of a node slider => make them appear
+                                let e = TW.partialGraph.graph.edges(eid)
+                                if (e) {
+                                  let nidkeys = eid.split(';')
 
-                                  // local level case
-                                  // stepToIdsArr is full of edges that don't really exist at this point
-                                  // we need to distinguish between absent edges => keep them absent because of local
-                                  //         and edges with hidden nodes => effect of a node slider => make them appear
-                                  if (! present.level) {
+                                  if (nidkeys.length != 2) {
+                                    console.error("invalid edge id:" + eid)
+                                  }
+                                  else {
+                                    let sid = nidkeys[0]
+                                    let tid = nidkeys[1]
 
-                                    // NB we assume the sigma convention eid = "nid1;nid2"
-                                    let nidkeys = eid.split(';')
+                                    let src = TW.partialGraph.graph.nodes(sid)
+                                    let tgt = TW.partialGraph.graph.nodes(tid)
 
-                                    if (nidkeys.length != 2) {
-                                      console.error("invalid edge id:" + eid)
-                                    }
-                                    else {
-                                      let sid = nidkeys[0]
-                                      let tid = nidkeys[1]
-
-                                      // if nodes not removed by local view
-                                      if (   TW.partialGraph.graph.nodes(sid)
-                                          && TW.partialGraph.graph.nodes(tid)) {
-                                            if(TW.partialGraph.graph.nodes(sid).hidden) unHide(sid)
-                                            if(TW.partialGraph.graph.nodes(tid).hidden) unHide(tid)
-                                            if (! TW.partialGraph.graph.edges(eid)) {
-                                              add1Elem(eid)
-                                            }
-                                            TW.partialGraph.graph.edges(eid).hidden = false
-                                            TW.Edges[eid].lock = false;
-                                      }
+                                    // if nothing is absent (nodes not
+                                    // removed by changetype or local view)
+                                    if (src && tgt) {
+                                      // unhide in case nodeslider hid them
+                                      src.hidden = false
+                                      tgt.hidden = false
+                                      e.hidden = false
                                     }
                                   }
-                                  // in any case we show the edge
-                                  // global level case
-                                  if (! TW.partialGraph.graph.edges(eid)) {
-                                    // legacy fallback shouldn't be necessary
-                                    add1Elem(eid)
-                                  }
-                                  TW.partialGraph.graph.edges(eid).hidden = false
-                                  TW.Edges[eid].lock = false;
+                                }
                               }
-                          }
+                            }
                       } else {
                           if(delflag) {
                               for(var i in eids) {
