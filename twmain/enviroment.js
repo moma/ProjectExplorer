@@ -978,7 +978,7 @@ function edgeSizesLookup(eTypeStrs, criterion) {
 
     for (var etype_i in eTypeStrs) {
       let eTypeStr = eTypeStrs[etype_i]
-      if (e && e.categ && e.categ == eTypeStr) {
+      if (e && e.categ && e.categ == eTypeStr && !e.hidden) {
         if (!edgeweis[e.categ])               edgeweis[e.categ] = {}
         if (!edgeweis[e.categ][e[criterion]]) edgeweis[e.categ][e[criterion]] = []
 

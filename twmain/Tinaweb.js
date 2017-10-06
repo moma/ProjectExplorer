@@ -802,7 +802,7 @@ var TinaWebJS = function ( sigmacanvas ) {
                     // update fa2 positions in any case, but don't skipHidden unless unstable positions
                     reInitFa2({
                       localZoneSettings: !TW.SystemState().level,
-                      skipHidden: !TW.conf.stablePositions,
+                      skipHidden: !TW.conf.stablePositions || TW.conf.independantTypes,
                       callback: function() {console.debug("noverlap: updated fa2 positions")}
                     })
                     TW.gui.elHtml.classList.remove('waiting');
@@ -1053,6 +1053,8 @@ var TinaWebJS = function ( sigmacanvas ) {
           if (mouseEvent.ctrlKey) {
             // update FA2 positions array
             reInitFa2({
+              localZoneSettings: !TW.SystemState().level,
+              skipHidden: !TW.conf.stablePositions || TW.conf.independantTypes,
               callback: function() {console.debug("dragNodes: updated fa2 positions")}
             })
           }
