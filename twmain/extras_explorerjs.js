@@ -325,7 +325,7 @@ function clearColorLegend (forTypes) {
 // @groupingTicks: an optional threshold's array expressing ranges with their low/up bounds label and ref to matchin nodeIds
 function updateColorsLegend ( daclass, forTypes, groupedByTicks ) {
 
-    console.warn("making legend forTypes", forTypes)
+    // console.warn("making legend forTypes", forTypes)
 
     // shortcut to erase legends for all types
     if(daclass == null) {

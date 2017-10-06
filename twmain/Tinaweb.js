@@ -1103,8 +1103,6 @@ var TinaWebJS = function ( sigmacanvas ) {
       var zoomSliOrigin =      Math.log(1/(TW.cam.ratio+zoomSliRangeRatio))
       var zoomSliStep = (zoomSliBoundaryTop - zoomSliBoundaryBot)/50
 
-      console.log("zoomSliOrigin",zoomSliOrigin)
-
       $("#zoomSlider").slider({
           orientation: "vertical",
 
