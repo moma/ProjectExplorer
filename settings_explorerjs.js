@@ -263,12 +263,12 @@ TW.conf = (function(TW){
   TWConf.mesoBackground = '#fcfcd5'
 
   // mouse captor zoom limits
-  TWConf.zoomMin = .015625         // for zoom IN   (ex: 1/64 to allow zoom x64)
-  TWConf.zoomMax = 4               // for zoom OUT
+  TWConf.zoomMin = 1/64            // for zoom IN   (ex: 1/64 to allow zoom x64)
+  TWConf.zoomMax = 8               // for zoom OUT
 
   // circle selection cursor
   TWConf.circleSizeMin = 0;
-  TWConf.circleSizeMax = 100;
+  TWConf.circleSizeMax = 200;
   TWConf.moreLabelsUnderArea = true; // show 3x more labels under area (/!\ costly)
 
   // em size range for neighbor nodes "tagcloud"  (1 = "normal size")

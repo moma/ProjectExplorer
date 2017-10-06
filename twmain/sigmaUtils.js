@@ -689,7 +689,7 @@ function gradientColoring(daclass, forTypes) {
 
     graphResetLabelsAndSizes()    // full loop
 
-    if (typeof forTypes != 'array' || ! forTypes.length) {
+    if (typeof forTypes == 'undefined' || ! forTypes.length) {
       // default strategy on multiple types: color all types that have the attr
       forTypes = getActivetypesNames().filter(function(ty){
         return daclass in TW.Facets[ty]
@@ -917,7 +917,7 @@ function heatmapColoring(daclass, forTypes) {
     }
   }
 
-  if (typeof forTypes != 'array' || ! forTypes.length) {
+  if (typeof forTypes == 'undefined' || ! forTypes.length) {
     // default strategy on multiple types: color all types that have the attr
     forTypes = getActivetypesNames().filter(function(ty){
       return daclass in TW.Facets[ty]
@@ -998,7 +998,7 @@ function clusterColoring(daclass, forTypes) {
 
     graphResetLabelsAndSizes()    // full loop (could be avoided most times if flag in sstate)
 
-    if (typeof forTypes != 'array' || ! forTypes.length) {
+    if (typeof forTypes == 'undefined' || ! forTypes.length) {
       // default strategy on multiple types: color all types that have the attr
       forTypes = getActivetypesNames().filter(function(ty){
         return daclass in TW.Facets[ty]
@@ -1010,8 +1010,7 @@ function clusterColoring(daclass, forTypes) {
         if(!TW.SystemState().LouvainFait) {
             try {
               RunLouvain(function() {
-                TW.SystemState().LouvainFait = true
-                clusterColoring("clust_louvain")
+                clusterColoring("clust_louvain", forTypes)
               })
             }
             catch(e) {

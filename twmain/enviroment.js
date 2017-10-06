@@ -978,7 +978,7 @@ function edgeSizesLookup(eTypeStrs, criterion) {
 
     for (var etype_i in eTypeStrs) {
       let eTypeStr = eTypeStrs[etype_i]
-      if (e && e.categ && e.categ == eTypeStr) {
+      if (e && e.categ && e.categ == eTypeStr && !e.hidden) {
         if (!edgeweis[e.categ])               edgeweis[e.categ] = {}
         if (!edgeweis[e.categ][e[criterion]]) edgeweis[e.categ][e[criterion]] = []
 
@@ -989,23 +989,55 @@ function edgeSizesLookup(eTypeStrs, criterion) {
   return edgeweis
 }
 
+// strategy : if < 25 distinct values: each distinct val becomes a step
+//            if > 25 distinct values: we group in 25 bins of +- equal pop
 function edgeSizesSteps(eTypeStr, esizesCensus) {
-  var stepToIdsArray = []
+  let allValsToIdsArray = []
+  let stepToIdsArray = []
   if (esizesCensus[eTypeStr]) {
     var sortedSizes = Object.keys(
                         esizesCensus[eTypeStr]
                       ).sort(function(a,b){return a-b})
 
+    let nEdges = 0
     for (let l in sortedSizes) {
-      stepToIdsArray.push(esizesCensus[eTypeStr][sortedSizes[l]])
+      let distinctVal = sortedSizes[l]
+      allValsToIdsArray.push(esizesCensus[eTypeStr][distinctVal])
+      nEdges += esizesCensus[eTypeStr][sortedSizes[l]].length
+    }
+    // now allValsToIdsArray has length == nb of distinct values
+
+    if (sortedSizes.length <= 25) {
+      stepToIdsArray = allValsToIdsArray
+    }
+    else {
+      chunkSize = parseInt(nEdges / 25)
+
+      // console.log("nEdges, nDistinct, chunkSize", nEdges, sortedSizes.length, chunkSize)
+
+      stepToIdsArray = makeSteps(chunkSize, allValsToIdsArray, [])
     }
   }
-
-  // console.warn (`edgeSizesSteps: for etype ${eTypeStr}` , stepToIdsArray)
-
   return stepToIdsArray
 }
 
+// recursive method (POSS: use a drift counter to compensate big exaequo subgroups
+//                         resulting in less ticks than 25)
+//                   cf. also alternate binning strategy using nthVal
+//                            in facetsBinning (samepop case)
+function makeSteps(chunkSize, remainder, groupedSteps) {
+  if (!remainder.length) {
+    return groupedSteps
+  }
+  else {
+    let newChunkIdsArray = []
+    while(newChunkIdsArray.length < chunkSize) {
+      newChunkIdsArray = newChunkIdsArray.concat(remainder.shift())
+    }
+    groupedSteps.push(newChunkIdsArray)
+    return makeSteps(chunkSize, remainder, groupedSteps)
+  }
+}
 
 //    Execution modes:
 //	EdgeWeightFilter("#sliderAEdgeWeight", "00", "weight");
