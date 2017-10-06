@@ -789,8 +789,9 @@ function changeLevel(optionalTgtState) {
 
         for(var nid in nodesToAdd)
           add1Elem(nid)
-        for(var eid in edgesToAdd)
+        for(var eid in edgesToAdd) {
           add1Elem(eid)
+        }
 
           // Adding intra-neighbors edges O(voisinage²)
           voisinage = Object.keys(voisinage)
@@ -1134,7 +1135,7 @@ function EdgeWeightFilter(sliderDivID , reltypestr ,  criteria) {
                                       var t0 = performance.now()
                                       if (TW.partialGraph.graph.edges(eid)) {
                                         TW.partialGraph.graph.edges(eid).hidden = true
-                                        TW.Edges[eid].lock = true;
+                                        // TW.Edges[eid].lock = true;
                                       }
                                       var t1 = performance.now()
 

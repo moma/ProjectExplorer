@@ -806,7 +806,7 @@ function add1Elem(id) {
     } else { // It's an edge!
         if(!isUndef(TW.partialGraph.graph.edges(id))) return;
         var e  = TW.Edges[id]
-        if(e && !e.lock){
+        if(e){
             // var anedge = {
             //     id:         id,
             //     source: e.source,
