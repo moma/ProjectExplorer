@@ -106,8 +106,8 @@ TW.conf = (function(TW){
   TWConf.legendsBins = 7
 
   // to normalize node sizes (larger range does increase visual size difference)
-  TWConf.desirableNodeSizeMin=1;
-  TWConf.desirableNodeSizeMax=2;
+  TWConf.desirableNodeSizeMin=100;
+  TWConf.desirableNodeSizeMax=105;
 
 
   // =============
@@ -181,10 +181,10 @@ TW.conf = (function(TW){
   // if fa2Available, the auto-run config:
 
     TWConf.fa2Enabled= true;        // fa2 auto-run at start and after graph modified ?
-    TWConf.fa2Milliseconds=4000;    // duration of auto-run
+    TWConf.fa2Milliseconds=500;     // constant factor in duration of auto-run
     TWConf.fa2AdaptDuration=true;   // duration of auto-run proportional log(nEdges)
     TWConf.minNodesForAutoFA2 = 5   // graph size threshold to auto-run
-    TWConf.fa2SlowerMeso = false    // slow down meso if few nodes
+    TWConf.fa2SlowerMeso = true     // slow down meso if few nodes
 
 
   // Full-text search

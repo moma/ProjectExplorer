@@ -585,7 +585,7 @@ var SigmaUtils = function () {
                     }
                     else {
                       let nEds = getVisibleEdges().length
-                      let newDur = parseInt(args.duration * Math.log(Math.sqrt(nEds)))
+                      let newDur = parseInt(args.duration * Math.log(nEds))
                       setTimeout(function(){sigma_utils.ourStopFA2()},newDur)
                       console.log("fa2 adapted duration", newDur)
                     }

@@ -52,18 +52,18 @@ TW.gui.noverlapConf = {
 
 TW.FA2Params = {
   // adapting speed -------------
-  slowDown: .3,                      // above 1:slower, in [.2;1]:faster, under .2:unstable
-  startingIterations: 4,             // keep it an even number to reduce visible oscillations at rendering
-  iterationsPerRender: 6,            // idem
+  slowDown: 1,                      // above 1:slower, in [.2;1]:faster, under .2:unstable
+  startingIterations: 2,             // keep it an even number to reduce visible oscillations at rendering
+  iterationsPerRender: 2,            // idem
   barnesHutOptimize: false,
   // barnesHutTheta: .5,
 
   // global behavior -----------
-  linLogMode: true,
-  edgeWeightInfluence: .7,          // <= slowish when above .5, unstable at 1
-  gravity: 1.1,
+  linLogMode: false,
+  edgeWeightInfluence: .8,          // <= slowish when above .5, unstable at 1
+  gravity: .5,
   strongGravityMode: false,
-  scalingRatio: .7,
+  scalingRatio: 4,
   skipHidden: false,      // if true fa2 initial filter nodes
 
   adjustSizes: false,     // ~ messy but sort of in favor of overlap prevention
@@ -667,6 +667,7 @@ function changeType(optionaltypeFlag) {
       reInitFa2({
         localZoneSettings: !outgoing.level,
         skipHidden: true,
+        typeAdapt: true,
         callback: function() {
           // runs FA2 conditionnaly
           if (!TW.conf.stablePositions) {
