@@ -1172,11 +1172,17 @@ function dictfyJSON( data , categories ) {
         node.CC = n.CC || '';
         node.ACR = n.ACR || '';
 
-        // £TODO REFA new sigma.js: shape is not attr but custom type linked to a renderer's name
-        // node.shape = "square";
+        // TODO make a [weight, term_occ] and [type, category] as members of a
+        //      class param: lists of alternate names for important attributes
+        //      alt_attribute_string => get()+transform_values() (here and gexf)
 
-        // £TODO generalize some alternate names in here and maybe gexf
-        if (n.term_occ) {
+        // alternate name: weight
+        if (n.weight && !n.size) {
+          node.size = n.weight
+        }
+
+        // alternate name: term_occ ==> zipfean nodes ==> log transform to keep label size range readable yet significant
+        if (n.term_occ && !n.size) {
           node.size = Math.log(1+Number(n.term_occ))
         }
 

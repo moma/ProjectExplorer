@@ -925,6 +925,17 @@ function reInitFa2 (params = {}) {
     // tweak FA2 config
     // ----------------
 
+    theseFA2Params.linLogMode = TW.partialGraph.graph.nNodes() < 300
+
+    if (params.typeAdapt) {
+      let semTypeOn = Boolean(TW.SystemState().activetypes[0])
+      theseFA2Params.linLogMode = semTypeOn || theseFA2Params.linLogMode || TW.FA2Params.linLogMode
+      theseFA2Params.gravity = semTypeOn ? TW.FA2Params.gravity * 3 : TW.FA2Params.gravity
+      theseFA2Params.scalingRatio = semTypeOn ? 1 : 20
+      theseFA2Params.iterationsPerRender = semTypeOn ? 4 : 32
+      theseFA2Params.slowDown = semTypeOn ? .5 : 1
+    }
+
     // meso: skipHidden, no gravity, no barnesHut, slightly larger scalingRatio.
     if (params.localZoneSettings) {
       theseFA2Params.skipHidden = true
@@ -953,13 +964,11 @@ function reInitFa2 (params = {}) {
         nNds = TW.partialGraph.graph.nNodes()
       }
       // slowDown default is 1.5 but optimal effect is when adapting
-      theseFA2Params.slowDown = Math.max(.2,parseInt(9000/nNds)/100)
-      // slowDown of 90/n:                          ^^^^^^^^^
-      //                                        30    for    3 nodes
-      //                                         6    for   15 nodes
-      //                                         3.75 for   24 nodes
-      //                                          .3  for  300 nodes
-      //                                          .2  for  450 nodes and more
+      theseFA2Params.slowDown = Math.max(.2,parseInt(1500/nNds)/100)
+      // slowDown of 15/n:                          ^^^^^^^^^
+      //                                         5    for  3 nodes
+      //                                         1    for 15 nodes
+      //                                          .2  for 75 nodes and more
       console.debug("nNodes, slowDown", nNds, theseFA2Params.slowDown)
     }
 
