@@ -107,6 +107,8 @@ function syncRemoteGraphData () {
 
   var mapLabel;      // user displayed label for this input dataset
 
+  let t0 = performance.now()
+
   // case (1) read from remote DB via API bridge fetching
   // ex: /services/api/graph?q=filters...
   if (TW.sourcemode == "api") {
@@ -301,6 +303,12 @@ function syncRemoteGraphData () {
       console.log('  fetch result: typeof data', typeof inData)
       console.log("\n============================\n")
     }
+  }
+
+  let dataLoadTime = performance.now() - t0
+  console.log("data loading time:", dataLoadTime)
+  if (TW.stats) {
+    TW.stats.dataLoadTime = dataLoadTime
   }
 
   return [inFormat, inData, mapLabel]
