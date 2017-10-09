@@ -783,6 +783,9 @@ var TinaWebJS = function ( sigmacanvas ) {
         if (TW.conf.disperseAvailable) {
           $("#noverlapButton").click(function () {
             if(! TW.partialGraph.isNoverlapRunning()) {
+                // determine if we work just on visible nodes
+                let skipHiddenFlag = !TW.conf.stablePositions || TW.conf.independantTypes
+
                 // show waiting cursor on page and button
                 TW.gui.elHtml.classList.add('waiting');
                 this.style.cursor = 'wait'
@@ -793,18 +796,21 @@ var TinaWebJS = function ( sigmacanvas ) {
                 let sizeFactor = Math.max.apply(null, TW.gui.sizeRatios)
                 TW.gui.noverlapConf.nodeMargin =  .5 * sizeFactor
                 TW.gui.noverlapConf.scaleNodes = 1.5 * sizeFactor
+                if (skipHiddenFlag) {
+                  TW.gui.noverlapConf.nodes = getVisibleNodes()
+                }
                 TW.partialGraph.configNoverlap(TW.gui.noverlapConf)
                 var listener = TW.partialGraph.startNoverlap();
                 var noverButton = this
                 listener.bind('stop', function(event) {
+                  // update fa2 positions in any case, but don't skipHidden unless unstable positions
+                  reInitFa2({
+                    localZoneSettings: !TW.SystemState().level,
+                    skipHidden: skipHiddenFlag,
+                    callback: function() {console.debug("noverlap: updated fa2 positions")}
+                  })
                   var stillRunning = document.getElementById('noverlapwait')
                   if (stillRunning) {
-                    // update fa2 positions in any case, but don't skipHidden unless unstable positions
-                    reInitFa2({
-                      localZoneSettings: !TW.SystemState().level,
-                      skipHidden: !TW.conf.stablePositions || TW.conf.independantTypes,
-                      callback: function() {console.debug("noverlap: updated fa2 positions")}
-                    })
                     TW.gui.elHtml.classList.remove('waiting');
                     noverButton.style.cursor = 'auto'
                     stillRunning.remove()
