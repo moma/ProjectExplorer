@@ -32,6 +32,9 @@ TW.facetOptions = TW.conf.defaultFacetOptions
 if (/mobile/i.test(navigator.userAgent))   mobileAdaptConf()
 
 
+// stats for de debug displays and dev tests
+TW.stats = {}
+
 //  ======== [   what to do at start ] ========= //
 console.log("Starting TWJS")
 

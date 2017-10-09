@@ -1294,7 +1294,14 @@ var TinaWebJS = function ( sigmacanvas ) {
       // add all numeric attributes to titlingMetric with option type fromFacets
       fillAttrsInForm('attr-titling-metric', 'num')
 
-      // cancelSelection(false);
+      // show dev stats on json input for this graph if available
+      if (TW.stats && Object.keys(TW.stats).length) {
+        $("#stats-panel").show()
+        $("#stats").html(showStats());
+      }
+      else {
+        $("#stats-panel").hide()
+      }
     }
 
 

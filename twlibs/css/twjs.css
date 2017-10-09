@@ -243,6 +243,32 @@ p.micromessage{
     font-size:80%;
 }
 
+#stats{
+    padding-left: 5%;
+    padding-right: 5%;
+    font-size: 80%;
+}
+
+#stats ul{
+    list-style:none;
+    padding-left:10%;
+}
+
+.stats-title {
+  color: #222;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 11px;
+  padding-top: 10px;
+}
+.stats-table {
+  margin: auto;
+}
+.stats-prop {
+  width: 50px;
+  min-width: 50px;
+}
+
 
 #localInput {
     font-size: 80%;
