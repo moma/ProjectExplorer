@@ -885,34 +885,43 @@ function renderTweet( tweet) {
 
 function showStats(){
   let statsHtml = ''
+  if (TW.stats.dataLoadTime) {
+    statsHtml += '<h5 class=stats-title>Data loading</h5>'
+    statsHtml += `<b>${parseInt(TW.stats.dataLoadTime)} ms</b>`
+  }
+
   let statCols = ['min','median', 'mean', 'max']
-  let ntypes = Object.keys(TW.stats.nodeSize)
-  if (ntypes.length) {
-    ntypes.sort()
-    statsHtml += '<h5 class=stats-title>Node sizes</h5>'
-    for (var ntype in TW.stats.nodeSize) {
-      statsHtml += `<b>${ntype} (${TW.stats.nodeSize[ntype].len})</b>`
-      statsHtml += `<table class=stats-table>`
-      for (var k in statCols) {
-        let prop = statCols[k]
-        statsHtml +=`<tr><td class=stats-prop>${prop}</td>`
-        statsHtml += `<td>${parseInt(TW.stats.nodeSize[ntype][prop]*10000)/10000}</td></tr>`
+  if (TW.stats.nodeSize && typeof TW.stats.nodeSize == "object") {
+    let ntypes = Object.keys(TW.stats.nodeSize)
+    if (ntypes.length) {
+      ntypes.sort()
+      statsHtml += '<h5 class=stats-title>Node sizes</h5>'
+      for (var ntype in TW.stats.nodeSize) {
+        statsHtml += `<b>${ntype} (${TW.stats.nodeSize[ntype].len})</b>`
+        statsHtml += `<table class=stats-table>`
+        for (var k in statCols) {
+          let prop = statCols[k]
+          statsHtml +=`<tr><td class=stats-prop>${prop}</td>`
+          statsHtml += `<td>${parseInt(TW.stats.nodeSize[ntype][prop]*10000)/10000}</td></tr>`
+        }
+        statsHtml += `</table>`
       }
-      statsHtml += `</table>`
     }
   }
-  let categs = Object.keys(TW.stats.edgeWeight)
-  if (categs.length) {
-    statsHtml += '<h5 class=stats-title>Edge weights</h5>'
-    for (var categ in TW.stats.edgeWeight) {
-      statsHtml += `<b>${categ} (${TW.stats.edgeWeight[categ].len})</b>`
-      statsHtml += `<table class=stats-table>`
-      for (var k in statCols) {
-        let prop = statCols[k]
-        statsHtml +=`<tr><td class=stats-prop>${prop}</td>`
-        statsHtml += `<td>${parseInt(TW.stats.edgeWeight[categ][prop]*10000)/10000}</td></tr>`
+  if (TW.stats.edgeWeight && typeof TW.stats.edgeWeight == "object") {
+    let categs = Object.keys(TW.stats.edgeWeight)
+    if (categs.length) {
+      statsHtml += '<h5 class=stats-title>Edge weights</h5>'
+      for (var categ in TW.stats.edgeWeight) {
+        statsHtml += `<b>${categ} (${TW.stats.edgeWeight[categ].len})</b>`
+        statsHtml += `<table class=stats-table>`
+        for (var k in statCols) {
+          let prop = statCols[k]
+          statsHtml +=`<tr><td class=stats-prop>${prop}</td>`
+          statsHtml += `<td>${parseInt(TW.stats.edgeWeight[categ][prop]*10000)/10000}</td></tr>`
+        }
+        statsHtml += `</table>`
       }
-      statsHtml += `</table>`
     }
   }
   return statsHtml

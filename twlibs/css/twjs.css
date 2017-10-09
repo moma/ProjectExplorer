@@ -262,7 +262,7 @@ p.micromessage{
   padding-top: 10px;
 }
 .stats-table {
-  margin: auto;
+  margin-left: 50px;
 }
 .stats-prop {
   width: 50px;
