@@ -1320,6 +1320,15 @@ var TinaWebJS = function ( sigmacanvas ) {
         }
       }
 
+      // show dev stats on json input for this graph if available
+      if (TW.stats && Object.keys(TW.stats).length) {
+        $("#stats-panel").show()
+        $("#stats").html(showStats());
+      }
+      else {
+        $("#stats-panel").hide()
+      }
+
       // cancelSelection(false);
     }
 

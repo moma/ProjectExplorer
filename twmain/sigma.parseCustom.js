@@ -1148,6 +1148,11 @@ function dictfyJSON( data , categories ) {
     let minNodeSize = Infinity
     let maxNodeSize = 0
 
+    // debug: for TW.stats
+    let allSizes = {}
+    let sumSizes = {}
+    TW.stats.nodeSize = {}
+
     // if scanAttributes, we'll also use:
     var tmpVals = {}
 
@@ -1194,6 +1199,20 @@ function dictfyJSON( data , categories ) {
         if(parseFloat(node.size) > maxNodeSize)
             maxNodeSize= parseFloat(node.size);
 
+        // debug: for stats  ---------------------------
+        if (! TW.stats.nodeSize[node.type]) {
+          allSizes[node.type] = []
+          sumSizes[node.type] = 0
+          TW.stats.nodeSize[node.type] = {'mean':null, 'median':null, 'max':0, 'min':1000000000}
+        }
+        allSizes[node.type].push(node.size)
+        sumSizes[node.type] += node.size
+        if (node.size < TW.stats.nodeSize[node.type].min)
+          TW.stats.nodeSize[node.type].min = node.size
+        if (node.size > TW.stats.nodeSize[node.type].max)
+          TW.stats.nodeSize[node.type].max = node.size
+        // --------------------------------------------
+
         if (!catCount[node.type]) catCount[node.type] = 0
         catCount[node.type]++;
 
@@ -1212,6 +1231,18 @@ function dictfyJSON( data , categories ) {
           tmpVals = updateValueFacets(tmpVals, node)
         }
     }
+
+    // -------------- debug: for local stats ----------------
+    for (var ntype in TW.stats.nodeSize) {
+      allSizes[ntype].sort();
+      let N = allSizes[ntype].length
+      TW.stats.nodeSize[ntype].len = N
+      TW.stats.nodeSize[ntype].median = allSizes[ntype][Math.round(N/2)]
+      TW.stats.nodeSize[ntype].mean = sumSizes[ntype]/N
+    }
+    // ------------- /debug: for local stats ----------------
+
+    // console.log("parseCustom(gexf) sizeStats:", sizeStats)
 
     // test: json with string facet (eg lab affiliation in comex)
     // console.log(tmpVals['Document'])
@@ -1238,6 +1269,13 @@ function dictfyJSON( data , categories ) {
         }
       }
     }
+
+
+
+    // for stats on edges, by type
+    let allWeights = {}
+    let sumWeights = {}
+    TW.stats.edgeWeight = {}
 
 
     // edges
@@ -1275,8 +1313,32 @@ function dictfyJSON( data , categories ) {
           // save
           if(!edges[target+";"+source])
               edges[id] = edge;
+
+
+          // ---  stats  ---
+          if (! TW.stats.edgeWeight[typestring]) {
+            TW.stats.edgeWeight[typestring] = {'mean':null, 'median':null, 'max':0, 'min':1000000000}
+            allWeights[typestring] = []
+            sumWeights[typestring] = 0
+          }
+          allWeights[typestring].push(weight)
+          sumWeights[typestring] += weight
+          if (weight < TW.stats.edgeWeight[typestring].min)
+            TW.stats.edgeWeight[typestring].min = weight
+          if (weight > TW.stats.edgeWeight[typestring].max)
+            TW.stats.edgeWeight[typestring].max = weight
+          // --- /stats  ---
         }
     }
+
+    // ---  stats  ---
+    for (var categ in TW.stats.edgeWeight) {
+      let M = allWeights[categ].length
+      TW.stats.edgeWeight[categ].len = M
+      TW.stats.edgeWeight[categ].median = allWeights[categ][Math.round(M/2)]
+      TW.stats.edgeWeight[categ].mean = sumWeights[categ]/M
+    }
+    // --- /stats  ---
 
     for(var i in TW.Relations) {
         for(var j in TW.Relations[i]) {
