@@ -924,16 +924,11 @@ function reInitFa2 (params = {}) {
 
     // tweak FA2 config
     // ----------------
-
-    theseFA2Params.linLogMode = TW.partialGraph.graph.nNodes() < 300
-
     if (params.typeAdapt) {
       let semTypeOn = Boolean(TW.SystemState().activetypes[0])
-      theseFA2Params.linLogMode = semTypeOn || theseFA2Params.linLogMode || TW.FA2Params.linLogMode
       theseFA2Params.gravity = semTypeOn ? TW.FA2Params.gravity * 3 : TW.FA2Params.gravity
-      theseFA2Params.scalingRatio = semTypeOn ? 1 : 20
       theseFA2Params.iterationsPerRender = semTypeOn ? 4 : 32
-      theseFA2Params.slowDown = semTypeOn ? .5 : 1
+      theseFA2Params.slowDown = semTypeOn ? .2 : .8
     }
 
     // meso: skipHidden, no gravity, no barnesHut, slightly larger scalingRatio.
@@ -942,7 +937,7 @@ function reInitFa2 (params = {}) {
       // gravity not needed in meso: no drift b/c always 1 connected component
       theseFA2Params.gravity = 0
       theseFA2Params.barnesHutOptimize = false
-      theseFA2Params.scalingRatio = TW.FA2Params.scalingRatio * 1.5
+      theseFA2Params.scalingRatio = theseFA2Params.scalingRatio * 1.5
       theseFA2Params.edgeWeightInfluence = .85
 
       // adjust slowDown in local zone (off by default)

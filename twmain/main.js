@@ -573,6 +573,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
       if (TW.conf.fa2Enabled) {
         reInitFa2({
           skipHidden: TW.conf.independantTypes,
+          typeAdapt: TW.conf.independantTypes,
           callback: function() {
             // initial FA2
             sigma_utils.smartForceAtlas()

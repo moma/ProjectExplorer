@@ -52,16 +52,16 @@ TW.gui.noverlapConf = {
 
 TW.FA2Params = {
   // adapting speed -------------
-  slowDown: 1,                      // above 1:slower, in [.2;1]:faster, under .2:unstable
+  slowDown: .8,                      // above 1:slower, in [.2;1]:faster, under .2:unstable
   startingIterations: 2,             // keep it an even number to reduce visible oscillations at rendering
-  iterationsPerRender: 2,            // idem
+  iterationsPerRender: 4,            // idem
   barnesHutOptimize: false,
   // barnesHutTheta: .5,
 
   // global behavior -----------
-  linLogMode: false,
+  linLogMode: true,
   edgeWeightInfluence: .8,          // <= slowish when above .5, unstable at 1
-  gravity: .5,
+  gravity: 1,
   strongGravityMode: false,
   scalingRatio: 4,
   skipHidden: false,      // if true fa2 initial filter nodes
