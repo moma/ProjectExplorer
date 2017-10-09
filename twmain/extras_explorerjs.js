@@ -1214,16 +1214,27 @@ function newSettingsAndRun() {
   if (scenario == "allstable") {
     TW.conf.stablePositions = true
     TW.conf.independantTypes = false
-    TW.FA2Params.iterationsPerRender = 6
+    TW.conf.fa2SlowerMeso = false
+    TW.FA2Params.iterationsPerRender = 12
+    TW.FA2Params.slowDown = .4
   }
   else if (scenario == "indeptypes") {
     TW.conf.stablePositions = true
     TW.conf.independantTypes = true
+    TW.conf.fa2SlowerMeso = false
+    TW.FA2Params.iterationsPerRender = 4
+  }
+  else if (scenario == "indeptypes-adaptspeed") {
+    TW.conf.stablePositions = true
+    TW.conf.independantTypes = true
+    TW.conf.fa2SlowerMeso = true
+    TW.FA2Params.iterationsPerRender = 4
     TW.FA2Params.iterationsPerRender = 4
   }
   else if (scenario == "notstable") {
     TW.conf.stablePositions = false
     TW.conf.independantTypes = true
+    TW.conf.fa2SlowerMeso = false
     TW.FA2Params.iterationsPerRender = 4
   }
 
