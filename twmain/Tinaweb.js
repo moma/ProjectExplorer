@@ -807,6 +807,7 @@ var TinaWebJS = function ( sigmacanvas ) {
                   reInitFa2({
                     localZoneSettings: !TW.SystemState().level,
                     skipHidden: skipHiddenFlag,
+                    typeAdapt: skipHiddenFlag,
                     callback: function() {console.debug("noverlap: updated fa2 positions")}
                   })
                   var stillRunning = document.getElementById('noverlapwait')
@@ -1061,6 +1062,7 @@ var TinaWebJS = function ( sigmacanvas ) {
             reInitFa2({
               localZoneSettings: !TW.SystemState().level,
               skipHidden: !TW.conf.stablePositions || TW.conf.independantTypes,
+              typeAdapt: !TW.conf.stablePositions || TW.conf.independantTypes,
               callback: function() {console.debug("dragNodes: updated fa2 positions")}
             })
           }
