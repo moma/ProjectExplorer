@@ -1238,7 +1238,7 @@ function dictfyJSON( data , categories ) {
 
         var source = (!isUndef(e.s))? e.s : e.source;
         var target = (!isUndef(e.t))? e.t : e.target;
-        var weight = (!isUndef(e.w))? e.w : e.weight;
+        var weight = (!isUndef(e.w))? Number(e.w) : Number(e.weight);
         var type = (!isUndef(e.type))? e.type : "curve";
         var id=source+";"+target;
 
