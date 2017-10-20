@@ -6,40 +6,57 @@
 
 // settings to function name
 TW.gui.colorFuns = {
-  'heatmap': "heatmapColoring",
-  'gradient': "gradientColoring",
-  'cluster': "clusterColoring"
-}
+  'heatmap': 'heatmapColoring',
+  'gradient': 'gradientColoring',
+  'cluster': 'clusterColoring',
+};
 
 // sigma has dynamic attributes.. the functions below return their resp. getters
 TW.sigmaAttributes = {
-  'auto-degree' :    function(sigInst) { return function(nd) {return sigInst.graph.degree(nd.id)}},
-  'auto-outdegree' : function(sigInst) { return function(nd) {return sigInst.graph.degree(nd.id, 'out')}},
-  'auto-indegree' :  function(sigInst) { return function(nd) {return sigInst.graph.degree(nd.id, 'in')}},
-  'auto-size' :    function() { return function(nd) {return nd.size}}
-}
+  'auto-degree': function(sigInst) {
+ return function(nd) {
+return sigInst.graph.degree(nd.id);
+};
+},
+  'auto-outdegree': function(sigInst) {
+ return function(nd) {
+return sigInst.graph.degree(nd.id, 'out');
+};
+},
+  'auto-indegree': function(sigInst) {
+ return function(nd) {
+return sigInst.graph.degree(nd.id, 'in');
+};
+},
+  'auto-size': function() {
+ return function(nd) {
+return nd.size;
+};
+},
+};
 
 
 // update the Auto-Facets
 //     (bins over dynamic sigma attributes like degree,
 //      available since we initialized the sigma instance)
 function updateDynamicFacets(optionalFilter) {
-    let autoVals = {}
-    for (var icat in TW.categories) {
-      let nodecat = TW.categories[icat]
-      autoVals[nodecat] = {}
+    let autoVals = {};
+    for (let icat in TW.categories) {
+      let nodecat = TW.categories[icat];
+      autoVals[nodecat] = {};
       for (var autoAttr in TW.sigmaAttributes) {
         if (!optionalFilter || autoAttr == optionalFilter) {
-          autoVals[nodecat][autoAttr] = {'map':{},'vals':{'vstr':[],'vnum':[]}}
-          let getVal = TW.sigmaAttributes[autoAttr](TW.partialGraph)
-          for (var nid of TW.ByType[icat]) {
-            let nd = TW.partialGraph.graph.nodes(nid)
+          autoVals[nodecat][autoAttr] = {'map': {}, 'vals': {'vstr': [], 'vnum': []}};
+          let getVal = TW.sigmaAttributes[autoAttr](TW.partialGraph);
+          for (let nid of TW.ByType[icat]) {
+            let nd = TW.partialGraph.graph.nodes(nid);
             if (nd) {
-              let val = getVal(TW.partialGraph.graph.nodes(nid))
-              if (! (val in autoVals[nodecat][autoAttr].map))
-                autoVals[nodecat][autoAttr].map[val] = []
-              autoVals[nodecat][autoAttr].map[val].push(nid)
-              autoVals[nodecat][autoAttr].vals.vnum.push(val)
+              let val = getVal(TW.partialGraph.graph.nodes(nid));
+              if (! (val in autoVals[nodecat][autoAttr].map)) {
+autoVals[nodecat][autoAttr].map[val] = [];
+}
+              autoVals[nodecat][autoAttr].map[val].push(nid);
+              autoVals[nodecat][autoAttr].vals.vnum.push(val);
             }
           }
         }
@@ -48,79 +65,77 @@ function updateDynamicFacets(optionalFilter) {
 
     // console.log("reparse dynamic attr, raw result", autoVals)
 
-    let autoFacets = facetsBinning(autoVals)
+    let autoFacets = facetsBinning(autoVals);
     // merge them into clusters
-    for (var nodecat in TW.catDict) {
+    for (let nodecat in TW.catDict) {
       for (var autoAttr in TW.sigmaAttributes) {
-        for (var facet in autoFacets[nodecat]) {
-          TW.Facets[nodecat][facet] = autoFacets[nodecat][facet]
+        for (let facet in autoFacets[nodecat]) {
+          TW.Facets[nodecat][facet] = autoFacets[nodecat][facet];
         }
       }
     }
-
 }
 
 // Execution:    changeGraphAppearanceByFacets( true )
 // It reads scanned node-attributes and prepared legends in TW.Facets
 //  to add the button in the html with the sigmaUtils.gradientColoring(x) listener.
 function changeGraphAppearanceByFacets(actypes) {
-    if(!TW.conf.colorByAtt) return;
+    if (!TW.conf.colorByAtt) return;
 
-    if (!actypes)            actypes = getActivetypesNames()
+    if (!actypes) actypes = getActivetypesNames();
 
-    let currentNbNodes = {}
+    let currentNbNodes = {};
     for (var k in actypes) {
-      currentNbNodes[actypes[k]] = TW.partialGraph.graph.getNodesByType(TW.catDict[actypes[k]]).length
+      currentNbNodes[actypes[k]] = TW.partialGraph.graph.getNodesByType(TW.catDict[actypes[k]]).length;
     }
 
     // create colormenu and 1st default entry
-    var color_menu_info = '<li><a href="#" onclick="graphResetAllColors() ; TW.partialGraph.refresh()">By Default</a></li>';
+    let color_menu_info = '<li><a href="#" onclick="graphResetAllColors() ; TW.partialGraph.refresh()">By Default</a></li>';
 
-    if( $( "#colorgraph-menu" ).length>0 ) {
+    if ( $( '#colorgraph-menu' ).length>0 ) {
       for (var k in actypes) {
-        let ty = actypes[k]
+        let ty = actypes[k];
 
         // heading by type iff more than one type
-        if (actypes.length > 1)
-          color_menu_info += `<li class="pseudo-optgroup">${ty}</li>`
+        if (actypes.length > 1) {
+color_menu_info += `<li class="pseudo-optgroup">${ty}</li>`;
+}
 
-        for (var attTitle in TW.Facets[ty]) {
-          let nbDomain = currentNbNodes[ty]
+        for (let attTitle in TW.Facets[ty]) {
+          let nbDomain = currentNbNodes[ty];
 
           // attribute counts: nb of classes
           // POSS here distinguish [ty][attTitle].classes.length and ranges.length
-          let nbOutput = TW.Facets[ty][attTitle].invIdx.length
+          let nbOutput = TW.Facets[ty][attTitle].invIdx.length;
 
           if (nbOutput) {
-            let lastClass = TW.Facets[ty][attTitle].invIdx[nbOutput-1]
+            let lastClass = TW.Facets[ty][attTitle].invIdx[nbOutput-1];
             if (lastClass.labl && /^_non_numeric_/.test(lastClass.labl) && lastClass.nids) {
               if (lastClass.nids.length) {
-                nbDomain -= lastClass.nids.length
-              }
-              else {
-                nbOutput -= 1
+                nbDomain -= lastClass.nids.length;
+              } else {
+                nbOutput -= 1;
               }
             }
           }
 
           // note any previous louvains
-          if (attTitle == 'clust_louvain')  gotPreviousLouvain = true
+          if (attTitle == 'clust_louvain') gotPreviousLouvain = true;
 
           // coloring function
-          let colMethod = getColorFunction(attTitle)
+          let colMethod = getColorFunction(attTitle);
 
           // family label :)
-          var attLabel ;
+          var attLabel;
           if (TW.facetOptions[attTitle] && TW.facetOptions[attTitle]['legend']) {
-            attLabel = TW.facetOptions[attTitle]['legend']
-          }
-          else attLabel = attTitle
+            attLabel = TW.facetOptions[attTitle]['legend'];
+          } else attLabel = attTitle;
 
           color_menu_info += `
             <li><a href="#" onclick='${colMethod}("${attTitle}",["${ty}"])'>
                 By ${attLabel} (${nbOutput} | ${nbDomain})
             </a></li>
-            `
+            `;
 
           // for ex country with 26 classes on 75 nodes:
           //
@@ -128,20 +143,18 @@ function changeGraphAppearanceByFacets(actypes) {
           //    By Country (26 | 75)
           //  </a>
           //
-
         }
 
         // if had not been already done, louvain added manually
         if (!TW.Facets[ty]['clust_louvain']) {
-          color_menu_info += `<li><a href="#" onclick='clusterColoring("clust_louvain",["${ty}"])'>By Louvain clustering ( <span id="louvainN">?</span> | ${currentNbNodes[ty]})</a></li>`
+          color_menu_info += `<li><a href="#" onclick='clusterColoring("clust_louvain",["${ty}"])'>By Louvain clustering ( <span id="louvainN">?</span> | ${currentNbNodes[ty]})</a></li>`;
         }
-
       }
 
       // for debug
       // console.warn('color_menu_info', color_menu_info)
 
-      $("#colorgraph-menu").html(color_menu_info)
+      $('#colorgraph-menu').html(color_menu_info);
     }
 
     // Legend slots were prepared in TW.Facets
@@ -149,102 +162,100 @@ function changeGraphAppearanceByFacets(actypes) {
 
 function getColorFunction(attTitle) {
   // coloringFunction name as str
-  var colMethod
+  let colMethod;
 
   // read from user settings
   if (TW.facetOptions[attTitle] && TW.facetOptions[attTitle]['col']) {
-    colMethod = TW.gui.colorFuns[TW.facetOptions[attTitle]['col']]
+    colMethod = TW.gui.colorFuns[TW.facetOptions[attTitle]['col']];
   }
 
   // fallback guess-values
   if (! colMethod) {
-    if(attTitle.indexOf("clust")>-1||attTitle.indexOf("class")>-1) {
+    if (attTitle.indexOf('clust')>-1||attTitle.indexOf('class')>-1) {
       // for classes and clusters
-      colMethod = "clusterColoring"
-    }
-    else {
-      colMethod = "gradientColoring"
+      colMethod = 'clusterColoring';
+    } else {
+      colMethod = 'gradientColoring';
     }
   }
 
-  return colMethod
+  return colMethod;
 }
 
 // @cb: optional callback
 function RunLouvain(cb) {
+  let node_realdata = [];
+  let nodesV = getVisibleNodes();
+  for (let n in nodesV) {
+node_realdata.push( nodesV[n].id );
+}
 
-  var node_realdata = []
-  var nodesV = getVisibleNodes()
-  for(var n in nodesV)
-    node_realdata.push( nodesV[n].id )
-
-  var edge_realdata = []
-  var edgesV = getVisibleEdges()
-  for(var e in edgesV) {
-    var st = edgesV[e].id.split(";")
-    var info = {
-        "source":st[0],
-        "target":st[1],
-        "weight":edgesV[e].weight
-    }
-    edge_realdata.push(info)
+  let edge_realdata = [];
+  let edgesV = getVisibleEdges();
+  for (let e in edgesV) {
+    let st = edgesV[e].id.split(';');
+    let info = {
+        'source': st[0],
+        'target': st[1],
+        'weight': edgesV[e].weight,
+    };
+    edge_realdata.push(info);
   }
-    var community = jLouvain().nodes(node_realdata).edges(edge_realdata);
-    var results = community();
+    let community = jLouvain().nodes(node_realdata).edges(edge_realdata);
+    let results = community();
 
-    var louvainValNids = {}
+    let louvainValNids = {};
 
-    for(var i in results) {
-      let n = TW.partialGraph.graph.nodes(i) // <= new way: like all other colors
+    for (let i in results) {
+      let n = TW.partialGraph.graph.nodes(i); // <= new way: like all other colors
       if (n) {
-        n.attributes["clust_louvain"] = results[i]
+        n.attributes['clust_louvain'] = results[i];
       }
 
       // also create legend's facets
-      louvainValNids = updateValueFacets(louvainValNids, n, "clust_louvain")
+      louvainValNids = updateValueFacets(louvainValNids, n, 'clust_louvain');
     }
 
-    let nClasses = 0
-    for (let typ in louvainValNids)  {
-      let reinvIdx = louvainValNids[typ]["clust_louvain"]['map']
+    let nClasses = 0;
+    for (let typ in louvainValNids) {
+      let reinvIdx = louvainValNids[typ]['clust_louvain']['map'];
 
       // init a new legend in TW.Facets
-      TW.Facets[typ]['clust_louvain'] = {'meta':{}, 'invIdx':[]}
+      TW.Facets[typ]['clust_louvain'] = {'meta': {}, 'invIdx': []};
 
       for (let entry in reinvIdx) {
-        let len = reinvIdx[entry].length
+        let len = reinvIdx[entry].length;
         if (len) {
           TW.Facets[typ]['clust_louvain'].invIdx.push({
             'labl': `cluster n°${entry} (${len})`,
             'fullLabl': `${typ}||Louvain||${entry} (${len})`,
             'nids': reinvIdx[entry],
-            'val': entry
-          })
-          nClasses ++
+            'val': entry,
+          });
+          nClasses ++;
         }
       }
     }
 
     // finally update the html menu
-    let menu = document.getElementById('louvainN')
+    let menu = document.getElementById('louvainN');
     if (menu) {
-      menu.innerHTML = nClasses
+      menu.innerHTML = nClasses;
     }
 
     if (! TW.facetOptions['clust_louvain']) {
-      TW.facetOptions['clust_louvain'] = {'col': 'cluster'}
+      TW.facetOptions['clust_louvain'] = {'col': 'cluster'};
     }
 
     // update state and menu
-    TW.SystemState().LouvainFait = true
-    changeGraphAppearanceByFacets()
+    TW.SystemState().LouvainFait = true;
+    changeGraphAppearanceByFacets();
 
     // callback
     if (cb && typeof cb == 'function') {
-      cb()
+      cb();
     }
 }
-
 
 
 // Highlights nodes with given value using id map
@@ -252,20 +263,20 @@ function RunLouvain(cb) {
 function SomeEffect( ValueclassCode ) {
     // console.debug("highlighting:", ValueclassCode )
 
-    cancelSelection(false, {"norender": true})
+    cancelSelection(false, {'norender': true});
 
-    TW.gui.selectionActive = true
+    TW.gui.selectionActive = true;
 
-    var nodes_2_colour = {};
-    var edges_2_colour = {};
+    let nodes_2_colour = {};
+    let edges_2_colour = {};
 
 
     // ex: ISItermsriskV2_140 & ISItermsriskV2_140::clust_default::7
     //       vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv          vvvvv      v
     //                     type                      Cluster key  class iClu
     //                                                (family)   (array index)
-    var raw = ValueclassCode.split("::")
-    var nodeType=raw[0],
+    let raw = ValueclassCode.split('::');
+    let nodeType=raw[0],
         cluType=raw[1],
         iClu=Number(raw[2]);
 
@@ -274,43 +285,44 @@ function SomeEffect( ValueclassCode ) {
 
     // we still filter it due to Level or sliders filters
     filteredNodes = TW.Facets[nodeType][cluType].invIdx[iClu].nids.filter(
-      function(nid){
-        return Boolean(TW.partialGraph.graph.nodes(nid))
+      function(nid) {
+        return Boolean(TW.partialGraph.graph.nodes(nid));
       }
-    )
+    );
 
     if (filteredNodes.length) {
-      TW.instance.selNgn.MultipleSelection2(
+      TW.instance.selNgn.multipleSelection2(
         {nodes: filteredNodes}
-      )
+      );
     }
-    TW.partialGraph.refresh()
+    TW.partialGraph.refresh();
 }
 
 // some colorings cases also modify size and label
-function graphResetLabelsAndSizes(){
-  for(let nid in TW.Nodes) {
-    let n = TW.partialGraph.graph.nodes(nid)
+function graphResetLabelsAndSizes() {
+  for (let nid in TW.Nodes) {
+    let n = TW.partialGraph.graph.nodes(nid);
     if (n) {
-      n.label = TW.Nodes[n.id].label
-      n.size = TW.Nodes[n.id].size
+      n.label = TW.Nodes[n.id].label;
+      n.size = TW.Nodes[n.id].size;
     }
   }
 }
 
 function graphResetAllColors() {
-  graphResetLabelsAndSizes()
-  TW.gui.handpickedcolorsReset()
-  updateColorsLegend()
+  graphResetLabelsAndSizes();
+  TW.gui.handpickedcolorsReset();
+  updateColorsLegend();
 }
 
 // removes selectively for an array of nodetypes
-function clearColorLegend (forTypes) {
+function clearColorLegend(forTypes) {
   // console.log('clearColorLegend', forTypes)
-  for (var ty of forTypes) {
-    let legTy = document.getElementById("legend-for-"+ty)
-    if (legTy)
-      legTy.remove()
+  for (let ty of forTypes) {
+    let legTy = document.getElementById('legend-for-'+ty);
+    if (legTy) {
+legTy.remove();
+}
   }
 }
 
@@ -318,74 +330,71 @@ function clearColorLegend (forTypes) {
 // @daclass: the name of a numeric/categorical attribute from node.attributes
 // @forTypes: array of which typenames are concerned
 // @groupingTicks: an optional threshold's array expressing ranges with their low/up bounds label and ref to matchin nodeIds
-function updateColorsLegend ( daclass, forTypes, groupedByTicks ) {
-
+function updateColorsLegend( daclass, forTypes, groupedByTicks ) {
     // console.warn("making legend forTypes", forTypes)
 
     // shortcut to erase legends for all types
-    if(daclass == null) {
-      clearColorLegend(TW.categories)
-      $("#legend-for-facets").html("")
+    if (daclass == null) {
+      clearColorLegend(TW.categories);
+      $('#legend-for-facets').html('');
     };
 
     // current display among TW.categories (ex: ['terms'])
     if (typeof forTypes == 'undefined' || ! forTypes.length) {
-      forTypes = getActivetypesNames().filter(function(ty){
-      return daclass in TW.Facets[ty]
-      })
+      forTypes = getActivetypesNames().filter(function(ty) {
+      return daclass in TW.Facets[ty];
+      });
     }
     // (we ignore other types: their color legends remain the same by default)
 
-    for (var k in forTypes) {
-      let curType = forTypes[k]
-      var LegendDiv = "<div id=legend-for-"+curType+" class=\"over-panels my-legend\">"
+    for (let k in forTypes) {
+      let curType = forTypes[k];
+      let LegendDiv = '<div id=legend-for-'+curType+' class="over-panels my-legend">';
 
       // all infos in a bin array
-      var legendInfo = []
+      var legendInfo = [];
 
       // sample node color
-      var ClustNB_CurrentColor = {}
+      let ClustNB_CurrentColor = {};
 
       // passed as arg   or  prepared in parseCustom
       if (!groupedByTicks && (!TW.Facets[curType] || !TW.Facets[curType][daclass])) {
-        console.warn(`no class bins for ${curType} ${daclass}`)
-      }
-      else {
-        let daclassLabel = daclass
-        if  (TW.facetOptions
+        console.warn(`no class bins for ${curType} ${daclass}`);
+      } else {
+        let daclassLabel = daclass;
+        if (TW.facetOptions
           && TW.facetOptions[daclass]
           && TW.facetOptions[daclass].legend) {
-            daclassLabel = TW.facetOptions[daclass].legend
+            daclassLabel = TW.facetOptions[daclass].legend;
         }
 
-        LegendDiv += `    <div class="legend-title"><small>${curType}:</small> ${daclassLabel}</div>`
-        LegendDiv += '    <div class="legend-scale">'
-        LegendDiv += '      <ul class="legend-labels">'
+        LegendDiv += `    <div class="legend-title"><small>${curType}:</small> ${daclassLabel}</div>`;
+        LegendDiv += '    <div class="legend-scale">';
+        LegendDiv += '      <ul class="legend-labels">';
 
-        var legendInfo = groupedByTicks || TW.Facets[curType][daclass].invIdx
+        var legendInfo = groupedByTicks || TW.Facets[curType][daclass].invIdx;
 
-        if (getColorFunction(daclass) == "clusterColoring") {
-          legendInfo.sort(function(a,b) {
-            return b.nids.length - a.nids.length
-          })
+        if (getColorFunction(daclass) == 'clusterColoring') {
+          legendInfo.sort(function(a, b) {
+            return b.nids.length - a.nids.length;
+          });
         }
 
         // valueclasses (values or intervals or classes) are already sorted in TW.Facets
-        for (var l in legendInfo) {
-          var nMatchedNodes = legendInfo[l]['nids'].length
+        for (let l in legendInfo) {
+          let nMatchedNodes = legendInfo[l]['nids'].length;
 
           // get a sample node color for each bin/class
-          let theColor = legendInfo[l].col || "#777"   // grey if empty
+          let theColor = legendInfo[l].col || '#777'; // grey if empty
 
           // create the legend item
-          var preparedLabel = legendInfo[l]['labl']
+          let preparedLabel = legendInfo[l]['labl'];
 
           if (/^_non_numeric_/.test(preparedLabel)) {
             if (!nMatchedNodes) {
-              continue                // we skip "trash" category if empty
-            }
-            else {
-              preparedLabel = "not numeric"
+              continue; // we skip "trash" category if empty
+            } else {
+              preparedLabel = 'not numeric';
             }
           }
 
@@ -394,49 +403,51 @@ function updateColorsLegend ( daclass, forTypes, groupedByTicks ) {
            && TW.facetOptions[daclass].titlingMetric
            && TW.facetOptions[daclass].titlingMetric != 'off'
            && TW.facetOptions[daclass].col == 'cluster') {
-
             // let t0 = performance.now()
 
-            let titles = []
-            let theRankingAttr = TW.facetOptions[daclass].titlingMetric
-            let maxLen = TW.facetOptions[daclass].titlingNTerms || 2
+            let titles = [];
+            let theRankingAttr = TW.facetOptions[daclass].titlingMetric;
+            let maxLen = TW.facetOptions[daclass].titlingNTerms || 2;
 
             // custom accessor (sigma auto attr or user settings or by default)
-            let getVal
-            if(theRankingAttr) {
+            let getVal;
+            if (theRankingAttr) {
               // one of the 3 sigma dynamic attributes 'degree', etc
               if (theRankingAttr in TW.sigmaAttributes) {
-                getVal = TW.sigmaAttributes[theRankingAttr](TW.partialGraph)
+                getVal = TW.sigmaAttributes[theRankingAttr](TW.partialGraph);
               }
               // a user setting for a source data attribute
               else {
-                getVal = function(node) {return node.attributes[theRankingAttr]}
+                getVal = function(node) {
+return node.attributes[theRankingAttr];
+};
               }
             }
             // default ranking: by size
             else {
-              getVal = function(node) {return node.size}
+              getVal = function(node) {
+return node.size;
+};
             }
 
             // our source of words (labels)
-            let ndsToRetrieveNameFrom = {}
+            let ndsToRetrieveNameFrom = {};
 
             // if node0 contains meaningful labels for titling
             // we can title node1 clusters using node0 neighborhood
             // => we'll use metric on bipartite neighborhood labels
             // POSS it could be a conf option to use another type or not
-            if (curType == TW.categories[1] && TW.Relations["XR"]) {
+            if (curType == TW.categories[1] && TW.Relations['XR']) {
               // transitive step from nodetype to their surrogate nodetype
               for (var i in legendInfo[l]['nids']) {
-                let start_nid = legendInfo[l]['nids'][i]
-                let transitiveNids = TW.Relations["XR"][start_nid]
-                for (var j in transitiveNids) {
-                  let nei_nid = transitiveNids[j]
+                let start_nid = legendInfo[l]['nids'][i];
+                let transitiveNids = TW.Relations['XR'][start_nid];
+                for (let j in transitiveNids) {
+                  let nei_nid = transitiveNids[j];
                   if (!ndsToRetrieveNameFrom[nei_nid]) {
-                    ndsToRetrieveNameFrom[nei_nid] = 1
-                  }
-                  else {
-                    ndsToRetrieveNameFrom[nei_nid] += 1   // <== coef
+                    ndsToRetrieveNameFrom[nei_nid] = 1;
+                  } else {
+                    ndsToRetrieveNameFrom[nei_nid] += 1; // <== coef
                   }
                 }
               }
@@ -444,63 +455,65 @@ function updateColorsLegend ( daclass, forTypes, groupedByTicks ) {
             // normal case => directly use metric on these nodes' labels
             else {
               for (var i in legendInfo[l]['nids']) {
-                let nid = legendInfo[l]['nids'][i]
-                ndsToRetrieveNameFrom[nid] = 1
+                let nid = legendInfo[l]['nids'][i];
+                ndsToRetrieveNameFrom[nid] = 1;
               }
             }
 
-            for (var nid in ndsToRetrieveNameFrom) {
-              let n = TW.Nodes[nid]
-              let coef = ndsToRetrieveNameFrom[nid]
+            for (let nid in ndsToRetrieveNameFrom) {
+              let n = TW.Nodes[nid];
+              let coef = ndsToRetrieveNameFrom[nid];
 
-              let theRankingVal = getVal(n) * Math.sqrt(coef)
+              let theRankingVal = getVal(n) * Math.sqrt(coef);
 
               if (titles.length < maxLen) {
-                titles.push({'key':n.label, 'val':theRankingVal})
-              }
-              else {
+                titles.push({'key': n.label, 'val': theRankingVal});
+              } else {
                 // we keep titles sorted for this
-                let lastMax = titles.slice(-1)[0].val
+                let lastMax = titles.slice(-1)[0].val;
                 if (theRankingVal > lastMax) {
-                  titles.push({'key':n.label, 'val':theRankingVal})
+                  titles.push({'key': n.label, 'val': theRankingVal});
                 }
               }
 
-              titles.sort(function(a,b) {return b.val - a.val})
-              titles = titles.slice(0,maxLen)
+              titles.sort(function(a, b) {
+return b.val - a.val;
+});
+              titles = titles.slice(0, maxLen);
             }
 
             // replacing the cluster numbers by those k best titles in the legend
-            preparedLabel = "["+titles.map(function(x){return x.key}).join(' / ')+"...]" + ` (${nMatchedNodes})`
+            preparedLabel = '['+titles.map(function(x) {
+return x.key;
+}).join(' / ')+'...]' + ` (${nMatchedNodes})`;
 
             // console.log("finding title perf", performance.now() - t0, titles)
           }
 
           // all-in-one argument for SomeEffect
-          var valueclassId = `${curType}::${daclass}::${l}`
+          let valueclassId = `${curType}::${daclass}::${l}`;
 
-          var colorBg = `<span class="lgdcol" style="background:${theColor};"></span>`
+          let colorBg = `<span class="lgdcol" style="background:${theColor};"></span>`;
 
-          LegendDiv += `<li onclick='SomeEffect("${valueclassId}")'>`
-          LegendDiv += colorBg + preparedLabel
-          LegendDiv += "</li>\n"
+          LegendDiv += `<li onclick='SomeEffect("${valueclassId}")'>`;
+          LegendDiv += colorBg + preparedLabel;
+          LegendDiv += '</li>\n';
         }
-        LegendDiv += '      </ul>'
-        LegendDiv += '    </div>'
-        LegendDiv += '  </div>'
+        LegendDiv += '      </ul>';
+        LegendDiv += '    </div>';
+        LegendDiv += '  </div>';
 
-        let perhapsPreviousLegend = document.getElementById("legend-for-"+curType)
+        let perhapsPreviousLegend = document.getElementById('legend-for-'+curType);
         if (perhapsPreviousLegend) {
-          perhapsPreviousLegend.outerHTML = LegendDiv
-        }
-        else {
-          let newLegend = document.createElement('div')
-          $("#legend-for-facets").prepend(newLegend)
-          newLegend.outerHTML = LegendDiv
+          perhapsPreviousLegend.outerHTML = LegendDiv;
+        } else {
+          let newLegend = document.createElement('div');
+          $('#legend-for-facets').prepend(newLegend);
+          newLegend.outerHTML = LegendDiv;
         }
       }
     }
-    $("#legend-for-facets").show()
+    $('#legend-for-facets').show();
 }
 
 // = = = = = = = = = = = [ / Clusters Plugin ] = = = = = = = = = = = //
@@ -508,18 +521,18 @@ function updateColorsLegend ( daclass, forTypes, groupedByTicks ) {
 
 // queryForType:
 //   prepare query words from "selections of a given nodetype"
-function queryForType(ntypeId){
+function queryForType(ntypeId) {
   let subSels = TW.SystemState().selectionNids.filter(function(nid) {
-    return TW.catDict[TW.Nodes[nid].type] == ntypeId
-  })
+    return TW.catDict[TW.Nodes[nid].type] == ntypeId;
+  });
 
-  let qWordsForType = []
-  for (var j in subSels) {
-    let n = TW.Nodes[subSels[j]]
-    qWordsForType.push(n.label)
+  let qWordsForType = [];
+  for (let j in subSels) {
+    let n = TW.Nodes[subSels[j]];
+    qWordsForType.push(n.label);
   }
 
-  return qWordsForType
+  return qWordsForType;
 }
 
 
@@ -533,59 +546,58 @@ function queryForType(ntypeId){
 //  - chosenAPI:      the API "switch" dbtype ('twitter'||'csv'||'CortextDB')
 //  - tgtDivId:       the div #id to update
 function getTopPapers(qWords, nodetypeId, chosenAPI, tgtDivId) {
-
   // waiting image
   let image='<img style="display:block; margin: 0px auto;" src="twlibs/img/loader.gif"></img>';
-  document.getElementById(tgtDivId).innerHTML = image
+  document.getElementById(tgtDivId).innerHTML = image;
 
   // args and defaults
-  if (! chosenAPI)      chosenAPI = TW.conf.relatedDocsType
+  if (! chosenAPI) chosenAPI = TW.conf.relatedDocsType;
 
-  let apiurl = TW.conf.relatedDocsAPIS[chosenAPI]
+  let apiurl = TW.conf.relatedDocsAPIS[chosenAPI];
 
   if (! apiurl) {
-    apiurl = TW.conf.relatedDocsAPI
+    apiurl = TW.conf.relatedDocsAPI;
   }
 
   let cbDisplay = function(jsonData) {
     // console.log("cbDisplay", jsonData)
-    return displayTopPapers(jsonData, nodetypeId, chosenAPI, tgtDivId)
-  }
+    return displayTopPapers(jsonData, nodetypeId, chosenAPI, tgtDivId);
+  };
 
   let stockErrMsg = `
   <p class="micromessage">The API ${chosenAPI} couldn't be connected to.</p>
   <p class="micromessage">The queried route found in TW.conf was: <span class=code>${apiurl}</span>
-  <br>Check if it is running and accessible.</p>`
+  <br>Check if it is running and accessible.</p>`;
 
-  let resHTML = ''
+  let resHTML = '';
 
-  if (chosenAPI == "twitter") {
-    let joinedQ = qWords.map(function(w){return'('+w+')'}).join(' AND ')
+  if (chosenAPI == 'twitter') {
+    let joinedQ = qWords.map(function(w) {
+return '('+w+')';
+}).join(' AND ');
     $.ajax({
         type: 'GET',
         url: apiurl,
         data: {'query': joinedQ},
-        contentType: "application/json",
-        success : function(data){
+        contentType: 'application/json',
+        success: function(data) {
             if (data.length) {
-              cbDisplay(data)
-            }
-            else {
+              cbDisplay(data);
+            } else {
               cbDisplay([{
-                "error": `<p class="micromessage centered">The query
+                'error': `<p class="micromessage centered">The query
                            <span class=code>${joinedQ}</span> delivers
-                           no results on Twitter.</p>`
-              }])
+                           no results on Twitter.</p>`,
+              }]);
             }
         },
-        error: function(){
-          console.log(`Not found: relatedDocs for ${apiurl}`)
-          cbDisplay([{ "error": stockErrMsg }])
-        }
+        error: function() {
+          console.log(`Not found: relatedDocs for ${apiurl}`);
+          cbDisplay([{'error': stockErrMsg}]);
+        },
     });
-  }
-  else {
-    let thisRelDocsConf = TW.currentRelDocsDBs[nodetypeId][chosenAPI]
+  } else {
+    let thisRelDocsConf = TW.currentRelDocsDBs[nodetypeId][chosenAPI];
     // /!\ documentation and specification needed for the php use cases /!\
     let joinedQ = JSON.stringify(qWords).split('&').join('__and__');
     // cf. the php code for these url args:
@@ -594,20 +606,20 @@ function getTopPapers(qWords, nodetypeId, chosenAPI, tgtDivId) {
     //             (we send it as param because phpAPI supports different dbtypes)
 
     // POSS object + join.map(join)
-    let urlParams = "ndtype="+nodetypeId+"&dbtype="+chosenAPI+"&query="+joinedQ+"&gexf="+TW.File+"&n="+TW.conf.relatedDocsMax ;
+    let urlParams = 'ndtype='+nodetypeId+'&dbtype='+chosenAPI+'&query='+joinedQ+'&gexf='+TW.File+'&n='+TW.conf.relatedDocsMax;
 
     $.ajax({
         type: 'GET',
         url: apiurl + '/info_div.php',
         data: urlParams,
-        contentType: "application/json",
-        success : function(data){
-          cbDisplay(data.hits)
+        contentType: 'application/json',
+        success: function(data) {
+          cbDisplay(data.hits);
         },
-        error: function(){
-          console.log(`Not found: relatedDocs for ${apiurl}`)
-          cbDisplay([{ "error": stockErrMsg }])
-        }
+        error: function() {
+          console.log(`Not found: relatedDocs for ${apiurl}`);
+          cbDisplay([{'error': stockErrMsg}]);
+        },
     });
   }
 }
@@ -616,189 +628,176 @@ function getTopPapers(qWords, nodetypeId, chosenAPI, tgtDivId) {
 //   1) project-local data/myproject/hit_templates directory
 //   2) app default twlibs/default_hit_templates directory
 function makeRendererFromTemplate(tmplName) {
-  let tmplStr = ''
-  let tmplURL
-  let gotTemplate
+  let tmplStr = '';
+  let tmplURL;
+  let gotTemplate;
 
   let defRenderer = function(jsonHit) {
-    return JSON.stringify(jsonHit, null, ' ').replace(/\n/g, '<br>') + '<br>'
-  }
+    return JSON.stringify(jsonHit, null, ' ').replace(/\n/g, '<br>') + '<br>';
+  };
 
   if (! tmplName) {
-    return defRenderer
+    return defRenderer;
   }
 
   // (1)
   if (TW.Project) {
-    tmplURL = TW.Project + '/hit_templates/' + tmplName + '.html' ;
+    tmplURL = TW.Project + '/hit_templates/' + tmplName + '.html';
     if (linkCheck(tmplURL)) {
-      gotTemplate = AjaxSync({ url: tmplURL });
+      gotTemplate = AjaxSync({url: tmplURL});
     }
   }
   // (2)
   if (! gotTemplate || ! gotTemplate['OK']) {
-    tmplURL = TW.conf.paths.templates + '/' + tmplName + '.html'
+    tmplURL = TW.conf.paths.templates + '/' + tmplName + '.html';
     if (linkCheck(tmplURL)) {
-      gotTemplate = AjaxSync({ url: tmplURL });
+      gotTemplate = AjaxSync({url: tmplURL});
     }
   }
 
   if (gotTemplate && gotTemplate['OK']) {
-    tmplStr = gotTemplate.data
+    tmplStr = gotTemplate.data;
     // we return a customized renderJsonToHtml function
     return function(jsonHit) {
-      let htmlOut = tmplStr
+      let htmlOut = tmplStr;
       for (key in jsonHit) {
         // our tags look like this in the template ==> by $${author}, [$${date}]
-        let reKey = new RegExp('\\$\\$\\{'+key+'\\}', 'g')
+        let reKey = new RegExp('\\$\\$\\{'+key+'\\}', 'g');
         // we replace them by value
-        htmlOut = htmlOut.replace(reKey, jsonHit[key])
+        htmlOut = htmlOut.replace(reKey, jsonHit[key]);
       }
 
       // we also replace any not found keys by 'N/A'
-      let reKeyAll = new RegExp('\\$\\$\\{[^\\}]+\\}', 'g')
-      htmlOut = htmlOut.replace(reKeyAll, "N/A")
+      let reKeyAll = new RegExp('\\$\\$\\{[^\\}]+\\}', 'g');
+      htmlOut = htmlOut.replace(reKeyAll, 'N/A');
 
-      return htmlOut
-    }
-  }
-  else {
+      return htmlOut;
+    };
+  } else {
     console.error(`couldn't find template ${tmplName} at ${tmplURL},
-                   using raw hits display`)
-    return defRenderer
+                   using raw hits display`);
+    return defRenderer;
   }
 }
 
 function displayTopPapers(jsonHits, ndtypeId, chosenAPI, targetDiv) {
-
   // console.log('jsonHits', jsonHits)
 
-  let resHTML = '<ul class="infoitems">'
-  let toHtmlFun = function(){}
+  let resHTML = '<ul class="infoitems">';
+  let toHtmlFun = function() {};
 
   if (chosenAPI == 'twitter') {
-    toHtmlFun = renderTweet
-  }
-  else if (chosenAPI == "CortextDB" || chosenAPI == "csv") {
-    let thisRelDocsConf = TW.currentRelDocsDBs[ndtypeId][chosenAPI]
+    toHtmlFun = renderTweet;
+  } else if (chosenAPI == 'CortextDB' || chosenAPI == 'csv') {
+    let thisRelDocsConf = TW.currentRelDocsDBs[ndtypeId][chosenAPI];
     if (thisRelDocsConf && thisRelDocsConf.template) {
-      toHtmlFun = makeRendererFromTemplate(thisRelDocsConf.template)
-    }
-    else {
-      console.warn(`no rendering template found in ${TW.conf.paths.sourceMenu} for this source ${TW.File}...`)
+      toHtmlFun = makeRendererFromTemplate(thisRelDocsConf.template);
+    } else {
+      console.warn(`no rendering template found in ${TW.conf.paths.sourceMenu} for this source ${TW.File}...`);
 
       // try the universal template
-      toHtmlFun = makeRendererFromTemplate("universal")
+      toHtmlFun = makeRendererFromTemplate('universal');
     }
   }
 
-  for (var k in jsonHits) {
-    let hitJson = jsonHits[k]
+  for (let k in jsonHits) {
+    let hitJson = jsonHits[k];
     if (hitJson.error) {
-      resHTML += hitJson.error
-    }
-    else {
-      resHTML += toHtmlFun(hitJson)
+      resHTML += hitJson.error;
+    } else {
+      resHTML += toHtmlFun(hitJson);
     }
   }
 
-  resHTML += '</ul>'
+  resHTML += '</ul>';
 
   // effect the changes in topPapers
-  document.getElementById(targetDiv).innerHTML = resHTML
+  document.getElementById(targetDiv).innerHTML = resHTML;
 }
 
 function newPopup(url) {
-	popupWindow = window.open(url,'popUpWindow','height=700,width=800,left=10,top=10,resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,directories=no,status=no')
+	popupWindow = window.open(url, 'popUpWindow', 'height=700,width=800,left=10,top=10,resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,directories=no,status=no');
 }
 
 function clickInsideTweet(e, tweetSrcUrl) {
-    e.preventDefault()
-    var tgt = e.target
-    let max = 5
-    if (tgt.tagName.toLowerCase() == "a") {
-      window.open(tgt.href, "Link in tweet")
-    }
-    else {
+    e.preventDefault();
+    let tgt = e.target;
+    let max = 5;
+    if (tgt.tagName.toLowerCase() == 'a') {
+      window.open(tgt.href, 'Link in tweet');
+    } else {
       while (tgt = tgt.parentElement) {
-        if (tgt.tagName.toLowerCase() == "a"
+        if (tgt.tagName.toLowerCase() == 'a'
             || tgt.classList.contains('Tweet')
             || tgt.id == 'sidebar'
             || max <= 0) {
-          break
-        }
-        else {
-          max--
+          break;
+        } else {
+          max--;
         }
       }
-      if (tgt.tagName.toLowerCase() == "a") {
-        window.open(tgt.href, "Parent Link in tweet")
-      }
-      else {
-        window.open(tweetSrcUrl, "Source Tweet")
+      if (tgt.tagName.toLowerCase() == 'a') {
+        window.open(tgt.href, 'Parent Link in tweet');
+      } else {
+        window.open(tweetSrcUrl, 'Source Tweet');
       }
     }
 }
 
-function formatDateLikeTwitter (aDate) {
+function formatDateLikeTwitter(aDate) {
   // partly inspired by https://github.com/hijonathan/moment.twitter/
-  let msDiff = Date.now() - aDate
+  let msDiff = Date.now() - aDate;
 
-  let resStr = ''
+  let resStr = '';
   if (msDiff < 6000) {
-    resStr = parseInt(msDiff/1000)+'s'
-  }
-  else if (msDiff < 36000) {
-    resStr = parseInt(msDiff/6000)+'m'
-  }
-  else if (msDiff < 86400000) {
-    resStr = parseInt(msDiff/36000)+'h'
-  }
-  else if (msDiff < 86400000) {
-    resStr = parseInt(msDiff/36000)+'h'
-  }
-  else if (msDiff < 6048e5) {
-    resStr = parseInt(msDiff/86400000)+'d'
-  }
-  else {
+    resStr = parseInt(msDiff/1000)+'s';
+  } else if (msDiff < 36000) {
+    resStr = parseInt(msDiff/6000)+'m';
+  } else if (msDiff < 86400000) {
+    resStr = parseInt(msDiff/36000)+'h';
+  } else if (msDiff < 86400000) {
+    resStr = parseInt(msDiff/36000)+'h';
+  } else if (msDiff < 6048e5) {
+    resStr = parseInt(msDiff/86400000)+'d';
+  } else {
     resStr = aDate.asDate.toLocaleDateString(
                 'en-US',
-                { 'year': 'numeric',
+                {'year': 'numeric',
                   'month': 'short',
-                  'day': 'numeric' }
-              )
+                  'day': 'numeric'}
+              );
   }
-  return '&nbsp;·&nbsp;'+resStr
+  return '&nbsp;·&nbsp;'+resStr;
 }
 
 function renderTweet( tweet) {
-    var tweet_links = true
+    let tweet_links = true;
 
-    var tweetText = tweet.text
+    let tweetText = tweet.text;
 
     // raw links
-    tweetText = tweetText.replace(/(https?:\/\/[\w\.\/\_]+)/g, '<a href="$1">$1</a>')
+    tweetText = tweetText.replace(/(https?:\/\/[\w\.\/\_]+)/g, '<a href="$1">$1</a>');
 
     // #hashtags
-    tweetText = tweetText.replace(/#(\w+)/g, '<a href="https://twitter.com/hashtag/$1">#$1</a>')
+    tweetText = tweetText.replace(/#(\w+)/g, '<a href="https://twitter.com/hashtag/$1">#$1</a>');
 
     // @users
-    tweetText = tweetText.replace(/@(\w+)/g, '<a href="https://twitter.com/$1">@$1</a>')
+    tweetText = tweetText.replace(/@(\w+)/g, '<a href="https://twitter.com/$1">@$1</a>');
 
     // date
-    var tweetDate = new Date(tweet.created_at)
+    let tweetDate = new Date(tweet.created_at);
 
-    var author_url = "http://twitter.com/"+tweet["user"]["screen_name"];
-    var tweet_url = author_url+"/status/"+tweet["id_str"]
-    var image_normal = author_url+"/profile_image?size=original";
-    var image_bigger = "";
-    if( tweet["user"]["profile_image_url"] ) {
-        let saferUrl = tweet["user"]["profile_image_url"].replace(/^http:/, "https:")
-        image_normal = saferUrl
-        image_bigger = saferUrl.replace("_normal","_bigger")
+    let author_url = 'http://twitter.com/'+tweet['user']['screen_name'];
+    let tweet_url = author_url+'/status/'+tweet['id_str'];
+    let image_normal = author_url+'/profile_image?size=original';
+    let image_bigger = '';
+    if ( tweet['user']['profile_image_url'] ) {
+        let saferUrl = tweet['user']['profile_image_url'].replace(/^http:/, 'https:');
+        image_normal = saferUrl;
+        image_bigger = saferUrl.replace('_normal', '_bigger');
     }
-    var html = ""
-    html += '\t\t'+ '<blockquote onclick="clickInsideTweet(event, \''+tweet_url+'\')" class="Tweet h-entry tweet subject expanded" cite="'+tweet_url+'" data-tweet-id="'+tweet["id_str"]+'" data-scribe="section:subject">' + '\n';
+    let html = '';
+    html += '\t\t'+ '<blockquote onclick="clickInsideTweet(event, \''+tweet_url+'\')" class="Tweet h-entry tweet subject expanded" cite="'+tweet_url+'" data-tweet-id="'+tweet['id_str']+'" data-scribe="section:subject">' + '\n';
 
     html += '\t\t\t'+ '<div class="Tweet-header u-cf">' + '\n';
 
@@ -807,7 +806,7 @@ function renderTweet( tweet) {
     html += '\t\t\t\t'+ '<span class="Tweet-metadata dateline">' + '\n';
 
     html += '\t\t\t\t\t'+ '<a target="_blank" class="u-linkBlend u-url customisable-highlight long-permalink" data-datetime="'+tweetDate.toISOString()+'" data-scribe="element:full_timestamp" href="'+tweet_url+'">' + '\n';
-    html += '\t\t\t\t\t\t'+ '<time class="dt-updated" datetime="'+tweetDate.toISOString()+'" title="'+tweet["created_at"]+'">'+formatDateLikeTwitter(tweetDate)+'</time>' + '\n';
+    html += '\t\t\t\t\t\t'+ '<time class="dt-updated" datetime="'+tweetDate.toISOString()+'" title="'+tweet['created_at']+'">'+formatDateLikeTwitter(tweetDate)+'</time>' + '\n';
     html += '\t\t\t\t\t'+ '</a>' + '\n';
     html += '\t\t\t\t'+ '</span>' + '\n';
 
@@ -823,8 +822,8 @@ function renderTweet( tweet) {
     html += '\t\t\t\t\t\t'+ '<span class="Tweet-authorAvatar Identity-avatar">' + '\n';
     html += '\t\t\t\t\t\t\t'+ '<img class="Avatar u-photo" data-scribe="element:avatar" data-src-2x="'+image_bigger+'" src="'+image_normal+'">' + '\n';
     html += '\t\t\t\t\t\t'+ '</span>' + '\n';
-    html += '\t\t\t\t\t\t'+ '<span class="Tweet-authorName Identity-name p-name customisable-highlight" data-scribe="element:name">'+tweet["user"]["name"]+'</span>' + '\n';
-    html += '\t\t\t\t\t\t'+ '<span class="Tweet-authorScreenName Identity-screenName p-nickname" data-scribe="element:screen_name">@'+tweet["user"]["screen_name"]+'</span>' + '\n';
+    html += '\t\t\t\t\t\t'+ '<span class="Tweet-authorName Identity-name p-name customisable-highlight" data-scribe="element:name">'+tweet['user']['name']+'</span>' + '\n';
+    html += '\t\t\t\t\t\t'+ '<span class="Tweet-authorScreenName Identity-screenName p-nickname" data-scribe="element:screen_name">@'+tweet['user']['screen_name']+'</span>' + '\n';
 
     html += '\t\t\t\t\t'+ '</a>' + '\n';
     html += '\t\t\t\t'+ '</div>' + '\n';
@@ -834,32 +833,32 @@ function renderTweet( tweet) {
 
     html += '\t\t\t\t'+ '<p class="Tweet-text e-entry-title" lang="en" dir="ltr">' + tweetText + '</p>' + '\n';
 
-    if( !isUndef(tweet["retweet_count"]) || !isUndef(tweet["favourites_count"])  ) {
+    if ( !isUndef(tweet['retweet_count']) || !isUndef(tweet['favourites_count']) ) {
         html += '\t\t\t\t'+ '<ul class="Tweet-actions" data-scribe="component:actions" role="menu" aria-label="Tweet actions">' + '\n';
-        if(tweet_links) {
+        if (tweet_links) {
             html += '\t\t\t\t\t'+ '<li class="Tweet-action">' + '\n';
-            html += '\t\t\t\t\t\t'+ '<a target="_blank" class="TweetAction TweetAction--reply web-intent" href="https://twitter.com/intent/tweet?in_reply_to='+tweet["id_str"]+""+'" data-scribe="element:reply">' + '\n';
+            html += '\t\t\t\t\t\t'+ '<a target="_blank" class="TweetAction TweetAction--reply web-intent" href="https://twitter.com/intent/tweet?in_reply_to='+tweet['id_str']+''+'" data-scribe="element:reply">' + '\n';
             html += '\t\t\t\t\t\t\t'+ '<div class="Icon Icon--reply TweetAction-icon" aria-label="Reply" title="Reply" role="img"></div>' + '\n';
             html += '\t\t\t\t\t\t'+ '</a>' + '\n';
             html += '\t\t\t\t\t'+ '</li>' + '\n';
         }
 
-        if(!isUndef(tweet["retweet_count"])) {
+        if (!isUndef(tweet['retweet_count'])) {
             html += '\t\t\t\t\t'+ '<li class="Tweet-action">' + '\n';
-            html += '\t\t\t\t\t\t'+ '<a target="_blank" class="TweetAction TweetAction--retweet web-intent" href="https://twitter.com/intent/retweet?tweet_id='+tweet["id_str"]+'" data-scribe="element:retweet">' + '\n';
+            html += '\t\t\t\t\t\t'+ '<a target="_blank" class="TweetAction TweetAction--retweet web-intent" href="https://twitter.com/intent/retweet?tweet_id='+tweet['id_str']+'" data-scribe="element:retweet">' + '\n';
             html += '\t\t\t\t\t\t\t'+ '<div class="Icon Icon--retweet TweetAction-icon" aria-label="Retweet" title="Retweet" role="img"></div>' + '\n';
-            html += '\t\t\t\t\t\t\t'+ '<span class="TweetAction-stat" data-scribe="element:retweet_count" aria-hidden="true">'+tweet["retweet_count"]+'</span>' + '\n';
-            html += '\t\t\t\t\t\t\t'+ '<span class="u-hiddenVisually">'+tweet["retweet_count"]+' Retweets</span>' + '\n';
+            html += '\t\t\t\t\t\t\t'+ '<span class="TweetAction-stat" data-scribe="element:retweet_count" aria-hidden="true">'+tweet['retweet_count']+'</span>' + '\n';
+            html += '\t\t\t\t\t\t\t'+ '<span class="u-hiddenVisually">'+tweet['retweet_count']+' Retweets</span>' + '\n';
             html += '\t\t\t\t\t\t'+ '</a>' + '\n';
             html += '\t\t\t\t\t'+ '</li>' + '\n';
         }
 
-        if(!isUndef(tweet["favourites_count"])) {
+        if (!isUndef(tweet['favourites_count'])) {
             html += '\t\t\t\t\t'+ '<li class="Tweet-action">' + '\n';
-            html += '\t\t\t\t\t\t'+ '<a target="_blank" class="TweetAction TweetAction--favorite web-intent" href="https://twitter.com/intent/favorite?tweet_id='+tweet["id_str"]+'" data-scribe="element:favorite">' + '\n';
+            html += '\t\t\t\t\t\t'+ '<a target="_blank" class="TweetAction TweetAction--favorite web-intent" href="https://twitter.com/intent/favorite?tweet_id='+tweet['id_str']+'" data-scribe="element:favorite">' + '\n';
             html += '\t\t\t\t\t\t\t'+ '<div class="Icon Icon--favorite TweetAction-icon" aria-label="Favorite" title="Favorite" role="img"></div>' + '\n';
-            html += '\t\t\t\t\t\t\t'+ '<span class="TweetAction-stat" data-scribe="element:favourites_count" aria-hidden="true">'+tweet["favourites_count"]+'</span>' + '\n';
-            html += '\t\t\t\t\t\t\t'+ '<span class="u-hiddenVisually">'+tweet["favourites_count"]+' favorites</span>' + '\n';
+            html += '\t\t\t\t\t\t\t'+ '<span class="TweetAction-stat" data-scribe="element:favourites_count" aria-hidden="true">'+tweet['favourites_count']+'</span>' + '\n';
+            html += '\t\t\t\t\t\t\t'+ '<span class="u-hiddenVisually">'+tweet['favourites_count']+' favorites</span>' + '\n';
             html += '\t\t\t\t\t\t'+ '</a>' + '\n';
             html += '\t\t\t\t\t'+ '</li>' + '\n';
         }
@@ -878,28 +877,28 @@ function renderTweet( tweet) {
     return html;
 }
 
-function getTips(){
+function getTips() {
     text =
-        "<br>"+
-        "Basic Interactions:"+
-        "<ul>"+
-        "<li>Click on a node to select/unselect and get its information. In case of multiple selection, the button unselect clears all selections,</li>"+
-        "<li> Use your mouse scroll to zoom in and out in the graph.</li>"+
-        "</ul>"+
-        "<br>"+
-        "Graph manipulation:"+
-        "<ul>"+
-        "<li>Node size is proportional to the number of documents with the associated term,</li>"+
-        "<li>Use the node filter to create a subgraph with nodes of a given size range (e.g. display only generic terms),</li>"+
-        "<li>Link strength is proportional to the strenght of terms association,</li>"+
-        "<li>Use the edge filter so create a subgraph with links in a given range (e.g. keep the strongest association).</li>"+
-        "</ul>"+
-        "<br>"+
-        "Global/local view:"+
-        "<ul>"+
-        "<li>The 'change level' button allows to change between global view and node centered view,</li>"+
-        "<li>To explore the neighborhood of a selection click on the 'change level' button.</li>"+
-        "</ul>";
+        '<br>'+
+        'Basic Interactions:'+
+        '<ul>'+
+        '<li>Click on a node to select/unselect and get its information. In case of multiple selection, the button unselect clears all selections,</li>'+
+        '<li> Use your mouse scroll to zoom in and out in the graph.</li>'+
+        '</ul>'+
+        '<br>'+
+        'Graph manipulation:'+
+        '<ul>'+
+        '<li>Node size is proportional to the number of documents with the associated term,</li>'+
+        '<li>Use the node filter to create a subgraph with nodes of a given size range (e.g. display only generic terms),</li>'+
+        '<li>Link strength is proportional to the strenght of terms association,</li>'+
+        '<li>Use the edge filter so create a subgraph with links in a given range (e.g. keep the strongest association).</li>'+
+        '</ul>'+
+        '<br>'+
+        'Global/local view:'+
+        '<ul>'+
+        '<li>The \'change level\' button allows to change between global view and node centered view,</li>'+
+        '<li>To explore the neighborhood of a selection click on the \'change level\' button.</li>'+
+        '</ul>';
     return text;
 }
 
@@ -910,8 +909,8 @@ function getTips(){
 //   => atm rewrote entire function with new values
 function circleTrackMouse(e) {
     // new sigma.js 2D mouse context
-    var ctx = TW.partialGraph.renderers[0].contexts.mouse;
-    ctx.globalCompositeOperation = "source-over";
+    let ctx = TW.partialGraph.renderers[0].contexts.mouse;
+    ctx.globalCompositeOperation = 'source-over';
 
     // clear zone each time to prevent repeated frame artifacts
     ctx.clearRect(0, 0,
@@ -925,83 +924,80 @@ function circleTrackMouse(e) {
     // optional: make more labels appear on circle hover (/!\ costly /!\ esp. on large graphs)
     if (TW.conf.moreLabelsUnderArea) {
       // convert screen => mouse => cam
-      var mouseCoords = sigma.utils.mouseCoords(e)
-      var camCoords = TW.cam.cameraPosition(mouseCoords.x, mouseCoords.y)
+      let mouseCoords = sigma.utils.mouseCoords(e);
+      let camCoords = TW.cam.cameraPosition(mouseCoords.x, mouseCoords.y);
 
-      var exactNodeset = circleGetAreaNodes(
+      let exactNodeset = circleGetAreaNodes(
         camCoords.x,
         camCoords.y
-      )
+      );
       // console.log("nodes under circle:", exactNodeset)
 
       // we'll use labelThreshold / 3 as the "boosted" cam:size threshold
-      let pfx = TW.cam.readPrefix
-      let toRedraw = []
-      for (var k in exactNodeset) {
-        let n = TW.partialGraph.graph.nodes(exactNodeset[k])
-        if(n[pfx+'size'] > (TW.customSettings.labelThreshold / 3)) {
-          toRedraw.push(n)
+      let pfx = TW.cam.readPrefix;
+      let toRedraw = [];
+      for (let k in exactNodeset) {
+        let n = TW.partialGraph.graph.nodes(exactNodeset[k]);
+        if (n[pfx+'size'] > (TW.customSettings.labelThreshold / 3)) {
+          toRedraw.push(n);
         }
       }
-      redrawNodesInHoverLayer(toRedraw, "hovers")
+      redrawNodesInHoverLayer(toRedraw, 'hovers');
     }
 
     // draw the circle itself
     ctx.strokeStyle = '#000';
     ctx.lineWidth = 1;
-    ctx.fillStyle = "#71C3FF";
+    ctx.fillStyle = '#71C3FF';
     ctx.globalAlpha = 0.5;
     ctx.beginPath();
     ctx.arc(x, y, TW.gui.circleSize, 0, Math.PI * 2, true);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
-    ctx.globalAlpha = 1
-
+    ctx.globalAlpha = 1;
 }
 
 
 // exact subset of nodes under circle
 function circleGetAreaNodes(camX0, camY0) {
-
-  var cursor_ray = TW.gui.circleSize * TW.cam.ratio // converting TW.gui.circleSize to cam units
+  let cursor_ray = TW.gui.circleSize * TW.cam.ratio; // converting TW.gui.circleSize to cam units
 
   // prepare an approximate neighborhood
-  var slightlyLargerNodeset = circleLocalSubset(
+  let slightlyLargerNodeset = circleLocalSubset(
     camX0, camY0,
     cursor_ray
-  )
+  );
 
   // console.log('slightlyLargerNodeset', slightlyLargerNodeset)
 
-  var exactNodeset = []
+  let exactNodeset = [];
 
-  for(var i in slightlyLargerNodeset){
+  for (let i in slightlyLargerNodeset) {
     n = slightlyLargerNodeset[i];
-    if(!n.hidden){
+    if (!n.hidden) {
       distance = Math.sqrt(
-                  Math.pow((camX0-parseInt(n['read_cam0:x'])),2) +
-                  Math.pow((camY0-parseInt(n['read_cam0:y'])),2)
+                  Math.pow((camX0-parseInt(n['read_cam0:x'])), 2) +
+                  Math.pow((camY0-parseInt(n['read_cam0:y'])), 2)
       );
 
       // console.log('D[P0,'+n.label+'] =', distance)
 
-      if( distance <= cursor_ray) {
-        exactNodeset.push(n.id)
+      if ( distance <= cursor_ray) {
+        exactNodeset.push(n.id);
       }
     }
   }
 
-  return exactNodeset
+  return exactNodeset;
 }
 
 
 // returns set of nodes in the quad subzones around a square
 //         that is containing the circle centered on x0, y0
 // (use case: reduce number of nodes before exact check)
-function circleLocalSubset(camX0, camY0 , camRay) {
-
-  var P0 = {x:camX0, y:camY0}
+function circleLocalSubset(camX0, camY0, camRay) {
+  let P0 = {x: camX0, y: camY0};
 
   // to use quadtree.area, we consider the square
   // in which our circle is inscribed
@@ -1017,19 +1013,19 @@ function circleLocalSubset(camX0, camY0 , camRay) {
   //                y+
 
 
-  var P1 = {x: P0.x - camRay , y: P0.y - camRay }  // top left
-  var P2 = {x: P0.x + camRay , y: P0.y - camRay }  // top right
+  let P1 = {x: P0.x - camRay, y: P0.y - camRay}; // top left
+  let P2 = {x: P0.x + camRay, y: P0.y - camRay}; // top right
 
-  var areaNodes = TW.cam.quadtree.area({
+  let areaNodes = TW.cam.quadtree.area({
                         height: 2 * camRay,
-                        x1:P1.x,  y1:P1.y,
-                        x2:P2.x,  y2:P2.y
-                      })
+                        x1: P1.x, y1: P1.y,
+                        x2: P2.x, y2: P2.y,
+                      });
 
   // neighborhood guaranteed a bit larger than the square
   // console.log('got ',areaNodes.length, 'nodes:', areaNodes)
 
-  return areaNodes
+  return areaNodes;
 }
 
 
@@ -1041,42 +1037,41 @@ function circleLocalSubset(camX0, camY0 , camRay) {
 //   - the dirname of the submodule's files (with a mandatory init.js)
 //   - the css class of all html elements added by the submodule
 function activateModules() {
-
     // special case: can't run if explorer opened locally (loadJS cors pb)
     // ex: location == "file:///home/romain/tw/DEV_PJXP/explorerjs.html"
-    if (window.location.protocol == "file:") {
-      let localWarning = "localfile mode: Won't sync optional modules"
+    if (window.location.protocol == 'file:') {
+      let localWarning = 'localfile mode: Won\'t sync optional modules';
 
       // log additional details if present
-      if (TW.conf.ModulesFlags && typeof TW.conf.ModulesFlags == "object") {
+      if (TW.conf.ModulesFlags && typeof TW.conf.ModulesFlags == 'object') {
         let requestedModules = Object.keys(
           TW.conf.ModulesFlags
-        ).filter(function(moduleName){return TW.conf.ModulesFlags[moduleName]})
-        localWarning += " (" + requestedModules.join(",") + " => not loaded)"
+        ).filter(function(moduleName) {
+return TW.conf.ModulesFlags[moduleName];
+});
+        localWarning += ' (' + requestedModules.join(',') + ' => not loaded)';
       }
-      console.warn(localWarning)
+      console.warn(localWarning);
     }
     // normal case (all other modes)
     // -----------
     else {
-      for(var key in TW.conf.ModulesFlags) {
-        if(TW.conf.ModulesFlags[key]===false) {
-            $("."+key).remove() ; // hide elements of module's class
-        }
-        else {
+      for (let key in TW.conf.ModulesFlags) {
+        if (TW.conf.ModulesFlags[key]===false) {
+            $('.'+key).remove(); // hide elements of module's class
+        } else {
             // console.log("extras:activateModules: key is true: "+key)
             // load JS+CSS items corresponding to the flagname
-            let my_src_dir = TW.conf.paths.modules + '/'+ key
+            let my_src_dir = TW.conf.paths.modules + '/'+ key;
 
             // synchronous ajax
-            let moduleIsPresent = linkCheck(my_src_dir+"/init.js")
+            let moduleIsPresent = linkCheck(my_src_dir+'/init.js');
 
             if (moduleIsPresent) {
-              loadJS(my_src_dir+"/init.js") ;
-            }
-            else {
-              console.warn (`didn't find module dir ${key}`)
-              $("."+key).remove()
+              loadJS(my_src_dir+'/init.js');
+            } else {
+              console.warn(`didn't find module dir ${key}`);
+              $('.'+key).remove();
             }
             // ex: for the flag = crowdsourcingTerms
             //     will load ==> JS    crowdsourcingTerms/init.js
@@ -1098,24 +1093,24 @@ function activateModules() {
 //  NB condition on dataType could be on an extended meta "attrType"
 //     cf. doc/developer_manual.md autodiagnose remark)
 function fillAttrsInForm(menuId, optionalAttTypeConstraint) {
-  var actypes = getActivetypesNames()
-  let elChooser = document.getElementById(menuId)
+  let actypes = getActivetypesNames();
+  let elChooser = document.getElementById(menuId);
 
   // 1- remove any previous options from possible previous graphs
-  let filledOptions = document.getElementById(menuId).querySelectorAll('option[data-opttype=filled]')
-  for (var i = 0 ; i <= filledOptions.length - 1 ; i++) {
-    elChooser.removeChild(filledOptions[i])
+  let filledOptions = document.getElementById(menuId).querySelectorAll('option[data-opttype=filled]');
+  for (let i = 0; i <= filledOptions.length - 1; i++) {
+    elChooser.removeChild(filledOptions[i]);
   }
 
   // 2- ls | uniq all options (no matter what active type they belong too)
-  let uniqOptions = {'clust_louvain': true}
+  let uniqOptions = {'clust_louvain': true};
   for (let tid in actypes) {
-    let ty = actypes[tid]
+    let ty = actypes[tid];
     for (var att in TW.Facets[ty]) {
       if (!optionalAttTypeConstraint
-           || (   TW.Facets[ty][att].meta.dataType
+           || ( TW.Facets[ty][att].meta.dataType
                && TW.Facets[ty][att].meta.dataType == optionalAttTypeConstraint)) {
-         uniqOptions[att] = true
+         uniqOptions[att] = true;
        }
      }
    }
@@ -1125,40 +1120,39 @@ function fillAttrsInForm(menuId, optionalAttTypeConstraint) {
     // <option> creation
     // -------------------
     // each facet family or clustering type was already prepared
-    let opt = document.createElement('option')
-    opt.value = att
-    opt.innerText = att
-    opt.dataset.opttype = "filled"
+    let opt = document.createElement('option');
+    opt.value = att;
+    opt.innerText = att;
+    opt.dataset.opttype = 'filled';
     if (att in TW.facetOptions && TW.facetOptions[att].legend) {
-      opt.innerText = TW.facetOptions[att].legend + " (" + att + ")"
-    }
-    else {
-      opt.innerText = "(" + att + ")"
+      opt.innerText = TW.facetOptions[att].legend + ' (' + att + ')';
+    } else {
+      opt.innerText = '(' + att + ')';
     }
     if (att == 'clust_louvain') {
-      opt.selected = true
+      opt.selected = true;
     }
-    elChooser.appendChild(opt)
+    elChooser.appendChild(opt);
   }
 
-  showAttrConf(null, 'clust_louvain')
+  showAttrConf(null, 'clust_louvain');
 }
 
 // for optional questions:
 //  ( displays subQuestion iff mainQuestion has one of the mainQOkValues )
 function conditiOpen(subQId, mainQId, mainQOkValues) {
-  let mainq = document.getElementById(mainQId)
-  let subq  = document.getElementById(subQId)
+  let mainq = document.getElementById(mainQId);
+  let subq = document.getElementById(subQId);
 
-  let triggerVal = false
+  let triggerVal = false;
   for (let i in mainQOkValues) {
     if (mainq.value == mainQOkValues[i]) {
-      triggerVal = true
-      break
+      triggerVal = true;
+      break;
     }
   }
   // show or not
-  subq.style.display = triggerVal ? 'block' : 'none'
+  subq.style.display = triggerVal ? 'block' : 'none';
 }
 
 // attr-col change has complex consequences
@@ -1166,52 +1160,50 @@ function colChangedHandler() {
   // for the implication [cluster => grey freeze binmode off but keep it shown,
   //                        other => reactivate ]
   // (no sense to ordinally bin clusters)
-  let elColQ = document.getElementById('attr-col')
-  let elBinmodeQ = document.getElementById('attr-binmode')
+  let elColQ = document.getElementById('attr-col');
+  let elBinmodeQ = document.getElementById('attr-binmode');
   if (elColQ.value == 'cluster') {
-    elBinmodeQ.value = "off"
-    elBinmodeQ.disabled = true
-    elBinmodeQ.style.backgroundColor = "#777"
-  }
-  else {
-    elBinmodeQ.disabled = false
-    elBinmodeQ.style.backgroundColor = ""
+    elBinmodeQ.value = 'off';
+    elBinmodeQ.disabled = true;
+    elBinmodeQ.style.backgroundColor = '#777';
+  } else {
+    elBinmodeQ.disabled = false;
+    elBinmodeQ.style.backgroundColor = '';
   }
 
   // for titling subquestion show
-  conditiOpen('choose-titling-div', 'attr-col',['cluster'])
+  conditiOpen('choose-titling-div', 'attr-col', ['cluster']);
 
   // for nbins subquestion show
-  conditiOpen('attr-nbins-div', 'attr-binmode',['samepop', 'samerange'])
-
+  conditiOpen('attr-nbins-div', 'attr-binmode', ['samepop', 'samerange']);
 }
 
 
 function showAttrConf(event, optionalAttrname) {
-  let attrTitle = optionalAttrname || this.value
-  let settings = TW.facetOptions[attrTitle] || {}
-  document.getElementById('attr-translation').value = settings.legend || attrTitle
-  document.getElementById('attr-col').value = settings.col || 'gradient'
-  document.getElementById('attr-binmode').value = settings.binmode || 'off'
-  document.getElementById('attr-nbins').value = settings.n || TW.conf.legendsBins || 5
-  document.getElementById('attr-titling-metric').value = settings.titlingMetric || 'auto-size'
-  document.getElementById('attr-titling-n').value = settings.titlingNTerms || 2
+  let attrTitle = optionalAttrname || this.value;
+  let settings = TW.facetOptions[attrTitle] || {};
+  document.getElementById('attr-translation').value = settings.legend || attrTitle;
+  document.getElementById('attr-col').value = settings.col || 'gradient';
+  document.getElementById('attr-binmode').value = settings.binmode || 'off';
+  document.getElementById('attr-nbins').value = settings.n || TW.conf.legendsBins || 5;
+  document.getElementById('attr-titling-metric').value = settings.titlingMetric || 'auto-size';
+  document.getElementById('attr-titling-n').value = settings.titlingNTerms || 2;
 
   // make the binmode and titling details adapt to choosen settings.col
-  colChangedHandler()
+  colChangedHandler();
 }
 
 
 // writes new attribute configuration from user form, recreates facet bins AND runs the new color
 // processing time: ~~ 1.5 ms for 100 nodes
 function newAttrConfAndColor() {
-  let attrTitle = document.getElementById('choose-attr').value
+  let attrTitle = document.getElementById('choose-attr').value;
 
   let legendChanged = (
-    (! "legend" in TW.facetOptions[attrTitle] && document.getElementById('attr-translation').value)
+    (! 'legend' in TW.facetOptions[attrTitle] && document.getElementById('attr-translation').value)
        ||
     (TW.facetOptions[attrTitle].legend != document.getElementById('attr-translation').value)
-  )
+  );
 
   // read values from GUI
   TW.facetOptions[attrTitle] = {
@@ -1222,45 +1214,44 @@ function newAttrConfAndColor() {
 
      // only for clusterings (ie currently <=> (col == "cluster"))
      'titlingMetric': document.getElementById('attr-titling-metric').value,
-     'titlingNTerms': document.getElementById('attr-titling-n').value || 2
-  }
+     'titlingNTerms': document.getElementById('attr-titling-n').value || 2,
+  };
 
   // case where we need to update dialog displays because of new legend
   if (legendChanged) {
-    fillAttrsInForm('choose-attr')
-    fillAttrsInForm('attr-titling-metric', 'num')
+    fillAttrsInForm('choose-attr');
+    fillAttrsInForm('attr-titling-metric', 'num');
   }
 
   // dynamic attribute case
   if (attrTitle in TW.sigmaAttributes) {
-    updateDynamicFacets(attrTitle)        // all-in-one function
+    updateDynamicFacets(attrTitle); // all-in-one function
   }
 
   // classic data-driven attribute case
   else {
-
     // 1 - find the corresponding types
-    let relevantTypes = {}
+    let relevantTypes = {};
     for (let ty in TW.Facets) {
       if (TW.Facets[ty][attrTitle]) {
-        relevantTypes[ty] = true
+        relevantTypes[ty] = true;
       }
     }
 
     // 2 - reparse values (avoids keeping them in RAM since parseCustom)
-    tmpVals = {}
+    tmpVals = {};
     for (let nid in TW.Nodes) {
-      let n = TW.Nodes[nid]
+      let n = TW.Nodes[nid];
       if (relevantTypes[n.type]) {
-        tmpVals = updateValueFacets(tmpVals, n, attrTitle)
+        tmpVals = updateValueFacets(tmpVals, n, attrTitle);
       }
     }
 
-    let newClustering = facetsBinning (tmpVals)
+    let newClustering = facetsBinning(tmpVals);
 
     // 3 - write result to global TW.Facets
     for (let ty in newClustering) {
-      TW.Facets[ty][attrTitle] = newClustering[ty][attrTitle]
+      TW.Facets[ty][attrTitle] = newClustering[ty][attrTitle];
     }
 
     // console.log("reparse raw result", tmpVals)
@@ -1268,9 +1259,9 @@ function newAttrConfAndColor() {
   }
 
   // update the GUI menu
-  changeGraphAppearanceByFacets()
+  changeGraphAppearanceByFacets();
 
   // run the new color
-  let colMethod = TW.gui.colorFuns[TW.facetOptions[attrTitle]['col']]
-  window[colMethod](attrTitle)
+  let colMethod = TW.gui.colorFuns[TW.facetOptions[attrTitle]['col']];
+  window[colMethod](attrTitle);
 }

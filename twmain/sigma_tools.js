@@ -1,24 +1,22 @@
 // (transitional package): sigmaTools for functions we had in sam's customized sigma v.1 under sigma.tools
 // TODO: unify with sigmaUtils or globalUtils
 
-var sigmaTools = {};
+let sigmaTools = {};
 
 sigmaTools = (function(stools) {
-
     // a simpler alternative to avoid parseCustom and prepareNodesRenderingProperties
     // temporarily after using the new gexf stock parser
     // (mostly to transform viz: attrs in real attrs)
     stools.myGexfParserReplacement = function(rawGexfNodes, rawGexfEdges) {
-
       // output, indexed by IDs
-      var newNodes = [],
-          newEdges = []
+      let newNodes = [],
+          newEdges = [];
 
-      for (var j in rawGexfNodes) {
-        var rawNode = rawGexfNodes[j]
+      for (let j in rawGexfNodes) {
+        let rawNode = rawGexfNodes[j];
         // pre-parse node rgb color
-        var rgbStr = rawNode.viz.color.match(/rgb\(([^\(]+)\)/)[1]
-        var newNode = {
+        var rgbStr = rawNode.viz.color.match(/rgb\(([^\(]+)\)/)[1];
+        let newNode = {
           id: rawNode.id,
           label: rawNode.label,
           x: rawNode.viz.position.x,
@@ -29,24 +27,24 @@ sigmaTools = (function(stools) {
           customAttrs: {
             active: false,
             highlight: false,
-            defgrey_color : "rgba("+rgbStr+",.4)"
+            defgrey_color: 'rgba('+rgbStr+',.4)',
           },
           // for metrics like centrality
           attributes: {
-            'clust_default': rawNode.attributes.modularity_class
-          }
-        }
-        newNodes[j] = newNode
+            'clust_default': rawNode.attributes.modularity_class,
+          },
+        };
+        newNodes[j] = newNode;
       }
 
-      for (var i in rawGexfEdges) {
-        var rawEdge = rawGexfEdges[i]
+      for (let i in rawGexfEdges) {
+        let rawEdge = rawGexfEdges[i];
 
-        var rgbStr = sigmaTools.edgeRGB(newNodes[rawEdge.source].color, newNodes[rawEdge.target].color)
-        var leColor = "rgba("+rgbStr+","+TW.conf.sigmaJsDrawingProperties.twEdgeDefaultOpacity+")"
+        var rgbStr = sigmaTools.edgeRGB(newNodes[rawEdge.source].color, newNodes[rawEdge.target].color);
+        let leColor = 'rgba('+rgbStr+','+TW.conf.sigmaJsDrawingProperties.twEdgeDefaultOpacity+')';
 
-        var newEid = rawEdge.source+";"+rawEdge.target;
-        var newEdge = {
+        let newEid = rawEdge.source+';'+rawEdge.target;
+        let newEdge = {
           id: newEid,
           source: rawEdge.source,
           target: rawEdge.target,
@@ -55,15 +53,14 @@ sigmaTools = (function(stools) {
           customAttrs: {
             activeEdge: false,
             true_color: leColor,
-            rgb: rgbStr
-          }
-        }
+            rgb: rgbStr,
+          },
+        };
 
-        newEdges[i] = newEdge
-
+        newEdges[i] = newEdge;
       }
 
-      return {nodes: newNodes, edges: newEdges}
+      return {nodes: newNodes, edges: newEdges};
     };
 
 
@@ -84,37 +81,34 @@ sigmaTools = (function(stools) {
 
     // TODO check duplicate functionalities with repaintEdges
     stools.edgeRGB = function(color_a, color_b) {
-
-      //edge color will be the combination of the 2 node colors
+      // edge color will be the combination of the 2 node colors
 
       // console.log("color a", color_a)
       // console.log("color b", color_b)
 
-      var tmp
+      let tmp;
 
-      if(color_a.charAt(0)!="#") {
-          tmp = color_a.replace(/rgba?\(/,"").replace(")","").split(",")
+      if (color_a.charAt(0)!='#') {
+          tmp = color_a.replace(/rgba?\(/, '').replace(')', '').split(',');
 
           // rgb array
-          color_a = [parseFloat( tmp[0] ) , parseFloat( tmp[1] ) , parseFloat( tmp[2] )];
-      }
-      else {
+          color_a = [parseFloat( tmp[0] ), parseFloat( tmp[1] ), parseFloat( tmp[2] )];
+      } else {
         color_a = hex2rgba(color_a);
       }
 
-      if(color_b.charAt(0)!="#") {
-          tmp = color_b.replace(/rgba?\(/,"").replace(")","").split(",")
-          color_b = [parseFloat( tmp[0] ) , parseFloat( tmp[1] ) , parseFloat( tmp[2] )];
-      }
-      else {
+      if (color_b.charAt(0)!='#') {
+          tmp = color_b.replace(/rgba?\(/, '').replace(')', '').split(',');
+          color_b = [parseFloat( tmp[0] ), parseFloat( tmp[1] ), parseFloat( tmp[2] )];
+      } else {
         color_b = hex2rgba(color_b);
       }
-      var r = (color_a[0] + color_b[0]) >> 1;
-      var g = (color_a[1] + color_b[1]) >> 1;
-      var b = (color_a[2] + color_b[2]) >> 1;
+      let r = (color_a[0] + color_b[0]) >> 1;
+      let g = (color_a[1] + color_b[1]) >> 1;
+      let b = (color_a[2] + color_b[2]) >> 1;
 
-      return [r,g,b].join(',')
-    }
+      return [r, g, b].join(',');
+    };
 
-    return stools
+    return stools;
 })(sigmaTools);
