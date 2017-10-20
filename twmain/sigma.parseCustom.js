@@ -1162,8 +1162,8 @@ function dictfyJSON( data , categories ) {
         node.label = (n.label)? n.label : ("node_"+node.id) ;
         node.size = (n.size)? n.size : 3 ;
         node.type = (n.type)? n.type : "Document" ;
-        node.x = (n.x)? n.x : 10000-Math.random()*20000;
-        node.y = (n.y)? n.y : 10000-Math.random()*20000;
+        node.x = (n.x)? n.x : 500-Math.random()*1000;
+        node.y = (n.y)? n.y : 500-Math.random()*1000;
         node.color = (n.color)? n.color : "#FFFFFF" ;
         if(n.shape) node.shape = n.shape;
         if(n.attributes) node.attributes = n.attributes

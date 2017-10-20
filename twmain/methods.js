@@ -926,7 +926,7 @@ function reInitFa2 (params = {}) {
     // ----------------
     if (params.typeAdapt) {
       let semTypeOn = Boolean(TW.SystemState().activetypes[0])
-      theseFA2Params.gravity = semTypeOn ? TW.FA2Params.gravity * 4.5 : TW.FA2Params.gravity
+      theseFA2Params.gravity = semTypeOn ? TW.FA2Params.gravity * 3.5 : TW.FA2Params.gravity
       theseFA2Params.iterationsPerRender = semTypeOn ? 4 : 32
       theseFA2Params.slowDown = semTypeOn ? .2 : .8
     }
