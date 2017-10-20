@@ -177,6 +177,13 @@ function syncRemoteGraphData () {
                     let typeName = TW.APIQuery[fieldName]
                     restParams.push("type"+itype+"="+typeName)
                   }
+                  // optional pivotType
+                  else if (fieldName == "_pivot_type") {
+                    let pivotType = TW.APIQuery[fieldName]
+                    if (pivotType == "scholars" || pivotType == "keywords") {
+                      restParams.push("pivot_type="+pivotType)
+                    }
+                  }
                   // an array of filters
                   else {
                     var nameSubElts = []
