@@ -3,61 +3,57 @@
 //   (for instance loop on full gexf in scanGexf then again in dictfyGexf)
 
 // Level-01
-var ParseCustom = function ( format , data, optionalNodeConf ) {
-
+let ParseCustom = function( format, data, optionalNodeConf ) {
     if (format == 'gexf') {
-      this.data = $.parseXML(data)
-    }
-    else {
-      this.data = JSON.parse(data)
+      this.data = $.parseXML(data);
+    } else {
+      this.data = JSON.parse(data);
     }
     this.format = format;
     this.nbCats = 0;
 
     // input = GEXFstring
     this.getGEXFCategories = function() {
-        let observedCategories = scanGexf(this.data)
-        let finalCategories = sortNodeTypes(observedCategories,optionalNodeConf)
+        let observedCategories = scanGexf(this.data);
+        let finalCategories = sortNodeTypes(observedCategories, optionalNodeConf);
         return finalCategories;
-    }// output = {'cats':[ "cat1" , "cat2" , ...], 'rev': {cat1: 0, cat2: 1...}}
+    };// output = {'cats':[ "cat1" , "cat2" , ...], 'rev': {cat1: 0, cat2: 1...}}
 
 
     // input = [ "cat1" , "cat2" , ...]
     this.parseGEXF = function(categories ) {
-        return dictfyGexf( this.data , categories );
-    }// output = { nodes, edges }
-
+        return dictfyGexf( this.data, categories );
+    };// output = { nodes, edges }
 
 
     // input = JSONstring
     this.getJSONCategories = function(json) {
-      let observedCategories = scanJSON(this.data)
-      let finalCategories = sortNodeTypes(observedCategories, optionalNodeConf)
+      let observedCategories = scanJSON(this.data);
+      let finalCategories = sortNodeTypes(observedCategories, optionalNodeConf);
       return finalCategories;
-    }// output = {'cats':[ "cat1" , "cat2" , ...], 'rev': {cat1: 0, cat2: 1...}}
+    };// output = {'cats':[ "cat1" , "cat2" , ...], 'rev': {cat1: 0, cat2: 1...}}
 
 
     // input = [ "cat1" , "cat2" , ...]
     this.parseJSON = function(categories ) {
-        return dictfyJSON( this.data , categories );
-    }// output = { nodes, edges }
-
+        return dictfyJSON( this.data, categories );
+    };// output = { nodes, edges }
 };
 
 // Level-02
 ParseCustom.prototype.scanFile = function() {
     let catInfos = {'categories': new Array(),
-                    'lookup_dict': new Object()}
+                    'lookup_dict': new Object()};
     switch (this.format) {
-        case "api.json":
+        case 'api.json':
             break;
-        case "db.json":
+        case 'db.json':
             break;
-        case "json":
+        case 'json':
             catInfos = this.getJSONCategories( this.data );
             return catInfos;
             break;
-        case "gexf":
+        case 'gexf':
             catInfos = this.getGEXFCategories( this.data );
             return catInfos;
             break;
@@ -68,35 +64,32 @@ ParseCustom.prototype.scanFile = function() {
 
 // Level-02
 ParseCustom.prototype.makeDicts = function(categories) {
-    let dictionaries = {}
+    let dictionaries = {};
     switch (this.format) {
-        case "api.json":
-            console.log("makeDicts: "+this.format)
+        case 'api.json':
+            console.log('makeDicts: '+this.format);
             break;
-        case "db.json":
-            console.log("makeDicts: "+this.format)
+        case 'db.json':
+            console.log('makeDicts: '+this.format);
             break;
-        case "json":
-            console.log("makeDicts: "+this.format)
+        case 'json':
+            console.log('makeDicts: '+this.format);
             dictionaries = this.parseJSON( categories );
             return dictionaries;
             break;
-        case "gexf":
-            console.log("makeDicts: "+this.format)
+        case 'gexf':
+            console.log('makeDicts: '+this.format);
             dictionaries = this.parseGEXF( categories );
             return dictionaries;
             break;
         default:
-            console.log("makeDicts   jsaispas: "+this.format)
+            console.log('makeDicts   jsaispas: '+this.format);
             break;
     }
 };
 
 
-
-
-function gexfCheckAttributesMap (someXMLContent) {
-
+function gexfCheckAttributesMap(someXMLContent) {
     // excerpt from targeted XML:
     // <graph defaultedgetype="undirected" mode="static">
     // |  <attributes class="node" mode="static">
@@ -108,19 +101,19 @@ function gexfCheckAttributesMap (someXMLContent) {
 
 
     // Census of the conversions between attr and some attr name
-    var i, j, k;
-    var nodesAttributes = {};
-    var edgesAttributes = {};
+    let i, j, k;
+    let nodesAttributes = {};
+    let edgesAttributes = {};
 
     // In the gexf (that is an xml), the list of xml nodes 'attributes' (note the plural 's')
-    var attributesNodes = someXMLContent.getElementsByTagName('attributes');
+    let attributesNodes = someXMLContent.getElementsByTagName('attributes');
 
-    for(i = 0; i<attributesNodes.length; i++){
-        var attributesNode = attributesNodes[i];  // attributesNode is each xml node 'attributes' (plural)
-        if(attributesNode.getAttribute('class') == 'node'){
-            var attributeNodes = attributesNode.getElementsByTagName('attribute');  // The list of xml nodes 'attribute' (no 's')
-            for(j = 0; j<attributeNodes.length; j++){
-                var attributeNode = attributeNodes[j];  // Each xml node 'attribute'
+    for (i = 0; i<attributesNodes.length; i++) {
+        let attributesNode = attributesNodes[i]; // attributesNode is each xml node 'attributes' (plural)
+        if (attributesNode.getAttribute('class') == 'node') {
+            var attributeNodes = attributesNode.getElementsByTagName('attribute'); // The list of xml nodes 'attribute' (no 's')
+            for (j = 0; j<attributeNodes.length; j++) {
+                var attributeNode = attributeNodes[j]; // Each xml node 'attribute'
 
                 var id = attributeNode.getAttribute('id'),
                 title = attributeNode.getAttribute('title'),
@@ -131,29 +124,27 @@ function gexfCheckAttributesMap (someXMLContent) {
                 // ex:   type  = "string"
 
                 var attribute = {
-                    id:id,
-                    title:title,
-                    type:type
+                    id: id,
+                    title: title,
+                    type: type,
                 };
                 nodesAttributes[id] = attribute;
-
             }
-        } else if(attributesNode.getAttribute('class') == 'edge'){
-            var attributeNodes = attributesNode.getElementsByTagName('attribute');  // The list of xml nodes 'attribute' (no 's')
-            for(j = 0; j<attributeNodes.length; j++){
-                var attributeNode = attributeNodes[j];  // Each xml node 'attribute'
+        } else if (attributesNode.getAttribute('class') == 'edge') {
+            var attributeNodes = attributesNode.getElementsByTagName('attribute'); // The list of xml nodes 'attribute' (no 's')
+            for (j = 0; j<attributeNodes.length; j++) {
+                var attributeNode = attributeNodes[j]; // Each xml node 'attribute'
 
                 var id = attributeNode.getAttribute('id'),
                 title = attributeNode.getAttribute('title'),
                 type = attributeNode.getAttribute('type');
 
                 var attribute = {
-                    id:id,
-                    title:title,
-                    type:type
+                    id: id,
+                    title: title,
+                    type: type,
                 };
                 edgesAttributes[id] = attribute;
-
             }
         }
     }
@@ -161,46 +152,46 @@ function gexfCheckAttributesMap (someXMLContent) {
     // console.debug('gexf declared nodesAttributes:', nodesAttributes)
     // console.debug('gexf declared edgesAttributes:', edgesAttributes)
 
-    return {nodeAttrs: nodesAttributes, edgeAttrs: edgesAttributes}
+    return {nodeAttrs: nodesAttributes, edgeAttrs: edgesAttributes};
 }
 
 // Level-00
 function scanGexf(gexfContent) {
-
-    var categoriesDict={};
+    let categoriesDict={};
 
     // adding gexfCheckAttributesMap call
     // to create a map from nodes/node/@for values to declared attribute name (title)
 
-    var declaredAttrs = gexfCheckAttributesMap(gexfContent)
+    let declaredAttrs = gexfCheckAttributesMap(gexfContent);
 
     let elsNodes = gexfContent.getElementsByTagName('nodes');
     // console.debug('>>> tr: elsNodes', elsNodes) // <<<
-    for(var i=0; i<elsNodes.length; i++){
-        var elNodes = elsNodes[i];  // Each xml node 'nodes' (plural)
+    for (let i=0; i<elsNodes.length; i++) {
+        let elNodes = elsNodes[i]; // Each xml node 'nodes' (plural)
         let node = elNodes.getElementsByTagName('node');
-        for(var j=0; j<node.length; j++){
+        for (let j=0; j<node.length; j++) {
             let attvalueNodes = node[j].getElementsByTagName('attvalue');
-            for(var k=0; k<attvalueNodes.length; k++){
+            for (let k=0; k<attvalueNodes.length; k++) {
                 let attvalueNode = attvalueNodes[k];
                 let attr = attvalueNode.getAttribute('for');
                 let val = attvalueNode.getAttribute('value');
 
                 // some attrs are gexf-local indices refering to an <attributes> declaration
                 // so if it matches declared we translate their integer in title
-                if (! isUndef(declaredAttrs.nodeAttrs[attr]))
-                  attr = declaredAttrs.nodeAttrs[attr].title
+                if (! isUndef(declaredAttrs.nodeAttrs[attr])) {
+attr = declaredAttrs.nodeAttrs[attr].title;
+}
 
                 // THIS WILL BECOME catDict (if ncats == 1 => monopart)
-                if (attr=="category" || attr=="type") {
-                  if (!categoriesDict[val])    categoriesDict[val] = 0
+                if (attr=='category' || attr=='type') {
+                  if (!categoriesDict[val]) categoriesDict[val] = 0;
                   categoriesDict[val]++;
                 }
             }
         }
     }
 
-    return categoriesDict
+    return categoriesDict;
 }
 
 // sorting observed node types into Sem/Soc
@@ -216,65 +207,69 @@ function scanGexf(gexfContent) {
 //     etc.
 // (it's read from project_conf.json)
 function sortNodeTypes(observedTypesDict, optionalNodeConf) {
-  var observedTypes = Object.keys(observedTypesDict)
-  observedTypes.sort(function(a,b) {return observedTypesDict[b] - observedTypesDict[a]})
+  let observedTypes = Object.keys(observedTypesDict);
+  observedTypes.sort(function(a, b) {
+return observedTypesDict[b] - observedTypesDict[a];
+});
 
-  let nbNodeTypes = 2
+  let nbNodeTypes = 2;
 
   if (observedTypes.length > nbNodeTypes) {
     console.warn(`The graph source data has more different node types than
                   supported. Less frequent node types will be ignored.
                   Max allowed types: ${nbNodeTypes},
-                  Found: ${observedTypes.length} (namely: ${observedTypes})`)
+                  Found: ${observedTypes.length} (namely: ${observedTypes})`);
   }
 
-  var declaredTypes = []
-  for (var i = 0 ; i < nbNodeTypes ; i++ ) {
-    if (optionalNodeConf && optionalNodeConf["node"+i]) {
-      declaredTypes[i] = optionalNodeConf["node"+i]
-      if (TW.conf.debug.logSettings)
-        console.log("expected cat (from db.json addtional conf)", i, declaredTypes[i])
-    }
-    else {
-      declaredTypes[i] = TW.conf[i == 0 ? 'catSem' : 'catSoc']
-      if (TW.conf.debug.logSettings)
-        console.log("expected cat (from settings_explorer defaults)", i, declaredTypes[i])
+  let declaredTypes = [];
+  for (var i = 0; i < nbNodeTypes; i++ ) {
+    if (optionalNodeConf && optionalNodeConf['node'+i]) {
+      declaredTypes[i] = optionalNodeConf['node'+i];
+      if (TW.conf.debug.logSettings) {
+console.log('expected cat (from db.json addtional conf)', i, declaredTypes[i]);
+}
+    } else {
+      declaredTypes[i] = TW.conf[i == 0 ? 'catSem' : 'catSoc'];
+      if (TW.conf.debug.logSettings) {
+console.log('expected cat (from settings_explorer defaults)', i, declaredTypes[i]);
+}
     }
   }
 
   // console.log("observedTypes", observedTypes)
   // console.log("declaredTypes", declaredTypes)
 
-  var newcats = []   // will become TW.categories
-  var catDict = {}   // will become TW.catDict
+  let newcats = []; // will become TW.categories
+  let catDict = {}; // will become TW.catDict
 
-  var nTypes = observedTypes.length
+  let nTypes = observedTypes.length;
 
-  if(nTypes==0) {
-      newcats[0]="Terms";
-      catDict["Terms"] = 0;
+  if (nTypes==0) {
+      newcats[0]='Terms';
+      catDict['Terms'] = 0;
   }
-  if(nTypes==1) {
+  if (nTypes==1) {
       // if we have only one category, it gets code 0 as Terms
-      newcats[0] = observedTypes[0]
+      newcats[0] = observedTypes[0];
       catDict[observedTypes[0]] = 0;
 
-      if (TW.conf.debug.logParsers)
-        console.log(`cat unique (${observedTypes[0]}) =>0`)
+      if (TW.conf.debug.logParsers) {
+console.log(`cat unique (${observedTypes[0]}) =>0`);
+}
   }
-  if(nTypes>1) {
+  if (nTypes>1) {
       // allows multiple node types even if not well declared
       // ----------------------------------------------------
       // POSSIBLE: an "all the rest" last nodeType ?
 
-      let alreadyUsed = {}
+      let alreadyUsed = {};
 
       // try declared cats in declared position, independantly from each other
-      for (var i = 0 ; i < nbNodeTypes; i++) {
+      for (var i = 0; i < nbNodeTypes; i++) {
         if (observedTypesDict[declaredTypes[i]]) {
-          let validatedType = declaredTypes[i]
+          let validatedType = declaredTypes[i];
           newcats[i] = validatedType;
-          alreadyUsed[validatedType] = true
+          alreadyUsed[validatedType] = true;
         }
       }
 
@@ -286,13 +281,13 @@ function sortNodeTypes(observedTypesDict, optionalNodeConf) {
       // heuristic A: fill missing ones, by frequence
       // (eg if nodes0 was not found, then type for nodes0 will be the
       //     majoritary observed one, unless taken where we move one up)
-      for (var i = 0 ; i < nbNodeTypes; i++) {
-        if (typeof newcats[i] == "undefined") {
-          for (var j = 0 ; j < nTypes ; j++) {
+      for (var i = 0; i < nbNodeTypes; i++) {
+        if (typeof newcats[i] == 'undefined') {
+          for (let j = 0; j < nTypes; j++) {
             if (!alreadyUsed[observedTypes[j]]) {
-              newcats[i] = observedTypes[j]
-              alreadyUsed[observedTypes[j]] = true
-              break
+              newcats[i] = observedTypes[j];
+              alreadyUsed[observedTypes[j]] = true;
+              break;
             }
           }
         }
@@ -301,10 +296,10 @@ function sortNodeTypes(observedTypesDict, optionalNodeConf) {
 
       // all the rest (heuristic B)
       if (!newcats[nbNodeTypes-1]) {
-        for(var i in observedTypes) {
+        for (var i in observedTypes) {
           // without a group others: if there is more than two cats altogether,
           //                         only the last cat counts as node1 cat
-          let c = observedTypes[i]
+          let c = observedTypes[i];
 
 
           // -------------------------------------------- for a group "others"
@@ -326,10 +321,10 @@ function sortNodeTypes(observedTypesDict, optionalNodeConf) {
 
   // reverse lookup
   for (var i in newcats) {
-    catDict[newcats[i]] = i
+    catDict[newcats[i]] = i;
   }
 
-  return {'categories': newcats, 'lookup_dict': catDict}
+  return {'categories': newcats, 'lookup_dict': catDict};
 }
 
 
@@ -348,92 +343,89 @@ function sortNodeTypes(observedTypesDict, optionalNodeConf) {
 
 // NB vals and map are both useful and complementary
 
-function facetsBinning (valuesIdx) {
-
+function facetsBinning(valuesIdx) {
   // console.debug("facetsBinning: valuesIdx", valuesIdx)
 
-  let facetIdx = {}
+  let facetIdx = {};
 
   if (TW.conf.debug.logFacets) {
-    console.log('facetsBinning: begin TW.Facets')
-    var classvalues_deb = performance.now()
+    console.log('facetsBinning: begin TW.Facets');
+    var classvalues_deb = performance.now();
   }
 
   // all scanned attributes get an inverted index
-  for (var cat in valuesIdx) {
-    if (!facetIdx[cat])    facetIdx[cat] = {}
+  for (let cat in valuesIdx) {
+    if (!facetIdx[cat]) facetIdx[cat] = {};
 
-    for (var at in valuesIdx[cat]) {
-      if (TW.conf.debug.logFacets) console.log(`======= ${cat}::${at} =======`)
+    for (let at in valuesIdx[cat]) {
+      if (TW.conf.debug.logFacets) console.log(`======= ${cat}::${at} =======`);
 
 
       // console.warn("all raw vals before binning" valuesIdx[cat][at].vals)
 
       // meta + new array of values/intervals with inverted index to node ids
-      facetIdx[cat][at] = {meta:{}, invIdx:[]}
+      facetIdx[cat][at] = {meta: {}, invIdx: []};
 
 
       // the full array of values of the accepted type
-      let workingVals = []
+      let workingVals = [];
 
       // the observed pre-eminent data type
-      let dataType = ''
+      let dataType = '';
 
       // if (less than 2% str) => type is mostly num
       //                                  ----------
       if (valuesIdx[cat][at].vals.vstr.length * 50 < valuesIdx[cat][at].vals.vnum.length) {
-        dataType = 'num'
+        dataType = 'num';
 
-        workingVals = valuesIdx[cat][at].vals.vnum
+        workingVals = valuesIdx[cat][at].vals.vnum;
 
         // here we just move the str values to isolate them in one legend item
-        valuesIdx[cat][at].map['_non_numeric_'] = []
+        valuesIdx[cat][at].map['_non_numeric_'] = [];
         for (let k in valuesIdx[cat][at].vals.vstr) {
-          let unusualValue = valuesIdx[cat][at].vals.vstr[k]
+          let unusualValue = valuesIdx[cat][at].vals.vstr[k];
 
-          if (TW.conf.debug.logFacets) console.log(`pruning unusual value ${unusualValue} from legends`)
+          if (TW.conf.debug.logFacets) console.log(`pruning unusual value ${unusualValue} from legends`);
 
           for (let j in valuesIdx[cat][at].map[unusualValue]) {
-            let nanNid = valuesIdx[cat][at].map[unusualValue][j]
-            valuesIdx[cat][at].map['_non_numeric_'].push(nanNid)
+            let nanNid = valuesIdx[cat][at].map[unusualValue][j];
+            valuesIdx[cat][at].map['_non_numeric_'].push(nanNid);
           }
-          delete valuesIdx[cat][at].map[unusualValue]
+          delete valuesIdx[cat][at].map[unusualValue];
         }
-
       }
       // type str is the catchall type
       // --------
       else {
-        dataType = 'str'
-        workingVals = valuesIdx[cat][at].vals.vstr
+        dataType = 'str';
+        workingVals = valuesIdx[cat][at].vals.vstr;
       }
 
-      if (TW.conf.debug.logFacets)  {
-        console.debug("datatyping:", dataType)
-        console.debug("valuesIdx after datatyping:", valuesIdx[cat][at])
-        console.debug("workingVals after datatyping:", workingVals)
+      if (TW.conf.debug.logFacets) {
+        console.debug('datatyping:', dataType);
+        console.debug('valuesIdx after datatyping:', valuesIdx[cat][at]);
+        console.debug('workingVals after datatyping:', workingVals);
       }
 
       // default options
-      let maxDiscreteValues = TW.conf.maxDiscreteValues
-      let nBins = TW.conf.legendsBins
-      let binningMode = 'samepop'
+      let maxDiscreteValues = TW.conf.maxDiscreteValues;
+      let nBins = TW.conf.legendsBins;
+      let binningMode = 'samepop';
 
       // read stipulated options in user settings
       // ----------------------------------------
       if (TW.facetOptions[at]) {
-        binningMode = TW.facetOptions[at]["binmode"]
-        nBins = TW.facetOptions[at]["n"]
-        maxDiscreteValues = nBins
+        binningMode = TW.facetOptions[at]['binmode'];
+        nBins = TW.facetOptions[at]['n'];
+        maxDiscreteValues = nBins;
 
         if (nBins == 0) {
-          console.warn(`Can't use user-specified number of bins value 0 for attribute ${at}, using TW.conf.legendsBins ${TW.conf.legendsBins} instead`)
-          nBins = TW.conf.legendsBins
+          console.warn(`Can't use user-specified number of bins value 0 for attribute ${at}, using TW.conf.legendsBins ${TW.conf.legendsBins} instead`);
+          nBins = TW.conf.legendsBins;
         }
-        if (TW.conf.debug.logFacets) console.log("TW.facetOptions[at]", TW.facetOptions[at])
-      }
-      else {
-        if (TW.conf.debug.logFacets) console.log("(no specified options in settings for this attribute)")
+        if (TW.conf.debug.logFacets) console.log('TW.facetOptions[at]', TW.facetOptions[at]);
+      } else {
+        if (TW.conf.debug.logFacets) console.log('(no specified options in settings for this attribute)');
       }
 
       // POSSible: auto-detect if vtypes ==> color
@@ -443,17 +435,16 @@ function facetsBinning (valuesIdx) {
 
       // if (binningMode != "off") console.warn("maxDiscreteValues from settings", maxDiscreteValues)
 
-      var nDistinctVals = Object.keys(valuesIdx[cat][at].map).length
+      let nDistinctVals = Object.keys(valuesIdx[cat][at].map).length;
 
       // if small number of distinct values doesn't need binify
-      if (    dataType == 'str'
-         || (TW.facetOptions[at]                               // case with custom facetOptions
-              && (nDistinctVals <= nBins || binningMode == "off"))
-         || (nDistinctVals <= maxDiscreteValues )           // case with unspecified options
+      if ( dataType == 'str'
+         || (TW.facetOptions[at] // case with custom facetOptions
+              && (nDistinctVals <= nBins || binningMode == 'off'))
+         || (nDistinctVals <= maxDiscreteValues ) // case with unspecified options
        ) {
-        for (var pval in valuesIdx[cat][at].map) {
-
-          var idList = valuesIdx[cat][at].map[pval]
+        for (let pval in valuesIdx[cat][at].map) {
+          let idList = valuesIdx[cat][at].map[pval];
           facetIdx[cat][at].invIdx.push({
             // simple label
             'labl': `${pval} (${idList.length})`,
@@ -461,128 +452,123 @@ function facetsBinning (valuesIdx) {
             'fullLabl': `${cat}||${at}||${pval} (${idList.length})`,
             'val': pval,
             // val2ids
-            'nids': idList
-          })
+            'nids': idList,
+          });
         }
       }
       // (if many values && binify)
       else if (dataType == 'num') {
-        var len = workingVals.length
+        let len = workingVals.length;
 
         // sort out vals
-        workingVals.sort(function (a,b) {
-               return Number(a)-Number(b)
-        })
+        workingVals.sort(function(a, b) {
+               return Number(a)-Number(b);
+        });
 
         // (enhanced intervalsInventory)
         // => creates bin, binlabels, inverted index per bins
-        var legendRefTicks = []
+        let legendRefTicks = [];
 
-        var lastUpperBound = null
+        let lastUpperBound = null;
 
         if (binningMode == 'samerange') {
           // minimax
-          let vMin = workingVals[0]
-          let vMax = workingVals.slice(-1)[0]
-          lastUpperBound = vMax
+          let vMin = workingVals[0];
+          let vMax = workingVals.slice(-1)[0];
+          lastUpperBound = vMax;
 
           // same interval each time
-          let step = (vMax - vMin) / nBins
-          for (var i = 0 ; i < nBins ; i++) {
-            legendRefTicks.push(vMin + i*step)
+          let step = (vMax - vMin) / nBins;
+          for (let i = 0; i < nBins; i++) {
+            legendRefTicks.push(vMin + i*step);
           }
           // NB these ticks are *minimums* so we stop one step *before* vMax
           //    and simply include it in last interval
 
           // console.warn(`samerange nBins:${nBins}, n distinct:${workingVals.length} => got n ticks:${legendRefTicks.length}`)
-        }
-
-        else if (binningMode == 'samepop') {
+        } else if (binningMode == 'samepop') {
           // create tick thresholds
-          for (var l=0 ; l < nBins ; l++) {
-            let nthVal = Math.floor(len * l / nBins)
-            legendRefTicks.push(workingVals[nthVal])
+          for (var l=0; l < nBins; l++) {
+            let nthVal = Math.floor(len * l / nBins);
+            legendRefTicks.push(workingVals[nthVal]);
           }
         }
 
-        if (TW.conf.debug.logFacets)    console.debug("intervals for", at, legendRefTicks, "(list of minima)")
+        if (TW.conf.debug.logFacets) console.debug('intervals for', at, legendRefTicks, '(list of minima)');
 
         // the unique-d array will serve as a todolist with lastCursor and k
         // won't use keys(map) because of _non_numeric_ entry
-        let uniqueVals = {}
+        let uniqueVals = {};
         for (let k in workingVals) {
           if (! uniqueVals[workingVals[k]]) {
-            uniqueVals[workingVals[k]] = 1
+            uniqueVals[workingVals[k]] = 1;
           }
         }
-        var sortedDistinctVals = Object.keys(uniqueVals).sort(function(a,b){return Number(a)-Number(b)})
+        let sortedDistinctVals = Object.keys(uniqueVals).sort(function(a, b) {
+return Number(a)-Number(b);
+});
 
-        var nTicks = legendRefTicks.length
+        let nTicks = legendRefTicks.length;
 
-        var lastCursor = 0
+        let lastCursor = 0;
 
         // create ticks objects with retrieved full info
         for (var l in legendRefTicks) {
-          l = Number(l)
+          l = Number(l);
 
-          let lowThres = Number(legendRefTicks[l])
-          let hiThres = null
+          let lowThres = Number(legendRefTicks[l]);
+          let hiThres = null;
 
           if (l < nTicks-1) {
-            hiThres = Number(legendRefTicks[l+1])
-          }
-          else if (binningMode == 'samepop') {
-            hiThres = Infinity
-          }
-          else {
+            hiThres = Number(legendRefTicks[l+1]);
+          } else if (binningMode == 'samepop') {
+            hiThres = Infinity;
+          } else {
             // in 'samerange' mode
-            hiThres = lastUpperBound
+            hiThres = lastUpperBound;
           }
 
-          var newTick = {
-            'labl':'',
-            'fullLabl':'',
-            'nids':[],
-            'range':[lowThres, hiThres]
-          }
+          let newTick = {
+            'labl': '',
+            'fullLabl': '',
+            'nids': [],
+            'range': [lowThres, hiThres],
+          };
 
-          if (TW.conf.debug.logFacets)  console.debug("...new interval:",[lowThres, hiThres])
+          if (TW.conf.debug.logFacets) console.debug('...new interval:', [lowThres, hiThres]);
 
           // 1) union of idmaps
-          for (var k = lastCursor ; k <= nDistinctVals ; k++) {
-            var val = Number(sortedDistinctVals[k])
+          for (let k = lastCursor; k <= nDistinctVals; k++) {
+            let val = Number(sortedDistinctVals[k]);
 
             if (val == '_non_numeric_') {
-              continue
+              continue;
             }
             // FIXME why still NaN sometimes ?
             // NB: however skipping them is enough for work
             else if (isNaN(val)) {
               // console.debug('skipped undetected NaN ? attribute, lastCursor, k, sortedDistinctVals[k], nodes:', at, lastCursor, k, val, valuesIdx[cat][at].map[sortedDistinctVals[k]])
-              continue
+              continue;
             }
 
             // for debug
             // console.debug('lastCursor, k, val', lastCursor, k, val)
 
             if (val < lowThres) {
-                console.error("mixup !!", val, lowThres, at)
-            }
-            else if ((val >= lowThres) && (val < hiThres)) {
+                console.error('mixup !!', val, lowThres, at);
+            } else if ((val >= lowThres) && (val < hiThres)) {
               if (!valuesIdx[cat][at].map[val]) {
-                console.error("unscanned val2ids mapping", val, at)
-              }
-              else {
+                console.error('unscanned val2ids mapping', val, at);
+              } else {
                 // eg bin2ids map for 2 <= val < 3
                 //    will be U(val2ids maps for 2, 2.1, 2.2,...,2.9)
                 for (var j in valuesIdx[cat][at].map[val]) {
-                  newTick.nids.push(valuesIdx[cat][at].map[val][j])
+                  newTick.nids.push(valuesIdx[cat][at].map[val][j]);
                 }
               }
             }
             // we're over the interval upper bound
             else if (val >= hiThres) {
-
               // console.log("over hiThres", val, hiThres)
 
               // normal case
@@ -590,8 +576,8 @@ function facetsBinning (valuesIdx) {
                 // console.log("...moving on to next interval")
 
                 // we just need to remember where we were for next interval
-                lastCursor = k
-                break
+                lastCursor = k;
+                break;
               }
 
               // samerange && last interval case: inclusive last interval upper bound
@@ -599,48 +585,46 @@ function facetsBinning (valuesIdx) {
                 // console.warn("last interval for samepop")
 
                 for (var j in valuesIdx[cat][at].map[val]) {
-                  newTick.nids.push(valuesIdx[cat][at].map[val][j])
+                  newTick.nids.push(valuesIdx[cat][at].map[val][j]);
                 }
               }
-
             }
           }
 
           // create label
           // round %.3f for display
-          var labLowThres = Math.round(lowThres*1000)/1000
-          var labHiThres = ''
-          var bracket = '['
+          let labLowThres = Math.round(lowThres*1000)/1000;
+          let labHiThres = '';
+          let bracket = '[';
 
           if (l < nTicks-1) {
-            labHiThres = Math.round(hiThres*1000)/1000
+            labHiThres = Math.round(hiThres*1000)/1000;
           }
           // last bound is +Inf if samepop
           else if (binningMode == 'samepop') {
-            labHiThres = '+ ∞'
-          }
-          else if (binningMode == 'samerange') {
-            labHiThres = Math.round(hiThres*1000)/1000
-            bracket = ']'
+            labHiThres = '+ ∞';
+          } else if (binningMode == 'samerange') {
+            labHiThres = Math.round(hiThres*1000)/1000;
+            bracket = ']';
           }
 
-          newTick.labl = `[<span title="${lowThres}">${labLowThres}</span> ; <span title="${hiThres}">${labHiThres}</span>${bracket} (${newTick.nids.length})`
+          newTick.labl = `[<span title="${lowThres}">${labLowThres}</span> ; <span title="${hiThres}">${labHiThres}</span>${bracket} (${newTick.nids.length})`;
           // newTick.fullLabl = `${cat}||${at}||[${lowThres} ; ${hiThres}${bracket} (${newTick.nids.length})`
 
           // faceting: save these bins as the cluster index (even if empty)
-          facetIdx[cat][at].invIdx.push(newTick)
+          facetIdx[cat][at].invIdx.push(newTick);
         }
 
         // finally add the 'trash' category with any non_numeric vals
         facetIdx[cat][at].invIdx.push({
-          'labl':'_non_numeric_',
-          'fullLabl':'`${cat}||${at}||_non_numeric_',
+          'labl': '_non_numeric_',
+          'fullLabl': '`${cat}||${at}||_non_numeric_',
           'nids': valuesIdx[cat][at].map['_non_numeric_'],
-        })
+        });
       }
 
       // store this attribute's metadata
-      facetIdx[cat][at].meta.dataType = dataType
+      facetIdx[cat][at].meta.dataType = dataType;
 
       // POSS: here we could distinguish more precise attr types
       //       numeric continuous vs. discrete etc.
@@ -649,51 +633,50 @@ function facetsBinning (valuesIdx) {
 
     // 'clust_default' is an alias to the user-defined default clustering
     if (TW.conf.nodeClusAtt != undefined
-        && facetIdx[cat][TW.conf.nodeClusAtt]   // <= if found in data
+        && facetIdx[cat][TW.conf.nodeClusAtt] // <= if found in data
         && !facetIdx[cat]['clust_default'] // <= and if an attr named 'clust_default' was not already in data
       ) {
-      facetIdx[cat]['clust_default'] = facetIdx[cat][TW.conf.nodeClusAtt]
+      facetIdx[cat]['clust_default'] = facetIdx[cat][TW.conf.nodeClusAtt];
     }
-
   }
 
   if (TW.conf.debug.logFacets) {
-    var classvalues_fin = performance.now()
-    console.log('end TW.Facets, own time:', classvalues_fin-classvalues_deb)
+    let classvalues_fin = performance.now();
+    console.log('end TW.Facets, own time:', classvalues_fin-classvalues_deb);
   }
 
-  return facetIdx
+  return facetIdx;
 }
 
 
 // Level-00
 // for {1,2}partite graphs
-function dictfyGexf( gexf , categories ){
-
-    if (TW.conf.debug.logParsers)
-      console.log("ParseCustom gexf 2nd loop, main data extraction, with categories", categories)
+function dictfyGexf( gexf, categories ) {
+    if (TW.conf.debug.logParsers) {
+console.log('ParseCustom gexf 2nd loop, main data extraction, with categories', categories);
+}
 
 
     // var catDict = {'terms':"0"}
 
-    var catDict = {}
-    var catCount = {}
-    for(var i in categories)  catDict[categories[i]] = i;
+    let catDict = {};
+    let catCount = {};
+    for (var i in categories) catDict[categories[i]] = i;
 
-    var edges={}, nodes={}, nodesByType={}
+    let edges={}, nodes={}, nodesByType={};
 
-    var declaredAtts = gexfCheckAttributesMap(gexf)
-    var nodesAttributes = declaredAtts.nodeAttrs
+    let declaredAtts = gexfCheckAttributesMap(gexf);
+    let nodesAttributes = declaredAtts.nodeAttrs;
     // var edgesAttributes = declaredAtts.eAttrs
 
     // NB nodesByType lists arrays of ids per nodetype
     // (equivalent to TW.partialGraph.graph.getNodesByType but on full nodeset)
-    for(var i in categories)  {
-      nodesByType[i] = []
+    for (var i in categories) {
+      nodesByType[i] = [];
 
 
       // without  a group "others" -------------------
-      catDict[categories[i]] = i
+      catDict[categories[i]] = i;
 
       // POSS subCats for cat "others" if open types mapped to n types
       //
@@ -703,16 +686,15 @@ function dictfyGexf( gexf , categories ){
       //   catDict[subCats[j]] = i
       // }
       // ---------------------- /with a group "others"
-
     }
 
 
-    var elsNodes = gexf.getElementsByTagName('nodes') // The list of xml nodes 'nodes' (plural)
+    let elsNodes = gexf.getElementsByTagName('nodes'); // The list of xml nodes 'nodes' (plural)
     TW.labels = [];
 
     // vars for stats => used in a posteriori normalization
-    let minNodeSize = Infinity
-    let maxNodeSize = 0
+    let minNodeSize = Infinity;
+    let maxNodeSize = 0;
 
     // debug: for local stats
     // let allSizes = []
@@ -720,7 +702,7 @@ function dictfyGexf( gexf , categories ){
     // let sizeStats = {'mean':null, 'median':null, 'max':0, 'min':1000000000}
 
     // if scanAttributes, we'll also use:
-    var tmpVals = {}        // to build inverted index attval => nodes
+    let tmpVals = {}; // to build inverted index attval => nodes
                             // (to inventory subclasses for a given attr)
                             //   if < maxDiscreteValues: keep all in legend
                             //   else:  show intervals in legend
@@ -741,13 +723,12 @@ function dictfyGexf( gexf , categories ){
     // }
 
     // usually there is only 1 <nodes> element...
-    for(i=0; i<elsNodes.length; i++) {
-        var elNodes = elsNodes[i];  // Each xml element 'nodes' (plural)
-        var elsNode = elNodes.getElementsByTagName('node'); // The list of xml nodes 'node' (no 's')
+    for (i=0; i<elsNodes.length; i++) {
+        let elNodes = elsNodes[i]; // Each xml element 'nodes' (plural)
+        let elsNode = elNodes.getElementsByTagName('node'); // The list of xml nodes 'node' (no 's')
 
-        for(j=0; j<elsNode.length; j++) {
-
-            var elNode = elsNode[j];  // Each xml node 'node' (no 's')
+        for (j=0; j<elsNode.length; j++) {
+            let elNode = elsNode[j]; // Each xml node 'node' (no 's')
 
             // window.NODE = elNode;
 
@@ -756,15 +737,15 @@ function dictfyGexf( gexf , categories ){
             // }
 
             // [ get ID ]
-            var id = elNode.getAttribute('id');
+            let id = elNode.getAttribute('id');
             // [ get Label ]
-            var label = elNode.getAttribute('label') || id;
+            let label = elNode.getAttribute('label') || id;
 
             // [ get Size ]
-            var size=false;
+            let size=false;
             let sizeNodes = elNode.getElementsByTagName('size');
             sizeNodes = sizeNodes.length ? sizeNodes : elNode.getElementsByTagName('viz:size');
-            if(sizeNodes.length>0){
+            if (sizeNodes.length>0) {
               let sizeNode = sizeNodes[0];
               size = parseFloat(sizeNode.getAttribute('value'));
 
@@ -774,77 +755,74 @@ function dictfyGexf( gexf , categories ){
               // if (size < sizeStats.min)  sizeStats.min = size
               // if (size > sizeStats.max)  sizeStats.max = size
               // --------------------------------------------
-
             }
             // fallback
             else {
-              size = 1
+              size = 1;
               console.log(`node without size: ${id} <= 1`);
             }// [ / get Size ]
 
             // [ get Coordinates ]
-            var x = 100 - 200*Math.random();
-            var y = 100 - 200*Math.random();
-            var positionNodes = elNode.getElementsByTagName('position');
-            positionNodes = positionNodes.length ? positionNodes : elNode.getElementsByTagNameNS('*','position');
-            if(positionNodes.length>0){
-                var positionNode = positionNodes[0];
+            let x = 100 - 200*Math.random();
+            let y = 100 - 200*Math.random();
+            let positionNodes = elNode.getElementsByTagName('position');
+            positionNodes = positionNodes.length ? positionNodes : elNode.getElementsByTagNameNS('*', 'position');
+            if (positionNodes.length>0) {
+                let positionNode = positionNodes[0];
                 x = parseFloat(positionNode.getAttribute('x'));
                 y = parseFloat(positionNode.getAttribute('y'));
             }// [ / get Coordinates ]
             // x = x*-1
-            y = y*-1   // aka -y
+            y = y*-1; // aka -y
 
             // [ get Colour ]
-            var colorNodes = elNode.getElementsByTagName('color');
-            colorNodes = colorNodes.length ? colorNodes : elNode.getElementsByTagNameNS('*','color');
+            let colorNodes = elNode.getElementsByTagName('color');
+            colorNodes = colorNodes.length ? colorNodes : elNode.getElementsByTagNameNS('*', 'color');
             var color;
-            if(colorNodes.length>0){
+            if (colorNodes.length>0) {
                 let colorNode = colorNodes[0];
                 color = '#'+sigmaTools.rgbToHex(parseFloat(colorNode.getAttribute('r')),
                     parseFloat(colorNode.getAttribute('g')),
                     parseFloat(colorNode.getAttribute('b')));
             }// [ / get Colour ]
 
-            var node = ({
-                id:id,
-                label:label,
-                size:size,
-                x:x,
-                y:y,
-                color:color
+            let node = ({
+                id: id,
+                label: label,
+                size: size,
+                x: x,
+                y: y,
+                color: color,
             });
 
             // console.debug('>>> tr: read node', node)
 
 
             // Attribute values
-            var attributes = []
+            let attributes = [];
             var attvalueNodes = elNode.getElementsByTagName('attvalue');
-            var atts={};
-            for(var k=0; k<attvalueNodes.length; k++){
+            let atts={};
+            for (var k=0; k<attvalueNodes.length; k++) {
                 var attvalueNode = attvalueNodes[k];
                 var attr = attvalueNode.getAttribute('for');
                 var val = attvalueNode.getAttribute('value');
 
-                if(! isUndef(nodesAttributes[attr])) {
-                  atts[nodesAttributes[attr].title]=val
-                }
-                else atts[attr]=val;
+                if (! isUndef(nodesAttributes[attr])) {
+                  atts[nodesAttributes[attr].title]=val;
+                } else atts[attr]=val;
             }
             node.attributes = atts;
 
-            let node_cat = ""
+            let node_cat = '';
 
-            if ( atts["category"] ) {
-              node_cat = atts["category"];
-            }
-            else {
+            if ( atts['category'] ) {
+              node_cat = atts['category'];
+            } else {
               // basic TW type idx is 0 (~ terms if one type, doc if both types)
-              node_cat = categories[0]
+              node_cat = categories[0];
             }
 
-            if (!catCount[node_cat]) catCount[node_cat] = 0
+            if (!catCount[node_cat]) catCount[node_cat] = 0;
             catCount[node_cat]++;
             node.type = node_cat;
 
@@ -852,39 +830,38 @@ function dictfyGexf( gexf , categories ){
 
             // user-indicated default => copy for old default accessors
             if (node.attributes[TW.conf.nodeClusAtt]) {
-              node.attributes['clust_default'] = node.attributes[TW.conf.nodeClusAtt]
+              node.attributes['clust_default'] = node.attributes[TW.conf.nodeClusAtt];
             }
 
             // save record
-            nodes[node.id] = node
+            nodes[node.id] = node;
             // console.log("catDict", catDict)
             // console.log("node.type", node.type)
             if (!nodesByType[catDict[node.type]]) {
-              console.warn("unrecognized type:", node.type)
-            }
-            else {
-              nodesByType[catDict[node.type]].push(node.id)
+              console.warn('unrecognized type:', node.type);
+            } else {
+              nodesByType[catDict[node.type]].push(node.id);
             }
 
-            if(parseFloat(node.size) < minNodeSize)
-                minNodeSize= parseFloat(node.size);
+            if (parseFloat(node.size) < minNodeSize) {
+minNodeSize= parseFloat(node.size);
+}
 
-            if(parseFloat(node.size) > maxNodeSize)
-                maxNodeSize= parseFloat(node.size);
+            if (parseFloat(node.size) > maxNodeSize) {
+maxNodeSize= parseFloat(node.size);
+}
 
             // console.debug("node.attributes", node.attributes)
             // creating a faceted index from node.attributes
             if (TW.conf.scanAttributes) {
-
-              tmpVals = updateValueFacets(tmpVals, node)
+              tmpVals = updateValueFacets(tmpVals, node);
             }
-
         } // finish nodes loop
     }
 
     // console.warn ('parseCustom output nodes', nodes)
 
-    console.warn ('parseCustom inverted index: vals to srcType', tmpVals)
+    console.warn('parseCustom inverted index: vals to srcType', tmpVals);
 
 
     // -------------- debug: for local stats ----------------
@@ -899,76 +876,77 @@ function dictfyGexf( gexf , categories ){
 
     // clusters and other facets => type => name => [{label,val/range,nodeids}]
     if (TW.conf.scanAttributes) {
-      TW.Facets = facetsBinning(tmpVals)
+      TW.Facets = facetsBinning(tmpVals);
     }
 
     // linear rescale node sizes
     if (!isUndef(TW.conf.desirableNodeSizeMin) && !isUndef(TW.conf.desirableNodeSizeMax)) {
-      let desiSizeRange = TW.conf.desirableNodeSizeMax-TW.conf.desirableNodeSizeMin
-      let realSizeRange = maxNodeSize - minNodeSize
+      let desiSizeRange = TW.conf.desirableNodeSizeMax-TW.conf.desirableNodeSizeMin;
+      let realSizeRange = maxNodeSize - minNodeSize;
 
       // all nodes have same size
       if (realSizeRange == 0) {
-        for(var nid in nodes){
-          nodes[nid].size  = TW.conf.desirableNodeSizeMin
+        for (var nid in nodes) {
+          nodes[nid].size = TW.conf.desirableNodeSizeMin;
         }
       }
       // normal case => rescaling
       else {
-        for(var nid in nodes){
-            nodes[nid].size = parseInt(1000 * ((parseFloat(nodes[nid].size) - minNodeSize) / realSizeRange * desiSizeRange + TW.conf.desirableNodeSizeMin)) / 1000
+        for (var nid in nodes) {
+            nodes[nid].size = parseInt(1000 * ((parseFloat(nodes[nid].size) - minNodeSize) / realSizeRange * desiSizeRange + TW.conf.desirableNodeSizeMin)) / 1000;
         }
       }
     }
 
     // looping source edges to conforming edge
     // then updateRelations
-    var edgeId = 0;
-    var edgesNodes = gexf.getElementsByTagName('edges');
+    let edgeId = 0;
+    let edgesNodes = gexf.getElementsByTagName('edges');
 
-    for(i=0; i<edgesNodes.length; i++) {
-        var edgesNode = edgesNodes[i];
-        var edgeNodes = edgesNode.getElementsByTagName('edge');
+    for (i=0; i<edgesNodes.length; i++) {
+        let edgesNode = edgesNodes[i];
+        let edgeNodes = edgesNode.getElementsByTagName('edge');
 
-        if (TW.conf.debug.logParsers)
-          console.log("edgeNodes.length", edgeNodes.length)
+        if (TW.conf.debug.logParsers) {
+console.log('edgeNodes.length', edgeNodes.length);
+}
 
-        for(j=0; j<edgeNodes.length; j++) {
-            var edgeNode = edgeNodes[j];
-            var source = edgeNode.getAttribute('source')
-            var target = edgeNode.getAttribute('target')
-            var type = edgeNode.getAttribute('type');//line or curve
+        for (j=0; j<edgeNodes.length; j++) {
+            let edgeNode = edgeNodes[j];
+            let source = edgeNode.getAttribute('source');
+            let target = edgeNode.getAttribute('target');
+            let type = edgeNode.getAttribute('type');// line or curve
 
             if (/;/.test(source)) {
-              console.warn (`edge source id has ";" ${source}` )
+              console.warn(`edge source id has ";" ${source}` );
             }
             if (/;/.test(target)) {
-              console.warn (`edge target id has ";" ${target}` )
+              console.warn(`edge target id has ";" ${target}` );
             }
 
-            var indice=source+";"+target;
+            let indice=source+';'+target;
 
-            var edge = {
+            let edge = {
                 id: indice,
                 source: source,
                 target: target,
-                type : (type) ? type : TW.conf.sigmaJsDrawingProperties['defaultEdgeType'],
-                label: "",
-                categ: "",
-                attributes: []
+                type: (type) ? type : TW.conf.sigmaJsDrawingProperties['defaultEdgeType'],
+                label: '',
+                categ: '',
+                attributes: [],
             };
 
-            let edge_weight = edgeNode.getAttribute('weight')
+            let edge_weight = edgeNode.getAttribute('weight');
             edge.weight = (edge_weight)?edge_weight:1;
 
             var attvalueNodes = edgeNode.getElementsByTagName('attvalue');
-            for(k=0; k<attvalueNodes.length; k++){
+            for (k=0; k<attvalueNodes.length; k++) {
                 var attvalueNode = attvalueNodes[k];
                 var attr = attvalueNode.getAttribute('for');
                 var val = attvalueNode.getAttribute('value');
                 edge.attributes.push({
-                    attr:attr,
-                    val:val
+                    attr: attr,
+                    val: val,
                 });
             }
 
@@ -977,40 +955,40 @@ function dictfyGexf( gexf , categories ){
             if ( nodes[source] && nodes[target] ) {
               // console.debug('>>> tr: new edge has matching source and target nodes')
 
-              let typestring = findEdgeType(nodes, source, target)
+              let typestring = findEdgeType(nodes, source, target);
 
               // save edge property
-              edge.categ = typestring
+              edge.categ = typestring;
               TW.Relations = updateRelations( TW.Relations,
                                               typestring,
-                                              source, target )
+                                              source, target );
 
 
               // boost crossrels edges
-              if (edge.categ == "XR")   edge.weight *= 1.5
+              if (edge.categ == 'XR') edge.weight *= 1.5;
 
               // save
-              if(!edges[target+";"+source])
-                  edges[indice] = edge;
+              if (!edges[target+';'+source]) {
+edges[indice] = edge;
+}
             }
         }
     }
 
-    for(var i in TW.Relations) {
-        for(var j in TW.Relations[i]) {
-            TW.Relations[i][j] = Object.keys(TW.Relations[i][j])
+    for (var i in TW.Relations) {
+        for (var j in TW.Relations[i]) {
+            TW.Relations[i][j] = Object.keys(TW.Relations[i][j]);
         }
     }
 
     // ------------------------------- resDict <<<
-    let resDict = {}
-    resDict.catCount = catCount;        // ex:  {'ISIterms':1877}  ie #nodes
-    resDict.nodes = nodes;              //  { nid1: {label:"...", size:"11.1", attributes:"...", color:"#aaa", etc}, nid2: ...}
+    let resDict = {};
+    resDict.catCount = catCount; // ex:  {'ISIterms':1877}  ie #nodes
+    resDict.nodes = nodes; //  { nid1: {label:"...", size:"11.1", attributes:"...", color:"#aaa", etc}, nid2: ...}
     resDict.edges = edges;
     resDict.byType = nodesByType;
     return resDict;
 }
-
 
 
 // To denote the edge type (Term=Term, Doc=Doc, Doc=Term...)
@@ -1018,116 +996,110 @@ function dictfyGexf( gexf , categories ){
 function findEdgeType(nodes, srcId, tgtId) {
   let srcType=nodes[srcId].type;
   let tgtType=nodes[tgtId].type;
-  let strKey = ''
+  let strKey = '';
   if (srcType != tgtType) {
-    strKey = "XR"
-  }
-  else {
+    strKey = 'XR';
+  } else {
     // ex: "00" <=> edge from nodetype 0 to nodetype 0
     //     "11" <=> edge from nodetype 1 to nodetype 1
-    strKey = String(TW.catDict[srcType]).repeat(2)
+    strKey = String(TW.catDict[srcType]).repeat(2);
   }
-  return strKey
+  return strKey;
 }
 
 // To fill TW.Relations with edges sorted by type (Doc=Doc, Doc=Term...)
-function updateRelations(typedRelations, edgeCateg, srcId, tgtId){
-  if(!typedRelations[edgeCateg]) typedRelations[edgeCateg] = {}
-  if(isUndef(typedRelations[edgeCateg][srcId])) typedRelations[edgeCateg][srcId] = {};
-  if(isUndef(typedRelations[edgeCateg][tgtId])) typedRelations[edgeCateg][tgtId] = {};
+function updateRelations(typedRelations, edgeCateg, srcId, tgtId) {
+  if (!typedRelations[edgeCateg]) typedRelations[edgeCateg] = {};
+  if (isUndef(typedRelations[edgeCateg][srcId])) typedRelations[edgeCateg][srcId] = {};
+  if (isUndef(typedRelations[edgeCateg][tgtId])) typedRelations[edgeCateg][tgtId] = {};
   typedRelations[edgeCateg][srcId][tgtId]=true;
   typedRelations[edgeCateg][tgtId][srcId]=true;
 
-  return typedRelations
+  return typedRelations;
 }
 
 
 // To fill the reverse map: values => nodeids of a given type
 function updateValueFacets(facetIdx, aNode, optionalFilter) {
-
-  if (!facetIdx[aNode.type])      facetIdx[aNode.type]={}
-  for (var at in aNode.attributes) {
-
+  if (!facetIdx[aNode.type]) facetIdx[aNode.type]={};
+  for (let at in aNode.attributes) {
     // we're not interested in node type/category at this point
-    if (at == 'category')
-      continue
+    if (at == 'category') {
+continue;
+}
 
     // attribute filter  undef or str: acceptedAttrName
     if (isUndef(optionalFilter) || at == optionalFilter) {
-      let val = aNode.attributes[at]
+      let val = aNode.attributes[at];
 
-      if (!facetIdx[aNode.type][at])  facetIdx[aNode.type][at]={'vals':{'vstr':[], 'vnum':[]},'map':{}}
+      if (!facetIdx[aNode.type][at]) facetIdx[aNode.type][at]={'vals': {'vstr': [], 'vnum': []}, 'map': {}};
 
       // shortcut
-      var indx = facetIdx[aNode.type][at]
+      let indx = facetIdx[aNode.type][at];
 
       // determine observed type of this single value
-      let castVal = Number(val)
+      let castVal = Number(val);
 
       // this discovered datatype will be a condition (no bins if not mostly numeric)
-      let dtype = ''
+      let dtype = '';
       if (isNaN(castVal)) {
-        dtype = 'vstr'
-      }
-      else {
-        dtype = 'vnum'
-        val = castVal           // we keep it as number
+        dtype = 'vstr';
+      } else {
+        dtype = 'vnum';
+        val = castVal; // we keep it as number
       }
 
-      if (!indx.map[val]) indx.map[val] = []
+      if (!indx.map[val]) indx.map[val] = [];
 
-      indx.vals[dtype].push(val)              // for ordered scale
-      indx.map[val].push(aNode.id)            // inverted index
+      indx.vals[dtype].push(val); // for ordered scale
+      indx.map[val].push(aNode.id); // inverted index
 
 
       // POSSIBLE with the discovered datatype
       //  => it would also allow to index text values (eg country, affiliation, etc.)
       //     with the strategy "most frequent distinct values" + "others"
       //     which would be useful (eg country, affiliation, etc.) !!!
-
     }
   }
-  return facetIdx
-
+  return facetIdx;
 }
 
 
 // Level-00
 function scanJSON( data ) {
+    let categoriesDict={};
+    let nodes = data.nodes;
 
-    var categoriesDict={};
-    var nodes = data.nodes;
-
-    for(var i in nodes) {
+    for (let i in nodes) {
         let ntype = nodes[i].type;
-        if(ntype) {
-          if (!categoriesDict[ntype])    categoriesDict[ntype] = 0
+        if (ntype) {
+          if (!categoriesDict[ntype]) categoriesDict[ntype] = 0;
           categoriesDict[ntype]++;
         }
     }
 
-    return categoriesDict
+    return categoriesDict;
 }
 
 // Level-00
 // for {1,2}partite graphs
-function dictfyJSON( data , categories ) {
+function dictfyJSON( data, categories ) {
+    if (TW.conf.debug.logParsers) {
+console.log('ParseCustom json 2nd loop, main data extraction, with categories', categories);
+}
 
-    if (TW.conf.debug.logParsers)
-      console.log("ParseCustom json 2nd loop, main data extraction, with categories", categories)
+    let catDict = {};
+    let catCount = {};
 
-    var catDict = {}
-    var catCount = {}
-
-    var edges={}, nodes={}, nodesByType={}
+    let edges={}, nodes={}, nodesByType={};
 
     // NB nodesByType lists arrays of ids per nodetype
     // (equivalent to TW.partialGraph.graph.getNodesByType but on full nodeset)
-    for(var i in categories)  {
-      nodesByType[i] = []
+    for (var i in categories) {
+      nodesByType[i] = [];
 
       // without  a group "others" -------------------
-      catDict[categories[i]] = i
+      catDict[categories[i]] = i;
 
       // POSS subCats for cat "others" if open types mapped to n types
       //
@@ -1140,28 +1112,28 @@ function dictfyJSON( data , categories ) {
     }
 
     // normalization, same as parseGexf
-    let minNodeSize = Infinity
-    let maxNodeSize = 0
+    let minNodeSize = Infinity;
+    let maxNodeSize = 0;
 
     // if scanAttributes, we'll also use:
-    var tmpVals = {}
+    let tmpVals = {};
 
-    for(var nid in data.nodes) {
+    for (let nid in data.nodes) {
         let n = data.nodes[nid];
 
-        let node = {}
+        let node = {};
 
-        node.id = (n.id) ? n.id : nid ; // use the key if no id
-        node.label = (n.label)? n.label : ("node_"+node.id) ;
-        node.size = (n.size)? n.size : 3 ;
-        node.type = (n.type)? n.type : "Document" ;
+        node.id = (n.id) ? n.id : nid; // use the key if no id
+        node.label = (n.label)? n.label : ('node_'+node.id);
+        node.size = (n.size)? n.size : 3;
+        node.type = (n.type)? n.type : 'Document';
         node.x = (n.x)? n.x : Math.random();
         node.y = (n.y)? n.y : Math.random();
-        node.color = (n.color)? n.color : "#FFFFFF" ;
-        if(n.shape) node.shape = n.shape;
-        if(n.attributes) node.attributes = n.attributes
-        else             node.attributes = {}
-        node.type = (n.type)? n.type : categories[0] ;
+        node.color = (n.color)? n.color : '#FFFFFF';
+        if (n.shape) node.shape = n.shape;
+        if (n.attributes) node.attributes = n.attributes;
+        else node.attributes = {};
+        node.type = (n.type)? n.type : categories[0];
 
         // any content to display on side panel (eg: comex v-card)
         node.htmlCont = n.content || '';
@@ -1175,31 +1147,32 @@ function dictfyJSON( data , categories ) {
 
         // £TODO generalize some alternate names in here and maybe gexf
         if (n.term_occ) {
-          node.size = Math.sqrt(Number(n.term_occ))
+          node.size = Math.sqrt(Number(n.term_occ));
         }
 
-        if(parseFloat(node.size) < minNodeSize)
-            minNodeSize= parseFloat(node.size);
+        if (parseFloat(node.size) < minNodeSize) {
+minNodeSize= parseFloat(node.size);
+}
 
-        if(parseFloat(node.size) > maxNodeSize)
-            maxNodeSize= parseFloat(node.size);
+        if (parseFloat(node.size) > maxNodeSize) {
+maxNodeSize= parseFloat(node.size);
+}
 
-        if (!catCount[node.type]) catCount[node.type] = 0
+        if (!catCount[node.type]) catCount[node.type] = 0;
         catCount[node.type]++;
 
         // record
         nodes[node.id] = node;
 
         if (!nodesByType[catDict[node.type]]) {
-          console.warn("unrecognized type:", node.type)
-        }
-        else {
-          nodesByType[catDict[node.type]].push(node.id)
+          console.warn('unrecognized type:', node.type);
+        } else {
+          nodesByType[catDict[node.type]].push(node.id);
         }
 
         // creating a faceted index from node.attributes
         if (TW.conf.scanAttributes) {
-          tmpVals = updateValueFacets(tmpVals, node)
+          tmpVals = updateValueFacets(tmpVals, node);
         }
     }
 
@@ -1207,7 +1180,7 @@ function dictfyJSON( data , categories ) {
     // console.log(tmpVals['Document'])
 
     if (TW.conf.scanAttributes) {
-      TW.Facets = facetsBinning (tmpVals)
+      TW.Facets = facetsBinning(tmpVals);
     }
 
     // £TODO ask if wanted
@@ -1223,24 +1196,26 @@ function dictfyJSON( data , categories ) {
 
 
     // £TODO this could be a call to clusterColoring()
-    TW.gui.colorList.sort(function(){ return Math.random()-0.5; });
-    for (var i in nodes ){
-        if (nodes[i].color=="#FFFFFF") {
-            var attval = ( isUndef(nodes[i].attributes) || isUndef(nodes[i].attributes["clust_default"]) )? 0 : nodes[i].attributes["clust_default"] ;
-            nodes[i].color = TW.gui.colorList[ attval ]
+    TW.gui.colorList.sort(function() {
+ return Math.random()-0.5;
+});
+    for (var i in nodes ) {
+        if (nodes[i].color=='#FFFFFF') {
+            let attval = ( isUndef(nodes[i].attributes) || isUndef(nodes[i].attributes['clust_default']) )? 0 : nodes[i].attributes['clust_default'];
+            nodes[i].color = TW.gui.colorList[attval];
         }
     }
 
     // edges
-    for(var i in data.links){
+    for (var i in data.links) {
         let e = data.links[i];
-        let edge = {}
+        let edge = {};
 
-        var source = (!isUndef(e.s))? e.s : e.source;
-        var target = (!isUndef(e.t))? e.t : e.target;
-        var weight = (!isUndef(e.w))? Number(e.w) : Number(e.weight);
-        var type = (!isUndef(e.type))? e.type : "curve";
-        var id=source+";"+target;
+        let source = (!isUndef(e.s))? e.s : e.source;
+        let target = (!isUndef(e.t))? e.t : e.target;
+        let weight = (!isUndef(e.w))? e.w : e.weight;
+        let type = (!isUndef(e.type))? e.type : 'curve';
+        let id=source+';'+target;
 
         edge.id = id;
         edge.source = source;
@@ -1251,31 +1226,32 @@ function dictfyJSON( data , categories ) {
         if ( nodes[source] && nodes[target] ) {
           // console.debug('>>> tr: new edge has matching source and target nodes')
 
-          let typestring = findEdgeType(nodes, source, target)
+          let typestring = findEdgeType(nodes, source, target);
 
           // save edge "type" in categ property
           // ----------------------------------
-          edge.categ = typestring
+          edge.categ = typestring;
           TW.Relations = updateRelations( TW.Relations,
                                           typestring,
-                                          source, target )
+                                          source, target );
 
           // boost crossrels edges
-          if (edge.categ == "XR")   edge.weight *= 1.5
+          if (edge.categ == 'XR') edge.weight *= 1.5;
 
           // save
-          if(!edges[target+";"+source])
-              edges[id] = edge;
+          if (!edges[target+';'+source]) {
+edges[id] = edge;
+}
         }
     }
 
-    for(var i in TW.Relations) {
-        for(var j in TW.Relations[i]) {
-            TW.Relations[i][j] = Object.keys(TW.Relations[i][j])
+    for (var i in TW.Relations) {
+        for (let j in TW.Relations[i]) {
+            TW.Relations[i][j] = Object.keys(TW.Relations[i][j]);
         }
     }
 
-    let resDict = {}
+    let resDict = {};
     resDict.catCount = catCount;
     resDict.nodes = nodes;
     resDict.byType = nodesByType;

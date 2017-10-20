@@ -2,21 +2,20 @@
 
 ### Presentation
 
-Thank you for using ProjectExplorer/TinawebJS.
+Thank you for using Tinaweb.
 
 This work is lead by the Complex Systems Institute of Paris Ile-de-France ([ISCPIF](http://iscpif.fr)) and the [Centre d'Analyse et de Mathématique Sociales](http://cams.ehess.fr/), both [CNRS](http://www.cnrs.fr/) entities.
 
 ###### Source code repository
-    https://github.com/moma/ProjectExplorer
+    https://github.com/ISCPIF/tinaweb
 
 ###### Authors
 
-Researchers and engineers of the [ISCPIF/CNRS - UPS 3611](http://iscpif.fr)
- - Dr. David Chavalarias
+This work is conducted under the supervision of Dr. David Chavalarias (CNRS, CAMS & ISC-PIF), with the following contributors to the development : 
  - Samuel Castillo
  - Romain Loth
 
-You can contact the authors by email (<firstname.lastname@iscpif.fr>).
+You can contact us by email (<firstname.lastname@iscpif.fr>).
 
 ###### Acknowledgements
  - TinawebJS is build on top of Alexis Jacomy and Guillaume Plique's [sigmaJS](http://sigmajs.org)
@@ -28,21 +27,21 @@ You can contact the authors by email (<firstname.lastname@iscpif.fr>).
 
 ### Usage
 
-ProjectExplorer is a versatile app that can be used as standalone or as a client library. The documentation concerning the different setup cases is being updated after a major refactoring and will grow in time.
+Tinaweb is a versatile app that can be used as standalone or as a client library. The documentation concerning the different setup cases is being updated after a major refactoring and will grow in time.
 
 Here are the main points.
 
 ###### Getting started
 In the simplest setup, just clone the repository and open explorerjs.html in a modern browser.
 ```
-git clone https://github.com/moma/ProjectExplorer.git
-cd ProjectExplorer
+git clone git@github.com:ISCPIF/tinaweb.git
+cd tinaweb
 firefox explorerjs.html
 ```
 => An input in the upper right side allows you to open any gexf file.
 []
 ###### Application and data structures
-An overview of the application structure can be found in the extended documentation under [00.DOCUMENTATION/A-Introduction/app_structure.md](https://github.com/moma/ProjectExplorer/blob/master/00.DOCUMENTATION/A-Introduction/app_structure.md) (comments are in french).
+An overview of the application structure can be found in the extended documentation under [00.DOCUMENTATION/A-Introduction/app_structure.md](https://github.com/ISCPIF/tinaweb/blob/master/00.DOCUMENTATION/A-Introduction/app_structure.md) (comments are in french).
 
 ###### Usage on a web server
 To activate all features, you should:
@@ -59,14 +58,14 @@ Once you have this webserver running and some source data files, you may also co
   - it will be shown as a **menu** to select graphs in the interface
   - it allows to define associated **node types** for each source
   - it allows to define associated **search backends** for each source
-  - to use this, follow the guidelines in the **[Project config HOWTO](https://github.com/moma/ProjectExplorer/blob/master/00.DOCUMENTATION/A-Introduction/project_config.md)**
+  - to use this, follow the guidelines in the **[Project config HOWTO](https://github.com/ISCPIF/tinaweb/blob/master/00.DOCUMENTATION/A-Introduction/project_config.md)**
 
 ###### Integration in a larger app
-To integrate ProjectExplorer in a larger web application, you may have several locations with subdirectories defined on your server. In this case, you'll need to use the provided path modification tool (see this [integration procedure example](https://github.com/moma/ProjectExplorer/tree/master/00.DOCUMENTATION/A-Introduction#integration-policy))
+To integrate ProjectExplorer in a larger web application, you may have several locations with subdirectories defined on your server. In this case, you'll need to use the provided path modification tool (see this [integration procedure example](https://github.com/ISCPIF/tinaweb/tree/master/00.DOCUMENTATION/A-Introduction#integration-policy))
 
 ###### Advanced settings
-For more information about ProjectExplorer's settings (settings file, input modes, attribute processing options), please refer to the [detailed introduction](https://github.com/moma/ProjectExplorer/blob/master/00.DOCUMENTATION/A-Introduction/README.md)
- and the [developer's manual](https://github.com/moma/ProjectExplorer/blob/master/00.DOCUMENTATION/C-advanced/developer_manual.md).
+For more information about ProjectExplorer's settings (settings file, input modes, attribute processing options), please refer to the [detailed introduction](https://github.com/ISCPIF/tinaweb/blob/master/00.DOCUMENTATION/A-Introduction/README.md)
+ and the [developer's manual](https://github.com/ISCPIF/tinaweb/blob/master/00.DOCUMENTATION/C-advanced/developer_manual.md).
 
 ### Copyright and license
 
