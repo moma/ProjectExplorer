@@ -1340,6 +1340,7 @@ function dictfyJSON( data , categories ) {
 
     // ---  stats  ---
     for (var categ in TW.stats.edgeWeight) {
+      allWeights[categ].sort()
       let M = allWeights[categ].length
       TW.stats.edgeWeight[categ].len = M
       TW.stats.edgeWeight[categ].median = allWeights[categ][Math.round(M/2)]
