@@ -26,20 +26,23 @@ TW.sigmaAttributes = {
 function updateDynamicFacets(optionalFilter) {
     let autoVals = {}
     for (var icat in TW.categories) {
-      let nodecat = TW.categories[icat]
-      autoVals[nodecat] = {}
-      for (var autoAttr in TW.sigmaAttributes) {
-        if (!optionalFilter || autoAttr == optionalFilter) {
-          autoVals[nodecat][autoAttr] = {'map':{},'vals':{'vstr':[],'vnum':[]}}
-          let getVal = TW.sigmaAttributes[autoAttr](TW.partialGraph)
-          for (var nid of TW.ByType[icat]) {
-            let nd = TW.partialGraph.graph.nodes(nid)
-            if (nd) {
-              let val = getVal(TW.partialGraph.graph.nodes(nid))
-              if (! (val in autoVals[nodecat][autoAttr].map))
-                autoVals[nodecat][autoAttr].map[val] = []
-              autoVals[nodecat][autoAttr].map[val].push(nid)
-              autoVals[nodecat][autoAttr].vals.vnum.push(val)
+      if (TW.SystemState().activetypes[icat]) {
+        let nodecat = TW.categories[icat]
+        autoVals[nodecat] = {}
+        for (var autoAttr in TW.sigmaAttributes) {
+          if (!optionalFilter || autoAttr == optionalFilter) {
+            autoVals[nodecat][autoAttr] = {'map':{},'vals':{'vstr':[],'vnum':[]}}
+            let getVal = TW.sigmaAttributes[autoAttr](TW.partialGraph)
+            for (var nid of TW.ByType[icat]) {
+              let nd = TW.partialGraph.graph.nodes(nid)
+              if (nd && !nd.hidden) {
+                let val = getVal(TW.partialGraph.graph.nodes(nid))
+                if (! (val in autoVals[nodecat][autoAttr].map))
+                  // a list of nids for each distinct values
+                  autoVals[nodecat][autoAttr].map[val] = []
+                autoVals[nodecat][autoAttr].map[val].push(nid)
+                autoVals[nodecat][autoAttr].vals.vnum.push(val)
+              }
             }
           }
         }
@@ -47,17 +50,42 @@ function updateDynamicFacets(optionalFilter) {
     }
 
     // console.log("reparse dynamic attr, raw result", autoVals)
-
     let autoFacets = facetsBinning(autoVals)
+    // console.log("reparse dynamic attr, binned result", autoFacets)
+
     // merge them into clusters
-    for (var nodecat in TW.catDict) {
-      for (var autoAttr in TW.sigmaAttributes) {
-        for (var facet in autoFacets[nodecat]) {
+    //  - new popu counts for ticks and new labels (to update in menus+legend)
+    //  - but preserve last color (for stability with previous view)
+    for (var nodecat in autoFacets) {
+      for (var facet in autoFacets[nodecat]) {
+
+        if (!TW.Facets[nodecat][facet]
+            || !TW.Facets[nodecat][facet].invIdx
+            || !TW.Facets[nodecat][facet].invIdx.length) {
+          // first time: simple copy
           TW.Facets[nodecat][facet] = autoFacets[nodecat][facet]
+        }
+        else {
+          // otherwise recycle old legend entries
+          // (inheriting last colors feels coherent between views meso<=>macro)
+          let last_colors = []
+          for (var i_prev in TW.Facets[nodecat][facet].invIdx) {
+            last_colors.push(TW.Facets[nodecat][facet].invIdx[i_prev].col)
+          }
+
+          // new legend entries allow
+          for (var i_new in autoFacets[nodecat][facet].invIdx) {
+            TW.Facets[nodecat][facet].invIdx[i_new] = autoFacets[nodecat][facet].invIdx[i_new]
+
+            // skipped iff new nb of bins (which will trigger recoloring anyway)
+            if (last_colors[i_new]) {
+              TW.Facets[nodecat][facet].invIdx[i_new].col = last_colors[i_new]
+            }
+          }
+
         }
       }
     }
-
 }
 
 // Execution:    changeGraphAppearanceByFacets( true )
