@@ -334,7 +334,6 @@ function graphResetAllColors() {
 
 // removes selectively for an array of nodetypes
 function clearColorLegend (forTypes) {
-  // console.log('clearColorLegend', forTypes)
   for (var ty of forTypes) {
     let legTy = document.getElementById("legend-for-"+TW.catDict[ty])
     if (legTy)

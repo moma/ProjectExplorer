@@ -95,6 +95,10 @@ TW.resetGraph = function() {
   // and set tabs to none
   resetTabs()
 
+  // reset colors legends for all types
+  if (TW.categories && TW.categories.length)
+    updateColorsLegend(TW.categories)
+
   // call the sigma graph clearing
   TW.instance.clearSigma()
 
@@ -108,9 +112,6 @@ TW.resetGraph = function() {
   // reset other gui flags
   TW.gui.checkBox=false
   TW.gui.lastFilters = {}
-
-  // reset colors legends
-  updateColorsLegend()
 
   // forget the states
   TW.states = [TW.initialSystemState]
