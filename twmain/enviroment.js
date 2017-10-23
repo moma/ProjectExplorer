@@ -654,12 +654,10 @@ function changeType(optionaltypeFlag) {
         if (TW.gui.handpickedcolors[ty].altattr) {
           TW.gui.handpickedcolors[ty].alton = true
 
-          // this re-coloring can be avoided if "hidden" was used in changeLevel and sliders
-          let recolorMethod = getColorFunction(TW.gui.handpickedcolors[ty].altattr)
-          window[recolorMethod](TW.gui.handpickedcolors[ty].altattr, [ty])
+          // alt color and legend kept unchanged => out of scope nodes remain grey
 
           // without re-coloring step, we would only need to recreate legend box
-          // updateColorsLegend(TW.gui.handpickedcolors[ty].altattr, [ty])
+          updateColorsLegend(TW.gui.handpickedcolors[ty].altattr, [ty])
         }
       }
     }
@@ -883,6 +881,12 @@ function changeLevel(optionalTgtState) {
             // we unhide 1 by 1
             let n = TW.partialGraph.graph.nodes(nid)
             if (activetypesDict[TW.Nodes[nid].type]) {
+              // if a meso color was on => we grey the out-of-scope nodes as we unhide them
+              // (because they can have an old alt_color)
+              if (TW.gui.handpickedcolors[n.type].alton && (n.hidden || n.sliderlock)) {
+                n.customAttrs.alt_color = TW.gui.defaultNodeColor
+                n.customAttrs.altgrey_color = TW.gui.defaultGreyNodeColor
+              }
               n.hidden = false
               n.sliderlock = false
             }
@@ -926,26 +930,6 @@ function changeLevel(optionalTgtState) {
 
       updateDynamicFacets()
       changeGraphAppearanceByFacets( getActivetypesNames() )
-
-      // going back to global: recolor nodes that were out of scope
-      if(futurelevel) {
-        let todoCols = {}
-        for (var ty in activetypesDict) {
-          if (TW.gui.handpickedcolors[ty].alton) {
-            let attr = TW.gui.handpickedcolors[ty].altattr
-            if (!todoCols[attr]) todoCols[attr] = {'types':[], 'fun': null}
-            todoCols[attr].types.push(ty)
-            if (! todoCols[attr].fun) {
-              todoCols[attr].fun = getColorFunction(attr)
-            }
-          }
-        }
-        for (var attr in todoCols) {
-          let recolorMethod = todoCols[attr].fun
-          let forTypes = todoCols[attr].types
-          window[recolorMethod](attr, forTypes)
-        }
-      }
 
       // recreates FA2 nodes array after changing the nodes
       reInitFa2({
