@@ -267,6 +267,51 @@ function rgbToHex(r, g, b) {
     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
+// high-level hex or rgba color format to rgb string => for example "255,32,255"
+function normalizeColorFormat(colStr) {
+  let rgbStr = null
+  let rgbaVals = []
+  let invalidFormat = false
+
+  if (typeof colStr == 'undefined' || ! colStr) {
+    invalidFormat = true
+  }
+  // hex color ex "#eee or #AA00AA"
+  else if (/^#[A-Fa-f0-9]{3,6}$/.test(colStr)) {
+    rgbaVals = hex2rgba(colStr)
+    rgbStr = rgbaVals.splice(0, 3).join(',');
+  }
+  else {
+    // "rgba(...)" or "rgb(...)" color
+    if (/^rgba?\(\d{1,3},\d{1,3},\d{1,3}(?:,\d{1,3})?\)$/.test(colStr)) {
+      // keep only the inside of parens (ex: "255,32,255,100")
+      colStr = colStr.match(/rgba?\(([^)]+)\)/)[1]
+      rgbaVals = colStr.split(',')
+    }
+    // we also allow data providing directly the inside (ex: "255,32,255,100")
+    else if (/^\d{1,3},\d{1,3},\d{1,3}(?:,\d{1,3})?$/.test(colStr)) {
+      rgbaVals = colStr.split(',')
+    }
+
+    if (rgbaVals.length == 3) {
+      rgbStr = colStr
+    }
+    else if (rgbaVals.length == 4) {
+      rgbStr = rgbaVals.splice(0, 3).join(',');
+    }
+    else {
+      invalidFormat = true
+    }
+
+  }
+
+  if (invalidFormat) {
+    rgbStr = null
+  }
+
+  return rgbStr
+}
+
 
 // lowercase etc query strings
 normalizeString = function(string, escapeHtml) {
