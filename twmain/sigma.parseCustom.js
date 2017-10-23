@@ -1159,7 +1159,7 @@ function dictfyJSON( data , categories ) {
         node.type = (n.type)? n.type : "Document" ;
         node.x = (n.x)? n.x : 500-Math.random()*1000;
         node.y = (n.y)? n.y : 500-Math.random()*1000;
-        node.color = (n.color)? n.color : "#FFFFFF" ;
+        node.color = (n.color)? n.color : TW.gui.defaultNodeColor ;
         if(n.shape) node.shape = n.shape;
         if(n.attributes) node.attributes = n.attributes
         else             node.attributes = {}
@@ -1238,14 +1238,6 @@ function dictfyJSON( data , categories ) {
       }
     }
 
-    // £TODO this could be a call to clusterColoring()
-    TW.gui.colorList.sort(function(){ return Math.random()-0.5; });
-    for (var i in nodes ){
-        if (nodes[i].color=="#FFFFFF") {
-            var attval = ( isUndef(nodes[i].attributes) || isUndef(nodes[i].attributes["clust_default"]) )? 0 : nodes[i].attributes["clust_default"] ;
-            nodes[i].color = TW.gui.colorList[ attval ]
-        }
-    }
 
     // edges
     for(var i in data.links){
