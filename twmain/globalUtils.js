@@ -289,7 +289,7 @@ function normalizeColorFormat(colStr) {
       rgbaVals = colStr.split(',')
     }
     // we also allow data providing directly the inside (ex: "255,32,255,100")
-    else if (/^\d{1,3},\d{1,3},\d{1,3}(?:,\d{1,3})$/.test(colStr)) {
+    else if (/^\d{1,3},\d{1,3},\d{1,3}(?:,\d{1,3})?$/.test(colStr)) {
       rgbaVals = colStr.split(',')
     }
 
