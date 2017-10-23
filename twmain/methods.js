@@ -690,58 +690,27 @@ function prepareNodesRenderingProperties(nodesDict) {
     // and quite enough in precision !!
     n.size = Math.round(n.size*sizeFactor*1000)/1000
 
-    // new initial setup of properties
-
-    var rgba, rgbStr, invalidFormat = false;
-
-    if (n.color) {
-      // rgb[a] color string ex: "19,180,244"
-      if (/^\d{1,3},\d{1,3},\d{1,3}$/.test(n.color)) {
-        rgba = n.color.split(',')
-        if (rgba.length = 3) {
-          rgbStr = n.color
-          rgba.push(255)
-        }
-        else if (rgba.length == 4) {
-          rgbStr = rgba.splice(0, 3).join(',');
-        }
-        else {
-          invalidFormat = true
-        }
-      }
-      // hex color ex "#eee or #AA00AA"
-      else if (/^#[A-Fa-f0-9]{3,6}$/.test(n.color)) {
-        rgba = hex2rgba(n.color)
-        rgbStr = rgba.splice(0, 3).join(',');
-      }
-      else {
-        invalidFormat = true
-      }
-    }
-    else {
-      invalidFormat = true
-    }
-
-    if (!invalidFormat) {
-      n.color = `rgb(${rgbStr})`
-    }
-    else {
-      // will not be modified
-      n.color = TW.conf.sigmaJsDrawingProperties.defaultNodeColor
-      rgbStr = n.color.split(',').splice(0, 3).join(',');
-    }
-
+    // rendering status flags
     n.customAttrs = {
-      // status flags
       active: false,              // when selected
       highlight: false,           // when neighbors or legend's click
-
-      // default unselected color
-      defgrey_color : "rgba("+rgbStr+","+TW.conf.sigmaJsDrawingProperties.twNodesGreyOpacity+")",
 
       // will be used for repainting (read when TW.gui.handpickedcolors flags)
       alt_color: null,
       altgrey_color: null,
+    }
+
+    // rgb color string ex: "19,180,244"
+    var rgbStr = normalizeColorFormat(n.color)
+
+    // n.color will not be modified
+    if (rgbStr) {
+      n.color = `rgb(${rgbStr})`
+      n.customAttrs.defgrey_color = "rgba("+rgbStr+","+TW.conf.sigmaJsDrawingProperties.twNodesGreyOpacity+")"
+    }
+    else {
+      n.color = TW.gui.defaultNodeColor
+      n.customAttrs.defgrey_color = TW.gui.defaultGreyNodeColor
     }
 
     // POSS n.type: distinguish rendtype and twtype

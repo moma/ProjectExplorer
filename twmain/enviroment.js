@@ -38,6 +38,12 @@ TW.gui.handpickedcolorsReset = function (forTypes = TW.categories) {
   }
 }
 
+// normalize defaultNodeColor format and create the unselected def color
+let defaultNodeRgbStr = normalizeColorFormat( TW.conf.sigmaJsDrawingProperties.defaultNodeColor )
+TW.gui.defaultNodeColor = `rgb(${defaultNodeRgbStr})`
+TW.gui.defaultGreyNodeColor = "rgba("+defaultNodeRgbStr+","+TW.conf.sigmaJsDrawingProperties.twNodesGreyOpacity+")"
+
+
 TW.gui.noverlapConf = {
   nodeMargin: .4,
   scaleNodes: 1.5,
