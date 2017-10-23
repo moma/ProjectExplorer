@@ -336,7 +336,7 @@ function graphResetAllColors() {
 function clearColorLegend (forTypes) {
   // console.log('clearColorLegend', forTypes)
   for (var ty of forTypes) {
-    let legTy = document.getElementById("legend-for-"+ty)
+    let legTy = document.getElementById("legend-for-"+TW.catDict[ty])
     if (legTy)
       legTy.remove()
   }
@@ -366,7 +366,7 @@ function updateColorsLegend ( daclass, forTypes, groupedByTicks ) {
 
     for (var k in forTypes) {
       let curType = forTypes[k]
-      var LegendDiv = "<div id=legend-for-"+curType+" class=\"over-panels my-legend\">"
+      var LegendDiv = "<div id=legend-for-"+TW.catDict[curType]+" class=\"over-panels my-legend\">"
 
       // all infos in a bin array
       var legendInfo = []
@@ -517,7 +517,7 @@ function updateColorsLegend ( daclass, forTypes, groupedByTicks ) {
         LegendDiv += '    </div>'
         LegendDiv += '  </div>'
 
-        let perhapsPreviousLegend = document.getElementById("legend-for-"+curType)
+        let perhapsPreviousLegend = document.getElementById("legend-for-"+TW.catDict[curType])
         if (perhapsPreviousLegend) {
           perhapsPreviousLegend.outerHTML = LegendDiv
         }
