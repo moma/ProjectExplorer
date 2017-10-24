@@ -41,9 +41,14 @@ var SigmaUtils = function () {
 
                 i++
             }
+            else {
+              n.hidden = true
+              graph.nodes.push(n)
+            }
         }
 
         // the typestrings in activereltypes are the key to stored Relations (<=> edges)
+        let checker = {}
         for (var k in initialActivereltypes) {
           let reltype = initialActivereltypes[k]
           for(let srcnid in TW.Relations[reltype]) {
@@ -53,9 +58,17 @@ var SigmaUtils = function () {
                   if(e) {
                       if(e.source != e.target) {
                           graph.edges.push( e);
+                          checker[e.id] = true
                       }
                   }
               }
+          }
+        }
+        for (var eid in TW.Edges) {
+          if (! checker[eid]) {
+            let e = TW.Edges[eid]
+            e.hidden = true
+            graph.edges.push(e)
           }
         }
         return graph;
@@ -190,7 +203,7 @@ var SigmaUtils = function () {
       var baseRGB = edge.customAttrs.useAltColor ? edge.customAttrs.alt_rgb : edge.customAttrs.rgb
 
       if (edge.customAttrs.activeEdge) {
-        size = (defSize * 1.5) + .5
+        size = defSize * 1.5 + .5
 
         // active edges look well with no opacity
         color = `rgb(${baseRGB})`
@@ -199,6 +212,7 @@ var SigmaUtils = function () {
       }
       else {
         color = settings('twEdgeGreyColor')
+        // console.log("defSize", defSize)
         size = defSize
       }
 
@@ -533,7 +547,7 @@ var SigmaUtils = function () {
 
         // restore edges if needed
         if (document.getElementById('edges-switch').checked) {
-          this.toggleEdges(true)
+          sigma_utils.toggleEdges(true)
         }
       }
 
@@ -541,22 +555,27 @@ var SigmaUtils = function () {
       //  - togglability (ie. turns FA2 off if called again)
       //  - custom expiration duration
       //  - edges management (turns them off and restores them after finished)
-      this.smartForceAtlas = function (args) {
+      //
+      // NB we don't change config here to be able to inherit last one
+      //    => conditions on graph size or meso context handled by reInitFa2
+
+      // POSS: use n.fixed flag https://github.com/jacomyal/sigma.js/issues/884
+      this.smartForceAtlas = function (args = {}) {
         if (TW.conf.fa2Available) {
-          if (!args)             args = {}
           if (!args.manual)      args.manual = false
           if (!args.duration)    args.duration = parseInt(TW.conf.fa2Milliseconds) || 4000
           if (!args.propDuration) args.propDuration = TW.conf.fa2AdaptDuration
 
           // togglability case
           if(TW.partialGraph.isForceAtlas2Running()) {
-              this.ourStopFA2()
+              sigma_utils.ourStopFA2()
               return;
           }
           // normal case
           else {
               if (TW.conf.fa2Enabled) {
 
+                // auto run
                 if (! args.manual) {
                   if (TW.partialGraph.graph.nNodes() < TW.conf.minNodesForAutoFA2)
                     return
@@ -566,18 +585,19 @@ var SigmaUtils = function () {
                     }
                     else {
                       let nEds = getVisibleEdges().length
-                      let newDur = parseInt(args.duration * Math.log(nEds) / 3)
+                      let newDur = parseInt(args.duration * Math.log(nEds))
                       setTimeout(function(){sigma_utils.ourStopFA2()},newDur)
-                      console.debug("fa2 adapted duration", newDur)
+                      console.log("fa2 adapted duration", newDur)
                     }
                   }
                 }
 
                 // hide edges during work for smaller cpu load
                 if (TW.partialGraph.settings('drawEdges')) {
-                  this.toggleEdges(false)
+                  sigma_utils.toggleEdges(false)
                 }
 
+                // console.error("running")
                 try {
                   TW.partialGraph.startForceAtlas2();
                 } catch(e) {return}
@@ -797,7 +817,7 @@ function gradientColoring(daclass, forTypes) {
               // (possible skip due to changeLevel or filters)
               for (var k = nidList.length-1 ; k >= 0 ; k--) {
                 let nd = TW.partialGraph.graph.nodes(nidList[k])
-                if (nd) {
+                if (nd && !nd.hidden) {
                   bins.invIdx[i].col = nd.customAttrs.alt_color
                   break
                 }
@@ -835,7 +855,7 @@ function repaintEdges() {
       else {
         let e = TW.partialGraph.graph.edges(eid)
 
-        if (e) {
+        if (e && !e.hidden) {
           let src = TW.partialGraph.graph.nodes(idPair[0])
           let tgt = TW.partialGraph.graph.nodes(idPair[1])
 
@@ -947,7 +967,7 @@ function heatmapColoring(daclass, forTypes) {
         // color the referred nodes
         for (var j in tickThresholds[k].nids) {
           let n = TW.partialGraph.graph.nodes(tickThresholds[k].nids[j])
-          if (n) {
+          if (n && !n.hidden) {
             n.customAttrs.alt_color = binColors[k]
             n.customAttrs.altgrey_color = "rgba("+rgbColStr+",0.4)"
 
@@ -1055,7 +1075,7 @@ function clusterColoring(daclass, forTypes) {
               let rgbColStr = hex2rgba(theColor).slice(0,3).join(',')
               for (let j in valGroup.nids) {
                 let theNode = TW.partialGraph.graph.nodes(valGroup.nids[j])
-                if (theNode) {
+                if (theNode && !theNode.hidden) {
                   theNode.customAttrs.alt_color = theColor
                   theNode.customAttrs.altgrey_color = "rgba("+rgbColStr+","+TW.conf.sigmaJsDrawingProperties.twNodesGreyOpacity+")"
                 }
@@ -1073,7 +1093,7 @@ function clusterColoring(daclass, forTypes) {
             let nid = nids[j]
             let the_node = TW.partialGraph.graph.nodes(nid)
 
-            if (the_node) {
+            if (the_node && !the_node.hidden) {
 
               // POSS: use "hidden" in filters instead of remove/readd
               //  typeName     then this condition would be more useful here
@@ -1093,7 +1113,6 @@ function clusterColoring(daclass, forTypes) {
                   theColor = colList[ someRepresentativeInt ]
                 }
 
-                // TW.partialGraph.graph.nodes(nid).color = theColor
                 the_node.customAttrs.alt_color = theColor
                 the_node.customAttrs.altgrey_color = "rgba("+(hex2rgba(theColor).slice(0,3).join(','))+",0.4)"
               }

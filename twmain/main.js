@@ -565,22 +565,39 @@ function mainStartGraph(inFormat, inData, twInstance) {
       }
 
       if (TW.conf.debug.logSettings) console.info("FA2 settings", TW.FA2Params)
+      // track which type has already been spatialised once
+      TW.didFA2OnTypes = TW.categories.map(function(){return false})
 
-      // init FA2 for any future forceAtlas2 calls
-      TW.partialGraph.configForceAtlas2(TW.FA2Params)
+      // adapt init parameters to conf and run initial fa2
+      if (TW.conf.fa2Enabled) {
+        reInitFa2({
+          skipHidden: TW.conf.independantTypes,
+          typeAdapt: TW.conf.independantTypes,
+          callback: function() {
+            // initial FA2
+            sigma_utils.smartForceAtlas()
+
+            if (TW.conf.stablePositions) {
+              if (TW.conf.independantTypes) {
+                TW.didFA2OnTypes = initialActivetypes
+              }
+              else {
+                TW.didFA2OnTypes = TW.categories.map(function(){return true})
+              }
+            }
+          }
+        })
+      }
+
+      // REFA new sigma.js
+      TW.partialGraph.camera.goTo({x:0, y:0, ratio:1.2, angle: 0})
 
       // NB: noverlap conf depends on sizeRatios so updated before each run
 
-      // REFA new sigma.js
-      TW.partialGraph.camera.goTo({x:0, y:0, ratio:0.9, angle: 0})
 
       // mostly json data are extracts provided by DB apis => no positions
       // if (inFormat == "json")  TW.conf.fa2Enabled = true
-
-      // will run fa2 if enough nodes and TW.conf.fa2Enabled == true
-      sigma_utils.smartForceAtlas()
   }
-
 }
 
 setTimeout( function() {

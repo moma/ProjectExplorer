@@ -783,6 +783,9 @@ var TinaWebJS = function ( sigmacanvas ) {
         if (TW.conf.disperseAvailable) {
           $("#noverlapButton").click(function () {
             if(! TW.partialGraph.isNoverlapRunning()) {
+                // determine if we work just on visible nodes
+                let skipHiddenFlag = !TW.conf.stablePositions || TW.conf.independantTypes
+
                 // show waiting cursor on page and button
                 TW.gui.elHtml.classList.add('waiting');
                 this.style.cursor = 'wait'
@@ -793,10 +796,20 @@ var TinaWebJS = function ( sigmacanvas ) {
                 let sizeFactor = Math.max.apply(null, TW.gui.sizeRatios)
                 TW.gui.noverlapConf.nodeMargin =  .5 * sizeFactor
                 TW.gui.noverlapConf.scaleNodes = 1.5 * sizeFactor
+                if (skipHiddenFlag) {
+                  TW.gui.noverlapConf.nodes = getVisibleNodes()
+                }
                 TW.partialGraph.configNoverlap(TW.gui.noverlapConf)
                 var listener = TW.partialGraph.startNoverlap();
                 var noverButton = this
                 listener.bind('stop', function(event) {
+                  // update fa2 positions in any case, but don't skipHidden unless unstable positions
+                  reInitFa2({
+                    localZoneSettings: !TW.SystemState().level,
+                    skipHidden: skipHiddenFlag,
+                    typeAdapt: skipHiddenFlag,
+                    callback: function() {console.debug("noverlap: updated fa2 positions")}
+                  })
                   var stillRunning = document.getElementById('noverlapwait')
                   if (stillRunning) {
                     reInitFa2({
@@ -1053,6 +1066,9 @@ var TinaWebJS = function ( sigmacanvas ) {
           if (mouseEvent.ctrlKey) {
             // update FA2 positions array
             reInitFa2({
+              localZoneSettings: !TW.SystemState().level,
+              skipHidden: !TW.conf.stablePositions || TW.conf.independantTypes,
+              typeAdapt: !TW.conf.stablePositions || TW.conf.independantTypes,
               callback: function() {console.debug("dragNodes: updated fa2 positions")}
             })
           }
@@ -1285,6 +1301,24 @@ var TinaWebJS = function ( sigmacanvas ) {
 
       // add all numeric attributes to titlingMetric with option type fromFacets
       fillAttrsInForm('attr-titling-metric', 'num')
+
+      // add attributes' names list to saveGEXF modal examples
+      // ex: "kw: nbjobs,total_occurrences / sch: nbjobs,total_occurrences"
+      let exs = document.getElementById("data_attrs_exemples")
+      if (exs) {
+        let spanContents = []
+        for (var ntype in TW.Facets) {
+          let attrs = Object.keys(TW.Facets[ntype])
+          // remove dynamic attributes
+          attrs = attrs.filter( function(at) { return (! TW.sigmaAttributes[at]) } )
+          if (attrs && attrs.length) {
+            spanContents.push(ntype+': '+attrs.join(","))
+          }
+        }
+        if (spanContents.length) {
+          exs.innerHTML = '('+spanContents.join(" / ")+')'
+        }
+      }
 
       // cancelSelection(false);
     }

@@ -78,6 +78,30 @@ TW.FA2Params = {
   outboundAttractionDistribution: false
 }
 
+TW.FA2Params = {
+  // adapting speed -------------
+  slowDown: .8,                      // above 1:slower, in [.2;1]:faster, under .2:unstable
+  startingIterations: 2,             // keep it an even number to reduce visible oscillations at rendering
+  iterationsPerRender: 4,            // idem
+  barnesHutOptimize: false,
+  // barnesHutTheta: .5,
+
+  // global behavior -----------
+  linLogMode: true,
+  edgeWeightInfluence: .8,          // <= slowish when above .5, unstable at 1
+  gravity: 1,
+  strongGravityMode: false,
+  scalingRatio: 4,
+  skipHidden: false,      // if true fa2 initial filter nodes
+
+  adjustSizes: false,     // ~ messy but sort of in favor of overlap prevention
+
+  // favors global centrality
+  // (rather not needed for large preferential attachment type of data ?)
+  outboundAttractionDistribution: false
+}
+
+
 // POSS: themed variants (ex: for dark bg vs light bg)
 // contrasted color list for clusterColoring()
 TW.gui.colorList = ["#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941",
@@ -316,6 +340,7 @@ function createFilechooserEl () {
 //============================ < NEW BUTTONS > =============================//
 
 function changeType(optionaltypeFlag) {
+    // var ctstart = performance.now()
 
     // RELATION TYPES
     //
@@ -372,6 +397,8 @@ function changeType(optionaltypeFlag) {
     //  => push a new gui state (node type [+ sels + highlight rels])
     //                      |
     //                      updates the sliders and selection panels
+
+    sigma_utils.ourStopFA2();
 
     let typeFlag
     let outgoing = TW.SystemState()
@@ -487,9 +514,9 @@ function changeType(optionaltypeFlag) {
 
     // in mode all the current selection (and only it) is preserved
     if (typeFlag == 'all') {
-      for (var i in outgoing.selectionNids) {
-        let nid = outgoing.selectionNids[i]
-        newNodes[nid] = TW.Nodes[nid]
+      for (var i in sourceNids) {
+        let nid = sourceNids[i]
+        newNodes[nid] = true
       }
     }
 
@@ -504,21 +531,21 @@ function changeType(optionaltypeFlag) {
     else {
       if (Object.keys(targetNids).length) {
         for (var nid in targetNids) {
-          newNodes[nid] = TW.Nodes[nid]
+          newNodes[nid] = true
         }
 
         // also more added because they are the "meso" sameside neighbors of the selection
         let rel = typeFlag.toString().repeat(2)
         let additionalNewTypeNids = getNeighbors(Object.keys(targetNids), rel)
         for (var nid in additionalNewTypeNids) {
-          newNodes[nid] = TW.Nodes[nid]
+          newNodes[nid] = true
         }
       }
       // if no selection, meso shouldn't be possible, but we can still
       // show something: those that were already of the correct type
       else if (mixedState) {
         for (var nid in alreadyOk) {
-          newNodes[nid] = TW.Nodes[nid]
+          newNodes[nid] = true
         }
       }
     }
@@ -526,7 +553,7 @@ function changeType(optionaltypeFlag) {
 
     // 5 - define the new selection
     let newselsArr = []
-    if (outgoing.selectionNids.length) {
+    if (sourceNids.length) {
       if (typeFlag != 'all') {
         newselsArr = Object.keys(targetNids)
         // NB: if mixedState we already filtered them at step 3
@@ -535,19 +562,24 @@ function changeType(optionaltypeFlag) {
         // not extending selection to all transitive neighbors
         // makes the operation stable (when clicked several times,
         // without changing selection, we go back to original state)
-        newselsArr = outgoing.selectionNids
+        newselsArr = sourceNids
       }
     }
 
 
     // 6 - effect the changes on nodes
     deselectNodes()
-    TW.partialGraph.graph.clear()   // a new start
 
-    for (var nid in newNodes) {
-      try {
-        TW.partialGraph.graph.addNode(newNodes[nid])
-      } catch(e) {continue}
+    for (var nid in TW.Nodes) {
+      let n = TW.partialGraph.graph.nodes(nid)
+      if (newNodes[nid]) {
+        n.hidden = false
+        n.sliderlock = false
+      }
+      else {
+        n.hidden = true
+        n.sliderlock = true
+      }
     }
 
     // 7 - add the relations
@@ -564,9 +596,9 @@ function changeType(optionaltypeFlag) {
               let eids = [`${srcnid};${tgtnid}`, `${tgtnid};${srcnid}`]
               for (var l in eids) {
                 let eid = eids[l]
-                if (eid && TW.Edges[eid] && !TW.partialGraph.graph.edges(eid)){
-                  newEdges[eid] = TW.Edges[eid]
-                  break
+                if (eid && TW.Edges[eid]){
+                  newEdges[eid] = true
+                  // POSS: do something about all those double-direction edges
                 }
               }
             }
@@ -576,10 +608,16 @@ function changeType(optionaltypeFlag) {
     }
 
     // 8 - effect the changes on edges
-    for (var eid in newEdges) {
-      try {
-        TW.partialGraph.graph.addEdge(newEdges[eid])
-      } catch(e) {continue}
+    for (var eid in TW.Edges) {
+      let e = TW.partialGraph.graph.edges(eid)
+      if (newEdges[eid]) {
+        e.hidden = false
+        e.sliderlock = false
+      }
+      else {
+        e.hidden = true
+        e.sliderlock = true
+      }
     }
 
     // 9 - refresh view and record the state
@@ -639,12 +677,10 @@ function changeType(optionaltypeFlag) {
         if (TW.gui.handpickedcolors[ty].altattr) {
           TW.gui.handpickedcolors[ty].alton = true
 
-          // this re-coloring can be avoided if "hidden" was used in changeLevel and sliders
-          let recolorMethod = getColorFunction(TW.gui.handpickedcolors[ty].altattr)
-          window[recolorMethod](TW.gui.handpickedcolors[ty].altattr, [ty])
+          // alt color and legend kept unchanged => out of scope nodes remain grey
 
           // without re-coloring step, we would only need to recreate legend box
-          // updateColorsLegend(TW.gui.handpickedcolors[ty].altattr, [ty])
+          updateColorsLegend(TW.gui.handpickedcolors[ty].altattr, [ty])
         }
       }
     }
@@ -653,13 +689,37 @@ function changeType(optionaltypeFlag) {
     fillAttrsInForm('choose-attr')
     fillAttrsInForm('attr-titling-metric', 'num')
 
-    // recreates FA2 nodes array from new nodes
-    reInitFa2({
-      useSoftMethod: false,
-      callback: function() {
-        sigma_utils.smartForceAtlas()
-      }
-    })
+    // in meso the changed nodes always need their FA2 config
+    if (!outgoing.level || TW.conf.independantTypes || !TW.conf.stablePositions) {
+      reInitFa2({
+        localZoneSettings: !outgoing.level,
+        skipHidden: true,
+        typeAdapt: true,
+        callback: function() {
+          // runs FA2 conditionnaly
+          if (!TW.conf.stablePositions) {
+            sigma_utils.smartForceAtlas()
+          }
+          else if (TW.conf.independantTypes) {
+            // check if all activetypes done
+            for (var tyId in newActivetypes) {
+              if (newActivetypes[tyId] && !TW.didFA2OnTypes[tyId]) {
+                sigma_utils.smartForceAtlas()
+                break
+              }
+            }
+            // mark them as done
+            for (var tyId in newActivetypes) {
+              if (newActivetypes[tyId]) {
+                TW.didFA2OnTypes[tyId] = true
+              }
+            }
+          }
+        }
+      })
+    }
+
+    // console.log("changeType time:", performance.now()-ctstart)
 
     // end update the gui ======================================================
 }
@@ -710,6 +770,8 @@ function getNeighbors(sourceNids, relKey) {
 //    POSS: rewrite using .hidden instead of add/remove
 function changeLevel(optionalTgtState) {
 
+    // var clstart = performance.now()
+
     // show waiting cursor
     TW.gui.elHtml.classList.add('waiting');
 
@@ -755,48 +817,63 @@ function changeLevel(optionalTgtState) {
         }
       }
 
-      TW.partialGraph.graph.clear();
-
-      var voisinage = {}
-      // Dictionaries of: selection+neighbors
-      var nodesToAdd = {}
-      var edgesToAdd = {}
-
-      for(var i in sels) {
-          s = sels[i];
-          nodesToAdd[s]=true;
-          for (var k in activereltypes) {
-            let activereltype = activereltypes[k]
-            if (TW.Relations[activereltype]) {
-              neigh = TW.Relations[activereltype][s]
-              if(neigh) {
-                  for(var j in neigh) {
-                      t = neigh[j]
-                      nodesToAdd[t]=true;
-                      edgesToAdd[s+";"+t]=true;
-                      edgesToAdd[t+";"+s]=true;
-                      if( !selsChecker[t]  )
-                          voisinage[ t ] = true;
-                  }
-              }
-            }
-            else {
-              // case where no edges at all (ex: scholars have no common keywords)
-              console.log("no edges between these nodes")
-            }
-          }
-      }
-
       var futurelevel = optionalTgtState ? optionalTgtState.level : !present.level
 
       if(!futurelevel) { // [Change to Local] when level=Global(1)
 
         TW.gui.elContainer.style.backgroundColor = TW.conf.mesoBackground
 
-        for(var nid in nodesToAdd)
-          add1Elem(nid)
-        for(var eid in edgesToAdd) {
-          add1Elem(eid)
+        var voisinage = {}
+        // Dictionaries of: selection+neighbors
+        var nodesToKeep = {}
+        var edgesToKeep = {}
+
+        for(var i in sels) {
+            s = sels[i];
+            nodesToKeep[s]=true;
+            for (var k in activereltypes) {
+              let activereltype = activereltypes[k]
+              if (TW.Relations[activereltype]) {
+                neigh = TW.Relations[activereltype][s]
+                if(neigh) {
+                    for(var j in neigh) {
+                        t = neigh[j]
+                        nodesToKeep[t]=true;
+                        edgesToKeep[s+";"+t]=true;
+                        edgesToKeep[t+";"+s]=true;
+                        if( !selsChecker[t]  )
+                            voisinage[ t ] = true;
+                    }
+                }
+              }
+              else {
+                // case where no edges at all (ex: scholars have no common keywords)
+                console.log("no edges between these nodes")
+              }
+            }
+        }
+
+        for (var nid in TW.Nodes) {
+          let n = TW.partialGraph.graph.nodes(nid)
+          if (!nodesToKeep[nid]) {
+            n.hidden = true
+            n.sliderlock = true
+          }
+          else {
+            n.hidden = false
+            n.sliderlock = false
+          }
+        }
+        for (var eid in TW.Edges) {
+          let e = TW.partialGraph.graph.edges(eid)
+          if (! edgesToKeep[eid]) {
+            e.hidden = true
+            e.sliderlock = true
+          }
+          else {
+            e.hidden = false
+            e.sliderlock = false
+          }
         }
 
           // Adding intra-neighbors edges O(voisinage²)
@@ -805,8 +882,16 @@ function changeLevel(optionalTgtState) {
               for(var j=1;j<voisinage.length;j++) {
                   if( voisinage[i]!=voisinage[j] ) {
                       // console.log( "\t" + voisinage[i] + " vs " + voisinage[j] )
-                      add1Elem( voisinage[i]+";"+voisinage[j] )
-                      add1Elem( voisinage[j]+";"+voisinage[i] )
+                      let e1 = TW.partialGraph.graph.edges(voisinage[i]+";"+voisinage[j])
+                      let e2 = TW.partialGraph.graph.edges(voisinage[j]+";"+voisinage[i])
+                      if (e1 && e1.hidden) {
+                        e1.hidden = false
+                        e1.sliderlock = false
+                      }
+                      if (e2 && e2.hidden) {
+                        e2.hidden = false
+                        e2.sliderlock = false
+                      }
                   }
               }
           }
@@ -816,16 +901,35 @@ function changeLevel(optionalTgtState) {
 
           // var t0 = performance.now()
           for(var nid in TW.Nodes) {
+            // we unhide 1 by 1
+            let n = TW.partialGraph.graph.nodes(nid)
             if (activetypesDict[TW.Nodes[nid].type]) {
-              // we add 1 by 1 (POSS: use hidden instead)
-              add1Elem(nid)
+              // if a meso color was on => we grey the out-of-scope nodes as we unhide them
+              // (because they can have an old alt_color)
+              if (TW.gui.handpickedcolors[n.type].alton && (n.hidden || n.sliderlock)) {
+                n.customAttrs.alt_color = TW.gui.defaultNodeColor
+                n.customAttrs.altgrey_color = TW.gui.defaultGreyNodeColor
+              }
+              n.hidden = false
+              n.sliderlock = false
+            }
+            else {
+              n.hidden = true
+              n.sliderlock = true
             }
           }
           for(var eid in TW.Edges) {
             for (var k in activereltypes) {
               let activereltype = activereltypes[k]
-              if(TW.Edges[eid].categ == activereltype)
-                  add1Elem(eid)
+              let e = TW.partialGraph.graph.edges(eid)
+              if(TW.Edges[eid].categ == activereltype) {
+                e.hidden = false
+                e.sliderlock = false
+              }
+              else {
+                e.hidden = true
+                e.sliderlock = true
+              }
             }
           }
           // var t1 = performance.now()
@@ -850,36 +954,23 @@ function changeLevel(optionalTgtState) {
       updateDynamicFacets()
       changeGraphAppearanceByFacets( getActivetypesNames() )
 
-      // going back to global: recolor nodes that were out of scope
-      if(futurelevel) {
-        let todoCols = {}
-        for (var ty in activetypesDict) {
-          if (TW.gui.handpickedcolors[ty].alton) {
-            let attr = TW.gui.handpickedcolors[ty].altattr
-            if (!todoCols[attr]) todoCols[attr] = {'types':[], 'fun': null}
-            todoCols[attr].types.push(ty)
-            if (! todoCols[attr].fun) {
-              todoCols[attr].fun = getColorFunction(attr)
-            }
-          }
-        }
-        for (var attr in todoCols) {
-          let recolorMethod = todoCols[attr].fun
-          let forTypes = todoCols[attr].types
-          window[recolorMethod](attr, forTypes)
-        }
-      }
-
-      // recreate FA2 nodes array after you change the nodes
+      // recreates FA2 nodes array after changing the nodes
       reInitFa2({
-        useSoftMethod: false,
+        skipHidden: !futurelevel,          // <= in meso, nodes move freely
+        localZoneSettings: !futurelevel,   // <= and they have lighter settings
         callback: function() {
-          TW.gui.elHtml.classList.remove('waiting');
+          // runs FA2
+          if (! TW.conf.stablePositions) {
+            sigma_utils.smartForceAtlas()
+          }
 
-          // rearrange nodes in all cases (&& if fa2Enabled)
-          sigma_utils.smartForceAtlas()
+          // remove changeLevel waiting cursor
+          TW.gui.elHtml.classList.remove('waiting');
         }
       })
+
+
+      // console.log("changeLevel time:", performance.now() - clstart)
     },500 // cursor waiting
   )
 }
@@ -901,7 +992,7 @@ function edgeSizesLookup(eTypeStrs, criterion) {
 
     for (var etype_i in eTypeStrs) {
       let eTypeStr = eTypeStrs[etype_i]
-      if (e && e.categ && e.categ == eTypeStr) {
+      if (e && e.categ && e.categ == eTypeStr && !e.hidden) {
         if (!edgeweis[e.categ])               edgeweis[e.categ] = {}
         if (!edgeweis[e.categ][e[criterion]]) edgeweis[e.categ][e[criterion]] = []
 
@@ -971,7 +1062,7 @@ function makeSteps(chunkSize, remainder, groupedSteps) {
 function EdgeWeightFilter(sliderDivID , reltypestr ,  criteria) {
 
     if(TW.partialGraph.graph.nEdges()<2) {
-        console.log('not enough edges for subsets: skipping GUI slider init')
+        console.debug('not enough edges for subsets: skipping GUI slider init')
         showDisabledSlider(sliderDivID)
         return;
     }
@@ -984,15 +1075,17 @@ function EdgeWeightFilter(sliderDivID , reltypestr ,  criteria) {
     var steps = stepToIdsArr.length
 
     if(steps<2) {
-        console.log('no size steps for edges: skipping GUI slider init')
+        console.debug('no size steps for edges: skipping GUI slider init')
         showDisabledSlider(sliderDivID)
         return;
     }
 
+    var sliderId = `${sliderDivID}/${reltypestr}`
+    var firstTimeFlag = isUndef(TW.gui.lastFilters[sliderId])
 
     // cache initial value
     var initialValue=("0-"+(steps-1));
-    TW.gui.lastFilters[`${sliderDivID}/${reltypestr}`] = initialValue
+    TW.gui.lastFilters[sliderId] = initialValue
 
     var present = TW.states.slice(-1)[0];
 
@@ -1022,7 +1115,7 @@ function EdgeWeightFilter(sliderDivID , reltypestr ,  criteria) {
         break;
     }
 
-    // legacy technique (should use .hidden more and possibly edg indx by sizes)
+    // legacy technique (should possibly use edg indx by sizes)
     $(sliderDivID).freshslider({
         range: true,
         step: 1,
@@ -1048,7 +1141,7 @@ function EdgeWeightFilter(sliderDivID , reltypestr ,  criteria) {
             edgeSlideTimeout = setTimeout ( function () {
 
                 var filtervalue = low+"-"+high
-                var lastvalue = TW.gui.lastFilters[`${sliderDivID}/${reltypestr}`]
+                var lastvalue = TW.gui.lastFilters[sliderId]
 
                 if(filtervalue!=lastvalue) {
 
@@ -1100,77 +1193,69 @@ function EdgeWeightFilter(sliderDivID , reltypestr ,  criteria) {
                           if(addflag) {
                             // console.log("adding "+ids.join())
                             for(var i in eids) {
-                                let eid = eids[i]
+                              let eid = eids[i]
 
-                                // we need to distinguish between
-                                //    - absent edges
-                                //       => keep them absent because of local
-                                //    - edges with absent nodes
-                                //       => effect of a node slider => make them appear
-                                let e = TW.partialGraph.graph.edges(eid)
-                                if (e) {
-                                  let nidkeys = eid.split(';')
+                              // consequences of local level or change type:
+                              // stepToIdsArr is full of edges that don't really exist at this point
+                              // we need to distinguish between
+                              //    - absent edges (sliderlock true)
+                              //       => keep them absent because of local
+                              //    - edges with hidden nodes (sliderlock false)
+                              //       => effect of a node slider => make them appear
 
-                                  if (nidkeys.length != 2) {
-                                    console.error("invalid edge id:" + eid)
-                                  }
-                                  else {
-                                    let sid = nidkeys[0]
-                                    let tid = nidkeys[1]
+                              // NB we assume the sigma convention eid = "nid1;nid2"
+                              let e = TW.partialGraph.graph.edges(eid)
+                              if (!e.sliderlock) {
+                                let nidkeys = eid.split(';')
 
-                                    let src = TW.partialGraph.graph.nodes(sid)
-                                    let tgt = TW.partialGraph.graph.nodes(tid)
+                                if (nidkeys.length != 2) {
+                                  console.error("invalid edge id:" + eid)
+                                }
+                                else {
+                                  let sid = nidkeys[0]
+                                  let tid = nidkeys[1]
 
-                                    // if nothing is absent (nodes not
-                                    // removed by changetype or local view)
-                                    if (src && tgt) {
-                                      // unhide in case nodeslider hid them
-                                      src.hidden = false
-                                      tgt.hidden = false
-                                      e.hidden = false
-                                    }
+                                  let src = TW.partialGraph.graph.nodes(sid)
+                                  let tgt = TW.partialGraph.graph.nodes(tid)
+
+                                  // if nothing is locked (nodes not
+                                  // removed by changetype or local view)
+                                  if (   (src && !src.sliderlock)
+                                      && (tgt && !tgt.sliderlock)) {
+                                        src.hidden = false
+                                        tgt.hidden = false
+                                        e.hidden = false
                                   }
                                 }
                               }
                             }
+                          }
                       } else {
                           if(delflag) {
                               for(var i in eids) {
                                   let eid = eids[i]
-                                  if(!isUndef(TW.partialGraph.graph.edges(eid))) {
-                                      var t0 = performance.now()
-                                      if (TW.partialGraph.graph.edges(eid)) {
-                                        TW.partialGraph.graph.edges(eid).hidden = true
-                                        // TW.Edges[eid].lock = true;
-                                      }
-                                      var t1 = performance.now()
-
-                                      totalDeletingTime += (t1-t0)
-
-                                      // console.log("\thiding "+eid)
-
-                                      // n = ID.split(";")
-                                      // if(n.length>1)
-                                      //     console.log("\t\tsource:("+TW.Nodes[n[0]].x+","+TW.Nodes[n[0]].y+") ||| target:("+TW.Nodes[n[1]].x+","+TW.Nodes[n[1]].y+")")
+                                  let e = TW.partialGraph.graph.edges(eid)
+                                  if(!isUndef(e)) {
+                                      e.hidden = true
                                   }
                               }
                           }
                       }
                   }
 
-                  if(delflag) {
-                    console.info('totalDeletingTime', totalDeletingTime)
-                    // NB: performance with hiding: more or less 8x faster than with dropEdge on large graphs
+                  if (!firstTimeFlag && !TW.conf.stablePositions) {
+                    setTimeout(function() {
+                        reInitFa2({
+                          // recreates FA2 edges array after changing the edges
+                          skipHidden: true,
+                          // runs FA2 with args from reInitFa2
+                          callback: sigma_utils.smartForceAtlas
+                        })
+                    }, 10)
                   }
 
-                  // [ Starting FA2 ]
-                  setTimeout(function() {
-                    sigma_utils.smartForceAtlas({'duration': 2000}) // shorter FA2 sufficient
-                  }, 10)
-                // [ / Starting FA2 ]
-
                   // memoize as last value
-                  TW.gui.lastFilters[`${sliderDivID}/${reltypestr}`] = filtervalue
+                  TW.gui.lastFilters[sliderId] = filtervalue
                 }
 
                 // in any case
@@ -1274,32 +1359,35 @@ function NodeWeightFilter( sliderDivID , tgtNodeKey) {
                       if(i>=low && i<=high){
                           for(var id in ids) {
                               ID = ids[id]
-                              if (! TW.Nodes[ID]) {
-                                console.warn ('nodeslider asks for nonexistatn ID', ID)
-                                continue;
-                              }
-
-                              TW.Nodes[ID].lock = false;
-                              if(TW.partialGraph.graph.nodes(ID))
-                                  TW.partialGraph.graph.nodes(ID).hidden = false;
+                              let n = TW.partialGraph.graph.nodes(ID)
+                              if(n && !n.sliderlock)
+                                  n.hidden = false;
                           }
                       } else {
                           for(var id in ids) {
                               ID = ids[id]
-                              TW.Nodes[ID].lock = true;
-                              if(TW.partialGraph.graph.nodes(ID))
-                                  TW.partialGraph.graph.nodes(ID).hidden = true;
+                              let n = TW.partialGraph.graph.nodes(ID)
+                              if(n && !n.sliderlock)
+                                  n.hidden = true;
                           }
                       }
                   }
+                  console.log("TW.gui.lastFilters", TW.gui.lastFilters)
                   TW.gui.lastFilters[sliderDivID] = filtervalue
 
                   TW.partialGraph.render()
 
-                  // [ Starting FA2 ]
-                  setTimeout(function() {
-                    sigma_utils.smartForceAtlas({'duration': 2000}) // shorter FA2 sufficient
-                  }, 10)
+                  // [ Starting FA2 ]*
+                  if (! TW.conf.stablePositions) {
+                    setTimeout(function() {
+                        reInitFa2({
+                          // recreates FA2 nodes array after changing the nodes
+                          skipHidden: true,
+                          // runs FA2 with args from reInitFa2
+                          callback: sigma_utils.smartForceAtlas
+                        })
+                    }, 10)
+                  }
                   // [ / Starting FA2 ]
                 }
             }, 1000)
