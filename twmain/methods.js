@@ -99,7 +99,7 @@ TW.resetGraph = function() {
 
   // reset colors legends for all types
   if (TW.categories && TW.categories.length)
-    updateColorsLegend(TW.categories)
+    updateColorsLegend(null, TW.categories)
 
   // call the sigma graph clearing
   TW.instance.clearSigma()
