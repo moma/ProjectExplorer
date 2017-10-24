@@ -800,71 +800,57 @@ function add1Elem(id) {
 }
 
 
+// read the saveGraph form and pass to exporters
 function saveGraph() {
 
-    let size = getByID("check_size").checked
-    let color = getByID("check_color").checked
-    let atts = {"size":size,"color":color}
-
-    if(getByID("fullgraph").checked) {
-        saveGEXF ( TW.Nodes , TW.Edges , atts);
+    let options = {
+      'filterHidden': getByID("visgraph").checked,
+      'exportVizAttrs': getByID("check_viz_attrs").checked,
+      'exportDataAttrs': getByID("check_data_attrs").checked
     }
 
-    if(getByID("visgraph").checked) {
-        saveGEXF ( getVisibleNodes() , getVisibleEdges(), atts )
-    }
+    // POSSible: add other exporters with the same options
+    // cf. xlsx or json exporers in linkurious.js/tree/develop/plugins/
+    saveGEXF ( TW.partialGraph, options );
 
     $("#closesavemodal").click();
 }
 
 
-// £TODO: we should use https://github.com/Linkurious/linkurious.js/tree/develop/plugins/sigma.exporters.gexf
-function saveGEXF(nodes,edges,atts){
-    let gexf = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    gexf += '<gexf xmlns="http://www.gexf.net/1.1draft" xmlns:viz="http://www.gephi.org/gexf/viz" version="1.1">\n';
-    gexf += '<graph defaultedgetype="undirected" type="static">\n';
-    gexf += '<attributes class="node" type="static">\n';
-    gexf += ' <attribute id="0" title="category" type="string">  </attribute>\n';
-    gexf += ' <attribute id="1" title="country" type="float">    </attribute>\n';
-    //gexf += ' <attribute id="2" title="content" type="string">    </attribute>\n';
-    //gexf += ' <attribute id="3" title="keywords" type="string">   </attribute>\n';
-    //gexf += ' <attribute id="4" title="weight" type="float">   </attribute>\n';
-    gexf += '</attributes>\n';
-    gexf += '<attributes class="edge" type="float">\n';
-    gexf += ' <attribute id="6" title="type" type="string"> </attribute>\n';
-    gexf += '</attributes>\n';
-    gexf += "<nodes>\n";
+// save via the linkurious plugin from the authors of sigmajs
+//               -----------------
+// github.com/Linkurious/linkurious.js/tree/develop/plugins/sigma.exporters.gexf
+function saveGEXF(sigmaInst, opts) {
 
-    for(var n in nodes){
+  // prepare (make sure we always preserve the 'type' attribute)
+  // -------
+  for (var j in TW.Nodes) {
+    let n = TW.partialGraph.graph.nodes(TW.Nodes[j].id)
+    if (n) {
+      // the properties under n.attributes will be saved => copy type inside it
+      if (opts['exportDataAttrs']) {
+        n.attributes.type = n.type
+      }
+      // no properties would be saved => copy type in a tempo dict to pass as nodeAttributes
+      else {
+        n._tempo = {'type': n.type}
+      }
+    }
+  }
 
-        gexf += '<node id="'+nodes[n].id+'" label="'+nodes[n].label+'">\n';
-        gexf += ' <viz:position x="'+nodes[n].x+'"    y="'+nodes[n].y+'"  z="0" />\n';
-        if(atts["color"]) gexf += ' <viz:size value="'+nodes[n].size+'" />\n';
-        if(atts["color"]) {
-            if (nodes[n].color && nodes[n].color.charAt(0) == '#') {
-              col = hex2rgba(nodes[n].color);
-              gexf += ' <viz:color r="'+col[0]+'" g="'+col[1]+'" b="'+col[2]+'" a='+col[3]+'/>\n';
-            }
-        }
-        gexf += ' <attvalues>\n';
-        gexf += ' <attvalue for="0" value="'+nodes[n].type+'"/>\n';
-        gexf += ' <attvalue for="1" value="'+TW.Nodes[nodes[n].id].CC+'"/>\n';
-        gexf += ' </attvalues>\n';
-        gexf += '</node>\n';
-    }
-    gexf += "\n</nodes>\n";
-    gexf += "<edges>\n";
-    let cont = 1;
-    for(var e in edges){
-        gexf += '<edge id="'+cont+'" source="'+edges[e].source+'"  target="'+edges[e].target+'" weight="'+edges[e].weight+'">\n';
-        gexf += '<attvalues> <attvalue for="6" value="'+edges[e].label+'"/></attvalues>';
-        gexf += '</edge>\n';
-        cont++;
-    }
-    gexf += "\n</edges>\n</graph>\n</gexf>";
-    let uriContent = "data:application/octet-stream," + encodeURIComponent(gexf);
-    let newWindow=window.open(uriContent, 'neuesDokument');
+  // save
+  // ----
+  sigmaInst.toGEXF({
+    creator: 'Sigma.js + ISCPIF ProjectExplorer',
+    filename: opts['filename'] ? opts['filename'] : 'ProjectExplorerGraph.gexf',
+    download: true,
+    renderer: opts['exportVizAttrs'] ? sigmaInst.renderers[0] : null,
+    nodeAttributes: opts['exportDataAttrs'] ? 'attributes' : '_tempo',
+    edgeAttributes: null,
+    filterHidden: opts['filterHidden']
+  });
 }
+
 
 function saveGraphIMG(){
     TW.rend.snapshot({
