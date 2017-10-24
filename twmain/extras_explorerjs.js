@@ -57,17 +57,19 @@ function updateDynamicFacets(optionalFilter) {
     //  - new popu counts for ticks and new labels (to update in menus+legend)
     //  - but preserve last color (for stability with previous view)
     for (var nodecat in autoFacets) {
-      for (var facet in autoFacets[nodecat]) {
 
-        if (!TW.Facets[nodecat][facet]
+      if (!TW.Facets[nodecat])  TW.Facets[nodecat] = {}
+
+      for (var facet in autoFacets[nodecat]) {
+        // first time: simple copy
+        if (   !TW.Facets[nodecat][facet]
             || !TW.Facets[nodecat][facet].invIdx
-            || !TW.Facets[nodecat][facet].invIdx.length) {
-          // first time: simple copy
+            || !TW.Facets[nodecat][facet].invIdx.length ) {
           TW.Facets[nodecat][facet] = autoFacets[nodecat][facet]
         }
+        // otherwise recycle old legend entries
+        // (inheriting last colors feels coherent between views meso<=>macro)
         else {
-          // otherwise recycle old legend entries
-          // (inheriting last colors feels coherent between views meso<=>macro)
           let last_colors = []
           for (var i_prev in TW.Facets[nodecat][facet].invIdx) {
             last_colors.push(TW.Facets[nodecat][facet].invIdx[i_prev].col)

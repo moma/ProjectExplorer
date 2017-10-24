@@ -1304,6 +1304,27 @@ var TinaWebJS = function ( sigmacanvas ) {
       else {
         $("#stats-panel").hide()
       }
+
+
+      // add attributes' names list to saveGEXF modal examples
+      // ex: "kw: nbjobs,total_occurrences / sch: nbjobs,total_occurrences"
+      let exs = document.getElementById("data_attrs_exemples")
+      if (exs) {
+        let spanContents = []
+        for (var ntype in TW.Facets) {
+          let attrs = Object.keys(TW.Facets[ntype])
+          // remove dynamic attributes
+          attrs = attrs.filter( function(at) { return (! TW.sigmaAttributes[at]) } )
+          if (attrs && attrs.length) {
+            spanContents.push(ntype+': '+attrs.join(","))
+          }
+        }
+        if (spanContents.length) {
+          exs.innerHTML = '('+spanContents.join(" / ")+')'
+        }
+      }
+
+      // cancelSelection(false);
     }
 
 

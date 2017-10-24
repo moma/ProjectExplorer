@@ -651,24 +651,25 @@
           </div>
 
           <div class="modal-body form-horizontal">
-            Which attributes do you want to keep?:
+            <p>Which attributes do you want to keep ?</p>
             <div class="form-group">
               <label class="col-lg-2 control-label"> </label>
               <div class="col-lg-10">
                 <div class="checkbox">
                   <label>
-                    <input type="checkbox" name="optionsRadios" id="check_size" value="option1">
-                    Size
+                    <input type="checkbox" id="check_viz_attrs" checked>
+                    Size, Position and Color
                   </label>
                 </div>
                 <div class="checkbox">
                   <label>
-                    <input type="checkbox" name="optionsRadios" id="check_color" value="option2">
-                    Color
+                    <input type="checkbox" id="check_data_attrs" checked>
+                    Data attributes <span id="data_attrs_exemples" class="micromessage"></span>
                   </label>
                 </div>
               </div>
             </div>
+            <p class=micromessage>NB: the 'type' of nodes is always saved</p>
           </div>
 
           <div class="modal-footer">
@@ -891,6 +892,7 @@
   <script src="twlibs3/sigma_v1.2/plugins/sigma.layout.forceAtlas2/worker.js"></script>
   <script src="twlibs3/sigma_v1.2/plugins/sigma.renderers.snapshot/sigma.renderers.snapshot.js"></script>
   <script src="twlibs3/sigma_v1.2/plugins/sigma.plugins.dragNodes/sigma.plugins.dragNodes.js"></script>
+  <script src="twlibs3/sigma_v1.2/plugins/sigma.exporters.gexf/sigma.exporters.gexf.js"></script>
 
 
 
