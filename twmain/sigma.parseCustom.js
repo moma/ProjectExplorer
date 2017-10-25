@@ -1237,7 +1237,7 @@ function dictfyJSON( data , categories ) {
       allSizes[ntype].sort();
       let N = allSizes[ntype].length
       TW.stats.nodeSize[ntype].len = N
-      TW.stats.nodeSize[ntype].median = allSizes[ntype][Math.round(N/2)]
+      TW.stats.nodeSize[ntype].median = allSizes[ntype][Math.floor(N/2)]
       TW.stats.nodeSize[ntype].mean = sumSizes[ntype]/N
     }
     // ------------- /debug: for local stats ----------------
@@ -1269,7 +1269,6 @@ function dictfyJSON( data , categories ) {
         }
       }
     }
-
 
 
     // for stats on edges, by type
@@ -1336,7 +1335,7 @@ function dictfyJSON( data , categories ) {
       allWeights[categ].sort()
       let M = allWeights[categ].length
       TW.stats.edgeWeight[categ].len = M
-      TW.stats.edgeWeight[categ].median = allWeights[categ][Math.round(M/2)]
+      TW.stats.edgeWeight[categ].median = allWeights[categ][Math.floor(M/2)]
       TW.stats.edgeWeight[categ].mean = sumWeights[categ]/M
     }
     // --- /stats  ---
