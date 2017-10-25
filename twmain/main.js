@@ -53,8 +53,8 @@ TW.instance.initSearchListeners();
 
 TW.currentRelDocsDBs = []  // to make available dbconf to topPapers
 
-// show the custom name + home link of the app
-writeBrand(TW.conf.branding, TW.conf.brandingLink)
+// show the custom name + home link of the app + custom video
+writeBrand(TW.conf.branding)
 
 // choosing the input
 // -------------------

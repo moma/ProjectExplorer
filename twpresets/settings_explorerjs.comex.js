@@ -6,9 +6,11 @@ TW.conf = (function(TW){
 
   let TWConf = {}
 
-  TWConf.branding = 'Community Explorer 2'  // <--- name displayed in upper left
-  TWConf.brandingLink = 'https://communityexplorer.org'   // <--- link to "home"
-
+  TWConf.branding = {
+    'name': 'Community Explorer 2',  // <--- name displayed in upper left
+    'link': 'https://communityexplorer.org',            // home  link
+    'video': 'https://player.vimeo.com/video/38383946'  // video link
+  }
 
   // ==========================
   // TINA POSSIBLE DATA SOURCES
@@ -155,7 +157,6 @@ TW.conf = (function(TW){
     'sourceFile': null,              // server: 1 default gexf|json graph source
     'sourceMenu': "static/tinawebJS/server_menu.json" // ...or server: a gexf|json sources list
   }
-  Object.freeze(TWConf.paths)  // /!\ to prevent path modification before load
 
   // Active modules
   // --------------
@@ -313,6 +314,8 @@ TW.conf = (function(TW){
     logSelections: false
   }
 
+  Object.freeze(TWConf.paths)  // /!\ to prevent path modification before load
+  Object.freeze(TWConf.branding)  // idem
 
   return TWConf
 })()

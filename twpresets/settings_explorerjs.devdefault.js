@@ -6,9 +6,11 @@ TW.conf = (function(TW){
 
   let TWConf = {}
 
-  TWConf.branding = 'ProjectExplorer'  // <--- name displayed in upper left
-  TWConf.brandingLink = 'http://iscpif.fr'   // <--- link to "home"
-
+  TWConf.branding = {
+    'name': 'ProjectExplorer',   // <--- name displayed in upper left
+    'link': 'http://iscpif.fr',                         // home  link
+    'video': 'https://player.vimeo.com/video/38383946'  // video link
+  }
 
   // ==========================
   // TINA POSSIBLE DATA SOURCES
@@ -131,7 +133,6 @@ TW.conf = (function(TW){
     'sourceFile': null,              // server: 1 default gexf|json graph source
     'sourceMenu': "server_menu.json" // ...or server: a gexf|json sources list
   }
-  Object.freeze(TWConf.paths)  // /!\ to prevent path modification before load
 
   // Active modules
   // --------------
@@ -299,6 +300,8 @@ TW.conf = (function(TW){
     logSelections: false
   }
 
+  Object.freeze(TWConf.paths)  // /!\ to prevent path modification before load
+  Object.freeze(TWConf.branding)  // idem
 
   return TWConf
 })()

@@ -218,7 +218,11 @@ function getHeatmapColors(nClasses) {
 }
 
 
-function writeBrand (brandString, brandLink) {
+function writeBrand (brandingParams = {}) {
+  let brandString = brandingParams.name || ''
+  let brandLink   = brandingParams.link || ''
+  let brandVideo  = brandingParams.video || ''
+
   let elTitle = document.getElementById('twbrand')
   if (elTitle) {
     elTitle.innerHTML = brandString
@@ -229,6 +233,17 @@ function writeBrand (brandString, brandLink) {
     if (anchors[k] && anchors[k].href) {
       anchors[k].href = brandLink
     }
+  }
+
+  if (brandVideo) {
+    let elVideo = document.getElementById("twbrand-video")
+    if (elVideo) {
+      elVideo.src = brandVideo
+    }
+  }
+  else {
+    let vidPanel = document.getElementById("video_explanation")
+    if (vidPanel) { vidPanel.remove() }
   }
 }
 
