@@ -600,9 +600,12 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
     namesDIV+= getNodeLabels( sels ).join(' <b>/</b> ')//aqui limitar
     namesDIV += '</h4></div>';
 
+    // they should be selectable iff bipartite rels active (<=> mixed view)
+    let opposIsSelectable = TW.SystemState().activereltypes.indexOf("XR") != -1
+
     if(oppos.length>0) {
       alterNodesDIV+='<div id="oppositesBox">';//tagcloud
-      alterNodesDIV+= htmlProportionalLabels( oppos , TW.conf.tagcloudOpposLimit, false).join("\n")
+      alterNodesDIV+= htmlProportionalLabels( oppos ,TW.conf.tagcloudOpposLimit, opposIsSelectable).join("\n")
       alterNodesDIV+= '</div>';
     }
 

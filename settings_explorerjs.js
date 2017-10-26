@@ -277,7 +277,7 @@ TW.conf = (function(TW){
   TWConf.tagcloudFontsizeMax = 1.5 ;
 
   TWConf.tagcloudSameLimit = 50     // max displayed neighbors of the same type
-  TWConf.tagcloudOpposLimit = 10    // max displayed neighbors of the opposite type
+  TWConf.tagcloudOpposLimit = 50    // max displayed neighbors of the opposite type
 
   // relative sizes (iff ChangeType == both nodetypes)
   TWConf.sizeMult = [];
