@@ -600,9 +600,12 @@ function updateRelatedNodesPanel( sels , same, oppos ) {
     namesDIV+= getNodeLabels( sels ).join(' <b>/</b> ')//aqui limitar
     namesDIV += '</h4></div>';
 
+    // they should be selectable iff bipartite rels active (<=> mixed view)
+    let opposIsSelectable = TW.SystemState().activereltypes.indexOf("XR") != -1
+
     if(oppos.length>0) {
       alterNodesDIV+='<div id="oppositesBox">';//tagcloud
-      alterNodesDIV+= htmlProportionalLabels( oppos , TW.conf.tagcloudOpposLimit, false).join("\n")
+      alterNodesDIV+= htmlProportionalLabels( oppos ,TW.conf.tagcloudOpposLimit, opposIsSelectable).join("\n")
       alterNodesDIV+= '</div>';
     }
 
@@ -740,7 +743,7 @@ function prepareEdgesRenderingProperties(edgesDict, nodesDict) {
 
 
 // use case: slider, changeLevel re-add nodes
-function add1Elem(id) {
+function add1Elem(id, optionalAttrsToAssign) {
     id = ""+id;
 
     if(id.split(";").length==1) { // i've received a NODE
@@ -749,22 +752,14 @@ function add1Elem(id) {
         if(!isUndef(TW.partialGraph.graph.nodes(id))) return;
 
         if(TW.Nodes[id]) {
-            var n = TW.Nodes[id]
+            let n = {}
 
-            // WE AVOIDED A COPY HERE BECAUSE properties are already complete
-            // ... however, TODO check if we shouldn't remove the n.attributes Obj
-
-            // var anode = {}
-            // anode.id = n.id;
-            // anode.label = n.label;
-            // anode.size = n.size;
-            // anode.x = n.x;
-            // anode.y = n.y;
-            // anode.hidden= n.lock ;
-            // anode.type = n.type;
-            // anode.color = n.color;
-            // if( n.shape ) n.shape = n.shape;
-            // anode.customAttrs = n.customAttrs
+            if (typeof optionalAttrsToAssign == "object" && optionalAttrsToAssign) {
+              n = Object.assign({}, TW.Nodes[id], optionalAttrsToAssign)
+            }
+            else {
+              n = TW.Nodes[id]
+            }
 
             // if(Number(anode.id)==287) console.log("coordinates of node 287: ( "+anode.x+" , "+anode.y+" ) ")
 
@@ -777,8 +772,7 @@ function add1Elem(id) {
         }
     } else { // It's an edge!
         if(!isUndef(TW.partialGraph.graph.edges(id))) return;
-        var e  = TW.Edges[id]
-        if(e && !e.lock){
+        if(TW.Edges[id]){
             // var anedge = {
             //     id:         id,
             //     source: e.source,
@@ -791,6 +785,15 @@ function add1Elem(id) {
             //     weight: e.weight,
             //     customAttrs : e.customAttrs
             // };
+
+            let e = {}
+
+            if (typeof optionalAttrsToAssign == "object" && optionalAttrsToAssign) {
+              e = Object.assign({}, TW.Edges[id], optionalAttrsToAssign)
+            }
+            else {
+              e = TW.Edges[id]
+            }
 
             // TW.partialGraph.graph.addEdge(anedge);
             TW.partialGraph.graph.addEdge(e);
@@ -882,9 +885,9 @@ function reInitFa2 (params = {}) {
     // ----------------
     if (params.typeAdapt) {
       let semTypeOn = Boolean(TW.SystemState().activetypes[0])
-      theseFA2Params.gravity = semTypeOn ? TW.FA2Params.gravity * 3.5 : TW.FA2Params.gravity
+      theseFA2Params.gravity = semTypeOn ? TW.FA2Params.gravity * 3 : TW.FA2Params.gravity
       theseFA2Params.iterationsPerRender = semTypeOn ? 4 : 32
-      theseFA2Params.slowDown = semTypeOn ? .2 : .8
+      theseFA2Params.slowDown = semTypeOn ? .4 : .8
     }
 
     // meso: skipHidden, no gravity, no barnesHut, slightly larger scalingRatio.

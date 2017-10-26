@@ -55,6 +55,28 @@ TW.gui.noverlapConf = {
                    // NB animation happens *after* processing
 }
 
+TW.FA2Params = {
+  // adapting speed -------------
+  slowDown: 1.5,
+  startingIterations: 2,             // keep it an even number to reduce visible oscillations at rendering
+  iterationsPerRender: 4,            // idem
+  barnesHutOptimize: false,
+  // barnesHutTheta: .5,
+
+  // global behavior -----------
+  linLogMode: true,
+  edgeWeightInfluence: .3,
+  gravity: .8,
+  strongGravityMode: false,
+  scalingRatio: 1,
+
+  adjustSizes: false,     // ~ messy but sort of in favor of overlap prevention
+
+  // favors global centrality
+  // (but rather not needed when data already shows topic-centered
+  //  node groups and/nor when preferential attachment type of data)
+  outboundAttractionDistribution: false
+}
 
 TW.FA2Params = {
   // adapting speed -------------
@@ -179,7 +201,11 @@ function getHeatmapColors(nClasses) {
 }
 
 
-function writeBrand (brandString, brandLink) {
+function writeBrand (brandingParams = {}) {
+  let brandString = brandingParams.name || ''
+  let brandLink   = brandingParams.link || ''
+  let brandVideo  = brandingParams.video || ''
+
   let elTitle = document.getElementById('twbrand')
   if (elTitle) {
     elTitle.innerHTML = brandString
@@ -190,6 +216,17 @@ function writeBrand (brandString, brandLink) {
     if (anchors[k] && anchors[k].href) {
       anchors[k].href = brandLink
     }
+  }
+
+  if (brandVideo) {
+    let elVideo = document.getElementById("twbrand-video")
+    if (elVideo) {
+      elVideo.src = brandVideo
+    }
+  }
+  else {
+    let vidPanel = document.getElementById("video_explanation")
+    if (vidPanel) { vidPanel.remove() }
   }
 }
 
@@ -448,6 +485,7 @@ function changeType(optionaltypeFlag) {
         }
       }
     }
+
     let targetNids = {}
     if (!mixedState) {
       targetNids = getNeighbors(sourceNids, 'XR')
@@ -747,8 +785,8 @@ function changeLevel(optionalTgtState) {
       else {
         var present = TW.SystemState(); // Last
         sels = present.selectionNids
-        deselectNodes()
       }
+      deselectNodes()
 
       let selsChecker = {}
       for (let i in sels) {

@@ -53,8 +53,8 @@ TW.instance.initSearchListeners();
 
 TW.currentRelDocsDBs = []  // to make available dbconf to topPapers
 
-// show the custom name + home link of the app
-writeBrand(TW.conf.branding, TW.conf.brandingLink)
+// show the custom name + home link of the app + custom video
+writeBrand(TW.conf.branding)
 
 // choosing the input
 // -------------------
@@ -570,7 +570,6 @@ function mainStartGraph(inFormat, inData, twInstance) {
       }
 
       if (TW.conf.debug.logSettings) console.info("FA2 settings", TW.FA2Params)
-
       // track which type has already been spatialised once
       TW.didFA2OnTypes = TW.categories.map(function(){return false})
 
@@ -594,7 +593,6 @@ function mainStartGraph(inFormat, inData, twInstance) {
           }
         })
       }
-
 
       // REFA new sigma.js
       TW.partialGraph.camera.goTo({x:0, y:0, ratio:1.2, angle: 0})

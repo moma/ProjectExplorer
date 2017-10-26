@@ -208,6 +208,45 @@ function ArraySortByValue(array, sortFunc){
     return tmp;
 }
 
+// Sorts by 2 keys and creates an agregated weight
+//  key1: how many times the node appears as neighbor
+//  key2: cumulated weight of all edges
+//  output value:   coef x key1 + key2
+//  with coef > Max(key2) to preserve the order
+//
+//  ex input {"kw1":[2,10], "kw2":[2,3], "kw3":[5,4]}
+//     - the expected output order is kw3, kw1, kw2
+//     - max key2 is 10
+//       => we set coef to 10+1 to allow key1 to always dominate key2 influence
+//     - the result sorted array with agregated values for proportional labels
+//       will be: [
+//                  [key: kw3, value: 59],   <--- 5*coef +  4
+//                  [key: kw1, value: 32],   <--- 2*coef + 10
+//                  [key: kw2, value: 25]    <--- 2*coef +  3
+//                ]
+// NB the output agregated values 59, 32, 25 are used for htmlProportionalLabels
+function ArraySortByAgValueIndepOccsPlusWeight(array, sortFunc){
+    let maxWeiSum = 0
+    for (var nid in array) {
+      var [indepOccs, weiSum] = array[nid]
+      weiSum = parseFloat(weiSum)
+      if (weiSum > maxWeiSum) {
+        maxWeiSum = weiSum
+      }
+    }
+
+    let coef = Math.ceil(maxWeiSum) + 1
+
+    let arrayWithAgregatedVals = {}
+    for (var nid in array) {
+      var [indepOccs, weiSum] = array[nid]
+      indepOccs = parseFloat(indepOccs)
+      weiSum    = parseFloat(weiSum)
+      arrayWithAgregatedVals[nid] = coef * indepOccs + weiSum
+    }
+    return ArraySortByValue(arrayWithAgregatedVals, sortFunc)
+}
+
 
 function getByID(elem) {
     return document.getElementById(elem);

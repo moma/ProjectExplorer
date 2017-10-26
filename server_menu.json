@@ -11,7 +11,8 @@
     "graph_example2.gexf"
   ],
   "data/test": [
-    "mini.gexf"
+    "mini.gexf",
+    "miserables.gexf"
   ],
   "data/politoscope": [
     "ProgrammeDesCandidats.gexf"

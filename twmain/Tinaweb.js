@@ -320,7 +320,6 @@ function SelectionEngine() {
                 activeRelations["XR"][srcnid] = {}
 
                 for(var k in bipaNeighs) {
-
                   let eid1 = srcnid+';'+bipaNeighs[k]
                   let eid2 = bipaNeighs[k]+';'+srcnid
 
@@ -332,16 +331,18 @@ function SelectionEngine() {
                     activeRelations["XR"][srcnid][bipaNeighs[k]] = 0;
                   }
                   if (typeof oppoSideNeighbors[bipaNeighs[k]] == "undefined") {
-                    oppoSideNeighbors[bipaNeighs[k]] = 0 ;
+                    oppoSideNeighbors[bipaNeighs[k]] = [0,0] ;
                   }
 
-                  // cumulated weight for all srcnids
-                  oppoSideNeighbors[bipaNeighs[k]] += edgeWeight
-
-                  // console.log('edgeWeight', edgeWeight)
+                  // how many times the target appears as neighbor of these srcs
+                  // + cumulated weight for all targets for all srcnids
+                  oppoSideNeighbors[bipaNeighs[k]][0] += 1
+                  oppoSideNeighbors[bipaNeighs[k]][1] += edgeWeight
+                  // (ex: sum for each keyword of each scholar's link to it)
 
                   // and the details
                   activeRelations["XR"][srcnid][bipaNeighs[k]] += edgeWeight
+
                 }
             }
         }
@@ -352,7 +353,7 @@ function SelectionEngine() {
         let same = []
 
         if (activeRelations["XR"]) {
-          oppos = ArraySortByValue(oppoSideNeighbors, function(a,b){
+          oppos = ArraySortByAgValueIndepOccsPlusWeight(oppoSideNeighbors, function(a,b){
             return b-a
           });
         }
@@ -812,6 +813,12 @@ var TinaWebJS = function ( sigmacanvas ) {
                   })
                   var stillRunning = document.getElementById('noverlapwait')
                   if (stillRunning) {
+                    reInitFa2({
+                      localZoneSettings: !TW.SystemState().level,
+                      skipHidden: !TW.conf.stablePositions,
+                      callback: function() {console.debug("noverlap: updated fa2 positions")}
+                    })
+
                     TW.gui.elHtml.classList.remove('waiting');
                     noverButton.style.cursor = 'auto'
                     stillRunning.remove()
@@ -1322,6 +1329,15 @@ var TinaWebJS = function ( sigmacanvas ) {
         if (spanContents.length) {
           exs.innerHTML = '('+spanContents.join(" / ")+')'
         }
+      }
+
+      // show dev stats on json input for this graph if available
+      if (TW.stats && Object.keys(TW.stats).length) {
+        $("#stats-panel").show()
+        $("#stats").html(showStats());
+      }
+      else {
+        $("#stats-panel").hide()
       }
 
       // cancelSelection(false);
