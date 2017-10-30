@@ -206,7 +206,7 @@ function syncRemoteGraphData () {
               }
               // special param 'query' with special value '*' used to "matchall"
               else {
-                  thedata = "qtype=filters&query=*"
+                  thedata = "qtype=filters&query=*" + restParams.join("&")
                   mapLabel = "(ENTIRE NETWORK)"
               }
           }
