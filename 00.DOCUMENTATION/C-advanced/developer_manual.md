@@ -85,6 +85,72 @@ At any given time, we keep the current state accesible via `TW.SystemState()`
     - the current node types displayed in state`.activetypes`
     - the current display level (aka macro/micro) in state`.level`
 
+## Inspecting TW variables
+Although the project's file structure is still messy, all the important package variables are now better organized under a common prefix `TW` and can be inspected from the console.
+
+#### Basic lookup
+  - Current configuration: `TW.conf` (loaded from `settings_explorerjs.js`)
+  - Current input mode: `TW.sourcemode`
+  - Current input identification:
+     - if sourcemode is API: `TW.APIQuery`
+     - if sourcemode is files (servermenu, serverfile or localfile): `TW.File` and `TW.Project`
+  - Past states: `TW.states` array
+  - `TW.gui` contains current gui flags and constants (loaded from `enviroment.js`)
+
+#### Input data
+  - source nodes are in `TW.Nodes` (by id) and `TW.ByType` (by nodetype)
+  - source edges are in `TW.Edges` (by id)
+  - edges are also represented in `TW.Relations` as a 3 level structure:
+    edgetype => source => target
+
+#### Input data overview
+All input data stats is stored in the `TW.stats` property.
+```
+// exemple
+"{
+  "dataLoadTime": 1616.41,
+  "nodeSize": {
+    "kw": {
+      "min": 1.099,
+      "median": 1.099,
+      "mean": 1.5028,
+      "max": 4.673,
+      "len": 737
+    },
+    "sch": {
+      "min": 2,
+      "median": 2,
+      "mean": 2,
+      "max": 2,
+      "len": 148
+    }
+  },
+  "edgeWeight": {
+    "00": {
+      "min": 0.0092,
+      "median": 0.3333,
+      "mean": 0.4699,
+      "max": 1,
+      "len": 5571
+    },
+    "11": {
+      "min": 0.0233,
+      "median": 0.0769,
+      "mean": 0.0867,
+      "max": 0.5,
+      "len": 5827
+    },
+    "XR": {
+      "min": 0.6568,
+      "median": 2.4238,
+      "mean": 2.5787,
+      "max": 13.1320,
+      "len": 1189
+    }
+  }
+}"
+```
+
 ## Variae
 
 #### Facets: node attributes as colors/clusters
@@ -124,10 +190,10 @@ These indexes are stored in the exposed `TW.Facets` variable by parseCustom time
     - (ie numeric cast doesn't give NaN or it do so very rarely over the values)
 
 NB: the use cases for stats go beyond numeric vs string ! we could easily autodiagnose in facetsBinning between :
-    - vnum with many distinct values => assumed continuous metric (useful for gradient or titling)
-    - vnum with few  distinct values => assumed classes var
-    - vstr with few  distinct values => assumed classes var
-    - vstr with many distinct values => assumed classes with zipf freq => create an "others" for the tail
+  - vnum with many distinct values => assumed continuous metric (useful for gradient or titling)
+  - vnum with few  distinct values => assumed classes var
+  - vstr with few  distinct values => assumed classes var
+  - vstr with many distinct values => assumed classes with zipf freq => create an "others" for the tail
 
 
 #### Custom indices
