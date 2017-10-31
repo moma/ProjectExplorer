@@ -201,14 +201,14 @@ function syncRemoteGraphData () {
               }
 
               if (filterLen) {
-                  thedata = "qtype=filters&" + restParams.join("&")
                   mapLabel = nameElts.join(" and ")
               }
               // special param 'query' with special value '*' used to "matchall"
               else {
-                  thedata = "qtype=filters&query=*" + restParams.join("&")
+                  restParams.push("query=*")
                   mapLabel = "(ENTIRE NETWORK)"
               }
+              thedata = "qtype=filters&" + restParams.join("&")
           }
 
           var bridgeRes = AjaxSync({ url: theurl, data:thedata, type:'GET' })
