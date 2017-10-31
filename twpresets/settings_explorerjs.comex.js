@@ -143,9 +143,10 @@ TW.conf = (function(TW){
   TWConf.maxDiscreteValues = 15
   TWConf.legendsBins = 7
 
-  // to normalize node sizes (larger range does increase visual size difference)
-  TWConf.desirableNodeSizeMin=100;
-  TWConf.desirableNodeSizeMax=105;
+  // to normalize node sizes (larger range max-min increases visual size difference)
+  //                         (larger min           increases overall visual size)
+  TWConf.desirableNodeSizeMin=3000;
+  TWConf.desirableNodeSizeMax=3010;
 
 
   // =============
