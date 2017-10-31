@@ -214,7 +214,7 @@ function scanGexf(gexfContent) {
 //    "node0": "Keywords",
 //    "node1": "Scholars"
 //     etc.
-// (it's read from project_conf.json)
+// (it's read from project_conf.json or from URL args _node0, _node1...)
 function sortNodeTypes(observedTypesDict, optionalNodeConf) {
   var observedTypes = Object.keys(observedTypesDict)
   observedTypes.sort(function(a,b) {return observedTypesDict[b] - observedTypesDict[a]})

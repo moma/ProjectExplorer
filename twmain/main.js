@@ -362,7 +362,14 @@ function mainStartGraph(inFormat, inData, twInstance) {
       let optProjectFacets = null
 
       if (TW.sourcemode == "api") {
+        // defaults nodetypes for this API from conf
         optNodeTypes = TW.conf.sourceAPI.nodetypes
+
+        // possible nodetypes declarations from URL params
+        if (TW.APIQuery && typeof TW.APIQuery == 'object') {
+          if (TW.APIQuery._node0)   optNodeTypes['node0'] = TW.APIQuery._node0
+          if (TW.APIQuery._node1)   optNodeTypes['node1'] = TW.APIQuery._node1
+        }
       }
       else {
         // we assume the filePath is of the form projectPath/sourceFile
