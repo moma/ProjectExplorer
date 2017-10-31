@@ -1342,6 +1342,8 @@ function newAttrConfAndColor() {
   let attrTitle = document.getElementById('choose-attr').value
 
   let legendChanged = (
+    (! TW.facetOptions[attrTitle])
+       ||
     (! "legend" in TW.facetOptions[attrTitle] && document.getElementById('attr-translation').value)
        ||
     (TW.facetOptions[attrTitle].legend != document.getElementById('attr-translation').value)
