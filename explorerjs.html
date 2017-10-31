@@ -219,9 +219,9 @@
              </a></li>
 
              <li>
-                 <a href="#dev-testing" id="facets" class="button"
-                    title="Open dev mode settings"
-                    data-toggle="modal" data-target="#dev-testing">
+                 <a href="#tune-settings-panel" id="tune-button" class="button"
+                    title="Tune settings"
+                    data-toggle="modal" data-target="#tune-settings-panel">
                    <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
                  </a>
              </li>
@@ -511,28 +511,6 @@
     -->
     <div class="panel-group" id="varinfos-accordion">
 
-      <!-- <div class="panel panel-default" id="dev-testing">
-        <div class="panel-heading">
-          <h4 class="panel-title">
-            <a data-toggle="collapse" data-target="#test-settings" href="#test-settings"
-               data-parent="#varinfos-accordion">
-              <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
-              &nbsp;Test settings
-            </a>
-          </h4>
-        </div>
-
-        <div class="panel-collapse collapse" id="test-settings">
-          <p>
-            <input id="stable-switch"
-                  title="Toggle 'stable positions' setting"
-                  class="nav btn btn-info"
-                  type="checkbox">
-            <span style="position: relative; top: 4px;">Stable positions</span>
-          </p>
-        </div>
-      </div> -->
-
       <div class="panel panel-default" id="video_explanation">
         <div class="panel-heading">
           <h4 class="panel-title">
@@ -679,20 +657,12 @@
     </div>
 
 
-    <!-- <div id="modalloader" class="modal fade">
-        <div id="loader" class="loader">
-            <img src="twlibs/img/loader.gif"></img>
-        </div>
-        <div id="closeloader" data-dismiss="modal"></div>
-    </div> -->
-
-
-    <div id="dev-testing" class="modal fade">
+    <div id="tune-settings-panel" class="modal fade">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h4 class="modal-title">Test settings</h4>
+            <h4 class="modal-title">Tune settings</h4>
           </div>
           <div class="modal-body">
             <div class="uform-white">
@@ -719,9 +689,6 @@
                        </select>
                      </div>
                    </div>
-
-                 <!-- <h3 class="formcat">Fonction de match</h3><br/> -->
-
               </form>
 
             </div>

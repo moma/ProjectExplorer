@@ -760,6 +760,13 @@ var TinaWebJS = function ( sigmacanvas ) {
         // we start with no selection
         $("#selection-tabs-contnr").hide();
 
+
+        if (TW.conf.tuningPanel) {
+          $("#tune-button").show();
+        } else {
+          $("#tune-button").hide();
+        }
+
         // #saveAs => toggle #savemodal initialized in html + bootstrap-native
 
         // button CENTER

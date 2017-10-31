@@ -440,11 +440,12 @@ ul.infoitems {
 }
 
 
-/* dev-testing panel */
-#dev-testing {
+/* more-settings panel */
+
+#tune-settings-panel {
+  padding: 10px;
 }
 
-#test-settings {
-  padding: 20px;
-  border-radius: 2em;
+#tune-settings-panel h3.formcat {
+  color: "#0f4766";
 }
