@@ -55,28 +55,6 @@ TW.gui.noverlapConf = {
                    // NB animation happens *after* processing
 }
 
-TW.FA2Params = {
-  // adapting speed -------------
-  slowDown: 1.5,
-  startingIterations: 2,             // keep it an even number to reduce visible oscillations at rendering
-  iterationsPerRender: 4,            // idem
-  barnesHutOptimize: false,
-  // barnesHutTheta: .5,
-
-  // global behavior -----------
-  linLogMode: true,
-  edgeWeightInfluence: .3,
-  gravity: .8,
-  strongGravityMode: false,
-  scalingRatio: 1,
-
-  adjustSizes: false,     // ~ messy but sort of in favor of overlap prevention
-
-  // favors global centrality
-  // (but rather not needed when data already shows topic-centered
-  //  node groups and/nor when preferential attachment type of data)
-  outboundAttractionDistribution: false
-}
 
 TW.FA2Params = {
   // adapting speed -------------
@@ -694,7 +672,7 @@ function changeType(optionaltypeFlag) {
 
           // alt color and legend kept unchanged => out of scope nodes remain grey
 
-          // without re-coloring step, we would only need to recreate legend box
+          // no re-coloring step, we only need to recreate legend box
           updateColorsLegend(TW.gui.handpickedcolors[ty].altattr, [ty])
         }
       }
@@ -782,7 +760,6 @@ function getNeighbors(sourceNids, relKey) {
 //  optional args:
 //    @optionalTgtState: in rare cases we already have it (like CTRL+Z)
 //                       (=> avoid redoing property computations and state push)
-//    POSS: rewrite using .hidden instead of add/remove
 function changeLevel(optionalTgtState) {
 
     // var clstart = performance.now()
