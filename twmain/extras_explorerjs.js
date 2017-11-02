@@ -1282,6 +1282,10 @@ function showAttrConf(event, optionalAttrname) {
 
 function newSettingsAndRun() {
 
+  // color palette
+  let color_palette = document.getElementById('color-palette').value
+  TW.gui.colorList = TW.gui.Palettes[color_palette] || TW.gui.Palettes[color_palette]
+
   // matching: traditional vs multi
   let match_alg = document.getElementById('match-alg').value
   if (match_alg == "tradi") {
