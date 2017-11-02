@@ -218,6 +218,17 @@ TW.conf = (function(TW){
 
   TWConf.independantTypes = true   // if stablePositions, types are not moving together
 
+  TWConf.colorTheme = "24DivergingZeileis"   // color palette for clusters
+                                             //  - "9CBrewerSet1"
+                                             //  - "12CBrewerPaired",
+                                             //  - "22Kelly"
+                                             //  - "24DivergingZeileis"
+                                             //  - "24ContrastedPastel"
+                                             //  - "50Fluo"
+                                             //  - "50Pastel"
+                                             //  - "80Pastel"
+                                             //  - "128Tina"
+
   // sigma rendering settings
   // ------------------------
   TWConf.sigmaJsDrawingProperties = {

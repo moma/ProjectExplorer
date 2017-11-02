@@ -80,10 +80,62 @@ TW.FA2Params = {
 }
 
 
-// POSS: themed variants (ex: for dark bg vs light bg)
-// contrasted color list for clusterColoring()
-// source http://tools.medialab.sciences-po.fr/iwanthue/
-TW.gui.colorList = ["#de7999","#ff698a","#d9737a","#de5461","#f92d54","#d3604f","#ff9279","#d65f2c","#ff9762","#ff8744","#be6f43","#ce6a00","#ffb36f","#b8740d","#ffbc4f","#af7a00","#ffc96c","#fec400","#b2994d","#a38800","#ffe067","#f6de8d","#ffe237","#eddf00","#ffff91","#a5af00","#bac800","#f4ff5b","#838931","#d2e600","#768c15","#c9ff47","#d7ff73","#73c000","#9abe72","#bfff91","#ceffab","#499428","#00b00e","#00c535","#00db4c","#00b23e","#84ff98","#249649","#00f379","#acfcbe","#4bff8e","#02e98b","#02d583","#7bffc2","#009665","#00a370","#29966c","#00c890","#01f3dc","#01feff","#82aeff","#8295ff","#8c76cb","#b996ff","#b17eff","#a367dc","#ca78ff","#b65cdd","#eaabff","#cd4eef","#a86eb4","#ee93ff","#feb7ff","#e345e5","#ff7af5","#d840cd","#f3a8e8","#c177b3","#ff91da","#ce57a8","#ff72bf","#f518a2","#e64097","#ff71a8"];
+// contrasted color lists for clusterColoring()
+// ----------------------
+// TW.gui.Palettes:  all available theme variants (ex: for dark bg vs light bg)
+// TW.gui.colorList: the chosen active palette
+// refs http://tools.medialab.sciences-po.fr/iwanthue/
+//      http://colorbrewer2.org
+//      https://graphicdesign.stackexchange.com/questions/3682/
+//      Kelly 1965 (http://nvlpubs.nist.gov/nistpubs/Legacy/SP/nbsspecialpublication440.pdf)
+//      Zeileis, Hornik, Murrell 2007 (http://epub.wu.ac.at/1692/1/document.pdf)
+TW.gui.Palettes = {
+  "9CBrewerSet1": ["#e41a1c","#377eb8","#4daf4a","#984ea3","#ff7f00","#ffff33","#a65628","#f781bf","#999999"],
+
+  "12CBrewerPaired": ["#a6cee3","#1f78b4","#b2df8a","#33a02c","#fb9a99","#e31a1c","#fdbf6f","#ff7f00","#cab2d6","#6a3d9a","#ffff99","#b15928"],
+
+  "22Kelly": ['#F2F3F4','#222222','#F3C300','#875692','#F38400','#A1CAF1','#BE0032','#C2B280','#848482','#008856','#E68FAC','#0067A5','#F99379','#604E97','#F6A600','#B3446C','#DCD300','#882D17','#8DB600','#654522','#E25822','#2B3D26'],
+
+  "24DivergingZeileis": ["#023fa5", "#7d87b9", "#bec1d4", "#d6bcc0", "#bb7784", "#8e063b", "#4a6fe3", "#8595e1", "#b5bbe3", "#e6afb9", "#e07b91", "#d33f6a", "#11c638", "#8dd593", "#c6dec7", "#ead3c6", "#f0b98d", "#ef9708", "#0fcfc0", "#9cded6", "#d5eae7", "#f3e1eb", "#f6c4e1", "#f79cd4"],
+
+  "24ContrastedPastel": ["#5fa571","#ab9ba2","#da876d","#bdd3ff","#b399df","#ffdfed","#33c8f3","#739e9a","#caeca3","#f6f7e5","#f9bcca","#ccb069","#c9ffde","#c58683","#6c9eb0","#ffd3cf","#ccffc7","#52a1b0","#d2ecff","#99fffe","#9295ae","#5ea38b","#fff0b3","#d99e68"],
+
+  "50Fluo": ["#ecdd6f","#efd745","#dab94c","#aced80","#61f2cb","#f18cac","#70c642","#e6b03a","#ef92e2","#a9d878","#59f68a","#4cce9c","#47d06d","#ec81f1","#a8e5a7","#3be03c","#5cc672","#47bdf5","#f1a72c","#acc15c","#bdbe4a","#eaad73","#86c255","#f4ce21","#f99643","#cba0f6","#83c689","#8eeeac","#d1f6ac","#5de76b","#59dfcd","#d7e431","#c0e35a","#f59881","#a8e335","#50eda2","#58e2f2","#82e951","#b5c883","#acaaf5","#eade90","#e9a4d9","#83ea36","#e0ea87","#38c2d1","#c1b66a","#dfbe64","#c9b71e","#82e68f","#e4a557"],
+
+  "50Pastel": ["#829b98","#cfcbff","#94c0ff","#e2fee0","#b9f4ff","#45a4a3","#ffe6d4","#4ac7fb","#fba988","#b68e6e","#fcf6e3","#d0fff1","#4ce6fe","#c48960","#9b91b7","#819d89","#ffcee9","#aacf88","#bcbb70","#f8fabe","#00b8bd","#4ed1bf","#c48ac7","#7798c5","#ae8e93","#80bf84","#7ca765","#ffbf9f","#aee0ff","#ffbefc","#b48e81","#b5905b","#b69e58","#ffa1a4","#4d9fcb","#de807d","#619fb7","#e6c27d","#ffa5d0","#939b60","#71d4ac","#c4abf3","#d5e89c","#b9ffcb","#ffbac1","#ef8ea9","#ffe7a9","#a68aca","#dce4ff","#ffd4a7"],
+
+  "80Pastel": ["#de7999","#ff698a","#d9737a","#de5461","#f92d54","#d3604f","#ff9279","#d65f2c","#ff9762","#ff8744","#be6f43","#ce6a00","#ffb36f","#b8740d","#ffbc4f","#af7a00","#ffc96c","#fec400","#b2994d","#a38800","#ffe067","#f6de8d","#ffe237","#eddf00","#ffff91","#a5af00","#bac800","#f4ff5b","#838931","#d2e600","#768c15","#c9ff47","#d7ff73","#73c000","#9abe72","#bfff91","#ceffab","#499428","#00b00e","#00c535","#00db4c","#00b23e","#84ff98","#249649","#00f379","#acfcbe","#4bff8e","#02e98b","#02d583","#7bffc2","#009665","#00a370","#29966c","#00c890","#01f3dc","#01feff","#82aeff","#8295ff","#8c76cb","#b996ff","#b17eff","#a367dc","#ca78ff","#b65cdd","#eaabff","#cd4eef","#a86eb4","#ee93ff","#feb7ff","#e345e5","#ff7af5","#d840cd","#f3a8e8","#c177b3","#ff91da","#ce57a8","#ff72bf","#f518a2","#e64097","#ff71a8"],
+
+  "128Tina": ["#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941",
+   "#006FA6", "#A30059", "#FFDBE5", "#7A4900", "#0000A6", "#63FFAC", "#B79762",
+   "#004D43", "#8FB0FF", "#997D87", "#5A0007", "#809693", "#FEFFE6", "#1B4400",
+   "#4FC601", "#3B5DFF", "#4A3B53", "#FF2F80", "#61615A", "#BA0900", "#6B7900",
+   "#00C2A0", "#FFAA92", "#FF90C9", "#B903AA", "#D16100", "#DDEFFF", "#000035",
+   "#7B4F4B", "#A1C299", "#300018", "#0AA6D8", "#013349", "#00846F", "#372101",
+   "#FFB500", "#C2FFED", "#A079BF", "#CC0744", "#C0B9B2", "#C2FF99", "#001E09",
+   "#00489C", "#6F0062", "#0CBD66", "#EEC3FF", "#456D75", "#B77B68", "#7A87A1",
+   "#788D66", "#885578", "#FAD09F", "#FF8A9A", "#D157A0", "#BEC459", "#456648",
+   "#0086ED", "#886F4C", "#34362D", "#B4A8BD", "#00A6AA", "#452C2C", "#636375",
+   "#A3C8C9", "#FF913F", "#938A81", "#575329", "#00FECF", "#B05B6F", "#8CD0FF",
+   "#3B9700", "#04F757", "#C8A1A1", "#1E6E00", "#7900D7", "#A77500", "#6367A9",
+   "#A05837", "#6B002C", "#772600", "#D790FF", "#9B9700", "#549E79", "#FFF69F",
+   "#201625", "#72418F", "#BC23FF", "#99ADC0", "#3A2465", "#922329", "#5B4534",
+   "#FDE8DC", "#404E55", "#0089A3", "#CB7E98", "#A4E804", "#324E72", "#6A3A4C",
+   "#83AB58", "#001C1E", "#D1F7CE", "#004B28", "#C8D0F6", "#A3A489", "#806C66",
+   "#222800", "#BF5650", "#E83000", "#66796D", "#DA007C", "#FF1A59", "#8ADBB4",
+   "#1E0200", "#5B4E51", "#C895C5", "#320033", "#FF6832", "#66E1D3", "#CFCDAC",
+   "#D0AC94", "#7ED379", "#012C58"]
+}
+
+
+// user-conf
+if (TW.conf.colorTheme && TW.gui.Palettes[TW.conf.colorTheme]) {
+  TW.gui.colorList = TW.gui.Palettes[TW.conf.colorTheme]
+}
+// default
+else {
+  TW.gui.colorList = TW.gui.Palettes["24DivergingZeileis"]
+}
 
 
 // 24 colors + White, divided in cold and warm range for getHeatmapColors() fun
