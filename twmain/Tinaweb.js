@@ -924,11 +924,33 @@ var TinaWebJS = function ( sigmacanvas ) {
 
               let returningState = TW.SystemState()
 
+              // prepare diagnostic if activetypes have changed
+              let sameTypesBool = true
+              let returningTypes = null
+              for (let typeId in returningState.activetypes) {
+                let isActive = previousState.activetypes[typeId]
+                let wasActive = returningState.activetypes[typeId]
+                sameTypesBool = sameTypesBool && (isActive == wasActive)
+                if (wasActive) {
+                  if (!returningTypes) {
+                    returningTypes = typeId
+                  }
+                  else {
+                    returningTypes = "all" // NB this code works for max 2 types
+                  }
+                }
+              }
+
               // restoring level (will also restore selections)
               if (returningState.level != previousState.level) {
                 changeLevel(returningState)
               }
               else {
+                // restoring type
+                if (! sameTypesBool) {
+                  changeType(returningTypes)
+                }
+
                 // restoring selection
                 if (returningState.selectionNids.length) {
                   TW.gui.selectionActive = true
@@ -943,6 +965,7 @@ var TinaWebJS = function ( sigmacanvas ) {
                   TW.gui.selectionActive = false
                   TW.partialGraph.refresh()
                 }
+
               }
             }, 100)
           }
@@ -1356,9 +1379,6 @@ var TinaWebJS = function ( sigmacanvas ) {
       if (TW.partialGraph && TW.partialGraph.graph) {
         TW.partialGraph.graph.clear()
         TW.partialGraph.refresh()
-
-        TW.pushGUIState({'sels':[]})
-        TW.SystemState().selectionNids = []
       }
     }
 
