@@ -595,9 +595,15 @@ function mainStartGraph(inFormat, inData, twInstance) {
 
             if (TW.conf.stablePositions) {
               if (TW.conf.independantTypes) {
-                TW.didFA2OnTypes = initialActivetypes
+                // only the active ones have been spatialised
+                // (we *copy* bool flags of activetypes)
+                for (var typeId in initialActivetypes) {
+                  TW.didFA2OnTypes = initialActivetypes[typeId]
+                }
               }
               else {
+                // all types have been spatialised
+                // repeat true for each category
                 TW.didFA2OnTypes = TW.categories.map(function(){return true})
               }
             }

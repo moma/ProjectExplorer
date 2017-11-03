@@ -1356,9 +1356,6 @@ var TinaWebJS = function ( sigmacanvas ) {
       if (TW.partialGraph && TW.partialGraph.graph) {
         TW.partialGraph.graph.clear()
         TW.partialGraph.refresh()
-
-        TW.pushGUIState({'sels':[]})
-        TW.SystemState().selectionNids = []
       }
     }
 
