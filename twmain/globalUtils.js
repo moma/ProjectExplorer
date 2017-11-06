@@ -208,6 +208,45 @@ function ArraySortByValue(array, sortFunc){
     return tmp;
 }
 
+// Sorts by 2 keys and creates an agregated weight
+//  key1: how many times the node appears as neighbor
+//  key2: cumulated weight of all edges
+//  output value:   coef x key1 + key2
+//  with coef > Max(key2) to preserve the order
+//
+//  ex input {"kw1":[2,10], "kw2":[2,3], "kw3":[5,4]}
+//     - the expected output order is kw3, kw1, kw2
+//     - max key2 is 10
+//       => we set coef to 10+1 to allow key1 to always dominate key2 influence
+//     - the result sorted array with agregated values for proportional labels
+//       will be: [
+//                  [key: kw3, value: 59],   <--- 5*coef +  4
+//                  [key: kw1, value: 32],   <--- 2*coef + 10
+//                  [key: kw2, value: 25]    <--- 2*coef +  3
+//                ]
+// NB the output agregated values 59, 32, 25 are used for htmlProportionalLabels
+function ArraySortByAgValueIndepOccsPlusWeight(array, sortFunc){
+    let maxWeiSum = 0
+    for (var nid in array) {
+      var [indepOccs, weiSum] = array[nid]
+      weiSum = parseFloat(weiSum)
+      if (weiSum > maxWeiSum) {
+        maxWeiSum = weiSum
+      }
+    }
+
+    let coef = Math.ceil(maxWeiSum) + 1
+
+    let arrayWithAgregatedVals = {}
+    for (var nid in array) {
+      var [indepOccs, weiSum] = array[nid]
+      indepOccs = parseFloat(indepOccs)
+      weiSum    = parseFloat(weiSum)
+      arrayWithAgregatedVals[nid] = coef * indepOccs + weiSum
+    }
+    return ArraySortByValue(arrayWithAgregatedVals, sortFunc)
+}
+
 
 function getByID(elem) {
     return document.getElementById(elem);
@@ -265,6 +304,51 @@ function componentToHex(c) {
 
 function rgbToHex(r, g, b) {
     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
+// high-level hex or rgba color format to rgb string => for example "255,32,255"
+function normalizeColorFormat(colStr) {
+  let rgbStr = null
+  let rgbaVals = []
+  let invalidFormat = false
+
+  if (typeof colStr == 'undefined' || ! colStr) {
+    invalidFormat = true
+  }
+  // hex color ex "#eee or #AA00AA"
+  else if (/^#[A-Fa-f0-9]{3,6}$/.test(colStr)) {
+    rgbaVals = hex2rgba(colStr)
+    rgbStr = rgbaVals.splice(0, 3).join(',');
+  }
+  else {
+    // "rgba(...)" or "rgb(...)" color
+    if (/^rgba?\(\d{1,3},\d{1,3},\d{1,3}(?:,\d{1,3})?\)$/.test(colStr)) {
+      // keep only the inside of parens (ex: "255,32,255,100")
+      colStr = colStr.match(/rgba?\(([^)]+)\)/)[1]
+      rgbaVals = colStr.split(',')
+    }
+    // we also allow data providing directly the inside (ex: "255,32,255,100")
+    else if (/^\d{1,3},\d{1,3},\d{1,3}(?:,\d{1,3})?$/.test(colStr)) {
+      rgbaVals = colStr.split(',')
+    }
+
+    if (rgbaVals.length == 3) {
+      rgbStr = colStr
+    }
+    else if (rgbaVals.length == 4) {
+      rgbStr = rgbaVals.splice(0, 3).join(',');
+    }
+    else {
+      invalidFormat = true
+    }
+
+  }
+
+  if (invalidFormat) {
+    rgbStr = null
+  }
+
+  return rgbStr
 }
 
 

@@ -320,7 +320,6 @@ function SelectionEngine() {
                 activeRelations["XR"][srcnid] = {}
 
                 for(var k in bipaNeighs) {
-
                   let eid1 = srcnid+';'+bipaNeighs[k]
                   let eid2 = bipaNeighs[k]+';'+srcnid
 
@@ -332,16 +331,18 @@ function SelectionEngine() {
                     activeRelations["XR"][srcnid][bipaNeighs[k]] = 0;
                   }
                   if (typeof oppoSideNeighbors[bipaNeighs[k]] == "undefined") {
-                    oppoSideNeighbors[bipaNeighs[k]] = 0 ;
+                    oppoSideNeighbors[bipaNeighs[k]] = [0,0] ;
                   }
 
-                  // cumulated weight for all srcnids
-                  oppoSideNeighbors[bipaNeighs[k]] += edgeWeight
-
-                  // console.log('edgeWeight', edgeWeight)
+                  // how many times the target appears as neighbor of these srcs
+                  // + cumulated weight for all targets for all srcnids
+                  oppoSideNeighbors[bipaNeighs[k]][0] += 1
+                  oppoSideNeighbors[bipaNeighs[k]][1] += edgeWeight
+                  // (ex: sum for each keyword of each scholar's link to it)
 
                   // and the details
                   activeRelations["XR"][srcnid][bipaNeighs[k]] += edgeWeight
+
                 }
             }
         }
@@ -352,7 +353,7 @@ function SelectionEngine() {
         let same = []
 
         if (activeRelations["XR"]) {
-          oppos = ArraySortByValue(oppoSideNeighbors, function(a,b){
+          oppos = ArraySortByAgValueIndepOccsPlusWeight(oppoSideNeighbors, function(a,b){
             return b-a
           });
         }
@@ -759,6 +760,13 @@ var TinaWebJS = function ( sigmacanvas ) {
         // we start with no selection
         $("#selection-tabs-contnr").hide();
 
+
+        if (TW.conf.tuningPanel) {
+          $("#tune-button").show();
+        } else {
+          $("#tune-button").hide();
+        }
+
         // #saveAs => toggle #savemodal initialized in html + bootstrap-native
 
         // button CENTER
@@ -783,6 +791,9 @@ var TinaWebJS = function ( sigmacanvas ) {
         if (TW.conf.disperseAvailable) {
           $("#noverlapButton").click(function () {
             if(! TW.partialGraph.isNoverlapRunning()) {
+                // determine if we work just on visible nodes
+                let skipHiddenFlag = !TW.conf.stablePositions || TW.conf.independantTypes
+
                 // show waiting cursor on page and button
                 TW.gui.elHtml.classList.add('waiting');
                 this.style.cursor = 'wait'
@@ -793,18 +804,28 @@ var TinaWebJS = function ( sigmacanvas ) {
                 let sizeFactor = Math.max.apply(null, TW.gui.sizeRatios)
                 TW.gui.noverlapConf.nodeMargin =  .5 * sizeFactor
                 TW.gui.noverlapConf.scaleNodes = 1.5 * sizeFactor
+                if (skipHiddenFlag) {
+                  TW.gui.noverlapConf.nodes = getVisibleNodes()
+                }
                 TW.partialGraph.configNoverlap(TW.gui.noverlapConf)
                 var listener = TW.partialGraph.startNoverlap();
                 var noverButton = this
                 listener.bind('stop', function(event) {
+                  // update fa2 positions in any case, but don't skipHidden unless unstable positions
+                  reInitFa2({
+                    localZoneSettings: !TW.SystemState().level,
+                    skipHidden: skipHiddenFlag,
+                    typeAdapt: skipHiddenFlag,
+                    callback: function() {console.debug("noverlap: updated fa2 positions")}
+                  })
                   var stillRunning = document.getElementById('noverlapwait')
                   if (stillRunning) {
-                    // update fa2 positions in any case, but don't skipHidden unless unstable positions
                     reInitFa2({
                       localZoneSettings: !TW.SystemState().level,
                       skipHidden: !TW.conf.stablePositions,
                       callback: function() {console.debug("noverlap: updated fa2 positions")}
                     })
+
                     TW.gui.elHtml.classList.remove('waiting');
                     noverButton.style.cursor = 'auto'
                     stillRunning.remove()
@@ -903,11 +924,33 @@ var TinaWebJS = function ( sigmacanvas ) {
 
               let returningState = TW.SystemState()
 
+              // prepare diagnostic if activetypes have changed
+              let sameTypesBool = true
+              let returningTypes = null
+              for (let typeId in returningState.activetypes) {
+                let isActive = previousState.activetypes[typeId]
+                let wasActive = returningState.activetypes[typeId]
+                sameTypesBool = sameTypesBool && (isActive == wasActive)
+                if (wasActive) {
+                  if (!returningTypes) {
+                    returningTypes = typeId
+                  }
+                  else {
+                    returningTypes = "all" // NB this code works for max 2 types
+                  }
+                }
+              }
+
               // restoring level (will also restore selections)
               if (returningState.level != previousState.level) {
                 changeLevel(returningState)
               }
               else {
+                // restoring type
+                if (! sameTypesBool) {
+                  changeType(returningTypes)
+                }
+
                 // restoring selection
                 if (returningState.selectionNids.length) {
                   TW.gui.selectionActive = true
@@ -922,6 +965,7 @@ var TinaWebJS = function ( sigmacanvas ) {
                   TW.gui.selectionActive = false
                   TW.partialGraph.refresh()
                 }
+
               }
             }, 100)
           }
@@ -1040,13 +1084,26 @@ var TinaWebJS = function ( sigmacanvas ) {
       //     ===============
       var zoomTimeoutId = null
       TW.cam.bind('coordinatesUpdated', function(e) {
-        $("#zoomSlider").slider("value",1/TW.cam.ratio)
+        $("#zoomSlider").slider("value",Math.log(1/(TW.cam.ratio+zoomSliRangeRatio)))
       })
 
 
       // dragNodes plugin
       if (TW.conf.dragNodesAvailable) {
         var dragListener = sigma.plugins.dragNodes(partialGraph, partialGraph.renderers[0]);
+
+        dragListener.bind("dragend", function(dragEndEvent){
+          let mouseEvent = dragEndEvent.data.captor
+          if (mouseEvent.ctrlKey) {
+            // update FA2 positions array
+            reInitFa2({
+              localZoneSettings: !TW.SystemState().level,
+              skipHidden: !TW.conf.stablePositions || TW.conf.independantTypes,
+              typeAdapt: !TW.conf.stablePositions || TW.conf.independantTypes,
+              callback: function() {console.debug("dragNodes: updated fa2 positions")}
+            })
+          }
+        })
 
         // intercept dragNodes events if not CTRL+click
         document.getElementById('sigma-contnr').addEventListener(
@@ -1086,20 +1143,29 @@ var TinaWebJS = function ( sigmacanvas ) {
 
       // sliders events
       // ==============
+
+      var zoomSliRangeRatio = TW.conf.zoomMin/TW.conf.zoomMax
+      var zoomSliBoundaryTop = Math.log(1/(TW.conf.zoomMin+zoomSliRangeRatio))
+      var zoomSliBoundaryBot = Math.log(1/(TW.conf.zoomMax+zoomSliRangeRatio))
+      var zoomSliOrigin =      Math.log(1/(TW.cam.ratio+zoomSliRangeRatio))
+      var zoomSliStep = (zoomSliBoundaryTop - zoomSliBoundaryBot)/50
+
       $("#zoomSlider").slider({
           orientation: "vertical",
 
           // new sigma.js current zoom ratio
           value: partialGraph.camera.ratio,
-          min: 1 / TW.conf.zoomMax,   // ex x.5
-          max: 1 / TW.conf.zoomMin,   // ex x32
+          min: zoomSliBoundaryBot,   // ex  log(1/(ZOOM-OUT_RATIO+k))
+          max: zoomSliBoundaryTop,   // ex  log(1/(ZOOM-IN_RATIO+k))
+          // where k is the ratio of the full range
+
           // range: true,
-          step: .2,
-          value: 1,
+          step: zoomSliStep,
+          value: zoomSliOrigin,
           slide: function( event, ui ) {
               TW.partialGraph.camera.goTo({
-                  // POSS: make a transform to increase detail around x = 1
-                  ratio: 1 / ui.value
+                  // we use 1/e^x -k transform for result like logscale on 1/x
+                  ratio: 1/Math.exp(ui.value) - zoomSliRangeRatio
               });
           }
       });
@@ -1267,6 +1333,43 @@ var TinaWebJS = function ( sigmacanvas ) {
       // add all numeric attributes to titlingMetric with option type fromFacets
       fillAttrsInForm('attr-titling-metric', 'num')
 
+      // show dev stats on json input for this graph if available
+      if (TW.stats && Object.keys(TW.stats).length) {
+        $("#stats-panel").show()
+        $("#stats").html(showStats());
+      }
+      else {
+        $("#stats-panel").hide()
+      }
+
+
+      // add attributes' names list to saveGEXF modal examples
+      // ex: "kw: nbjobs,total_occurrences / sch: nbjobs,total_occurrences"
+      let exs = document.getElementById("data_attrs_exemples")
+      if (exs) {
+        let spanContents = []
+        for (var ntype in TW.Facets) {
+          let attrs = Object.keys(TW.Facets[ntype])
+          // remove dynamic attributes
+          attrs = attrs.filter( function(at) { return (! TW.sigmaAttributes[at]) } )
+          if (attrs && attrs.length) {
+            spanContents.push(ntype+': '+attrs.join(","))
+          }
+        }
+        if (spanContents.length) {
+          exs.innerHTML = '('+spanContents.join(" / ")+')'
+        }
+      }
+
+      // show dev stats on json input for this graph if available
+      if (TW.stats && Object.keys(TW.stats).length) {
+        $("#stats-panel").show()
+        $("#stats").html(showStats());
+      }
+      else {
+        $("#stats-panel").hide()
+      }
+
       // cancelSelection(false);
     }
 
@@ -1276,9 +1379,6 @@ var TinaWebJS = function ( sigmacanvas ) {
       if (TW.partialGraph && TW.partialGraph.graph) {
         TW.partialGraph.graph.clear()
         TW.partialGraph.refresh()
-
-        TW.pushGUIState({'sels':[]})
-        TW.SystemState().selectionNids = []
       }
     }
 

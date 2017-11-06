@@ -1,4 +1,4 @@
- 
+
 # Compiled source #
 ###################
 *.com
@@ -22,13 +22,16 @@
 *.tar
 *.zip
 
+# Data directory  #
+###################
+data
+
 # Logs and databases #
 ######################
 *.log
 *.sql
 *.db
 *.sqlite
-*.gexf
 *.json
 
 # OS generated files #
@@ -38,4 +41,3 @@
 .Spotlight-V100
 .Trashes
 data/*
-

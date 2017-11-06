@@ -218,6 +218,14 @@
                 </ul>
              </a></li>
 
+             <li>
+                 <a href="#tune-settings-panel" id="tune-button" class="button"
+                    title="Tune settings"
+                    data-toggle="modal" data-target="#tune-settings-panel">
+                   <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+                 </a>
+             </li>
+
             <li class="tworow-selectors for-nodecategory-0">
               <!-- Create a subgraph over nodes from TW.categories[0] (terms or def nodes)-->
               <table>
@@ -503,7 +511,6 @@
     -->
     <div class="panel-group" id="varinfos-accordion">
 
-
       <div class="panel panel-default" id="video_explanation">
         <div class="panel-heading">
           <h4 class="panel-title">
@@ -515,11 +522,8 @@
           </h4>
         </div>
 
-        <!-- TODO: outcloud the video for better stream+player -->
         <div class="panel-collapse collapse" id="le_tutorial">
-          <p>here video</p>
-          <video width="100%"
-            src="" controls=""  frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></video>
+          <iframe id='twbrand-video' src="" width="100%" height="201" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
         </div>
       </div>
 
@@ -539,6 +543,21 @@
         </div>
       </div>
 
+      <div class="panel panel-default" id="stats-panel">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-target="#stats" href="#stats"
+               data-parent="#varinfos-accordion">
+              <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+              &nbsp;Stats
+            </a>
+          </h4>
+        </div>
+
+        <div class="panel-collapse collapse in" id="stats">
+          <p>here stats inserted by twmain/Tinaweb.js</p>
+        </div>
+      </div>
 
       <div class="panel panel-default" id="video_explanationw">
         <div class="panel-heading">
@@ -607,24 +626,25 @@
           </div>
 
           <div class="modal-body form-horizontal">
-            Which attributes do you want to keep?:
+            <p>Which attributes do you want to keep ?</p>
             <div class="form-group">
               <label class="col-lg-2 control-label"> </label>
               <div class="col-lg-10">
                 <div class="checkbox">
                   <label>
-                    <input type="checkbox" name="optionsRadios" id="check_size" value="option1">
-                    Size
+                    <input type="checkbox" id="check_viz_attrs" checked>
+                    Size, Position and Color
                   </label>
                 </div>
                 <div class="checkbox">
                   <label>
-                    <input type="checkbox" name="optionsRadios" id="check_color" value="option2">
-                    Color
+                    <input type="checkbox" id="check_data_attrs" checked>
+                    Data attributes <span id="data_attrs_exemples" class="micromessage"></span>
                   </label>
                 </div>
               </div>
             </div>
+            <p class=micromessage>NB: the 'type' of nodes is always saved</p>
           </div>
 
           <div class="modal-footer">
@@ -637,12 +657,73 @@
     </div>
 
 
-    <!-- <div id="modalloader" class="modal fade">
-        <div id="loader" class="loader">
-            <img src="twlibs/img/loader.gif"></img>
+    <div id="tune-settings-panel" class="modal fade">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h4 class="modal-title">Tune settings</h4>
+          </div>
+          <div class="modal-body">
+            <div class="uform-white">
+              <form id="dev_testing-form">
+                 <h3 class="formcat">Palette de couleurs</h3><br/>
+
+                   <div class="question">
+                     <div class="input-group">
+                       <label for="color-palette" class="smlabel input-group-addon">Colors for clusters</label>
+                       <select id="color-palette" name="color-palette" class="custom-select form-control">
+                         <option value="9CBrewerSet1">9CBrewerSet1</option>
+                         <option value="12CBrewerPaired">12CBrewerPaired</option>
+                         <option value="22Kelly">22Kelly</option>
+                         <option selected value="24DivergingZeileis">24DivergingZeileis</option>
+                         <option value="24ContrastedPastel">24ContrastedPastel</option>
+                         <option value="50Fluo">50Fluo</option>
+                         <option value="50Pastel">50Pastel</option>
+                         <option value="80Pastel">80Pastel</option>
+                         <option value="128Tina">128Tina</option>
+                       </select>
+                     </div>
+                   </div>
+
+                 <h3 class="formcat">Réglages de spatialisation</h3><br/>
+
+                   <div class="question">
+                     <div class="input-group">
+                       <label for="layout-scenario" class="smlabel input-group-addon">Scenarios</label>
+                       <select id="layout-scenario" name="layout-scenario" class="custom-select form-control">
+                          <option selected value="indeptypes">Spatialisation distincte par types, stable par filtres</option>
+                          <option value="indeptypes-adaptspeed">Idem avec slowDown en meso</option>
+                          <option value="allstable">Spatialisation conjointe stable</option>
+                          <option value="notstable">Re-spatialisation à chaque vue ou filtre</option>
+                       </select>
+                     </div>
+                   </div>
+                   <div class="question">
+                     <div class="input-group">
+                       <label for="match-alg" class="smlabel input-group-addon">Algo match</label>
+                       <select id="match-alg" name="match-alg" class="custom-select form-control">
+                          <option selected value="tradi">Jaccard via algo traditionnel</option>
+                          <option value="multi">Jaccard via algo multimatch</option>
+                       </select>
+                     </div>
+                   </div>
+              </form>
+
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-default" data-dismiss="modal">
+              Cancel
+            </button>
+            <button class="btn btn-primary"
+              type=button onclick="newSettingsAndRun()" data-dismiss="modal">
+              Run
+            </button>
+          </div>
         </div>
-        <div id="closeloader" data-dismiss="modal"></div>
-    </div> -->
+      </div>
+    </div>
 
 
     <div id="facet-options" class="modal fade">
@@ -794,6 +875,7 @@
   <script src="twlibs3/sigma_v1.2/plugins/sigma.layout.forceAtlas2/worker.js"></script>
   <script src="twlibs3/sigma_v1.2/plugins/sigma.renderers.snapshot/sigma.renderers.snapshot.js"></script>
   <script src="twlibs3/sigma_v1.2/plugins/sigma.plugins.dragNodes/sigma.plugins.dragNodes.js"></script>
+  <script src="twlibs3/sigma_v1.2/plugins/sigma.exporters.gexf/sigma.exporters.gexf.js"></script>
 
 
 

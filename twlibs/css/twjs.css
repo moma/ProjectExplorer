@@ -211,9 +211,9 @@ html.waiting {
 }
 
 /* small messages */
-p.micromessage{
+.micromessage{
   font-size: 85%;
-  color: #707070 ;
+  color: #555 ;
 }
 
 .btn-sm:hover {
@@ -241,6 +241,32 @@ p.micromessage{
 
 #information {
     font-size:80%;
+}
+
+#stats{
+    padding-left: 5%;
+    padding-right: 5%;
+    font-size: 80%;
+}
+
+#stats ul{
+    list-style:none;
+    padding-left:10%;
+}
+
+.stats-title {
+  color: #222;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 11px;
+  padding-top: 10px;
+}
+.stats-table {
+  margin-left: 50px;
+}
+.stats-prop {
+  width: 50px;
+  min-width: 50px;
 }
 
 
@@ -411,4 +437,15 @@ ul.infoitems {
     padding-right: 3px;
     background-color: #EEEEEE; color: #999999;
     text-align: right;
+}
+
+
+/* more-settings panel */
+
+#tune-settings-panel {
+  padding: 10px;
+}
+
+#tune-settings-panel h3.formcat {
+  color: "#0f4766";
 }

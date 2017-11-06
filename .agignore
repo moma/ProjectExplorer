@@ -1,0 +1,8 @@
+experiments/
+*.min.js
+tinawebJS/sigma_v1.2/
+tinawebJS/sigma_v1.5/
+histogramModule/dygraph/dygraph.combined.js
+*.heapprofile
+*jquery*
+*bootstrap*

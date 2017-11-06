@@ -26,21 +26,23 @@ TW.sigmaAttributes = {
 function updateDynamicFacets(optionalFilter) {
     let autoVals = {}
     for (var icat in TW.categories) {
-      let nodecat = TW.categories[icat]
-      autoVals[nodecat] = {}
-      for (var autoAttr in TW.sigmaAttributes) {
-        if (!optionalFilter || autoAttr == optionalFilter) {
-          autoVals[nodecat][autoAttr] = {'map':{},'vals':{'vstr':[],'vnum':[]}}
-          let getVal = TW.sigmaAttributes[autoAttr](TW.partialGraph)
-          for (var nid of TW.ByType[icat]) {
-            let nd = TW.partialGraph.graph.nodes(nid)
-            if (nd && !nd.hidden) {
-              let val = getVal(TW.partialGraph.graph.nodes(nid))
-              if (! (val in autoVals[nodecat][autoAttr].map))
-                // a list of nids for each distinct values
-                autoVals[nodecat][autoAttr].map[val] = []
-              autoVals[nodecat][autoAttr].map[val].push(nid)
-              autoVals[nodecat][autoAttr].vals.vnum.push(val)
+      if (TW.SystemState().activetypes[icat]) {
+        let nodecat = TW.categories[icat]
+        autoVals[nodecat] = {}
+        for (var autoAttr in TW.sigmaAttributes) {
+          if (!optionalFilter || autoAttr == optionalFilter) {
+            autoVals[nodecat][autoAttr] = {'map':{},'vals':{'vstr':[],'vnum':[]}}
+            let getVal = TW.sigmaAttributes[autoAttr](TW.partialGraph)
+            for (var nid of TW.ByType[icat]) {
+              let nd = TW.partialGraph.graph.nodes(nid)
+              if (nd && !nd.hidden) {
+                let val = getVal(TW.partialGraph.graph.nodes(nid))
+                if (! (val in autoVals[nodecat][autoAttr].map))
+                  // a list of nids for each distinct values
+                  autoVals[nodecat][autoAttr].map[val] = []
+                autoVals[nodecat][autoAttr].map[val].push(nid)
+                autoVals[nodecat][autoAttr].vals.vnum.push(val)
+              }
             }
           }
         }
@@ -48,17 +50,44 @@ function updateDynamicFacets(optionalFilter) {
     }
 
     // console.log("reparse dynamic attr, raw result", autoVals)
-
     let autoFacets = facetsBinning(autoVals)
+    // console.log("reparse dynamic attr, binned result", autoFacets)
+
     // merge them into clusters
-    for (var nodecat in TW.catDict) {
-      for (var autoAttr in TW.sigmaAttributes) {
-        for (var facet in autoFacets[nodecat]) {
+    //  - new popu counts for ticks and new labels (to update in menus+legend)
+    //  - but preserve last color (for stability with previous view)
+    for (var nodecat in autoFacets) {
+
+      if (!TW.Facets[nodecat])  TW.Facets[nodecat] = {}
+
+      for (var facet in autoFacets[nodecat]) {
+        // first time: simple copy
+        if (   !TW.Facets[nodecat][facet]
+            || !TW.Facets[nodecat][facet].invIdx
+            || !TW.Facets[nodecat][facet].invIdx.length ) {
           TW.Facets[nodecat][facet] = autoFacets[nodecat][facet]
+        }
+        // otherwise recycle old legend entries
+        // (inheriting last colors feels coherent between views meso<=>macro)
+        else {
+          let last_colors = []
+          for (var i_prev in TW.Facets[nodecat][facet].invIdx) {
+            last_colors.push(TW.Facets[nodecat][facet].invIdx[i_prev].col)
+          }
+
+          // new legend entries allow
+          for (var i_new in autoFacets[nodecat][facet].invIdx) {
+            TW.Facets[nodecat][facet].invIdx[i_new] = autoFacets[nodecat][facet].invIdx[i_new]
+
+            // skipped iff new nb of bins (which will trigger recoloring anyway)
+            if (last_colors[i_new]) {
+              TW.Facets[nodecat][facet].invIdx[i_new].col = last_colors[i_new]
+            }
+          }
+
         }
       }
     }
-
 }
 
 // Execution:    changeGraphAppearanceByFacets( true )
@@ -69,125 +98,74 @@ function changeGraphAppearanceByFacets(actypes) {
 
     if (!actypes)            actypes = getActivetypesNames()
 
-    let colorsMeta = {}
-    let allNbNodes = TW.partialGraph.graph.nNodes()
-    let gotPreviousLouvain = false
-
     let currentNbNodes = {}
     for (var k in actypes) {
       currentNbNodes[actypes[k]] = TW.partialGraph.graph.getNodesByType(TW.catDict[actypes[k]]).length
     }
 
-    // 1st loop: census on [colors <=> types] and involved nb Nodes
-    for (var k in actypes) {
-      let ty = actypes[k]
-      let attNbNodes = currentNbNodes[ty]
-
-      // each facet family or clustering type was already prepared
-      for (var attTitle in TW.Facets[ty]) {
-        if (! colorsMeta[attTitle]) {
-          colorsMeta[attTitle] = []
-        }
-
-        // attribute counts: nb of classes
-        // POSS here distinguish [ty][attTitle].classes.length and ranges.length
-        let attNbClasses = TW.Facets[ty][attTitle].invIdx.length
-
-        if (attNbClasses) {
-          let lastClass = TW.Facets[ty][attTitle].invIdx[attNbClasses-1]
-          if (lastClass.labl && /^_non_numeric_/.test(lastClass.labl) && lastClass.nids) {
-            if (lastClass.nids.length) {
-              attNbNodes -= lastClass.nids.length
-            }
-            else {
-              attNbClasses -= 1
-            }
-          }
-        }
-
-        // note any previous louvains
-        if (attTitle == 'clust_louvain')  gotPreviousLouvain = true
-
-        // save relevant info
-        colorsMeta[attTitle].push({
-          'type': ty,
-          'nbDomain': attNbNodes,
-          'nbOutput': attNbClasses
-        })
-      }
-    }
-    // console.log(colorsMeta)
-
-    // sorted by type and how many types (one type x by alpha, one type y by alpha, two types xy by alpha)
-    let colorsList = Object.keys(colorsMeta)
-    colorsList.sort(function (a, b) {
-      let cmp = colorsMeta[a].length - colorsMeta[b].length
-      if (cmp == 0) {
-        cmp = (a in TW.sigmaAttributes) - (b in TW.sigmaAttributes)
-        if (cmp == 0) {
-          if (colorsMeta[a][0].type < colorsMeta[b][0].type) cmp = -1
-          else if (colorsMeta[a][0].type > colorsMeta[b][0].type) cmp = 1
-          else {
-            if (a < b) cmp = -1
-            else if (a > b) cmp = 1
-          }
-        }
-      }
-      return cmp
-    })
-
-    // 2nd loop: create colormenu and 1st default entry
+    // create colormenu and 1st default entry
     var color_menu_info = '<li><a href="#" onclick="graphResetAllColors() ; TW.partialGraph.refresh()">By Default</a></li>';
 
-    let lastGroup = null
     if( $( "#colorgraph-menu" ).length>0 ) {
+      for (var k in actypes) {
+        let ty = actypes[k]
 
-      for (var l in colorsList) {
-        var attTitle = colorsList[l]
+        // heading by type iff more than one type
+        if (actypes.length > 1)
+          color_menu_info += `<li class="pseudo-optgroup">${ty}</li>`
 
-        // which concerned types and how many concerned nodes and output classes
-        let attNbNodes = 0
-        let forTypes = []
-        for (var i in colorsMeta[attTitle]) {
-          forTypes.push(colorsMeta[attTitle][i].type)
-          attNbNodes += colorsMeta[attTitle][i].nbDomain
-        }
-        let attNbClasses = colorsMeta[attTitle][0].nbOutput
+        for (var attTitle in TW.Facets[ty]) {
+          let nbDomain = currentNbNodes[ty]
 
-        // coloring function
-        let colMethod = getColorFunction(attTitle)
+          // attribute counts: nb of classes
+          // POSS here distinguish [ty][attTitle].classes.length and ranges.length
+          let nbOutput = TW.Facets[ty][attTitle].invIdx.length
 
-        // family label :)
-        var attLabel ;
-        if (TW.facetOptions[attTitle] && TW.facetOptions[attTitle]['legend']) {
-          attLabel = TW.facetOptions[attTitle]['legend']
-        }
-        else attLabel = attTitle
-
-        if (actypes.length == 1) {
-          color_menu_info += `
-            <li><a href="#" onclick='${colMethod}("${attTitle}")'>
-                By ${attLabel} (${attNbClasses} | ${attNbNodes})
-            </a></li>
-            `
-        }
-        else {
-          groupName = `${forTypes}`
-          if (groupName != lastGroup) {
-            color_menu_info += `<li class="pseudo-optgroup">${groupName}</li>`
+          if (nbOutput) {
+            let lastClass = TW.Facets[ty][attTitle].invIdx[nbOutput-1]
+            if (lastClass.labl && /^_non_numeric_/.test(lastClass.labl) && lastClass.nids) {
+              if (lastClass.nids.length) {
+                nbDomain -= lastClass.nids.length
+              }
+              else {
+                nbOutput -= 1
+              }
+            }
           }
+
+          // note any previous louvains
+          if (attTitle == 'clust_louvain')  gotPreviousLouvain = true
+
+          // coloring function
+          let colMethod = getColorFunction(attTitle)
+
+          // family label :)
+          var attLabel ;
+          if (TW.facetOptions[attTitle] && TW.facetOptions[attTitle]['legend']) {
+            attLabel = TW.facetOptions[attTitle]['legend']
+          }
+          else attLabel = attTitle
+
           color_menu_info += `
-            <li><a href="#" onclick='${colMethod}("${attTitle}",${JSON.stringify(forTypes)})'>
-                By ${attLabel} (${attNbClasses} | ${attNbNodes})
+            <li><a href="#" onclick='${colMethod}("${attTitle}",["${ty}"])'>
+                By ${attLabel} (${nbOutput} | ${nbDomain})
             </a></li>
             `
-          lastGroup = groupName
-        }
-      }
 
-      // we also add clust_louvain if not already there
-      if (!gotPreviousLouvain) {
-        color_menu_info += `<li><a href="#" onclick='clusterColoring("clust_louvain")'>By Louvain clustering ( <span id="louvainN">?</span> | ${allNbNodes})</a></li>`
+          // for ex country with 26 classes on 75 nodes:
+          //
+          //  <a href="#" onclick="clusterColoring('country',['Scholars'])">
+          //    By Country (26 | 75)
+          //  </a>
+          //
+
+        }
+
+        // if had not been already done, louvain added manually
+        if (!TW.Facets[ty]['clust_louvain']) {
+          color_menu_info += `<li><a href="#" onclick='clusterColoring("clust_louvain",["${ty}"])'>By Louvain clustering ( <span id="louvainN">?</span> | ${currentNbNodes[ty]})</a></li>`
+        }
+
       }
 
       // for debug
@@ -286,7 +264,10 @@ function RunLouvain(cb) {
     if (! TW.facetOptions['clust_louvain']) {
       TW.facetOptions['clust_louvain'] = {'col': 'cluster'}
     }
-    // NB the LouvainFait flag is updated by caller fun
+
+    // update state and menu
+    TW.SystemState().LouvainFait = true
+    changeGraphAppearanceByFacets()
 
     // callback
     if (cb && typeof cb == 'function') {
@@ -359,9 +340,8 @@ function graphResetAllColors() {
 
 // removes selectively for an array of nodetypes
 function clearColorLegend (forTypes) {
-  // console.log('clearColorLegend', forTypes)
   for (var ty of forTypes) {
-    let legTy = document.getElementById("legend-for-"+ty)
+    let legTy = document.getElementById("legend-for-"+TW.catDict[ty])
     if (legTy)
       legTy.remove()
   }
@@ -373,6 +353,8 @@ function clearColorLegend (forTypes) {
 // @groupingTicks: an optional threshold's array expressing ranges with their low/up bounds label and ref to matchin nodeIds
 function updateColorsLegend ( daclass, forTypes, groupedByTicks ) {
 
+    // console.warn("making legend forTypes", forTypes)
+
     // shortcut to erase legends for all types
     if(daclass == null) {
       clearColorLegend(TW.categories)
@@ -380,16 +362,16 @@ function updateColorsLegend ( daclass, forTypes, groupedByTicks ) {
     };
 
     // current display among TW.categories (ex: ['terms'])
-    if (typeof forTypes != 'array' || ! forTypes.length) {
+    if (typeof forTypes == 'undefined' || ! forTypes.length) {
       forTypes = getActivetypesNames().filter(function(ty){
-        return daclass in TW.Facets[ty]
+      return daclass in TW.Facets[ty]
       })
     }
     // (we ignore other types: their color legends remain the same by default)
 
     for (var k in forTypes) {
       let curType = forTypes[k]
-      var LegendDiv = "<div id=legend-for-"+curType+" class=\"over-panels my-legend\">"
+      var LegendDiv = "<div id=legend-for-"+TW.catDict[curType]+" class=\"over-panels my-legend\">"
 
       // all infos in a bin array
       var legendInfo = []
@@ -540,7 +522,7 @@ function updateColorsLegend ( daclass, forTypes, groupedByTicks ) {
         LegendDiv += '    </div>'
         LegendDiv += '  </div>'
 
-        let perhapsPreviousLegend = document.getElementById("legend-for-"+curType)
+        let perhapsPreviousLegend = document.getElementById("legend-for-"+TW.catDict[curType])
         if (perhapsPreviousLegend) {
           perhapsPreviousLegend.outerHTML = LegendDiv
         }
@@ -929,6 +911,51 @@ function renderTweet( tweet) {
     return html;
 }
 
+function showStats(){
+  let statsHtml = ''
+  if (TW.stats.dataLoadTime) {
+    statsHtml += '<h5 class=stats-title>Data loading</h5>'
+    statsHtml += `<b>${parseInt(TW.stats.dataLoadTime)} ms</b>`
+  }
+
+  let statCols = ['min','median', 'mean', 'max']
+  if (TW.stats.nodeSize && typeof TW.stats.nodeSize == "object") {
+    let ntypes = Object.keys(TW.stats.nodeSize)
+    if (ntypes.length) {
+      ntypes.sort()
+      statsHtml += '<h5 class=stats-title>Node sizes</h5>'
+      for (var ntype in TW.stats.nodeSize) {
+        statsHtml += `<b>${ntype} (${TW.stats.nodeSize[ntype].len})</b>`
+        statsHtml += `<table class=stats-table>`
+        for (var k in statCols) {
+          let prop = statCols[k]
+          statsHtml +=`<tr><td class=stats-prop>${prop}</td>`
+          statsHtml += `<td>${parseInt(TW.stats.nodeSize[ntype][prop]*10000)/10000}</td></tr>`
+        }
+        statsHtml += `</table>`
+      }
+    }
+  }
+  if (TW.stats.edgeWeight && typeof TW.stats.edgeWeight == "object") {
+    let categs = Object.keys(TW.stats.edgeWeight)
+    if (categs.length) {
+      statsHtml += '<h5 class=stats-title>Edge weights</h5>'
+      for (var categ in TW.stats.edgeWeight) {
+        statsHtml += `<b>${categ} (${TW.stats.edgeWeight[categ].len})</b>`
+        statsHtml += `<table class=stats-table>`
+        for (var k in statCols) {
+          let prop = statCols[k]
+          statsHtml +=`<tr><td class=stats-prop>${prop}</td>`
+          statsHtml += `<td>${parseInt(TW.stats.edgeWeight[categ][prop]*10000)/10000}</td></tr>`
+        }
+        statsHtml += `</table>`
+      }
+    }
+  }
+  return statsHtml
+}
+
+
 function getTips(){
     text =
         "<br>"+
@@ -1253,12 +1280,74 @@ function showAttrConf(event, optionalAttrname) {
 }
 
 
+function newSettingsAndRun() {
+
+  // color palette
+  let color_palette = document.getElementById('color-palette').value
+  TW.gui.colorList = TW.gui.Palettes[color_palette] || TW.gui.Palettes[color_palette]
+
+  // matching: traditional vs multi
+  let match_alg = document.getElementById('match-alg').value
+  if (match_alg == "tradi") {
+    TW.conf.sourceAPI["forNormalQuery"] = "services/api/graph"
+    TW.conf.sourceAPI["forFilteredQuery"] = "services/api/graph"
+  }
+  else if (match_alg == "multi") {
+    TW.conf.sourceAPI["forNormalQuery"] = "services/api/multimatch"
+    TW.conf.sourceAPI["forFilteredQuery"] = "services/api/multimatch"
+  }
+
+  // position stability scenarios
+  let scenario = document.getElementById('layout-scenario').value
+
+  if (scenario == "allstable") {
+    TW.conf.stablePositions = true
+    TW.conf.independantTypes = false
+    TW.conf.fa2SlowerMeso = false
+    TW.FA2Params.iterationsPerRender = 12
+    TW.FA2Params.slowDown = .4
+  }
+  else if (scenario == "indeptypes") {
+    TW.conf.stablePositions = true
+    TW.conf.independantTypes = true
+    TW.conf.fa2SlowerMeso = false
+    TW.FA2Params.iterationsPerRender = 4
+  }
+  else if (scenario == "indeptypes-adaptspeed") {
+    TW.conf.stablePositions = true
+    TW.conf.independantTypes = true
+    TW.conf.fa2SlowerMeso = true
+    TW.FA2Params.iterationsPerRender = 4
+    TW.FA2Params.iterationsPerRender = 4
+  }
+  else if (scenario == "notstable") {
+    TW.conf.stablePositions = false
+    TW.conf.independantTypes = true
+    TW.conf.fa2SlowerMeso = false
+    TW.FA2Params.iterationsPerRender = 4
+  }
+
+  console.warn("TW.conf.sourceAPI[\"forFilteredQuery\"] <= ", TW.conf.sourceAPI["forFilteredQuery"])
+  console.warn("TW.conf.stablePositions <= ", TW.conf.stablePositions)
+  console.warn("TW.conf.independantTypes <= ", TW.conf.independantTypes)
+  console.warn("TW.FA2Params.iterationsPerRender <= ", TW.FA2Params.iterationsPerRender)
+
+  // in all cases we reload
+  TW.resetGraph()
+  var [inFormat, inData, mapLabel] = syncRemoteGraphData()
+  mainStartGraph(inFormat, inData, TW.instance)
+  writeLabel(mapLabel)
+}
+
+
 // writes new attribute configuration from user form, recreates facet bins AND runs the new color
 // processing time: ~~ 1.5 ms for 100 nodes
 function newAttrConfAndColor() {
   let attrTitle = document.getElementById('choose-attr').value
 
   let legendChanged = (
+    (! TW.facetOptions[attrTitle])
+       ||
     (! "legend" in TW.facetOptions[attrTitle] && document.getElementById('attr-translation').value)
        ||
     (TW.facetOptions[attrTitle].legend != document.getElementById('attr-translation').value)

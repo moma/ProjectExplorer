@@ -564,6 +564,7 @@ var SigmaUtils = function () {
         if (TW.conf.fa2Available) {
           if (!args.manual)      args.manual = false
           if (!args.duration)    args.duration = parseInt(TW.conf.fa2Milliseconds) || 4000
+          if (!args.propDuration) args.propDuration = TW.conf.fa2AdaptDuration
 
           // togglability case
           if(TW.partialGraph.isForceAtlas2Running()) {
@@ -578,8 +579,17 @@ var SigmaUtils = function () {
                 if (! args.manual) {
                   if (TW.partialGraph.graph.nNodes() < TW.conf.minNodesForAutoFA2)
                     return
-                  else
-                    setTimeout(function(){sigma_utils.ourStopFA2()},args.duration)
+                  else {
+                    if (!args.propDuration) {
+                      setTimeout(function(){sigma_utils.ourStopFA2()},args.duration)
+                    }
+                    else {
+                      let nEds = getVisibleEdges().length
+                      let newDur = parseInt(args.duration * Math.log(nEds))
+                      setTimeout(function(){sigma_utils.ourStopFA2()},newDur)
+                      console.log("fa2 adapted duration", newDur)
+                    }
+                  }
                 }
 
                 // hide edges during work for smaller cpu load
@@ -679,7 +689,7 @@ function gradientColoring(daclass, forTypes) {
 
     graphResetLabelsAndSizes()    // full loop
 
-    if (typeof forTypes != 'array' || ! forTypes.length) {
+    if (typeof forTypes == 'undefined' || ! forTypes.length) {
       // default strategy on multiple types: color all types that have the attr
       forTypes = getActivetypesNames().filter(function(ty){
         return daclass in TW.Facets[ty]
@@ -907,7 +917,7 @@ function heatmapColoring(daclass, forTypes) {
     }
   }
 
-  if (typeof forTypes != 'array' || ! forTypes.length) {
+  if (typeof forTypes == 'undefined' || ! forTypes.length) {
     // default strategy on multiple types: color all types that have the attr
     forTypes = getActivetypesNames().filter(function(ty){
       return daclass in TW.Facets[ty]
@@ -988,7 +998,7 @@ function clusterColoring(daclass, forTypes) {
 
     graphResetLabelsAndSizes()    // full loop (could be avoided most times if flag in sstate)
 
-    if (typeof forTypes != 'array' || ! forTypes.length) {
+    if (typeof forTypes == 'undefined' || ! forTypes.length) {
       // default strategy on multiple types: color all types that have the attr
       forTypes = getActivetypesNames().filter(function(ty){
         return daclass in TW.Facets[ty]
@@ -1000,8 +1010,7 @@ function clusterColoring(daclass, forTypes) {
         if(!TW.SystemState().LouvainFait) {
             try {
               RunLouvain(function() {
-                TW.SystemState().LouvainFait = true
-                clusterColoring("clust_louvain")
+                clusterColoring("clust_louvain", forTypes)
               })
             }
             catch(e) {

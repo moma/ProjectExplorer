@@ -32,6 +32,9 @@ TW.facetOptions = TW.conf.defaultFacetOptions
 if (/mobile/i.test(navigator.userAgent))   mobileAdaptConf()
 
 
+// stats for de debug displays and dev tests
+TW.stats = {}
+
 //  ======== [   what to do at start ] ========= //
 console.log("Starting TWJS")
 
@@ -50,8 +53,8 @@ TW.instance.initSearchListeners();
 
 TW.currentRelDocsDBs = []  // to make available dbconf to topPapers
 
-// show the custom name + home link of the app
-writeBrand(TW.conf.branding, TW.conf.brandingLink)
+// show the custom name + home link of the app + custom video
+writeBrand(TW.conf.branding)
 
 // choosing the input
 // -------------------
@@ -103,6 +106,8 @@ function syncRemoteGraphData () {
   var inData;        // = {nodes: [....], edges: [....], cats:...}
 
   var mapLabel;      // user displayed label for this input dataset
+
+  let t0 = performance.now()
 
   // case (1) read from remote DB via API bridge fetching
   // ex: /services/api/graph?q=filters...
@@ -163,6 +168,8 @@ function syncRemoteGraphData () {
 
               var restParams = []
               var nameElts = []
+              var filterLen = 0
+
               // build REST parameters from filtering arrays
               // and name from each filter value
               for (var fieldName in TW.APIQuery) {
@@ -172,8 +179,16 @@ function syncRemoteGraphData () {
                     let typeName = TW.APIQuery[fieldName]
                     restParams.push("type"+itype+"="+typeName)
                   }
+                  // optional pivotType
+                  else if (fieldName == "_pivot_type") {
+                    let pivotType = TW.APIQuery[fieldName]
+                    if (pivotType == "scholars" || pivotType == "keywords") {
+                      restParams.push("pivot_type="+pivotType)
+                    }
+                  }
                   // an array of filters
                   else {
+                    filterLen ++
                     var nameSubElts = []
                     for (var value of TW.APIQuery[fieldName]) {
                         // exemple: "countries[]=France"
@@ -185,27 +200,15 @@ function syncRemoteGraphData () {
 
               }
 
-              if (restParams.length) {
-                  thedata = "qtype=filters&" + restParams.join("&")
+              if (filterLen) {
                   mapLabel = nameElts.join(" and ")
               }
+              // special param 'query' with special value '*' used to "matchall"
               else {
-                  thedata = "qtype=filters&query=*"
+                  restParams.push("query=*")
                   mapLabel = "(ENTIRE NETWORK)"
               }
-          }
-
-          // Assigning name for the network
-          if (! mapLabel) {
-              elements = []
-              queryarray = JSON.parse(ourGetUrlParam.nodeidparam)
-              for(var i in queryarray) {
-                  item = queryarray[i]
-                  if(Array.isArray(item) && item.length>0) {
-                      for(var j in item) elements.push(item[j])
-                  }
-              }
-              mapLabel = '"'+elements.join('" , "')+'"';
+              thedata = "qtype=filters&" + restParams.join("&")
           }
 
           var bridgeRes = AjaxSync({ url: theurl, data:thedata, type:'GET' })
@@ -300,6 +303,12 @@ function syncRemoteGraphData () {
     }
   }
 
+  let dataLoadTime = performance.now() - t0
+  console.log("data loading time:", dataLoadTime)
+  if (TW.stats) {
+    TW.stats.dataLoadTime = dataLoadTime
+  }
+
   return [inFormat, inData, mapLabel]
 }
 
@@ -353,7 +362,14 @@ function mainStartGraph(inFormat, inData, twInstance) {
       let optProjectFacets = null
 
       if (TW.sourcemode == "api") {
+        // defaults nodetypes for this API from conf
         optNodeTypes = TW.conf.sourceAPI.nodetypes
+
+        // possible nodetypes declarations from URL params
+        if (TW.APIQuery && typeof TW.APIQuery == 'object') {
+          if (TW.APIQuery._node0)   optNodeTypes['node0'] = TW.APIQuery._node0
+          if (TW.APIQuery._node1)   optNodeTypes['node1'] = TW.APIQuery._node1
+        }
       }
       else {
         // we assume the filePath is of the form projectPath/sourceFile
@@ -564,46 +580,46 @@ function mainStartGraph(inFormat, inData, twInstance) {
         }
       }
 
-      TW.FA2Params = {
-        // adapting speed -------------
-        slowDown: 1.5,
-        startingIterations: 2,             // keep it an even number to reduce visible oscillations at rendering
-        iterationsPerRender: 4,            // idem
-        barnesHutOptimize: false,
-        // barnesHutTheta: .5,
+      if (TW.conf.debug.logSettings) console.info("FA2 settings", TW.FA2Params)
+      // track which type has already been spatialised once
+      TW.didFA2OnTypes = TW.categories.map(function(){return false})
 
-        // global behavior -----------
-        linLogMode: true,
-        edgeWeightInfluence: .4,
-        gravity: .3,
-        strongGravityMode: false,
-        scalingRatio: 1,
-        skipHidden: false,      // if true fa2 initial filter nodes
+      // adapt init parameters to conf and run initial fa2
+      if (TW.conf.fa2Enabled) {
+        reInitFa2({
+          skipHidden: TW.conf.independantTypes,
+          typeAdapt: TW.conf.independantTypes,
+          callback: function() {
+            // initial FA2
+            sigma_utils.smartForceAtlas()
 
-        adjustSizes: false,     // ~ messy but sort of in favor of overlap prevention
-
-        // favors global centrality
-        // (rather not needed for large preferential attachment type of data ?)
-        outboundAttractionDistribution: false
+            if (TW.conf.stablePositions) {
+              if (TW.conf.independantTypes) {
+                // only the active ones have been spatialised
+                // (we *copy* bool flags of activetypes)
+                for (var typeId in initialActivetypes) {
+                  TW.didFA2OnTypes = initialActivetypes[typeId]
+                }
+              }
+              else {
+                // all types have been spatialised
+                // repeat true for each category
+                TW.didFA2OnTypes = TW.categories.map(function(){return true})
+              }
+            }
+          }
+        })
       }
 
-      if (TW.conf.debug.logSettings) console.info("FA2 settings", TW.FA2Params)
-
-      // init FA2 for any future forceAtlas2 calls
-      TW.partialGraph.configForceAtlas2(TW.FA2Params)
+      // REFA new sigma.js
+      TW.partialGraph.camera.goTo({x:0, y:0, ratio:1.2, angle: 0})
 
       // NB: noverlap conf depends on sizeRatios so updated before each run
 
-      // REFA new sigma.js
-      TW.partialGraph.camera.goTo({x:0, y:0, ratio:0.9, angle: 0})
 
       // mostly json data are extracts provided by DB apis => no positions
       // if (inFormat == "json")  TW.conf.fa2Enabled = true
-
-      // will run fa2 if enough nodes and TW.conf.fa2Enabled == true
-      sigma_utils.smartForceAtlas()
   }
-
 }
 
 setTimeout( function() {

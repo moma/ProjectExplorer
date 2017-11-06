@@ -6,9 +6,11 @@ TW.conf = (function(TW){
 
   let TWConf = {}
 
-  TWConf.branding = 'ProjectExplorer'  // <--- name displayed in upper left
-  TWConf.brandingLink = 'http://iscpif.fr'   // <--- link to "home"
-
+  TWConf.branding = {
+    'name': 'ProjectExplorer',   // <--- name displayed in upper left
+    'link': 'http://iscpif.fr',                         // home  link
+    'video': 'https://player.vimeo.com/video/38383946'  // video link
+  }
 
   // ==========================
   // TINA POSSIBLE DATA SOURCES
@@ -105,9 +107,10 @@ TW.conf = (function(TW){
   TWConf.maxDiscreteValues = 15
   TWConf.legendsBins = 7
 
-  // to normalize node sizes (larger range does increase visual size difference)
-  TWConf.desirableNodeSizeMin=1;
-  TWConf.desirableNodeSizeMax=4;
+  // to normalize node sizes (larger range max-min increases visual size difference)
+  //                         (larger min           increases overall visual size)
+  TWConf.desirableNodeSizeMin=3000;
+  TWConf.desirableNodeSizeMax=3010;
 
 
   // =============
@@ -131,7 +134,6 @@ TW.conf = (function(TW){
     'sourceFile': null,              // server: 1 default gexf|json graph source
     'sourceMenu': "server_menu.json" // ...or server: a gexf|json sources list
   }
-  Object.freeze(TWConf.paths)  // /!\ to prevent path modification before load
 
   // Active modules
   // --------------
@@ -155,6 +157,8 @@ TW.conf = (function(TW){
 
   TWConf.colorByAtt = true;            // show "Set colors" menu
 
+  TWConf.tuningPanel = true;           // show "Tune settings" menu button
+
   TWConf.dragNodesAvailable = true;    // allow dragging nodes with CTRL+click
 
   TWConf.deselectOnclickStage = true   // click on background remove selection ?
@@ -175,14 +179,16 @@ TW.conf = (function(TW){
 
   // Layout options
   // --------------
-  TWConf.fa2Available=true;        // show/hide fa2Button
   TWConf.disperseAvailable=true;   // show/hide disperseButton
+  TWConf.fa2Available=true;        // show/hide fa2Button
 
   // if fa2Available, the auto-run config:
 
     TWConf.fa2Enabled= true;        // fa2 auto-run at start and after graph modified ?
-    TWConf.fa2Milliseconds=4000;    // duration of auto-run
+    TWConf.fa2Milliseconds=900;     // constant factor in duration of auto-run
+    TWConf.fa2AdaptDuration=true;   // duration of auto-run proportional log(nEdges)
     TWConf.minNodesForAutoFA2 = 5   // graph size threshold to auto-run
+    TWConf.fa2SlowerMeso = true     // slow down meso if few nodes
 
 
   // Full-text search
@@ -209,6 +215,19 @@ TW.conf = (function(TW){
                                    //    (and when layouts are called,
                                    //     all types are moving together
                                    //      even when some are hidden)
+
+  TWConf.independantTypes = true   // if stablePositions, types are not moving together
+
+  TWConf.colorTheme = "24DivergingZeileis"   // color palette for clusters
+                                             //  - "9CBrewerSet1"
+                                             //  - "12CBrewerPaired",
+                                             //  - "22Kelly"
+                                             //  - "24DivergingZeileis"
+                                             //  - "24ContrastedPastel"
+                                             //  - "50Fluo"
+                                             //  - "50Pastel"
+                                             //  - "80Pastel"
+                                             //  - "128Tina"
 
   // sigma rendering settings
   // ------------------------
@@ -259,20 +278,20 @@ TW.conf = (function(TW){
   TWConf.mesoBackground = '#fcfcd5'
 
   // mouse captor zoom limits
-  TWConf.zoomMin = .015625         // for zoom IN   (ex: 1/64 to allow zoom x64)
-  TWConf.zoomMax = 4               // for zoom OUT
+  TWConf.zoomMin = 1/64            // for zoom IN   (ex: 1/64 to allow zoom x64)
+  TWConf.zoomMax = 8               // for zoom OUT
 
   // circle selection cursor
   TWConf.circleSizeMin = 0;
-  TWConf.circleSizeMax = 100;
+  TWConf.circleSizeMax = 200;
   TWConf.moreLabelsUnderArea = true; // show 3x more labels under area (/!\ costly)
 
   // em size range for neighbor nodes "tagcloud"  (1 = "normal size")
   TWConf.tagcloudFontsizeMin = .8  ;
   TWConf.tagcloudFontsizeMax = 1.5 ;
 
-  TWConf.tagcloudSameLimit = 50     // max displayed neighbors of the same type
-  TWConf.tagcloudOpposLimit = 10    // max displayed neighbors of the opposite type
+  TWConf.tagcloudSameLimit = 100     // max displayed neighbors of the same type
+  TWConf.tagcloudOpposLimit = 100    // max displayed neighbors of the opposite type
 
   // relative sizes (iff ChangeType == both nodetypes)
   TWConf.sizeMult = [];
@@ -295,6 +314,8 @@ TW.conf = (function(TW){
     logSelections: false
   }
 
+  Object.freeze(TWConf.paths)  // /!\ to prevent path modification before load
+  Object.freeze(TWConf.branding)  // idem
 
   return TWConf
 })()
