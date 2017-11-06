@@ -40,7 +40,7 @@ TW.conf = (function(TW){
 
   // routes by corresponding type
   TWConf.relatedDocsAPIS = {
-    "twitter": "https://134.158.74.111/twitter_search",
+    "twitter": "/twitter_search",
     "CortextDB": "twbackends/phpAPI",
     "csv": "twbackends/phpAPI"
   }
@@ -148,6 +148,9 @@ TW.conf = (function(TW){
 
   // cf. twmodules/crowdsourcingModule/README.md to initialize the associated db
   TWConf.ModulesFlags["crowdsourcingModule"] = true ;
+
+  // automated interactive exploration
+  TWConf.ModulesFlags["demoFSAModule"] = true ;
 
   // Other GUI options
   // ------------------
