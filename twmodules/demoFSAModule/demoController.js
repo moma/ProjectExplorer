@@ -103,10 +103,10 @@ Demo = function (settings = demoFSA.settings) {
       console.warn("won't neighborSelect: no current selection or no neighbors")
     }
     else {
-      let currentNeighbors = []
+      let currentNeighNids = []
       for (var relType in TW.SystemState().selectionRels) {
         for (var selectedNid in TW.SystemState().selectionRels[relType]) {
-          currentNeighbors = currentNeighbors.append(
+          currentNeighNids = currentNeighNids.concat(
             Object.keys(
               TW.SystemState().selectionRels[relType][selectedNid]
             )
@@ -114,7 +114,8 @@ Demo = function (settings = demoFSA.settings) {
         }
       }
 
-      let picked_node = this._randpick(currentNeighbors)
+      let picked_nid = this._randpick(currentNeighNids)
+      let picked_node = TW.partialGraph.graph.nodes(picked_nid)
       if (! picked_node || ! picked_node.id) {
         console.warn("won't neighborSelect: invalid node: ", picked_node)
       }
@@ -141,10 +142,13 @@ Demo = function (settings = demoFSA.settings) {
   // mapping from our actions to the name of the method to call
   this.actions = {
     "ChgLvl" : window.changeLevel, // => will call window.changeLevel()
-    "ChgType" : this.changeType,
-    "NeiSelect": this.neighborSelect,
-    "RandSelect": this.randomSelect
+    "ChgType" : this.changeType.bind(this),
+    "NeiSelect": this.neighborSelect.bind(this),
+    "RandSelect": this.randomSelect.bind(this)
   }
+
+  // prevent linking to any other method
+  Object.freeze(this.actions)
 
   this.step = 0
 
@@ -177,7 +181,7 @@ Demo = function (settings = demoFSA.settings) {
 
       // make a step
       let method = this.actions[todoAction]
-      method()                                // <==== /!\ invoke
+      method()                           // <==== /!\ invoke
       this.step ++
       console.log("did step", this.step, ":", todoAction)
 
