@@ -11,11 +11,11 @@ demoFSA.settings = {
     // operations (probabilities for each op)
     "transition_probas": {
       "NeiAdd": .25,
-      "NeiSelect": .3,
+      "NeiSelect": .25,
       "RandSelect": .05,
-      "ChgLvl": .25,
+      "ChgLvl": .2,
       "ChgType": .15,
-      "SwitchTab": .5,
+      "SwitchTab": .1,
     }
 
     // NB   at this point we return each time to the *same* state
