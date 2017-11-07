@@ -73,7 +73,7 @@ Demo = function (settings = demoFSA.settings) {
   // pick one, from array
   this._randpick = function(arr) {
     let picked = Math.floor(Math.random() * arr.length)
-    console.log("picked", arr.length, picked, arr[picked])
+    // console.log("picked", arr.length, picked, arr[picked])
     return arr[picked]
   }
 
@@ -195,6 +195,8 @@ Demo = function (settings = demoFSA.settings) {
   // prevent linking to any other method
   Object.freeze(this.actions)
 
+  this.cam = null
+
   this.step = 0
 
   this.run = async function(settings = demoFSA.settings) {
@@ -203,6 +205,9 @@ Demo = function (settings = demoFSA.settings) {
     while (typeof TW.partialGraph == 'undefined') {
       await this._sleep(500)
     }
+
+    // get cam from the sigma instance
+    this.cam = TW.partialGraph.camera
 
     // monitor global time
     let startTime = performance.now()
@@ -230,11 +235,30 @@ Demo = function (settings = demoFSA.settings) {
       this.step ++
       console.log("did step", this.step, ":", todoAction)
 
-      // POSSIBLE use selected node as center
-      TW.partialGraph.camera.goTo({x:0, y:0, ratio:.8, angle: 0})
+      // zoom around one of the selected nodes as center
+      let selected = TW.SystemState().selectionNids
+      let aNode = TW.partialGraph.graph.nodes(demo._randpick(selected))
+      let camPfx = this.cam.readPrefix
+      if (aNode && aNode[camPfx+'x'] && aNode[camPfx+'y']) {
+        sigma.utils.zoomTo(
+          this.cam,                         // cam
+          aNode[camPfx+'x'] - this.cam.x,   // x
+          aNode[camPfx+'y'] - this.cam.y,   // y
+          .3,                               // rel ratio
+          {'duration': 500}                 // animation
+        )
+      }
 
       // rest a little
       await this._sleep(settings.sleepDuration)
+
+      // when abs cam ratio becomes too close, add a 2s de-zoom step
+      if (this.cam.ratio < .3) {
+        // de-zoom
+        sigma.utils.zoomTo(this.cam, 0, 0, 1/this.cam.ratio, {'duration': 2000})
+        await this._sleep(2000)
+      }
+
     }
     console.log("--- finished demo ---")
   }
@@ -243,7 +267,7 @@ Demo = function (settings = demoFSA.settings) {
 
 // add a button to run the demo
 let demo = new Demo()
-let demoButton = '<button type="button" id="run-demo" class="btn btn-primary btn-sm" title="Lancez une démo d\'exploration automatique" onclick="demo.run()">Run Demo</button>'
+let demoButton = '<button type="button" id="run-demo" class="btn btn-warning btn-sm" title="Lancez une démo d\'exploration automatique" onclick="demo.run()">Run Demo</button>'
 let navbar = document.getElementById('searchnav')
 if (navbar) {
   let navItem = document.createElement('li')
