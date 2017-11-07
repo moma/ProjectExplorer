@@ -10,12 +10,17 @@ demoFSA.settings = {
 
     // operations (probabilities for each op)
     "transition_probas": {
-      "NeiAdd": .3,
-      "NeiSelect": .2,
-      "RandSelect": .05,
-      "ChgLvl": .2,
-      "ChgType": .15,
-      "SwitchTab": .1,
+      "NeiAdd": .1,
+      "NeiSelect": .15,
+      "RandSelect": .15,
+      "ChgLvl": .15,
+
+      // only makes sense if relatedDocs is true
+      "SwitchDocTab": .05,
+
+      // only makes sense if TW.categories.length > 1
+      "ChgType": .2,
+      "SwitchNeiTab": .2
     }
 
     // NB   at this point we return each time to the *same* state
@@ -45,11 +50,13 @@ Demo = function (settings = demoFSA.settings) {
   this.opRanges = []
   // exemple:
   // [
-  //   {threshold: 0.25, action: "NeiSelect"}
-  //   {threshold: 0.3, action: "RandSelect"}
-  //   {threshold: 0.45, action: "ChgLvl"}
-  //   {threshold: 0.6, action: "ChgType"}
-  //   {threshold: 1, action: "Sleep"}
+  //   {threshold: 0.2, action: "NeiAdd"}
+  //   {threshold: 0.4, action: "NeiSelect"}
+  //   {threshold: 0.45, action: "RandSelect"}
+  //   {threshold: 0.6, action: "ChgLvl"}
+  //   {threshold: 0.8, action: "ChgType"}
+  //   {threshold: 0.85, action: "SwitchDocTab"}
+  //   {threshold: 1, action: "SwitchNeiTab"}
   // ]
 
   // prepare opRanges
@@ -60,7 +67,7 @@ Demo = function (settings = demoFSA.settings) {
     this.lastRangeMax += p
   }
 
-  console.log("opRanges, final max", this.opRanges, this.lastRangeMax)
+  // console.log("opRanges, final max", this.opRanges, this.lastRangeMax)
 
   if (this.lastRangeMax != 1) {
     console.warn('demoFSA transitions don\'t add up to 1, will normalize')
@@ -156,6 +163,20 @@ Demo = function (settings = demoFSA.settings) {
   }
 
 
+  // switching neighbors/opposites tab
+  this.switchNeiTab = function() {
+    // do we have another possible tab (an inactive one) ?
+    let possTabsAnchors = document.querySelectorAll("#selection-tabs-contnr > ul > li:not(.active) > a")
+    if (!possTabsAnchors.length) {
+      console.warn("won't switchNeiTab: no inactive neighbors-tab")
+    }
+    else {
+      // choose one tab from the inactive
+      let link = this._randpick(possTabsAnchors)
+      link.click()
+    }
+  }
+
   // switching related docs tab
   this.switchRDTab = function() {
     let rdtabs = document.getElementById("reldocs-tabs")
@@ -196,7 +217,8 @@ Demo = function (settings = demoFSA.settings) {
     "ChgType" :   this.changeType.bind(this),
     "NeiSelect":  this.neighborSelect.bind(this),
     "NeiAdd":     this.neighborAdd.bind(this),
-    "SwitchTab":  this.switchRDTab.bind(this),
+    "SwitchDocTab":  this.switchRDTab.bind(this),
+    "SwitchNeiTab":  this.switchNeiTab.bind(this),
     "RandSelect": this.randomSelect.bind(this)
   }
 
@@ -244,7 +266,7 @@ Demo = function (settings = demoFSA.settings) {
       console.log("did step", this.step, ":", todoAction)
 
       // zoom around one of the selected nodes as center
-      if (todoAction != "SwitchTab") {
+      if (todoAction != "SwitchNeiTab" && todoAction != "SwitchDocTab") {
         let selected = TW.SystemState().selectionNids
         let aNode = TW.partialGraph.graph.nodes(demo._randpick(selected))
         let camPfx = this.cam.readPrefix
