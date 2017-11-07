@@ -43,7 +43,7 @@ TW.conf = (function(TW){
 
   // routes by corresponding type
   TWConf.relatedDocsAPIS = {
-    "twitter": "http://127.0.0.1:5000/twitter_search",
+    "twitter": "/twitter_search",
     "CortextDB": "twbackends/phpAPI",
     "csv": "twbackends/phpAPI"
   }
@@ -145,8 +145,8 @@ TW.conf = (function(TW){
 
   // to normalize node sizes (larger range max-min increases visual size difference)
   //                         (larger min           increases overall visual size)
-  TWConf.desirableNodeSizeMin=3000;
-  TWConf.desirableNodeSizeMax=3010;
+  TWConf.desirableNodeSizeMin=2500;
+  TWConf.desirableNodeSizeMax=2510;
 
 
   // =============
@@ -164,7 +164,7 @@ TW.conf = (function(TW){
   // ------------
   TWConf.paths = {
     'ourlibs':   'static/tinawebJS/twlibs',
-    'modules':   'static/tinawebModuleComexLayout',
+    'modules':   'static/tinawebModules',
     'templates': 'static/tinawebJS/twlibs/default_hit_templates',
 
     'sourceFile': null,              // server: 1 default gexf|json graph source
@@ -179,6 +179,9 @@ TW.conf = (function(TW){
   // see also activateModules()
   TWConf.ModulesFlags["comexTopBarLoader"] = true ;
 
+  // automated interactive exploration
+  TWConf.ModulesFlags["demoFSAModule"] = true ;
+
   // Other GUI options
   // ------------------
   TWConf.sidePanelSize = "300px"       // width of the side panel (def: 400px)
@@ -187,7 +190,7 @@ TW.conf = (function(TW){
 
   TWConf.colorByAtt = true;            // show "Set colors" menu
 
-  TWConf.tuningPanel = false;          // show "Tune settings" menu button
+  TWConf.tuningPanel = true;           // show "Tune settings" menu button
 
   TWConf.dragNodesAvailable = true;    // allow dragging nodes with CTRL+click
 
@@ -208,7 +211,7 @@ TW.conf = (function(TW){
   // if fa2Available, the auto-run config:
 
     TWConf.fa2Enabled= true;        // fa2 auto-run at start and after graph modified ?
-    TWConf.fa2Milliseconds=500;     // constant factor in duration of auto-run
+    TWConf.fa2Milliseconds=750;     // constant factor in duration of auto-run
     TWConf.fa2AdaptDuration=true;   // duration of auto-run proportional sqrt(nEdges)
     TWConf.minNodesForAutoFA2 = 5   // graph size threshold to auto-run
     TWConf.fa2SlowerMeso = false    // slow down meso if few nodes
