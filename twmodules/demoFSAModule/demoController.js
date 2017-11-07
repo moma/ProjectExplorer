@@ -241,7 +241,16 @@ Demo = function (settings = demoFSA.settings) {
 }
 
 
+// add a button to run the demo
 let demo = new Demo()
-
-// we wait 4s for tina to load and then run for totalDuration
-demo.run()
+let demoButton = '<button type="button" id="run-demo" class="btn btn-primary btn-sm" title="Lancez une démo d\'exploration automatique" onclick="demo.run()">Run Demo</button>'
+let navbar = document.getElementById('searchnav')
+if (navbar) {
+  let navItem = document.createElement('li')
+  navItem.id = "demo-navitem"
+  navItem.classList.add("navbar-lower")
+  navItem.classList.add("demoFSAModule")
+  navItem.style.marginLeft = ".5em"
+  navItem.innerHTML = demoButton
+  navbar.appendChild(navItem)
+}
