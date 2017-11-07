@@ -1466,7 +1466,10 @@ function createWaitIcon(idname, width) {
   return icon
 }
 
-activateRDTab = function(elTgt) {
+
+// exemple usage:
+//  TW.gui.activateRDTab(document.querySelectorAll("#reldocs-tabs > li:not(.active) > a")[0])
+TW.gui.activateRDTab = function(elTgt) {
   let relDbType = elTgt.dataset.reldocstype
   let ndTypeId = elTgt.dataset.nodetype
 
@@ -1566,7 +1569,7 @@ function resetTabs(activetypes, dbconf) {
           // add handler to switch relatedDocsType
           newRDTab.addEventListener('click', function(e){
             // tab mecanism
-            activateRDTab(e.target)
+            TW.gui.activateRDTab(e.target)
             // no need to run associated query:
             // (updateRelatedNodesPanel did it at selection time)
           })

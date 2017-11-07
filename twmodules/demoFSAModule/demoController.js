@@ -3,17 +3,19 @@
 demoFSA.settings = {
     // total duration of demo run in ms
     // "totalDuration": 120000,
-    "totalDuration": 20000,
+    "totalDuration": 40000,
 
     // duration sleep step between operations
     "sleepDuration": 4000,
 
     // operations (probabilities for each op)
     "transition_probas": {
-      "NeiSelect": .35,
+      "NeiAdd": .25,
+      "NeiSelect": .3,
       "RandSelect": .05,
-      "ChgLvl": .4,
-      "ChgType": .2
+      "ChgLvl": .25,
+      "ChgType": .15,
+      "SwitchTab": .5,
     }
 
     // NB   at this point we return each time to the *same* state
@@ -24,10 +26,15 @@ demoFSA.settings = {
 }
 
 
-// NB Demo implementation depends on 3 fundamental ProjectExplorer primitives:
+// NB Demo implementation depends on 4 fundamental ProjectExplorer primitives:
 //  - TW.SystemState()
 //  - TW.partialGraph
 //  - TW.instance
+//  - TW.categories
+
+// and access to some gui elements:
+//  - TW.gui.checkBox
+//  - TW.gui.activateRDTab
 
 /* ---------------------  demoFSA object  ----------------------- */
 Demo = function (settings = demoFSA.settings) {
@@ -53,6 +60,8 @@ Demo = function (settings = demoFSA.settings) {
     this.lastRangeMax += p
   }
 
+  console.log("opRanges, final max", this.opRanges, this.lastRangeMax)
+
   if (this.lastRangeMax != 1) {
     console.warn('demoFSA transitions don\'t add up to 1, will normalize')
   }
@@ -62,14 +71,15 @@ Demo = function (settings = demoFSA.settings) {
   // --------
 
   // pick one, from array
-  this._randpick = function(nds) {
-    let picked = Math.round(Math.random() * nds.length)
-    return nds[picked]
+  this._randpick = function(arr) {
+    let picked = Math.floor(Math.random() * arr.length)
+    console.log("picked", arr.length, picked, arr[picked])
+    return arr[picked]
   }
 
   // select one, via TinaWebJS instance
   this._select = function(nid) {
-    TW.instance.selNgn.MultipleSelection2({nodes:[nid]})
+    TW.instance.selNgn.runAndEffects([nid])
   }
 
   // cf. stackoverflow.com/questions/951021
@@ -115,12 +125,45 @@ Demo = function (settings = demoFSA.settings) {
       }
 
       let picked_nid = this._randpick(currentNeighNids)
-      let picked_node = TW.partialGraph.graph.nodes(picked_nid)
+      let picked_node = null
+      try {
+        picked_node = TW.partialGraph.graph.nodes(picked_nid)
+      }
+      catch (e) {
+        console.error("skipping neighborSelect on error:", e)
+      }
       if (! picked_node || ! picked_node.id) {
         console.warn("won't neighborSelect: invalid node: ", picked_node)
       }
       else {
         this._select(picked_node.id)
+      }
+    }
+  }
+
+  this.neighborAdd = function() {
+    TW.gui.checkBox = true
+    this.neighborSelect()
+    TW.gui.checkBox = false
+  }
+
+
+  // switching related docs tab
+  this.switchRDTab = function() {
+    let rdtabs = document.getElementById("reldocs-tabs")
+
+    if (! TW.conf.getRelatedDocs && rdtabs) {
+      console.warn("won't switchRDTab: no rdtabs")
+    }
+    else {
+      // do we have another possible tab (an inactive one) ?
+      let possTabsAnchors = rdtabs.querySelectorAll("li:not(.active) > a")
+      if (!possTabsAnchors.length) {
+        console.warn("won't switchRDTab: no inactive rdtab")
+      }
+      else {
+        // choose one tab from the inactive
+        TW.gui.activateRDTab(this._randpick(possTabsAnchors))
       }
     }
   }
@@ -141,9 +184,11 @@ Demo = function (settings = demoFSA.settings) {
   // --------
   // mapping from our actions to the name of the method to call
   this.actions = {
-    "ChgLvl" : window.changeLevel, // => will call window.changeLevel()
-    "ChgType" : this.changeType.bind(this),
-    "NeiSelect": this.neighborSelect.bind(this),
+    "ChgLvl" :    window.changeLevel, // => will call window.changeLevel()
+    "ChgType" :   this.changeType.bind(this),
+    "NeiSelect":  this.neighborSelect.bind(this),
+    "NeiAdd":     this.neighborAdd.bind(this),
+    "SwitchTab":  this.switchRDTab.bind(this),
     "RandSelect": this.randomSelect.bind(this)
   }
 
