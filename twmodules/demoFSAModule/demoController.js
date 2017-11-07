@@ -105,22 +105,30 @@ Demo = function (settings = demoFSA.settings) {
 
   // we assume something is already selected and that it has a neighbor
   this.neighborSelect = function() {
-    let currentNeiRels = TW.SystemState().selectionRels
+    let sysState = TW.SystemState()
 
-    if (   !TW.SystemState()
-        || !TW.SystemState().selectionRels
-        || !Object.keys(TW.SystemState().selectionRels).length) {
+    let currentActiveRels = {}
+
+    for (var i in sysState.activereltypes) {
+      currentActiveRels[sysState.activereltypes[i]] = true
+    }
+
+    if (   !sysState
+        || !sysState.selectionRels
+        || !Object.keys(sysState.selectionRels).length) {
       console.warn("won't neighborSelect: no current selection or no neighbors")
     }
     else {
       let currentNeighNids = []
-      for (var relType in TW.SystemState().selectionRels) {
-        for (var selectedNid in TW.SystemState().selectionRels[relType]) {
-          currentNeighNids = currentNeighNids.concat(
-            Object.keys(
-              TW.SystemState().selectionRels[relType][selectedNid]
+      for (var relType in sysState.selectionRels) {
+        if (currentActiveRels[relType]) {
+          for (var selectedNid in sysState.selectionRels[relType]) {
+            currentNeighNids = currentNeighNids.concat(
+              Object.keys(
+                sysState.selectionRels[relType][selectedNid]
+              )
             )
-          )
+          }
         }
       }
 
