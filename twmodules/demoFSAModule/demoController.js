@@ -6,12 +6,12 @@ demoFSA.settings = {
     "totalDuration": 40000,
 
     // duration sleep step between operations
-    "sleepDuration": 4000,
+    "sleepDuration": 5000,
 
     // operations (probabilities for each op)
     "transition_probas": {
-      "NeiAdd": .25,
-      "NeiSelect": .25,
+      "NeiAdd": .3,
+      "NeiSelect": .2,
       "RandSelect": .05,
       "ChgLvl": .2,
       "ChgType": .15,
@@ -236,17 +236,19 @@ Demo = function (settings = demoFSA.settings) {
       console.log("did step", this.step, ":", todoAction)
 
       // zoom around one of the selected nodes as center
-      let selected = TW.SystemState().selectionNids
-      let aNode = TW.partialGraph.graph.nodes(demo._randpick(selected))
-      let camPfx = this.cam.readPrefix
-      if (aNode && aNode[camPfx+'x'] && aNode[camPfx+'y']) {
-        sigma.utils.zoomTo(
-          this.cam,                         // cam
-          aNode[camPfx+'x'] - this.cam.x,   // x
-          aNode[camPfx+'y'] - this.cam.y,   // y
-          .3,                               // rel ratio
-          {'duration': 500}                 // animation
-        )
+      if (todoAction != "SwitchTab") {
+        let selected = TW.SystemState().selectionNids
+        let aNode = TW.partialGraph.graph.nodes(demo._randpick(selected))
+        let camPfx = this.cam.readPrefix
+        if (aNode && aNode[camPfx+'x'] && aNode[camPfx+'y']) {
+          sigma.utils.zoomTo(
+            this.cam,                         // cam
+            aNode[camPfx+'x'] - this.cam.x,   // x
+            aNode[camPfx+'y'] - this.cam.y,   // y
+            .4,                               // rel ratio
+            {'duration': 500}                 // animation
+          )
+        }
       }
 
       // rest a little
@@ -267,7 +269,7 @@ Demo = function (settings = demoFSA.settings) {
 
 // add a button to run the demo
 let demo = new Demo()
-let demoButton = '<button type="button" id="run-demo" class="btn btn-warning btn-sm" title="Lancez une démo d\'exploration automatique" onclick="demo.run()">Run Demo</button>'
+let demoButton = '<button type="button" id="run-demo" class="btn btn-warning btn-sm" title="Lancez une démo d\'exploration automatique" onclick="demo.run()" style="color: DarkSlateGray;">Run Demo</button>'
 let navbar = document.getElementById('searchnav')
 if (navbar) {
   let navItem = document.createElement('li')
