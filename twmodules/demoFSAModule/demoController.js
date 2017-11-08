@@ -17,8 +17,8 @@ demoFSA.settings = {
 
     // operations (probabilities for each op)
     "transition_probas": {
-      "NeiAdd": .1,
-      "NeiSelect": .15,
+      "NeiAdd": .15,
+      "NeiSelect": .1,
       "RandSelect": .15,
       "ChgLvl": .15,
 
@@ -83,7 +83,7 @@ Demo = function (settings = demoFSA.settings) {
 
 
   // like "interrupt signal" to stop after current step
-  this.stopDemo = false
+  this.pauseDemo = false
 
   // flag to see if running
   this.isRunning = false
@@ -92,8 +92,8 @@ Demo = function (settings = demoFSA.settings) {
   this.lastActionTimeout = null
 
   this.pauseOnAction = function() {
-    // stop if running
-    this.stop()
+    // pause if running
+    this.pause()
 
     // remove potentially scheduled starts
     if (this.lastActionTimeout) {
@@ -104,7 +104,7 @@ Demo = function (settings = demoFSA.settings) {
     this.lastActionTimeout = window.setTimeout (
        function(){
          console.log("--- restarting demo ---", this.step)
-         this.stopDemo = false
+         this.pauseDemo = false
          this.run()
        }.bind(this),
        settings.pauseDuration
@@ -140,11 +140,23 @@ Demo = function (settings = demoFSA.settings) {
   }
 
 
+  this.pause = function() {
+    if (this.isRunning) {
+      this.pauseDemo = true
+    }
+
+    if (this.button) {
+      this.button.style.color = "DarkSlateGray"
+      this.button.innerText = "Run Demo"
+    }
+  }
+
   // allow manual stopping
   this.stop = function() {
-    if (this.isRunning) {
-      this.stopDemo = true
-    }
+    this.pause()
+
+    // full stop: remove scheduled restarts
+    window.clearTimeout(this.lastActionTimeout)
   }
 
   this.randomSelect = function() {
@@ -288,8 +300,10 @@ Demo = function (settings = demoFSA.settings) {
   // OPTIONAL BUTTON
   // ---------------
 
+  this.button = null
+
   // add a button to run the demo
-  this.showButton = function(demoObjName = "demo") {
+  this.showButton = function() {
     let navbar = document.getElementById('searchnav')
     if (navbar) {
       let navItem = document.createElement('li')
@@ -298,18 +312,28 @@ Demo = function (settings = demoFSA.settings) {
       navItem.style.marginLeft = ".5em"
       navbar.appendChild(navItem)
 
-      let demoButton = document.createElement('button')
-      demoButton.id = "run-demo"
-      demoButton.classList.add("btn", "btn-warning", "btn-sm")
-      demoButton.style.color = "DarkSlateGray"
-      demoButton.innerText = "Run Demo"
+      this.button = document.createElement('button')
+      this.button.id = "run-demo"
+      this.button.classList.add("btn", "btn-warning", "btn-sm")
+      this.button.style.color = "DarkSlateGray"
+      this.button.innerText = "Run Demo"
 
-      let buttonClick = function() { this.run() }.bind(this)
-      demoButton.addEventListener('click', buttonClick, false)
-      navItem.appendChild(demoButton)
+      let buttonClick = function() {
+        if (! this.isRunning)    this.run()
+        else                     this.stop()
+      }.bind(this)
+      this.button.addEventListener('click', buttonClick, false)
+      navItem.appendChild(this.button)
     }
   }
 
+  this.removeButton = function() {
+    let navItem = document.getElementById("demo-navitem")
+    if (navItem) {
+      navItem.remove()
+      this.button = null
+    }
+  }
 
   // MAIN RUN
   // --------
@@ -332,11 +356,16 @@ Demo = function (settings = demoFSA.settings) {
 
   this.step = 0
 
-
-  // run until stopDemo
+  // run until pauseDemo
   this.run = async function(settings = demoFSA.settings) {
-    this.stopDemo = false
+    this.pauseDemo = false
     this.isRunning = true
+
+    // show on button
+    if (this.button) {
+      this.button.style.color = "Blue"
+      this.button.innerText = "Stop Demo"
+    }
 
     // wait until partialGraph (sigma instance) is loaded
     while (typeof TW.partialGraph == 'undefined') {
@@ -354,7 +383,7 @@ Demo = function (settings = demoFSA.settings) {
     this.randomSelect()
 
     // next steps
-    while (!this.stopDemo
+    while (!this.pauseDemo
          &&
           (   settings.stopCondition != "duration"
            || performance.now() - startTime < settings.totalDuration)
