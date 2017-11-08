@@ -1,15 +1,19 @@
 /* ---------------------  demoFSA settings  ----------------------- */
 
 demoFSA.settings = {
-    // total duration of demo run in ms
-    // "totalDuration": 120000,
-    "totalDuration": 40000,
-
-    // duration sleep step between operations
-    "sleepDuration": 5000,
-
     // show button (otherwise still runnable via console)
     "showButton": false,
+
+    // behavior choice: the 2 possible conditions are "interactions", "duration"
+    "stopCondition": "interactions",
+
+    // pause duration before demo restart when user makes actions
+    // (used iff stopCondition is "interactions")
+    "pauseDuration": 120000,
+
+    // total duration of demo run
+    // (used iff stopCondition is "duration")
+    "totalDuration": 40000,
 
     // operations (probabilities for each op)
     "transition_probas": {
@@ -24,14 +28,20 @@ demoFSA.settings = {
       // only makes sense if TW.categories.length > 1
       "ChgType": .2,
       "SwitchNeiTab": .2
-    }
+    },
+
+    // sleep between operations
+    "sleepDuration": 5000
 
     // NB   at this point we return each time to the *same* state
     // POSSIBLE: we could define different states
     //           to allow contextual transition probas,
     //           ex: the proba to changeLevel could be higher after a zoom
-
 }
+
+
+// expose var to monitor any interactions in the window
+demoFSA.lastInteraction = performance.now()
 
 
 // NB Demo implementation depends on 4 fundamental ProjectExplorer primitives:
@@ -48,7 +58,6 @@ demoFSA.settings = {
 Demo = function (settings = demoFSA.settings) {
   // INIT
   // ----
-
   // opRanges: array of choices as a partition of segments inside [0;1]
   this.opRanges = []
   // exemple:
@@ -77,6 +86,44 @@ Demo = function (settings = demoFSA.settings) {
   }
 
 
+  // like "interrupt signal" to stop after current step
+  this.stopDemo = false
+
+  // flag to see if running
+  this.isRunning = false
+
+  // wait until lastInteraction > 120000
+  this.lastActionTimeout = null
+
+  this.pauseOnAction = function() {
+    // stop if running
+    this.stop()
+
+    // remember when we stopped
+    demoFSA.lastInteraction = performance.now()
+
+    // remove potentially scheduled starts
+    if (this.lastActionTimeout) {
+      window.clearTimeout(this.lastActionTimeout)
+    }
+
+    // schedule restart after pauseDuration
+    this.lastActionTimeout = window.setTimeout (
+       function(){
+         console.log("--- restarting demo ---", this.step)
+         this.stopDemo = false
+         this.run()
+       }.bind(this),
+       settings.pauseDuration
+    )
+  }
+
+  // listen in the window to remember last interactions
+  document.body.addEventListener("click", this.pauseOnAction.bind(this), true)
+  document.body.addEventListener("keydown", this.pauseOnAction.bind(this), true)
+  document.body.addEventListener("touchstart", this.pauseOnAction.bind(this), true)
+
+
   // ROUTINES
   // --------
 
@@ -95,6 +142,14 @@ Demo = function (settings = demoFSA.settings) {
   // cf. stackoverflow.com/questions/951021
   this._sleep = function(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+
+  // allow manual stopping
+  this.stop = function() {
+    if (this.isRunning) {
+      this.stopDemo = true
+    }
   }
 
   this.randomSelect = function() {
@@ -234,7 +289,6 @@ Demo = function (settings = demoFSA.settings) {
       let buttonClick = function() { this.run() }.bind(this)
       demoButton.addEventListener('click', buttonClick, false)
       navItem.appendChild(demoButton)
-
     }
   }
 
@@ -259,7 +313,11 @@ Demo = function (settings = demoFSA.settings) {
 
   this.step = 0
 
+
+  // run until stopDemo
   this.run = async function(settings = demoFSA.settings) {
+    this.stopDemo = false
+    this.isRunning = true
 
     // wait until partialGraph (sigma instance) is loaded
     while (typeof TW.partialGraph == 'undefined') {
@@ -277,7 +335,11 @@ Demo = function (settings = demoFSA.settings) {
     this.randomSelect()
 
     // next steps
-    while (performance.now() - startTime < settings.totalDuration) {
+    while (!this.stopDemo
+         &&
+          (   settings.stopCondition != "duration"
+           || performance.now() - startTime < settings.totalDuration)
+         ) {
       // choose an action
       let todoAction = null
       let rand = Math.random() * this.lastRangeMax  // <=> normalized by total
@@ -322,7 +384,8 @@ Demo = function (settings = demoFSA.settings) {
       }
 
     }
-    console.log("--- finished demo ---")
+    console.log("--- paused demo ---")
+    this.isRunning = false
   }
 }
 
