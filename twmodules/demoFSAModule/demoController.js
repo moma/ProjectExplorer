@@ -219,7 +219,18 @@ Demo = function (settings = demoFSA.settings) {
   // switching neighbors/opposites tab
   this.switchNeiTab = function() {
     // do we have another possible tab (an inactive one) ?
-    let possTabsAnchors = document.querySelectorAll("#selection-tabs-contnr > ul > li:not(.active) > a")
+    let possTabsItems = document.querySelectorAll("#selection-tabs-contnr > ul > li:not(.active)")
+    let possTabsAnchors = []
+
+    // we must also filter li by display != 'none'
+    for (var i=0 ; i < possTabsItems.length ; i++) {
+      let elLi = possTabsItems[i]
+      if (elLi && (!elLi.style.display || elLi.style.display != 'none')) {
+        let elA = elLi.querySelector("a")
+        possTabsAnchors.push(elA)
+      }
+    }
+
     if (!possTabsAnchors.length) {
       console.warn("won't switchNeiTab: no inactive neighbors-tab")
     }
