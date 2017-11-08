@@ -251,10 +251,22 @@ Demo = function (settings = demoFSA.settings) {
   }
 
 
+  // call changeLevel if at least one selected
+  this.changeLevel = function() {
+    if (TW.SystemState().selectionNids.length) {
+      window.changeLevel()
+      this.cam.goTo({x:0, y:0, ratio:.9, angle: 0})
+    }
+    else {
+      console.warn("won't changeLevel: no selection")
+    }
+  }
+
   // call changeType if more than one type
   this.changeType = function() {
     if (TW.categories.length > 1) {
       window.changeType()
+      this.cam.goTo({x:0, y:0, ratio:.9, angle: 0})
     }
     else {
       console.warn("won't changeType: only one nodetype")
@@ -292,7 +304,7 @@ Demo = function (settings = demoFSA.settings) {
   // --------
   // mapping from our actions to the name of the method to call
   this.actions = {
-    "ChgLvl" :    window.changeLevel, // => will call window.changeLevel()
+    "ChgLvl" :    this.changeLevel.bind(this),
     "ChgType" :   this.changeType.bind(this),
     "NeiSelect":  this.neighborSelect.bind(this),
     "NeiAdd":     this.neighborAdd.bind(this),
@@ -300,6 +312,7 @@ Demo = function (settings = demoFSA.settings) {
     "SwitchNeiTab":  this.switchNeiTab.bind(this),
     "RandSelect": this.randomSelect.bind(this)
   }
+
 
   // prevent linking to any other method
   Object.freeze(this.actions)
@@ -362,7 +375,7 @@ Demo = function (settings = demoFSA.settings) {
             this.cam,                         // cam
             aNode[camPfx+'x'] - this.cam.x,   // x
             aNode[camPfx+'y'] - this.cam.y,   // y
-            .4,                               // rel ratio
+            .7,                               // rel ratio
             {'duration': 500}                 // animation
           )
         }
@@ -372,7 +385,7 @@ Demo = function (settings = demoFSA.settings) {
       await this._sleep(settings.sleepDuration)
 
       // when abs cam ratio becomes too close, add a 2s de-zoom step
-      if (this.cam.ratio < .3) {
+      if (this.cam.ratio < .4) {
         // de-zoom
         sigma.utils.zoomTo(this.cam, 0, 0, 1/this.cam.ratio, {'duration': 2000})
         await this._sleep(2000)
