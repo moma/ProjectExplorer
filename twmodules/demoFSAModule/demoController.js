@@ -8,6 +8,9 @@ demoFSA.settings = {
     // duration sleep step between operations
     "sleepDuration": 5000,
 
+    // show button (otherwise still runnable via console)
+    "showButton": false,
+
     // operations (probabilities for each op)
     "transition_probas": {
       "NeiAdd": .1,
@@ -209,6 +212,33 @@ Demo = function (settings = demoFSA.settings) {
   }
 
 
+  // OPTIONAL BUTTON
+  // ---------------
+
+  // add a button to run the demo
+  this.showButton = function(demoObjName = "demo") {
+    let navbar = document.getElementById('searchnav')
+    if (navbar) {
+      let navItem = document.createElement('li')
+      navItem.id = "demo-navitem"
+      navItem.classList.add("navbar-lower", "demoFSAModule")
+      navItem.style.marginLeft = ".5em"
+      navbar.appendChild(navItem)
+
+      let demoButton = document.createElement('button')
+      demoButton.id = "run-demo"
+      demoButton.classList.add("btn", "btn-warning", "btn-sm")
+      demoButton.style.color = "DarkSlateGray"
+      demoButton.innerText = "Run Demo"
+
+      let buttonClick = function() { this.run() }.bind(this)
+      demoButton.addEventListener('click', buttonClick, false)
+      navItem.appendChild(demoButton)
+
+    }
+  }
+
+
   // MAIN RUN
   // --------
   // mapping from our actions to the name of the method to call
@@ -296,17 +326,8 @@ Demo = function (settings = demoFSA.settings) {
   }
 }
 
-
-// add a button to run the demo
+// runnable with demo.run()
 let demo = new Demo()
-let demoButton = '<button type="button" id="run-demo" class="btn btn-warning btn-sm" title="Lancez une démo d\'exploration automatique" onclick="demo.run()" style="color: DarkSlateGray;">Run Demo</button>'
-let navbar = document.getElementById('searchnav')
-if (navbar) {
-  let navItem = document.createElement('li')
-  navItem.id = "demo-navitem"
-  navItem.classList.add("navbar-lower")
-  navItem.classList.add("demoFSAModule")
-  navItem.style.marginLeft = ".5em"
-  navItem.innerHTML = demoButton
-  navbar.appendChild(navItem)
-}
+
+// optional button
+if (demoFSA.settings.showButton)  demo.showButton()
