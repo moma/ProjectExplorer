@@ -40,10 +40,6 @@ demoFSA.settings = {
 }
 
 
-// expose var to monitor any interactions in the window
-demoFSA.lastInteraction = performance.now()
-
-
 // NB Demo implementation depends on 4 fundamental ProjectExplorer primitives:
 //  - TW.SystemState()
 //  - TW.partialGraph
@@ -99,9 +95,6 @@ Demo = function (settings = demoFSA.settings) {
     // stop if running
     this.stop()
 
-    // remember when we stopped
-    demoFSA.lastInteraction = performance.now()
-
     // remove potentially scheduled starts
     if (this.lastActionTimeout) {
       window.clearTimeout(this.lastActionTimeout)
@@ -119,9 +112,11 @@ Demo = function (settings = demoFSA.settings) {
   }
 
   // listen in the window to remember last interactions
-  document.body.addEventListener("click", this.pauseOnAction.bind(this), true)
+  document.body.addEventListener("mousedown", this.pauseOnAction.bind(this), true)
   document.body.addEventListener("keydown", this.pauseOnAction.bind(this), true)
   document.body.addEventListener("touchstart", this.pauseOnAction.bind(this), true)
+
+  // NB: 'mousedown' better than 'click' because we may trigger 'click' via demo
 
 
   // ROUTINES
