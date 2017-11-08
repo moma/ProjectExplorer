@@ -598,7 +598,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
                 // only the active ones have been spatialised
                 // (we *copy* bool flags of activetypes)
                 for (var typeId in initialActivetypes) {
-                  TW.didFA2OnTypes = initialActivetypes[typeId]
+                  TW.didFA2OnTypes[typeId] = initialActivetypes[typeId]
                 }
               }
               else {
