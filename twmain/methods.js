@@ -387,7 +387,11 @@ function getNActive(someState) {
 // NB: "low-level" <=> by design, does NOT change the state, gui nor global flag
 //                     but ought to be called by "scenario" functions that do
 
+// NB: we need to turn flags off even if hidden otherwise when comeback
+//     they'd be highlighted again
+
 // fast because works on the subset of active nodes indicated in SystemState()
+
 function deselectNodes(aSystemState){
     if (isUndef(aSystemState))   aSystemState = TW.SystemState()
 
@@ -399,7 +403,7 @@ function deselectNodes(aSystemState){
     for(let i in sels) {
       let n = TW.partialGraph.graph.nodes(sels[i])
 
-      if (!n || n.hidden) continue
+      if (!n) continue
 
       // mark as unselected!
       n.customAttrs.active = 0
@@ -418,15 +422,12 @@ function deselectNodes(aSystemState){
           let tgt = TW.partialGraph.graph.nodes(tgtnid)
           if (tgt && !tgt.hidden) {
             tgt.customAttrs.highlight = 0
-            let eid1 = `${srcnid};${tgtnid}`
-            let eid2 = `${tgtnid};${srcnid}`
-
             let e1 = TW.partialGraph.graph.edges(`${srcnid};${tgtnid}`)
-            if(e1 && !e1.hidden) {
+            if(e1) {
               e1.customAttrs.activeEdge = 0
             }
             let e2 = TW.partialGraph.graph.edges(`${tgtnid};${srcnid}`)
-            if(e2 && !e2.hidden) {
+            if(e2) {
               e2.customAttrs.activeEdge = 0
             }
           }
