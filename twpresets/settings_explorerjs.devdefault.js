@@ -40,7 +40,7 @@ TW.conf = (function(TW){
 
   // routes by corresponding type
   TWConf.relatedDocsAPIS = {
-    "twitter": "https://134.158.74.111/twitter_search",
+    "twitter": "/twitter_search",
     "CortextDB": "twbackends/phpAPI",
     "csv": "twbackends/phpAPI"
   }
@@ -149,6 +149,9 @@ TW.conf = (function(TW){
   // cf. twmodules/crowdsourcingModule/README.md to initialize the associated db
   TWConf.ModulesFlags["crowdsourcingModule"] = true ;
 
+  // automated interactive exploration
+  TWConf.ModulesFlags["demoFSAModule"] = true ;
+
   // Other GUI options
   // ------------------
   TWConf.sidePanelSize = "400px"       // width of the side panel (def: 400px)
@@ -161,8 +164,10 @@ TW.conf = (function(TW){
 
   TWConf.dragNodesAvailable = true;    // allow dragging nodes with CTRL+click
 
-  TWConf.deselectOnclickStage = true   // click on background remove selection ?
-                                       // (except when dragging)
+  TWConf.deselectOnClickStage = false   // click on background remove selection?
+                                        // (except when dragging)
+
+  TWConf.deselectOnDoubleClickStage = true   // idem double click on background
 
   TWConf.histogramStartThreshold = 10 ;   // for daily histo module
                                           // (from how many docs are significant)
