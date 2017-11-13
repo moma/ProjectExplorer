@@ -210,10 +210,13 @@ var SigmaUtils = function () {
 
         // console.debug(`t=${tstamp()} curve render activeedge: ${edgeInfos(edge)})`)
       }
-      else {
+      else if (TW.gui.drawAllEdges) {
         color = settings('twEdgeGreyColor')
         // console.log("defSize", defSize)
         size = defSize
+      }
+      else {
+        return null
       }
 
       context.strokeStyle = color;
@@ -519,16 +522,18 @@ var SigmaUtils = function () {
 
 
       this.toggleEdges = function(optionalTargetFlag) {
-        var targetFlag
+        // old way: use the global sigma setting (cf. github.com/jacomyal/sigma.js/wiki/Settings#renderers-settings)
+        // currentFlag = TW.partialGraph.settings('drawEdges')
+        // (...)
+        // TW.partialGraph.settings('drawEdges', targetFlag)
+
+        // new way: our own flag (for requested functionality: draw none except selected)
         if (typeof optionalTargetFlag == "undefined") {
-          targetFlag = ! TW.partialGraph.settings('drawEdges')
-          // console.log('unprovided targetFlag:', targetFlag)
+          TW.gui.drawAllEdges = !TW.gui.drawAllEdges
         }
         else {
-          targetFlag = optionalTargetFlag
-          // console.log('provided targetFlag:', targetFlag)
+          TW.gui.drawAllEdges = optionalTargetFlag
         }
-        TW.partialGraph.settings('drawEdges', targetFlag)
         TW.partialGraph.render()
       }
 

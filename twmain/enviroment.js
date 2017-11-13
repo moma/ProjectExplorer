@@ -17,6 +17,7 @@ for (var i in document.styleSheets) {
 // GUI vars
 TW.gui.selectionActive = false  // <== changes rendering mode
 TW.gui.smallView=false;         // tracks if small width
+TW.gui.drawAllEdges = true
 TW.gui.circleSize = 0;
 TW.gui.circleSlider = null
 TW.gui.checkBox=false;
