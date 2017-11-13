@@ -793,7 +793,7 @@ function formatDateLikeTwitter (aDate) {
   else if (msDiff < 6048e5) {
     resStr = parseInt(msDiff/86400000)+'d'
   }
-  else {
+  else if (aDate && aDate.asDate) {
     resStr = aDate.asDate.toLocaleDateString(
                 'en-US',
                 { 'year': 'numeric',
