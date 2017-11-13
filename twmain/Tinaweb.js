@@ -1026,6 +1026,7 @@ var TinaWebJS = function ( sigmacanvas ) {
         }
       })
 
+
       // when one node and normal click
       // ===============================
       partialGraph.bind('clickNode', function(e) {
@@ -1064,21 +1065,29 @@ var TinaWebJS = function ( sigmacanvas ) {
         changeLevel(TW.SystemState())
       })
 
+
       // when click in the empty background
       // ==================================
-      if (TW.conf.deselectOnclickStage) {
-        partialGraph.bind('clickStage', function(e) {
-          // console.log("clickStage event e", e)
+      // we clear selections and all its effects
+      let deselectClick = function(e) {
+        if (! e.data.captor.isDragging
+          && TW.gui.selectionActive
+          && ! TW.gui.circleSize) {
 
-          if (! e.data.captor.isDragging
-            && TW.gui.selectionActive
-            && ! TW.gui.circleSize) {
-
-            // we clear selections and all its effects
-            cancelSelection(false);
-          }
-        })
+          cancelSelection(false);
+        }
       }
+
+      if (TW.conf.deselectOnClickStage) {
+        partialGraph.bind('clickStage', deselectClick)
+      }
+      if (TW.conf.deselectOnDoubleClickStage) {
+        partialGraph.bind('doubleClickStage', deselectClick)
+
+        // also, remove def "zoom in" behavior of sigma _doubleClickHandler()
+        partialGraph.settings('doubleClickEnabled', false)
+      }
+
 
       // for all TW.cam.goTo (move/zoom) events
       //     ===============

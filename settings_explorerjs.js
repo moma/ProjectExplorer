@@ -164,8 +164,10 @@ TW.conf = (function(TW){
 
   TWConf.dragNodesAvailable = true;    // allow dragging nodes with CTRL+click
 
-  TWConf.deselectOnclickStage = true   // click on background remove selection ?
-                                       // (except when dragging)
+  TWConf.deselectOnClickStage = false   // click on background remove selection?
+                                        // (except when dragging)
+
+  TWConf.deselectOnDoubleClickStage = true   // idem double click on background
 
   TWConf.histogramStartThreshold = 10 ;   // for daily histo module
                                           // (from how many docs are significant)
