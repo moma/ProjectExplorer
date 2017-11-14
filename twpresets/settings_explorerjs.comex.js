@@ -179,7 +179,7 @@ TW.conf = (function(TW){
   // see also activateModules()
   TWConf.ModulesFlags["comexTopBarLoader"] = true ;
 
-  // automated interactive exploration
+  // create the automated exploration instance (in 'demo' var)
   TWConf.ModulesFlags["demoFSAModule"] = true ;
 
   // Other GUI options

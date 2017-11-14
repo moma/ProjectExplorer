@@ -149,8 +149,8 @@ TW.conf = (function(TW){
   // cf. twmodules/crowdsourcingModule/README.md to initialize the associated db
   TWConf.ModulesFlags["crowdsourcingModule"] = true ;
 
-  // automated interactive exploration
-  TWConf.ModulesFlags["demoFSAModule"] = false ;
+  // create the automated exploration instance (in 'demo' var)
+  TWConf.ModulesFlags["demoFSAModule"] = true ;
 
   // Other GUI options
   // ------------------

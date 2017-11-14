@@ -92,26 +92,29 @@ Demo = function (settings = demoFSA.settings) {
   this.lastActionTimeout = null
 
   this.pauseOnAction = function() {
-    // pause if running
-    this.pause()
-
     // remove potentially scheduled starts
     if (this.lastActionTimeout) {
       window.clearTimeout(this.lastActionTimeout)
     }
 
-    // schedule restart after pauseDuration
-    this.lastActionTimeout = window.setTimeout (
-       function(){
-         console.log("--- restarting demo ---", this.step)
-         this.pauseDemo = false
-         this.run()
-       }.bind(this),
-       settings.pauseDuration
-    )
+    // if not running we don't do a thing
+    if (this.isRunning) {
+      // pause
+      this.pauseDemo = true
+
+      // schedule restart after pauseDuration
+      this.lastActionTimeout = window.setTimeout (
+         function(){
+           console.log("--- restarting demo ---", this.step)
+           this.pauseDemo = false
+           this.run()
+         }.bind(this),
+         settings.pauseDuration
+      )
+    }
   }
 
-  // listen in the window to remember last interactions
+  // listen to events in the window to pause on GUI interactions
   document.body.addEventListener("mousedown", this.pauseOnAction.bind(this), true)
   document.body.addEventListener("keydown", this.pauseOnAction.bind(this), true)
   document.body.addEventListener("touchstart", this.pauseOnAction.bind(this), true)
