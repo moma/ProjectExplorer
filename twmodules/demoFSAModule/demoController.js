@@ -15,19 +15,58 @@ demoFSA.settings = {
     // (used iff stopCondition is "duration")
     "totalDuration": 40000,
 
-    // operations (probabilities for each op)
-    "transition_probas": {
-      "NeiAdd": .15,
-      "NeiSelect": .1,
-      "RandSelect": .15,
-      "ChgLvl": .15,
+    // operations (proba and tgt state for each op, for each src state)
+    "stateTransitions":  {
 
-      // only makes sense if relatedDocs is true
-      "SwitchDocTab": .05,
+      // 2-states system, used when TW.categories.length == 1
+      "monoMacro": {
+        "ChgLvl":       [.2,  "monoMeso"],
+        "NeiAdd":       [.25, "monoMacro"],
+        "NeiSelect":    [.2,  "monoMacro"],
+        "RandSelect":   [.15, "monoMacro"],
+        "SwitchDocTab": [.2,  "monoMacro"]
+      },
+      "monoMeso": {
+        "ChgLvl":       [.4,  "monoMacro"],   // high proba to go back to macro
+        "NeiAdd":       [.2,  "monoMeso"],
+        "NeiSelect":    [.05, "monoMeso"],
+        "RandSelect":   [.15, "monoMeso"],
+        "SwitchDocTab": [.2,  "monoMeso"]
+      },
 
-      // only makes sense if TW.categories.length > 1
-      "ChgType": .2,
-      "SwitchNeiTab": .2
+      // 4-states system, used when TW.categories.length > 1
+      "bipaMacro": {
+        "ChgLvl":       [.3,  "bipaMeso"],     // favorise bipaMeso
+        "ChgType":      [.3,  "bipaMacro"],
+        "NeiAdd":       [.15, "bipaMacro"],
+        "NeiSelect":    [.1,  "bipaMacro"],
+        "RandSelect":   [.05, "bipaMacro"],
+        "SwitchDocTab": [.1,  "bipaMacro"]
+      },
+      "bipaMeso": {
+        "ChgLvl":       [.2,  "bipaMacro"],
+        "ChgType":      [.4,  "bipaMesoXR"],   // access to mixed meso
+        "NeiAdd":       [.15, "bipaMeso"],
+        "NeiSelect":    [.1,  "bipaMeso"],
+        "RandSelect":   [.05, "bipaMeso"],
+        "SwitchDocTab": [.1,  "bipaMeso"]
+      },
+      "bipaMacroXR": {
+        "ChgLvl":       [.1,  "bipaMesoXR"],
+        "ChgType":      [.1,  "bipaMacro"],     // back to non-mixed view
+        "NeiAdd":       [.2,  "bipaMacroXR"],
+        "NeiSelect":    [.15, "bipaMacroXR"],
+        "RandSelect":   [.15, "bipaMacroXR"],
+        "SwitchDocTab": [.3, "bipaMacroXR"]
+      },
+      "bipaMesoXR": {
+        "ChgLvl":       [.2,  "bipaMacroXR"],
+        "ChgType":      [.2,  "bipaMeso"],     // idem
+        "NeiAdd":       [.2,  "bipaMesoXR"],
+        "NeiSelect":    [.15, "bipaMesoXR"],
+        "RandSelect":   [.1,  "bipaMesoXR"],
+        "SwitchDocTab": [.15, "bipaMesoXR"]
+      }
     },
 
     // sleep between operations
@@ -37,6 +76,40 @@ demoFSA.settings = {
     // POSSIBLE: we could define different states
     //           to allow contextual transition probas,
     //           ex: the proba to changeLevel could be higher after a zoom
+}
+
+
+
+// prepares a state from one conf entry in stateTransitions
+AutomState = function (fsaName, fsaProbas) {
+  this.transitions = fsaProbas
+
+  // opRanges: array of choices as a partition of segments inside [0;1]
+  this.opRanges = []
+  // exemple:
+  // [
+  //   {threshold: 0.2, action: "NeiAdd"}
+  //   {threshold: 0.4, action: "NeiSelect"}
+  //   {threshold: 0.45, action: "RandSelect"}
+  //   {threshold: 0.6, action: "ChgLvl"}
+  //   {threshold: 0.8, action: "ChgType"}
+  //   {threshold: 0.85, action: "SwitchDocTab"}
+  //   {threshold: 1, action: "SwitchNeiTab"}
+  // ]
+
+  // prepare opRanges
+  this.lastRangeMax = 0
+  for (var action in this.transitions) {
+    let [value, target] = this.transitions[action]
+    let p = parseFloat(value)
+    this.opRanges.push({'threshold': this.lastRangeMax+p, 'action': action})
+    this.lastRangeMax += p
+  }
+
+  if (this.lastRangeMax != 1) {
+    console.log('demoFSA transitions for state "',fsaName,'" don\'t add up to 1, will normalize')
+  }
+
 }
 
 
@@ -54,31 +127,20 @@ demoFSA.settings = {
 Demo = function (settings = demoFSA.settings) {
   // INIT
   // ----
-  // opRanges: array of choices as a partition of segments inside [0;1]
-  this.opRanges = []
-  // exemple:
-  // [
-  //   {threshold: 0.2, action: "NeiAdd"}
-  //   {threshold: 0.4, action: "NeiSelect"}
-  //   {threshold: 0.45, action: "RandSelect"}
-  //   {threshold: 0.6, action: "ChgLvl"}
-  //   {threshold: 0.8, action: "ChgType"}
-  //   {threshold: 0.85, action: "SwitchDocTab"}
-  //   {threshold: 1, action: "SwitchNeiTab"}
-  // ]
+  this.currentState = null
 
-  // prepare opRanges
-  this.lastRangeMax = 0
-  for (var action in settings['transition_probas']) {
-    let p = parseFloat(settings['transition_probas'][action])
-    this.opRanges.push({'threshold': this.lastRangeMax+p, 'action': action})
-    this.lastRangeMax += p
-  }
+  // prepare states
+  this.states = {}
+  for (var stateName in settings['stateTransitions']) {
+    let state = new AutomState(
+        stateName,
+        settings['stateTransitions'][stateName]
+    )
 
-  // console.log("opRanges, final max", this.opRanges, this.lastRangeMax)
+    // console.log(stateName, "opRanges, final max", state.opRanges, state.lastRangeMax)
 
-  if (this.lastRangeMax != 1) {
-    console.warn('demoFSA transitions don\'t add up to 1, will normalize')
+    // save the obj
+    this.states[stateName] = state
   }
 
 
@@ -375,6 +437,11 @@ Demo = function (settings = demoFSA.settings) {
       await this._sleep(500)
     }
 
+    // deduce start state name
+    if (! this.currentState) {
+      this.currentState = TW.categories.length > 1 ? "bipaMacro" : "monoMacro"
+    }
+
     // get cam from the sigma instance
     this.cam = TW.partialGraph.camera
 
@@ -391,13 +458,21 @@ Demo = function (settings = demoFSA.settings) {
           (   settings.stopCondition != "duration"
            || performance.now() - startTime < settings.totalDuration)
          ) {
+
+      // our current state
+      let state = this.states[this.currentState]
+
       // choose an action
       let todoAction = null
-      let rand = Math.random() * this.lastRangeMax  // <=> normalized by total
-      for (var i in this.opRanges) {
-        let op = this.opRanges[i]
+      let todoTarget = null
+      let rand = Math.random() * state.lastRangeMax  // <=> normalized by
+                                                     //     total for this state
+
+      for (var i in state.opRanges) {
+        let op = state.opRanges[i]
         if (rand < op['threshold']) {
           todoAction = op['action']
+          todoTarget = state.transitions[todoAction][1]
           break
         }
       }
@@ -406,7 +481,10 @@ Demo = function (settings = demoFSA.settings) {
       let method = this.actions[todoAction]
       method()                           // <==== /!\ invoke
       this.step ++
-      console.log("did step", this.step, ":", todoAction)
+      console.log("did step", this.step, ":", todoAction, "=>", todoTarget)
+
+      // new state
+      this.currentState = todoTarget
 
       // zoom around one of the selected nodes as center
       if (todoAction != "SwitchNeiTab" && todoAction != "SwitchDocTab") {
