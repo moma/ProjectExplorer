@@ -351,6 +351,14 @@ function normalizeColorFormat(colStr) {
   return rgbStr
 }
 
+// light or dark color => true or false
+function colorIsLight (aColor) {
+  let rgbCol = normalizeColorFormat(aColor).split(/,/)
+  let lightness = parseInt(rgbCol[0]) + parseInt(rgbCol[1]) + parseInt(rgbCol[2])
+  // 382 = (255 * 3) / 2
+  return Boolean(lightness > 382)
+}
+
 
 // lowercase etc query strings
 normalizeString = function(string, escapeHtml) {

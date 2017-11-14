@@ -130,10 +130,17 @@ var SigmaUtils = function () {
 
         context.beginPath();
 
-        if (settings('twSelectedColor') == "node")
+        if (settings('twSelectedBGColor') == "node") {
           context.fillStyle = TW.gui.handpickedcolors[node.type].alton ? node.customAttrs.alt_color : node.color; // node's
-        else
+
+          // label dark on light bgs and light on dark bgs
+          if (colorIsLight(context.fillStyle)) labelColor = "#000"
+          else                                 labelColor = "#fff"
+        }
+        else {
           context.fillStyle = "#fff"; // default
+        }
+
 
         if (node.label && settings('labelHoverShadow')) {
           context.shadowOffsetX = 0;
@@ -421,6 +428,7 @@ var SigmaUtils = function () {
             fontStyle = settings('hoverFontStyle') || settings('fontStyle'),
             prefix = settings('prefix') || '',
             size = node[prefix + 'size'],
+            labelColor = null,
             fontSize = (settings('labelSize') === 'fixed') ?
               settings('defaultLabelSize') :
               settings('labelSizeRatio') * size;
@@ -442,9 +450,20 @@ var SigmaUtils = function () {
             fontSize + 'px ' + (settings('hoverFont') || settings('font'));
 
           context.beginPath();
-          context.fillStyle = settings('labelHoverBGColor') === 'node' ?
-            (node.color || settings('defaultNodeColor')) :
-            settings('defaultHoverLabelBGColor');
+
+          if (settings('labelHoverBGColor') == 'node') {
+            context.fillStyle = TW.gui.handpickedcolors[node.type].alton ? node.customAttrs.alt_color : node.color; // node's
+
+            // label dark on light bgs and light on dark bgs
+            if (colorIsLight(context.fillStyle)) labelColor = "#000"
+            else                                 labelColor = "#fff"
+
+          }
+          else {
+            context.fillStyle = settings('defaultHoverLabelBGColor')
+            labelColor = settings('defaultLabelHoverColor')
+          }
+
 
           if (node.label && settings('labelHoverShadow')) {
             context.shadowOffsetX = 0;
@@ -505,9 +524,7 @@ var SigmaUtils = function () {
           // Display the label:
           if (node.label && typeof node.label === 'string') {
 
-            context.fillStyle = (settings('labelHoverColor') === 'node') ?
-              (node.color || settings('defaultNodeColor')) :
-              settings('defaultLabelHoverColor');
+            context.fillStyle = labelColor
 
             context.fillText(
               node.label,

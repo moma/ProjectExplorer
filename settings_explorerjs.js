@@ -256,16 +256,19 @@ TW.conf = (function(TW){
                                          // (old tina: showLabelsIfZoom)
 
       // hovered nodes
+      // -------------
       defaultHoverLabelBGColor: '#fff',
       defaultHoverLabelColor: '#000',
       borderSize: 2.5,                   // for ex, bigger border when hover
       nodeBorderColor: "node",           // choices: 'default' color vs. node color
       defaultNodeBorderColor: "black",   // <- if nodeBorderColor = 'default'
+      labelHoverBGColor: "default",     // "node" for a label bg like the node color,
+                                        // "default" for white background
 
-
-      // selected nodes <=> special label
-      twSelectedColor: "default",     // "node" for a label bg like the node color,
-                                      // "default" for white background
+      // selected nodes
+      // --------------
+      twSelectedBGColor: "default",     // "node" for a label bg like the node color,
+                                        // "default" for white background
 
       // not selected <=> (1-greyness)
       twNodesGreyOpacity: .5,                       // smaller value: more grey
