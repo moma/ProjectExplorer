@@ -162,7 +162,7 @@ Demo = function (settings = demoFSA.settings) {
     // if not running we don't do a thing
     if (this.isRunning) {
       // pause
-      this.pauseDemo = true
+      this.pause()
 
       // schedule restart after pauseDuration
       this.lastActionTimeout = window.setTimeout (
@@ -437,9 +437,16 @@ Demo = function (settings = demoFSA.settings) {
       await this._sleep(500)
     }
 
-    // deduce start state name
+    // (at start or after pause) deduce new state name from TW vars
     if (! this.currentState) {
-      this.currentState = TW.categories.length > 1 ? "bipaMacro" : "monoMacro"
+      let prefix = TW.categories.length > 1 ? "bipa" : "mono"
+      let level = TW.SystemState().level ? "Macro" : "Meso"
+      let mixed = TW.SystemState().activereltypes.length > 1 ? "XR" : ""
+
+      // TODO remove depending on name convention
+      this.currentState = prefix + level + mixed
+
+      console.log("chosed currentState",   this.currentState )
     }
 
     // get cam from the sigma instance
@@ -515,6 +522,7 @@ Demo = function (settings = demoFSA.settings) {
     }
     console.log("--- paused demo ---")
     this.isRunning = false
+    this.currentState = null
   }
 }
 
