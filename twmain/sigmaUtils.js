@@ -138,7 +138,7 @@ var SigmaUtils = function () {
           else                                 labelColor = "#fff"
         }
         else {
-          context.fillStyle = "#fff"; // default
+          context.fillStyle = settings('twDefaultBGBoxColor'); // default
         }
 
 
@@ -460,7 +460,7 @@ var SigmaUtils = function () {
 
           }
           else {
-            context.fillStyle = settings('defaultHoverLabelBGColor')
+            context.fillStyle = settings('twDefaultBGBoxColor')
             labelColor = settings('defaultLabelHoverColor')
           }
 
