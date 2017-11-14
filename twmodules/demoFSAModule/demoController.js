@@ -9,7 +9,7 @@ demoFSA.settings = {
 
     // pause duration before demo restart when user makes actions
     // (used iff stopCondition is "interactions")
-    "pauseDuration": 120000,
+    "pauseDuration": 60000,
 
     // total duration of demo run
     // (used iff stopCondition is "duration")
@@ -36,36 +36,40 @@ demoFSA.settings = {
 
       // 4-states system, used when TW.categories.length > 1
       "bipaMacro": {
-        "ChgLvl":       [.3,  "bipaMeso"],     // favorise bipaMeso
-        "ChgType":      [.3,  "bipaMacro"],
-        "NeiAdd":       [.15, "bipaMacro"],
-        "NeiSelect":    [.1,  "bipaMacro"],
-        "RandSelect":   [.05, "bipaMacro"],
-        "SwitchDocTab": [.1,  "bipaMacro"]
+        "ChgLvl":       [.4,    "bipaMeso"],     // favorise bipaMeso
+        "ChgType":      [.25,  "bipaMacro"],
+        "NeiAdd":       [.05,  "bipaMacro"],
+        "NeiSelect":    [.1,   "bipaMacro"],
+        "RandSelect":   [.05,  "bipaMacro"],
+        "SwitchNeiTab": [.1,   "bipaMacro"],
+        "SwitchDocTab": [.05,  "bipaMacro"]
       },
       "bipaMeso": {
-        "ChgLvl":       [.2,  "bipaMacro"],
-        "ChgType":      [.4,  "bipaMesoXR"],   // access to mixed meso
-        "NeiAdd":       [.15, "bipaMeso"],
-        "NeiSelect":    [.1,  "bipaMeso"],
-        "RandSelect":   [.05, "bipaMeso"],
-        "SwitchDocTab": [.1,  "bipaMeso"]
+        "ChgLvl":       [.15,  "bipaMacro"],
+        "ChgType":      [.5,  "bipaMesoXR"],   // access to mixed meso
+        "NeiAdd":       [.1,    "bipaMeso"],
+        "NeiSelect":    [.1,    "bipaMeso"],
+        "RandSelect":   [.05,   "bipaMeso"],
+        "SwitchNeiTab": [.09,   "bipaMeso"],
+        "SwitchDocTab": [.01,   "bipaMeso"]
       },
       "bipaMacroXR": {
-        "ChgLvl":       [.1,  "bipaMesoXR"],
-        "ChgType":      [.1,  "bipaMacro"],     // back to non-mixed view
+        "ChgLvl":       [.1,   "bipaMesoXR"],
+        "ChgType":      [.1,    "bipaMacro"],     // back to non-mixed view
         "NeiAdd":       [.2,  "bipaMacroXR"],
         "NeiSelect":    [.15, "bipaMacroXR"],
         "RandSelect":   [.15, "bipaMacroXR"],
-        "SwitchDocTab": [.3, "bipaMacroXR"]
+        "SwitchNeiTab": [.1,  "bipaMacroXR"],
+        "SwitchDocTab": [.2,  "bipaMacroXR"]
       },
       "bipaMesoXR": {
-        "ChgLvl":       [.2,  "bipaMacroXR"],
-        "ChgType":      [.2,  "bipaMeso"],     // idem
-        "NeiAdd":       [.2,  "bipaMesoXR"],
-        "NeiSelect":    [.15, "bipaMesoXR"],
-        "RandSelect":   [.1,  "bipaMesoXR"],
-        "SwitchDocTab": [.15, "bipaMesoXR"]
+        "ChgLvl":       [.3,  "bipaMacroXR"],
+        "ChgType":      [.3,     "bipaMeso"],     // idem
+        "NeiAdd":       [.05,  "bipaMesoXR"],
+        "NeiSelect":    [.05,  "bipaMesoXR"],
+        "RandSelect":   [.15,  "bipaMesoXR"],
+        "SwitchNeiTab": [.14,  "bipaMesoXR"],
+        "SwitchDocTab": [.01,  "bipaMesoXR"]
       }
     },
 
@@ -227,12 +231,12 @@ Demo = function (settings = demoFSA.settings) {
   this.randomSelect = function() {
     let nds = TW.partialGraph.graph.nodes().filter(function(n){return !n.hidden})
     if (! nds.length) {
-      console.warn("won't randomSelect: no visible nodes")
+      console.log("won't randomSelect: no visible nodes")
     }
     else {
       let picked_node = this._randpick(nds)
       if (! picked_node || ! picked_node.id) {
-        console.warn("won't randomSelect: invalid node: ", picked_node)
+        console.log("won't randomSelect: invalid node: ", picked_node)
       }
       else {
         this._select(picked_node.id)
@@ -253,7 +257,7 @@ Demo = function (settings = demoFSA.settings) {
     if (   !sysState
         || !sysState.selectionRels
         || !Object.keys(sysState.selectionRels).length) {
-      console.warn("won't neighborSelect: no current selection or no neighbors")
+      console.log("won't neighborSelect: no current selection or no neighbors")
     }
     else {
       let currentNeighNids = []
@@ -278,7 +282,7 @@ Demo = function (settings = demoFSA.settings) {
         console.error("skipping neighborSelect on error:", e)
       }
       if (! picked_node || ! picked_node.id) {
-        console.warn("won't neighborSelect: invalid node: ", picked_node)
+        console.log("won't neighborSelect: invalid node: ", picked_node)
       }
       else {
         this._select(picked_node.id)
@@ -309,7 +313,7 @@ Demo = function (settings = demoFSA.settings) {
     }
 
     if (!possTabsAnchors.length) {
-      console.warn("won't switchNeiTab: no inactive neighbors-tab")
+      console.log("won't switchNeiTab: no inactive neighbors-tab")
     }
     else {
       // choose one tab from the inactive
@@ -323,13 +327,13 @@ Demo = function (settings = demoFSA.settings) {
     let rdtabs = document.getElementById("reldocs-tabs")
 
     if (! TW.conf.getRelatedDocs && rdtabs) {
-      console.warn("won't switchRDTab: no rdtabs")
+      console.log("won't switchRDTab: no rdtabs")
     }
     else {
       // do we have another possible tab (an inactive one) ?
       let possTabsAnchors = rdtabs.querySelectorAll("li:not(.active) > a")
       if (!possTabsAnchors.length) {
-        console.warn("won't switchRDTab: no inactive rdtab")
+        console.log("won't switchRDTab: no inactive rdtab")
       }
       else {
         // choose one tab from the inactive
@@ -346,7 +350,7 @@ Demo = function (settings = demoFSA.settings) {
       this.cam.goTo({x:0, y:0, ratio:.9, angle: 0})
     }
     else {
-      console.warn("won't changeLevel: no selection")
+      console.log("won't changeLevel: no selection")
     }
   }
 
@@ -357,7 +361,7 @@ Demo = function (settings = demoFSA.settings) {
       this.cam.goTo({x:0, y:0, ratio:.9, angle: 0})
     }
     else {
-      console.warn("won't changeType: only one nodetype")
+      console.log("won't changeType: only one nodetype")
     }
   }
 
@@ -492,6 +496,13 @@ Demo = function (settings = demoFSA.settings) {
 
       // new state
       this.currentState = todoTarget
+
+      // special case: bipaMacroXR needs fa2 if present
+      if (this.currentState == "bipaMacroXR"
+          && sigma_utils && sigma_utils.smartForceAtlas) {
+        sigma_utils.smartForceAtlas()
+        await this._sleep(settings.sleepDuration)
+      }
 
       // zoom around one of the selected nodes as center
       if (todoAction != "SwitchNeiTab" && todoAction != "SwitchDocTab") {
