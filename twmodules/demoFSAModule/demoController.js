@@ -20,54 +20,60 @@ demoFSA.settings = {
 
       // 2-states system, used when TW.categories.length == 1
       "monoMacro": {
-        "ChgLvl":       [.2,  "monoMeso"],
-        "NeiAdd":       [.25, "monoMacro"],
+        "ChgLvl":       [.15,  "monoMeso"],
+        "NeiAdd":       [.1,  "monoMacro"],
         "NeiSelect":    [.2,  "monoMacro"],
         "RandSelect":   [.15, "monoMacro"],
+        "RandColor":    [.2,  "monoMacro"],
         "SwitchDocTab": [.2,  "monoMacro"]
       },
       "monoMeso": {
-        "ChgLvl":       [.4,  "monoMacro"],   // high proba to go back to macro
-        "NeiAdd":       [.2,  "monoMeso"],
+        "ChgLvl":       [.35, "monoMacro"],   // high proba to go back to macro
+        "NeiAdd":       [.05, "monoMeso"],
         "NeiSelect":    [.05, "monoMeso"],
         "RandSelect":   [.15, "monoMeso"],
+        "RandColor":    [.2,  "monoMeso"],
         "SwitchDocTab": [.2,  "monoMeso"]
       },
 
       // 4-states system, used when TW.categories.length > 1
       "bipaMacro": {
-        "ChgLvl":       [.4,    "bipaMeso"],     // favorise bipaMeso
-        "ChgType":      [.25,  "bipaMacro"],
+        "ChgLvl":       [.25,   "bipaMeso"],     // favorise bipaMeso
+        "ChgType":      [.2,   "bipaMacro"],
         "NeiAdd":       [.05,  "bipaMacro"],
         "NeiSelect":    [.1,   "bipaMacro"],
         "RandSelect":   [.05,  "bipaMacro"],
-        "SwitchNeiTab": [.1,   "bipaMacro"],
-        "SwitchDocTab": [.05,  "bipaMacro"]
+        "RandColor":    [.2,   "bipaMacro"],
+        "SwitchNeiTab": [.05,  "bipaMacro"],
+        "SwitchDocTab": [.01,  "bipaMacro"]
       },
       "bipaMeso": {
         "ChgLvl":       [.15,  "bipaMacro"],
-        "ChgType":      [.5,  "bipaMesoXR"],   // access to mixed meso
-        "NeiAdd":       [.1,    "bipaMeso"],
+        "ChgType":      [.4,  "bipaMesoXR"],   // access to mixed meso
+        "NeiAdd":       [.05,   "bipaMeso"],
         "NeiSelect":    [.1,    "bipaMeso"],
         "RandSelect":   [.05,   "bipaMeso"],
+        "RandColor":    [.15,   "bipaMeso"],
         "SwitchNeiTab": [.09,   "bipaMeso"],
         "SwitchDocTab": [.01,   "bipaMeso"]
       },
       "bipaMacroXR": {
         "ChgLvl":       [.1,   "bipaMesoXR"],
         "ChgType":      [.1,    "bipaMacro"],     // back to non-mixed view
-        "NeiAdd":       [.2,  "bipaMacroXR"],
-        "NeiSelect":    [.15, "bipaMacroXR"],
-        "RandSelect":   [.15, "bipaMacroXR"],
+        "NeiAdd":       [.05, "bipaMacroXR"],
+        "NeiSelect":    [.1,  "bipaMacroXR"],
+        "RandSelect":   [.1,  "bipaMacroXR"],
+        "RandColor":    [.25, "bipaMacroXR"],
         "SwitchNeiTab": [.1,  "bipaMacroXR"],
         "SwitchDocTab": [.2,  "bipaMacroXR"]
       },
       "bipaMesoXR": {
-        "ChgLvl":       [.3,  "bipaMacroXR"],
-        "ChgType":      [.3,     "bipaMeso"],     // idem
+        "ChgLvl":       [.3,  "bipaMacroXR"],     // access to full map
+        "ChgType":      [.15,    "bipaMeso"],     // back to non-mixed view
         "NeiAdd":       [.05,  "bipaMesoXR"],
         "NeiSelect":    [.05,  "bipaMesoXR"],
         "RandSelect":   [.15,  "bipaMesoXR"],
+        "RandColor":    [.15, "bipaMacroXR"],
         "SwitchNeiTab": [.14,  "bipaMesoXR"],
         "SwitchDocTab": [.01,  "bipaMesoXR"]
       }
@@ -126,7 +132,8 @@ AutomState = function (fsaName, fsaProbas) {
 // ...and access to some gui elements and utilities call:
 //  - TW.gui.checkBox
 //  - TW.gui.activateRDTab
-//  - sigma_utils (for layouts)
+//  - sigma_utils calls (for layouts)
+//  - getActivetypesNames
 
 /* ---------------------  demoFSA object  ----------------------- */
 Demo = function (settings = demoFSA.settings) {
@@ -344,6 +351,29 @@ Demo = function (settings = demoFSA.settings) {
   }
 
 
+  // apply a random color from those available in current view
+  this.applyRandomColor = function() {
+    if (getActivetypesNames && getColorFunction) {
+      let actypes = getActivetypesNames()
+      let possibleColors = []
+      for (var k in actypes) {
+        let ty = actypes[k]
+        for (var attTitle in TW.Facets[ty]) {
+          possibleColors.push(attTitle)
+        }
+      }
+
+      let pickedColor = this._randpick(possibleColors)
+      // coloring function
+      let colMethod = getColorFunction(pickedColor)
+
+      console.log("pickedColor", pickedColor, colMethod)
+
+      // invoke
+      window[colMethod](pickedColor)
+    }
+  }
+
   // call changeLevel if at least one selected
   this.changeLevel = function() {
     if (TW.SystemState().selectionNids.length) {
@@ -415,6 +445,7 @@ Demo = function (settings = demoFSA.settings) {
     "NeiAdd":     this.neighborAdd.bind(this),
     "SwitchDocTab":  this.switchRDTab.bind(this),
     "SwitchNeiTab":  this.switchNeiTab.bind(this),
+    "RandColor":  this.applyRandomColor.bind(this),
     "RandSelect": this.randomSelect.bind(this)
   }
 
