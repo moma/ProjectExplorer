@@ -123,9 +123,10 @@ AutomState = function (fsaName, fsaProbas) {
 //  - TW.instance
 //  - TW.categories
 
-// and access to some gui elements:
+// ...and access to some gui elements and utilities call:
 //  - TW.gui.checkBox
 //  - TW.gui.activateRDTab
+//  - sigma_utils (for layouts)
 
 /* ---------------------  demoFSA object  ----------------------- */
 Demo = function (settings = demoFSA.settings) {
@@ -500,7 +501,9 @@ Demo = function (settings = demoFSA.settings) {
       // special case: bipaMacroXR needs fa2 if present
       if (this.currentState == "bipaMacroXR"
           && sigma_utils && sigma_utils.smartForceAtlas) {
-        sigma_utils.smartForceAtlas()
+        sigma_utils.smartForceAtlas({
+          'callback': sigma_utils.smartDisperse
+        })
         await this._sleep(settings.sleepDuration)
       }
 
