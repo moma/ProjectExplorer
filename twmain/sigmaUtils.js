@@ -573,6 +573,61 @@ var SigmaUtils = function () {
         }
       }
 
+
+      // config and invoke sigma.layout.noverlap plugin
+      // -----------------------------------------------
+      this.smartDisperse = function () {
+        if(! TW.partialGraph.isNoverlapRunning()) {
+            // determine if we work just on visible nodes
+            let skipHiddenFlag = !TW.conf.stablePositions || TW.conf.independantTypes
+
+            // get button ref
+            var noverButton = document.getElementById("noverlapButton")
+
+            // show waiting cursor on page and button
+            TW.gui.elHtml.classList.add('waiting');
+            if (noverButton) {
+              noverButton.style.cursor = 'wait'
+              // and waiting icon
+              noverButton.insertBefore(createWaitIcon('noverlapwait'), noverButton.children[0])
+            }
+
+            // reconfigure to account for nodesizes (if current sizes up => margin needs up)
+            let sizeFactor = Math.max.apply(null, TW.gui.sizeRatios)
+            TW.gui.noverlapConf.nodeMargin =  .5 * sizeFactor
+            TW.gui.noverlapConf.scaleNodes = 1.5 * sizeFactor
+            if (skipHiddenFlag) {
+              TW.gui.noverlapConf.nodes = getVisibleNodes()
+            }
+            TW.partialGraph.configNoverlap(TW.gui.noverlapConf)
+            var listener = TW.partialGraph.startNoverlap();
+
+            listener.bind('stop', function(event) {
+              // update fa2 positions in any case, but don't skipHidden unless unstable positions
+              reInitFa2({
+                localZoneSettings: !TW.SystemState().level,
+                skipHidden: skipHiddenFlag,
+                typeAdapt: skipHiddenFlag,
+                callback: function() {console.debug("noverlap: updated fa2 positions")}
+              })
+              var stillRunning = document.getElementById('noverlapwait')
+              if (stillRunning) {
+                reInitFa2({
+                  localZoneSettings: !TW.SystemState().level,
+                  skipHidden: !TW.conf.stablePositions,
+                  callback: function() {console.debug("noverlap: updated fa2 positions")}
+                })
+
+                TW.gui.elHtml.classList.remove('waiting');
+                noverButton.style.cursor = 'auto'
+                stillRunning.remove()
+              }
+            });
+
+            return;
+        }
+      }
+
       // factorized: forceAtlas2 supervisor call with:
       //  - togglability (ie. turns FA2 off if called again)
       //  - custom expiration duration
@@ -588,6 +643,9 @@ var SigmaUtils = function () {
           if (!args.duration)    args.duration = parseInt(TW.conf.fa2Milliseconds) || 4000
           if (!args.propDuration) args.propDuration = TW.conf.fa2AdaptDuration
 
+          // NB callback if not manual otherwise there's no timeout
+          if (!args.callback)     args.callback = null
+
           // togglability case
           if(TW.partialGraph.isForceAtlas2Running()) {
               sigma_utils.ourStopFA2()
@@ -602,15 +660,24 @@ var SigmaUtils = function () {
                   if (TW.partialGraph.graph.nNodes() < TW.conf.minNodesForAutoFA2)
                     return
                   else {
-                    if (!args.propDuration) {
-                      setTimeout(function(){sigma_utils.ourStopFA2()},args.duration)
-                    }
-                    else {
+                    // default dur
+                    let duration = args.duration
+
+                    // if adaptable dur
+                    if (args.propDuration) {
                       let nEds = getVisibleEdges().length
-                      let newDur = parseInt(args.duration * Math.log(nEds))
-                      setTimeout(function(){sigma_utils.ourStopFA2()},newDur)
-                      console.log("fa2 adapted duration", newDur)
+                      duration = parseInt(args.duration * Math.log(nEds))
+                      console.log("fa2 adapted duration", duration)
                     }
+
+                    // schedule stop
+                    setTimeout(function(){
+                      sigma_utils.ourStopFA2()
+                      if (args.callback && typeof args.callback == "function") {
+                        // for instance disperse after autoFa2
+                        args.callback()
+                      }
+                    }, duration)
                   }
                 }
 
