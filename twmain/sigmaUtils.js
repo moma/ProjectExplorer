@@ -1243,6 +1243,15 @@ function getSizeFactor(val) {
 
 // mobile versions should get lighter settings
 function mobileAdaptConf() {
+    // move the search and servermenu where we can see them on mobile display
+    $("#search_input_group").prependTo("#sidebar");
+    $("#network").prependTo("#sidebar");
+    $("#network").css("padding-bottom", "20px");
+    // move the mainlogo to credits
+    $("#mainlogo").appendTo("#toolbar");
+
+    // topbar is now empty
+    $("#topbar").remove();
 
     TW.conf.overSampling = false
     TW.conf.dragNodesAvailable = false
@@ -1267,12 +1276,5 @@ function mobileAdaptConf() {
     // TW.conf.scanAttributes = false
     // TW.conf.twRendering = false
 
-    // £TODO better CSS for histogram on mobile
     TW.conf.ModulesFlags.histogramModule = false
-
-
-    // move the search and servermenu where we can see them on mobile display
-    $("#search_input_group").prependTo("#sidebar");
-    $("#network").prependTo("#sidebar");
-
 }

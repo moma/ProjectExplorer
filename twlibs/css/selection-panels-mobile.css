@@ -2,10 +2,12 @@
 
 /* sm and smaller: for mobile */
 @media(max-width:768px){
+
+  /* move a little higher on mobile because topbar hidden */
   #lefttopbox {
-    top: 105px;
+    top: 70px;
     left: 0;
-    width:30% ;
+    width:25% ;
   }
   #lefttopbox h4 {
     font-size: 10px;
@@ -20,8 +22,8 @@
   /* zoombar re-positioned */
   #ctlzoom {
     right: 5px ;
-    bottom: calc(40% - 105px);
-    /* bot just above #sidebar which has top at calc(105px + 60%); */
+    bottom: calc(45% - 55px);
+    /* bot just above #sidebar which has top at calc(50px + 55%); */
   }
 
   /* "top left" */
@@ -50,8 +52,8 @@
 
   /* legend re-positioned */
   #legend-for-facets {
-    bottom: calc(40% - 100px);
-    /* bot just above #sidebar which has top at calc(105px + 60%); */
+    bottom: calc(45% - 45px);
+    /* bot just above #sidebar which has top at calc(50px + 55%); */
   }
 
   /* collapsed menu styling */

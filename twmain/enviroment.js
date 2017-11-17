@@ -262,7 +262,9 @@ function writeBrand (brandingParams = {}) {
 }
 
 function writeLabel (aMapLabel) {
-  document.getElementById('maplabel').innerHTML = aMapLabel
+  let labelSpan = document.getElementById('maplabel')
+  if (labelSpan)
+    labelSpan.innerHTML = aMapLabel
 }
 
 
