@@ -1269,4 +1269,10 @@ function mobileAdaptConf() {
 
     // £TODO better CSS for histogram on mobile
     TW.conf.ModulesFlags.histogramModule = false
+
+
+    // move the search and servermenu where we can see them on mobile display
+    $("#search_input_group").prependTo("#sidebar");
+    $("#network").prependTo("#sidebar");
+
 }
