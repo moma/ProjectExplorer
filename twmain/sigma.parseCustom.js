@@ -715,9 +715,9 @@ function dictfyGexf( gexf , categories ){
     let maxNodeSize = 0
 
     // debug: for local stats
-    // let allSizes = []
-    // let sumSizes = 0
-    // let sizeStats = {'mean':null, 'median':null, 'max':0, 'min':1000000000}
+    let allSizes = {}
+    let sumSizes = {}
+    TW.stats.nodeSize = {}
 
     // if scanAttributes, we'll also use:
     var tmpVals = {}        // to build inverted index attval => nodes
@@ -767,14 +767,6 @@ function dictfyGexf( gexf , categories ){
             if(sizeNodes.length>0){
               let sizeNode = sizeNodes[0];
               size = parseFloat(sizeNode.getAttribute('value'));
-
-              // debug: for stats  ---------------------------
-              // allSizes.push(size)
-              // sumSizes += size
-              // if (size < sizeStats.min)  sizeStats.min = size
-              // if (size > sizeStats.max)  sizeStats.max = size
-              // --------------------------------------------
-
             }
             // fallback
             else {
@@ -874,6 +866,20 @@ function dictfyGexf( gexf , categories ){
 
             if(parseFloat(node.size) > maxNodeSize)
                 maxNodeSize= parseFloat(node.size);
+                
+            // debug: for stats  ---------------------------
+            if (! TW.stats.nodeSize[node.type]) {
+              allSizes[node.type] = []
+              sumSizes[node.type] = 0
+              TW.stats.nodeSize[node.type] = {'mean':null, 'median':null, 'max':0, 'min':1000000000}
+            }
+            allSizes[node.type].push(size)
+            sumSizes[node.type] += size
+            if (size < TW.stats.nodeSize[node.type].min)
+              TW.stats.nodeSize[node.type].min = size
+            if (size > TW.stats.nodeSize[node.type].max)
+              TW.stats.nodeSize[node.type].max = size
+            // --------------------------------------------
 
             // console.debug("node.attributes", node.attributes)
             // creating a faceted index from node.attributes
@@ -891,12 +897,13 @@ function dictfyGexf( gexf , categories ){
 
 
     // -------------- debug: for local stats ----------------
-    // allSizes.sort();
-    // let N = allSizes.length
-    // sizeStats.median = allSizes[Math.round(N/2)]
-    // sizeStats.mean = Math.round(sumSizes/N * 100)/100
-    //
-    // console.log("parseCustom(gexf) sizeStats:", sizeStats)
+    for (var ntype in TW.stats.nodeSize) {
+      allSizes[ntype].sort();
+      let N = allSizes[ntype].length
+      TW.stats.nodeSize[ntype].len = N
+      TW.stats.nodeSize[ntype].median = allSizes[ntype][Math.floor(N/2)]
+      TW.stats.nodeSize[ntype].mean = sumSizes[ntype]/N
+    }
     // ------------- /debug: for local stats ----------------
 
 
