@@ -513,7 +513,7 @@ function mainStartGraph(inFormat, inData, twInstance) {
           },
 
           // 2) user-configurable values (cf. settings_explorer)
-          TW.conf.sigmaJsDrawingProperties,
+          TW.conf.sigmaJsDrawingProperties
       )
 
 
